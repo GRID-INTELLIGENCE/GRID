@@ -1,0 +1,196 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://grid-project.org/schemas/master-workflow-system.json",
+  "title": "GRID Master Workflow System Schema",
+  "description": "Structured input schema for GRID's unified workflow system with integrated guardrails",
+  "type": "object",
+  "properties": {
+    "system": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "const": "GRID Master Workflow System" },
+        "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+        "description": { "type": "string" },
+        "principles": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 3
+        }
+      },
+      "required": ["name", "version", "description", "principles"]
+    },
+    "guardrails": {
+      "type": "object",
+      "properties": {
+        "rules": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "scope": { "type": "array", "items": { "type": "string" } },
+              "rules": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "enforcement": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            },
+            "required": ["id", "name", "scope", "rules", "enforcement"]
+          }
+        }
+      },
+      "required": ["rules"]
+    },
+    "workflows": {
+      "type": "object",
+      "properties": {
+        "integrated_workflows": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "guardrails_applied": { "type": "array", "items": { "type": "string" } },
+              "phases": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            },
+            "required": ["id", "name", "guardrails_applied", "phases"]
+          }
+        }
+      },
+      "required": ["integrated_workflows"]
+    },
+    "execution_pipeline": {
+      "type": "object",
+      "properties": {
+        "input_processing_chain": { "type": "string" },
+        "guardrail_integration_points": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "required": ["input_processing_chain", "guardrail_integration_points"]
+    },
+    "quality_gates": {
+      "type": "object",
+      "properties": {
+        "automated_gates": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string" },
+              "checks": { "type": "array", "items": { "type": "string" } }
+            },
+            "required": ["type", "checks"]
+          }
+        },
+        "manual_enforcement": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "required": ["automated_gates", "manual_enforcement"]
+    },
+    "error_handling": {
+      "type": "object",
+      "properties": {
+        "violation_detection": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "recovery_procedures": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "required": ["violation_detection", "recovery_procedures"]
+    },
+    "monitoring": {
+      "type": "object",
+      "properties": {
+        "metrics_tracking": {
+          "type": "object",
+          "properties": {
+            "compliance_metrics": { "type": "array", "items": { "type": "string" } },
+            "process_metrics": { "type": "array", "items": { "type": "string" } }
+          },
+          "required": ["compliance_metrics", "process_metrics"]
+        },
+        "feedback_loops": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "required": ["metrics_tracking", "feedback_loops"]
+    },
+    "emergency_procedures": {
+      "type": "object",
+      "properties": {
+        "guardrail_bypass": {
+          "type": "object",
+          "properties": {
+            "conditions": { "type": "array", "items": { "type": "string" } },
+            "procedure": { "type": "array", "items": { "type": "string" } }
+          },
+          "required": ["conditions", "procedure"]
+        },
+        "system_recovery": {
+          "type": "object",
+          "properties": {
+            "conditions": { "type": "array", "items": { "type": "string" } },
+            "procedure": { "type": "array", "items": { "type": "string" } }
+          },
+          "required": ["conditions", "procedure"]
+        }
+      },
+      "required": ["guardrail_bypass", "system_recovery"]
+    },
+    "ai_integration": {
+      "type": "object",
+      "properties": {
+        "cascade_interaction": {
+          "type": "object",
+          "properties": {
+            "context_loading": { "type": "array", "items": { "type": "string" } },
+            "response_guidelines": { "type": "array", "items": { "type": "string" } }
+          },
+          "required": ["context_loading", "response_guidelines"]
+        },
+        "workflow_automation": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "required": ["cascade_interaction", "workflow_automation"]
+    },
+    "future_evolution": {
+      "type": "object",
+      "properties": {
+        "rule_expansion": { "type": "array", "items": { "type": "string" } },
+        "workflow_enhancement": { "type": "array", "items": { "type": "string" } },
+        "governance_maturity": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["rule_expansion", "workflow_enhancement", "governance_maturity"]
+    }
+  },
+  "required": [
+    "system",
+    "guardrails",
+    "workflows",
+    "execution_pipeline",
+    "quality_gates",
+    "error_handling",
+    "monitoring",
+    "emergency_procedures",
+    "ai_integration",
+    "future_evolution"
+  ]
+}

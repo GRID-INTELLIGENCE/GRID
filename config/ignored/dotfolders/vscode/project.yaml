@@ -1,0 +1,72 @@
+project:
+  package: grid
+
+stakeholders:
+  - name: NVIDIA
+    role: Exploration & Insight partner
+    expectations:
+      - technical insights
+
+current_reviews_and_progress: []
+
+FAQ: []
+
+INSIGHTS:
+  light_of_the_seven:
+    system: Light of the Seven
+    component: cognitive_layer
+    description: >
+      Decision matrix system with weight normalization, DecisionContext integration,
+      and weight learning from decision history.
+    flows:
+      - id: DecisionMatrixGenerator.create_matrix
+        focus: normalize weights, iterate options/criteria, apply weighted scores,
+          and select best option.
+        files:
+          - decision_matrix.py: lines 50-84
+      - id: learn_weights
+        focus: analyze decision history, count criterion usage, normalize to weights,
+          persist to UserCognitiveProfile, update timestamps.
+        files:
+          - decision_matrix.py: lines 129-147
+          - user_cognitive_profile.py: line 143
+      - id: cognitive_layer_exports
+        focus: ensure DecisionMatrixGenerator, DecisionContext, and UserCognitiveProfile
+          are exported via cognitive_layer.__init__.
+        files:
+          - cognitive_layer/__init__.py: lines 17-43
+    motivation: >
+      Weight learning captures hidden preferences and adapts decisions to individual users.
+
+config_presets:
+  - name: analog_bass
+    type: module_preset
+    exposed_params:
+      - filter_cutoff
+      - env_decay
+      - sub_level
+    version: "1.0.0"
+  - name: pluck_arp
+    type: module_preset
+    exposed_params:
+      - arp_rate
+      - filter_env
+      - delay_feedback
+    version: "1.0.0"
+  - name: wide_pad
+    type: module_preset
+    exposed_params:
+      - reverb_size
+      - chorus_rate
+      - lfo_amount
+    version: "1.0.0"
+
+preset_policy:
+  store: git-lfs or artifact registry
+  semantic_versioning: true
+  manifest_fields:
+    - name
+    - type
+    - exposed_params
+    - version
+    - owner

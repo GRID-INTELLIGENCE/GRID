@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GRID Coverage - Bus Channel Visualization</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-scale@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-scale-chromatic@3"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-interpolate@3"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-color@3"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+
+        :root {
+            /* Bus Channel: Master HSL routing - all colors derived from this */
+            --bus-hue: 260;
+            --bus-sat: 65%;
+            --channel-bg: hsl(var(--bus-hue), 15%, 8%);
+            --channel-surface: hsl(var(--bus-hue), 12%, 12%);
+            --channel-border: hsl(var(--bus-hue), 20%, 18%);
+            --channel-text: hsl(var(--bus-hue), 10%, 75%);
+            --channel-muted: hsl(var(--bus-hue), 8%, 45%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'IBM Plex Sans', system-ui, sans-serif;
+            background: var(--channel-bg);
+            color: var(--channel-text);
+            min-height: 100vh;
+        }
+
+        .console {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 32px;
+        }
+
+        .header {
+            display: flex;
+            align-items: baseline;
+            gap: 16px;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--channel-border);
+        }
+
+        .title {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: hsl(var(--bus-hue), 60%, 75%);
+        }
+
+        .meta {
+            font-size: 0.85rem;
+            color: var(--channel-muted);
+            font-family: 'IBM Plex Mono', monospace;
+        }
+
+        /* Bus meter - master output visualization */
+        .bus-meter {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 48px;
+            height: 48px;
+        }
+
+        .meter-segment {
+            flex: 1;
+            border-radius: 3px;
+            position: relative;
+            cursor: crosshair;
+            transition: transform 0.15s ease;
+        }
+
+        .meter-segment:hover {
+            transform: scaleY(1.1);
+        }
+
+        .meter-segment::after {
+            content: attr(data-label);
+            position: absolute;
+            bottom: -22px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.65rem;
+            font-family: 'IBM Plex Mono', monospace;
+            color: var(--channel-muted);
+            white-space: nowrap;
+        }
+
+        /* Grid layout - modular channel strips */
+        .channel-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 16px;
+        }
+
+        .channel {
+            background: var(--channel-surface);
+            border: 1px solid var(--channel-border);
+            border-radius: 8px;
+            padding: 20px;
+            position: relative;
+        }
+
+        .channel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 20px;
+            right: 20px;
+            height: 2px;
+            border-radius: 0 0 2px 2px;
+        }
+
+        .channel.span-8 {
+            grid-column: span 8;
+        }
+
+        .channel.span-6 {
+            grid-column: span 6;
+        }
+
+        .channel.span-4 {
+            grid-column: span 4;
+        }
+
+        .channel.span-3 {
+            grid-column: span 3;
+        }
+
+        .channel.span-12 {
+            grid-column: span 12;
+        }
+
+        .channel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .channel-name {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--channel-muted);
+        }
+
+        .channel-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 0.6;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        .chart-area {
+            height: 320px;
+            position: relative;
+        }
+
+        .chart-area.compact {
+            height: 260px;
+        }
+
+        /* Data table - structured I/O */
+        .io-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .io-table th {
+            text-align: left;
+            padding: 8px 12px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-weight: 500;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--channel-muted);
+            border-bottom: 1px solid var(--channel-border);
+        }
+
+        .io-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid hsl(var(--bus-hue), 10%, 14%);
+        }
+
+        .io-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .io-table .value {
+            font-family: 'IBM Plex Mono', monospace;
+            font-weight: 500;
+        }
+
+        .level-bar {
+            height: 6px;
+            background: hsl(var(--bus-hue), 10%, 18%);
+            border-radius: 3px;
+            overflow: hidden;
+            width: 80px;
+        }
+
+        .level-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.8s ease;
+        }
+
+        /* Summary row */
+        .summary-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .summary-cell {
+            background: var(--channel-surface);
+            border: 1px solid var(--channel-border);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .summary-value {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 2rem;
+            font-weight: 600;
+        }
+
+        .summary-label {
+            font-size: 0.75rem;
+            color: var(--channel-muted);
+            margin-top: 6px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        @media (max-width: 1024px) {
+
+            .channel.span-8,
+            .channel.span-6 {
+                grid-column: span 12;
+            }
+
+            .channel.span-4,
+            .channel.span-3 {
+                grid-column: span 6;
+            }
+
+            .summary-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+
+            .channel.span-4,
+            .channel.span-3 {
+                grid-column: span 12;
+            }
+
+            .summary-row {
+                grid-template-columns: 1fr;
+            }
+
+            .bus-meter {
+                height: 32px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="console">
+        <header class="header">
+            <h1 class="title">GRID::COVERAGE</h1>
+            <span class="meta">BUS_CHANNEL_VISUALIZATION // 15 CATEGORIES // 4747 LINES</span>
+        </header>
+
+        <!-- Bus Meter: Visual representation of all category coverage routed through master bus -->
+        <div class="bus-meter" id="busMeter"></div>
+
+        <div class="summary-row" id="summaryRow"></div>
+
+        <div class="channel-grid">
+            <div class="channel span-8">
+                <div class="channel-header">
+                    <span class="channel-name">Coverage Distribution</span>
+                    <span class="channel-indicator" id="mainIndicator"></span>
+                </div>
+                <div class="chart-area">
+                    <canvas id="mainChart"></canvas>
+                </div>
+            </div>
+
+            <div class="channel span-4">
+                <div class="channel-header">
+                    <span class="channel-name">Signal Routing</span>
+                    <span class="channel-indicator" id="signalIndicator"></span>
+                </div>
+                <div class="chart-area compact">
+                    <canvas id="signalChart"></canvas>
+                </div>
+            </div>
+
+            <div class="channel span-6">
+                <div class="channel-header">
+                    <span class="channel-name">Layer Analysis</span>
+                    <span class="channel-indicator" id="layerIndicator"></span>
+                </div>
+                <div class="chart-area compact">
+                    <canvas id="layerChart"></canvas>
+                </div>
+            </div>
+
+            <div class="channel span-6">
+                <div class="channel-header">
+                    <span class="channel-name">Category I/O</span>
+                    <span class="channel-indicator" id="ioIndicator"></span>
+                </div>
+                <table class="io-table" id="ioTable">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Coverage</th>
+                            <th>Level</th>
+                            <th>Lines</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ═══════════════════════════════════════════════════════════════════
+        // BUS CHANNEL COLOR SYSTEM
+        // All colors routed through a single perceptually uniform scale
+        // Using D3's curated scientific color schemes (legacy-compatible)
+        // ═══════════════════════════════════════════════════════════════════
+
+        const ColorBus={
+            // Master scale: Viridis - perceptually uniform, colorblind safe
+            viridis: d3.interpolateViridis,
+            plasma: d3.interpolatePlasma,
+            magma: d3.interpolateMagma,
+            inferno: d3.interpolateInferno,
+            turbo: d3.interpolateTurbo,
+
+            // Route a value (0-1) through the bus
+            route(value,scale='viridis') {
+                return this[scale](value);
+            },
+
+            // Generate n colors from the bus
+            palette(n,scale='viridis') {
+                return Array.from({length: n},(_,i) => this.route(i/(n-1),scale));
+            },
+
+            // Coverage-based routing: maps coverage % to color position
+            coverage(percent,scale='viridis') {
+                // Invert so high coverage = end of scale (yellow/bright)
+                return this.route(percent/100,scale);
+            }
+        };
+
+        // ═══════════════════════════════════════════════════════════════════
+        // DATA
+        // ═══════════════════════════════════════════════════════════════════
+
+        const data={
+            categories: ['API','CLI','Core','DB','Bridge','NER','Pattern','Vision','Plugins','Workflow','Finance','Value','Geo','Transform','Utils'],
+            coverage: [95.9,75.7,48.0,100,100,85.2,88.5,92.3,97.5,78.4,82.1,88.9,90.2,76.8,94.3],
+            lines: [380,148,456,124,86,312,520,180,98,268,95,142,115,135,188]
+        };
+
+        const layers={
+            names: ['Presentation','Business','Data','Infrastructure','Extensions'],
+            values: [85.8,87.3,100,48.0,97.5]
+        };
+
+        // ═══════════════════════════════════════════════════════════════════
+        // RENDER BUS METER
+        // ═══════════════════════════════════════════════════════════════════
+
+        function renderBusMeter() {
+            const meter=document.getElementById('busMeter');
+            const sorted=data.categories.map((cat,i) => ({
+                name: cat,
+                coverage: data.coverage[i],
+                color: ColorBus.coverage(data.coverage[i],'viridis')
+            })).sort((a,b) => a.coverage-b.coverage);
+
+            meter.innerHTML=sorted.map(item => `
+                <div class="meter-segment"
+                     style="background: ${item.color}; opacity: ${0.5+(item.coverage/200)}"
+                     data-label="${item.name}"
+                     title="${item.name}: ${item.coverage}%">
+                </div>
+            `).join('');
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // RENDER SUMMARY
+        // ═══════════════════════════════════════════════════════════════════
+
+        function renderSummary() {
+            const avg=data.coverage.reduce((a,b) => a+b)/data.coverage.length;
+            const total=data.lines.reduce((a,b) => a+b);
+            const covered=Math.round(total*0.796);
+
+            const stats=[
+                {value: '79.6%',label: 'Coverage'},
+                {value: data.categories.length,label: 'Categories'},
+                {value: covered.toLocaleString(),label: 'Covered'},
+                {value: total.toLocaleString(),label: 'Total Lines'}
+            ];
+
+            const colors=ColorBus.palette(4,'viridis');
+            const row=document.getElementById('summaryRow');
+
+            row.innerHTML=stats.map((stat,i) => `
+                <div class="summary-cell">
+                    <div class="summary-value" style="color: ${colors[i]}">${stat.value}</div>
+                    <div class="summary-label">${stat.label}</div>
+                </div>
+            `).join('');
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // RENDER I/O TABLE
+        // ═══════════════════════════════════════════════════════════════════
+
+        function renderIOTable() {
+            const tbody=document.querySelector('#ioTable tbody');
+            const sorted=data.categories.map((cat,i) => ({
+                name: cat,
+                coverage: data.coverage[i],
+                lines: data.lines[i],
+                color: ColorBus.coverage(data.coverage[i],'viridis')
+            })).sort((a,b) => b.coverage-a.coverage).slice(0,8);
+
+            tbody.innerHTML=sorted.map(item => `
+                <tr>
+                    <td>${item.name}</td>
+                    <td class="value" style="color: ${item.color}">${item.coverage}%</td>
+                    <td>
+                        <div class="level-bar">
+                            <div class="level-fill" style="width: ${item.coverage}%; background: ${item.color}"></div>
+                        </div>
+                    </td>
+                    <td class="value">${item.lines}</td>
+                </tr>
+            `).join('');
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // RENDER CHANNEL INDICATORS
+        // ═══════════════════════════════════════════════════════════════════
+
+        function setIndicators() {
+            const colors=ColorBus.palette(4,'plasma');
+            document.getElementById('mainIndicator').style.background=colors[0];
+            document.getElementById('signalIndicator').style.background=colors[1];
+            document.getElementById('layerIndicator').style.background=colors[2];
+            document.getElementById('ioIndicator').style.background=colors[3];
+
+            // Set channel top borders
+            document.querySelectorAll('.channel').forEach((ch,i) => {
+                ch.style.setProperty('--ch-color',colors[i%4]);
+                ch.querySelector('::before')?.style?.setProperty('background',colors[i%4]);
+            });
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // CHARTS - All using bus-routed colors
+        // ═══════════════════════════════════════════════════════════════════
+
+        Chart.defaults.font.family='IBM Plex Sans';
+        Chart.defaults.color='hsl(260, 8%, 45%)';
+
+        // Main bar chart
+        new Chart(document.getElementById('mainChart'),{
+            type: 'bar',
+            data: {
+                labels: data.categories,
+                datasets: [{
+                    data: data.coverage,
+                    backgroundColor: data.coverage.map(v => ColorBus.coverage(v,'viridis')),
+                    borderRadius: 4,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {display: false},
+                    tooltip: {
+                        backgroundColor: 'hsl(260, 15%, 12%)',
+                        borderColor: 'hsl(260, 20%, 25%)',
+                        borderWidth: 1,
+                        titleFont: {family: 'IBM Plex Mono'},
+                        bodyFont: {family: 'IBM Plex Mono'},
+                        callbacks: {
+                            label: ctx => `${ctx.raw}%`
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {display: false},
+                        ticks: {font: {size: 10,family: 'IBM Plex Mono'}}
+                    },
+                    y: {
+                        max: 100,
+                        grid: {color: 'hsl(260, 10%, 15%)'},
+                        ticks: {callback: v => v+'%',font: {family: 'IBM Plex Mono'}}
+                    }
+                }
+            }
+        });
+
+        // Signal routing (polar area)
+        new Chart(document.getElementById('signalChart'),{
+            type: 'polarArea',
+            data: {
+                labels: data.categories.slice(0,8),
+                datasets: [{
+                    data: data.coverage.slice(0,8),
+                    backgroundColor: data.coverage.slice(0,8).map((v,i) =>
+                        ColorBus.coverage(v,'plasma')+'cc'
+                    ),
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        max: 100,
+                        ticks: {display: false},
+                        grid: {color: 'hsl(260, 10%, 18%)'}
+                    }
+                },
+                plugins: {
+                    legend: {display: false},
+                    tooltip: {
+                        backgroundColor: 'hsl(260, 15%, 12%)',
+                        borderColor: 'hsl(260, 20%, 25%)',
+                        borderWidth: 1,
+                        callbacks: {
+                            label: ctx => `${ctx.label}: ${ctx.raw}%`
+                        }
+                    }
+                }
+            }
+        });
+
+        // Layer analysis (horizontal bar)
+        new Chart(document.getElementById('layerChart'),{
+            type: 'bar',
+            data: {
+                labels: layers.names,
+                datasets: [{
+                    data: layers.values,
+                    backgroundColor: layers.values.map(v => ColorBus.coverage(v,'magma')),
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {display: false},
+                    tooltip: {
+                        backgroundColor: 'hsl(260, 15%, 12%)',
+                        borderColor: 'hsl(260, 20%, 25%)',
+                        borderWidth: 1,
+                        callbacks: {label: ctx => `${ctx.raw}%`}
+                    }
+                },
+                scales: {
+                    x: {
+                        max: 100,
+                        grid: {color: 'hsl(260, 10%, 15%)'},
+                        ticks: {callback: v => v+'%',font: {family: 'IBM Plex Mono'}}
+                    },
+                    y: {
+                        grid: {display: false},
+                        ticks: {font: {size: 11,family: 'IBM Plex Mono'}}
+                    }
+                }
+            }
+        });
+
+        // Initialize
+        renderBusMeter();
+        renderSummary();
+        renderIOTable();
+        setIndicators();
+    </script>
+</body>
+
+</html>

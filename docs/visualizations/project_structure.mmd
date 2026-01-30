@@ -1,0 +1,45 @@
+graph TB
+    subgraph "Root Level"
+        ROOT[e:\grid/]
+        ROOT --> SRC[src/]
+        ROOT --> TEST[tests/]
+        ROOT --> DOCS[docs/]
+        ROOT --> CONFIG[config/]
+        ROOT --> SCRIPTS[scripts/]
+        ROOT --> DOCKER[docker/]
+        ROOT --> TOOLS[tools/]
+    end
+
+    subgraph "Development Areas"
+        ROOT --> DEV[dev/]
+        ROOT --> REPORTS[reports/]
+        ROOT --> DOCS_EXT[docs-ext/]
+    end
+
+    subgraph "Source Structure"
+        SRC --> GRID[src/grid/]
+        SRC --> APP[src/application/]
+        SRC --> COG[src/cognitive/]
+        SRC --> TOOLS_SRC[src/tools/]
+
+        GRID --> AGENT[agentic/]
+        GRID --> CONTEXT[context/]
+        GRID --> WORKFLOW[workflow/]
+        GRID --> SKILLS[skills/]
+    end
+
+    style ROOT fill:#e1f5fe
+    style SRC fill:#e8f5e8
+    style TEST fill:#fff3e0
+    style DOCS fill:#fce4ec
+    style CONFIG fill:#f3e5f5
+    style SCRIPTS fill:#f3e5f5
+    style DOCKER fill:#f3e5f5
+    style TOOLS fill:#f3e5f5
+    style DEV fill:#e3f2fd
+    style REPORTS fill:#e3f2fd
+    style DOCS_EXT fill:#e3f2fd
+    style GRID fill:#c8e6c9
+    style APP fill:#c8e6c9
+    style COG fill:#c8e6c9
+    style TOOLS_SRC fill:#c8e6c9

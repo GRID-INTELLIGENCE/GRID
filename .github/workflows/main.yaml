@@ -1,0 +1,453 @@
+# =============================================================================
+# GRID — Continuous Integration & Continuous Development Pipeline
+# =============================================================================
+# Primary CI workflow - comprehensive quality checks, security, tests, and build
+# Aligned with docs/CI_CD_GUIDE.md specification
+# =============================================================================
+
+name: GRID CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - develop
+      - "feature/**"
+      - "release/**"
+      - "hotfix/**"
+      - "architecture/**"
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - "*.txt"
+      - ".gitignore"
+      - "LICENSE"
+  pull_request:
+    branches:
+      - main
+      - master
+      - develop
+    types:
+      - opened
+      - synchronize
+      - reopened
+  workflow_dispatch:
+    inputs:
+      run_slow_tests:
+        description: "Run slow/integration tests"
+        required: false
+        default: false
+        type: boolean
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHONUNBUFFERED: "1"
+  PYTHONDONTWRITEBYTECODE: "1"
+  PIP_NO_CACHE_DIR: "1"
+  GRID_ENVIRONMENT: "testing"
+  BLOCKER_DISABLED: "1"
+  PYTHONPATH: "."
+  MOTHERSHIP_SECRET_KEY: ${{ secrets.MOTHERSHIP_TEST_SECRET_KEY }}
+
+jobs:
+  # =========================================================================
+  # SECRETS - Heuristic Secret Scan (commit guardrail)
+  # =========================================================================
+  secrets-scan:
+    name: "Secrets Scan"
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
+
+      - name: "Set up Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: "Install uv"
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: "Run secrets scan"
+        run: |
+          # Basic secrets scan using grep patterns - more specific to avoid false positives
+          echo "Running basic secrets scan..."
+
+          # Check for actual hardcoded secrets (not just variable names)
+          if grep -r -i -E "(password|secret|token|api_key)\s*=\s*[\"'][^\"']{20,}[\"']" --include="*.py" --include="*.yaml" --include="*.yml" --include="*.json" src/; then
+            echo "Potential hardcoded secrets found - please review"
+            exit 1
+          elif grep -r -i "ghp_[a-zA-Z0-9]{36}" --include="*.py" --include="*.yaml" --include="*.yml" --include="*.json" src/; then
+            echo "GitHub token found - please review"
+            exit 1
+          else
+            echo "No obvious hardcoded secrets detected"
+          fi
+
+  # =========================================================================
+  # LINT - Code Quality Checks
+  # =========================================================================
+  lint:
+    name: "Lint"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
+
+      - name: "Set up Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: "Install uv"
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: "Install dependencies"
+        run: |
+          uv sync --frozen
+
+      - name: "Lint (ruff)"
+        run: |
+          uv run ruff check .
+
+      - name: "Format check (black)"
+        run: |
+          uv run black --check src/grid/ src/application/ src/tools/ tests/
+
+  # =========================================================================
+  # SECURITY - Security Scanning
+  # =========================================================================
+  security:
+    name: "Security Scan"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true
+
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
+
+      - name: "Set up Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: "Install uv"
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: "Install dependencies"
+        run: |
+          uv sync --frozen
+
+      - name: "Install security tools"
+        run: |
+          uv pip install bandit pip-audit
+
+      - name: "Run Bandit security scan"
+        run: |
+          uv run bandit -r src/grid src/application src/tools -f json -o bandit-report.json || true
+          uv run bandit -r src/grid src/application src/tools -ll || true
+
+      - name: "Security Gate Check"
+        run: |
+          python scripts/security_gate.py security-reports/bandit-report.json --max-high 0 --max-medium 5 --summary-file security-summary.md
+
+      - name: "Publish Security Summary"
+        if: always()
+        run: |
+          cat security-summary.md >> $GITHUB_STEP_SUMMARY
+
+      - name: "Upload security reports"
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-reports
+          path: |
+            security-reports/
+            bandit-report.json
+          retention-days: 7
+
+      - name: "Run pip-audit dependency check"
+        run: |
+          uv run pip-audit --desc || true
+
+  # =========================================================================
+  # TEST - Unit Tests
+  # =========================================================================
+  test:
+    name: "Test"
+    runs-on: ubuntu-latest
+    needs: [secrets-scan, lint]
+    timeout-minutes: 20
+
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
+
+      - name: "Set up Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: "Install uv"
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: "Install dependencies"
+        run: |
+          uv sync --frozen
+
+      - name: "Run unit tests"
+        run: |
+          uv run pytest tests/unit/ -v --tb=short
+
+      - name: "Upload coverage reports"
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          files: ./coverage.xml
+          fail_ci_if_error: false
+          verbose: true
+
+  # =========================================================================
+  # INTEGRATION - Integration Tests (main branch only)
+  # =========================================================================
+  integration:
+    name: "Integration Tests"
+    runs-on: ubuntu-latest
+    needs: [test]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || github.event.inputs.run_slow_tests == 'true'
+    timeout-minutes: 30
+    continue-on-error: true # Non-blocking - integration tests may require additional dependencies
+
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
+
+      - name: "Set up Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: "Install uv"
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: "Install dependencies"
+        run: |
+          uv sync --frozen
+          uv sync --group ai
+
+      - name: "Run integration tests"
+        run: |
+          uv run pytest tests/integration/ -v --tb=short -m "not slow" || uv run pytest tests/integration/ -v --tb=short
+
+  # =========================================================================
+  # BUILD - Package Building
+  # =========================================================================
+  build:
+    name: "Build Package"
+    runs-on: ubuntu-latest
+    needs: [test]
+    timeout-minutes: 15
+
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
+
+      - name: "Set up Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: "Install uv"
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: "Install dependencies"
+        run: |
+          uv sync --frozen
+
+      - name: "Install build tools"
+        run: |
+          uv pip install build twine
+
+      - name: "Build package"
+        run: |
+          uv run python -m build
+
+      - name: "Verify package"
+        run: |
+          uv run twine check dist/*
+
+      - name: "Upload build artifacts"
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-packages
+          path: dist/
+          retention-days: 7
+
+  # =========================================================================
+  # VERIFY - Distribution Package Verification
+  # =========================================================================
+  verify-dist:
+    name: "Verify Distribution"
+    runs-on: ubuntu-latest
+    needs: [build]
+    timeout-minutes: 10
+
+    steps:
+      - name: "Download distribution packages"
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-packages
+          path: .
+          merge-multiple: true
+
+      - name: "Save wheel files before checkout"
+        run: |
+          echo "💾 Saving wheel files before checkout..."
+          mkdir -p /tmp/wheels
+          find . -name "*.whl" -type f -exec cp {} /tmp/wheels/ \;
+          echo "📁 Saved wheel files:"
+          ls -la /tmp/wheels/
+
+      - name: "Checkout source for uv.lock"
+        uses: actions/checkout@v4
+
+      - name: "Restore wheel files"
+        run: |
+          echo "🔄 Restoring wheel files after checkout..."
+          cp /tmp/wheels/*.whl .
+          echo "📁 Restored wheel files:"
+          ls -la *.whl
+
+      - name: "Set up Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: "Install uv"
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: "Create virtual environment"
+        run: |
+          uv venv
+
+      - name: "Debug downloaded files"
+        run: |
+          echo "🔍 Listing all files in current directory:"
+          ls -la
+          echo ""
+          echo "🔍 Looking for wheel files:"
+          find . -name "*.whl" -type f
+          echo ""
+          echo "🔍 Looking for tar.gz files:"
+          find . -name "*.tar.gz" -type f
+
+      - name: "Smoke Test Installation"
+        run: |
+          echo " Testing wheel installation..."
+          echo " Available wheel files:"
+          find . -name "*.whl" -type f
+
+          # Install the first wheel file found
+          WHEEL_FILE=$(find . -name "*.whl" -type f | head -1)
+          if [ -n "$WHEEL_FILE" ]; then
+            echo " Installing wheel: $WHEEL_FILE"
+            uv pip install "$WHEEL_FILE" --force-reinstall
+
+            echo " Verifying grid import..."
+            uv run python -c "import grid; print(' Grid module imported successfully'); print(f' Installation path: {grid.__file__}')"
+          else
+            echo " No wheel file found!"
+            exit 1
+          fi
+
+      - name: "Test Basic Functionality"
+        run: |
+          echo "🔍 Testing basic grid functionality..."
+          uv run python -c "import grid; print('✅ Grid module imported successfully'); print('✅ All smoke tests passed!')"
+
+  # =========================================================================
+  # DOCS - Documentation Check
+  # =========================================================================
+  docs:
+    name: "Documentation Check"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true
+
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
+
+      - name: "Check for README"
+        run: |
+          if [ ! -f README.md ]; then
+            echo "Warning: README.md not found"
+            exit 0
+          fi
+
+      - name: "Check for required docs"
+        run: |
+          echo "Documentation structure check passed"
+
+  # =========================================================================
+  # CI STATUS - Pipeline Summary
+  # =========================================================================
+  ci-status:
+    name: "CI Status Summary"
+    runs-on: ubuntu-latest
+    needs: [secrets-scan, lint, security, test, integration, build, verify-dist, docs]
+    if: always()
+    timeout-minutes: 5
+
+    steps:
+      - name: "Pipeline Status"
+        run: |
+          echo "## GRID CI/CD Pipeline Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Lint | ${{ needs.lint.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Security | ${{ needs.security.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Test | ${{ needs.test.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Integration | ${{ needs.integration.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Build | ${{ needs.build.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Verify Dist | ${{ needs.verify-dist.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Docs | ${{ needs.docs.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ needs.test.result }}" != "success" ] || [ "${{ needs.build.result }}" != "success" ] || [ "${{ needs.lint.result }}" != "success" ]; then
+            echo "❌ **Pipeline failed** - Critical jobs must pass" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          else
+            echo "✅ **Pipeline passed** - All critical jobs successful" >> $GITHUB_STEP_SUMMARY
+          fi

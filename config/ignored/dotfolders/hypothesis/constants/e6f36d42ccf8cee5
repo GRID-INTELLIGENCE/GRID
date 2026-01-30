@@ -1,0 +1,4 @@
+# file: E:\grid\grid\organization\models.py
+# hypothesis_version: 6.150.0
+
+[0.0, 'Additional metadata', 'Admin user IDs', 'Allowed features', 'Email address', 'Organization domain', 'Organization name', 'Organization role', 'Primary focus areas', 'Prompt preferences', 'Prompt templates', 'Restricted features', 'Storage limit in GB', 'User custom prompts', 'User role', 'User status', 'Username', 'active', 'admin', 'analyst', 'banned', 'customer', 'developer', 'guest', 'inactive', 'internal', 'manager', 'nvidia', 'openai', 'partner', 'pending', 'suspended', 'viewer', 'walt_disney_pictures']

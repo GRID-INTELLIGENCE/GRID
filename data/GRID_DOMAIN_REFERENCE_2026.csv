@@ -1,0 +1,13 @@
+Category,Domain Name,Path,Layer,Metaphor,Partition,Signal FX,Technology,Primary Artifacts
+Core Intelligence,GRID Core,grid/,Domain Core,Railway (Temporal Interlock),CORE_INTEL,Echo (High Persistence),Python; Pydantic,essence/; patterns/; awareness/
+Application,Mothership / Resonance,application/,Presentation/Service,Freeway (Structural Flux),APP_SERVICE,Reverb (Standard Context),FastAPI; SQLAlchemy; stripe,application/mothership/; application/resonance/
+Cognitive,Light of the Seven,light_of_the_seven/,Cognitive Extension,Freeway (High Scalability),COGNITIVE,Reverb (Deep Context),Python; Bounded Rationality Models,light_of_the_seven/cognitive_layer/
+Infrastructure,Tools & EQ,tools/ / EQ/,Infrastructure,Freeway (Resource Lane),TOOLS_INFRA,Echo (Jittered Retry),ChromaDB; Ollama; httpx,EQ/integration.py; tools/rag/
+Testing,The Arena,Arena/,Verification,Hybrid (Iron + Flux),ARENA,Friction (Simulation Load),Python; Simulation Engines,Arena/the_chase/
+Integration,Connectivity,External APIs / DBs,Infrastructure,Hybrid (Compounded),INTEGRATION,Reverb (Emotional Aura),Databricks; Redis; SQLite,grid/interfaces/; EQ/api_client.py
+Documentation,Research Knowledge,docs/,Support,Railway (Hard Anchor),RESEARCH_DOCS,Echo (Verification),Markdown; Mermaid,docs/ARCHITECTURE_STRATEGY.md
+Subterranean Control,Iron Frame,Internal Architecture,Hardware/Skeleton,Iron Frame (Immutability),N/A,Friction (Thermal Load),Rust (Backplane Hooks),grid/distribution/ghost_router.py
+Subterranean Flux,Temporal Drift,Global Events,Ephemeral Time,Temporal Flux (Volatility),N/A,Drift (Information Decay),Redis Streams,grid/distribution/ghost_fx.py
+System Medium,Worker Pool,Redis Streams,Transmission,The Asphalt,grid:worker_group,N/A,Redis Streams; socket,grid/distribution/worker_pool.py
+Central Interchange,Distribution Manager,grid/distribution/manager.py,Orchestration,The Interchange,N/A,Echo + Reverb + Glimpse,Python; AsyncIO,grid/distribution/manager.py
+Routing Logic,Highway Router,grid/distribution/router.py,Logic,Navigation,N/A,Deterministic Hashing,Python (hashlib),grid/distribution/router.py

@@ -1,0 +1,13 @@
+# Custom Nginx image for GRID MCP Gateway
+# Eliminates Windows bind-mount issues by copying config into image
+
+FROM nginx:alpine
+
+# Copy the security configuration directly into the image
+COPY nginx-security.conf /etc/nginx/conf.d/custom.conf
+
+# Expose ports
+EXPOSE 80 443
+
+# Default command
+CMD ["nginx", "-g", "daemon off;"]

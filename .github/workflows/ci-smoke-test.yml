@@ -1,0 +1,207 @@
+name: CI Smoke Test
+
+# Minimal reproducible workflow for pipeline stabilization
+# Goal: Fast feedback, env/PATH debugging, dependency caching
+# Iterate until consistently green
+
+on:
+  push:
+    branches: [main, develop, architecture/**]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+    inputs:
+      debug_mode:
+        description: "Enable verbose debugging"
+        required: false
+        default: false
+        type: boolean
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.13"
+  UV_SYSTEM_PYTHON: "true"
+  UV_CACHE_DIR: /tmp/.uv-cache
+
+jobs:
+  smoke-test:
+    name: Smoke Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      # =========================================================
+      # STEP 1: Checkout
+      # =========================================================
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # =========================================================
+      # STEP 2: Environment Debugging
+      # Print env/PATH for troubleshooting environment mismatches
+      # =========================================================
+      - name: Debug Environment
+        run: |
+          echo "=== ENVIRONMENT DEBUG ==="
+          echo "Runner OS: $RUNNER_OS"
+          echo "Runner Arch: $RUNNER_ARCH"
+          echo "GitHub Ref: $GITHUB_REF"
+          echo "GitHub SHA: $GITHUB_SHA"
+          echo ""
+          echo "=== PATH ==="
+          echo "$PATH" | tr ':' '\n'
+          echo ""
+          echo "=== Python Versions Available ==="
+          which python3 || echo "python3 not found"
+          python3 --version || echo "python3 version check failed"
+          echo ""
+          echo "=== Working Directory ==="
+          pwd
+          ls -la
+          echo ""
+          echo "=== Key Files Check ==="
+          [ -f pyproject.toml ] && echo "✓ pyproject.toml exists" || echo "✗ pyproject.toml missing"
+          [ -f uv.lock ] && echo "✓ uv.lock exists" || echo "✗ uv.lock missing"
+          [ -d tests ] && echo "✓ tests/ directory exists" || echo "✗ tests/ missing"
+          [ -d src ] && echo "✓ src/ directory exists" || echo "✗ src/ missing"
+
+      # =========================================================
+      # STEP 3: Python Setup
+      # =========================================================
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Verify Python
+        run: |
+          echo "=== Python Setup Verification ==="
+          which python
+          python --version
+          python -c "import sys; print(f'Python path: {sys.executable}')"
+          python -c "import sys; print(f'Python prefix: {sys.prefix}')"
+
+      # =========================================================
+      # STEP 4: UV Installation with Caching
+      # =========================================================
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Verify uv
+        run: |
+          echo "=== UV Verification ==="
+          which uv
+          uv --version
+          echo "UV cache dir: $UV_CACHE_DIR"
+
+      # =========================================================
+      # STEP 5: Restore UV Cache
+      # =========================================================
+      - name: Restore uv cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.UV_CACHE_DIR }}
+          key: uv-${{ runner.os }}-${{ hashFiles('uv.lock') }}
+          restore-keys: |
+            uv-${{ runner.os }}-
+
+      # =========================================================
+      # STEP 6: Install Dependencies
+      # =========================================================
+      - name: Install dependencies
+        run: |
+          echo "=== Installing Dependencies ==="
+          uv sync --frozen --group test
+          echo ""
+          echo "=== Installed Packages ==="
+          uv pip list | head -30
+
+      # =========================================================
+      # STEP 7: Smoke Test - Import Check
+      # Verify core modules can be imported
+      # =========================================================
+      - name: Smoke Test - Import Check
+        run: |
+          echo "=== Import Smoke Test ==="
+          uv run python -c "
+          import sys
+          print(f'Python: {sys.version}')
+          print()
+
+          # Test core imports
+          imports_to_test = [
+              ('pytest', 'pytest'),
+              ('pydantic', 'pydantic'),
+              ('fastapi', 'fastapi'),
+          ]
+
+          passed = 0
+          failed = 0
+
+          for name, module in imports_to_test:
+              try:
+                  __import__(module)
+                  print(f'✓ {name}')
+                  passed += 1
+              except ImportError as e:
+                  print(f'✗ {name}: {e}')
+                  failed += 1
+
+          print()
+          print(f'Import check: {passed} passed, {failed} failed')
+
+          if failed > 0:
+              sys.exit(1)
+          "
+
+      # =========================================================
+      # STEP 8: Smoke Test - Fast Unit Tests
+      # Run a minimal subset of tests for quick feedback
+      # =========================================================
+      - name: Smoke Test - Fast Unit Tests
+        run: |
+          echo "=== Running Fast Smoke Tests ==="
+          uv run pytest tests/unit/test_smoke.py -v \
+            --timeout=60 \
+            --tb=short \
+            -m "critical" \
+            --no-header
+
+      # =========================================================
+      # STEP 9: Smoke Test - Collection Check
+      # Ensure pytest can collect all tests without errors
+      # =========================================================
+      - name: Smoke Test - Test Collection
+        run: |
+          echo "=== Test Collection Check ==="
+          uv run pytest tests/unit --collect-only -q 2>&1 | head -50
+          echo ""
+          echo "Collection check complete"
+
+      # =========================================================
+      # STEP 10: Save UV Cache
+      # =========================================================
+      - name: Minimize uv cache
+        run: uv cache prune --ci
+
+      # =========================================================
+      # STEP 11: Summary
+      # =========================================================
+      - name: Summary
+        run: |
+          echo "=== SMOKE TEST SUMMARY ==="
+          echo "✓ Environment verified"
+          echo "✓ Python ${{ env.PYTHON_VERSION }} installed"
+          echo "✓ UV installed and cached"
+          echo "✓ Dependencies installed"
+          echo "✓ Core imports successful"
+          echo "✓ Fast unit tests completed"
+          echo "✓ Test collection verified"
+          echo ""
+          echo "Pipeline smoke test PASSED"

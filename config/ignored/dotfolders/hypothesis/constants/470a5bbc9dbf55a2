@@ -1,0 +1,4 @@
+# file: E:\grid\application\mothership\security\auth.py
+# hypothesis_version: 6.150.0
+
+['API key required', 'AUTHORIZATION_DENIED', 'Bearer', 'JWT token required', 'Permission denied', 'SECURITY_ERROR', 'WWW-Authenticate', 'admin', 'api_key', 'authenticated', 'bearer', 'dev_bypass', 'dev_user', 'jwt_user', 'method', 'none', 'permissions', 'read', 'user_id', 'write']

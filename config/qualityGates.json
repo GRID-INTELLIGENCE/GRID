@@ -1,0 +1,269 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Grid Quality Gates Configuration",
+  "description": "Centralized configuration for all quality thresholds, limits, and scoring parameters in Grid codebase",
+  "version": "1.0.0",
+
+  "arena": {
+    "description": "Arena penalty system thresholds",
+    "violationThresholds": {
+      "repeatedViolation": {
+        "usePercentiles": false,
+        "threshold": 3,
+        "adaptive": true
+      },
+      "severeViolation": {
+        "usePercentiles": false,
+        "threshold": 5,
+        "adaptive": true
+      },
+      "highViolationRate": {
+        "usePercentiles": false,
+        "threshold": 2,
+        "adaptive": true
+      }
+    },
+    "reputationThresholds": {
+      "lowReputationWarning": {
+        "threshold": 0.3,
+        "usePercentiles": false,
+        "adaptive": true
+      },
+      "criticalReputation": {
+        "threshold": 0.1,
+        "usePercentiles": false,
+        "adaptive": true
+      },
+      "harvestSeasonLeniency": {
+        "threshold": 0.5,
+        "usePercentiles": false,
+        "adaptive": true
+      }
+    },
+    "environments": {
+      "city": {
+        "warningThreshold": 1,
+        "fineThreshold": 2,
+        "banThreshold": 4,
+        "penaltyMultiplier": 1.5,
+        "reputationDecayRate": 0.15,
+        "useAdaptiveThresholds": true
+      },
+      "village": {
+        "warningThreshold": 3,
+        "fineThreshold": 6,
+        "banThreshold": 10,
+        "penaltyMultiplier": 0.8,
+        "reputationDecayRate": 0.05,
+        "useAdaptiveThresholds": true
+      },
+      "tournament": {
+        "warningThreshold": 1,
+        "fineThreshold": 2,
+        "banThreshold": 3,
+        "penaltyMultiplier": 2.0,
+        "reputationDecayRate": 0.2,
+        "useAdaptiveThresholds": false
+      },
+      "casual": {
+        "warningThreshold": 5,
+        "fineThreshold": 10,
+        "banThreshold": 20,
+        "penaltyMultiplier": 0.5,
+        "reputationDecayRate": 0.02,
+        "useAdaptiveThresholds": true
+      },
+      "default": {
+        "warningThreshold": 2,
+        "fineThreshold": 4,
+        "banThreshold": 8,
+        "penaltyMultiplier": 1.0,
+        "reputationDecayRate": 0.1,
+        "useAdaptiveThresholds": true
+      }
+    }
+  },
+
+  "inferenceAbrasiveness": {
+    "description": "Inference abrasiveness system thresholds",
+    "thresholds": {
+      "confidence": {
+        "default": 0.7,
+        "min": 0.5,
+        "max": 0.9,
+        "usePercentiles": false,
+        "adaptive": true
+      },
+      "resourceUtilization": {
+        "default": 0.8,
+        "min": 0.0,
+        "max": 1.0,
+        "usePercentiles": false,
+        "adaptive": true
+      },
+      "failureCount": {
+        "default": 5,
+        "min": 0,
+        "max": 20,
+        "usePercentiles": false,
+        "adaptive": true
+      },
+      "temporalDecay": {
+        "default": 0.5,
+        "min": 0.0,
+        "max": 1.0,
+        "usePercentiles": false,
+        "adaptive": true
+      },
+      "patternDeviation": {
+        "default": 0.3,
+        "min": 0.0,
+        "max": 1.0,
+        "usePercentiles": true,
+        "adaptive": true
+      }
+    },
+    "adjustmentFactors": {
+      "lowConfidenceMultiplier": 0.8,
+      "highConfidenceMultiplier": 1.1,
+      "criticalPriorityMultiplier": 1.5,
+      "lowPriorityMultiplier": 0.8,
+      "rareCaseConfidenceMultiplier": 0.7,
+      "rareCaseDeviationMultiplier": 1.3,
+      "useAdaptiveMultipliers": true
+    },
+    "cleanup": {
+      "temporaryFilesDays": 7,
+      "staleResultsDays": 30,
+      "cacheDays": 90,
+      "cloudContentDehydration": 0.5,
+      "downloadsCleanupDays": 30,
+      "recycleBinDays": 14
+    }
+  },
+
+  "optimization": {
+    "description": "Optimization and health metrics thresholds",
+    "healthMetrics": {
+      "hubConcentration": {
+        "threshold": 2.5,
+        "usePercentiles": true,
+        "tieredScoring": {
+          "excellent": 1.5,
+          "good": 2.0,
+          "normal": 2.5,
+          "poor": 3.0
+        }
+      },
+      "connectivityIndex": {
+        "optimalThreshold": 0.10,
+        "usePercentiles": true,
+        "tieredScoring": {
+          "excellent": 0.05,
+          "good": 0.08,
+          "optimal": 0.10,
+          "acceptable": 0.15
+        }
+      },
+      "riskBalance": {
+        "floor": 0.84,
+        "usePercentiles": true,
+        "tieredScoring": {
+          "excellent": 0.95,
+          "good": 0.90,
+          "acceptable": 0.84,
+          "poor": 0.70
+        }
+      },
+      "phaseAlignment": {
+        "perfect": 1.0,
+        "usePercentiles": true,
+        "tieredScoring": {
+          "excellent": 0.95,
+          "good": 0.85,
+          "acceptable": 0.75,
+          "poor": 0.60
+        }
+      },
+      "overallHealth": {
+        "weights": {
+          "phaseAlignment": 0.35,
+          "connectivityIndex": 0.25,
+          "hubConcentration": 0.20,
+          "isolationRate": 0.10,
+          "riskBalance": 0.10
+        },
+        "tieredScoring": {
+          "excellent": 80,
+          "good": 70,
+          "acceptable": 60,
+          "poor": 50
+        }
+      }
+    },
+    "boundaries": {
+      "maxConnectionDegree": 6,
+      "phaseAdjacency": 1,
+      "useAdaptiveBoundaries": true
+    }
+  },
+
+  "abrasiveExtraction": {
+    "description": "Abrasive extraction system thresholds",
+    "minimums": {
+      "requiredResults": {
+        "default": 3,
+        "usePercentiles": true,
+        "adaptive": true
+      },
+      "scoreThreshold": {
+        "default": 0.15,
+        "usePercentiles": true,
+        "adaptive": true
+      }
+    },
+    "quality": {
+      "qualityThresholdCalculation": "additive",
+      "useAdaptiveCalculation": true,
+      "extremeEdgeCaseThresholds": {
+        "topScore": 0.1,
+        "patternDeviation": 0.5,
+        "averageScore": 0.1
+      }
+    },
+    "confidence": {
+      "weights": {
+        "topScore": 0.5,
+        "resultCount": 0.3,
+        "patternDeviation": 0.2
+      },
+      "countBasedBoosts": {
+        "high": 5,
+        "medium": 3,
+        "highBoost": 0.2,
+        "mediumBoost": 0.1
+      }
+    }
+  },
+
+  "rateLimiting": {
+    "description": "Rate limiting configuration",
+    "default": {
+      "requestsPerMinute": 60,
+      "useAdaptiveLimiting": true,
+      "loadBasedScaling": true
+    },
+    "userTypes": {
+      "default": 60,
+      "premium": 120,
+      "admin": 300
+    }
+  },
+
+  "validation": {
+    "description": "Configuration validation rules",
+    "enforceThresholdRanges": true,
+    "validateLogicalConsistency": true,
+    "checkAdaptiveSettings": true
+  }
+}

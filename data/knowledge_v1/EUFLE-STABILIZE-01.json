@@ -1,0 +1,38 @@
+{
+  "id": "EUFLE-STABILIZE-01",
+  "title": "EUFLE Model Routing and Configuration",
+  "summary": "Documents EUFLE's multi-tier model routing architecture, including fallback chains between llama.cpp (GGUF), local HF models, and Ollama. Covers the complete troubleshooting journey for Ministral-14B compatibility issues (corrupted tokenizer, FP8 quantization, multimodal architecture incompatibility, code patches applied, comprehensive root cause analysis, and final resolution by updating default configuration to use TinyLlama GGUF model for reliable out-of-box functionality.",
+  "links": [
+    {
+      "label": "Code patches",
+      "path": "grid/distribution/eufle_bridge.py",
+      "type": "code_patch"
+    },
+    {
+      "label": "Overview",
+      "path": "docs/architecture/RESONANCE_v1_0_FINALIZATION.md",
+      "type": "document"
+    },
+    {
+      "label": "Root cause analysis",
+      "path": "reception_artifact_sanitized.json",
+      "type": "analysis"
+    },
+    {
+      "label": "Troubleshooting",
+      "path": "logs/eufle_health.jsonl",
+      "type": "log"
+    },
+    {
+      "label": "Verification results",
+      "path": "docs/final_release/grid-report.md",
+      "type": "analysis"
+    }
+  ],
+  "timestamp": "2026-01-09T21:06:04.614507",
+  "tags": [
+    "eufle",
+    "stabilization"
+  ],
+  "metadata": {}
+}

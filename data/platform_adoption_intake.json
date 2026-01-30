@@ -1,0 +1,31 @@
+{
+    "project_name": "Platform Engineering Sync",
+    "objective": "Resolve adoption bottlenecks and manage infrastructure complexity for the Engineering Team.",
+    "status_summary": "Large-scale monorepo with high technical debt. Developers are resistant to new platform standards due to cognitive load.",
+    "recommended_roles": [
+        "Architect",
+        "Lawyer"
+    ],
+    "recommended_tasks": [
+        "/plan",
+        "/gapanalysis"
+    ],
+    "metadata": {
+        "category": "PLATFORM_ENFORCEMENT",
+        "priority": "HIGH"
+    },
+    "structured_data": {
+        "keywords": [
+            "platform",
+            "adoption",
+            "complexity",
+            "standardization"
+        ],
+        "components": [
+            "CI/CD Pipelines",
+            "Developer Portal",
+            "Infrastructure-as-Code",
+            "Governance Engine"
+        ]
+    }
+}

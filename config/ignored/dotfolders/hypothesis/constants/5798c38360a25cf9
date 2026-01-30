@@ -1,0 +1,4 @@
+# file: E:\grid\grid\entry_points\cli_entry.py
+# hypothesis_version: 6.150.0
+
+['Permission denied', 'cli_command', 'command', 'data', 'error', 'processed', 'success', 'trace_id']

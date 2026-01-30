@@ -1,0 +1,7 @@
+component_id,component_type,fix_id,description,ops_per_second,latency_us,throughput_score,efficiency_score,current_priority,age_ratio,sustain_phase,honor_level,reward_level_encoded,decay_rate,threshold_seconds,decay_curve,performance_reward,test_pass_rate,efficiency_reward,composite_reward,timestamp,test_status,benchmark_iterations
+honor_decay,decay_mechanism,1,Honor decay mechanism for CharacterRewardState,8144648.97,0.123,0.8145,0.8886,0.5,0.3,0.0,0.3,1.0,0.01,86400.0,0.5,0.8923,0.6,0.8886,0.8046,1768401001.898623,EDGE_CASE,10000
+de_escalation,reward_system,2,Auto de-escalation check for reward levels,8854258.9,0.113,0.8854,0.9312,0.5,0.3,0.0,0.75,3.0,0.01,2592000.0,0.5,0.9335,0.4,0.9312,0.7734,1768401001.898623,EDGE_CASE,10000
+effective_priority,cache_operation,3,Effective priority calculation with gradual decay,5578.27,179.267,0.0006,0.3286,0.8,0.6,0.0,0.5,1.0,0.01,2592000.0,0.5,0.345,0.8,0.3286,0.4815,1768401001.898623,PASS,10000
+sustain_phase,cache_operation,4,Sustain phase tracking for cache entries,6880891.77,0.145,0.6881,0.8128,0.8,0.2,1.0,0.5,1.0,0.01,2592000.0,0.5,0.819,1.0,0.8128,0.8733,1768401001.898623,PASS,10000
+cache_ops,cache_operation,5,Cache operations with decay mechanisms,1455.0,687.285,0.0001,0.1252,0.8,0.6,0.0,0.5,1.0,0.01,2592000.0,0.5,0.1314,0.667,0.1252,0.2921,1768401001.898623,PASS,10000
+eviction,cache_operation,5,Eviction using effective priority,1754.54,569.952,0.0002,0.1721,0.8,0.6,0.0,0.5,1.0,0.01,2592000.0,0.5,0.1807,1.0,0.1721,0.4265,1768401001.898623,PASS,1000

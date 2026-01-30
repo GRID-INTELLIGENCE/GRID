@@ -1,0 +1,6 @@
+Error: 'Settings' object has no attribute 'openai'
+Traceback (most recent call last):
+  File "E:\grid\src\services\ner_service.py", line 147, in extract_entities
+    model=getattr(settings.openai, "model", "gpt-4-turbo-preview"),
+                  ^^^^^^^^^^^^^^^
+AttributeError: 'Settings' object has no attribute 'openai'

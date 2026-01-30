@@ -1,0 +1,88 @@
+# Docker Compose Override for Development
+# This file is automatically loaded by docker-compose when present
+# Usage: docker-compose up (automatically uses this override)
+# To ignore: docker-compose --no-override up
+
+services:
+  # PostgreSQL - Development overrides
+  postgres:
+    # Expose port for external access (e.g., pgAdmin, DBeaver)
+    ports:
+      - "127.0.0.1:5432:5432"
+
+  # Redis - Development overrides
+  redis:
+    # Expose port for external access (e.g., redis-cli, redis-commander)
+    ports:
+      - "127.0.0.1:6379:6379"
+
+  # ChromaDB - Development overrides
+  chroma:
+    # Expose port for external access
+    ports:
+      - "127.0.0.1:8000:8000"
+
+  # Ollama - Development overrides
+  ollama:
+    # Expose port for external access (matches base compose mapping)
+    ports:
+      - "127.0.0.1:11435:11434"
+
+  # Note: mothership-api service removed - API runs on host (Option B)
+  # Start API with: python backend/server.py
+
+  # Optional: Redis Commander for Redis management
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: grid-redis-commander
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - "127.0.0.1:8081:8081"
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - grid-network
+    profiles:
+      - tools
+
+  # Optional: pgAdmin for PostgreSQL management
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: grid-pgadmin
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@grid.local
+      - PGADMIN_DEFAULT_PASSWORD=admin
+      - PGADMIN_CONFIG_SERVER_MODE=False
+    ports:
+      - "127.0.0.1:5050:80"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - grid-network
+    profiles:
+      - tools
+
+  # Optional: Development database initialization
+  postgres-init:
+    image: postgres:16-alpine
+    container_name: grid-postgres-init
+    volumes:
+      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: >
+      sh -c "
+      echo 'Waiting for PostgreSQL...' &&
+      until pg_isready -h postgres -U grid; do sleep 1; done &&
+      echo 'PostgreSQL is ready!' &&
+      psql -h postgres -U grid -d grid_db -f /docker-entrypoint-initdb.d/init.sql &&
+      echo 'Database initialized successfully!'
+      "
+    networks:
+      - grid-network
+    profiles:
+      - init

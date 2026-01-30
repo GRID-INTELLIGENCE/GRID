@@ -1,0 +1,68 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "GRID Topics Seed Data Schema",
+    "description": "Schema for validating the structure of topics_seed.json used in GRID research initialization.",
+    "type": "object",
+    "required": [
+        "topics"
+    ],
+    "properties": {
+        "topics": {
+            "type": "array",
+            "description": "List of research topics.",
+            "items": {
+                "$ref": "#/definitions/topic"
+            }
+        }
+    },
+    "definitions": {
+        "topic": {
+            "type": "object",
+            "required": [
+                "id",
+                "title",
+                "sections"
+            ],
+            "properties": {
+                "id": {
+                    "type": [
+                        "string",
+                        "integer"
+                    ],
+                    "description": "Unique identifier for the topic."
+                },
+                "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Title of the research topic."
+                },
+                "sections": {
+                    "type": "array",
+                    "description": "Sections containing content for the topic.",
+                    "items": {
+                        "$ref": "#/definitions/section"
+                    },
+                    "minItems": 1
+                }
+            }
+        },
+        "section": {
+            "type": "object",
+            "required": [
+                "header",
+                "content"
+            ],
+            "properties": {
+                "header": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Header title for the section."
+                },
+                "content": {
+                    "type": "string",
+                    "description": "Text content of the section."
+                }
+            }
+        }
+    }
+}

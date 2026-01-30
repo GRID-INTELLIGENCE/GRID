@@ -1,0 +1,33 @@
+digraph GRID {
+  rankdir=LR;
+  node [shape=box];
+  "__init__";
+  "api";
+  "ares";
+  "bridge";
+  "cli";
+  "concept";
+  "core";
+  "database";
+  "demos";
+  "grid";
+  "kernel";
+  "main";
+  "ml";
+  "nl_dev";
+  "pattern_engine";
+  "physics";
+  "plugins";
+  "realtime";
+  "services";
+  "throughput_engine";
+  "tools";
+  "transformer";
+  "utils";
+  "valuation";
+  "vision";
+  "workflow_engine";
+  "grid" -> "main";
+  "grid" -> "utils";
+  "services" -> "database";
+}

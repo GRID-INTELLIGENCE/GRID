@@ -1,0 +1,4 @@
+# file: E:\grid\application\mothership\routers\navigation_simple.py
+# hypothesis_version: 6.150.0
+
+[0.0, 0.1, 0.5, 0.7, 0.8, 0.85, 1.0, 30.0, 35.0, 1000, '/decision', '/navigation', '/plan', '1.0.0', '2026-01-08T00:00:00Z', 'Adaptation threshold', 'Alternative paths', 'Decision context', 'Decision goal', 'Learning weight', 'Navigation context', 'Navigation goal', 'Original goal', 'Plan confidence', 'Request source', 'action', 'alternative_path', 'api', 'arrive', 'confidence', 'context_used', 'current', 'decision_id', 'estimated_time', 'goal', 'location', 'move_toward', 'navigation', 'proceed', 'reasoning', 'recommended_action', 'request_id', 'scopes', 'start', 'steps', 'target', 'user_id', 'variant']

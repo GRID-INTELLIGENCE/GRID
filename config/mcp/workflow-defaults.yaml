@@ -1,0 +1,185 @@
+# MCP Workflow Defaults
+# Controls tool availability, naming conventions, and execution behavior
+
+tool_surface:
+  # Enabled server groups (disable unused servers to reduce confusion)
+  enabled_servers:
+    - grid-rag # Knowledge base - always enabled
+    - grid-enhanced-tools # Code analysis - always enabled
+    - grid-mastermind # Project analysis - always enabled (if available)
+    - grid-git # Version control - always enabled (if available)
+    - filesystem # File operations - always enabled
+    - database # DB operations - enable on request
+    - postgres # PostgreSQL - enable on request
+
+  # Disabled by default (uncomment to enable)
+  disabled_servers:
+    - memory # Internal use only
+    - playwright # Browser automation (specialist tool)
+
+naming_conventions:
+  # Aliases for common tool names (help LLM pick correct tool)
+  # These map user expectations to actual server tool names
+  aliases:
+    # File operations
+    "ls": "list_directory"
+    "cat": "read_file"
+    "cd": "navigate_directory"
+    "mkdir": "create_directory"
+    "cp": "copy_file"
+    "mv": "move_file"
+    "rm": "delete_file"
+    "pwd": "current_directory"
+    "grep": "search_in_file"
+    "find": "find_files"
+
+    # Version control
+    "git_status": "git_status"
+    "git_log": "git_log"
+    "git_blame": "git_blame"
+    "git_diff": "git_diff"
+
+    # Knowledge base
+    "query": "rag_query"
+    "search": "rag_query"
+    "index": "rag_index"
+
+    # Code analysis
+    "profile": "performance_profiler"
+    "optimize": "code_optimizer"
+    "format": "formatter"
+
+  # Standard tool name mappings
+  standard_names:
+    rag_query: "rag_query"
+    rag_index: "rag_index"
+    rag_search: "rag_search"
+    rag_stats: "rag_stats"
+    rag_add_document: "rag_add_document"
+    rag_on_demand: "rag_on_demand"
+    performance_profiler: "performance_profiler"
+    code_optimizer: "code_optimizer"
+    formatter: "formatter"
+    list_directory: "list_directory"
+    read_file: "read_file"
+    write_file: "write_file"
+    create_directory: "create_directory"
+
+execution:
+  # Timeout in seconds for tool execution
+  timeout_seconds: 30
+
+  # Maximum tool call failures before giving up
+  max_failures: 3
+
+  # Retry on failure
+  retry_on_failure: true
+  retry_delay_ms: 500
+
+  # Error recovery strategy
+  error_recovery:
+    - log_error
+    - suggest_alternative_tool
+    - offer_manual_retry
+
+logging:
+  # Log all tool calls for debugging
+  log_tool_calls: true
+  log_file: "logs/mcp/tool_calls.log"
+
+  # Log level (DEBUG, INFO, WARNING, ERROR)
+  level: "INFO"
+
+  # Include full arguments in logs (may include sensitive data)
+  log_full_arguments: false
+
+  # Retention period in days
+  retention_days: 30
+
+validation:
+  # Validate schema before execution
+  validate_schema: true
+
+  # Warn on unusual parameters
+  warn_on_unknown_params: true
+
+  # Require all recommended parameters
+  require_recommended_params: false
+
+performance:
+  # Track performance metrics
+  track_metrics: true
+
+  # Performance SLA for tool calls (milliseconds)
+  sla_ms:
+    filesystem: 100
+    database: 500
+    rag: 1000
+    code_analysis: 2000
+
+  # Alert on SLA breach
+  alert_on_sla_breach: true
+
+tool_surface_defaults:
+  # Default tool categories for specific use cases
+
+  code_analysis:
+    - performance_profiler
+    - code_optimizer
+    - grid-mastermind
+
+  knowledge_base:
+    - rag_query
+    - rag_search
+    - rag_index
+
+  file_operations:
+    - list_directory
+    - read_file
+    - write_file
+    - create_directory
+
+  version_control:
+    - git_status
+    - git_log
+    - git_blame
+    - git_diff
+
+  database_operations:
+    - database
+    - postgres
+
+# LLM Integration Hints
+llm_hints:
+  # Tell LLM about tool availability
+  available_tools_summary: |
+    Available MCP tool servers:
+    1. grid-rag: Knowledge base queries, document indexing
+    2. grid-enhanced-tools: Code profiling and optimization
+    3. grid-mastermind: Project analysis and navigation
+    4. grid-git: Git operations and history
+    5. filesystem: File and directory operations
+
+  # Tell LLM about common mistakes
+  common_mistakes:
+    - Calling "ls" instead of "list_directory"
+    - Providing wrong parameter names (e.g., "path" instead of "file_path")
+    - Not providing required parameters
+    - Using wrong enum values (e.g., "gpu" when only "cpu" available)
+
+  # Tell LLM about schema examples
+  schema_examples:
+    rag_query: |
+      Required: query (string)
+      Optional: limit (int, default 5), threshold (float, default 0.0)
+      Example: rag_query(query="What is GRID's architecture?", limit=3)
+
+    list_directory: |
+      Required: path (string, directory path)
+      Optional: pattern (string, file pattern to match)
+      Example: list_directory(path="src/grid")
+
+    performance_profiler: |
+      Required: target (string, file path)
+      Optional: profiler_type (enum: cpu, memory, line_profiler)
+      Example: performance_profiler(target="src/my_module.py", profiler_type="cpu")

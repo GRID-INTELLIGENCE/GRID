@@ -1,0 +1,4 @@
+# file: E:\grid\grid\organization\discipline.py
+# hypothesis_version: 6.150.0
+
+[0.0, 1.0, 3.0, 5.0, 7.0, 8.0, 10.0, 15.0, 20.0, 100, 'Action duration', 'Additional metadata', 'Default penalty type', 'Misconduct', 'Organization context', 'Penalty duration', 'Penalty points', 'Rate Limit Exceeded', 'Reason for action', 'Reason for penalty', 'Resource Abuse', 'Rule category', 'Rule description', 'Rule name', 'Type of penalty', 'Unauthorized Access', 'User affected', 'Violation context', 'When action expires', 'When penalty expires', 'ban', 'conduct', 'feature_restriction', 'misconduct', 'points', 'rate_limit', 'rate_limit_exceeded', 'rate_limiting', 'resource', 'resource_abuse', 'resource_restriction', 'security', 'suspension', 'unauthorized_access', 'warning']

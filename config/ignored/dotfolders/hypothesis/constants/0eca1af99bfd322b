@@ -1,0 +1,4 @@
+# file: E:\grid\application\mothership\services\payment\stripe_gateway.py
+# hypothesis_version: 6.150.0
+
+['amount', 'canceled', 'client_secret', 'currency', 'current_period_end', 'current_period_start', 'data', 'enterprise', 'error_type', 'gateway_refund_id', 'id', 'items', 'livemode', 'metadata', 'payment_intent', 'price', 'price_enterprise', 'price_pro', 'price_starter', 'processing', 'professional', 'reason', 'requires_action', 'requires_capture', 'starter', 'status', 'stripe', 'succeeded', 'tier', 'to_dict', 'type', 'user_id']

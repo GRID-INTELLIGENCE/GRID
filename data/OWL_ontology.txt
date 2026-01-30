@@ -1,0 +1,201 @@
+@prefix dp: <http://design-project.org/ontology#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+#################################################################
+# Ontology Definition
+#################################################################
+
+dp:DesignProjectOntology rdf:type owl:Ontology .
+
+
+#################################################################
+# Core Classes
+#################################################################
+
+dp:DataEntity rdf:type owl:Class .
+dp:Operation rdf:type owl:Class .
+dp:Artifact rdf:type owl:Class .
+dp:Requirement rdf:type owl:Class .
+dp:Risk rdf:type owl:Class .
+dp:ConceptNode rdf:type owl:Class .
+dp:MarketSchemaField rdf:type owl:Class .
+dp:Domain rdf:type owl:Class .
+
+#################################################################
+# Object Properties
+#################################################################
+
+dp:feeds rdf:type owl:ObjectProperty ;
+         rdfs:domain dp:DataEntity ;
+         rdfs:range dp:Operation .
+
+dp:produces rdf:type owl:ObjectProperty ;
+            rdfs:domain dp:Operation ;
+            rdfs:range dp:DataEntity, dp:Artifact .
+
+dp:requires rdf:type owl:ObjectProperty ;
+            rdfs:domain dp:Operation, dp:Artifact ;
+            rdfs:range dp:Requirement .
+
+dp:blockedBy rdf:type owl:ObjectProperty ;
+             rdfs:domain dp:Operation ;
+             rdfs:range dp:Risk .
+
+dp:influences rdf:type owl:ObjectProperty ;
+              rdfs:domain dp:ConceptNode ;
+              rdfs:range dp:ConceptNode .
+
+dp:derivedFrom rdf:type owl:ObjectProperty ;
+               rdfs:domain dp:Artifact ;
+               rdfs:range dp:Operation .
+
+dp:consumes rdf:type owl:ObjectProperty ;
+            rdfs:domain dp:Operation ;
+            rdfs:range dp:DataEntity .
+
+dp:enables rdf:type owl:ObjectProperty ;
+           rdfs:domain dp:ConceptNode ;
+           rdfs:range dp:ConceptNode .
+
+dp:enhances rdf:type owl:ObjectProperty ;
+            rdfs:domain dp:ConceptNode ;
+            rdfs:range dp:ConceptNode .
+
+dp:usesSchema rdf:type owl:ObjectProperty ;
+              rdfs:domain dp:Operation ;
+              rdfs:range dp:MarketSchemaField .
+
+#################################################################
+# Data Ops Individuals
+#################################################################
+
+dp:Chatlogs rdf:type dp:DataEntity .
+dp:MergedChatlogs rdf:type dp:DataEntity .
+dp:EntitySet rdf:type dp:DataEntity .
+dp:CompressedSummary rdf:type dp:DataEntity .
+dp:HolisticJSONBundle rdf:type dp:Artifact .
+dp:CSVTable rdf:type dp:Artifact .
+
+dp:IngestChatlogs rdf:type dp:Operation .
+dp:ExtractEntities rdf:type dp:Operation .
+dp:CompressContent rdf:type dp:Operation .
+dp:ProduceStructuredJSON rdf:type dp:Operation .
+dp:GenerateCSV rdf:type dp:Operation .
+
+dp:Chatlogs dp:feeds dp:IngestChatlogs .
+dp:IngestChatlogs dp:produces dp:MergedChatlogs .
+
+dp:MergedChatlogs dp:feeds dp:ExtractEntities .
+dp:ExtractEntities dp:produces dp:EntitySet .
+
+dp:EntitySet dp:feeds dp:CompressContent .
+dp:CompressContent dp:produces dp:CompressedSummary .
+
+dp:CompressedSummary dp:feeds dp:ProduceStructuredJSON .
+dp:ProduceStructuredJSON dp:produces dp:HolisticJSONBundle .
+
+dp:MergedChatlogs dp:feeds dp:GenerateCSV .
+dp:GenerateCSV dp:produces dp:CSVTable .
+
+
+#################################################################
+# Code Refactor Individuals
+#################################################################
+
+dp:NERService_extract_entities_function rdf:type dp:Operation .
+dp:NERService_detect_hidden_players_function rdf:type dp:Operation .
+
+dp:SyncAsyncSupport rdf:type dp:Requirement .
+dp:RemoveRunInExecutor rdf:type dp:Requirement .
+dp:MockCompatibility rdf:type dp:Requirement .
+
+dp:EventLoopBlockingRisk rdf:type dp:Risk .
+
+dp:NERService_extract_entities_function dp:requires dp:SyncAsyncSupport .
+dp:NERService_extract_entities_function dp:requires dp:MockCompatibility .
+dp:NERService_extract_entities_function dp:blockedBy dp:EventLoopBlockingRisk .
+
+dp:NERService_detect_hidden_players_function dp:requires dp:SyncAsyncSupport .
+dp:NERService_detect_hidden_players_function dp:requires dp:RemoveRunInExecutor .
+dp:NERService_detect_hidden_players_function dp:blockedBy dp:EventLoopBlockingRisk .
+
+dp:EventLoopBlockingRisk rdf:type dp:Risk .
+
+
+#################################################################
+# Conceptual Mapping Individuals
+#################################################################
+
+dp:AttentionMechanics rdf:type dp:ConceptNode .
+dp:MarketCompetition rdf:type dp:ConceptNode .
+dp:SocietalSpillover rdf:type dp:ConceptNode .
+dp:DailyLifeFeedback rdf:type dp:ConceptNode .
+
+dp:QuantumComputeAcceleration rdf:type dp:ConceptNode .
+dp:QubitFoundations rdf:type dp:ConceptNode .
+dp:SuperpositionDynamics rdf:type dp:ConceptNode .
+dp:TelecomRealTimeData rdf:type dp:ConceptNode .
+
+dp:AttentionMechanics dp:influences dp:MarketCompetition .
+dp:MarketCompetition dp:influences dp:SocietalSpillover .
+dp:SocietalSpillover dp:influences dp:DailyLifeFeedback .
+
+dp:QuantumComputeAcceleration dp:enables dp:QubitFoundations .
+dp:QubitFoundations dp:enables dp:SuperpositionDynamics .
+dp:TelecomRealTimeData dp:enhances dp:SuperpositionDynamics .
+
+dp:IdentifyMissingNodes rdf:type dp:Operation .
+dp:SpatialGeometryMapping rdf:type dp:Operation .
+
+dp:DiagramGapReport rdf:type dp:Artifact .
+dp:TemporalSpatialMap rdf:type dp:Artifact .
+
+dp:DiagramGapReport dp:derivedFrom dp:IdentifyMissingNodes .
+dp:TemporalSpatialMap dp:derivedFrom dp:SpatialGeometryMapping .
+
+
+#################################################################
+# Market Analysis Individuals
+#################################################################
+
+dp:ProblemSpace rdf:type dp:MarketSchemaField .
+dp:MacroTrends rdf:type dp:MarketSchemaField .
+dp:Solutions rdf:type dp:MarketSchemaField .
+dp:Limitations rdf:type dp:MarketSchemaField .
+dp:Opportunities rdf:type dp:MarketSchemaField .
+
+dp:Valuation rdf:type dp:Operation .
+dp:NicheGapDetection rdf:type dp:Operation .
+dp:MarketDynamicsMapping rdf:type dp:Operation .
+
+dp:Valuation dp:usesSchema dp:MacroTrends .
+dp:NicheGapDetection dp:usesSchema dp:Limitations .
+dp:MarketDynamicsMapping dp:usesSchema dp:ProblemSpace .
+
+
+#################################################################
+# Cross-Cutting Individuals
+#################################################################
+
+dp:PatternDetection rdf:type dp:Operation .
+dp:SignalExtraction rdf:type dp:Operation .
+dp:SchemaUnification rdf:type dp:Operation .
+dp:CanonicalDataset rdf:type dp:Artifact .
+
+dp:MergedChatlogs dp:feeds dp:SignalExtraction .
+dp:EntitySet dp:feeds dp:PatternDetection .
+
+dp:PatternDetection dp:produces dp:SchemaUnification .
+dp:SignalExtraction dp:produces dp:SchemaUnification .
+
+dp:SchemaUnification dp:produces dp:CanonicalDataset .
+
+dp:HolisticJSONBundle dp:feeds dp:SchemaUnification .
+dp:CSVTable dp:feeds dp:SchemaUnification .
+dp:DiagramGapReport dp:feeds dp:SchemaUnification .
+dp:TemporalSpatialMap dp:feeds dp:SchemaUnification .
+dp:Valuation dp:feeds dp:SchemaUnification .
+dp:NicheGapDetection dp:feeds dp:SchemaUnification .
+dp:MarketDynamicsMapping dp:feeds dp:SchemaUnification .

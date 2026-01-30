@@ -1,0 +1,202 @@
+services:
+  # Secure Nginx Gateway
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+    container_name: grid-nginx-secure
+    ports:
+      - "443:443"
+      - "80:80"
+    networks:
+      - grid-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    depends_on:
+      - mcp-filesystem
+      - mcp-memory
+      - mcp-postgres
+      - mcp-playwright
+      - mcp-database
+
+
+  # Secure MCP Filesystem Server
+  mcp-filesystem:
+    build:
+      context: ../../
+      dockerfile: docker/Dockerfile.mcp
+      target: filesystem-server
+    container_name: grid-mcp-filesystem-secure
+    ports:
+      - "8081:8080"
+    env_file:
+      - .env.docker
+      - .env.security
+    environment:
+      - MCP_SERVER_NAME=filesystem
+      - MCP_TLS_ENABLED=true
+      - MCP_TLS_CERT_PATH=/etc/ssl/certs/filesystem/filesystem-cert.pem
+      - MCP_TLS_KEY_PATH=/etc/ssl/certs/filesystem/filesystem-key.pem
+    volumes:
+      - ./filesystem:/etc/ssl/certs/filesystem
+    networks:
+      - grid-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 8080"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512m
+
+  # Secure MCP Memory Server
+  mcp-memory:
+    build:
+      context: ../../
+      dockerfile: docker/Dockerfile.mcp
+    container_name: grid-mcp-memory-secure
+    ports:
+      - "8082:8080"
+    env_file:
+      - .env.docker
+      - .env.security
+    environment:
+      - MCP_SERVER_NAME=memory
+      - MCP_TLS_ENABLED=true
+      - MCP_TLS_CERT_PATH=/etc/ssl/certs/memory/memory-cert.pem
+      - MCP_TLS_KEY_PATH=/etc/ssl/certs/memory/memory-key.pem
+    volumes:
+      - ./memory:/etc/ssl/certs/memory
+    networks:
+      - grid-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 8080"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512m
+
+  # Secure MCP PostgreSQL Server
+  mcp-postgres:
+    build:
+      context: ../../
+      dockerfile: docker/Dockerfile.mcp
+      target: postgres-server
+    container_name: grid-mcp-postgres-secure
+    ports:
+      - "8083:8080"
+    env_file:
+      - .env.docker
+      - .env.security
+    environment:
+      - MCP_SERVER_NAME=postgres
+      - MCP_TLS_ENABLED=true
+      - MCP_TLS_CERT_PATH=/etc/ssl/certs/postgres/postgres-cert.pem
+      - MCP_TLS_KEY_PATH=/etc/ssl/certs/postgres/postgres-key.pem
+    volumes:
+      - ./postgres:/etc/ssl/certs/postgres
+    networks:
+      - grid-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 8080"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512m
+
+  # Secure MCP Playwright Server
+  mcp-playwright:
+    build:
+      context: ../../
+      dockerfile: docker/Dockerfile.mcp
+      target: playwright-server
+    container_name: grid-mcp-playwright-secure
+    ports:
+      - "8089:8080"
+    env_file:
+      - .env.docker
+      - .env.security
+    environment:
+      - MCP_SERVER_NAME=playwright
+      - MCP_TLS_ENABLED=true
+      - MCP_TLS_CERT_PATH=/etc/ssl/certs/playwright/playwright-cert.pem
+      - MCP_TLS_KEY_PATH=/etc/ssl/certs/playwright/playwright-key.pem
+    volumes:
+      - ./playwright:/etc/ssl/certs/playwright
+    networks:
+      - grid-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 8080"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1024m
+
+  # Secure MCP Database Server
+  mcp-database:
+    build:
+      context: ../../
+      dockerfile: docker/Dockerfile.mcp
+      target: database-server
+    container_name: grid-mcp-database-secure
+    ports:
+      - "8090:8080"
+    env_file:
+      - .env.docker
+      - .env.security
+    environment:
+      - MCP_SERVER_NAME=database
+      - MCP_TLS_ENABLED=true
+      - MCP_TLS_CERT_PATH=/etc/ssl/certs/database/database-cert.pem
+      - MCP_TLS_KEY_PATH=/etc/ssl/certs/database/database-key.pem
+    volumes:
+      - ./database:/etc/ssl/certs/database
+    networks:
+      - grid-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 8080"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512m
+
+networks:
+  grid-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.27.0.0/16

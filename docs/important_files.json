@@ -1,0 +1,37 @@
+[
+  {
+    "path": "E:\\grid\\application\\resonance\\README.md",
+    "rel_path": "application\\resonance\\README.md",
+    "score": 33
+  },
+  {
+    "path": "E:\\grid\\docs\\chatlogs\\README.md",
+    "rel_path": "docs\\chatlogs\\README.md",
+    "score": 33
+  },
+  {
+    "path": "E:\\grid\\docs\\structured_ai_implementation\\README.md",
+    "rel_path": "docs\\structured_ai_implementation\\README.md",
+    "score": 33
+  },
+  {
+    "path": "E:\\grid\\CONTEXTUAL_BRIEF.md",
+    "rel_path": "CONTEXTUAL_BRIEF.md",
+    "score": 30
+  },
+  {
+    "path": "E:\\grid\\GROWTH_STRATEGY_Q1_2026.md",
+    "rel_path": "GROWTH_STRATEGY_Q1_2026.md",
+    "score": 30
+  },
+  {
+    "path": "E:\\grid\\tools\\rag\\README.md",
+    "rel_path": "tools\\rag\\README.md",
+    "score": 30
+  },
+  {
+    "path": "E:\\grid\\application\\mothership\\main.py",
+    "rel_path": "application\\mothership\\main.py",
+    "score": 28
+  }
+]

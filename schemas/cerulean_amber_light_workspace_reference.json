@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json.schemastore.org/vscode-workspace",
+  "folders": [
+    { "path": "." }
+  ],
+  "settings": {
+    "workbench.colorTheme": "Default Dark+",
+
+    /* =============================
+       EDITOR – Focus First
+       Light cerulean base, no purples
+       ============================= */
+    "workbench.colorCustomizations": {
+      "editor.background": "#e9f2ff",
+      "editor.foreground": "#1f2a44",
+      "editor.lineHighlightBackground": "#dbe9ff",
+      "editor.selectionBackground": "#ffe58a",
+      "editor.selectionHighlightBackground": "#ffefb833",
+      "editorCursor.foreground": "#ffd24a",
+      "editorWhitespace.foreground": "#c3d4ee",
+
+      /* Syntax contrast */
+      "editorBracketMatch.background": "#ffeaa7",
+      "editorBracketMatch.border": "#ffd24a",
+
+      /* =============================
+         AI CHAT / SIDE PANEL
+         Distinct but calm
+         ============================= */
+      "sideBar.background": "#dfeeff",
+      "sideBar.foreground": "#203052",
+      "sideBarSectionHeader.background": "#d3e6ff",
+      "sideBarSectionHeader.foreground": "#1f2a44",
+
+      "panel.background": "#e4f0ff",
+      "panel.border": "#b7c9e8",
+
+      /* =============================
+         TERMINAL
+         ============================= */
+      "terminal.background": "#e6f1ff",
+      "terminal.foreground": "#1f2a44",
+      "terminalCursor.foreground": "#ffd24a",
+      "terminalCursor.background": "#ffd24a33",
+
+      /* =============================
+         STRUCTURE & BORDERS
+         ============================= */
+      "editorGroup.border": "#b7c9e8",
+      "editorGroupHeader.tabsBackground": "#d6e8ff",
+      "editorGroupHeader.tabsBorder": "#b7c9e8",
+      "tab.activeBackground": "#e9f2ff",
+      "tab.inactiveBackground": "#d6e8ff",
+      "tab.activeForeground": "#1f2a44",
+      "tab.inactiveForeground": "#5a6b8f",
+
+      /* =============================
+         STATUS BAR
+         ============================= */
+      "statusBar.background": "#cfe3ff",
+      "statusBar.foreground": "#1f2a44",
+      "statusBar.border": "#b7c9e8",
+
+      /* =============================
+         EXPLORER / LISTS
+         Defaults preserved
+         ============================= */
+      "list.hoverBackground": "#dbe9ff",
+      "list.activeSelectionBackground": "#ffe58a",
+      "list.activeSelectionForeground": "#1f2a44",
+      "list.inactiveSelectionBackground": "#ffefb8",
+      "list.inactiveSelectionForeground": "#1f2a44"
+    }
+  }
+}

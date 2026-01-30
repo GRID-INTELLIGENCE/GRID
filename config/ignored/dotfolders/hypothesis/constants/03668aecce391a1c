@@ -1,0 +1,4 @@
+# file: E:\grid\grid\quantum\locomotion.py
+# hypothesis_version: 6.150.0
+
+[0.0, 1.0, 100, 'Additional metadata', 'Distance moved', 'Movement direction', 'Quantizer', 'backward', 'bounds', 'direction', 'distance', 'down', 'forward', 'from_state', 'left', 'position', 'right', 'rotate', 'rotation', 'scale', 'theta', 'to_state', 'up', 'x', 'y', 'z']

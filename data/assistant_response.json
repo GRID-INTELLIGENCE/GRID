@@ -1,0 +1,62 @@
+{
+  "id": "TranslatorAssistantResponse",
+  "type": "form",
+  "title": "Translator Assistant – Response (Read Only)",
+  "fields": [
+    {
+      "name": "result_text",
+      "label": "Result Text",
+      "type": "textarea",
+      "readonly": true
+    },
+    {
+      "name": "target_language",
+      "label": "Target Language(s)",
+      "type": "text",
+      "readonly": true
+    },
+    {
+      "name": "explanation",
+      "label": "Explanation",
+      "type": "textarea",
+      "readonly": true
+    },
+    {
+      "name": "notes",
+      "label": "Notes",
+      "type": "list",
+      "readonly": true
+    },
+    {
+      "name": "segments",
+      "label": "Segments",
+      "type": "table",
+      "readonly": true,
+      "columns": ["source", "result", "comment"]
+    },
+    {
+      "name": "mode",
+      "label": "Mode",
+      "type": "text",
+      "readonly": true
+    },
+    {
+      "name": "domain",
+      "label": "Domain",
+      "type": "text",
+      "readonly": true
+    },
+    {
+      "name": "code_context_used",
+      "label": "Code Context Used",
+      "type": "boolean",
+      "readonly": true
+    },
+    {
+      "name": "metadata",
+      "label": "Metadata",
+      "type": "json",
+      "readonly": true
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+graph TB
+    subgraph "User Interface Layer"
+        UI[Web Dashboard] --> API[REST API]
+        CLI[Command Line] --> API
+    end
+
+    subgraph "Application Layer"
+        API --> MS[Mothership App]
+        MS --> AG[Agentic System]
+        MS --> RS[Resonance API]
+        MS --> SS[Skills System]
+    end
+
+    subgraph "Core Intelligence"
+        AG --> EI[Event Intelligence]
+        RS --> GR[Geometric Resonance]
+        SS --> IS[Intelligent Skills]
+        GR --> CP[9 Cognition Patterns]
+        IS --> SD[Skill Discovery]
+    end
+
+    subgraph "Data & Storage"
+        EI --> DB[(Databricks)]
+        GR --> VS[(Vector Store)]
+        IS --> SK[(Skills DB)]
+        VS --> CD[ChromaDB]
+        SK --> SL[(SQLite)]
+    end
+
+    subgraph "Infrastructure"
+        DB --> DOCKER[Docker Stack]
+        VS --> DOCKER
+        SK --> DOCKER
+        DOCKER --> HC[Health Checks]
+    end
+
+    style UI fill:#e1f5fe
+    style CLI fill:#e1f5fe
+    style API fill:#f3e5f5
+    style MS fill:#f3e5f5
+    style AG fill:#e8f5e8
+    style RS fill:#e8f5e8
+    style SS fill:#e8f5e8
+    style DB fill:#fff3e0
+    style VS fill:#fff3e0
+    style SK fill:#fff3e0
+    style DOCKER fill:#fce4ec

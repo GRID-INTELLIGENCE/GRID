@@ -1,0 +1,4 @@
+# file: E:\grid\application\mothership\main.py
+# hypothesis_version: 6.150.0
+
+[1000, '/', '/api/v1', '/cockpit', '/docs', '/health/live', '/openapi.json', '/ping', '/redoc', '1', 'INTERNAL_ERROR', 'VALIDATION_ERROR', 'Validation error', 'X-Process-Time', 'X-Request-ID', '__main__', 'api', 'cockpit', 'code', 'details', 'docs', 'errors', 'health', 'http', 'loc', 'message', 'msg', 'name', 'operational', 'ping', 'pong', 'root', 'status', 'type', 'value_error', 'version']

@@ -1,0 +1,543 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://grid.local/schemas/external_integrations_inbox.json",
+  "title": "GRID External Integrations Inbox",
+  "description": "Daily inbox schema for tracking external API integrations, JSON handshakes, and mismatches requiring EQ-weighted resolution",
+  "version": "1.0.0",
+  "type": "object",
+  "required": ["inbox_meta", "external_integrations", "mismatches"],
+  "properties": {
+    "inbox_meta": {
+      "type": "object",
+      "description": "Metadata for the daily inbox",
+      "required": ["date", "version", "generated_at"],
+      "properties": {
+        "date": {
+          "type": "string",
+          "format": "date",
+          "description": "Date of this inbox (YYYY-MM-DD)"
+        },
+        "version": {
+          "type": "string",
+          "default": "1.0.0"
+        },
+        "generated_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp when inbox was generated"
+        },
+        "workspace_version": {
+          "type": "string",
+          "description": "grid.code-workspace version"
+        },
+        "total_integrations": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total_mismatches": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "resolution_status": {
+          "type": "string",
+          "enum": ["pending", "in_progress", "resolved", "escalated"]
+        }
+      }
+    },
+    "external_integrations": {
+      "type": "array",
+      "description": "Registry of all external integrations with JSON handshakes",
+      "items": {
+        "$ref": "#/definitions/ExternalIntegration"
+      }
+    },
+    "mismatches": {
+      "type": "array",
+      "description": "Detected integration mismatches requiring attention",
+      "items": {
+        "$ref": "#/definitions/IntegrationMismatch"
+      }
+    },
+    "eq_resolution_queue": {
+      "type": "array",
+      "description": "Mismatches queued for EQ-weighted semantic resolution",
+      "items": {
+        "$ref": "#/definitions/EQResolutionItem"
+      }
+    },
+    "daily_summary": {
+      "$ref": "#/definitions/DailySummary"
+    }
+  },
+  "definitions": {
+    "ExternalIntegration": {
+      "type": "object",
+      "description": "An external service integration that performs JSON handshakes",
+      "required": ["id", "name", "type", "status"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for this integration"
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable name"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["llm_api", "http_rest", "grpc", "websocket", "internal_bridge", "file_io"],
+          "description": "Type of external integration"
+        },
+        "provider": {
+          "type": "string",
+          "description": "External provider name (e.g., 'mistral', 'openai', 'azure')"
+        },
+        "endpoint": {
+          "type": "string",
+          "description": "API endpoint or module path"
+        },
+        "auth_method": {
+          "type": "string",
+          "enum": ["api_key", "oauth", "bearer", "none", "env_var"],
+          "default": "env_var"
+        },
+        "env_var_required": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Required environment variables for this integration"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["active", "inactive", "degraded", "error", "unknown"]
+        },
+        "last_handshake": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last successful JSON handshake timestamp"
+        },
+        "handshake_schema": {
+          "$ref": "#/definitions/HandshakeSchema"
+        },
+        "source_files": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Source files that use this integration"
+        },
+        "dependencies": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Python packages required"
+        },
+        "fallback_available": {
+          "type": "boolean",
+          "default": false
+        },
+        "fallback_integration_id": {
+          "type": "string",
+          "description": "ID of fallback integration if primary fails"
+        }
+      }
+    },
+    "HandshakeSchema": {
+      "type": "object",
+      "description": "Schema definition for JSON handshake data",
+      "properties": {
+        "request_format": {
+          "type": "object",
+          "description": "Expected request JSON structure",
+          "properties": {
+            "content_type": {"type": "string", "default": "application/json"},
+            "required_fields": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "optional_fields": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "example": {"type": "object"}
+          }
+        },
+        "response_format": {
+          "type": "object",
+          "description": "Expected response JSON structure",
+          "properties": {
+            "content_type": {"type": "string", "default": "application/json"},
+            "expected_fields": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "error_fields": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "example": {"type": "object"}
+          }
+        },
+        "serialization": {
+          "type": "string",
+          "enum": ["json.dumps", "json.loads", "pydantic", "dataclass", "raw"],
+          "description": "How data is serialized/deserialized"
+        }
+      }
+    },
+    "IntegrationMismatch": {
+      "type": "object",
+      "description": "A detected mismatch in external integration handshakes",
+      "required": ["id", "integration_id", "mismatch_type", "severity", "detected_at"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique mismatch identifier"
+        },
+        "integration_id": {
+          "type": "string",
+          "description": "Reference to the external integration"
+        },
+        "mismatch_type": {
+          "type": "string",
+          "enum": [
+            "schema_violation",
+            "type_coercion_failure",
+            "missing_required_field",
+            "unexpected_field",
+            "encoding_error",
+            "auth_failure",
+            "timeout",
+            "rate_limit",
+            "parse_error",
+            "serialization_error",
+            "version_mismatch",
+            "protocol_error"
+          ]
+        },
+        "severity": {
+          "type": "string",
+          "enum": ["critical", "high", "medium", "low", "info"]
+        },
+        "detected_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "source_location": {
+          "type": "object",
+          "properties": {
+            "file": {"type": "string"},
+            "line": {"type": "integer"},
+            "function": {"type": "string"}
+          }
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable description of the mismatch"
+        },
+        "expected_value": {
+          "description": "What was expected"
+        },
+        "actual_value": {
+          "description": "What was received"
+        },
+        "stack_trace": {
+          "type": "string"
+        },
+        "request_payload": {
+          "type": "object",
+          "description": "The JSON payload that was sent"
+        },
+        "response_payload": {
+          "type": "object",
+          "description": "The JSON response that was received"
+        },
+        "resolution_status": {
+          "type": "string",
+          "enum": ["open", "acknowledged", "in_progress", "resolved", "wont_fix", "deferred"]
+        },
+        "eq_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "EQ-weighted priority score for resolution"
+        }
+      }
+    },
+    "EQResolutionItem": {
+      "type": "object",
+      "description": "A mismatch queued for EQ-weighted semantic resolution",
+      "required": ["mismatch_id", "eq_analysis"],
+      "properties": {
+        "mismatch_id": {
+          "type": "string",
+          "description": "Reference to the mismatch"
+        },
+        "eq_analysis": {
+          "type": "object",
+          "description": "EQ-Spectrum analysis results",
+          "properties": {
+            "sentiment": {
+              "type": "number",
+              "minimum": -1,
+              "maximum": 1,
+              "description": "Sentiment score of the error context"
+            },
+            "arousal": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Urgency/arousal level"
+            },
+            "dominant_emotion": {
+              "type": "string",
+              "description": "Primary emotional classification"
+            },
+            "eq_score": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Combined EQ weight for prioritization"
+            },
+            "intent": {
+              "type": "string",
+              "description": "Detected intent of the integration"
+            }
+          }
+        },
+        "suggested_resolution": {
+          "type": "object",
+          "properties": {
+            "action": {
+              "type": "string",
+              "enum": [
+                "add_validation",
+                "update_schema",
+                "add_fallback",
+                "fix_serialization",
+                "update_dependency",
+                "add_error_handling",
+                "refactor_integration",
+                "escalate_to_human"
+              ]
+            },
+            "description": {
+              "type": "string"
+            },
+            "code_suggestion": {
+              "type": "string",
+              "description": "Suggested code fix"
+            },
+            "confidence": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          }
+        },
+        "semantic_grep_matches": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "node_id": {"type": "string"},
+              "label": {"type": "string"},
+              "path": {"type": "string"},
+              "relevance_score": {"type": "number"}
+            }
+          },
+          "description": "Matching nodes from semantic grep tree"
+        },
+        "priority_rank": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Priority ranking in the resolution queue"
+        }
+      }
+    },
+    "DailySummary": {
+      "type": "object",
+      "description": "Daily summary of integration health",
+      "properties": {
+        "total_handshakes": {
+          "type": "integer",
+          "description": "Total JSON handshakes attempted today"
+        },
+        "successful_handshakes": {
+          "type": "integer"
+        },
+        "failed_handshakes": {
+          "type": "integer"
+        },
+        "success_rate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Percentage of successful handshakes"
+        },
+        "new_mismatches": {
+          "type": "integer"
+        },
+        "resolved_mismatches": {
+          "type": "integer"
+        },
+        "integrations_by_status": {
+          "type": "object",
+          "properties": {
+            "active": {"type": "integer"},
+            "inactive": {"type": "integer"},
+            "degraded": {"type": "integer"},
+            "error": {"type": "integer"}
+          }
+        },
+        "top_mismatch_types": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {"type": "string"},
+              "count": {"type": "integer"}
+            }
+          }
+        },
+        "average_eq_score": {
+          "type": "number",
+          "description": "Average EQ score of pending resolutions"
+        },
+        "recommendations": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "AI-generated recommendations for the day"
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "inbox_meta": {
+        "date": "2025-01-15",
+        "version": "1.0.0",
+        "generated_at": "2025-01-15T08:00:00Z",
+        "workspace_version": "3.2.0",
+        "total_integrations": 5,
+        "total_mismatches": 2,
+        "resolution_status": "pending"
+      },
+      "external_integrations": [
+        {
+          "id": "mistral_chat_api",
+          "name": "Mistral Chat Completions",
+          "type": "llm_api",
+          "provider": "mistral",
+          "endpoint": "client.chat.complete",
+          "auth_method": "env_var",
+          "env_var_required": ["MISTRAL_API_KEY"],
+          "status": "active",
+          "source_files": [
+            "grid/AGENT/agent.py",
+            "grid/AGENT/api/router.py",
+            "grid/AGENT/cli/main.py"
+          ],
+          "dependencies": ["mistralai"],
+          "fallback_available": false,
+          "handshake_schema": {
+            "request_format": {
+              "content_type": "application/json",
+              "required_fields": ["model", "messages"],
+              "optional_fields": ["tools", "temperature", "max_tokens", "top_p"]
+            },
+            "response_format": {
+              "expected_fields": ["choices", "model", "usage"],
+              "error_fields": ["error", "message"]
+            },
+            "serialization": "json.dumps"
+          }
+        },
+        {
+          "id": "openai_ner_service",
+          "name": "OpenAI NER Service",
+          "type": "llm_api",
+          "provider": "openai",
+          "endpoint": "NERService.extract_entities",
+          "auth_method": "env_var",
+          "env_var_required": ["OPENAI_API_KEY"],
+          "status": "inactive",
+          "source_files": [
+            "grid/AGENT/grid_capabilities.py"
+          ],
+          "dependencies": ["openai"],
+          "fallback_available": true,
+          "fallback_integration_id": "heuristic_ner"
+        },
+        {
+          "id": "eq_spectrum_bridge",
+          "name": "EQ-Spectrum GRID Bridge",
+          "type": "internal_bridge",
+          "provider": "grid",
+          "endpoint": "workspace.grid_bridge.EQSpectrumNERBridge",
+          "auth_method": "none",
+          "status": "active",
+          "source_files": [
+            "light_of_the_seven/full_datakit/At the rate/grep_eq_spectrum/workspace/grid_bridge.py"
+          ],
+          "dependencies": [],
+          "fallback_available": true
+        }
+      ],
+      "mismatches": [
+        {
+          "id": "mismatch_001",
+          "integration_id": "mistral_chat_api",
+          "mismatch_type": "type_coercion_failure",
+          "severity": "medium",
+          "detected_at": "2025-01-15T07:30:00Z",
+          "source_location": {
+            "file": "grid/AGENT/agent.py",
+            "line": 197,
+            "function": "run"
+          },
+          "description": "Tool call arguments received as string instead of dict, requires json.loads",
+          "expected_value": {"type": "dict"},
+          "actual_value": {"type": "string"},
+          "resolution_status": "open",
+          "eq_score": 0.65
+        }
+      ],
+      "eq_resolution_queue": [
+        {
+          "mismatch_id": "mismatch_001",
+          "eq_analysis": {
+            "sentiment": -0.2,
+            "arousal": 0.6,
+            "dominant_emotion": "concern",
+            "eq_score": 0.65,
+            "intent": "data_transform"
+          },
+          "suggested_resolution": {
+            "action": "add_validation",
+            "description": "Add explicit type checking and JSON parsing with error handling",
+            "code_suggestion": "args = json.loads(args_raw) if isinstance(args_raw, str) else args_raw",
+            "confidence": 0.85
+          },
+          "priority_rank": 1
+        }
+      ],
+      "daily_summary": {
+        "total_handshakes": 150,
+        "successful_handshakes": 148,
+        "failed_handshakes": 2,
+        "success_rate": 98.67,
+        "new_mismatches": 1,
+        "resolved_mismatches": 0,
+        "integrations_by_status": {
+          "active": 3,
+          "inactive": 1,
+          "degraded": 0,
+          "error": 0
+        },
+        "average_eq_score": 0.65,
+        "recommendations": [
+          "Add explicit JSON parsing guard to agent.py line 197",
+          "Consider implementing Pydantic models for tool call arguments",
+          "Monitor OpenAI NER service availability"
+        ]
+      }
+    }
+  ]
+}

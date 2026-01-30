@@ -1,0 +1,6 @@
+﻿{
+    "enable-proposed-api": [
+        "ms-python.python",
+        "GitHub.copilot"
+      ]
+}

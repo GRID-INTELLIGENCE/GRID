@@ -1,0 +1,141 @@
+# =============================================================================
+# Dependabot Configuration for GRID
+# =============================================================================
+# Automated dependency updates to keep GRID secure and up-to-date.
+# https://docs.github.com/en/code-security/dependabot
+# =============================================================================
+
+version: 2
+
+# registries:
+#   # Add private registries here if needed
+#   # pypi-private:
+#   #   type: python-index
+#   #   url: https://private.pypi.org/simple
+#   #   username: ${{ secrets.PYPI_USERNAME }}
+#   #   password: ${{ secrets.PYPI_PASSWORD }}
+
+updates:
+  # ---------------------------------------------------------------------------
+  # Python Dependencies (pip)
+  # ---------------------------------------------------------------------------
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Etc/UTC"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "python"
+      - "automated"
+    commit-message:
+      prefix: "deps(python)"
+      include: "scope"
+    groups:
+      # Group all development dependencies together
+      dev-dependencies:
+        patterns:
+          - "pytest*"
+          - "mypy*"
+          - "ruff"
+          - "black"
+          - "isort"
+          - "coverage"
+          - "tox"
+          - "pre-commit"
+        update-types:
+          - "minor"
+          - "patch"
+      # Group all testing dependencies
+      testing:
+        patterns:
+          - "pytest*"
+          - "coverage"
+          - "hypothesis"
+        update-types:
+          - "minor"
+          - "patch"
+      # Group type stubs
+      type-stubs:
+        patterns:
+          - "types-*"
+        update-types:
+          - "minor"
+          - "patch"
+      # Group FastAPI ecosystem
+      fastapi-ecosystem:
+        patterns:
+          - "fastapi*"
+          - "uvicorn*"
+          - "starlette*"
+          - "pydantic*"
+        update-types:
+          - "minor"
+          - "patch"
+      # Group data science dependencies
+      data-science:
+        patterns:
+          - "numpy*"
+          - "pandas*"
+          - "scikit-learn*"
+          - "networkx*"
+        update-types:
+          - "minor"
+          - "patch"
+    ignore:
+      # Ignore major version updates for critical dependencies (review manually)
+      - dependency-name: "pydantic"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "sqlalchemy"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "fastapi"
+        update-types: ["version-update:semver-major"]
+
+  # ---------------------------------------------------------------------------
+  # GitHub Actions
+  # ---------------------------------------------------------------------------
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Etc/UTC"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "github-actions"
+      - "automated"
+    commit-message:
+      prefix: "ci(actions)"
+      include: "scope"
+    groups:
+      # Group all GitHub Actions together
+      github-actions:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # ---------------------------------------------------------------------------
+  # Docker (if Dockerfile exists)
+  # ---------------------------------------------------------------------------
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "09:00"
+      timezone: "Etc/UTC"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "docker"
+      - "automated"
+    commit-message:
+      prefix: "deps(docker)"
+      include: "scope"

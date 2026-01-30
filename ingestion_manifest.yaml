@@ -1,0 +1,156 @@
+# Ingestion Manifest for GRID Knowledge Base
+# ========================================
+# Defines chunking profiles and source paths for document ingestion
+
+profiles:
+  # Profile for specification/documentation files
+  spec_profile:
+    chunk_size: 800
+    overlap: 120
+    description: "Optimized for documentation and specification files"
+
+  # Profile for code files
+  code_profile:
+    chunk_size: 1200
+    overlap: 150
+    description: "Optimized for source code files"
+
+  # Profile for markdown files
+  markdown_profile:
+    chunk_size: 900
+    overlap: 130
+    description: "Optimized for markdown documentation"
+
+  # Profile for Jupyter notebooks
+  notebook_profile:
+    chunk_size: 1000
+    overlap: 140
+    description: "Optimized for Jupyter notebooks (markdown + code cells)"
+
+sources:
+  # Documentation files
+  - path: docs/**/*.md
+    profile: spec_profile
+    metadata:
+      doc_type: spec
+      module: docs
+      security_level: internal
+      git_ref: main
+
+  - path: docs/architecture/**/*.md
+    profile: markdown_profile
+    metadata:
+      doc_type: architecture
+      module: architecture
+      security_level: internal
+      git_ref: main
+
+  - path: docs/integration/**/*.md
+    profile: markdown_profile
+    metadata:
+      doc_type: integration
+      module: integration
+      security_level: internal
+      git_ref: main
+
+  # Source code files
+  - path: src/**/*.py
+    profile: code_profile
+    metadata:
+      doc_type: code
+      module: core
+      security_level: internal
+      git_ref: main
+
+  - path: src/**/*.rst
+    profile: spec_profile
+    metadata:
+      doc_type: spec
+      module: core
+      security_level: internal
+      git_ref: main
+
+  # Test files
+  - path: tests/**/*.py
+    profile: code_profile
+    metadata:
+      doc_type: code
+      module: tests
+      security_level: internal
+      git_ref: main
+
+  # Configuration files
+  - path: src/**/*.json
+    profile: spec_profile
+    metadata:
+      doc_type: config
+      module: config
+      security_level: internal
+      git_ref: main
+
+  - path: src/**/*.yaml
+    profile: spec_profile
+    metadata:
+      doc_type: config
+      module: config
+      security_level: internal
+      git_ref: main
+
+  # Workflows
+  - path: workflows/**/*.md
+    profile: markdown_profile
+    metadata:
+      doc_type: workflow
+      module: workflows
+      security_level: internal
+      git_ref: main
+
+  # Research files (selective)
+  - path: research/**/*.md
+    profile: spec_profile
+    metadata:
+      doc_type: research
+      module: research
+      security_level: internal
+      git_ref: main
+
+  # Jupyter notebooks
+  - path: src/**/*.ipynb
+    profile: notebook_profile
+    metadata:
+      doc_type: notebook
+      module: notebooks
+      security_level: internal
+      git_ref: main
+
+# Security scanning configuration
+security:
+  # Paths to skip (secrets)
+  skip_patterns:
+    - "**/.env"
+    - "**/*.pem"
+    - "**/secret/**"
+    - "**/credentials/**"
+    - "**/.aws/**"
+    - "**/.ssh/**"
+
+  # Allowlist for benign patterns (optional)
+  allowlist:
+    # Example: patterns that look like secrets but are safe
+    # - "test_api_key"
+    # - "example_token"
+
+# Incremental sync configuration
+sync:
+  # Store last ingested commit SHA
+  store_last_ingested_sha: true
+  # Use git diff for change detection
+  use_git_diff: true
+  # Minimum age for re-ingestion (seconds)
+  min_reingest_age: 60
+
+# Feedback loop configuration
+feedback:
+  enable_feedback: true
+  store_in_db: true
+  feedback_table: kb_feedback

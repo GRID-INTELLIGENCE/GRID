@@ -1,0 +1,130 @@
+================================================================================
+TEST FAILURE ANALYSIS REPORT
+================================================================================
+
+Total Failures: 29
+Total Errors: 5
+
+================================================================================
+RECOMMENDATIONS BY CATEGORY
+================================================================================
+
+## Assertion Failures (15 items)
+--------------------------------------------------------------------------------
+1. Review test logic in tests\unit\test_cli.py: assert 'task.created' in 'task_created from test\ntask_created from test'
+2. Review test logic in tests\unit\test_message_broker_retry_persistence.py: 0 == 1
+3. Review test logic in tests\unit\test_ner_service.py: 0 == 1
+4. Review test logic in tests\unit\test_ner_service.py: 0 > 0
+5. Review test logic in tests\unit\test_ner_service.py: 0 == 2
+6. Review test logic in tests\unit\test_ner_service.py: 0 == 1
+7. Review test logic in tests\unit\test_ner_service.py: 0 == 1
+8. Review test logic in tests\unit\test_ner_service_coverage.py: 0 == 3
+9. Review test logic in tests\unit\test_ner_service_coverage.py: 0 == 1
+10. Review test logic in tests\unit\test_ner_service_coverage.py: 0 > 0
+11. Review test logic in tests\unit\test_ner_service_coverage.py: 0 > 0
+12. Review test logic in tests\unit\test_ner_service_coverage.py: 0 > 0
+13. Review test logic in tests\unit\test_ner_service_coverage.py: 0 > 0
+14. Review test logic in tests\unit\test_nl_dev.py: assert 'modified content' == 'original content'
+15. Review test logic in venv\Lib\site-packages\sqlalchemy\engine\base.py: assert 1 == 0
+
+## Async Issues (1 items)
+--------------------------------------------------------------------------------
+1. Add await for coroutine in C:\Users\irfan\AppData\Local\Programs\Python\Python314\Lib\_py_warnings.py
+
+## AttributeErrors (3 items)
+--------------------------------------------------------------------------------
+1. Fix missing attribute in tests\unit\test_intelligent_routing.py: 'HeuristicRouter' object has no attribute 'predict_priority'
+2. Fix patch target or implement missing attribute 'RetrievalService' in tests\unit\test_pattern_engine_rag.py
+3. Fix patch target or implement missing attribute 'RetrievalService' in tests\unit\test_pattern_engine_rag.py
+
+## Fixture Errors (2 items)
+--------------------------------------------------------------------------------
+1. Install pytest plugin or define fixture 'benchmark'
+2. Install pytest plugin or define fixture 'benchmark'
+
+## KeyErrors (1 items)
+--------------------------------------------------------------------------------
+1. Add missing key 'status' to response/dict in tests\integration\api\test_inject.py
+
+## Logic Failures (2 items)
+--------------------------------------------------------------------------------
+1. Fix logic returning empty results in tests\unit\test_nl_dev.py: test_generate_modify_file_success
+2. Fix unexpected state in tests\unit\test_nl_dev.py: test_generate_delete_file_success
+
+## Other (1 items)
+--------------------------------------------------------------------------------
+1. Investigate ImportError: 2 failures
+
+## TypeErrors (5 items)
+--------------------------------------------------------------------------------
+1. Ensure object is a dataclass before calling asdict() in tests\unit\test_cli_commands.py
+2. Fix signature in tests\unit\test_integration_pipeline_robustness.py: Remove or add support for 'initial_backoff_ms' parameter
+3. Fix signature in tests\unit\test_integration_pipeline_robustness.py: Remove or add support for 'initial_backoff_ms' parameter
+4. Fix signature in tests\unit\test_intelligent_routing.py: Remove or add support for 'priority' parameter
+5. Fix signature in tests\unit\test_intelligent_routing.py: Remove or add support for 'priority' parameter
+
+================================================================================
+DETAILED FAILURE BREAKDOWN
+================================================================================
+
+### C:\Users\irfan\AppData\Local\Programs\Python\Python314\Lib\_py_warnings.py (1 failures)
+  - test_run_migrations_completes: RuntimeWarning
+
+### E:\grid\tests\benchmarks\test_performance.py (5 failures)
+  - test_pattern_engine_small_dataset: SetupError
+  - test_pattern_engine_medium_dataset: SetupError
+  - test_pattern_engine_large_dataset: SetupError
+  - test_health_endpoint_performance: SetupError
+  - test_ready_endpoint_performance: SetupError
+
+### tests\integration\api\test_inject.py (1 failures)
+  - test_inject_accepts_valid_payload: KeyError
+
+### tests\unit\test_cli.py (1 failures)
+  - TestEventCommands.test_list_events: AssertionError
+
+### tests\unit\test_cli_commands.py (1 failures)
+  - test_task_create_calls_service: TypeError
+
+### tests\unit\test_integration_pipeline_robustness.py (2 failures)
+  - test_retry_logic: TypeError
+  - test_dead_letter_queue: TypeError
+
+### tests\unit\test_intelligent_routing.py (3 failures)
+  - test_priority_queue_ordering: TypeError
+  - test_heuristic_router_logic: AttributeError
+  - test_pipeline_applies_heuristics: TypeError
+
+### tests\unit\test_message_broker_retry_persistence.py (1 failures)
+  - test_broker_persists_retry_record_and_moves_to_dlq: AssertionError
+
+### tests\unit\test_ner_service.py (5 failures)
+  - test_extract_entities_success: AssertionError
+  - test_detect_hidden_players_success: AssertionError
+  - test_extract_entities_with_relationships: AssertionError
+  - test_extract_entities_with_rag_context_success: AssertionError
+  - test_extract_entities_with_rag_failure_falls_back: AssertionError
+
+### tests\unit\test_ner_service_coverage.py (6 failures)
+  - TestNERService.test_extract_entities_success: AssertionError
+  - TestNERService.test_extract_entities_confidence_filtering: AssertionError
+  - TestNERService.test_extract_entities_with_rag: AssertionError
+  - TestNERService.test_extract_entities_rag_failure: AssertionError
+  - TestNERService.test_process_event: AssertionError
+  - TestNERService.test_detect_hidden_players: AssertionError
+
+### tests\unit\test_nl_dev.py (3 failures)
+  - test_generate_modify_file_success: AssertionError
+  - test_generate_delete_file_success: AssertionError
+  - test_rollback: AssertionError
+
+### tests\unit\test_pattern_engine_matching.py (2 failures)
+  - test_save_pattern_matches_success: ImportError
+  - test_save_pattern_matches_invalid_format_raises: ImportError
+
+### tests\unit\test_pattern_engine_rag.py (2 failures)
+  - test_pattern_engine_with_rag_context: AttributeError
+  - test_pattern_engine_rag_failure_falls_back: AttributeError
+
+### venv\Lib\site-packages\sqlalchemy\engine\base.py (1 failures)
+  - test_persistence_survives_restart: AssertionError

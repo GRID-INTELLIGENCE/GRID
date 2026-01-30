@@ -1,0 +1,4 @@
+# file: E:\grid\application\mothership\routers\billing.py
+# hypothesis_version: 6.150.0
+
+[365, '/billing', '/invoices', '/usage', 'Access denied', 'Get Usage Summary', 'Period in days', 'billing', 'invoice', 'unknown', 'user_id']

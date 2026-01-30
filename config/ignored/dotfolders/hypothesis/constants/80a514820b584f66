@@ -1,0 +1,4 @@
+# file: E:\grid\application\mothership\services\__init__.py
+# hypothesis_version: 6.150.0
+
+[100, 300, 401, 429, 1000, '1.0.0', 'Alert', 'AlertService', 'AsyncEventHandler', 'CockpitEvent', 'CockpitService', 'Component', 'ComponentService', 'EventHandler', 'Operation', 'OperationService', 'SESSION_EXPIRED', 'Session', 'Session has expired', 'SessionService', 'acknowledged', 'acknowledged_by', 'alert', 'cancelled', 'cockpit', 'completed', 'component', 'component_service', 'created', 'data', 'duration_seconds', 'entity_id', 'entity_type', 'error', 'event_type', 'failed', 'health_changed', 'message', 'name', 'new_health', 'old_health', 'operation', 'pending', 'progress', 'progress_message', 'progress_percent', 'queued', 'registered', 'resolved', 'resolved_by', 'session', 'started', 'status', 'stopped', 'system', 'terminated', 'timestamp', 'unregistered', 'user_id']

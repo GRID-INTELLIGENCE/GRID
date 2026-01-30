@@ -1,0 +1,10 @@
+# =============================================================================
+# GRID — Issue Template Configuration
+# =============================================================================
+# Configure the issue template chooser for the repository.
+# =============================================================================
+
+blank_issues_enabled: true
+
+contact_links: []- name: Report a problem
+  url: https://example.com/report

@@ -1,0 +1,4 @@
+# file: E:\grid\application\mothership\routers\intelligence.py
+# hypothesis_version: 6.150.0
+
+[1000.0, '/process', 'api_total_ms', 'intelligence', 'interaction_count', 'request_id', 'timings_ms', 'user_id']

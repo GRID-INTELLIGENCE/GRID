@@ -1,0 +1,34 @@
+{
+    "project_name": "Advanced Agentic System",
+    "objective": "Implement a configurable agentic system with terrain mapping and inference monitoring.",
+    "status_summary": "Core logic implemented and verified via verify_features.py. UI updated with Terrain Map and Toggle Kit. Capabilities Demo verified performance.",
+    "recommended_roles": [
+        "Lawyer",
+        "Architect"
+    ],
+    "recommended_tasks": [
+        "/plan",
+        "/validate"
+    ],
+    "metadata": {
+        "category": "ARCHITECTURAL_SYNC",
+        "priority": "HIGH"
+    },
+    "structured_data": {
+        "keywords": [
+            "agentic",
+            "resonance",
+            "terrain",
+            "toggle",
+            "monitor"
+        ],
+        "components": [
+            "InsightExtractor",
+            "TracedDiscussionAgent",
+            "TerrainMapper",
+            "ToggleKit",
+            "InferenceMonitor",
+            "MemoGenerator"
+        ]
+    }
+}

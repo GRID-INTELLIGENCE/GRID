@@ -1,0 +1,4 @@
+# file: E:\grid\grid\senses\sensory_processor.py
+# hypothesis_version: 6.150.0
+
+[0.0, 'amplitude', 'audio', 'celsius', 'content', 'data', 'distance', 'en', 'flavor', 'frequency', 'intensity', 'language', 'location', 'meters', 'notes', 'pascal', 'pressure', 'proximity', 'quality', 'raw', 'scent', 'smell', 'taste', 'temperature', 'text', 'texture', 'touch', 'type', 'unit', 'unknown', 'value', 'vibration', 'visual']

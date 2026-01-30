@@ -1,0 +1,46 @@
+{
+  "honor_decay": {
+    "operation": "honor_decay",
+    "iterations": 10000,
+    "elapsed_seconds": 0.0032260000007227063,
+    "ops_per_second": 3099814.010464893,
+    "avg_time_per_op_us": 0.32260000007227063
+  },
+  "de_escalation": {
+    "operation": "de_escalation_check",
+    "iterations": 10000,
+    "elapsed_seconds": 0.0014315000007627532,
+    "ops_per_second": 6985679.353595286,
+    "avg_time_per_op_us": 0.14315000007627532
+  },
+  "effective_priority": {
+    "operation": "effective_priority",
+    "iterations": 10000,
+    "elapsed_seconds": 0.0015002000000094995,
+    "ops_per_second": 6665777.896238287,
+    "avg_time_per_op_us": 0.15002000000094995
+  },
+  "sustain_phase": {
+    "operation": "sustain_phase_check",
+    "iterations": 10000,
+    "elapsed_seconds": 0.001673899998422712,
+    "ops_per_second": 5974072.530869725,
+    "avg_time_per_op_us": 0.1673899998422712
+  },
+  "cache_ops": {
+    "operation": "cache_get_with_decay",
+    "cache_size": 1000,
+    "iterations": 10000,
+    "elapsed_seconds": 1.3735303000030399,
+    "ops_per_second": 7280.509210446881,
+    "avg_time_per_op_us": 137.353030000304
+  },
+  "eviction": {
+    "operation": "eviction_with_effective_priority",
+    "entries_added": 1000,
+    "cache_max_size": 500,
+    "elapsed_seconds": 0.15783039999951143,
+    "entries_per_second": 6335.9150075213365,
+    "avg_time_per_entry_us": 157.83039999951143
+  }
+}

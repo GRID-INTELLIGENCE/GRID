@@ -1,0 +1,3933 @@
+{
+  "task_id": "GRID-001",
+  "task_name": "GRID-001",
+  "difficulty": "normal",
+  "status": "running",
+  "timestamp_start": "2025-11-29T07:16:46.825647Z",
+  "watched_paths": [
+    "src",
+    "tests",
+    "docs"
+  ],
+  "snapshot": {
+    "src\\__init__.py": {
+      "num_lines": 6
+    },
+    "src\\api\\cognition.py": {
+      "num_lines": 49
+    },
+    "src\\api\\dependencies.py": {
+      "num_lines": 89
+    },
+    "src\\api\\main.py": {
+      "num_lines": 74
+    },
+    "src\\api\\middleware.py": {
+      "num_lines": 133
+    },
+    "src\\api\\ner_routes.py": {
+      "num_lines": 440
+    },
+    "src\\api\\rag.py": {
+      "num_lines": 71
+    },
+    "src\\api\\routers.py": {
+      "num_lines": 395
+    },
+    "src\\api\\routes.py": {
+      "num_lines": 56
+    },
+    "src\\api\\server.py": {
+      "num_lines": 110
+    },
+    "src\\api\\__init__.py": {
+      "num_lines": 1
+    },
+    "src\\ares\\.gitignore": {
+      "num_lines": 178
+    },
+    "src\\ares\\.pre-commit-config.yaml": {
+      "num_lines": 94
+    },
+    "src\\ares\\.pylintrc": {
+      "num_lines": 20
+    },
+    "src\\ares\\.readthedocs.yaml": {
+      "num_lines": 28
+    },
+    "src\\ares\\.secrets.baseline": {
+      "num_lines": 174
+    },
+    "src\\ares\\bandit.yaml": {
+      "num_lines": 2
+    },
+    "src\\ares\\CODE_OF_CONDUCT.md": {
+      "num_lines": 127
+    },
+    "src\\ares\\LICENSE": {
+      "num_lines": 201
+    },
+    "src\\ares\\mypy.ini": {
+      "num_lines": 3
+    },
+    "src\\ares\\pyproject.toml": {
+      "num_lines": 95
+    },
+    "src\\ares\\README.md": {
+      "num_lines": 112
+    },
+    "src\\ares\\renovate.json": {
+      "num_lines": 6
+    },
+    "src\\ares\\setup.py": {
+      "num_lines": 5
+    },
+    "src\\bridge\\__init__.py": {
+      "num_lines": 1
+    },
+    "src\\cli\\main.py": {
+      "num_lines": 295
+    },
+    "src\\cli\\__init__.py": {
+      "num_lines": 1
+    },
+    "src\\core\\application.py": {
+      "num_lines": 121
+    },
+    "src\\core\\config.py": {
+      "num_lines": 371
+    },
+    "src\\core\\dependency_injection.py": {
+      "num_lines": 110
+    },
+    "src\\core\\effort_model.py": {
+      "num_lines": 51
+    },
+    "src\\core\\exceptions.py": {
+      "num_lines": 72
+    },
+    "src\\core\\logging.py": {
+      "num_lines": 69
+    },
+    "src\\core\\security.py": {
+      "num_lines": 98
+    },
+    "src\\core\\security_pipeline_middleware.py": {
+      "num_lines": 194
+    },
+    "src\\core\\the_grid.py": {
+      "num_lines": 109
+    },
+    "src\\core\\__init__.py": {
+      "num_lines": 1
+    },
+    "src\\database\\migrations.py": {
+      "num_lines": 470
+    },
+    "src\\database\\models.py": {
+      "num_lines": 325
+    },
+    "src\\database\\session.py": {
+      "num_lines": 52
+    },
+    "src\\database\\__init__.py": {
+      "num_lines": 1
+    },
+    "src\\demos\\demo_vision_to_chaplin.py": {
+      "num_lines": 108
+    },
+    "src\\grid\\config.py": {
+      "num_lines": 46
+    },
+    "src\\grid\\exceptions.py": {
+      "num_lines": 43
+    },
+    "src\\grid\\logging.py": {
+      "num_lines": 67
+    },
+    "src\\grid\\__init__.py": {
+      "num_lines": 8
+    },
+    "src\\grid.egg-info\\dependency_links.txt": {
+      "num_lines": 1
+    },
+    "src\\grid.egg-info\\entry_points.txt": {
+      "num_lines": 3
+    },
+    "src\\grid.egg-info\\PKG-INFO": {
+      "num_lines": 32
+    },
+    "src\\grid.egg-info\\requires.txt": {
+      "num_lines": 19
+    },
+    "src\\grid.egg-info\\SOURCES.txt": {
+      "num_lines": 94
+    },
+    "src\\grid.egg-info\\top_level.txt": {
+      "num_lines": 13
+    },
+    "src\\kernel\\bus.py": {
+      "num_lines": 30
+    },
+    "src\\kernel\\core_integration.py": {
+      "num_lines": 212
+    },
+    "src\\kernel\\data_quality.py": {
+      "num_lines": 132
+    },
+    "src\\kernel\\integration_pipeline.py": {
+      "num_lines": 455
+    },
+    "src\\kernel\\message_broker.py": {
+      "num_lines": 446
+    },
+    "src\\kernel\\node_ledger.py": {
+      "num_lines": 70
+    },
+    "src\\plugins\\articulation.py": {
+      "num_lines": 40
+    },
+    "src\\plugins\\ner_plugin.py": {
+      "num_lines": 226
+    },
+    "src\\plugins\\physics.py": {
+      "num_lines": 7
+    },
+    "src\\plugins\\ubi_physics_plugin.py": {
+      "num_lines": 235
+    },
+    "src\\services\\document_indexer.py": {
+      "num_lines": 337
+    },
+    "src\\services\\ner_service.py": {
+      "num_lines": 351
+    },
+    "src\\services\\pattern_engine.py": {
+      "num_lines": 7
+    },
+    "src\\services\\quantum_utils.py": {
+      "num_lines": 681
+    },
+    "src\\services\\rag_monitor.py": {
+      "num_lines": 48
+    },
+    "src\\services\\relationship_analyzer.py": {
+      "num_lines": 845
+    },
+    "src\\services\\retrieval_service.py": {
+      "num_lines": 115
+    },
+    "src\\services\\rules_engine.py": {
+      "num_lines": 369
+    },
+    "src\\services\\scenario_analyzer.py": {
+      "num_lines": 504
+    },
+    "src\\services\\vision_bridge.py": {
+      "num_lines": 59
+    },
+    "src\\services\\visual_theme_analyzer.py": {
+      "num_lines": 138
+    },
+    "src\\throughput_engine\\engine.py": {
+      "num_lines": 178
+    },
+    "src\\throughput_engine\\physics_demo.py": {
+      "num_lines": 91
+    },
+    "src\\throughput_engine\\test_engine.py": {
+      "num_lines": 37
+    },
+    "src\\throughput_engine\\__init__.py": {
+      "num_lines": 4
+    },
+    "src\\tools\\annotator.py": {
+      "num_lines": 148
+    },
+    "src\\tools\\cli.py": {
+      "num_lines": 101
+    },
+    "src\\tools\\client_auth.py": {
+      "num_lines": 202
+    },
+    "src\\tools\\cli_auth.py": {
+      "num_lines": 69
+    },
+    "src\\tools\\contribution_calculator.py": {
+      "num_lines": 154
+    },
+    "src\\tools\\contribution_tracker.py": {
+      "num_lines": 484
+    },
+    "src\\tools\\finalize_iteration.py": {
+      "num_lines": 281
+    },
+    "src\\tools\\optimizer.py": {
+      "num_lines": 71
+    },
+    "src\\transformer\\Dockerfile": {
+      "num_lines": 19
+    },
+    "src\\transformer\\main.py": {
+      "num_lines": 206
+    },
+    "src\\transformer\\metrics.py": {
+      "num_lines": 13
+    },
+    "src\\transformer\\README.md": {
+      "num_lines": 46
+    },
+    "src\\transformer\\requirements.txt": {
+      "num_lines": 8
+    },
+    "src\\ui_prototype\\index.html": {
+      "num_lines": 66
+    },
+    "src\\ui_prototype\\script.js": {
+      "num_lines": 364
+    },
+    "src\\ui_prototype\\style.css": {
+      "num_lines": 687
+    },
+    "src\\utils\\cognition_grid.py": {
+      "num_lines": 224
+    },
+    "src\\workflow_engine\\workflow_pipeline_integration.py": {
+      "num_lines": 161
+    },
+    "src\\__pycache__\\__init__.cpython-314.pyc": {
+      "num_lines": 7
+    },
+    "src\\workflow_engine\\workflow_engine\\core.py": {
+      "num_lines": 164
+    },
+    "src\\workflow_engine\\workflow_engine\\patterns.py": {
+      "num_lines": 78
+    },
+    "src\\workflow_engine\\workflow_engine\\steps.py": {
+      "num_lines": 449
+    },
+    "src\\workflow_engine\\workflow_engine\\__init__.py": {
+      "num_lines": 3
+    },
+    "src\\workflow_engine\\workflow_engine\\logs\\client_briefs.jsonl": {
+      "num_lines": 3
+    },
+    "src\\workflow_engine\\workflow_engine\\logs\\history.jsonl": {
+      "num_lines": 3
+    },
+    "src\\workflow_engine\\workflow_engine\\logs\\joule_history.jsonl": {
+      "num_lines": 6
+    },
+    "src\\workflow_engine\\workflow_engine\\logs\\ubi_ledger.jsonl": {
+      "num_lines": 5
+    },
+    "src\\workflow_engine\\workflow_engine\\runners\\cli.py": {
+      "num_lines": 41
+    },
+    "src\\workflow_engine\\workflow_engine\\runners\\__init__.py": {
+      "num_lines": 1
+    },
+    "src\\workflow_engine\\workflow_engine\\workflows\\compute_daily_base_return.yaml": {
+      "num_lines": 11
+    },
+    "src\\workflow_engine\\workflow_engine\\workflows\\explore_idea.yaml": {
+      "num_lines": 36
+    },
+    "src\\workflow_engine\\workflow_engine\\workflows\\full_cycle.yaml": {
+      "num_lines": 34
+    },
+    "src\\workflow_engine\\workflow_engine\\workflows\\log_effort.yaml": {
+      "num_lines": 11
+    },
+    "src\\workflow_engine\\workflow_engine\\workflows\\quantum_constraint_solve.yaml": {
+      "num_lines": 55
+    },
+    "src\\workflow_engine\\workflow_engine\\workflows\\realtime_glimpse_session.yaml": {
+      "num_lines": 26
+    },
+    "src\\workflow_engine\\workflow_engine\\workflows\\run_session.py": {
+      "num_lines": 54
+    },
+    "src\\workflow_engine\\workflow_engine\\workflows\\weekly_relationship_review.yaml": {
+      "num_lines": 8
+    },
+    "src\\workflow_engine\\workflow_engine\\__pycache__\\core.cpython-314.pyc": {
+      "num_lines": 87
+    },
+    "src\\workflow_engine\\workflow_engine\\__pycache__\\patterns.cpython-314.pyc": {
+      "num_lines": 45
+    },
+    "src\\workflow_engine\\workflow_engine\\__pycache__\\steps.cpython-314.pyc": {
+      "num_lines": 300
+    },
+    "src\\workflow_engine\\workflow_engine\\__pycache__\\__init__.cpython-314.pyc": {
+      "num_lines": 3
+    },
+    "src\\workflow_engine\\workflow_engine\\runners\\__pycache__\\cli.cpython-314.pyc": {
+      "num_lines": 35
+    },
+    "src\\workflow_engine\\workflow_engine\\runners\\__pycache__\\__init__.cpython-314.pyc": {
+      "num_lines": 3
+    },
+    "src\\utils\\__pycache__\\cognition_grid.cpython-314.pyc": {
+      "num_lines": 112
+    },
+    "src\\transformer\\tests\\test_transformer.py": {
+      "num_lines": 26
+    },
+    "src\\tools\\__pycache__\\client_auth.cpython-314.pyc": {
+      "num_lines": 79
+    },
+    "src\\tools\\__pycache__\\cli_auth.cpython-314.pyc": {
+      "num_lines": 62
+    },
+    "src\\tools\\__pycache__\\contribution_calculator.cpython-314.pyc": {
+      "num_lines": 86
+    },
+    "src\\tools\\__pycache__\\contribution_tracker.cpython-314.pyc": {
+      "num_lines": 273
+    },
+    "src\\tools\\__pycache__\\finalize_iteration.cpython-314.pyc": {
+      "num_lines": 121
+    },
+    "src\\throughput_engine\\__pycache__\\engine.cpython-314.pyc": {
+      "num_lines": 122
+    },
+    "src\\streamsets\\pipelines\\raw-events-to-features.json": {
+      "num_lines": 75
+    },
+    "src\\services\\__pycache__\\document_indexer.cpython-314.pyc": {
+      "num_lines": 168
+    },
+    "src\\services\\__pycache__\\ner_service.cpython-314.pyc": {
+      "num_lines": 192
+    },
+    "src\\services\\__pycache__\\pattern_engine.cpython-314.pyc": {
+      "num_lines": 283
+    },
+    "src\\services\\__pycache__\\quantum_utils.cpython-314.pyc": {
+      "num_lines": 354
+    },
+    "src\\services\\__pycache__\\rag_monitor.cpython-314.pyc": {
+      "num_lines": 33
+    },
+    "src\\services\\__pycache__\\relationship_analyzer.cpython-314.pyc": {
+      "num_lines": 393
+    },
+    "src\\services\\__pycache__\\retrieval_service.cpython-314.pyc": {
+      "num_lines": 67
+    },
+    "src\\services\\__pycache__\\rules_engine.cpython-314.pyc": {
+      "num_lines": 167
+    },
+    "src\\services\\__pycache__\\scenario_analyzer.cpython-314.pyc": {
+      "num_lines": 255
+    },
+    "src\\services\\__pycache__\\vision_bridge.cpython-314.pyc": {
+      "num_lines": 43
+    },
+    "src\\services\\__pycache__\\visual_theme_analyzer.cpython-314.pyc": {
+      "num_lines": 70
+    },
+    "src\\realtime\\glimpse\\alignment.py": {
+      "num_lines": 1363
+    },
+    "src\\realtime\\glimpse\\alignment_report.json": {
+      "num_lines": 176
+    },
+    "src\\realtime\\glimpse\\alignment_report_20251029_141436.json": {
+      "num_lines": 528
+    },
+    "src\\realtime\\glimpse\\alignment_report_20251029_141652.json": {
+      "num_lines": 526
+    },
+    "src\\realtime\\glimpse\\alignment_report_20251029_142100.json": {
+      "num_lines": 470
+    },
+    "src\\realtime\\glimpse\\alignment_report_20251029_142700.json": {
+      "num_lines": 496
+    },
+    "src\\realtime\\glimpse\\alignment_report_20251029_143136.json": {
+      "num_lines": 498
+    },
+    "src\\realtime\\glimpse\\alignment_report_20251029_143536.json": {
+      "num_lines": 498
+    },
+    "src\\realtime\\glimpse\\alignment_report_20251029_143605.json": {
+      "num_lines": 496
+    },
+    "src\\realtime\\glimpse\\alignment_report_20251029_143754.json": {
+      "num_lines": 498
+    },
+    "src\\realtime\\glimpse\\alignment_report_20251029_145319.json": {
+      "num_lines": 380
+    },
+    "src\\realtime\\glimpse\\alignment_report_20251029_145641.json": {
+      "num_lines": 383
+    },
+    "src\\realtime\\glimpse\\alignment_report_20251029_145959.json": {
+      "num_lines": 436
+    },
+    "src\\realtime\\glimpse\\alignment_report_20251029_150219.json": {
+      "num_lines": 436
+    },
+    "src\\realtime\\glimpse\\alignment_report_20251029_150510.json": {
+      "num_lines": 436
+    },
+    "src\\realtime\\glimpse\\A_conversation_with_Jony_Ive_20251026_195147.txt": {
+      "num_lines": 11
+    },
+    "src\\realtime\\glimpse\\A_conversation_with_Jony_Ive_20251026_195353.txt": {
+      "num_lines": 11
+    },
+    "src\\realtime\\glimpse\\batch_helpers.py": {
+      "num_lines": 82
+    },
+    "src\\realtime\\glimpse\\benchmark_cached_batch.py": {
+      "num_lines": 74
+    },
+    "src\\realtime\\glimpse\\benchmark_glimpse.py": {
+      "num_lines": 28
+    },
+    "src\\realtime\\glimpse\\benchmark_openai.py": {
+      "num_lines": 34
+    },
+    "src\\realtime\\glimpse\\clarifier_engine.py": {
+      "num_lines": 372
+    },
+    "src\\realtime\\glimpse\\competitor_scope.md": {
+      "num_lines": 71
+    },
+    "src\\realtime\\glimpse\\context_grid_throughput.md": {
+      "num_lines": 39
+    },
+    "src\\realtime\\glimpse\\demo_glimpse_engine.py": {
+      "num_lines": 33
+    },
+    "src\\realtime\\glimpse\\engine.py": {
+      "num_lines": 360
+    },
+    "src\\realtime\\glimpse\\enhanced_clarifier_engine.py": {
+      "num_lines": 414
+    },
+    "src\\realtime\\glimpse\\Face_To_Face_Carl_Gustav_Jung_1959_HQ_20251029_105200.txt": {
+      "num_lines": 411
+    },
+    "src\\realtime\\glimpse\\full trajectory.md": {
+      "num_lines": 2824
+    },
+    "src\\realtime\\glimpse\\Glimpse.py": {
+      "num_lines": 20
+    },
+    "src\\realtime\\glimpse\\goals mission and vision.txt": {
+      "num_lines": 15
+    },
+    "src\\realtime\\glimpse\\load_test_openai.py": {
+      "num_lines": 143
+    },
+    "src\\realtime\\glimpse\\metrics.py": {
+      "num_lines": 216
+    },
+    "src\\realtime\\glimpse\\metrics_server.py": {
+      "num_lines": 121
+    },
+    "src\\realtime\\glimpse\\multi_turn_report.json": {
+      "num_lines": 199
+    },
+    "src\\realtime\\glimpse\\overview.txt": {
+      "num_lines": 100
+    },
+    "src\\realtime\\glimpse\\performance_optimizer.py": {
+      "num_lines": 365
+    },
+    "src\\realtime\\glimpse\\phase1.txt": {
+      "num_lines": 473
+    },
+    "src\\realtime\\glimpse\\proposition.txt": {
+      "num_lines": 225
+    },
+    "src\\realtime\\glimpse\\rate_limiter.py": {
+      "num_lines": 358
+    },
+    "src\\realtime\\glimpse\\README.md": {
+      "num_lines": 412
+    },
+    "src\\realtime\\glimpse\\research_brief_competitors.md": {
+      "num_lines": 92
+    },
+    "src\\realtime\\glimpse\\reverb_model.py": {
+      "num_lines": 92
+    },
+    "src\\realtime\\glimpse\\sampler_openai.py": {
+      "num_lines": 136
+    },
+    "src\\realtime\\glimpse\\scan result.txt": {
+      "num_lines": 58
+    },
+    "src\\realtime\\glimpse\\Seamless_natural_communication_between_humans_and_machines_20251018_012415.txt": {
+      "num_lines": 593
+    },
+    "src\\realtime\\glimpse\\single_turn_report.json": {
+      "num_lines": 228
+    },
+    "src\\realtime\\glimpse\\The_Lake_House_2006_Full_Movie_HD_20251018_014449.txt": {
+      "num_lines": 1507
+    },
+    "src\\realtime\\glimpse\\TRANSFORMERS_THE_BASICS_on_MINI-CONS_20251009_190958.txt": {
+      "num_lines": 148
+    },
+    "src\\realtime\\glimpse\\vis.py": {
+      "num_lines": 42
+    },
+    "src\\realtime\\glimpse\\website_content_20251018_011105.txt": {
+      "num_lines": 19
+    },
+    "src\\realtime\\glimpse\\__init__.py": {
+      "num_lines": 54
+    },
+    "src\\realtime\\i_o\\cohesive_fix_plan.md": {
+      "num_lines": 38
+    },
+    "src\\realtime\\i_o\\orchestral_integration_documentation.md": {
+      "num_lines": 412
+    },
+    "src\\realtime\\i_o\\smart_optimizer.py": {
+      "num_lines": 421
+    },
+    "src\\realtime\\logs\\api.log": {
+      "num_lines": 198
+    },
+    "src\\realtime\\logs\\api_calls.log": {
+      "num_lines": 60
+    },
+    "src\\realtime\\logs\\api_detailed.log": {
+      "num_lines": 11
+    },
+    "src\\realtime\\logs\\api_export_20251102_090615.json": {
+      "num_lines": 92
+    },
+    "src\\realtime\\logs\\api_export_20251102_090649.json": {
+      "num_lines": 159
+    },
+    "src\\realtime\\logs\\assistant_logs.log": {
+      "num_lines": 5
+    },
+    "src\\realtime\\logs\\echoes.log": {
+      "num_lines": 48934
+    },
+    "src\\realtime\\logs\\errors.log": {
+      "num_lines": 2
+    },
+    "src\\realtime\\logs\\fused_assistant_logs.log": {
+      "num_lines": 153
+    },
+    "src\\realtime\\logs\\metrics.json": {
+      "num_lines": 21
+    },
+    "src\\realtime\\logs\\root_cleanup.log": {
+      "num_lines": 495
+    },
+    "src\\realtime\\logs\\sandstorm_dev_diagnostic.log": {
+      "num_lines": 129
+    },
+    "src\\realtime\\logs\\sandstorm_diagnostic.log": {
+      "num_lines": 15
+    },
+    "src\\realtime\\logs\\test_ucr.log": {
+      "num_lines": 25
+    },
+    "src\\realtime\\glimpse\\__pycache__\\clarifier_engine.cpython-314.pyc": {
+      "num_lines": 157
+    },
+    "src\\realtime\\glimpse\\__pycache__\\engine.cpython-314.pyc": {
+      "num_lines": 180
+    },
+    "src\\realtime\\glimpse\\__pycache__\\enhanced_clarifier_engine.cpython-314.pyc": {
+      "num_lines": 197
+    },
+    "src\\realtime\\glimpse\\__pycache__\\Glimpse.cpython-314.pyc": {
+      "num_lines": 9
+    },
+    "src\\realtime\\glimpse\\__pycache__\\performance_optimizer.cpython-314.pyc": {
+      "num_lines": 195
+    },
+    "src\\realtime\\glimpse\\__pycache__\\sampler_openai.cpython-314.pyc": {
+      "num_lines": 76
+    },
+    "src\\realtime\\glimpse\\__pycache__\\__init__.cpython-314.pyc": {
+      "num_lines": 15
+    },
+    "src\\plugins\\__pycache__\\articulation.cpython-314.pyc": {
+      "num_lines": 31
+    },
+    "src\\plugins\\__pycache__\\ner_plugin.cpython-314.pyc": {
+      "num_lines": 96
+    },
+    "src\\plugins\\__pycache__\\physics.cpython-314.pyc": {
+      "num_lines": 63
+    },
+    "src\\plugins\\__pycache__\\ubi_physics_plugin.cpython-314.pyc": {
+      "num_lines": 139
+    },
+    "src\\ml\\model\\register_model.py": {
+      "num_lines": 67
+    },
+    "src\\kernel\\kernel\\bus.py": {
+      "num_lines": 92
+    },
+    "src\\kernel\\__pycache__\\bus.cpython-314.pyc": {
+      "num_lines": 16
+    },
+    "src\\kernel\\__pycache__\\core_integration.cpython-314.pyc": {
+      "num_lines": 72
+    },
+    "src\\kernel\\__pycache__\\data_quality.cpython-314.pyc": {
+      "num_lines": 89
+    },
+    "src\\kernel\\__pycache__\\integration_pipeline.cpython-314.pyc": {
+      "num_lines": 198
+    },
+    "src\\kernel\\__pycache__\\message_broker.cpython-314.pyc": {
+      "num_lines": 245
+    },
+    "src\\kernel\\__pycache__\\node_ledger.cpython-314.pyc": {
+      "num_lines": 53
+    },
+    "src\\kernel\\kernel\\__pycache__\\bus.cpython-314.pyc": {
+      "num_lines": 54
+    },
+    "src\\grid\\api\\health.py": {
+      "num_lines": 15
+    },
+    "src\\grid\\api\\tasks.py": {
+      "num_lines": 15
+    },
+    "src\\grid\\api\\__init__.py": {
+      "num_lines": 6
+    },
+    "src\\grid\\cli\\commands.py": {
+      "num_lines": 377
+    },
+    "src\\grid\\cli\\ingestion.py": {
+      "num_lines": 247
+    },
+    "src\\grid\\cli\\main.py": {
+      "num_lines": 440
+    },
+    "src\\grid\\cli\\utils.py": {
+      "num_lines": 275
+    },
+    "src\\grid\\cli\\__init__.py": {
+      "num_lines": 43
+    },
+    "src\\grid\\financial\\analysis.py": {
+      "num_lines": 439
+    },
+    "src\\grid\\financial\\__init__.py": {
+      "num_lines": 6
+    },
+    "src\\grid\\models\\base.py": {
+      "num_lines": 31
+    },
+    "src\\grid\\models\\event.py": {
+      "num_lines": 53
+    },
+    "src\\grid\\models\\task.py": {
+      "num_lines": 55
+    },
+    "src\\grid\\models\\user.py": {
+      "num_lines": 36
+    },
+    "src\\grid\\models\\__init__.py": {
+      "num_lines": 15
+    },
+    "src\\grid\\pattern\\engine.py": {
+      "num_lines": 605
+    },
+    "src\\grid\\pattern\\__init__.py": {
+      "num_lines": 6
+    },
+    "src\\grid\\physics\\engine.py": {
+      "num_lines": 105
+    },
+    "src\\grid\\physics\\__init__.py": {
+      "num_lines": 6
+    },
+    "src\\grid\\services\\event_service.py": {
+      "num_lines": 97
+    },
+    "src\\grid\\services\\task_service.py": {
+      "num_lines": 107
+    },
+    "src\\grid\\services\\workflow_service.py": {
+      "num_lines": 77
+    },
+    "src\\grid\\services\\__init__.py": {
+      "num_lines": 7
+    },
+    "src\\grid\\vision\\optimizer.py": {
+      "num_lines": 16
+    },
+    "src\\grid\\vision\\personas.py": {
+      "num_lines": 30
+    },
+    "src\\grid\\vision\\summarizer.py": {
+      "num_lines": 48
+    },
+    "src\\grid\\vision\\triage.py": {
+      "num_lines": 30
+    },
+    "src\\grid\\vision\\__init__.py": {
+      "num_lines": 16
+    },
+    "src\\grid\\__pycache__\\config.cpython-314.pyc": {
+      "num_lines": 20
+    },
+    "src\\grid\\__pycache__\\logging.cpython-314.pyc": {
+      "num_lines": 40
+    },
+    "src\\grid\\__pycache__\\__init__.cpython-314.pyc": {
+      "num_lines": 6
+    },
+    "src\\grid\\services\\__pycache__\\event_service.cpython-314.pyc": {
+      "num_lines": 52
+    },
+    "src\\grid\\services\\__pycache__\\task_service.cpython-314.pyc": {
+      "num_lines": 80
+    },
+    "src\\grid\\services\\__pycache__\\workflow_service.cpython-314.pyc": {
+      "num_lines": 66
+    },
+    "src\\grid\\services\\__pycache__\\__init__.cpython-314.pyc": {
+      "num_lines": 5
+    },
+    "src\\grid\\pattern\\__pycache__\\engine.cpython-314.pyc": {
+      "num_lines": 282
+    },
+    "src\\grid\\pattern\\__pycache__\\__init__.cpython-314.pyc": {
+      "num_lines": 6
+    },
+    "src\\grid\\models\\__pycache__\\base.cpython-314.pyc": {
+      "num_lines": 21
+    },
+    "src\\grid\\models\\__pycache__\\event.cpython-314.pyc": {
+      "num_lines": 43
+    },
+    "src\\grid\\models\\__pycache__\\task.cpython-314.pyc": {
+      "num_lines": 41
+    },
+    "src\\grid\\models\\__pycache__\\user.cpython-314.pyc": {
+      "num_lines": 26
+    },
+    "src\\grid\\models\\__pycache__\\__init__.cpython-314.pyc": {
+      "num_lines": 4
+    },
+    "src\\grid\\cli\\__pycache__\\commands.cpython-314.pyc": {
+      "num_lines": 240
+    },
+    "src\\grid\\cli\\__pycache__\\ingestion.cpython-314.pyc": {
+      "num_lines": 142
+    },
+    "src\\grid\\cli\\__pycache__\\main.cpython-314.pyc": {
+      "num_lines": 267
+    },
+    "src\\grid\\cli\\__pycache__\\utils.cpython-314.pyc": {
+      "num_lines": 194
+    },
+    "src\\grid\\cli\\__pycache__\\__init__.cpython-314.pyc": {
+      "num_lines": 14
+    },
+    "src\\database\\__pycache__\\migrations.cpython-314.pyc": {
+      "num_lines": 327
+    },
+    "src\\database\\__pycache__\\models.cpython-314.pyc": {
+      "num_lines": 182
+    },
+    "src\\database\\__pycache__\\session.cpython-314.pyc": {
+      "num_lines": 25
+    },
+    "src\\database\\__pycache__\\__init__.cpython-314.pyc": {
+      "num_lines": 3
+    },
+    "src\\core\\__pycache__\\application.cpython-314.pyc": {
+      "num_lines": 56
+    },
+    "src\\core\\__pycache__\\config.cpython-314.pyc": {
+      "num_lines": 123
+    },
+    "src\\core\\__pycache__\\dependency_injection.cpython-314.pyc": {
+      "num_lines": 42
+    },
+    "src\\core\\__pycache__\\exceptions.cpython-314.pyc": {
+      "num_lines": 39
+    },
+    "src\\core\\__pycache__\\logging.cpython-314.pyc": {
+      "num_lines": 29
+    },
+    "src\\core\\__pycache__\\security.cpython-314.pyc": {
+      "num_lines": 51
+    },
+    "src\\core\\__pycache__\\security_pipeline_middleware.cpython-314.pyc": {
+      "num_lines": 110
+    },
+    "src\\core\\__pycache__\\__init__.cpython-314.pyc": {
+      "num_lines": 3
+    },
+    "src\\cli\\__pycache__\\main.cpython-314.pyc": {
+      "num_lines": 157
+    },
+    "src\\cli\\__pycache__\\__init__.cpython-314.pyc": {
+      "num_lines": 3
+    },
+    "src\\bridge\\task_state\\emitter.py": {
+      "num_lines": 28
+    },
+    "src\\bridge\\task_state\\model.py": {
+      "num_lines": 26
+    },
+    "src\\bridge\\task_state\\receiver.py": {
+      "num_lines": 21
+    },
+    "src\\bridge\\task_state\\__init__.py": {
+      "num_lines": 5
+    },
+    "src\\bridge\\temperature\\controller.py": {
+      "num_lines": 21
+    },
+    "src\\bridge\\temperature\\model.py": {
+      "num_lines": 18
+    },
+    "src\\bridge\\temperature\\monitor.py": {
+      "num_lines": 28
+    },
+    "src\\bridge\\temperature\\__init__.py": {
+      "num_lines": 5
+    },
+    "src\\bridge\\__pycache__\\__init__.cpython-314.pyc": {
+      "num_lines": 2
+    },
+    "src\\bridge\\temperature\\__pycache__\\controller.cpython-314.pyc": {
+      "num_lines": 20
+    },
+    "src\\bridge\\temperature\\__pycache__\\model.cpython-314.pyc": {
+      "num_lines": 12
+    },
+    "src\\bridge\\temperature\\__pycache__\\monitor.cpython-314.pyc": {
+      "num_lines": 21
+    },
+    "src\\bridge\\temperature\\__pycache__\\__init__.cpython-314.pyc": {
+      "num_lines": 4
+    },
+    "src\\bridge\\task_state\\__pycache__\\emitter.cpython-314.pyc": {
+      "num_lines": 19
+    },
+    "src\\bridge\\task_state\\__pycache__\\model.cpython-314.pyc": {
+      "num_lines": 18
+    },
+    "src\\bridge\\task_state\\__pycache__\\receiver.cpython-314.pyc": {
+      "num_lines": 21
+    },
+    "src\\bridge\\task_state\\__pycache__\\__init__.cpython-314.pyc": {
+      "num_lines": 4
+    },
+    "src\\ares\\.git\\config": {
+      "num_lines": 14
+    },
+    "src\\ares\\.git\\description": {
+      "num_lines": 1
+    },
+    "src\\ares\\.git\\FETCH_HEAD": {
+      "num_lines": 18
+    },
+    "src\\ares\\.git\\HEAD": {
+      "num_lines": 1
+    },
+    "src\\ares\\.git\\index": {
+      "num_lines": 310
+    },
+    "src\\ares\\.git\\packed-refs": {
+      "num_lines": 20
+    },
+    "src\\ares\\ares\\.gitignore": {
+      "num_lines": 178
+    },
+    "src\\ares\\ares\\.pre-commit-config.yaml": {
+      "num_lines": 94
+    },
+    "src\\ares\\ares\\.pylintrc": {
+      "num_lines": 20
+    },
+    "src\\ares\\ares\\.readthedocs.yaml": {
+      "num_lines": 28
+    },
+    "src\\ares\\ares\\.secrets.baseline": {
+      "num_lines": 174
+    },
+    "src\\ares\\ares\\bandit.yaml": {
+      "num_lines": 2
+    },
+    "src\\ares\\ares\\CODE_OF_CONDUCT.md": {
+      "num_lines": 127
+    },
+    "src\\ares\\ares\\LICENSE": {
+      "num_lines": 201
+    },
+    "src\\ares\\ares\\mypy.ini": {
+      "num_lines": 3
+    },
+    "src\\ares\\ares\\pyproject.toml": {
+      "num_lines": 95
+    },
+    "src\\ares\\ares\\README.md": {
+      "num_lines": 112
+    },
+    "src\\ares\\ares\\renovate.json": {
+      "num_lines": 6
+    },
+    "src\\ares\\ares\\setup.py": {
+      "num_lines": 5
+    },
+    "src\\ares\\assets\\advbench_refusal_keywords.json": {
+      "num_lines": 31
+    },
+    "src\\ares\\assets\\harmbench_prompt.yaml": {
+      "num_lines": 52
+    },
+    "src\\ares\\assets\\pii-seeds.csv": {
+      "num_lines": 11
+    },
+    "src\\ares\\docs\\make.bat": {
+      "num_lines": 35
+    },
+    "src\\ares\\docs\\Makefile": {
+      "num_lines": 20
+    },
+    "src\\ares\\docs\\requirements.txt": {
+      "num_lines": 1
+    },
+    "src\\ares\\example_configs\\connectors.yaml": {
+      "num_lines": 200
+    },
+    "src\\ares\\example_configs\\minimal.yaml": {
+      "num_lines": 9
+    },
+    "src\\ares\\notebooks\\Red Teaming with ARES.ipynb": {
+      "num_lines": 376
+    },
+    "src\\ares\\plugins\\README.md": {
+      "num_lines": 72
+    },
+    "src\\ares\\tests\\test_cli.py": {
+      "num_lines": 98
+    },
+    "src\\ares\\tests\\test_redteamer.py": {
+      "num_lines": 184
+    },
+    "src\\ares\\tests\\test_show.py": {
+      "num_lines": 47
+    },
+    "src\\ares\\tests\\test_utils.py": {
+      "num_lines": 80
+    },
+    "src\\ares\\tests\\__init__.py": {
+      "num_lines": 0
+    },
+    "src\\ares\\tests\\connectors\\test_granite_guardian_hf.py": {
+      "num_lines": 59
+    },
+    "src\\ares\\tests\\connectors\\test_guarded_connector.py": {
+      "num_lines": 145
+    },
+    "src\\ares\\tests\\connectors\\test_guardrail_reject.py": {
+      "num_lines": 99
+    },
+    "src\\ares\\tests\\connectors\\test_huggingface.py": {
+      "num_lines": 247
+    },
+    "src\\ares\\tests\\connectors\\test_restful_connector.py": {
+      "num_lines": 117
+    },
+    "src\\ares\\tests\\connectors\\test_shield_gemma_hf.py": {
+      "num_lines": 91
+    },
+    "src\\ares\\tests\\connectors\\test_watsonx_agent_connector.py": {
+      "num_lines": 200
+    },
+    "src\\ares\\tests\\connectors\\test_watsonx_connector.py": {
+      "num_lines": 253
+    },
+    "src\\ares\\tests\\connectors\\test_watsonx_rest_connector.py": {
+      "num_lines": 120
+    },
+    "src\\ares\\tests\\evals\\test_huggingface_eval.py": {
+      "num_lines": 92
+    },
+    "src\\ares\\tests\\evals\\test_keyword_eval.py": {
+      "num_lines": 124
+    },
+    "src\\ares\\tests\\evals\\test_llm_eval.py": {
+      "num_lines": 91
+    },
+    "src\\ares\\tests\\evals\\__init__.py": {
+      "num_lines": 0
+    },
+    "src\\ares\\tests\\goals\\test_generic_attack_goal.py": {
+      "num_lines": 211
+    },
+    "src\\ares\\tests\\strategies\\test_attack_strategy.py": {
+      "num_lines": 243
+    },
+    "src\\ares\\tests\\strategies\\__init__.py": {
+      "num_lines": 0
+    },
+    "src\\ares\\tests\\test_resources\\.gitignore": {
+      "num_lines": 1
+    },
+    "src\\ares\\tests\\test_resources\\connectors.yaml": {
+      "num_lines": 16
+    },
+    "src\\ares\\tests\\test_resources\\example-goals-with-target.csv": {
+      "num_lines": 3
+    },
+    "src\\ares\\tests\\test_resources\\example-goals.csv": {
+      "num_lines": 3
+    },
+    "src\\ares\\tests\\test_resources\\example-goals.json": {
+      "num_lines": 1
+    },
+    "src\\ares\\tests\\test_resources\\example-goals.parquet": {
+      "num_lines": 1
+    },
+    "src\\ares\\tests\\test_resources\\example_goals.json": {
+      "num_lines": 5
+    },
+    "src\\ares\\tests\\test_resources\\example_jailbreaks.json": {
+      "num_lines": 4
+    },
+    "src\\ares\\tests\\test_resources\\example_keywords.json": {
+      "num_lines": 1
+    },
+    "src\\ares\\tests\\test_resources\\example_model_output.json": {
+      "num_lines": 5
+    },
+    "src\\ares\\tests\\test_resources\\example_safety_behaviors.csv": {
+      "num_lines": 2
+    },
+    "src\\ares\\tests\\test_resources\\test_config.yaml": {
+      "num_lines": 22
+    },
+    "src\\ares\\tests\\test_resources\\watsonx_guardrails_config.yaml": {
+      "num_lines": 25
+    },
+    "src\\ares\\src\\ares\\cli.py": {
+      "num_lines": 148
+    },
+    "src\\ares\\src\\ares\\dashboard.py": {
+      "num_lines": 441
+    },
+    "src\\ares\\src\\ares\\exception.py": {
+      "num_lines": 5
+    },
+    "src\\ares\\src\\ares\\intents.json": {
+      "num_lines": 21
+    },
+    "src\\ares\\src\\ares\\logging_config.py": {
+      "num_lines": 30
+    },
+    "src\\ares\\src\\ares\\redteam.py": {
+      "num_lines": 460
+    },
+    "src\\ares\\src\\ares\\show.py": {
+      "num_lines": 173
+    },
+    "src\\ares\\src\\ares\\strategies.json": {
+      "num_lines": 13
+    },
+    "src\\ares\\src\\ares\\utils.py": {
+      "num_lines": 599
+    },
+    "src\\ares\\src\\ares\\__init__.py": {
+      "num_lines": 6
+    },
+    "src\\ares\\src\\ares\\connectors\\connector.py": {
+      "num_lines": 282
+    },
+    "src\\ares\\src\\ares\\connectors\\guarded_connector.py": {
+      "num_lines": 153
+    },
+    "src\\ares\\src\\ares\\connectors\\huggingface.py": {
+      "num_lines": 205
+    },
+    "src\\ares\\src\\ares\\connectors\\restful_connector.py": {
+      "num_lines": 380
+    },
+    "src\\ares\\src\\ares\\connectors\\watsonx_agent_connector.py": {
+      "num_lines": 139
+    },
+    "src\\ares\\src\\ares\\connectors\\watsonx_connector.py": {
+      "num_lines": 470
+    },
+    "src\\ares\\src\\ares\\connectors\\watsonx_rest_connector.py": {
+      "num_lines": 165
+    },
+    "src\\ares\\src\\ares\\connectors\\__init__.py": {
+      "num_lines": 13
+    },
+    "src\\ares\\src\\ares\\evals\\attack_eval.py": {
+      "num_lines": 169
+    },
+    "src\\ares\\src\\ares\\evals\\huggingface_eval.py": {
+      "num_lines": 71
+    },
+    "src\\ares\\src\\ares\\evals\\keyword_eval.py": {
+      "num_lines": 111
+    },
+    "src\\ares\\src\\ares\\evals\\llm_eval.py": {
+      "num_lines": 204
+    },
+    "src\\ares\\src\\ares\\evals\\__init__.py": {
+      "num_lines": 6
+    },
+    "src\\ares\\src\\ares\\goals\\attack_goal.py": {
+      "num_lines": 78
+    },
+    "src\\ares\\src\\ares\\goals\\generic_attack_goal.py": {
+      "num_lines": 202
+    },
+    "src\\ares\\src\\ares\\goals\\__init__.py": {
+      "num_lines": 5
+    },
+    "src\\ares\\src\\ares\\strategies\\attack_strategy.py": {
+      "num_lines": 137
+    },
+    "src\\ares\\src\\ares\\strategies\\direct_requests.py": {
+      "num_lines": 71
+    },
+    "src\\ares\\src\\ares\\strategies\\__init__.py": {
+      "num_lines": 5
+    },
+    "src\\ares\\src\\ares\\evals\\eval_resources\\__init__.py": {
+      "num_lines": 3
+    },
+    "src\\ares\\src\\ares\\connectors\\guardrails\\granite_guardian_hf.py": {
+      "num_lines": 165
+    },
+    "src\\ares\\src\\ares\\connectors\\guardrails\\guardrail_hf.py": {
+      "num_lines": 55
+    },
+    "src\\ares\\src\\ares\\connectors\\guardrails\\reject.py": {
+      "num_lines": 65
+    },
+    "src\\ares\\src\\ares\\connectors\\guardrails\\shield_gemma_hf.py": {
+      "num_lines": 169
+    },
+    "src\\ares\\src\\ares\\connectors\\guardrails\\__init__.py": {
+      "num_lines": 3
+    },
+    "src\\ares\\plugins\\ares-autodan\\pyproject.toml": {
+      "num_lines": 30
+    },
+    "src\\ares\\plugins\\ares-autodan\\README.MD": {
+      "num_lines": 26
+    },
+    "src\\ares\\plugins\\ares-autodan\\requirements.txt": {
+      "num_lines": 1
+    },
+    "src\\ares\\plugins\\ares-autodan\\setup.py": {
+      "num_lines": 5
+    },
+    "src\\ares\\plugins\\ares-garak\\LICENSE.txt": {
+      "num_lines": 201
+    },
+    "src\\ares\\plugins\\ares-garak\\pyproject.toml": {
+      "num_lines": 30
+    },
+    "src\\ares\\plugins\\ares-garak\\README.md": {
+      "num_lines": 30
+    },
+    "src\\ares\\plugins\\ares-garak\\requirements.txt": {
+      "num_lines": 1
+    },
+    "src\\ares\\plugins\\ares-garak\\setup.py": {
+      "num_lines": 5
+    },
+    "src\\ares\\plugins\\ares-gcg\\requirements.txt": {
+      "num_lines": 1
+    },
+    "src\\ares\\plugins\\ares-gcg\\setup.py": {
+      "num_lines": 5
+    },
+    "src\\ares\\plugins\\ares-granite-io\\LICENSE": {
+      "num_lines": 201
+    },
+    "src\\ares\\plugins\\ares-granite-io\\pyproject.toml": {
+      "num_lines": 30
+    },
+    "src\\ares\\plugins\\ares-granite-io\\README.md": {
+      "num_lines": 58
+    },
+    "src\\ares\\plugins\\ares-granite-io\\requirements.txt": {
+      "num_lines": 1
+    },
+    "src\\ares\\plugins\\ares-granite-io\\setup.py": {
+      "num_lines": 5
+    },
+    "src\\ares\\plugins\\ares-human-jailbreak\\LICENSE": {
+      "num_lines": 201
+    },
+    "src\\ares\\plugins\\ares-human-jailbreak\\pyproject.toml": {
+      "num_lines": 29
+    },
+    "src\\ares\\plugins\\ares-human-jailbreak\\README.md": {
+      "num_lines": 55
+    },
+    "src\\ares\\plugins\\ares-human-jailbreak\\requirements.txt": {
+      "num_lines": 1
+    },
+    "src\\ares\\plugins\\ares-human-jailbreak\\setup.py": {
+      "num_lines": 5
+    },
+    "src\\ares\\plugins\\ares-icarus-connector\\LICENSE": {
+      "num_lines": 201
+    },
+    "src\\ares\\plugins\\ares-icarus-connector\\pyproject.toml": {
+      "num_lines": 28
+    },
+    "src\\ares\\plugins\\ares-icarus-connector\\README.md": {
+      "num_lines": 57
+    },
+    "src\\ares\\plugins\\ares-icarus-connector\\requirements.txt": {
+      "num_lines": 1
+    },
+    "src\\ares\\plugins\\ares-intrinsics\\pyproject.toml": {
+      "num_lines": 25
+    },
+    "src\\ares\\plugins\\ares-intrinsics\\README.MD": {
+      "num_lines": 0
+    },
+    "src\\ares\\plugins\\ares-intrinsics\\requirements.txt": {
+      "num_lines": 1
+    },
+    "src\\ares\\plugins\\ares-intrinsics\\setup.py": {
+      "num_lines": 5
+    },
+    "src\\ares\\plugins\\ares-litellm-connector\\LICENSE": {
+      "num_lines": 201
+    },
+    "src\\ares\\plugins\\ares-litellm-connector\\pyproject.toml": {
+      "num_lines": 52
+    },
+    "src\\ares\\plugins\\ares-litellm-connector\\README.md": {
+      "num_lines": 36
+    },
+    "src\\ares\\plugins\\ares-litellm-connector\\requirements.txt": {
+      "num_lines": 1
+    },
+    "src\\ares\\plugins\\ares-litellm-connector\\setup.py": {
+      "num_lines": 5
+    },
+    "src\\ares\\plugins\\ares-pyrit\\LICENSE": {
+      "num_lines": 201
+    },
+    "src\\ares\\plugins\\ares-pyrit\\pyproject.toml": {
+      "num_lines": 24
+    },
+    "src\\ares\\plugins\\ares-pyrit\\README.md": {
+      "num_lines": 112
+    },
+    "src\\ares\\plugins\\ares-pyrit\\requirements.txt": {
+      "num_lines": 1
+    },
+    "src\\ares\\plugins\\ares-pyrit\\setup.py": {
+      "num_lines": 5
+    },
+    "src\\ares\\plugins\\ares-vllm-connector\\LICENSE": {
+      "num_lines": 201
+    },
+    "src\\ares\\plugins\\ares-vllm-connector\\pyproject.toml": {
+      "num_lines": 30
+    },
+    "src\\ares\\plugins\\ares-vllm-connector\\README.md": {
+      "num_lines": 36
+    },
+    "src\\ares\\plugins\\ares-vllm-connector\\requirements.txt": {
+      "num_lines": 1
+    },
+    "src\\ares\\plugins\\ares-vllm-connector\\setup.py": {
+      "num_lines": 5
+    },
+    "src\\ares\\plugins\\ares-watsonx-orchestrate\\LICENSE": {
+      "num_lines": 201
+    },
+    "src\\ares\\plugins\\ares-watsonx-orchestrate\\pyproject.toml": {
+      "num_lines": 25
+    },
+    "src\\ares\\plugins\\ares-watsonx-orchestrate\\README.md": {
+      "num_lines": 38
+    },
+    "src\\ares\\plugins\\ares-watsonx-orchestrate\\requirements.txt": {
+      "num_lines": 1
+    },
+    "src\\ares\\plugins\\new-plugin-template\\LICENSE": {
+      "num_lines": 201
+    },
+    "src\\ares\\plugins\\new-plugin-template\\README.md": {
+      "num_lines": 42
+    },
+    "src\\ares\\plugins\\new-plugin-template\\setup.py": {
+      "num_lines": 47
+    },
+    "src\\ares\\plugins\\new-plugin-template\\src\\ares_template\\__init__.py": {
+      "num_lines": 6
+    },
+    "src\\ares\\plugins\\ares-watsonx-orchestrate\\tests\\test_wxo_connector.py": {
+      "num_lines": 34
+    },
+    "src\\ares\\plugins\\ares-watsonx-orchestrate\\tests\\test_resources\\restful_wxo_config.yaml.template": {
+      "num_lines": 14
+    },
+    "src\\ares\\plugins\\ares-watsonx-orchestrate\\src\\ares_watsonx_orchestrate\\__init__.py": {
+      "num_lines": 0
+    },
+    "src\\ares\\plugins\\ares-watsonx-orchestrate\\src\\ares_watsonx_orchestrate\\connector\\wxo_connector.py": {
+      "num_lines": 256
+    },
+    "src\\ares\\plugins\\ares-watsonx-orchestrate\\src\\ares_watsonx_orchestrate\\connector\\__init__.py": {
+      "num_lines": 0
+    },
+    "src\\ares\\plugins\\ares-vllm-connector\\tests\\test_vllm.py": {
+      "num_lines": 20
+    },
+    "src\\ares\\plugins\\ares-vllm-connector\\src\\ares_vllm_connector\\__init__.py": {
+      "num_lines": 118
+    },
+    "src\\ares\\plugins\\ares-pyrit\\assets\\example_goals.csv": {
+      "num_lines": 2
+    },
+    "src\\ares\\plugins\\ares-pyrit\\tests\\test_crescendo.py": {
+      "num_lines": 100
+    },
+    "src\\ares\\plugins\\ares-pyrit\\tests\\__init__.py": {
+      "num_lines": 0
+    },
+    "src\\ares\\plugins\\ares-pyrit\\tests\\test_resources\\connectors.yaml": {
+      "num_lines": 11
+    },
+    "src\\ares\\plugins\\ares-pyrit\\tests\\test_resources\\test_simple.json": {
+      "num_lines": 6
+    },
+    "src\\ares\\plugins\\ares-pyrit\\src\\ares_pyrit\\util.py": {
+      "num_lines": 27
+    },
+    "src\\ares\\plugins\\ares-pyrit\\src\\ares_pyrit\\__init__.py": {
+      "num_lines": 3
+    },
+    "src\\ares\\plugins\\ares-pyrit\\src\\ares_pyrit\\strategy\\crescendo.py": {
+      "num_lines": 249
+    },
+    "src\\ares\\plugins\\ares-pyrit\\src\\ares_pyrit\\strategy\\__init__.py": {
+      "num_lines": 5
+    },
+    "src\\ares\\plugins\\ares-litellm-connector\\tests\\test_litellm.py": {
+      "num_lines": 25
+    },
+    "src\\ares\\plugins\\ares-litellm-connector\\src\\ares_litellm\\__init__.py": {
+      "num_lines": 206
+    },
+    "src\\ares\\plugins\\ares-intrinsics\\tests\\evals\\test_intrinsics.py": {
+      "num_lines": 53
+    },
+    "src\\ares\\plugins\\ares-intrinsics\\src\\ares_intrinsics\\evals\\formatters.py": {
+      "num_lines": 76
+    },
+    "src\\ares\\plugins\\ares-intrinsics\\src\\ares_intrinsics\\evals\\intrinsics.py": {
+      "num_lines": 185
+    },
+    "src\\ares\\plugins\\ares-intrinsics\\src\\ares_intrinsics\\evals\\__init__.py": {
+      "num_lines": 0
+    },
+    "src\\ares\\plugins\\ares-icarus-connector\\src\\ares_icarus_connector\\connector.py": {
+      "num_lines": 264
+    },
+    "src\\ares\\plugins\\ares-icarus-connector\\src\\ares_icarus_connector\\__init__.py": {
+      "num_lines": 3
+    },
+    "src\\ares\\plugins\\ares-human-jailbreak\\tests\\strategies\\test_human_jailbreak.py": {
+      "num_lines": 109
+    },
+    "src\\ares\\plugins\\ares-human-jailbreak\\tests\\test_resources\\example_goals.json": {
+      "num_lines": 5
+    },
+    "src\\ares\\plugins\\ares-human-jailbreak\\tests\\test_resources\\example_jailbreaks.json": {
+      "num_lines": 4
+    },
+    "src\\ares\\plugins\\ares-human-jailbreak\\src\\ares_human_jailbreak\\__init__.py": {
+      "num_lines": 6
+    },
+    "src\\ares\\plugins\\ares-human-jailbreak\\src\\ares_human_jailbreak\\strategies\\human_jailbreak.py": {
+      "num_lines": 75
+    },
+    "src\\ares\\plugins\\ares-human-jailbreak\\src\\ares_human_jailbreak\\strategies\\__init__.py": {
+      "num_lines": 0
+    },
+    "src\\ares\\plugins\\ares-granite-io\\tests\\__init__.py": {
+      "num_lines": 0
+    },
+    "src\\ares\\plugins\\ares-granite-io\\tests\\connectors\\test_granite_io.py": {
+      "num_lines": 22
+    },
+    "src\\ares\\plugins\\ares-granite-io\\tests\\strategies\\test_attack_strategies.py": {
+      "num_lines": 70
+    },
+    "src\\ares\\plugins\\ares-granite-io\\tests\\test_resources\\example_goals.json": {
+      "num_lines": 5
+    },
+    "src\\ares\\plugins\\ares-granite-io\\src\\ares_granite_io\\__init__.py": {
+      "num_lines": 6
+    },
+    "src\\ares\\plugins\\ares-granite-io\\src\\ares_granite_io\\connectors\\granite_io.py": {
+      "num_lines": 160
+    },
+    "src\\ares\\plugins\\ares-granite-io\\src\\ares_granite_io\\connectors\\__init__.py": {
+      "num_lines": 0
+    },
+    "src\\ares\\plugins\\ares-gcg\\assets\\test_example_single_target.csv": {
+      "num_lines": 3
+    },
+    "src\\ares\\plugins\\ares-gcg\\tests\\strategies\\test_gcg.py": {
+      "num_lines": 293
+    },
+    "src\\ares\\plugins\\ares-gcg\\tests\\test_resources\\gcg_blank_target.json": {
+      "num_lines": 10
+    },
+    "src\\ares\\plugins\\ares-gcg\\tests\\test_resources\\gcg_guardrail_test_example.json": {
+      "num_lines": 16
+    },
+    "src\\ares\\plugins\\ares-gcg\\tests\\test_resources\\gcg_test_example.json": {
+      "num_lines": 18
+    },
+    "src\\ares\\plugins\\ares-gcg\\tests\\results\\gcg\\run_99\\gcg_config.json": {
+      "num_lines": 38
+    },
+    "src\\ares\\plugins\\ares-gcg\\tests\\results\\gcg\\run_99\\prompt_num_0\\best_string.json": {
+      "num_lines": 7
+    },
+    "src\\ares\\plugins\\ares-gcg\\tests\\results\\gcg\\run_99\\prompt_num_0\\gcg_config.json": {
+      "num_lines": 33
+    },
+    "src\\ares\\plugins\\ares-gcg\\tests\\results\\gcg\\run_99\\prompt_num_0\\opt_results.json": {
+      "num_lines": 14
+    },
+    "src\\ares\\plugins\\ares-gcg\\tests\\results\\gcg\\run_99\\prompt_num_0\\prompt_log.json": {
+      "num_lines": 41
+    },
+    "src\\ares\\plugins\\ares-gcg\\src\\ares_gcg\\__init__.py": {
+      "num_lines": 6
+    },
+    "src\\ares\\plugins\\ares-gcg\\src\\ares_gcg\\goals\\gcg_goals.py": {
+      "num_lines": 100
+    },
+    "src\\ares\\plugins\\ares-gcg\\src\\ares_gcg\\goals\\__init__.py": {
+      "num_lines": 0
+    },
+    "src\\ares\\plugins\\ares-gcg\\src\\ares_gcg\\strategies\\gcg.py": {
+      "num_lines": 918
+    },
+    "src\\ares\\plugins\\ares-gcg\\src\\ares_gcg\\strategies\\utils.py": {
+      "num_lines": 327
+    },
+    "src\\ares\\plugins\\ares-gcg\\src\\ares_gcg\\strategies\\__init__.py": {
+      "num_lines": 0
+    },
+    "src\\ares\\plugins\\ares-garak\\tests\\__init__.py": {
+      "num_lines": 0
+    },
+    "src\\ares\\plugins\\ares-garak\\tests\\evals\\test_encoding_detectors.py": {
+      "num_lines": 111
+    },
+    "src\\ares\\plugins\\ares-garak\\tests\\strategies\\test_encoding_strategies.py": {
+      "num_lines": 91
+    },
+    "src\\ares\\plugins\\ares-garak\\tests\\test_resources\\configs\\test_encoding_config.yaml": {
+      "num_lines": 35
+    },
+    "src\\ares\\plugins\\ares-garak\\tests\\test_resources\\data\\example_goals.json": {
+      "num_lines": 3
+    },
+    "src\\ares\\plugins\\ares-garak\\tests\\test_resources\\data\\example_safety_behaviors.csv": {
+      "num_lines": 2
+    },
+    "src\\ares\\plugins\\ares-garak\\tests\\test_resources\\data\\harmbench_attacks.json": {
+      "num_lines": 38
+    },
+    "src\\ares\\plugins\\ares-garak\\tests\\test_resources\\data\\harmbench_goals.json": {
+      "num_lines": 6
+    },
+    "src\\ares\\plugins\\ares-garak\\tests\\test_resources\\data\\harmbench_results.json": {
+      "num_lines": 44
+    },
+    "src\\ares\\plugins\\ares-garak\\src\\ares_garak\\__init__.py": {
+      "num_lines": 6
+    },
+    "src\\ares\\plugins\\ares-garak\\src\\ares_garak\\evals\\encoding.py": {
+      "num_lines": 80
+    },
+    "src\\ares\\plugins\\ares-garak\\src\\ares_garak\\evals\\__init__.py": {
+      "num_lines": 0
+    },
+    "src\\ares\\plugins\\ares-garak\\src\\ares_garak\\strategies\\encoding.py": {
+      "num_lines": 98
+    },
+    "src\\ares\\plugins\\ares-garak\\src\\ares_garak\\strategies\\__init__.py": {
+      "num_lines": 1
+    },
+    "src\\ares\\plugins\\ares-autodan\\src\\__init__.py": {
+      "num_lines": 0
+    },
+    "src\\ares\\plugins\\ares-autodan\\tests\\strategies\\test_autodan.py": {
+      "num_lines": 60
+    },
+    "src\\ares\\plugins\\ares-autodan\\tests\\test_resources\\autodan_test_example.json": {
+      "num_lines": 27
+    },
+    "src\\ares\\plugins\\ares-autodan\\tests\\test_resources\\refusal_keywords.json": {
+      "num_lines": 1
+    },
+    "src\\ares\\plugins\\ares-autodan\\src\\ares_autodan\\strategies\\autodan.py": {
+      "num_lines": 395
+    },
+    "src\\ares\\plugins\\ares-autodan\\src\\ares_autodan\\strategies\\opt_utils.py": {
+      "num_lines": 645
+    },
+    "src\\ares\\plugins\\ares-autodan\\src\\ares_autodan\\strategies\\string_utils.py": {
+      "num_lines": 166
+    },
+    "src\\ares\\plugins\\ares-autodan\\src\\ares_autodan\\strategies\\__init__.py": {
+      "num_lines": 0
+    },
+    "src\\ares\\plugins\\ares-autodan\\src\\ares_autodan\\strategies\\assets\\prompt_group.pth": {
+      "num_lines": 1007
+    },
+    "src\\ares\\plugins\\ares-autodan\\src\\ares_autodan\\strategies\\assets\\__init__.py": {
+      "num_lines": 0
+    },
+    "src\\ares\\notebooks\\assets\\advbench_refusal_keywords.json": {
+      "num_lines": 31
+    },
+    "src\\ares\\notebooks\\assets\\ares-high-level.png": {
+      "num_lines": 4503
+    },
+    "src\\ares\\notebooks\\assets\\connectors.yaml": {
+      "num_lines": 145
+    },
+    "src\\ares\\notebooks\\assets\\qwen_demo.yaml": {
+      "num_lines": 32
+    },
+    "src\\ares\\notebooks\\assets\\safety_behaviors_text_subset.csv": {
+      "num_lines": 1530
+    },
+    "src\\ares\\example_configs\\custom\\wx-agent-ares-native.yaml": {
+      "num_lines": 7
+    },
+    "src\\ares\\example_configs\\custom\\wx-model-ares-native.yaml": {
+      "num_lines": 11
+    },
+    "src\\ares\\example_configs\\guarded\\qwen-guarded.yaml": {
+      "num_lines": 13
+    },
+    "src\\ares\\example_configs\\guarded\\qwen-input-guarded.yaml": {
+      "num_lines": 9
+    },
+    "src\\ares\\example_configs\\guarded\\qwen-output-guarded.yaml": {
+      "num_lines": 9
+    },
+    "src\\ares\\example_configs\\guarded\\qwen-reject.yaml": {
+      "num_lines": 13
+    },
+    "src\\ares\\example_configs\\owasp\\qwen-owasp-llm-02.yaml": {
+      "num_lines": 6
+    },
+    "src\\ares\\example_configs\\plugins\\ares_garak\\1_encoding.yaml": {
+      "num_lines": 32
+    },
+    "src\\ares\\example_configs\\plugins\\ares_garak\\2_encoding_detector.yaml": {
+      "num_lines": 31
+    },
+    "src\\ares\\example_configs\\plugins\\ares_garak\\3_encoding_detector.yaml": {
+      "num_lines": 28
+    },
+    "src\\ares\\example_configs\\plugins\\ares_garak\\4_encoding_detector.yaml": {
+      "num_lines": 29
+    },
+    "src\\ares\\example_configs\\plugins\\ares_garak\\5_encoding_detector.yaml": {
+      "num_lines": 28
+    },
+    "src\\ares\\example_configs\\plugins\\ares_garak\\README.md": {
+      "num_lines": 11
+    },
+    "src\\ares\\example_configs\\plugins\\ares_gcg\\connectors.yaml": {
+      "num_lines": 160
+    },
+    "src\\ares\\example_configs\\plugins\\ares_gcg\\gcg_example.yaml": {
+      "num_lines": 27
+    },
+    "src\\ares\\example_configs\\plugins\\ares_granite_io\\ollama_example.yaml": {
+      "num_lines": 11
+    },
+    "src\\ares\\example_configs\\plugins\\ares_granite_io\\watsonx_example.yaml": {
+      "num_lines": 11
+    },
+    "src\\ares\\example_configs\\plugins\\ares_human_jailbreak\\human_jailbreak.yaml": {
+      "num_lines": 28
+    },
+    "src\\ares\\example_configs\\plugins\\ares_icarus_connector\\icarus-connector-example.yaml": {
+      "num_lines": 13
+    },
+    "src\\ares\\example_configs\\plugins\\ares_litellm_connector\\litellm-connector-example-ollama.yaml": {
+      "num_lines": 14
+    },
+    "src\\ares\\example_configs\\plugins\\ares_litellm_connector\\litellm-connector-example-rits.yaml": {
+      "num_lines": 15
+    },
+    "src\\ares\\example_configs\\plugins\\ares_litellm_connector\\litellm-connector-example-watsonx.yaml": {
+      "num_lines": 14
+    },
+    "src\\ares\\example_configs\\plugins\\ares_pyrit\\crescendo_huggingface_example.yaml": {
+      "num_lines": 58
+    },
+    "src\\ares\\example_configs\\plugins\\ares_pyrit\\crescendo_rest_example.yaml": {
+      "num_lines": 62
+    },
+    "src\\ares\\example_configs\\plugins\\ares_pyrit\\crescendo_watsonx_example.yaml": {
+      "num_lines": 40
+    },
+    "src\\ares\\example_configs\\plugins\\ares_pyrit\\crescendo_watsonx_minimal.yaml": {
+      "num_lines": 20
+    },
+    "src\\ares\\example_configs\\plugins\\ares_vllm_connector\\vllm-connector-example.yaml": {
+      "num_lines": 28
+    },
+    "src\\ares\\example_configs\\plugins\\ares_watsonx_orchestrate\\connectors.yaml": {
+      "num_lines": 14
+    },
+    "src\\ares\\example_configs\\plugins\\ares_watsonx_orchestrate\\wxo-connector-multi-turn.yaml": {
+      "num_lines": 30
+    },
+    "src\\ares\\example_configs\\plugins\\ares_watsonx_orchestrate\\wxo-connector.yaml": {
+      "num_lines": 27
+    },
+    "src\\ares\\example_configs\\custom\\huggingface\\qwen-ares-native-strategies.yaml": {
+      "num_lines": 11
+    },
+    "src\\ares\\example_configs\\custom\\huggingface\\qwen-ares-native-strategy.yaml": {
+      "num_lines": 5
+    },
+    "src\\ares\\example_configs\\custom\\huggingface\\qwen-custom-multiple-strategies.yaml": {
+      "num_lines": 18
+    },
+    "src\\ares\\example_configs\\custom\\huggingface\\qwen-custom-strategy.yaml": {
+      "num_lines": 13
+    },
+    "src\\ares\\example_configs\\custom\\huggingface\\qwen-harmbench-eval.yaml": {
+      "num_lines": 19
+    },
+    "src\\ares\\example_configs\\custom\\huggingface\\qwen-huggingface-eval.yaml": {
+      "num_lines": 19
+    },
+    "src\\ares\\example_configs\\custom\\huggingface\\qwen-litellm-eval.yaml": {
+      "num_lines": 25
+    },
+    "src\\ares\\example_configs\\custom\\watsonx\\granite-ares-native-probs.yaml": {
+      "num_lines": 19
+    },
+    "src\\ares\\example_configs\\custom\\watsonx\\granite-ares-native.yaml": {
+      "num_lines": 15
+    },
+    "src\\ares\\example_configs\\custom\\watsonx\\granite-chat-ares-native.yaml": {
+      "num_lines": 13
+    },
+    "src\\ares\\example_configs\\custom\\watsonx\\granite-guardrails-ares-native.yaml": {
+      "num_lines": 11
+    },
+    "src\\ares\\docs\\source\\ares_strategies.rst": {
+      "num_lines": 44
+    },
+    "src\\ares\\docs\\source\\conf.py": {
+      "num_lines": 39
+    },
+    "src\\ares\\docs\\source\\configuration.rst": {
+      "num_lines": 134
+    },
+    "src\\ares\\docs\\source\\connector_configuration.rst": {
+      "num_lines": 137
+    },
+    "src\\ares\\docs\\source\\evaluation_configuration.rst": {
+      "num_lines": 49
+    },
+    "src\\ares\\docs\\source\\faq.rst": {
+      "num_lines": 108
+    },
+    "src\\ares\\docs\\source\\getting_started.rst": {
+      "num_lines": 49
+    },
+    "src\\ares\\docs\\source\\goal_configuration.rst": {
+      "num_lines": 39
+    },
+    "src\\ares\\docs\\source\\guardrails_connector.rst": {
+      "num_lines": 44
+    },
+    "src\\ares\\docs\\source\\index.rst": {
+      "num_lines": 71
+    },
+    "src\\ares\\docs\\source\\make.bat": {
+      "num_lines": 35
+    },
+    "src\\ares\\docs\\source\\Makefile": {
+      "num_lines": 20
+    },
+    "src\\ares\\docs\\source\\modules.rst": {
+      "num_lines": 7
+    },
+    "src\\ares\\docs\\source\\plugins.rst": {
+      "num_lines": 115
+    },
+    "src\\ares\\docs\\source\\rest_connector.rst": {
+      "num_lines": 74
+    },
+    "src\\ares\\docs\\source\\strategy_configuration.rst": {
+      "num_lines": 48
+    },
+    "src\\ares\\docs\\source\\usage.rst": {
+      "num_lines": 171
+    },
+    "src\\ares\\docs\\source\\_static\\ares-header.jpeg": {
+      "num_lines": 852
+    },
+    "src\\ares\\docs\\source\\_static\\ares-orchestrate.png": {
+      "num_lines": 7661
+    },
+    "src\\ares\\docs\\source\\_static\\ares-programming-model.png": {
+      "num_lines": 2955
+    },
+    "src\\ares\\docs\\source\\_static\\ARES-ProgrammingModel.png": {
+      "num_lines": 2903
+    },
+    "src\\ares\\docs\\source\\_static\\ares_guardrail.png": {
+      "num_lines": 1706
+    },
+    "src\\ares\\docs\\source\\_static\\ares_pipeline.png": {
+      "num_lines": 611
+    },
+    "src\\ares\\docs\\source\\_static\\custom.css": {
+      "num_lines": 12
+    },
+    "src\\ares\\docs\\source\\_static\\favicon.ico": {
+      "num_lines": 7
+    },
+    "src\\ares\\ares\\.git\\config": {
+      "num_lines": 14
+    },
+    "src\\ares\\ares\\.git\\description": {
+      "num_lines": 1
+    },
+    "src\\ares\\ares\\.git\\FETCH_HEAD": {
+      "num_lines": 18
+    },
+    "src\\ares\\ares\\.git\\HEAD": {
+      "num_lines": 1
+    },
+    "src\\ares\\ares\\.git\\index": {
+      "num_lines": 310
+    },
+    "src\\ares\\ares\\.git\\packed-refs": {
+      "num_lines": 20
+    },
+    "src\\ares\\ares\\assets\\advbench_refusal_keywords.json": {
+      "num_lines": 31
+    },
+    "src\\ares\\ares\\assets\\harmbench_prompt.yaml": {
+      "num_lines": 52
+    },
+    "src\\ares\\ares\\assets\\pii-seeds.csv": {
+      "num_lines": 11
+    },
+    "src\\ares\\ares\\docs\\make.bat": {
+      "num_lines": 35
+    },
+    "src\\ares\\ares\\docs\\Makefile": {
+      "num_lines": 20
+    },
+    "src\\ares\\ares\\docs\\requirements.txt": {
+      "num_lines": 1
+    },
+    "src\\ares\\ares\\example_configs\\connectors.yaml": {
+      "num_lines": 200
+    },
+    "src\\ares\\ares\\example_configs\\minimal.yaml": {
+      "num_lines": 9
+    },
+    "src\\ares\\ares\\notebooks\\Red Teaming with ARES.ipynb": {
+      "num_lines": 376
+    },
+    "src\\ares\\ares\\plugins\\README.md": {
+      "num_lines": 72
+    },
+    "src\\ares\\ares\\tests\\test_cli.py": {
+      "num_lines": 98
+    },
+    "src\\ares\\ares\\tests\\test_redteamer.py": {
+      "num_lines": 184
+    },
+    "src\\ares\\ares\\tests\\test_show.py": {
+      "num_lines": 47
+    },
+    "src\\ares\\ares\\tests\\test_utils.py": {
+      "num_lines": 80
+    },
+    "src\\ares\\ares\\tests\\__init__.py": {
+      "num_lines": 0
+    },
+    "src\\ares\\ares\\tests\\connectors\\test_granite_guardian_hf.py": {
+      "num_lines": 59
+    },
+    "src\\ares\\ares\\tests\\connectors\\test_guarded_connector.py": {
+      "num_lines": 145
+    },
+    "src\\ares\\ares\\tests\\connectors\\test_guardrail_reject.py": {
+      "num_lines": 99
+    },
+    "src\\ares\\ares\\tests\\connectors\\test_huggingface.py": {
+      "num_lines": 247
+    },
+    "src\\ares\\ares\\tests\\connectors\\test_restful_connector.py": {
+      "num_lines": 117
+    },
+    "src\\ares\\ares\\tests\\connectors\\test_shield_gemma_hf.py": {
+      "num_lines": 91
+    },
+    "src\\ares\\ares\\tests\\connectors\\test_watsonx_agent_connector.py": {
+      "num_lines": 200
+    },
+    "src\\ares\\ares\\tests\\connectors\\test_watsonx_connector.py": {
+      "num_lines": 253
+    },
+    "src\\ares\\ares\\tests\\connectors\\test_watsonx_rest_connector.py": {
+      "num_lines": 120
+    },
+    "src\\ares\\ares\\tests\\evals\\test_huggingface_eval.py": {
+      "num_lines": 92
+    },
+    "src\\ares\\ares\\tests\\evals\\test_keyword_eval.py": {
+      "num_lines": 124
+    },
+    "src\\ares\\ares\\tests\\evals\\test_llm_eval.py": {
+      "num_lines": 91
+    },
+    "src\\ares\\ares\\tests\\evals\\__init__.py": {
+      "num_lines": 0
+    },
+    "src\\ares\\ares\\tests\\goals\\test_generic_attack_goal.py": {
+      "num_lines": 211
+    },
+    "src\\ares\\ares\\tests\\strategies\\test_attack_strategy.py": {
+      "num_lines": 243
+    },
+    "src\\ares\\ares\\tests\\strategies\\__init__.py": {
+      "num_lines": 0
+    },
+    "src\\ares\\ares\\tests\\test_resources\\.gitignore": {
+      "num_lines": 1
+    },
+    "src\\ares\\ares\\tests\\test_resources\\connectors.yaml": {
+      "num_lines": 16
+    },
+    "src\\ares\\ares\\tests\\test_resources\\example-goals-with-target.csv": {
+      "num_lines": 3
+    },
+    "src\\ares\\ares\\tests\\test_resources\\example-goals.csv": {
+      "num_lines": 3
+    },
+    "src\\ares\\ares\\tests\\test_resources\\example-goals.json": {
+      "num_lines": 1
+    },
+    "src\\ares\\ares\\tests\\test_resources\\example-goals.parquet": {
+      "num_lines": 1
+    },
+    "src\\ares\\ares\\tests\\test_resources\\example_goals.json": {
+      "num_lines": 5
+    },
+    "src\\ares\\ares\\tests\\test_resources\\example_jailbreaks.json": {
+      "num_lines": 4
+    },
+    "src\\ares\\ares\\tests\\test_resources\\example_keywords.json": {
+      "num_lines": 1
+    },
+    "src\\ares\\ares\\tests\\test_resources\\example_model_output.json": {
+      "num_lines": 5
+    },
+    "src\\ares\\ares\\tests\\test_resources\\example_safety_behaviors.csv": {
+      "num_lines": 2
+    },
+    "src\\ares\\ares\\tests\\test_resources\\test_config.yaml": {
+      "num_lines": 22
+    },
+    "src\\ares\\ares\\tests\\test_resources\\watsonx_guardrails_config.yaml": {
+      "num_lines": 25
+    },
+    "src\\ares\\ares\\src\\ares\\cli.py": {
+      "num_lines": 148
+    },
+    "src\\ares\\ares\\src\\ares\\dashboard.py": {
+      "num_lines": 441
+    },
+    "src\\ares\\ares\\src\\ares\\exception.py": {
+      "num_lines": 5
+    },
+    "src\\ares\\ares\\src\\ares\\intents.json": {
+      "num_lines": 21
+    },
+    "src\\ares\\ares\\src\\ares\\logging_config.py": {
+      "num_lines": 30
+    },
+    "src\\ares\\ares\\src\\ares\\redteam.py": {
+      "num_lines": 460
+    },
+    "src\\ares\\ares\\src\\ares\\show.py": {
+      "num_lines": 173
+    },
+    "src\\ares\\ares\\src\\ares\\strategies.json": {
+      "num_lines": 13
+    },
+    "src\\ares\\ares\\src\\ares\\utils.py": {
+      "num_lines": 599
+    },
+    "src\\ares\\ares\\src\\ares\\__init__.py": {
+      "num_lines": 6
+    },
+    "src\\ares\\ares\\src\\ares\\connectors\\connector.py": {
+      "num_lines": 282
+    },
+    "src\\ares\\ares\\src\\ares\\connectors\\guarded_connector.py": {
+      "num_lines": 153
+    },
+    "src\\ares\\ares\\src\\ares\\connectors\\huggingface.py": {
+      "num_lines": 205
+    },
+    "src\\ares\\ares\\src\\ares\\connectors\\restful_connector.py": {
+      "num_lines": 380
+    },
+    "src\\ares\\ares\\src\\ares\\connectors\\watsonx_agent_connector.py": {
+      "num_lines": 139
+    },
+    "src\\ares\\ares\\src\\ares\\connectors\\watsonx_connector.py": {
+      "num_lines": 470
+    },
+    "src\\ares\\ares\\src\\ares\\connectors\\watsonx_rest_connector.py": {
+      "num_lines": 165
+    },
+    "src\\ares\\ares\\src\\ares\\connectors\\__init__.py": {
+      "num_lines": 13
+    },
+    "src\\ares\\ares\\src\\ares\\evals\\attack_eval.py": {
+      "num_lines": 169
+    },
+    "src\\ares\\ares\\src\\ares\\evals\\huggingface_eval.py": {
+      "num_lines": 71
+    },
+    "src\\ares\\ares\\src\\ares\\evals\\keyword_eval.py": {
+      "num_lines": 111
+    },
+    "src\\ares\\ares\\src\\ares\\evals\\llm_eval.py": {
+      "num_lines": 204
+    },
+    "src\\ares\\ares\\src\\ares\\evals\\__init__.py": {
+      "num_lines": 6
+    },
+    "src\\ares\\ares\\src\\ares\\goals\\attack_goal.py": {
+      "num_lines": 78
+    },
+    "src\\ares\\ares\\src\\ares\\goals\\generic_attack_goal.py": {
+      "num_lines": 202
+    },
+    "src\\ares\\ares\\src\\ares\\goals\\__init__.py": {
+      "num_lines": 5
+    },
+    "src\\ares\\ares\\src\\ares\\strategies\\attack_strategy.py": {
+      "num_lines": 137
+    },
+    "src\\ares\\ares\\src\\ares\\strategies\\direct_requests.py": {
+      "num_lines": 71
+    },
+    "src\\ares\\ares\\src\\ares\\strategies\\__init__.py": {
+      "num_lines": 5
+    },
+    "src\\ares\\ares\\src\\ares\\evals\\eval_resources\\__init__.py": {
+      "num_lines": 3
+    },
+    "src\\ares\\ares\\src\\ares\\connectors\\guardrails\\granite_guardian_hf.py": {
+      "num_lines": 165
+    },
+    "src\\ares\\ares\\src\\ares\\connectors\\guardrails\\guardrail_hf.py": {
+      "num_lines": 55
+    },
+    "src\\ares\\ares\\src\\ares\\connectors\\guardrails\\reject.py": {
+      "num_lines": 65
+    },
+    "src\\ares\\ares\\src\\ares\\connectors\\guardrails\\shield_gemma_hf.py": {
+      "num_lines": 169
+    },
+    "src\\ares\\ares\\src\\ares\\connectors\\guardrails\\__init__.py": {
+      "num_lines": 3
+    },
+    "src\\ares\\ares\\plugins\\ares-autodan\\pyproject.toml": {
+      "num_lines": 30
+    },
+    "src\\ares\\ares\\plugins\\ares-autodan\\README.MD": {
+      "num_lines": 26
+    },
+    "src\\ares\\ares\\plugins\\ares-autodan\\requirements.txt": {
+      "num_lines": 1
+    },
+    "src\\ares\\ares\\plugins\\ares-autodan\\setup.py": {
+      "num_lines": 5
+    },
+    "src\\ares\\ares\\plugins\\ares-garak\\LICENSE.txt": {
+      "num_lines": 201
+    },
+    "src\\ares\\ares\\plugins\\ares-garak\\pyproject.toml": {
+      "num_lines": 30
+    },
+    "src\\ares\\ares\\plugins\\ares-garak\\README.md": {
+      "num_lines": 30
+    },
+    "src\\ares\\ares\\plugins\\ares-garak\\requirements.txt": {
+      "num_lines": 1
+    },
+    "src\\ares\\ares\\plugins\\ares-garak\\setup.py": {
+      "num_lines": 5
+    },
+    "src\\ares\\ares\\plugins\\ares-gcg\\requirements.txt": {
+      "num_lines": 1
+    },
+    "src\\ares\\ares\\plugins\\ares-gcg\\setup.py": {
+      "num_lines": 5
+    },
+    "src\\ares\\ares\\plugins\\ares-granite-io\\LICENSE": {
+      "num_lines": 201
+    },
+    "src\\ares\\ares\\plugins\\ares-granite-io\\pyproject.toml": {
+      "num_lines": 30
+    },
+    "src\\ares\\ares\\plugins\\ares-granite-io\\README.md": {
+      "num_lines": 58
+    },
+    "src\\ares\\ares\\plugins\\ares-granite-io\\requirements.txt": {
+      "num_lines": 1
+    },
+    "src\\ares\\ares\\plugins\\ares-granite-io\\setup.py": {
+      "num_lines": 5
+    },
+    "src\\ares\\ares\\plugins\\ares-human-jailbreak\\LICENSE": {
+      "num_lines": 201
+    },
+    "src\\ares\\ares\\plugins\\ares-human-jailbreak\\pyproject.toml": {
+      "num_lines": 29
+    },
+    "src\\ares\\ares\\plugins\\ares-human-jailbreak\\README.md": {
+      "num_lines": 55
+    },
+    "src\\ares\\ares\\plugins\\ares-human-jailbreak\\requirements.txt": {
+      "num_lines": 1
+    },
+    "src\\ares\\ares\\plugins\\ares-human-jailbreak\\setup.py": {
+      "num_lines": 5
+    },
+    "src\\ares\\ares\\plugins\\ares-icarus-connector\\LICENSE": {
+      "num_lines": 201
+    },
+    "src\\ares\\ares\\plugins\\ares-icarus-connector\\pyproject.toml": {
+      "num_lines": 28
+    },
+    "src\\ares\\ares\\plugins\\ares-icarus-connector\\README.md": {
+      "num_lines": 57
+    },
+    "src\\ares\\ares\\plugins\\ares-icarus-connector\\requirements.txt": {
+      "num_lines": 1
+    },
+    "src\\ares\\ares\\plugins\\ares-intrinsics\\pyproject.toml": {
+      "num_lines": 25
+    },
+    "src\\ares\\ares\\plugins\\ares-intrinsics\\README.MD": {
+      "num_lines": 0
+    },
+    "src\\ares\\ares\\plugins\\ares-intrinsics\\requirements.txt": {
+      "num_lines": 1
+    },
+    "src\\ares\\ares\\plugins\\ares-intrinsics\\setup.py": {
+      "num_lines": 5
+    },
+    "src\\ares\\ares\\plugins\\ares-litellm-connector\\LICENSE": {
+      "num_lines": 201
+    },
+    "src\\ares\\ares\\plugins\\ares-litellm-connector\\pyproject.toml": {
+      "num_lines": 52
+    },
+    "src\\ares\\ares\\plugins\\ares-litellm-connector\\README.md": {
+      "num_lines": 36
+    },
+    "src\\ares\\ares\\plugins\\ares-litellm-connector\\requirements.txt": {
+      "num_lines": 1
+    },
+    "src\\ares\\ares\\plugins\\ares-litellm-connector\\setup.py": {
+      "num_lines": 5
+    },
+    "src\\ares\\ares\\plugins\\ares-pyrit\\LICENSE": {
+      "num_lines": 201
+    },
+    "src\\ares\\ares\\plugins\\ares-pyrit\\pyproject.toml": {
+      "num_lines": 24
+    },
+    "src\\ares\\ares\\plugins\\ares-pyrit\\README.md": {
+      "num_lines": 112
+    },
+    "src\\ares\\ares\\plugins\\ares-pyrit\\requirements.txt": {
+      "num_lines": 1
+    },
+    "src\\ares\\ares\\plugins\\ares-pyrit\\setup.py": {
+      "num_lines": 5
+    },
+    "src\\ares\\ares\\plugins\\ares-vllm-connector\\LICENSE": {
+      "num_lines": 201
+    },
+    "src\\ares\\ares\\plugins\\ares-vllm-connector\\pyproject.toml": {
+      "num_lines": 30
+    },
+    "src\\ares\\ares\\plugins\\ares-vllm-connector\\README.md": {
+      "num_lines": 36
+    },
+    "src\\ares\\ares\\plugins\\ares-vllm-connector\\requirements.txt": {
+      "num_lines": 1
+    },
+    "src\\ares\\ares\\plugins\\ares-vllm-connector\\setup.py": {
+      "num_lines": 5
+    },
+    "src\\ares\\ares\\plugins\\ares-watsonx-orchestrate\\LICENSE": {
+      "num_lines": 201
+    },
+    "src\\ares\\ares\\plugins\\ares-watsonx-orchestrate\\pyproject.toml": {
+      "num_lines": 25
+    },
+    "src\\ares\\ares\\plugins\\ares-watsonx-orchestrate\\README.md": {
+      "num_lines": 38
+    },
+    "src\\ares\\ares\\plugins\\ares-watsonx-orchestrate\\requirements.txt": {
+      "num_lines": 1
+    },
+    "src\\ares\\ares\\plugins\\new-plugin-template\\LICENSE": {
+      "num_lines": 201
+    },
+    "src\\ares\\ares\\plugins\\new-plugin-template\\README.md": {
+      "num_lines": 42
+    },
+    "src\\ares\\ares\\plugins\\new-plugin-template\\setup.py": {
+      "num_lines": 47
+    },
+    "src\\ares\\ares\\plugins\\new-plugin-template\\src\\ares_template\\__init__.py": {
+      "num_lines": 6
+    },
+    "src\\ares\\ares\\plugins\\ares-watsonx-orchestrate\\tests\\test_wxo_connector.py": {
+      "num_lines": 34
+    },
+    "src\\ares\\ares\\plugins\\ares-watsonx-orchestrate\\tests\\test_resources\\restful_wxo_config.yaml.template": {
+      "num_lines": 14
+    },
+    "src\\ares\\ares\\plugins\\ares-watsonx-orchestrate\\src\\ares_watsonx_orchestrate\\__init__.py": {
+      "num_lines": 0
+    },
+    "src\\ares\\ares\\plugins\\ares-watsonx-orchestrate\\src\\ares_watsonx_orchestrate\\connector\\wxo_connector.py": {
+      "num_lines": 256
+    },
+    "src\\ares\\ares\\plugins\\ares-watsonx-orchestrate\\src\\ares_watsonx_orchestrate\\connector\\__init__.py": {
+      "num_lines": 0
+    },
+    "src\\ares\\ares\\plugins\\ares-vllm-connector\\tests\\test_vllm.py": {
+      "num_lines": 20
+    },
+    "src\\ares\\ares\\plugins\\ares-vllm-connector\\src\\ares_vllm_connector\\__init__.py": {
+      "num_lines": 118
+    },
+    "src\\ares\\ares\\plugins\\ares-pyrit\\assets\\example_goals.csv": {
+      "num_lines": 2
+    },
+    "src\\ares\\ares\\plugins\\ares-pyrit\\tests\\test_crescendo.py": {
+      "num_lines": 100
+    },
+    "src\\ares\\ares\\plugins\\ares-pyrit\\tests\\__init__.py": {
+      "num_lines": 0
+    },
+    "src\\ares\\ares\\plugins\\ares-pyrit\\tests\\test_resources\\connectors.yaml": {
+      "num_lines": 11
+    },
+    "src\\ares\\ares\\plugins\\ares-pyrit\\tests\\test_resources\\test_simple.json": {
+      "num_lines": 6
+    },
+    "src\\ares\\ares\\plugins\\ares-pyrit\\src\\ares_pyrit\\util.py": {
+      "num_lines": 27
+    },
+    "src\\ares\\ares\\plugins\\ares-pyrit\\src\\ares_pyrit\\__init__.py": {
+      "num_lines": 3
+    },
+    "src\\ares\\ares\\plugins\\ares-pyrit\\src\\ares_pyrit\\strategy\\crescendo.py": {
+      "num_lines": 249
+    },
+    "src\\ares\\ares\\plugins\\ares-pyrit\\src\\ares_pyrit\\strategy\\__init__.py": {
+      "num_lines": 5
+    },
+    "src\\ares\\ares\\plugins\\ares-litellm-connector\\tests\\test_litellm.py": {
+      "num_lines": 25
+    },
+    "src\\ares\\ares\\plugins\\ares-litellm-connector\\src\\ares_litellm\\__init__.py": {
+      "num_lines": 206
+    },
+    "src\\ares\\ares\\plugins\\ares-intrinsics\\tests\\evals\\test_intrinsics.py": {
+      "num_lines": 53
+    },
+    "src\\ares\\ares\\plugins\\ares-intrinsics\\src\\ares_intrinsics\\evals\\formatters.py": {
+      "num_lines": 76
+    },
+    "src\\ares\\ares\\plugins\\ares-intrinsics\\src\\ares_intrinsics\\evals\\intrinsics.py": {
+      "num_lines": 185
+    },
+    "src\\ares\\ares\\plugins\\ares-intrinsics\\src\\ares_intrinsics\\evals\\__init__.py": {
+      "num_lines": 0
+    },
+    "src\\ares\\ares\\plugins\\ares-icarus-connector\\src\\ares_icarus_connector\\connector.py": {
+      "num_lines": 264
+    },
+    "src\\ares\\ares\\plugins\\ares-icarus-connector\\src\\ares_icarus_connector\\__init__.py": {
+      "num_lines": 3
+    },
+    "src\\ares\\ares\\plugins\\ares-human-jailbreak\\tests\\strategies\\test_human_jailbreak.py": {
+      "num_lines": 109
+    },
+    "src\\ares\\ares\\plugins\\ares-human-jailbreak\\tests\\test_resources\\example_goals.json": {
+      "num_lines": 5
+    },
+    "src\\ares\\ares\\plugins\\ares-human-jailbreak\\tests\\test_resources\\example_jailbreaks.json": {
+      "num_lines": 4
+    },
+    "src\\ares\\ares\\plugins\\ares-human-jailbreak\\src\\ares_human_jailbreak\\__init__.py": {
+      "num_lines": 6
+    },
+    "src\\ares\\ares\\plugins\\ares-human-jailbreak\\src\\ares_human_jailbreak\\strategies\\human_jailbreak.py": {
+      "num_lines": 75
+    },
+    "src\\ares\\ares\\plugins\\ares-human-jailbreak\\src\\ares_human_jailbreak\\strategies\\__init__.py": {
+      "num_lines": 0
+    },
+    "src\\ares\\ares\\plugins\\ares-granite-io\\tests\\__init__.py": {
+      "num_lines": 0
+    },
+    "src\\ares\\ares\\plugins\\ares-granite-io\\tests\\connectors\\test_granite_io.py": {
+      "num_lines": 22
+    },
+    "src\\ares\\ares\\plugins\\ares-granite-io\\tests\\strategies\\test_attack_strategies.py": {
+      "num_lines": 70
+    },
+    "src\\ares\\ares\\plugins\\ares-granite-io\\tests\\test_resources\\example_goals.json": {
+      "num_lines": 5
+    },
+    "src\\ares\\ares\\plugins\\ares-granite-io\\src\\ares_granite_io\\__init__.py": {
+      "num_lines": 6
+    },
+    "src\\ares\\ares\\plugins\\ares-granite-io\\src\\ares_granite_io\\connectors\\granite_io.py": {
+      "num_lines": 160
+    },
+    "src\\ares\\ares\\plugins\\ares-granite-io\\src\\ares_granite_io\\connectors\\__init__.py": {
+      "num_lines": 0
+    },
+    "src\\ares\\ares\\plugins\\ares-gcg\\assets\\test_example_single_target.csv": {
+      "num_lines": 3
+    },
+    "src\\ares\\ares\\plugins\\ares-gcg\\tests\\strategies\\test_gcg.py": {
+      "num_lines": 293
+    },
+    "src\\ares\\ares\\plugins\\ares-gcg\\tests\\test_resources\\gcg_blank_target.json": {
+      "num_lines": 10
+    },
+    "src\\ares\\ares\\plugins\\ares-gcg\\tests\\test_resources\\gcg_guardrail_test_example.json": {
+      "num_lines": 16
+    },
+    "src\\ares\\ares\\plugins\\ares-gcg\\tests\\test_resources\\gcg_test_example.json": {
+      "num_lines": 18
+    },
+    "src\\ares\\ares\\plugins\\ares-gcg\\tests\\results\\gcg\\run_99\\gcg_config.json": {
+      "num_lines": 38
+    },
+    "src\\ares\\ares\\plugins\\ares-gcg\\tests\\results\\gcg\\run_99\\prompt_num_0\\best_string.json": {
+      "num_lines": 7
+    },
+    "src\\ares\\ares\\plugins\\ares-gcg\\tests\\results\\gcg\\run_99\\prompt_num_0\\gcg_config.json": {
+      "num_lines": 33
+    },
+    "src\\ares\\ares\\plugins\\ares-gcg\\tests\\results\\gcg\\run_99\\prompt_num_0\\opt_results.json": {
+      "num_lines": 14
+    },
+    "src\\ares\\ares\\plugins\\ares-gcg\\tests\\results\\gcg\\run_99\\prompt_num_0\\prompt_log.json": {
+      "num_lines": 41
+    },
+    "src\\ares\\ares\\plugins\\ares-gcg\\src\\ares_gcg\\__init__.py": {
+      "num_lines": 6
+    },
+    "src\\ares\\ares\\plugins\\ares-gcg\\src\\ares_gcg\\goals\\gcg_goals.py": {
+      "num_lines": 100
+    },
+    "src\\ares\\ares\\plugins\\ares-gcg\\src\\ares_gcg\\goals\\__init__.py": {
+      "num_lines": 0
+    },
+    "src\\ares\\ares\\plugins\\ares-gcg\\src\\ares_gcg\\strategies\\gcg.py": {
+      "num_lines": 918
+    },
+    "src\\ares\\ares\\plugins\\ares-gcg\\src\\ares_gcg\\strategies\\utils.py": {
+      "num_lines": 327
+    },
+    "src\\ares\\ares\\plugins\\ares-gcg\\src\\ares_gcg\\strategies\\__init__.py": {
+      "num_lines": 0
+    },
+    "src\\ares\\ares\\plugins\\ares-garak\\tests\\__init__.py": {
+      "num_lines": 0
+    },
+    "src\\ares\\ares\\plugins\\ares-garak\\tests\\evals\\test_encoding_detectors.py": {
+      "num_lines": 111
+    },
+    "src\\ares\\ares\\plugins\\ares-garak\\tests\\strategies\\test_encoding_strategies.py": {
+      "num_lines": 91
+    },
+    "src\\ares\\ares\\plugins\\ares-garak\\tests\\test_resources\\configs\\test_encoding_config.yaml": {
+      "num_lines": 35
+    },
+    "src\\ares\\ares\\plugins\\ares-garak\\tests\\test_resources\\data\\example_goals.json": {
+      "num_lines": 3
+    },
+    "src\\ares\\ares\\plugins\\ares-garak\\tests\\test_resources\\data\\example_safety_behaviors.csv": {
+      "num_lines": 2
+    },
+    "src\\ares\\ares\\plugins\\ares-garak\\tests\\test_resources\\data\\harmbench_attacks.json": {
+      "num_lines": 38
+    },
+    "src\\ares\\ares\\plugins\\ares-garak\\tests\\test_resources\\data\\harmbench_goals.json": {
+      "num_lines": 6
+    },
+    "src\\ares\\ares\\plugins\\ares-garak\\tests\\test_resources\\data\\harmbench_results.json": {
+      "num_lines": 44
+    },
+    "src\\ares\\ares\\plugins\\ares-garak\\src\\ares_garak\\__init__.py": {
+      "num_lines": 6
+    },
+    "src\\ares\\ares\\plugins\\ares-garak\\src\\ares_garak\\evals\\encoding.py": {
+      "num_lines": 80
+    },
+    "src\\ares\\ares\\plugins\\ares-garak\\src\\ares_garak\\evals\\__init__.py": {
+      "num_lines": 0
+    },
+    "src\\ares\\ares\\plugins\\ares-garak\\src\\ares_garak\\strategies\\encoding.py": {
+      "num_lines": 98
+    },
+    "src\\ares\\ares\\plugins\\ares-garak\\src\\ares_garak\\strategies\\__init__.py": {
+      "num_lines": 1
+    },
+    "src\\ares\\ares\\plugins\\ares-autodan\\src\\__init__.py": {
+      "num_lines": 0
+    },
+    "src\\ares\\ares\\plugins\\ares-autodan\\tests\\strategies\\test_autodan.py": {
+      "num_lines": 60
+    },
+    "src\\ares\\ares\\plugins\\ares-autodan\\tests\\test_resources\\autodan_test_example.json": {
+      "num_lines": 27
+    },
+    "src\\ares\\ares\\plugins\\ares-autodan\\tests\\test_resources\\refusal_keywords.json": {
+      "num_lines": 1
+    },
+    "src\\ares\\ares\\plugins\\ares-autodan\\src\\ares_autodan\\strategies\\autodan.py": {
+      "num_lines": 395
+    },
+    "src\\ares\\ares\\plugins\\ares-autodan\\src\\ares_autodan\\strategies\\opt_utils.py": {
+      "num_lines": 645
+    },
+    "src\\ares\\ares\\plugins\\ares-autodan\\src\\ares_autodan\\strategies\\string_utils.py": {
+      "num_lines": 166
+    },
+    "src\\ares\\ares\\plugins\\ares-autodan\\src\\ares_autodan\\strategies\\__init__.py": {
+      "num_lines": 0
+    },
+    "src\\ares\\ares\\plugins\\ares-autodan\\src\\ares_autodan\\strategies\\assets\\prompt_group.pth": {
+      "num_lines": 1007
+    },
+    "src\\ares\\ares\\plugins\\ares-autodan\\src\\ares_autodan\\strategies\\assets\\__init__.py": {
+      "num_lines": 0
+    },
+    "src\\ares\\ares\\notebooks\\assets\\advbench_refusal_keywords.json": {
+      "num_lines": 31
+    },
+    "src\\ares\\ares\\notebooks\\assets\\ares-high-level.png": {
+      "num_lines": 4503
+    },
+    "src\\ares\\ares\\notebooks\\assets\\connectors.yaml": {
+      "num_lines": 145
+    },
+    "src\\ares\\ares\\notebooks\\assets\\qwen_demo.yaml": {
+      "num_lines": 32
+    },
+    "src\\ares\\ares\\notebooks\\assets\\safety_behaviors_text_subset.csv": {
+      "num_lines": 1530
+    },
+    "src\\ares\\ares\\example_configs\\custom\\wx-agent-ares-native.yaml": {
+      "num_lines": 7
+    },
+    "src\\ares\\ares\\example_configs\\custom\\wx-model-ares-native.yaml": {
+      "num_lines": 11
+    },
+    "src\\ares\\ares\\example_configs\\guarded\\qwen-guarded.yaml": {
+      "num_lines": 13
+    },
+    "src\\ares\\ares\\example_configs\\guarded\\qwen-input-guarded.yaml": {
+      "num_lines": 9
+    },
+    "src\\ares\\ares\\example_configs\\guarded\\qwen-output-guarded.yaml": {
+      "num_lines": 9
+    },
+    "src\\ares\\ares\\example_configs\\guarded\\qwen-reject.yaml": {
+      "num_lines": 13
+    },
+    "src\\ares\\ares\\example_configs\\owasp\\qwen-owasp-llm-02.yaml": {
+      "num_lines": 6
+    },
+    "src\\ares\\ares\\example_configs\\plugins\\ares_garak\\1_encoding.yaml": {
+      "num_lines": 32
+    },
+    "src\\ares\\ares\\example_configs\\plugins\\ares_garak\\2_encoding_detector.yaml": {
+      "num_lines": 31
+    },
+    "src\\ares\\ares\\example_configs\\plugins\\ares_garak\\3_encoding_detector.yaml": {
+      "num_lines": 28
+    },
+    "src\\ares\\ares\\example_configs\\plugins\\ares_garak\\4_encoding_detector.yaml": {
+      "num_lines": 29
+    },
+    "src\\ares\\ares\\example_configs\\plugins\\ares_garak\\5_encoding_detector.yaml": {
+      "num_lines": 28
+    },
+    "src\\ares\\ares\\example_configs\\plugins\\ares_garak\\README.md": {
+      "num_lines": 11
+    },
+    "src\\ares\\ares\\example_configs\\plugins\\ares_gcg\\connectors.yaml": {
+      "num_lines": 160
+    },
+    "src\\ares\\ares\\example_configs\\plugins\\ares_gcg\\gcg_example.yaml": {
+      "num_lines": 27
+    },
+    "src\\ares\\ares\\example_configs\\plugins\\ares_granite_io\\ollama_example.yaml": {
+      "num_lines": 11
+    },
+    "src\\ares\\ares\\example_configs\\plugins\\ares_granite_io\\watsonx_example.yaml": {
+      "num_lines": 11
+    },
+    "src\\ares\\ares\\example_configs\\plugins\\ares_human_jailbreak\\human_jailbreak.yaml": {
+      "num_lines": 28
+    },
+    "src\\ares\\ares\\example_configs\\plugins\\ares_icarus_connector\\icarus-connector-example.yaml": {
+      "num_lines": 13
+    },
+    "src\\ares\\ares\\example_configs\\plugins\\ares_litellm_connector\\litellm-connector-example-ollama.yaml": {
+      "num_lines": 14
+    },
+    "src\\ares\\ares\\example_configs\\plugins\\ares_litellm_connector\\litellm-connector-example-rits.yaml": {
+      "num_lines": 15
+    },
+    "src\\ares\\ares\\example_configs\\plugins\\ares_litellm_connector\\litellm-connector-example-watsonx.yaml": {
+      "num_lines": 14
+    },
+    "src\\ares\\ares\\example_configs\\plugins\\ares_pyrit\\crescendo_huggingface_example.yaml": {
+      "num_lines": 58
+    },
+    "src\\ares\\ares\\example_configs\\plugins\\ares_pyrit\\crescendo_rest_example.yaml": {
+      "num_lines": 62
+    },
+    "src\\ares\\ares\\example_configs\\plugins\\ares_pyrit\\crescendo_watsonx_example.yaml": {
+      "num_lines": 40
+    },
+    "src\\ares\\ares\\example_configs\\plugins\\ares_pyrit\\crescendo_watsonx_minimal.yaml": {
+      "num_lines": 20
+    },
+    "src\\ares\\ares\\example_configs\\plugins\\ares_vllm_connector\\vllm-connector-example.yaml": {
+      "num_lines": 28
+    },
+    "src\\ares\\ares\\example_configs\\plugins\\ares_watsonx_orchestrate\\connectors.yaml": {
+      "num_lines": 14
+    },
+    "src\\ares\\ares\\example_configs\\plugins\\ares_watsonx_orchestrate\\wxo-connector-multi-turn.yaml": {
+      "num_lines": 30
+    },
+    "src\\ares\\ares\\example_configs\\plugins\\ares_watsonx_orchestrate\\wxo-connector.yaml": {
+      "num_lines": 27
+    },
+    "src\\ares\\ares\\example_configs\\custom\\huggingface\\qwen-ares-native-strategies.yaml": {
+      "num_lines": 11
+    },
+    "src\\ares\\ares\\example_configs\\custom\\huggingface\\qwen-ares-native-strategy.yaml": {
+      "num_lines": 5
+    },
+    "src\\ares\\ares\\example_configs\\custom\\huggingface\\qwen-custom-multiple-strategies.yaml": {
+      "num_lines": 18
+    },
+    "src\\ares\\ares\\example_configs\\custom\\huggingface\\qwen-custom-strategy.yaml": {
+      "num_lines": 13
+    },
+    "src\\ares\\ares\\example_configs\\custom\\huggingface\\qwen-harmbench-eval.yaml": {
+      "num_lines": 19
+    },
+    "src\\ares\\ares\\example_configs\\custom\\huggingface\\qwen-huggingface-eval.yaml": {
+      "num_lines": 19
+    },
+    "src\\ares\\ares\\example_configs\\custom\\huggingface\\qwen-litellm-eval.yaml": {
+      "num_lines": 25
+    },
+    "src\\ares\\ares\\example_configs\\custom\\watsonx\\granite-ares-native-probs.yaml": {
+      "num_lines": 19
+    },
+    "src\\ares\\ares\\example_configs\\custom\\watsonx\\granite-ares-native.yaml": {
+      "num_lines": 15
+    },
+    "src\\ares\\ares\\example_configs\\custom\\watsonx\\granite-chat-ares-native.yaml": {
+      "num_lines": 13
+    },
+    "src\\ares\\ares\\example_configs\\custom\\watsonx\\granite-guardrails-ares-native.yaml": {
+      "num_lines": 11
+    },
+    "src\\ares\\ares\\docs\\source\\ares_strategies.rst": {
+      "num_lines": 44
+    },
+    "src\\ares\\ares\\docs\\source\\conf.py": {
+      "num_lines": 39
+    },
+    "src\\ares\\ares\\docs\\source\\configuration.rst": {
+      "num_lines": 134
+    },
+    "src\\ares\\ares\\docs\\source\\connector_configuration.rst": {
+      "num_lines": 137
+    },
+    "src\\ares\\ares\\docs\\source\\evaluation_configuration.rst": {
+      "num_lines": 49
+    },
+    "src\\ares\\ares\\docs\\source\\faq.rst": {
+      "num_lines": 108
+    },
+    "src\\ares\\ares\\docs\\source\\getting_started.rst": {
+      "num_lines": 49
+    },
+    "src\\ares\\ares\\docs\\source\\goal_configuration.rst": {
+      "num_lines": 39
+    },
+    "src\\ares\\ares\\docs\\source\\guardrails_connector.rst": {
+      "num_lines": 44
+    },
+    "src\\ares\\ares\\docs\\source\\index.rst": {
+      "num_lines": 71
+    },
+    "src\\ares\\ares\\docs\\source\\make.bat": {
+      "num_lines": 35
+    },
+    "src\\ares\\ares\\docs\\source\\Makefile": {
+      "num_lines": 20
+    },
+    "src\\ares\\ares\\docs\\source\\modules.rst": {
+      "num_lines": 7
+    },
+    "src\\ares\\ares\\docs\\source\\plugins.rst": {
+      "num_lines": 115
+    },
+    "src\\ares\\ares\\docs\\source\\rest_connector.rst": {
+      "num_lines": 74
+    },
+    "src\\ares\\ares\\docs\\source\\strategy_configuration.rst": {
+      "num_lines": 48
+    },
+    "src\\ares\\ares\\docs\\source\\usage.rst": {
+      "num_lines": 171
+    },
+    "src\\ares\\ares\\docs\\source\\_static\\ares-header.jpeg": {
+      "num_lines": 852
+    },
+    "src\\ares\\ares\\docs\\source\\_static\\ares-orchestrate.png": {
+      "num_lines": 7661
+    },
+    "src\\ares\\ares\\docs\\source\\_static\\ares-programming-model.png": {
+      "num_lines": 2955
+    },
+    "src\\ares\\ares\\docs\\source\\_static\\ARES-ProgrammingModel.png": {
+      "num_lines": 2903
+    },
+    "src\\ares\\ares\\docs\\source\\_static\\ares_guardrail.png": {
+      "num_lines": 1706
+    },
+    "src\\ares\\ares\\docs\\source\\_static\\ares_pipeline.png": {
+      "num_lines": 611
+    },
+    "src\\ares\\ares\\docs\\source\\_static\\custom.css": {
+      "num_lines": 12
+    },
+    "src\\ares\\ares\\docs\\source\\_static\\favicon.ico": {
+      "num_lines": 7
+    },
+    "src\\ares\\ares\\.github\\ISSUE_TEMPLATE\\bug-report.md": {
+      "num_lines": 19
+    },
+    "src\\ares\\ares\\.github\\ISSUE_TEMPLATE\\feature-request.md": {
+      "num_lines": 25
+    },
+    "src\\ares\\ares\\.github\\workflows\\cleanup-cache.yaml": {
+      "num_lines": 29
+    },
+    "src\\ares\\ares\\.github\\workflows\\codeql.yml": {
+      "num_lines": 98
+    },
+    "src\\ares\\ares\\.github\\workflows\\docs-check.yaml": {
+      "num_lines": 42
+    },
+    "src\\ares\\ares\\.github\\workflows\\docs-publish.yaml": {
+      "num_lines": 49
+    },
+    "src\\ares\\ares\\.github\\workflows\\linting.yml": {
+      "num_lines": 25
+    },
+    "src\\ares\\ares\\.github\\workflows\\release.yml": {
+      "num_lines": 81
+    },
+    "src\\ares\\ares\\.github\\workflows\\testing.yml": {
+      "num_lines": 53
+    },
+    "src\\ares\\ares\\.git\\refs\\heads\\main": {
+      "num_lines": 1
+    },
+    "src\\ares\\ares\\.git\\refs\\remotes\\origin\\gcg-notebook": {
+      "num_lines": 1
+    },
+    "src\\ares\\ares\\.git\\refs\\remotes\\origin\\HEAD": {
+      "num_lines": 1
+    },
+    "src\\ares\\ares\\.git\\refs\\remotes\\origin\\main": {
+      "num_lines": 1
+    },
+    "src\\ares\\ares\\.git\\refs\\remotes\\origin\\renovate\\black-25.x": {
+      "num_lines": 1
+    },
+    "src\\ares\\ares\\.git\\refs\\remotes\\origin\\renovate\\click-8.x": {
+      "num_lines": 1
+    },
+    "src\\ares\\ares\\.git\\refs\\remotes\\origin\\renovate\\garak-0.x": {
+      "num_lines": 1
+    },
+    "src\\ares\\ares\\.git\\refs\\remotes\\origin\\renovate\\ibm_watsonx_ai-1.x": {
+      "num_lines": 1
+    },
+    "src\\ares\\ares\\.git\\refs\\remotes\\origin\\renovate\\litellm-1.x": {
+      "num_lines": 1
+    },
+    "src\\ares\\ares\\.git\\refs\\remotes\\origin\\renovate\\major-github-artifact-actions": {
+      "num_lines": 1
+    },
+    "src\\ares\\ares\\.git\\refs\\remotes\\origin\\renovate\\pandas-2.x": {
+      "num_lines": 1
+    },
+    "src\\ares\\ares\\.git\\refs\\remotes\\origin\\renovate\\pre-commit-4.x": {
+      "num_lines": 1
+    },
+    "src\\ares\\ares\\.git\\refs\\remotes\\origin\\renovate\\python-dotenv-1.x": {
+      "num_lines": 1
+    },
+    "src\\ares\\ares\\.git\\refs\\remotes\\origin\\renovate\\selenium-4.x": {
+      "num_lines": 1
+    },
+    "src\\ares\\ares\\.git\\objects\\04\\1412ed06a85905bbc93290d4de9b8ea4aa6ad6": {
+      "num_lines": 3
+    },
+    "src\\ares\\ares\\.git\\objects\\08\\0995e7c3815012192bc76dd8f9b4d963b996ac": {
+      "num_lines": 1
+    },
+    "src\\ares\\ares\\.git\\objects\\10\\f051c563983005f9db8cbc8f51ac223a47b6ba": {
+      "num_lines": 4
+    },
+    "src\\ares\\ares\\.git\\objects\\16\\00663f0d58f49af091dd051f0503f2bfc4123a": {
+      "num_lines": 6
+    },
+    "src\\ares\\ares\\.git\\objects\\16\\2e7d9886b39a69f2b7ef67443ff6634b288577": {
+      "num_lines": 3
+    },
+    "src\\ares\\ares\\.git\\objects\\17\\13e96b86ab39b5f3cda9b403a347c4eb68f17c": {
+      "num_lines": 5
+    },
+    "src\\ares\\ares\\.git\\objects\\21\\5c7b2cbda06f9dc6c06e2223d9e6b22b1c3af0": {
+      "num_lines": 3
+    },
+    "src\\ares\\ares\\.git\\objects\\22\\168f610e4eb352157dfdeb5d60e7bdfe7dc2b2": {
+      "num_lines": 2
+    },
+    "src\\ares\\ares\\.git\\objects\\2e\\8ff83d3f563223d1066120123da8f8771a9a93": {
+      "num_lines": 2
+    },
+    "src\\ares\\ares\\.git\\objects\\31\\a0549a5fcf17778bd51784dfa49586468eec57": {
+      "num_lines": 7
+    },
+    "src\\ares\\ares\\.git\\objects\\31\\dd0bb013f7fd1e2c33c68c87f749d674ab31f5": {
+      "num_lines": 4
+    },
+    "src\\ares\\ares\\.git\\objects\\32\\fec6a5df61f80b225476c5292cc68a57dbc51e": {
+      "num_lines": 3
+    },
+    "src\\ares\\ares\\.git\\objects\\39\\e703a104d3d7b0858c653ceb53cf2bcd25f974": {
+      "num_lines": 6
+    },
+    "src\\ares\\ares\\.git\\objects\\49\\e4c84ef1274ac548f363b94b93fa8186f602d6": {
+      "num_lines": 2
+    },
+    "src\\ares\\ares\\.git\\objects\\58\\96b0994caa462996ce47e75aae887e334a2d48": {
+      "num_lines": 60
+    },
+    "src\\ares\\ares\\.git\\objects\\59\\9fa900ac2f64240d06a18ba87541c7a3a7ee65": {
+      "num_lines": 10
+    },
+    "src\\ares\\ares\\.git\\objects\\5e\\2ea4a91f6ad29686f56f7f3c8dbe2dd1feabf7": {
+      "num_lines": 11
+    },
+    "src\\ares\\ares\\.git\\objects\\61\\7d874e87b30f643ebf5a19f71e187439025d0b": {
+      "num_lines": 3
+    },
+    "src\\ares\\ares\\.git\\objects\\6b\\8291f7487216679038e05b2689ce7078f072bd": {
+      "num_lines": 1
+    },
+    "src\\ares\\ares\\.git\\objects\\6e\\ef2b41cf9f5b16cf4c83a5a382eb2db50185d0": {
+      "num_lines": 4
+    },
+    "src\\ares\\ares\\.git\\objects\\7a\\dd3a24db891f61fcc3bc2f5ad0ff0455a861c2": {
+      "num_lines": 3
+    },
+    "src\\ares\\ares\\.git\\objects\\89\\3264ba8923553354b0f61408db6f66546b13d6": {
+      "num_lines": 4
+    },
+    "src\\ares\\ares\\.git\\objects\\93\\844bffa7d23f28e4f61e841953afd7a34ec57f": {
+      "num_lines": 52
+    },
+    "src\\ares\\ares\\.git\\objects\\97\\5f41ccc8ee05d2121a4788f60d8906b243c7b7": {
+      "num_lines": 3
+    },
+    "src\\ares\\ares\\.git\\objects\\a1\\259b2633185e2dab5d8da26b4355f670d62205": {
+      "num_lines": 4
+    },
+    "src\\ares\\ares\\.git\\objects\\a5\\02de3deb1dd8b90dca322b8cbad6efec7b2fa4": {
+      "num_lines": 2
+    },
+    "src\\ares\\ares\\.git\\objects\\a5\\5deb4ddee6fec3fa8e9c0e0f7d19ea2e60bdc4": {
+      "num_lines": 4
+    },
+    "src\\ares\\ares\\.git\\objects\\a8\\b544eb666bc430c59bb4c76b105c5f2fa5ddd3": {
+      "num_lines": 1
+    },
+    "src\\ares\\ares\\.git\\objects\\b5\\906bd0454a6433b163505c96f68348aa621251": {
+      "num_lines": 5
+    },
+    "src\\ares\\ares\\.git\\objects\\bb\\0eeca71f96b6d2cfe394b18ed995e07e8087bb": {
+      "num_lines": 10
+    },
+    "src\\ares\\ares\\.git\\objects\\bb\\9b28f017dedaa5690389d8ae8b14c25559d9e1": {
+      "num_lines": 6
+    },
+    "src\\ares\\ares\\.git\\objects\\c3\\1b247ffed6a0b309801828983d1c428ca3311e": {
+      "num_lines": 2
+    },
+    "src\\ares\\ares\\.git\\objects\\e4\\94b160bdc410c329fe8ff8b9f3f9687694a7f8": {
+      "num_lines": 2
+    },
+    "src\\ares\\ares\\.git\\objects\\e4\\9e1bd377384c877b7ca6d6017e657c6276ee79": {
+      "num_lines": 4
+    },
+    "src\\ares\\ares\\.git\\objects\\ee\\48cd7436602cdbefbdcd4c2a227ea6d8636f22": {
+      "num_lines": 2
+    },
+    "src\\ares\\ares\\.git\\objects\\f0\\95da07eba40efbd05e27ef73fcd06389aff40a": {
+      "num_lines": 3
+    },
+    "src\\ares\\ares\\.git\\objects\\f0\\e5e28f36f5becc6eb8419a74ac2d3fbfcbacc2": {
+      "num_lines": 8
+    },
+    "src\\ares\\ares\\.git\\objects\\fe\\80a78d801bb8d266335b4326e2a8b8acf0499f": {
+      "num_lines": 4
+    },
+    "src\\ares\\ares\\.git\\objects\\pack\\pack-1b033e726408fb27e843f935fcc8af987784dc4d.idx": {
+      "num_lines": 571
+    },
+    "src\\ares\\ares\\.git\\objects\\pack\\pack-1b033e726408fb27e843f935fcc8af987784dc4d.pack": {
+      "num_lines": 29976
+    },
+    "src\\ares\\ares\\.git\\objects\\pack\\pack-1b033e726408fb27e843f935fcc8af987784dc4d.rev": {
+      "num_lines": 281
+    },
+    "src\\ares\\.github\\ISSUE_TEMPLATE\\bug-report.md": {
+      "num_lines": 19
+    },
+    "src\\ares\\.github\\ISSUE_TEMPLATE\\feature-request.md": {
+      "num_lines": 25
+    },
+    "src\\ares\\.github\\workflows\\cleanup-cache.yaml": {
+      "num_lines": 29
+    },
+    "src\\ares\\.github\\workflows\\codeql.yml": {
+      "num_lines": 98
+    },
+    "src\\ares\\.github\\workflows\\docs-check.yaml": {
+      "num_lines": 42
+    },
+    "src\\ares\\.github\\workflows\\docs-publish.yaml": {
+      "num_lines": 49
+    },
+    "src\\ares\\.github\\workflows\\linting.yml": {
+      "num_lines": 25
+    },
+    "src\\ares\\.github\\workflows\\release.yml": {
+      "num_lines": 81
+    },
+    "src\\ares\\.github\\workflows\\testing.yml": {
+      "num_lines": 53
+    },
+    "src\\ares\\.git\\hooks\\applypatch-msg.sample": {
+      "num_lines": 15
+    },
+    "src\\ares\\.git\\hooks\\commit-msg.sample": {
+      "num_lines": 24
+    },
+    "src\\ares\\.git\\hooks\\fsmonitor-watchman.sample": {
+      "num_lines": 174
+    },
+    "src\\ares\\.git\\hooks\\post-update.sample": {
+      "num_lines": 8
+    },
+    "src\\ares\\.git\\hooks\\pre-applypatch.sample": {
+      "num_lines": 14
+    },
+    "src\\ares\\.git\\hooks\\pre-commit.sample": {
+      "num_lines": 49
+    },
+    "src\\ares\\.git\\hooks\\pre-merge-commit.sample": {
+      "num_lines": 13
+    },
+    "src\\ares\\.git\\hooks\\pre-push.sample": {
+      "num_lines": 53
+    },
+    "src\\ares\\.git\\hooks\\pre-rebase.sample": {
+      "num_lines": 169
+    },
+    "src\\ares\\.git\\hooks\\pre-receive.sample": {
+      "num_lines": 24
+    },
+    "src\\ares\\.git\\hooks\\prepare-commit-msg.sample": {
+      "num_lines": 42
+    },
+    "src\\ares\\.git\\hooks\\push-to-checkout.sample": {
+      "num_lines": 78
+    },
+    "src\\ares\\.git\\hooks\\sendemail-validate.sample": {
+      "num_lines": 77
+    },
+    "src\\ares\\.git\\hooks\\update.sample": {
+      "num_lines": 128
+    },
+    "src\\ares\\.git\\info\\exclude": {
+      "num_lines": 6
+    },
+    "src\\ares\\.git\\logs\\HEAD": {
+      "num_lines": 1
+    },
+    "src\\ares\\.git\\refs\\heads\\main": {
+      "num_lines": 1
+    },
+    "src\\ares\\.git\\refs\\remotes\\origin\\gcg-notebook": {
+      "num_lines": 1
+    },
+    "src\\ares\\.git\\refs\\remotes\\origin\\HEAD": {
+      "num_lines": 1
+    },
+    "src\\ares\\.git\\refs\\remotes\\origin\\main": {
+      "num_lines": 1
+    },
+    "src\\ares\\.git\\refs\\remotes\\origin\\renovate\\black-25.x": {
+      "num_lines": 1
+    },
+    "src\\ares\\.git\\refs\\remotes\\origin\\renovate\\click-8.x": {
+      "num_lines": 1
+    },
+    "src\\ares\\.git\\refs\\remotes\\origin\\renovate\\garak-0.x": {
+      "num_lines": 1
+    },
+    "src\\ares\\.git\\refs\\remotes\\origin\\renovate\\ibm_watsonx_ai-1.x": {
+      "num_lines": 1
+    },
+    "src\\ares\\.git\\refs\\remotes\\origin\\renovate\\litellm-1.x": {
+      "num_lines": 1
+    },
+    "src\\ares\\.git\\refs\\remotes\\origin\\renovate\\major-github-artifact-actions": {
+      "num_lines": 1
+    },
+    "src\\ares\\.git\\refs\\remotes\\origin\\renovate\\pandas-2.x": {
+      "num_lines": 1
+    },
+    "src\\ares\\.git\\refs\\remotes\\origin\\renovate\\pre-commit-4.x": {
+      "num_lines": 1
+    },
+    "src\\ares\\.git\\refs\\remotes\\origin\\renovate\\python-dotenv-1.x": {
+      "num_lines": 1
+    },
+    "src\\ares\\.git\\refs\\remotes\\origin\\renovate\\selenium-4.x": {
+      "num_lines": 1
+    },
+    "src\\ares\\.git\\objects\\04\\1412ed06a85905bbc93290d4de9b8ea4aa6ad6": {
+      "num_lines": 3
+    },
+    "src\\ares\\.git\\objects\\08\\0995e7c3815012192bc76dd8f9b4d963b996ac": {
+      "num_lines": 1
+    },
+    "src\\ares\\.git\\objects\\10\\f051c563983005f9db8cbc8f51ac223a47b6ba": {
+      "num_lines": 4
+    },
+    "src\\ares\\.git\\objects\\16\\00663f0d58f49af091dd051f0503f2bfc4123a": {
+      "num_lines": 6
+    },
+    "src\\ares\\.git\\objects\\16\\2e7d9886b39a69f2b7ef67443ff6634b288577": {
+      "num_lines": 3
+    },
+    "src\\ares\\.git\\objects\\17\\13e96b86ab39b5f3cda9b403a347c4eb68f17c": {
+      "num_lines": 5
+    },
+    "src\\ares\\.git\\objects\\21\\5c7b2cbda06f9dc6c06e2223d9e6b22b1c3af0": {
+      "num_lines": 3
+    },
+    "src\\ares\\.git\\objects\\22\\168f610e4eb352157dfdeb5d60e7bdfe7dc2b2": {
+      "num_lines": 2
+    },
+    "src\\ares\\.git\\objects\\2e\\8ff83d3f563223d1066120123da8f8771a9a93": {
+      "num_lines": 2
+    },
+    "src\\ares\\.git\\objects\\31\\a0549a5fcf17778bd51784dfa49586468eec57": {
+      "num_lines": 7
+    },
+    "src\\ares\\.git\\objects\\31\\dd0bb013f7fd1e2c33c68c87f749d674ab31f5": {
+      "num_lines": 4
+    },
+    "src\\ares\\.git\\objects\\32\\fec6a5df61f80b225476c5292cc68a57dbc51e": {
+      "num_lines": 3
+    },
+    "src\\ares\\.git\\objects\\39\\e703a104d3d7b0858c653ceb53cf2bcd25f974": {
+      "num_lines": 6
+    },
+    "src\\ares\\.git\\objects\\49\\e4c84ef1274ac548f363b94b93fa8186f602d6": {
+      "num_lines": 2
+    },
+    "src\\ares\\.git\\objects\\58\\96b0994caa462996ce47e75aae887e334a2d48": {
+      "num_lines": 60
+    },
+    "src\\ares\\.git\\objects\\59\\9fa900ac2f64240d06a18ba87541c7a3a7ee65": {
+      "num_lines": 10
+    },
+    "src\\ares\\.git\\objects\\5e\\2ea4a91f6ad29686f56f7f3c8dbe2dd1feabf7": {
+      "num_lines": 11
+    },
+    "src\\ares\\.git\\objects\\61\\7d874e87b30f643ebf5a19f71e187439025d0b": {
+      "num_lines": 3
+    },
+    "src\\ares\\.git\\objects\\6b\\8291f7487216679038e05b2689ce7078f072bd": {
+      "num_lines": 1
+    },
+    "src\\ares\\.git\\objects\\6e\\ef2b41cf9f5b16cf4c83a5a382eb2db50185d0": {
+      "num_lines": 4
+    },
+    "src\\ares\\.git\\objects\\7a\\dd3a24db891f61fcc3bc2f5ad0ff0455a861c2": {
+      "num_lines": 3
+    },
+    "src\\ares\\.git\\objects\\89\\3264ba8923553354b0f61408db6f66546b13d6": {
+      "num_lines": 4
+    },
+    "src\\ares\\.git\\objects\\93\\844bffa7d23f28e4f61e841953afd7a34ec57f": {
+      "num_lines": 52
+    },
+    "src\\ares\\.git\\objects\\97\\5f41ccc8ee05d2121a4788f60d8906b243c7b7": {
+      "num_lines": 3
+    },
+    "src\\ares\\.git\\objects\\a1\\259b2633185e2dab5d8da26b4355f670d62205": {
+      "num_lines": 4
+    },
+    "src\\ares\\.git\\objects\\a5\\02de3deb1dd8b90dca322b8cbad6efec7b2fa4": {
+      "num_lines": 2
+    },
+    "src\\ares\\.git\\objects\\a5\\5deb4ddee6fec3fa8e9c0e0f7d19ea2e60bdc4": {
+      "num_lines": 4
+    },
+    "src\\ares\\.git\\objects\\a8\\b544eb666bc430c59bb4c76b105c5f2fa5ddd3": {
+      "num_lines": 1
+    },
+    "src\\ares\\.git\\objects\\b5\\906bd0454a6433b163505c96f68348aa621251": {
+      "num_lines": 5
+    },
+    "src\\ares\\.git\\objects\\bb\\0eeca71f96b6d2cfe394b18ed995e07e8087bb": {
+      "num_lines": 10
+    },
+    "src\\ares\\.git\\objects\\bb\\9b28f017dedaa5690389d8ae8b14c25559d9e1": {
+      "num_lines": 6
+    },
+    "src\\ares\\.git\\objects\\c3\\1b247ffed6a0b309801828983d1c428ca3311e": {
+      "num_lines": 2
+    },
+    "src\\ares\\.git\\objects\\e4\\94b160bdc410c329fe8ff8b9f3f9687694a7f8": {
+      "num_lines": 2
+    },
+    "src\\ares\\.git\\objects\\e4\\9e1bd377384c877b7ca6d6017e657c6276ee79": {
+      "num_lines": 4
+    },
+    "src\\ares\\.git\\objects\\ee\\48cd7436602cdbefbdcd4c2a227ea6d8636f22": {
+      "num_lines": 2
+    },
+    "src\\ares\\.git\\objects\\f0\\95da07eba40efbd05e27ef73fcd06389aff40a": {
+      "num_lines": 3
+    },
+    "src\\ares\\.git\\objects\\f0\\e5e28f36f5becc6eb8419a74ac2d3fbfcbacc2": {
+      "num_lines": 8
+    },
+    "src\\ares\\.git\\objects\\fe\\80a78d801bb8d266335b4326e2a8b8acf0499f": {
+      "num_lines": 4
+    },
+    "src\\ares\\.git\\objects\\pack\\pack-1b033e726408fb27e843f935fcc8af987784dc4d.idx": {
+      "num_lines": 571
+    },
+    "src\\ares\\.git\\objects\\pack\\pack-1b033e726408fb27e843f935fcc8af987784dc4d.pack": {
+      "num_lines": 29976
+    },
+    "src\\ares\\.git\\objects\\pack\\pack-1b033e726408fb27e843f935fcc8af987784dc4d.rev": {
+      "num_lines": 281
+    },
+    "src\\ares\\.git\\logs\\refs\\heads\\main": {
+      "num_lines": 1
+    },
+    "src\\ares\\.git\\logs\\refs\\remotes\\origin\\gcg-notebook": {
+      "num_lines": 2
+    },
+    "src\\ares\\.git\\logs\\refs\\remotes\\origin\\HEAD": {
+      "num_lines": 1
+    },
+    "src\\ares\\.git\\logs\\refs\\remotes\\origin\\main": {
+      "num_lines": 1
+    },
+    "src\\ares\\.git\\logs\\refs\\remotes\\origin\\renovate\\black-25.x": {
+      "num_lines": 1
+    },
+    "src\\ares\\.git\\logs\\refs\\remotes\\origin\\renovate\\click-8.x": {
+      "num_lines": 1
+    },
+    "src\\ares\\.git\\logs\\refs\\remotes\\origin\\renovate\\garak-0.x": {
+      "num_lines": 1
+    },
+    "src\\ares\\.git\\logs\\refs\\remotes\\origin\\renovate\\ibm_watsonx_ai-1.x": {
+      "num_lines": 1
+    },
+    "src\\ares\\.git\\logs\\refs\\remotes\\origin\\renovate\\litellm-1.x": {
+      "num_lines": 1
+    },
+    "src\\ares\\.git\\logs\\refs\\remotes\\origin\\renovate\\major-github-artifact-actions": {
+      "num_lines": 1
+    },
+    "src\\ares\\.git\\logs\\refs\\remotes\\origin\\renovate\\pandas-2.x": {
+      "num_lines": 1
+    },
+    "src\\ares\\.git\\logs\\refs\\remotes\\origin\\renovate\\pre-commit-4.x": {
+      "num_lines": 1
+    },
+    "src\\ares\\.git\\logs\\refs\\remotes\\origin\\renovate\\python-dotenv-1.x": {
+      "num_lines": 1
+    },
+    "src\\ares\\.git\\logs\\refs\\remotes\\origin\\renovate\\selenium-4.x": {
+      "num_lines": 1
+    },
+    "src\\api\\__pycache__\\cognition.cpython-314.pyc": {
+      "num_lines": 31
+    },
+    "src\\api\\__pycache__\\dependencies.cpython-314.pyc": {
+      "num_lines": 39
+    },
+    "src\\api\\__pycache__\\main.cpython-314.pyc": {
+      "num_lines": 45
+    },
+    "src\\api\\__pycache__\\middleware.cpython-314.pyc": {
+      "num_lines": 58
+    },
+    "src\\api\\__pycache__\\ner_routes.cpython-314.pyc": {
+      "num_lines": 187
+    },
+    "src\\api\\__pycache__\\rag.cpython-314.pyc": {
+      "num_lines": 33
+    },
+    "src\\api\\__pycache__\\routers.cpython-314.pyc": {
+      "num_lines": 139
+    },
+    "src\\api\\__pycache__\\routes.cpython-314.pyc": {
+      "num_lines": 22
+    },
+    "src\\api\\__pycache__\\server.cpython-314.pyc": {
+      "num_lines": 55
+    },
+    "src\\api\\__pycache__\\__init__.cpython-314.pyc": {
+      "num_lines": 3
+    },
+    "tests\\conftest.py": {
+      "num_lines": 187
+    },
+    "tests\\test_cognition_api.py": {
+      "num_lines": 78
+    },
+    "tests\\test_cognition_grid.py": {
+      "num_lines": 106
+    },
+    "tests\\test_integration_demo.py": {
+      "num_lines": 195
+    },
+    "tests\\__init__.py": {
+      "num_lines": 1
+    },
+    "tests\\e2e\\test_e2e.py": {
+      "num_lines": 39
+    },
+    "tests\\e2e\\__init__.py": {
+      "num_lines": 1
+    },
+    "tests\\integration\\test_application.py": {
+      "num_lines": 66
+    },
+    "tests\\integration\\test_core_integration.py": {
+      "num_lines": 78
+    },
+    "tests\\integration\\test_integration.py": {
+      "num_lines": 54
+    },
+    "tests\\integration\\test_ner_api.py": {
+      "num_lines": 100
+    },
+    "tests\\integration\\test_ner_plugin.py": {
+      "num_lines": 65
+    },
+    "tests\\integration\\test_relationship_judgment.py": {
+      "num_lines": 106
+    },
+    "tests\\integration\\test_vision_comedy_integration.py": {
+      "num_lines": 156
+    },
+    "tests\\integration\\__init__.py": {
+      "num_lines": 1
+    },
+    "tests\\unit\\test_bridge_task_state.py": {
+      "num_lines": 52
+    },
+    "tests\\unit\\test_bridge_temperature.py": {
+      "num_lines": 51
+    },
+    "tests\\unit\\test_cli.py": {
+      "num_lines": 267
+    },
+    "tests\\unit\\test_config.py": {
+      "num_lines": 56
+    },
+    "tests\\unit\\test_contribution_tracker.py": {
+      "num_lines": 59
+    },
+    "tests\\unit\\test_data_quality.py": {
+      "num_lines": 72
+    },
+    "tests\\unit\\test_dependency_injection.py": {
+      "num_lines": 125
+    },
+    "tests\\unit\\test_heat_cooling_manager.py": {
+      "num_lines": 166
+    },
+    "tests\\unit\\test_heuristic_router_value.py": {
+      "num_lines": 62
+    },
+    "tests\\unit\\test_integration_pipeline_robustness.py": {
+      "num_lines": 72
+    },
+    "tests\\unit\\test_intelligent_routing.py": {
+      "num_lines": 81
+    },
+    "tests\\unit\\test_message_extractor_compass.py": {
+      "num_lines": 152
+    },
+    "tests\\unit\\test_models.py": {
+      "num_lines": 58
+    },
+    "tests\\unit\\test_ner_plugin_unit.py": {
+      "num_lines": 306
+    },
+    "tests\\unit\\test_ner_service.py": {
+      "num_lines": 330
+    },
+    "tests\\unit\\test_ner_service_coverage.py": {
+      "num_lines": 303
+    },
+    "tests\\unit\\test_pattern_engine.py": {
+      "num_lines": 620
+    },
+    "tests\\unit\\test_pattern_engine_rag.py": {
+      "num_lines": 122
+    },
+    "tests\\unit\\test_relationship_analyzer.py": {
+      "num_lines": 291
+    },
+    "tests\\unit\\test_relationship_analyzer_rag.py": {
+      "num_lines": 151
+    },
+    "tests\\unit\\test_retrieval_service.py": {
+      "num_lines": 110
+    },
+    "tests\\unit\\test_rules_engine.py": {
+      "num_lines": 343
+    },
+    "tests\\unit\\test_scenario_analyzer.py": {
+      "num_lines": 510
+    },
+    "tests\\unit\\test_services.py": {
+      "num_lines": 128
+    },
+    "tests\\unit\\test_vision_bridge.py": {
+      "num_lines": 30
+    },
+    "tests\\unit\\__init__.py": {
+      "num_lines": 1
+    },
+    "tests\\__pycache__\\conftest.cpython-314-pytest-7.4.3.pyc": {
+      "num_lines": 59
+    },
+    "tests\\__pycache__\\conftest.cpython-314-pytest-8.4.2.pyc": {
+      "num_lines": 52
+    },
+    "tests\\__pycache__\\conftest.cpython-314-pytest-9.0.1.pyc": {
+      "num_lines": 52
+    },
+    "tests\\__pycache__\\test_cognition_api.cpython-314-pytest-7.4.3.pyc": {
+      "num_lines": 105
+    },
+    "tests\\__pycache__\\test_cognition_api.cpython-314-pytest-8.4.2.pyc": {
+      "num_lines": 107
+    },
+    "tests\\__pycache__\\test_cognition_api.cpython-314-pytest-9.0.1.pyc": {
+      "num_lines": 107
+    },
+    "tests\\__pycache__\\test_cognition_grid.cpython-314-pytest-7.4.3.pyc": {
+      "num_lines": 141
+    },
+    "tests\\__pycache__\\test_cognition_grid.cpython-314-pytest-8.4.2.pyc": {
+      "num_lines": 142
+    },
+    "tests\\__pycache__\\test_cognition_grid.cpython-314-pytest-9.0.1.pyc": {
+      "num_lines": 142
+    },
+    "tests\\__pycache__\\test_integration_demo.cpython-314-pytest-7.4.3.pyc": {
+      "num_lines": 138
+    },
+    "tests\\__pycache__\\__init__.cpython-314.pyc": {
+      "num_lines": 3
+    },
+    "tests\\unit\\api\\test_middleware.py": {
+      "num_lines": 62
+    },
+    "tests\\unit\\api\\test_server.py": {
+      "num_lines": 17
+    },
+    "tests\\unit\\cli\\test_cli.py": {
+      "num_lines": 141
+    },
+    "tests\\unit\\core\\test_security.py": {
+      "num_lines": 81
+    },
+    "tests\\unit\\database\\test_migrations.py": {
+      "num_lines": 47
+    },
+    "tests\\unit\\plugins\\test_plugins.py": {
+      "num_lines": 58
+    },
+    "tests\\unit\\__pycache__\\test_bridge_task_state.cpython-314-pytest-7.4.3.pyc": {
+      "num_lines": 42
+    },
+    "tests\\unit\\__pycache__\\test_bridge_task_state.cpython-314-pytest-8.4.2.pyc": {
+      "num_lines": 42
+    },
+    "tests\\unit\\__pycache__\\test_bridge_temperature.cpython-314-pytest-7.4.3.pyc": {
+      "num_lines": 28
+    },
+    "tests\\unit\\__pycache__\\test_bridge_temperature.cpython-314-pytest-8.4.2.pyc": {
+      "num_lines": 28
+    },
+    "tests\\unit\\__pycache__\\test_cli.cpython-314-pytest-7.4.3.pyc": {
+      "num_lines": 225
+    },
+    "tests\\unit\\__pycache__\\test_config.cpython-314-pytest-7.4.3.pyc": {
+      "num_lines": 88
+    },
+    "tests\\unit\\__pycache__\\test_config.cpython-314-pytest-8.4.2.pyc": {
+      "num_lines": 88
+    },
+    "tests\\unit\\__pycache__\\test_config.cpython-314-pytest-9.0.1.pyc": {
+      "num_lines": 88
+    },
+    "tests\\unit\\__pycache__\\test_contribution_tracker.cpython-314-pytest-7.4.3.pyc": {
+      "num_lines": 63
+    },
+    "tests\\unit\\__pycache__\\test_data_quality.cpython-314-pytest-7.4.3.pyc": {
+      "num_lines": 92
+    },
+    "tests\\unit\\__pycache__\\test_dependency_injection.cpython-314-pytest-7.4.3.pyc": {
+      "num_lines": 112
+    },
+    "tests\\unit\\__pycache__\\test_dependency_injection.cpython-314-pytest-8.4.2.pyc": {
+      "num_lines": 112
+    },
+    "tests\\unit\\__pycache__\\test_dependency_injection.cpython-314-pytest-9.0.1.pyc": {
+      "num_lines": 112
+    },
+    "tests\\unit\\__pycache__\\test_heat_cooling_manager.cpython-314-pytest-7.4.3.pyc": {
+      "num_lines": 192
+    },
+    "tests\\unit\\__pycache__\\test_heat_cooling_manager.cpython-314.pyc": {
+      "num_lines": 30
+    },
+    "tests\\unit\\__pycache__\\test_heuristic_router_value.cpython-314-pytest-7.4.3.pyc": {
+      "num_lines": 63
+    },
+    "tests\\unit\\__pycache__\\test_integration_pipeline_robustness.cpython-314-pytest-7.4.3.pyc": {
+      "num_lines": 66
+    },
+    "tests\\unit\\__pycache__\\test_intelligent_routing.cpython-314-pytest-7.4.3.pyc": {
+      "num_lines": 86
+    },
+    "tests\\unit\\__pycache__\\test_message_extractor_compass.cpython-314-pytest-7.4.3.pyc": {
+      "num_lines": 272
+    },
+    "tests\\unit\\__pycache__\\test_models.cpython-314-pytest-7.4.3.pyc": {
+      "num_lines": 102
+    },
+    "tests\\unit\\__pycache__\\test_ner_plugin.cpython-314-pytest-9.0.1.pyc": {
+      "num_lines": 189
+    },
+    "tests\\unit\\__pycache__\\test_ner_plugin_unit.cpython-314-pytest-7.4.3.pyc": {
+      "num_lines": 190
+    },
+    "tests\\unit\\__pycache__\\test_ner_plugin_unit.cpython-314-pytest-8.4.2.pyc": {
+      "num_lines": 188
+    },
+    "tests\\unit\\__pycache__\\test_ner_plugin_unit.cpython-314-pytest-9.0.1.pyc": {
+      "num_lines": 188
+    },
+    "tests\\unit\\__pycache__\\test_ner_service.cpython-314-pytest-7.4.3.pyc": {
+      "num_lines": 326
+    },
+    "tests\\unit\\__pycache__\\test_ner_service.cpython-314-pytest-8.4.2.pyc": {
+      "num_lines": 326
+    },
+    "tests\\unit\\__pycache__\\test_ner_service.cpython-314-pytest-9.0.1.pyc": {
+      "num_lines": 326
+    },
+    "tests\\unit\\__pycache__\\test_ner_service_coverage.cpython-314-pytest-7.4.3.pyc": {
+      "num_lines": 274
+    },
+    "tests\\unit\\__pycache__\\test_pattern_engine.cpython-314-pytest-7.4.3.pyc": {
+      "num_lines": 438
+    },
+    "tests\\unit\\__pycache__\\test_pattern_engine.cpython-314-pytest-8.4.2.pyc": {
+      "num_lines": 369
+    },
+    "tests\\unit\\__pycache__\\test_pattern_engine.cpython-314-pytest-9.0.1.pyc": {
+      "num_lines": 369
+    },
+    "tests\\unit\\__pycache__\\test_pattern_engine_rag.cpython-314-pytest-7.4.3.pyc": {
+      "num_lines": 65
+    },
+    "tests\\unit\\__pycache__\\test_pattern_engine_rag.cpython-314-pytest-8.4.2.pyc": {
+      "num_lines": 65
+    },
+    "tests\\unit\\__pycache__\\test_pattern_engine_rag.cpython-314-pytest-9.0.1.pyc": {
+      "num_lines": 65
+    },
+    "tests\\unit\\__pycache__\\test_relationship_analyzer.cpython-314-pytest-7.4.3.pyc": {
+      "num_lines": 191
+    },
+    "tests\\unit\\__pycache__\\test_relationship_analyzer.cpython-314-pytest-8.4.2.pyc": {
+      "num_lines": 191
+    },
+    "tests\\unit\\__pycache__\\test_relationship_analyzer.cpython-314-pytest-9.0.1.pyc": {
+      "num_lines": 191
+    },
+    "tests\\unit\\__pycache__\\test_relationship_analyzer_rag.cpython-314-pytest-7.4.3.pyc": {
+      "num_lines": 161
+    },
+    "tests\\unit\\__pycache__\\test_relationship_analyzer_rag.cpython-314-pytest-8.4.2.pyc": {
+      "num_lines": 159
+    },
+    "tests\\unit\\__pycache__\\test_relationship_analyzer_rag.cpython-314-pytest-9.0.1.pyc": {
+      "num_lines": 159
+    },
+    "tests\\unit\\__pycache__\\test_retrieval_service.cpython-314-pytest-7.4.3.pyc": {
+      "num_lines": 91
+    },
+    "tests\\unit\\__pycache__\\test_retrieval_service.cpython-314-pytest-8.4.2.pyc": {
+      "num_lines": 91
+    },
+    "tests\\unit\\__pycache__\\test_retrieval_service.cpython-314-pytest-9.0.1.pyc": {
+      "num_lines": 91
+    },
+    "tests\\unit\\__pycache__\\test_rules_engine.cpython-314-pytest-7.4.3.pyc": {
+      "num_lines": 214
+    },
+    "tests\\unit\\__pycache__\\test_rules_engine.cpython-314-pytest-8.4.2.pyc": {
+      "num_lines": 214
+    },
+    "tests\\unit\\__pycache__\\test_rules_engine.cpython-314-pytest-9.0.1.pyc": {
+      "num_lines": 214
+    },
+    "tests\\unit\\__pycache__\\test_scenario_analyzer.cpython-314-pytest-7.4.3.pyc": {
+      "num_lines": 325
+    },
+    "tests\\unit\\__pycache__\\test_scenario_analyzer.cpython-314-pytest-8.4.2.pyc": {
+      "num_lines": 327
+    },
+    "tests\\unit\\__pycache__\\test_scenario_analyzer.cpython-314-pytest-9.0.1.pyc": {
+      "num_lines": 327
+    },
+    "tests\\unit\\__pycache__\\test_services.cpython-314-pytest-7.4.3.pyc": {
+      "num_lines": 157
+    },
+    "tests\\unit\\__pycache__\\test_vision_bridge.cpython-314-pytest-7.4.3.pyc": {
+      "num_lines": 86
+    },
+    "tests\\unit\\__pycache__\\__init__.cpython-314.pyc": {
+      "num_lines": 3
+    },
+    "tests\\unit\\plugins\\__pycache__\\test_plugins.cpython-314-pytest-7.4.3.pyc": {
+      "num_lines": 41
+    },
+    "tests\\unit\\plugins\\__pycache__\\test_plugins.cpython-314-pytest-8.4.2.pyc": {
+      "num_lines": 41
+    },
+    "tests\\unit\\plugins\\__pycache__\\test_plugins.cpython-314-pytest-9.0.1.pyc": {
+      "num_lines": 41
+    },
+    "tests\\unit\\plugins\\__pycache__\\test_plugins.cpython-314.pyc": {
+      "num_lines": 28
+    },
+    "tests\\unit\\database\\__pycache__\\test_migrations.cpython-314-pytest-7.4.3.pyc": {
+      "num_lines": 33
+    },
+    "tests\\unit\\database\\__pycache__\\test_migrations.cpython-314-pytest-8.4.2.pyc": {
+      "num_lines": 33
+    },
+    "tests\\unit\\database\\__pycache__\\test_migrations.cpython-314-pytest-9.0.1.pyc": {
+      "num_lines": 33
+    },
+    "tests\\unit\\core\\__pycache__\\test_security.cpython-314-pytest-7.4.3.pyc": {
+      "num_lines": 63
+    },
+    "tests\\unit\\core\\__pycache__\\test_security.cpython-314-pytest-8.4.2.pyc": {
+      "num_lines": 63
+    },
+    "tests\\unit\\core\\__pycache__\\test_security.cpython-314-pytest-9.0.1.pyc": {
+      "num_lines": 63
+    },
+    "tests\\unit\\cli\\__pycache__\\test_cli.cpython-314-pytest-7.4.3.pyc": {
+      "num_lines": 204
+    },
+    "tests\\unit\\cli\\__pycache__\\test_cli.cpython-314-pytest-8.4.2.pyc": {
+      "num_lines": 208
+    },
+    "tests\\unit\\cli\\__pycache__\\test_cli.cpython-314-pytest-9.0.1.pyc": {
+      "num_lines": 208
+    },
+    "tests\\unit\\api\\__pycache__\\test_middleware.cpython-314-pytest-7.4.3.pyc": {
+      "num_lines": 75
+    },
+    "tests\\unit\\api\\__pycache__\\test_middleware.cpython-314-pytest-8.4.2.pyc": {
+      "num_lines": 75
+    },
+    "tests\\unit\\api\\__pycache__\\test_middleware.cpython-314-pytest-9.0.1.pyc": {
+      "num_lines": 75
+    },
+    "tests\\unit\\api\\__pycache__\\test_server.cpython-314-pytest-7.4.3.pyc": {
+      "num_lines": 23
+    },
+    "tests\\unit\\api\\__pycache__\\test_server.cpython-314-pytest-8.4.2.pyc": {
+      "num_lines": 23
+    },
+    "tests\\unit\\api\\__pycache__\\test_server.cpython-314-pytest-9.0.1.pyc": {
+      "num_lines": 23
+    },
+    "tests\\integration\\api\\test_health.py": {
+      "num_lines": 13
+    },
+    "tests\\integration\\api\\test_inject.py": {
+      "num_lines": 13
+    },
+    "tests\\integration\\api\\test_metrics.py": {
+      "num_lines": 9
+    },
+    "tests\\integration\\api\\test_middleware_and_dependencies.py": {
+      "num_lines": 8
+    },
+    "tests\\integration\\api\\test_users_router.py": {
+      "num_lines": 78
+    },
+    "tests\\integration\\__pycache__\\test_application.cpython-314-pytest-7.4.3.pyc": {
+      "num_lines": 85
+    },
+    "tests\\integration\\__pycache__\\test_application.cpython-314-pytest-8.4.2.pyc": {
+      "num_lines": 85
+    },
+    "tests\\integration\\__pycache__\\test_application.cpython-314-pytest-9.0.1.pyc": {
+      "num_lines": 85
+    },
+    "tests\\integration\\__pycache__\\test_core_integration.cpython-314-pytest-7.4.3.pyc": {
+      "num_lines": 37
+    },
+    "tests\\integration\\__pycache__\\test_integration.cpython-314-pytest-7.4.3.pyc": {
+      "num_lines": 53
+    },
+    "tests\\integration\\__pycache__\\test_ner_api.cpython-314-pytest-7.4.3.pyc": {
+      "num_lines": 95
+    },
+    "tests\\integration\\__pycache__\\test_ner_api.cpython-314-pytest-8.4.2.pyc": {
+      "num_lines": 95
+    },
+    "tests\\integration\\__pycache__\\test_ner_api.cpython-314-pytest-9.0.1.pyc": {
+      "num_lines": 95
+    },
+    "tests\\integration\\__pycache__\\test_ner_plugin.cpython-314-pytest-7.4.3.pyc": {
+      "num_lines": 49
+    },
+    "tests\\integration\\__pycache__\\test_ner_plugin.cpython-314-pytest-8.4.2.pyc": {
+      "num_lines": 49
+    },
+    "tests\\integration\\__pycache__\\test_ner_plugin.cpython-314-pytest-9.0.1.pyc": {
+      "num_lines": 49
+    },
+    "tests\\integration\\__pycache__\\test_relationship_judgment.cpython-314-pytest-7.4.3.pyc": {
+      "num_lines": 61
+    },
+    "tests\\integration\\__pycache__\\test_relationship_judgment.cpython-314-pytest-8.4.2.pyc": {
+      "num_lines": 61
+    },
+    "tests\\integration\\__pycache__\\test_relationship_judgment.cpython-314-pytest-9.0.1.pyc": {
+      "num_lines": 61
+    },
+    "tests\\integration\\__pycache__\\test_vision_comedy_integration.cpython-314-pytest-7.4.3.pyc": {
+      "num_lines": 285
+    },
+    "tests\\integration\\__pycache__\\__init__.cpython-314.pyc": {
+      "num_lines": 3
+    },
+    "tests\\integration\\api\\__pycache__\\test_health.cpython-314-pytest-7.4.3.pyc": {
+      "num_lines": 21
+    },
+    "tests\\integration\\api\\__pycache__\\test_health.cpython-314-pytest-8.4.2.pyc": {
+      "num_lines": 21
+    },
+    "tests\\integration\\api\\__pycache__\\test_health.cpython-314-pytest-9.0.1.pyc": {
+      "num_lines": 21
+    },
+    "tests\\integration\\api\\__pycache__\\test_inject.cpython-314-pytest-7.4.3.pyc": {
+      "num_lines": 20
+    },
+    "tests\\integration\\api\\__pycache__\\test_inject.cpython-314-pytest-8.4.2.pyc": {
+      "num_lines": 21
+    },
+    "tests\\integration\\api\\__pycache__\\test_inject.cpython-314-pytest-9.0.1.pyc": {
+      "num_lines": 21
+    },
+    "tests\\integration\\api\\__pycache__\\test_metrics.cpython-314-pytest-7.4.3.pyc": {
+      "num_lines": 26
+    },
+    "tests\\integration\\api\\__pycache__\\test_metrics.cpython-314-pytest-8.4.2.pyc": {
+      "num_lines": 26
+    },
+    "tests\\integration\\api\\__pycache__\\test_metrics.cpython-314-pytest-9.0.1.pyc": {
+      "num_lines": 26
+    },
+    "tests\\integration\\api\\__pycache__\\test_middleware_and_dependencies.cpython-314-pytest-7.4.3.pyc": {
+      "num_lines": 10
+    },
+    "tests\\integration\\api\\__pycache__\\test_middleware_and_dependencies.cpython-314-pytest-8.4.2.pyc": {
+      "num_lines": 10
+    },
+    "tests\\integration\\api\\__pycache__\\test_middleware_and_dependencies.cpython-314-pytest-9.0.1.pyc": {
+      "num_lines": 10
+    },
+    "tests\\integration\\api\\__pycache__\\test_users_router.cpython-314-pytest-7.4.3.pyc": {
+      "num_lines": 38
+    },
+    "tests\\integration\\api\\__pycache__\\test_users_router.cpython-314-pytest-8.4.2.pyc": {
+      "num_lines": 38
+    },
+    "tests\\integration\\api\\__pycache__\\test_users_router.cpython-314-pytest-9.0.1.pyc": {
+      "num_lines": 38
+    },
+    "tests\\e2e\\__pycache__\\test_e2e.cpython-314-pytest-7.4.3.pyc": {
+      "num_lines": 32
+    },
+    "tests\\e2e\\__pycache__\\__init__.cpython-314.pyc": {
+      "num_lines": 3
+    },
+    "docs\\api.md": {
+      "num_lines": 860
+    },
+    "docs\\architecture.md": {
+      "num_lines": 321
+    },
+    "docs\\cd-checkpoints.md": {
+      "num_lines": 101
+    },
+    "docs\\client_report.txt": {
+      "num_lines": 33
+    },
+    "docs\\CLI_IMPLEMENTATION.md": {
+      "num_lines": 496
+    },
+    "docs\\CLI_QUICK_REFERENCE.md": {
+      "num_lines": 256
+    },
+    "docs\\CLI_REFERENCE.md": {
+      "num_lines": 602
+    },
+    "docs\\CLI_USAGE.md": {
+      "num_lines": 443
+    },
+    "docs\\cognition-grid.md": {
+      "num_lines": 103
+    },
+    "docs\\Competitive Analysis and Strategic Patterns for Grid.txt": {
+      "num_lines": 408
+    },
+    "docs\\Competitive Strategy and Product De.txt": {
+      "num_lines": 1
+    },
+    "docs\\COMPONENTS_REFERENCE.md": {
+      "num_lines": 303
+    },
+    "docs\\consistency_patch_plan.md": {
+      "num_lines": 32
+    },
+    "docs\\context_features.md": {
+      "num_lines": 204
+    },
+    "docs\\contribution_tracker.md": {
+      "num_lines": 45
+    },
+    "docs\\Core_Component_Integration_Guide.md": {
+      "num_lines": 110
+    },
+    "docs\\final_all_output.txt": {
+      "num_lines": 487
+    },
+    "docs\\final_test_output.txt": {
+      "num_lines": 651
+    },
+    "docs\\getting-started.md": {
+      "num_lines": 212
+    },
+    "docs\\git_history.txt": {
+      "num_lines": 1
+    },
+    "docs\\global_layer.md": {
+      "num_lines": 183
+    },
+    "docs\\grid.log": {
+      "num_lines": 53
+    },
+    "docs\\grid_concept.md": {
+      "num_lines": 140
+    },
+    "docs\\grid_explorations.txt": {
+      "num_lines": 32
+    },
+    "docs\\GRID_VISION_INTEGRATION_REPORT.md": {
+      "num_lines": 231
+    },
+    "docs\\HOLISTIC_VALIDATION_REPORT.md": {
+      "num_lines": 27
+    },
+    "docs\\IMPLEMENTATION_COMPLETE.md": {
+      "num_lines": 414
+    },
+    "docs\\implementation_plan.md": {
+      "num_lines": 185
+    },
+    "docs\\INTEGRATION_COMPLETE.md": {
+      "num_lines": 282
+    },
+    "docs\\INTEGRATION_PLAN.md": {
+      "num_lines": 78
+    },
+    "docs\\JUNG_COLLABORATIVE_RESEARCH_PLAN.md": {
+      "num_lines": 128
+    },
+    "docs\\JUNG_INTERVIEW_ANALYSIS.md": {
+      "num_lines": 64
+    },
+    "docs\\JUNG_SUBTLE_CUE_ANALYSIS_TASK.md": {
+      "num_lines": 120
+    },
+    "docs\\llm_behavior_analysis.md": {
+      "num_lines": 153
+    },
+    "docs\\MICRO_UBI_INTEGRATION.md": {
+      "num_lines": 561
+    },
+    "docs\\my_acknowledgements.txt": {
+      "num_lines": 16
+    },
+    "docs\\ner_output.txt": {
+      "num_lines": 519
+    },
+    "docs\\pattern_language.md": {
+      "num_lines": 77
+    },
+    "docs\\perspective_flip_example.md": {
+      "num_lines": 76
+    },
+    "docs\\pytest_debug.log": {
+      "num_lines": 181
+    },
+    "docs\\pytest_debug.txt": {
+      "num_lines": 181
+    },
+    "docs\\QUICKSTART.md": {
+      "num_lines": 181
+    },
+    "docs\\README.md": {
+      "num_lines": 357
+    },
+    "docs\\realtime_glimpse_journal_2025-11-23.md": {
+      "num_lines": 7
+    },
+    "docs\\relationship_analyzer_design.md": {
+      "num_lines": 433
+    },
+    "docs\\relationship_journal.md": {
+      "num_lines": 60
+    },
+    "docs\\relationship_judgment.md": {
+      "num_lines": 352
+    },
+    "docs\\rel_output.txt": {
+      "num_lines": 289
+    },
+    "docs\\requirements.txt": {
+      "num_lines": 31
+    },
+    "docs\\rules_output.txt": {
+      "num_lines": 223
+    },
+    "docs\\STRUCTURE_GUIDE.md": {
+      "num_lines": 215
+    },
+    "docs\\test-coverage.md": {
+      "num_lines": 163
+    },
+    "docs\\test_output.txt": {
+      "num_lines": 535
+    },
+    "docs\\test_output_2.txt": {
+      "num_lines": 225
+    },
+    "docs\\test_output_phase1.txt": {
+      "num_lines": 271
+    },
+    "docs\\test_results.txt": {
+      "num_lines": 571
+    },
+    "docs\\TEXT_vs_IMAGE_ANALYSIS_COMPARISON.md": {
+      "num_lines": 81
+    },
+    "docs\\This document includes.txt": {
+      "num_lines": 314
+    },
+    "docs\\unified-environment.md": {
+      "num_lines": 188
+    },
+    "docs\\users_output.txt": {
+      "num_lines": 203
+    },
+    "docs\\we_definition.md": {
+      "num_lines": 42
+    },
+    "docs\\WINDOWS_INSTALL.md": {
+      "num_lines": 65
+    },
+    "docs\\contributions\\2025-11-27_contribution_log.md": {
+      "num_lines": 73
+    },
+    "docs\\events\\2025-11-27_unified_event_snapshot.md": {
+      "num_lines": 192
+    },
+    "docs\\journal\\idea_2025-11-23.md": {
+      "num_lines": 20
+    },
+    "docs\\research\\clarity.md": {
+      "num_lines": 1
+    },
+    "docs\\research\\competitor_scope.md": {
+      "num_lines": 71
+    },
+    "docs\\research\\context_grid_throughput.md": {
+      "num_lines": 39
+    },
+    "docs\\research\\k1_cognitive_vectors.md": {
+      "num_lines": 149
+    },
+    "docs\\research\\research_brief_competitors.md": {
+      "num_lines": 92
+    },
+    "docs\\visual_references\\blue_spatial.png": {
+      "num_lines": 5674
+    },
+    "docs\\visual_references\\Centralize communication through a VPC Transit Hub and Spoke architecture - Part one _ IBM Cloud Docs.pdf": {
+      "num_lines": 19501
+    },
+    "docs\\visual_references\\gold_combination.png": {
+      "num_lines": 6641
+    },
+    "docs\\visual_references\\green_flow.png": {
+      "num_lines": 5299
+    },
+    "docs\\visual_references\\orange_light.png": {
+      "num_lines": 4727
+    },
+    "docs\\visual_references\\patterns.md": {
+      "num_lines": 59
+    },
+    "docs\\visual_references\\purple_repetition.png": {
+      "num_lines": 4960
+    },
+    "docs\\visual_references\\red_deviation.png": {
+      "num_lines": 5138
+    },
+    "docs\\visual_references\\silver_temporal.png": {
+      "num_lines": 4701
+    },
+    "docs\\visual_references\\teal_cause.png": {
+      "num_lines": 5450
+    },
+    "docs\\visual_references\\yellow_rhythms.png": {
+      "num_lines": 5853
+    }
+  },
+  "decisions": []
+}

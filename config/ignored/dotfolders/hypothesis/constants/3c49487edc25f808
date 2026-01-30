@@ -1,0 +1,4 @@
+# file: E:\grid\grid\prompts\models.py
+# hypothesis_version: 6.150.0
+
+[0.0, 0.1, 1.0, 'Additional context', 'Additional metadata', 'Context for prompt', 'Domain context', 'Last usage timestamp', 'Operation type', 'Organization context', 'Prompt content', 'Prompt description', 'Prompt name', 'Prompt priority', 'Prompt source', 'Session context', 'Success rate (0-1)', 'User context', 'critical', 'derived', 'high', 'low', 'medium', 'org_default', 'system_default', 'template', 'user_custom']

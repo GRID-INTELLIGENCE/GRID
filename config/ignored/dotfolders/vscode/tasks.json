@@ -1,0 +1,206 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "🧠 Brain · Seed Validation",
+            "type": "shell",
+            "command": "uv run python scripts/validate_seed.py",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "focus": true
+            }
+        },
+        {
+            "label": "⚓ Hook · Install Pre-push",
+            "type": "shell",
+            "command": "powershell -Command \"Copy-Item scripts/hooks/pre-push-evolved .git/hooks/pre-push; git update-index --chmod=+x .git/hooks/pre-push\"",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "🔍 RAG · Query",
+            "type": "shell",
+            "command": "uv run python -m tools.rag.cli query",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "focus": true
+            }
+        },
+        {
+            "label": "🧪 Tests · Run All (Full Suite)",
+            "type": "shell",
+            "command": "make test",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "📊 RAG · Index Docs",
+            "type": "shell",
+            "command": "uv run python -m tools.rag.cli index docs/",
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "📈 Monitoring · Live CI Status",
+            "type": "shell",
+            "command": "make watch-ci",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            }
+        },
+        {
+            "label": "🐳 Monitoring · Docker Build",
+            "type": "shell",
+            "command": "make watch-docker",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            }
+        },
+        {
+            "label": "🛰️ PULSAR · Dashboard",
+            "type": "shell",
+            "command": "powershell scripts/start_pulsar.ps1",
+            "group": "build",
+            "presentation": {
+                "reveal": "silent",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "⚡ Stress · Run Async Harness",
+            "type": "shell",
+            "command": "uv run python tests/async_stress_harness.py --concurrency 100 --repeats 10 --save-latencies",
+            "group": "test",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            }
+        },
+        {
+            "label": "📈 Bench · Research Benchmarks",
+            "type": "shell",
+            "command": "uv run pytest tests/test_grid_benchmark.py -v",
+            "group": "test",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "🎯 Format · Full Project",
+            "type": "shell",
+            "command": "make format",
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "✏️  Lint · Project Checks",
+            "type": "shell",
+            "command": "make lint",
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "🔄 Git · Topic Branch Create",
+            "type": "shell",
+            "command": "uv run python scripts/git-topic create --theme feature --short describe-your-feature --issue 999",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "📂 Repo · Check File Structure",
+            "type": "shell",
+            "command": "echo '=== GRID Project Structure ===' && find . -maxdepth 2 -type d -not -path '*/\\.*' | sort",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "📈 System · Vitals",
+            "type": "shell",
+            "command": "uv run python -c \"import psutil, time; [print(f'CPU: {psutil.cpu_percent()}% | MEM: {psutil.virtual_memory().percent}%') or time.sleep(1) for _ in range(30)]\"",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            }
+        },
+        {
+            "label": "🧘 Zen · Focus Tips",
+            "type": "shell",
+            "command": "echo '🧘 ZEN MODE TIP: Press Ctrl+K Z to toggle Zen Mode. Keep max 5 tabs open. Take breaks every 50 min.'",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "📋 Reorganization · View Manifest",
+            "type": "shell",
+            "command": "cat data/reorganization_manifest.json | python -m json.tool | head -100",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        }
+    ],
+    "presets": [
+        {
+            "name": "Analog_Bass",
+            "exposed_params": [
+                "filter_cutoff",
+                "env_decay",
+                "sub_level"
+            ]
+        },
+        {
+            "name": "Pluck_Arp",
+            "exposed_params": [
+                "arp_rate",
+                "filter_env",
+                "delay_feedback"
+            ]
+        },
+        {
+            "name": "Wide_Pad",
+            "exposed_params": [
+                "reverb_size",
+                "chorus_rate",
+                "lfo_amount"
+            ]
+        }
+    ]
+}

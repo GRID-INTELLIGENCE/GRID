@@ -1,0 +1,611 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://grid-project.org/schemas/structural-intelligence/mission-control.json",
+  "title": "GRID Mission Control - Structural Intelligence Interface",
+  "description": "Configuration for an intelligent workspace interface providing real-time status, progress, roadmap, warnings, and strategic intelligence",
+  "version": "1.0.0",
+  "system": {
+    "name": "GRID Mission Control",
+    "codename": "Atmosphere Integration",
+    "description": "A structural intelligence layer that transforms the workspace into a smart, self-aware interface providing developers with real-time insights, status updates, progress tracking, and proactive guidance",
+    "architecture": {
+      "pattern": "Event-Driven Cockpit",
+      "influences": [
+        "Continue.dev Mission Control - AI workflow orchestration",
+        "WakaTime - Real-time productivity metrics",
+        "CodeScene - Code health biomarkers",
+        "SonarQube - Architecture as Code",
+        "Mothership Cockpit - Session and operation lifecycle management"
+      ],
+      "core_components": [
+        "StatusMonitor",
+        "ProgressTracker",
+        "RoadmapEngine",
+        "AlertSystem",
+        "StrategicIntelligence"
+      ]
+    }
+  },
+  "intelligence_layers": {
+    "layer_1_awareness": {
+      "name": "System Awareness Layer",
+      "purpose": "Real-time monitoring of workspace state and health",
+      "capabilities": [
+        "File system change detection",
+        "Git status monitoring",
+        "Test execution tracking",
+        "Build status monitoring",
+        "Dependency health checks"
+      ],
+      "data_sources": [
+        "VS Code file system API",
+        "Git integration",
+        "Terminal output parsing",
+        "Extension APIs",
+        "Diagnostic providers"
+      ]
+    },
+    "layer_2_analysis": {
+      "name": "Analysis & Pattern Recognition Layer",
+      "purpose": "Analyze events and identify patterns, anomalies, and opportunities",
+      "capabilities": [
+        "Code health scoring (biomarkers)",
+        "Technical debt detection",
+        "Hotspot identification",
+        "Change coupling analysis",
+        "Complexity trend tracking"
+      ],
+      "algorithms": [
+        "EQ-Spectrum weighted analysis",
+        "Heuristic pattern matching",
+        "Semantic code analysis",
+        "Temporal pattern detection"
+      ]
+    },
+    "layer_3_prediction": {
+      "name": "Predictive Intelligence Layer",
+      "purpose": "Forecast issues, suggest improvements, and optimize workflow",
+      "capabilities": [
+        "Risk prediction for code changes",
+        "Bottleneck forecasting",
+        "Resource optimization suggestions",
+        "Timeline estimation",
+        "Quality gate predictions"
+      ],
+      "models": [
+        "Historical pattern analysis",
+        "Complexity-based estimation",
+        "Dependency impact modeling"
+      ]
+    },
+    "layer_4_action": {
+      "name": "Action & Automation Layer",
+      "purpose": "Transform insights into actionable guidance and automated fixes",
+      "capabilities": [
+        "Automated code formatting",
+        "Suggested refactorings",
+        "One-click issue resolution",
+        "Workflow automation triggers",
+        "Strategic recommendation generation"
+      ]
+    }
+  },
+  "dashboard_panels": {
+    "status_panel": {
+      "id": "status-overview",
+      "name": "🌐 System Status",
+      "description": "Real-time health and status of all GRID systems",
+      "location": "sidebar-top",
+      "refresh_interval_ms": 5000,
+      "widgets": [
+        {
+          "id": "health-indicator",
+          "type": "status-badge",
+          "label": "System Health",
+          "states": ["healthy", "degraded", "critical", "offline"],
+          "colors": {
+            "healthy": "#10B981",
+            "degraded": "#FACC15",
+            "critical": "#EF4444",
+            "offline": "#6B7280"
+          }
+        },
+        {
+          "id": "active-sessions",
+          "type": "counter",
+          "label": "Active Sessions",
+          "source": "mothership.sessions.active"
+        },
+        {
+          "id": "running-operations",
+          "type": "counter",
+          "label": "Running Operations",
+          "source": "mothership.operations.running"
+        },
+        {
+          "id": "component-health",
+          "type": "health-grid",
+          "label": "Components",
+          "source": "mothership.components"
+        }
+      ]
+    },
+    "progress_panel": {
+      "id": "progress-tracker",
+      "name": "📊 Progress & Metrics",
+      "description": "Track development progress, productivity, and milestones",
+      "location": "sidebar-middle",
+      "refresh_interval_ms": 30000,
+      "widgets": [
+        {
+          "id": "daily-progress",
+          "type": "progress-ring",
+          "label": "Today's Progress",
+          "metrics": ["commits", "tests_passed", "issues_resolved", "code_reviews"]
+        },
+        {
+          "id": "sprint-burndown",
+          "type": "chart-line",
+          "label": "Sprint Burndown",
+          "timeframe": "current_sprint"
+        },
+        {
+          "id": "code-health-trend",
+          "type": "sparkline",
+          "label": "Code Health Trend",
+          "source": "codescene.health_score",
+          "timeframe": "7d"
+        },
+        {
+          "id": "test-coverage",
+          "type": "gauge",
+          "label": "Test Coverage",
+          "source": "pytest.coverage_percent",
+          "thresholds": {"red": 60, "yellow": 80, "green": 90}
+        },
+        {
+          "id": "productivity-stats",
+          "type": "stat-group",
+          "label": "Productivity",
+          "stats": [
+            {"id": "lines_added", "label": "Lines Added", "icon": "➕"},
+            {"id": "lines_removed", "label": "Lines Removed", "icon": "➖"},
+            {"id": "files_touched", "label": "Files Touched", "icon": "📄"},
+            {"id": "active_time", "label": "Active Time", "icon": "⏱️"}
+          ]
+        }
+      ]
+    },
+    "alerts_panel": {
+      "id": "alerts-warnings",
+      "name": "⚠️ Alerts & Warnings",
+      "description": "Proactive alerts for issues, risks, and opportunities",
+      "location": "sidebar-bottom",
+      "refresh_interval_ms": 10000,
+      "severity_levels": [
+        {"id": "critical", "icon": "🔴", "color": "#EF4444", "priority": 1},
+        {"id": "high", "icon": "🟠", "color": "#F97316", "priority": 2},
+        {"id": "medium", "icon": "🟡", "color": "#FACC15", "priority": 3},
+        {"id": "low", "icon": "🔵", "color": "#3B82F6", "priority": 4},
+        {"id": "info", "icon": "⚪", "color": "#9CA3AF", "priority": 5}
+      ],
+      "alert_types": [
+        {
+          "id": "integration_mismatch",
+          "name": "Integration Mismatch",
+          "source": "integration_inbox",
+          "description": "JSON handshake or API contract violations"
+        },
+        {
+          "id": "test_failure",
+          "name": "Test Failure",
+          "source": "pytest",
+          "description": "Test suite failures requiring attention"
+        },
+        {
+          "id": "lint_error",
+          "name": "Lint Error",
+          "source": "ruff",
+          "description": "Code quality issues detected"
+        },
+        {
+          "id": "security_vulnerability",
+          "name": "Security Alert",
+          "source": "dependabot",
+          "description": "Security vulnerabilities in dependencies"
+        },
+        {
+          "id": "guardrail_violation",
+          "name": "Guardrail Violation",
+          "source": "master_workflow",
+          "description": "Violations of canon policy or governance rules"
+        },
+        {
+          "id": "performance_degradation",
+          "name": "Performance Issue",
+          "source": "benchmark",
+          "description": "Performance regressions detected"
+        },
+        {
+          "id": "code_health_decline",
+          "name": "Code Health Decline",
+          "source": "codescene",
+          "description": "Declining code health in hotspots"
+        }
+      ],
+      "widgets": [
+        {
+          "id": "alert-list",
+          "type": "alert-list",
+          "max_display": 10,
+          "actions": ["acknowledge", "snooze", "resolve", "investigate"]
+        },
+        {
+          "id": "alert-summary",
+          "type": "alert-counter",
+          "group_by": "severity"
+        }
+      ]
+    },
+    "roadmap_panel": {
+      "id": "roadmap-strategy",
+      "name": "🗺️ Roadmap & Strategy",
+      "description": "Project roadmap, milestones, and strategic alliances",
+      "location": "panel-right",
+      "refresh_interval_ms": 60000,
+      "widgets": [
+        {
+          "id": "current-milestone",
+          "type": "milestone-card",
+          "label": "Current Milestone",
+          "fields": ["name", "due_date", "progress_percent", "blockers"]
+        },
+        {
+          "id": "upcoming-milestones",
+          "type": "timeline",
+          "label": "Upcoming Milestones",
+          "timeframe": "90d",
+          "max_items": 5
+        },
+        {
+          "id": "strategic-goals",
+          "type": "goal-list",
+          "label": "Strategic Goals",
+          "categories": ["technical", "product", "team", "integration"]
+        },
+        {
+          "id": "dependency-status",
+          "type": "dependency-graph",
+          "label": "External Dependencies",
+          "show_health": true
+        },
+        {
+          "id": "strategic-alliances",
+          "type": "alliance-list",
+          "label": "Strategic Alliances",
+          "fields": ["partner", "integration_type", "status", "value_delivered"]
+        }
+      ]
+    },
+    "activity_panel": {
+      "id": "recent-activity",
+      "name": "📜 Recent Events",
+      "description": "What's happening now and recent history",
+      "location": "panel-bottom",
+      "refresh_interval_ms": 3000,
+      "widgets": [
+        {
+          "id": "activity-feed",
+          "type": "event-stream",
+          "label": "Live Activity",
+          "event_types": [
+            "file_save",
+            "git_commit",
+            "test_run",
+            "build_complete",
+            "deployment",
+            "alert_triggered",
+            "session_start",
+            "operation_complete"
+          ],
+          "max_items": 50
+        },
+        {
+          "id": "daily-summary",
+          "type": "summary-card",
+          "label": "Today's Summary",
+          "metrics": [
+            "commits_count",
+            "files_changed",
+            "tests_run",
+            "alerts_resolved",
+            "time_coded"
+          ]
+        }
+      ]
+    }
+  },
+  "data_integrations": {
+    "internal_sources": [
+      {
+        "id": "mothership_cockpit",
+        "name": "Mothership Cockpit",
+        "module": "application.mothership",
+        "provides": ["sessions", "operations", "components", "alerts", "health"],
+        "polling_interval_ms": 5000
+      },
+      {
+        "id": "integration_inbox",
+        "name": "Integration Inbox",
+        "module": "AGENT.integration_inbox",
+        "provides": ["integrations", "mismatches", "handshakes", "eq_analysis"],
+        "polling_interval_ms": 10000
+      },
+      {
+        "id": "master_workflow",
+        "name": "Master Workflow System",
+        "module": ".windsurf.workflows",
+        "provides": ["guardrails", "compliance", "workflow_status"],
+        "polling_interval_ms": 30000
+      },
+      {
+        "id": "circuits_api",
+        "name": "Circuits API",
+        "module": "circuits",
+        "provides": ["decision_engine", "eq_processor", "test_analyzer"],
+        "polling_interval_ms": 15000
+      }
+    ],
+    "external_sources": [
+      {
+        "id": "github",
+        "name": "GitHub",
+        "type": "oauth",
+        "provides": ["issues", "pull_requests", "actions", "discussions"],
+        "optional": true
+      },
+      {
+        "id": "sentry",
+        "name": "Sentry",
+        "type": "api_key",
+        "provides": ["errors", "performance", "releases"],
+        "optional": true
+      },
+      {
+        "id": "linear",
+        "name": "Linear",
+        "type": "api_key",
+        "provides": ["issues", "projects", "cycles", "roadmap"],
+        "optional": true
+      }
+    ],
+    "vscode_sources": [
+      {
+        "id": "diagnostics",
+        "name": "VS Code Diagnostics",
+        "api": "vscode.languages.getDiagnostics",
+        "provides": ["errors", "warnings", "hints"]
+      },
+      {
+        "id": "git",
+        "name": "Git Integration",
+        "api": "vscode.git",
+        "provides": ["status", "commits", "branches", "remotes"]
+      },
+      {
+        "id": "tasks",
+        "name": "Task Runner",
+        "api": "vscode.tasks",
+        "provides": ["task_status", "task_output"]
+      },
+      {
+        "id": "debug",
+        "name": "Debug Sessions",
+        "api": "vscode.debug",
+        "provides": ["active_sessions", "breakpoints", "call_stack"]
+      }
+    ]
+  },
+  "notification_channels": {
+    "in_workspace": {
+      "status_bar": {
+        "enabled": true,
+        "position": "right",
+        "priority": 100,
+        "shows": ["health", "alerts_count", "progress"]
+      },
+      "toast_notifications": {
+        "enabled": true,
+        "severity_threshold": "medium",
+        "auto_dismiss_ms": 5000
+      },
+      "webview_panel": {
+        "enabled": true,
+        "view_id": "grid.missionControl",
+        "title": "GRID Mission Control"
+      },
+      "tree_view": {
+        "enabled": true,
+        "view_id": "grid.statusTree",
+        "location": "explorer"
+      }
+    },
+    "external": {
+      "slack": {
+        "enabled": false,
+        "webhook_url": "${GRID_SLACK_WEBHOOK}",
+        "severity_threshold": "high"
+      },
+      "email": {
+        "enabled": false,
+        "severity_threshold": "critical"
+      },
+      "webhook": {
+        "enabled": false,
+        "url": "${GRID_NOTIFICATION_WEBHOOK}",
+        "severity_threshold": "medium"
+      }
+    }
+  },
+  "automation_rules": {
+    "auto_actions": [
+      {
+        "id": "auto_format_on_error",
+        "name": "Auto-format on lint error",
+        "trigger": {"event": "lint_error", "severity": "low"},
+        "action": "run_task",
+        "task": "Format: Ruff Format",
+        "enabled": true
+      },
+      {
+        "id": "auto_test_on_save",
+        "name": "Run related tests on save",
+        "trigger": {"event": "file_save", "pattern": "*.py"},
+        "action": "run_related_tests",
+        "enabled": false
+      },
+      {
+        "id": "alert_on_health_decline",
+        "name": "Alert on code health decline",
+        "trigger": {"event": "code_health_change", "direction": "decline", "threshold": 0.5},
+        "action": "create_alert",
+        "severity": "medium",
+        "enabled": true
+      },
+      {
+        "id": "notify_on_build_failure",
+        "name": "Notify on build failure",
+        "trigger": {"event": "build_complete", "status": "failure"},
+        "action": "send_notification",
+        "channel": "toast",
+        "enabled": true
+      }
+    ],
+    "scheduled_tasks": [
+      {
+        "id": "daily_health_report",
+        "name": "Generate daily health report",
+        "schedule": "0 9 * * 1-5",
+        "action": "generate_report",
+        "report_type": "daily_health",
+        "output": "reports/daily/"
+      },
+      {
+        "id": "weekly_roadmap_sync",
+        "name": "Sync roadmap with external tools",
+        "schedule": "0 10 * * 1",
+        "action": "sync_roadmap",
+        "sources": ["github", "linear"]
+      },
+      {
+        "id": "cleanup_old_alerts",
+        "name": "Cleanup resolved alerts",
+        "schedule": "0 0 * * *",
+        "action": "cleanup_alerts",
+        "age_days": 30
+      }
+    ]
+  },
+  "ui_configuration": {
+    "theme": {
+      "mode": "auto",
+      "colors": {
+        "primary": "#0078D4",
+        "secondary": "#FFB300",
+        "success": "#10B981",
+        "warning": "#FACC15",
+        "error": "#EF4444",
+        "info": "#3B82F6",
+        "background": "#0D1B2A",
+        "surface": "#1E303D",
+        "text_primary": "#D4D4D4",
+        "text_secondary": "#9D9D9D"
+      }
+    },
+    "layout": {
+      "sidebar_width": 300,
+      "panel_height": 200,
+      "compact_mode": false,
+      "show_icons": true,
+      "animations_enabled": true
+    },
+    "accessibility": {
+      "high_contrast_support": true,
+      "reduced_motion_support": true,
+      "screen_reader_labels": true
+    }
+  },
+  "persistence": {
+    "state_storage": {
+      "location": ".windsurf/structural-intelligence/state",
+      "format": "json",
+      "backup_enabled": true,
+      "max_backups": 7
+    },
+    "metrics_storage": {
+      "location": ".windsurf/structural-intelligence/metrics",
+      "retention_days": 90,
+      "aggregation_intervals": ["hourly", "daily", "weekly"]
+    },
+    "session_recovery": {
+      "enabled": true,
+      "save_interval_ms": 30000
+    }
+  },
+  "future_enhancements": {
+    "planned_features": [
+      {
+        "id": "ai_insights",
+        "name": "AI-Powered Insights",
+        "description": "Use LLMs to generate contextual insights and recommendations",
+        "status": "planned",
+        "priority": "high"
+      },
+      {
+        "id": "collaborative_dashboard",
+        "name": "Team Collaboration",
+        "description": "Share dashboard state and alerts with team members",
+        "status": "planned",
+        "priority": "medium"
+      },
+      {
+        "id": "custom_widgets",
+        "name": "Custom Widget Builder",
+        "description": "Allow users to create custom dashboard widgets",
+        "status": "backlog",
+        "priority": "low"
+      },
+      {
+        "id": "predictive_alerts",
+        "name": "Predictive Alerting",
+        "description": "Predict issues before they occur using ML models",
+        "status": "research",
+        "priority": "high"
+      },
+      {
+        "id": "voice_commands",
+        "name": "Voice Interface",
+        "description": "Control dashboard and get status updates via voice",
+        "status": "backlog",
+        "priority": "low"
+      }
+    ],
+    "integration_roadmap": [
+      {
+        "id": "jira_integration",
+        "name": "Jira Integration",
+        "target_version": "1.2.0"
+      },
+      {
+        "id": "datadog_integration",
+        "name": "Datadog Integration",
+        "target_version": "1.3.0"
+      },
+      {
+        "id": "pagerduty_integration",
+        "name": "PagerDuty Integration",
+        "target_version": "1.4.0"
+      }
+    ]
+  }
+}

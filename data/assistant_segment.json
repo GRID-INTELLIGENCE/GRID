@@ -1,0 +1,28 @@
+{
+  "id": "TranslatorAssistantSegment",
+  "type": "form",
+  "title": "Translator Assistant – Segment",
+  "fields": [
+    {
+      "name": "source",
+      "label": "Source Segment",
+      "type": "textarea",
+      "required": true,
+      "help": "Original slice of text."
+    },
+    {
+      "name": "result",
+      "label": "Result Segment",
+      "type": "textarea",
+      "required": true,
+      "help": "Transformed / bridged slice of text."
+    },
+    {
+      "name": "comment",
+      "label": "Comment",
+      "type": "text",
+      "required": false,
+      "help": "Optional note about this mapping."
+    }
+  ]
+}

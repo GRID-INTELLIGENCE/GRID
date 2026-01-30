@@ -1,0 +1,4 @@
+# file: E:\grid\application\mothership\services\billing\service.py
+# hypothesis_version: 6.150.0
+
+['amount_cents', 'description', 'draft', 'limits', 'period_days', 'tier', 'usage']

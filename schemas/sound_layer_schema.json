@@ -1,0 +1,498 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://grid.local/schemas/sound-layer/v1.json",
+  "title": "Grid Sound Layer Schema v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "envelope", "inputs", "outputs"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "sound-layer-v1"
+    },
+
+    "envelope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stream_id",
+        "created_at_ms",
+        "window_ms",
+        "sample_period_ms",
+        "timebase"
+      ],
+      "properties": {
+        "stream_id": { "type": "string", "minLength": 1 },
+        "created_at_ms": { "type": "integer", "minimum": 0 },
+        "window_ms": { "type": "integer", "minimum": 1, "description": "Aggregation window for SoundFrame inputs." },
+        "sample_period_ms": { "type": "integer", "minimum": 1, "description": "How often a SoundFrame is produced (e.g., every 200ms)." },
+        "timebase": {
+          "type": "string",
+          "enum": ["monotonic_ms", "unix_ms"],
+          "description": "Timestamp basis for frames/events."
+        },
+        "source": {
+          "type": "string",
+          "description": "Optional origin identifier (api, cli, sim, replay)."
+        }
+      }
+    },
+
+    "inputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["frame", "events"],
+      "properties": {
+        "frame": { "$ref": "#/$defs/SoundFrame" },
+        "events": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/SoundEvent" },
+          "description": "Discrete cues occurring within the current sample period."
+        }
+      }
+    },
+
+    "outputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mapping_spec", "render_plan"],
+      "properties": {
+        "mapping_spec": { "$ref": "#/$defs/SoundMappingSpec" },
+        "render_plan": { "$ref": "#/$defs/SoundRenderPlan" }
+      }
+    }
+  },
+
+  "$defs": {
+    "SoundFrame": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "t_ms",
+        "metrics",
+        "quality",
+        "provenance"
+      ],
+      "properties": {
+        "t_ms": { "type": "integer", "minimum": 0, "description": "Frame timestamp." },
+
+        "metrics": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "polarity_mean",
+            "polarity_variance",
+            "confidence_mean",
+            "risk_index",
+            "event_rate_per_s",
+            "deviation_rate_per_min",
+            "novelty_score"
+          ],
+          "properties": {
+            "polarity_mean": {
+              "type": "number",
+              "minimum": -1.0,
+              "maximum": 1.0,
+              "description": "Mean influence direction (adversarial ↔ supportive)."
+            },
+            "polarity_variance": {
+              "type": "number",
+              "minimum": 0.0,
+              "description": "Dispersion of polarity across evaluated relationships (>=0)."
+            },
+            "confidence_mean": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0,
+              "description": "Mean certainty of judgments."
+            },
+            "risk_index": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0,
+              "description": "Normalized risk (low=0, high=1)."
+            },
+            "event_rate_per_s": {
+              "type": "number",
+              "minimum": 0.0,
+              "description": "Information packet arrival rate."
+            },
+            "deviation_rate_per_min": {
+              "type": "number",
+              "minimum": 0.0,
+              "description": "Rate of deviation/pattern-break detections."
+            },
+            "novelty_score": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0,
+              "description": "How novel/unexpected recent info is (0=expected, 1=novel)."
+            }
+          }
+        },
+
+        "quality": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["coverage", "stability", "dropout"],
+          "properties": {
+            "coverage": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0,
+              "description": "How complete the underlying measurements are."
+            },
+            "stability": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0,
+              "description": "Smoothed stability estimate (1=stable)."
+            },
+            "dropout": {
+              "type": "boolean",
+              "description": "True if inputs were missing/partial for this frame."
+            }
+          }
+        },
+
+        "provenance": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["source_components", "entity_count", "pair_count"],
+          "properties": {
+            "source_components": {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 1,
+              "description": "Which subsystems contributed (ner, relationships, patterns, rag)."
+            },
+            "entity_count": { "type": "integer", "minimum": 0 },
+            "pair_count": { "type": "integer", "minimum": 0 },
+            "notes": { "type": "string" }
+          }
+        }
+      }
+    },
+
+    "SoundEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["t_ms", "kind", "salience", "payload"],
+      "properties": {
+        "t_ms": { "type": "integer", "minimum": 0 },
+
+        "kind": {
+          "type": "string",
+          "enum": [
+            "tick",
+            "state_transition",
+            "threshold_crossing",
+            "deviation_detected",
+            "novelty_spike",
+            "risk_spike",
+            "calm_stable",
+            "error"
+          ],
+          "description": "Discrete cue type."
+        },
+
+        "salience": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "How attention-grabbing this event should be (rate-limited by renderer)."
+        },
+
+        "payload": {
+          "type": "object",
+          "description": "Event-specific data. Keep small; reference IDs rather than embedding heavy blobs.",
+          "additionalProperties": true,
+          "properties": {
+            "label": { "type": "string" },
+            "metric": { "type": "string" },
+            "from": { "type": "number" },
+            "to": { "type": "number" },
+            "threshold": { "type": "number" },
+            "entity_ids": { "type": "array", "items": { "type": "string" } },
+            "relationship_ids": { "type": "array", "items": { "type": "string" } },
+            "error_code": { "type": "string" },
+            "error_message": { "type": "string" }
+          }
+        }
+      }
+    },
+
+    "SoundMappingSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "principles", "channels", "rate_limits"],
+      "properties": {
+        "version": { "type": "string", "const": "sound-mapping-v1" },
+
+        "principles": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["consistent_encoding", "normalized_scales", "uncertainty_is_a_signal"],
+          "properties": {
+            "consistent_encoding": { "type": "boolean", "const": true },
+            "normalized_scales": { "type": "boolean", "const": true },
+            "uncertainty_is_a_signal": { "type": "boolean", "const": true },
+            "notes": { "type": "string" }
+          }
+        },
+
+        "channels": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ambient", "foreground", "alerts"],
+          "properties": {
+            "ambient": { "$ref": "#/$defs/AmbientChannelSpec" },
+            "foreground": { "$ref": "#/$defs/ForegroundChannelSpec" },
+            "alerts": { "$ref": "#/$defs/AlertChannelSpec" }
+          }
+        },
+
+        "rate_limits": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["max_alerts_per_min", "max_foreground_events_per_s", "min_gap_ms_between_alerts"],
+          "properties": {
+            "max_alerts_per_min": { "type": "integer", "minimum": 0 },
+            "max_foreground_events_per_s": { "type": "number", "minimum": 0.0 },
+            "min_gap_ms_between_alerts": { "type": "integer", "minimum": 0 }
+          }
+        }
+      }
+    },
+
+    "AmbientChannelSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pitch", "loudness", "timbre", "stereo_pan"],
+      "properties": {
+        "pitch": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["metric", "mapping", "range_hz", "neutral_hz"],
+          "properties": {
+            "metric": { "type": "string", "const": "polarity_mean" },
+            "mapping": { "type": "string", "enum": ["linear", "log"] },
+            "range_hz": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": { "type": "number", "minimum": 20.0 },
+              "description": "Min/max pitch. Use log perceptual mapping in renderer."
+            },
+            "neutral_hz": { "type": "number", "minimum": 20.0 }
+          }
+        },
+        "loudness": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["metric", "range_db", "floor_db"],
+          "properties": {
+            "metric": { "type": "string", "const": "confidence_mean" },
+            "range_db": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": { "type": "number" }
+            },
+            "floor_db": { "type": "number", "description": "Silence floor used to avoid constant loudness." }
+          }
+        },
+        "timbre": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["metric", "mode"],
+          "properties": {
+            "metric": { "type": "string", "const": "risk_index" },
+            "mode": {
+              "type": "string",
+              "enum": ["sine_to_saw_mix", "lowpass_cutoff", "noise_mix"],
+              "description": "Renderer-specific timbre control mode."
+            }
+          }
+        },
+        "stereo_pan": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["metric", "mode"],
+          "properties": {
+            "metric": { "type": "string", "const": "polarity_mean" },
+            "mode": { "type": "string", "enum": ["centered", "polarity_left_right"] }
+          }
+        }
+      }
+    },
+
+    "ForegroundChannelSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rhythm", "tick_sound"],
+      "properties": {
+        "rhythm": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["metric", "mode", "max_hz"],
+          "properties": {
+            "metric": { "type": "string", "const": "event_rate_per_s" },
+            "mode": { "type": "string", "enum": ["pulse_density", "subdivisions"] },
+            "max_hz": { "type": "number", "minimum": 0.0, "description": "Cap to prevent overwhelm." }
+          }
+        },
+        "tick_sound": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["waveform", "duration_ms", "base_pitch_hz"],
+          "properties": {
+            "waveform": { "type": "string", "enum": ["click", "short_sine", "woodblock", "noise_tick"] },
+            "duration_ms": { "type": "integer", "minimum": 1, "maximum": 500 },
+            "base_pitch_hz": { "type": "number", "minimum": 20.0 }
+          }
+        }
+      }
+    },
+
+    "AlertChannelSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kinds", "severity_to_sound"],
+      "properties": {
+        "kinds": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": ["threshold_crossing", "deviation_detected", "novelty_spike", "risk_spike", "error"]
+          }
+        },
+        "severity_to_sound": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mode", "min_duration_ms", "max_duration_ms"],
+          "properties": {
+            "mode": { "type": "string", "enum": ["interval", "chord", "sweep", "alarm"] },
+            "min_duration_ms": { "type": "integer", "minimum": 10 },
+            "max_duration_ms": { "type": "integer", "minimum": 10 }
+          }
+        }
+      }
+    },
+
+    "SoundRenderPlan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["t_ms", "ambient", "foreground", "alerts"],
+      "properties": {
+        "t_ms": { "type": "integer", "minimum": 0 },
+
+        "ambient": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["oscillator", "gain", "filter", "pan", "smoothing"],
+          "properties": {
+            "oscillator": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["type", "frequency_hz"],
+              "properties": {
+                "type": { "type": "string", "enum": ["sine", "triangle", "saw", "square", "noise", "mix"] },
+                "frequency_hz": { "type": "number", "minimum": 0.0 }
+              }
+            },
+            "gain": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["db"],
+              "properties": { "db": { "type": "number" } }
+            },
+            "filter": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["type", "cutoff_hz"],
+              "properties": {
+                "type": { "type": "string", "enum": ["lowpass", "highpass", "bandpass", "none"] },
+                "cutoff_hz": { "type": "number", "minimum": 0.0 }
+              }
+            },
+            "pan": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["value"],
+              "properties": { "value": { "type": "number", "minimum": -1.0, "maximum": 1.0 } }
+            },
+            "smoothing": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["attack_ms", "release_ms"],
+              "properties": {
+                "attack_ms": { "type": "integer", "minimum": 0 },
+                "release_ms": { "type": "integer", "minimum": 0 }
+              }
+            }
+          }
+        },
+
+        "foreground": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ticks"],
+          "properties": {
+            "ticks": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["at_offset_ms", "pitch_hz", "gain_db", "duration_ms", "waveform"],
+                "properties": {
+                  "at_offset_ms": { "type": "integer", "minimum": 0, "description": "Offset from render_plan.t_ms." },
+                  "pitch_hz": { "type": "number", "minimum": 0.0 },
+                  "gain_db": { "type": "number" },
+                  "duration_ms": { "type": "integer", "minimum": 1, "maximum": 1000 },
+                  "waveform": { "type": "string", "enum": ["click", "short_sine", "woodblock", "noise_tick"] }
+                }
+              }
+            }
+          }
+        },
+
+        "alerts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["items"],
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["kind", "at_offset_ms", "salience", "sound"],
+                "properties": {
+                  "kind": { "type": "string" },
+                  "at_offset_ms": { "type": "integer", "minimum": 0 },
+                  "salience": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+                  "sound": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["mode", "duration_ms", "params"],
+                    "properties": {
+                      "mode": { "type": "string", "enum": ["interval", "chord", "sweep", "alarm"] },
+                      "duration_ms": { "type": "integer", "minimum": 10, "maximum": 10000 },
+                      "params": {
+                        "type": "object",
+                        "additionalProperties": true,
+                        "description": "Renderer-specific params (e.g., start_hz/end_hz for sweep)."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,98 @@
+{
+  "python.defaultInterpreterPath": "./.venv/Scripts/python.exe",
+  "python.terminal.activateEnvironment": true,
+  "python.terminal.activateEnvInCurrentTerminal": true,
+  "python.terminal.executeInFileDir": false,
+  "python.terminal.launchArgs": [
+    "-m",
+    "uv",
+    "run"
+  ],
+  "python.analysis.autoImportCompletions": true,
+  "python.analysis.typeCheckingMode": "strict",
+  "python.linting.enabled": true,
+  "python.linting.pylintEnabled": false,
+  "python.linting.ruffEnabled": true,
+  "python.formatting.provider": "black",
+  "python.testing.pytestEnabled": true,
+  "python.testing.pytestPath": "./.venv/Scripts/pytest.exe",
+  "python.testing.unittestEnabled": false,
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/*.pyc": true
+  },
+  "project_template": {
+    "name": "meltech_template",
+    "bpm": 124,
+    "sample_rate": 48000,
+    "bit_depth": "32_float",
+    "buses": [
+      "KICK",
+      "DRUMS",
+      "PERC",
+      "BASS",
+      "SYNTHS",
+      "ARPS",
+      "ATMOS",
+      "FX_SENDS",
+      "MASTER"
+    ],
+    "stems_contract": {
+      "required_fields": [
+        "name",
+        "type",
+        "mono_stereo",
+        "trim_db",
+        "owner",
+        "sidechain_target",
+        "preset_version"
+      ],
+      "defaults": {
+        "trim_db": -6,
+        "mono_stereo": "stereo",
+        "preset_version": "1.0.0"
+      }
+    },
+    "master_chain": [
+      {
+        "name": "HPF",
+        "params": {
+          "cutoff_hz": 30,
+          "bypass_export": true
+        }
+      },
+      {
+        "name": "Saturation",
+        "params": {
+          "drive_db": 1.0
+        }
+      },
+      {
+        "name": "BusEQ",
+        "params": {
+          "notes": "tame low mids"
+        }
+      },
+      {
+        "name": "GlueComp",
+        "params": {
+          "ratio": 1.8,
+          "attack_ms": 30,
+          "release_ms": 300
+        }
+      },
+      {
+        "name": "Metering",
+        "params": {
+          "lufs_target": -9
+        }
+      },
+      {
+        "name": "Limiter",
+        "params": {
+          "ceiling_db": -0.3
+        }
+      }
+    ]
+  }
+}

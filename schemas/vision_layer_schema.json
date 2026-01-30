@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://grid.local/schemas/vision-layer/v1.json",
+  "title": "Grid Vision Layer Schema v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "envelope", "inputs", "outputs"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "vision-layer-v1"
+    },
+
+    "envelope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "visualizer_id",
+        "created_at_ms",
+        "context_scope"
+      ],
+      "properties": {
+        "visualizer_id": { "type": "string", "minLength": 1 },
+        "created_at_ms": { "type": "integer", "minimum": 0 },
+        "context_scope": {
+          "type": "string",
+          "description": "Identifier for the scope being visualized (e.g., 'global', 'entity:123', 'flow:process_a')."
+        }
+      }
+    },
+
+    "inputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["structured_data", "workflows"],
+      "properties": {
+        "structured_data": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Raw data inputs to be visualized.",
+          "properties": {
+            "concepts": { "type": "array", "items": { "type": "object" } },
+            "flows": { "type": "array", "items": { "type": "object" } },
+            "relationships": { "type": "array", "items": { "type": "object" } }
+          }
+        },
+        "workflows": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "List of workflow identifiers or raw markdown tables defining directional flows."
+        },
+        "example_runs": {
+          "type": "array",
+          "items": { "type": "object" },
+          "description": "Optional execution traces to overlay on the visualization."
+        }
+      }
+    },
+
+    "outputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["graph", "named_flows", "assumptions"],
+      "properties": {
+        "graph": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["nodes", "edges"],
+          "properties": {
+            "nodes": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/VisualNode" }
+            },
+            "edges": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/VisualEdge" }
+            }
+          }
+        },
+
+        "named_flows": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/VisualFlow" },
+          "description": "Specific pathways or sequences identified within the graph."
+        },
+
+        "assumptions": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "List of interpretive choices made during visualization (e.g., 'Inferred link from name')."
+        }
+      }
+    }
+  },
+
+  "$defs": {
+    "VisualNode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "label", "type"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "label": { "type": "string" },
+        "type": {
+          "type": "string",
+          "enum": ["concept", "step", "state", "entity", "event"],
+          "description": "Semantic type of the node."
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Additional visual properties (color, size, icon)."
+        }
+      }
+    },
+
+    "VisualEdge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "target", "relation"],
+      "properties": {
+        "source": { "type": "string", "description": "ID of source node." },
+        "target": { "type": "string", "description": "ID of target node." },
+        "relation": {
+          "type": "string",
+          "enum": ["sequence", "cross_link", "instance_path", "influence", "dependency"],
+          "description": "Type of connection."
+        },
+        "attributes": {
+          "type": "object",
+          "properties": {
+            "weight": { "type": "number" },
+            "polarity": { "type": "number", "minimum": -1, "maximum": 1 },
+            "label": { "type": "string" }
+          }
+        }
+      }
+    },
+
+    "VisualFlow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "path_ids"],
+      "properties": {
+        "name": { "type": "string", "description": "Display name of the flow." },
+        "path_ids": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 2,
+          "description": "Ordered list of Node IDs representing the flow path."
+        },
+        "type": {
+          "type": "string",
+          "enum": ["backbone", "dialogue", "example_run", "derivative"]
+        }
+      }
+    }
+  }
+}

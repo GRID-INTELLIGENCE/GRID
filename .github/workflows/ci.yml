@@ -1,0 +1,67 @@
+name: GRID CI - Complete Verification
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  call-quality:
+    name: Call Quality Checks
+    uses: ./.github/workflows/ci-quality.yml
+
+  call-tests:
+    name: Call Test Suite
+    uses: ./.github/workflows/ci-test.yml
+
+  verify-services:
+    name: Verify Services
+    runs-on: ubuntu-latest
+    needs: [call-quality, call-tests]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: |
+          uv venv --python 3.13
+          uv sync --group dev --group test
+
+      - name: Verify MCP servers
+        run: |
+          python -c "from grid.mcp.enhanced_rag_server import EnhancedRAGMCPServer"
+          python -c "from tools.rag.conversational_rag import create_conversational_rag_engine"
+
+      - name: Verify Ghost Registry handlers
+        run: |
+          python -c "from src.application.mothership.rag_handlers import register_rag_handlers; register_rag_handlers()"
+
+  all-checks:
+    name: All Checks Passed
+    runs-on: ubuntu-latest
+    needs: [call-quality, call-tests, verify-services]
+    if: always()
+    steps:
+      - name: Check all statuses
+        run: |
+          if [ "${{ needs.call-quality.result }}" == "failure" ] || \
+             [ "${{ needs.call-tests.result }}" == "failure" ] || \
+             [ "${{ needs.verify-services.result }}" == "failure" ]; then
+            echo "❌ CI failed"
+            exit 1
+          else
+            echo "✅ All CI checks passed"
+          fi

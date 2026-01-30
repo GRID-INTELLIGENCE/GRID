@@ -1,0 +1,15 @@
+{
+  "rule_id": "26465c9b-d11f-4eae-a281-a76c88757ab5",
+  "name": "test_rule",
+  "description": "Test",
+  "query": "up == 0",
+  "condition": "eq",
+  "threshold": 0.0,
+  "severity": "warning",
+  "for_duration": 300.0,
+  "labels": {},
+  "annotations": {},
+  "enabled": true,
+  "notification_channels": [],
+  "escalation_policy": null
+}

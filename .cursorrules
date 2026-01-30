@@ -1,0 +1,290 @@
+# GRID Project - AI Assistant Rules
+
+You are an AI assistant working on the GRID (Geometric Resonance Intelligence Driver) project. These rules ensure your responses align with the project's architecture, patterns, and constraints.
+
+## Project Identity
+
+GRID is a Python-based framework for exploring complex systems through geometric resonance patterns. It combines:
+- Layered architecture (core, API, database, CLI, services)
+- Cognitive decision support layer (`light_of_the_seven/cognitive_layer/`)
+- Local-only RAG system (`tools/rag/`) using Ollama models
+- Pattern recognition using 9 cognition patterns
+- Event-driven processing pipeline
+
+## Core Principles
+
+### 1. Local-First Operation
+- **NEVER** suggest external API calls (OpenAI, Anthropic, etc.) unless explicitly requested
+- Use local Ollama models: `nomic-embed-text-v2-moe:latest` for embeddings, `ministral` or `gpt-oss-safeguard` for LLM
+- All RAG context stays local (ChromaDB in `.rag_db/`)
+- Default to local-only solutions
+
+### 2. Scaling and Decisions
+- **Comprehensive Testing**: Always comprehensively test anything before scaling.
+- **Iterative Decisions**: Significant architectural or scaling decisions must be made through iterative testing, research, and refinement (typically over a couple of weeks).
+- **Behavioral Consistency**: Decisions should reproduce established patterns and ensure structural symbiosis between systems.
+
+### 3. Architecture Alignment
+- Follow layered architecture: core → API → database → CLI → services
+- Respect module boundaries and separation of concerns
+- Use dependency injection patterns
+- Maintain stateless compute where possible
+
+### 3. Code Quality Standards
+- Python 3.11+ with full type hints
+- Use Pydantic for data models
+- Follow PEP 8 with project-specific overrides (120 char line length)
+- Maintain ≥80% test coverage
+- Run `ruff` and `black` before committing
+
+### 4. Pattern-Based Development
+- Reference existing patterns before creating new ones
+- Use the 9 cognition patterns when relevant (Flow, Spatial, Rhythm, Color, Repetition, Deviation, Cause, Time, Combination)
+- Follow established code patterns in the codebase
+- Check similar implementations first
+
+### 5. Cognitive Layer Integration
+- When making decisions, consider cognitive factors:
+  - Use `light_of_the_seven/cognitive_layer/` for decision support
+  - Consider cognitive load when designing interfaces
+  - Respect user mental models
+  - Apply bounded rationality principles
+
+### 6. RAG-Enhanced Context
+- Use the project's RAG system (`tools/rag/`) to retrieve project context
+- Query local knowledge base before making assumptions
+- Reference `docs/` directory for detailed information
+- Use RAG for understanding existing patterns and decisions
+
+
+### 7. Agent Ignore System
+- Respect \.agentignore\ files across the project
+- Do not process or modify files/directories listed in \.agentignore\
+- Refer to \docs/AGENT_IGNORE_SUMMARY.md\ for the system overview
+- Maintain consistency between \.agentignore\, \.gitignore\, and \.cursorignore\
+
+## Before Making Changes
+
+1. **Read Relevant Files**: Check existing implementations in the same area
+2. **Check Architecture**: Verify your change fits the layered architecture
+3. **Review Patterns**: Look for similar patterns in the codebase
+4. **Query RAG**: Use RAG system to understand project context
+5. **Consider Tests**: Ensure tests exist or need to be created
+6. **Check Cognitive Layer**: Consider if decision support is needed
+
+## Coding Standards
+
+### Python Style
+- Type hints required for all functions and methods
+- Use `Optional[T]` for nullable types
+- Prefer dataclasses or Pydantic models over dicts
+- Use f-strings for formatting
+- Line length: 120 characters (configured in `pyproject.toml`)
+
+### Imports
+- Group imports: stdlib, third-party, local
+- Use absolute imports for project modules
+- Avoid wildcard imports
+
+### Error Handling
+- Use custom exception hierarchy
+- Provide clear error messages
+- Log errors with context
+- Fail fast for configuration errors
+
+### Testing
+- Write tests alongside code changes
+- Use pytest fixtures for setup
+- Mock external dependencies
+- Aim for ≥80% coverage
+
+## Architecture Constraints
+
+### Module Organization
+- `grid/` - Core intelligence layer (essence, patterns, awareness, evolution, interfaces)
+- `light_of_the_seven/` - Cognitive architecture and research
+- `tools/rag/` - RAG system (local-only, ChromaDB)
+- `application/` - Application-specific code
+- `docs/` - Documentation (reference via RAG)
+
+### Integration Patterns
+- Use dependency injection for services
+- Follow Clean Architecture principles
+- Maintain separation between layers
+- Use event-driven patterns where appropriate
+
+### Data Flow
+- Input → Process → Output (explicit pipeline)
+- Use RAG for context retrieval
+- Store state in appropriate layer (database, vector store)
+- Maintain traceability (event_id, chunk_id, doc_id)
+
+## AI Behavior Guidelines
+
+### Decision Making
+1. **Reference First**: Always check existing code before creating new
+2. **Pattern Match**: Look for similar implementations
+3. **Ask When Uncertain**: If constraints are unclear, ask for clarification
+4. **Respect Constraints**: Don't suggest solutions that violate project principles
+5. **Use RAG**: Query project knowledge base for context
+
+### Code Generation
+- Follow existing patterns and style
+- Include type hints
+- Add docstrings for public APIs
+- Consider testability
+- Maintain backward compatibility
+
+### When to Ask
+- Architecture decisions that affect multiple layers
+- Breaking changes to existing APIs
+- New external dependencies
+- Changes to core patterns
+- Uncertainty about project constraints
+
+## Context Management
+
+### Files to Read
+- `.context/DEFINITION.md` - Master Context Manifest (Check this first)
+- `docs/global_layer.md` - Global rules and workflow
+- `docs/architecture.md` - Architecture documentation
+- `docs/pattern_language.md` - Pattern language
+- `pyproject.toml` - Project configuration
+- Relevant module `__init__.py` files
+- `.context/preparedness.json` - Active Project Status
+
+### Files to Ignore
+- Generated files (`__pycache__/`, `*.pyc`)
+- Build artifacts (`dist/`, `build/`)
+- Virtual environments (`.venv/`, `venv/`)
+- Large data files
+- Node modules
+
+### RAG Usage
+- Query RAG system for project context: `python -m tools.rag.cli query "your question"`
+- Use RAG to understand existing patterns
+- Reference RAG results when making decisions
+
+## Output Formatting
+
+### Code Blocks
+- Use proper Python syntax
+- Include type hints
+- Add docstrings
+- Follow project style
+
+### Explanations
+- Be concise but complete
+- Reference specific files when relevant
+- Explain architectural decisions
+- Link to relevant documentation
+
+### Error Messages
+- Clear and actionable
+- Reference relevant files
+- Suggest solutions
+- Include context
+
+## Cognitive Layer Integration
+
+When making decisions that affect user experience:
+- Consider cognitive load (use `light_of_the_seven/cognitive_layer/cognitive_load/`)
+- Apply decision support (use `light_of_the_seven/cognitive_layer/decision_support/`)
+- Check mental model alignment (use `light_of_the_seven/cognitive_layer/mental_models/`)
+- Use bounded rationality when appropriate
+
+## RAG System Usage
+
+The project has a local-only RAG system:
+- Embeddings: `nomic-embed-text-v2-moe:latest`
+- LLM: `ministral` or `gpt-oss-safeguard` (local)
+- Vector Store: ChromaDB in `.rag_db/`
+- Index: `python -m tools.rag.cli index <path>`
+- Query: `python -m tools.rag.cli query "<question>"`
+
+Use RAG to:
+- Understand project architecture
+- Find existing patterns
+- Retrieve relevant documentation
+- Understand decision history
+
+## Common Patterns
+
+### Service Pattern
+```python
+from typing import Optional
+from pydantic import BaseModel
+
+class ServiceName:
+    """Service description."""
+
+    def __init__(self, dependency: DependencyType):
+        self.dependency = dependency
+
+    def method(self, param: ParamType) -> ReturnType:
+        """Method description."""
+        # Implementation
+        pass
+```
+
+### API Endpoint Pattern
+```python
+from fastapi import APIRouter, Depends
+from pydantic import BaseModel
+
+router = APIRouter(prefix="/api/v1/resource")
+
+@router.post("/endpoint")
+async def endpoint(
+    request: RequestModel,
+    service: ServiceType = Depends(get_service)
+) -> ResponseModel:
+    """Endpoint description."""
+    result = service.process(request)
+    return ResponseModel.from_result(result)
+```
+
+### Test Pattern
+```python
+import pytest
+from your_module import YourClass
+
+def test_feature():
+    """Test description."""
+    # Arrange
+    instance = YourClass()
+
+    # Act
+    result = instance.method()
+
+    # Assert
+    assert result == expected
+```
+
+## Prohibited Practices
+
+1. **No External APIs**: Don't suggest OpenAI, Anthropic, or other cloud APIs unless explicitly requested
+2. **No Breaking Changes**: Don't remove functionality without explicit approval
+3. **No Magic Numbers**: Use named constants
+4. **No Untyped Code**: All functions must have type hints
+5. **No Untested Code**: Significant changes require tests
+6. **No Hardcoded Secrets**: Use environment variables
+7. **No Direct Database Access**: Use repository pattern or ORM
+
+## When Uncertain
+
+If you're uncertain about:
+- Architecture decisions → Ask and reference `docs/architecture.md`
+- Coding standards → Check `pyproject.toml` and existing code
+- Project patterns → Query RAG system or check `docs/pattern_language.md`
+- Integration approach → Review similar integrations in codebase
+- Testing strategy → Check existing tests in `tests/`
+
+## Remember
+
+- GRID is a local-first, cognitive-aware system
+- Always prefer existing patterns over new solutions
+- Use RAG for project context
+- Respect the layered architecture
+- Maintain code quality standards
+- Consider cognitive factors in design decisions

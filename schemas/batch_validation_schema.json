@@ -1,0 +1,384 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://grid-project.io/schemas/batch-validation-schema.json",
+  "title": "GRID Batch Validation Schema",
+  "description": "Schema for GRID batch file validation reports, metrics, and issue tracking",
+  "version": "1.0.0",
+  "type": "object",
+  "definitions": {
+    "severity": {
+      "type": "string",
+      "enum": ["error", "warning", "info"],
+      "description": "Severity level of a validation issue"
+    },
+    "issueType": {
+      "type": "string",
+      "enum": [
+        "missing_file",
+        "syntax_error",
+        "date_inconsistency",
+        "broken_link",
+        "missing_header",
+        "long_line",
+        "todo_marker",
+        "missing_docstring",
+        "deprecated_typing",
+        "missing_pattern",
+        "missing_dependency",
+        "missing_config",
+        "missing_cross_reference",
+        "encoding_error",
+        "format_error",
+        "schema_violation"
+      ],
+      "description": "Type of validation issue"
+    },
+    "validationIssue": {
+      "type": "object",
+      "description": "A single validation issue found during batch review",
+      "required": ["severity", "file_path", "issue_type", "message"],
+      "properties": {
+        "severity": {
+          "$ref": "#/definitions/severity"
+        },
+        "file_path": {
+          "type": "string",
+          "description": "Relative path to the file with the issue"
+        },
+        "line_number": {
+          "type": ["integer", "null"],
+          "minimum": 1,
+          "description": "Line number where the issue occurs (null if file-level)"
+        },
+        "issue_type": {
+          "$ref": "#/definitions/issueType"
+        },
+        "message": {
+          "type": "string",
+          "description": "Human-readable description of the issue"
+        },
+        "suggestion": {
+          "type": ["string", "null"],
+          "description": "Suggested fix for the issue"
+        },
+        "auto_fixable": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether this issue can be automatically fixed"
+        }
+      },
+      "additionalProperties": false
+    },
+    "fileMetrics": {
+      "type": "object",
+      "description": "Metrics for a validated file",
+      "required": ["path", "size_bytes", "line_count", "word_count", "hash_md5"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Relative path to the file"
+        },
+        "size_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "File size in bytes"
+        },
+        "line_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of lines in the file"
+        },
+        "word_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of words in the file"
+        },
+        "hash_md5": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{32}$",
+          "description": "MD5 hash of file contents for change detection"
+        },
+        "created_date": {
+          "type": ["string", "null"],
+          "description": "Date extracted from file frontmatter/metadata"
+        },
+        "has_frontmatter": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether file has YAML/markdown frontmatter"
+        },
+        "file_type": {
+          "type": "string",
+          "enum": ["markdown", "python", "json", "yaml", "config", "other"],
+          "description": "Detected file type"
+        },
+        "encoding": {
+          "type": "string",
+          "default": "utf-8",
+          "description": "File encoding"
+        }
+      },
+      "additionalProperties": false
+    },
+    "validationSummary": {
+      "type": "object",
+      "description": "Summary statistics for the validation run",
+      "required": ["files_validated", "total_issues", "validation_status"],
+      "properties": {
+        "files_validated": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total number of files validated"
+        },
+        "total_issues": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total number of issues found"
+        },
+        "errors": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of error-level issues"
+        },
+        "warnings": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of warning-level issues"
+        },
+        "info": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of info-level issues"
+        },
+        "total_size_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Combined size of all validated files"
+        },
+        "total_lines": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Combined line count of all validated files"
+        },
+        "auto_fixable": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of issues that can be auto-fixed"
+        },
+        "validation_status": {
+          "type": "string",
+          "enum": ["PASS", "FAIL", "WARN"],
+          "description": "Overall validation status"
+        },
+        "fixes_applied": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of auto-fixes applied (if --fix flag used)"
+        }
+      },
+      "additionalProperties": true
+    },
+    "batchInfo": {
+      "type": "object",
+      "description": "Information about the batch being validated",
+      "properties": {
+        "batch_id": {
+          "type": "string",
+          "description": "Unique identifier for the batch"
+        },
+        "batch_name": {
+          "type": "string",
+          "description": "Human-readable name for the batch"
+        },
+        "created_files": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of files created in this batch"
+        },
+        "modified_files": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of files modified in this batch"
+        },
+        "source_context": {
+          "type": "string",
+          "description": "Reference to source materials (e.g., chatlog files)"
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "required": ["timestamp", "files_validated", "issues", "summary"],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Reference to this schema"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of when validation was run"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Version of the validation tool/schema"
+    },
+    "python_version": {
+      "type": "string",
+      "description": "Python version used for validation"
+    },
+    "platform": {
+      "type": "string",
+      "description": "Platform/OS information"
+    },
+    "project_root": {
+      "type": "string",
+      "description": "Absolute path to project root directory"
+    },
+    "files_validated": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Total number of files validated"
+    },
+    "batch_info": {
+      "$ref": "#/definitions/batchInfo"
+    },
+    "issues": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/validationIssue"
+      },
+      "description": "List of all validation issues found"
+    },
+    "metrics": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/fileMetrics"
+      },
+      "description": "Metrics for each validated file"
+    },
+    "summary": {
+      "$ref": "#/definitions/validationSummary"
+    },
+    "benchmark_results": {
+      "type": "object",
+      "description": "Optional benchmark results from performance evaluation",
+      "properties": {
+        "total_validation_time_ms": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Total time to run validation in milliseconds"
+        },
+        "file_read_time_ms": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Time spent reading files"
+        },
+        "analysis_time_ms": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Time spent analyzing content"
+        },
+        "throughput_files_per_second": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Files validated per second"
+        }
+      },
+      "additionalProperties": true
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional metadata about the validation run",
+      "properties": {
+        "tool_name": {
+          "type": "string",
+          "const": "GRID Batch Validator"
+        },
+        "tool_version": {
+          "type": "string"
+        },
+        "git_commit": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$",
+          "description": "Git commit hash at time of validation"
+        },
+        "git_branch": {
+          "type": "string",
+          "description": "Git branch name"
+        },
+        "run_by": {
+          "type": "string",
+          "description": "User or system that ran the validation"
+        },
+        "ci_build_id": {
+          "type": "string",
+          "description": "CI/CD build identifier if run in pipeline"
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false,
+  "examples": [
+    {
+      "timestamp": "2024-12-17T15:30:00Z",
+      "version": "1.0.0",
+      "python_version": "3.13.0",
+      "platform": "Windows-11-10.0.22631-SP0",
+      "files_validated": 10,
+      "batch_info": {
+        "batch_id": "batch-2024-12-17-001",
+        "batch_name": "Performance Optimization Session",
+        "created_files": [
+          "GRID_TODO_TASKLIST.md",
+          "GRID_IMPLEMENTATION_STATUS.md",
+          "GRID_MARKET_ANALYSIS_VALUATION.md"
+        ],
+        "modified_files": [
+          ".gitignore",
+          "README.md",
+          "CONTRIBUTING.md"
+        ]
+      },
+      "issues": [
+        {
+          "severity": "warning",
+          "file_path": "GRID_MARKET_ANALYSIS_VALUATION.md",
+          "line_number": null,
+          "issue_type": "date_inconsistency",
+          "message": "Mixed dates found: 3 refs to 2024, 2 refs to 2025",
+          "suggestion": "Standardize all dates to December 2024",
+          "auto_fixable": true
+        }
+      ],
+      "metrics": [
+        {
+          "path": "GRID_TODO_TASKLIST.md",
+          "size_bytes": 24576,
+          "line_count": 586,
+          "word_count": 3200,
+          "hash_md5": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4",
+          "created_date": "December 2024",
+          "has_frontmatter": true
+        }
+      ],
+      "summary": {
+        "files_validated": 10,
+        "total_issues": 5,
+        "errors": 0,
+        "warnings": 3,
+        "info": 2,
+        "total_size_bytes": 98304,
+        "total_lines": 2500,
+        "auto_fixable": 2,
+        "validation_status": "PASS"
+      }
+    }
+  ]
+}

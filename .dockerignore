@@ -1,0 +1,141 @@
+# Python and build artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+.Python
+*.pyc
+*.pyo
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+.virtualenv
+
+# IDE and editors
+.vscode/
+.idea/
+.cursor/
+.windsurf/
+*.swp
+*.swo
+*~
+.DS_Store
+.env.local
+*.sublime-project
+*.sublime-workspace
+
+# Git and version control
+.git/
+.gitignore
+.gitattributes
+.github/
+
+# Testing and coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.hypothesis/
+*.cover
+test-results/
+
+# Development
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Project data (large files - don't include in build context)
+# Reorganized Jan 1, 2026 - now in organized directories
+.rag_db/
+logs/
+.cache/
+temp/
+*.log
+data/
+models/
+demos/
+archival/
+research_snapshots/
+analysis_report/
+artifacts/
+
+# Specific data files to exclude
+data/benchmark_metrics.json
+data/benchmark_results.json
+data/stress_metrics.json
+data/all_*.json
+data/all_*.csv
+data/project_data_export.json
+
+# Docker
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Documentation
+docs/
+*.md
+README*
+
+# System
+.DS_Store
+Thumbs.db
+.env
+.env.*
+!.env.example
+!.env.docker
+
+# Temporary build files
+*.o
+*.a
+*.lib
+*.so.*
+*.dylib
+
+# Large archives
+*.tar.gz
+*.zip
+*.rar
+
+# Backup files
+*.bak
+*.backup
+*.tmp
+*.swp
+*~
+
+# Node modules and dependencies
+node_modules/
+yarn.lock
+package-lock.json
+
+# Python cache
+pip-log.txt
+pip-delete-this-directory.txt
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Rust artifacts
+target/
+Cargo.lock
+
+# IDE specific
+.vscode
+.idea
+.DS_Store
+
+# Miscellaneous
+*.orig
+dist-newstyle
+.stack-work
+*.egg-info

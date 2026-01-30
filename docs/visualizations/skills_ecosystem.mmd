@@ -1,0 +1,48 @@
+graph TB
+    subgraph "Discovery Layer"
+        SD[Skill Discovery Engine] --> FS[File System Watcher]
+        SD --> DV[Dependency Validator]
+        SD --> AR[Auto Registration]
+    end
+
+    subgraph "Execution Layer"
+        AR --> EX[Skill Executor]
+        EX --> PG[Performance Guard]
+        EX --> BM[Batch Manager]
+    end
+
+    subgraph "Intelligence Layer"
+        PG --> ID[Intelligence Database]
+        BM --> ID
+        ID --> RT[Regression Tracking]
+        ID --> NS[NSR Monitoring]
+    end
+
+    subgraph "Management Layer"
+        RT --> CM[Configuration Manager]
+        NS --> CM
+        CM --> AB[A/B Testing]
+        CM --> VR[Version Rollback]
+    end
+
+    subgraph "API Layer"
+        AB --> REST[REST Endpoints]
+        VR --> REST
+        REST --> DASH[Analytics Dashboard]
+    end
+
+    style SD fill:#e1f5fe
+    style FS fill:#e3f2fd
+    style DV fill:#e3f2fd
+    style AR fill:#e3f2fd
+    style EX fill:#e8f5e8
+    style PG fill:#e8f5e8
+    style BM fill:#e8f5e8
+    style ID fill:#fff3e0
+    style RT fill:#fff3e0
+    style NS fill:#fff3e0
+    style CM fill:#fce4ec
+    style AB fill:#fce4ec
+    style VR fill:#fce4ec
+    style REST fill:#f3e5f5
+    style DASH fill:#f3e5f5

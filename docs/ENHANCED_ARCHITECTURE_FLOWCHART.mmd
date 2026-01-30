@@ -1,0 +1,106 @@
+graph TB
+    subgraph UserLayer["User Interaction Layer"]
+        CursorIDE["Cursor IDE"]
+        CLI["CLI Tools"]
+        WebDash["Web Dashboard"]
+        APIClients["API Clients"]
+    end
+
+    subgraph ContextLayer["User Context Layer (NEW)"]
+        UserContextMgr["User Context Manager"]
+        PatternRec["Pattern Recognition"]
+        ContextRecognizer["Contextual Recognizer"]
+        LearningEng["Learning Engine"]
+        ContextStorage["Context Storage"]
+    end
+
+    subgraph ProjectLayer["Project Layer"]
+        subgraph Grid["GRID Project"]
+            AgenticSys["Agentic System<br/>(Enhanced with Context)"]
+            EventBus["Event Bus"]
+            SkillsReg["Skills Registry"]
+            RAGGrid["RAG System"]
+            BehaviorTracer["Behavior Tracer"]
+        end
+
+        subgraph EUFLE["EUFLE Project"]
+            ModelRouter["Model Router<br/>(Enhanced with Context)"]
+            CodeTrans["Code Transformer"]
+            FineTune["Fine-Tuning Pipeline"]
+            RAGEUFLE["RAG System"]
+            Dashboard["Observability Dashboard"]
+        end
+
+        subgraph Apps["Apps Project"]
+            HarnessSvc["Harness Service"]
+            NormSvc["Normalization Service"]
+            ReasonSvc["Reasoning Service"]
+            AISafety["AI Safety Analyzer"]
+        end
+    end
+
+    subgraph WorkflowLayer["Workflow Layer (NEW)"]
+        WorkflowOrch["Workflow Orchestrator"]
+        WorkflowAuto["Workflow Automation"]
+        PredictiveSugg["Predictive Suggestions"]
+    end
+
+    subgraph BridgeLayer["Cross-Project Bridge (NEW)"]
+        ContextService["Context Service"]
+        ProfileSync["Profile Sync"]
+        PatternShare["Pattern Sharing"]
+    end
+
+    subgraph SharedServices["Shared Services Layer"]
+        AnalysisOut["Analysis Outputs"]
+        WorkspaceUtils["Workspace Utils"]
+        RAGShared["Shared RAG"]
+    end
+
+    UserLayer -->|"User Actions"| ContextLayer
+    ContextLayer -->|"Provides Context"| ProjectLayer
+    ContextLayer -->|"Coordinates"| WorkflowLayer
+    ContextLayer -->|"Shares"| BridgeLayer
+
+    UserLayer -->|"User Actions"| Grid
+    UserLayer -->|"User Actions"| EUFLE
+    UserLayer -->|"User Actions"| Apps
+
+    Grid -->|"Uses Context"| ContextLayer
+    EUFLE -->|"Uses Context"| ContextLayer
+    Apps -->|"Uses Context"| ContextLayer
+
+    Grid -->|"Events"| EventBus
+    EventBus -->|"Coordinates"| AgenticSys
+    AgenticSys -->|"Uses"| SkillsReg
+    AgenticSys -->|"Queries"| RAGGrid
+    AgenticSys -->|"Tracks"| BehaviorTracer
+    AgenticSys -->|"Tracks Patterns"| ContextLayer
+
+    EUFLE -->|"Routes"| ModelRouter
+    ModelRouter -->|"Uses Preferences"| ContextLayer
+    ModelRouter -->|"Uses"| RAGEUFLE
+    CodeTrans -->|"Uses"| RAGEUFLE
+
+    Apps -->|"Harvests"| HarnessSvc
+    HarnessSvc -->|"Uses Context"| ContextLayer
+
+    WorkflowLayer -->|"Orchestrates"| Grid
+    WorkflowLayer -->|"Orchestrates"| EUFLE
+    WorkflowLayer -->|"Orchestrates"| Apps
+
+    BridgeLayer -->|"Synchronizes"| ContextLayer
+    BridgeLayer -->|"Shares Patterns"| Grid
+    BridgeLayer -->|"Shares Patterns"| EUFLE
+    BridgeLayer -->|"Shares Patterns"| Apps
+
+    Grid -->|"Reads/Writes"| AnalysisOut
+    Apps -->|"Writes"| AnalysisOut
+    Apps -->|"Uses"| WorkspaceUtils
+
+    ContextLayer -->|"Learns"| LearningEng
+    LearningEng -->|"Updates"| ContextLayer
+
+    style ContextLayer fill:#ccffcc,stroke:#00aa00,stroke-width:2px
+    style WorkflowLayer fill:#ccffcc,stroke:#00aa00,stroke-width:2px
+    style BridgeLayer fill:#ccffcc,stroke:#00aa00,stroke-width:2px

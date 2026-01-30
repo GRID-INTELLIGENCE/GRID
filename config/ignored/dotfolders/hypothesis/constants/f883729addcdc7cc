@@ -1,0 +1,4 @@
+# file: E:\grid\grid\senses\sensory_input.py
+# hypothesis_version: 6.150.0
+
+[0.0, 1.0, 'Additional metadata', 'Intensity (0-1)', 'Quality descriptor', 'Sensory data', 'Source of input', 'Spatial location', 'audio', 'flavor', 'intensity', 'pressure', 'proximity', 'quality', 'scent', 'smell', 'taste', 'temperature', 'text', 'texture', 'touch', 'unknown', 'vibration', 'visual']

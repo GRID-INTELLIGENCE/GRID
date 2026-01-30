@@ -1,0 +1,59 @@
+{
+  "focusAreas": [
+    {
+      "name": "Network / Reliability",
+      "paths": [
+        "windows_ai_network_remediation.ps1",
+        "windows_ai_network_diagnostic.ps1"
+      ],
+      "priority": 1
+    },
+    {
+      "name": "Core",
+      "paths": [
+        "core",
+        "circuits",
+        "backend"
+      ],
+      "priority": 2
+    },
+    {
+      "name": "Hogwarts / Visualizations",
+      "paths": [
+        "light_of_the_seven/full_datakit/visualizations/Hogwarts/prototypes/A Wizard's Tablet/A-wizard-s-tablet"
+      ],
+      "priority": 3
+    },
+    {
+      "name": "Tests",
+      "paths": [
+        "tests"
+      ],
+      "priority": 4
+    }
+  ],
+  "metrics": [
+    {
+      "name": "Build reliability",
+      "goal": "No unexpected network failures during npm/pip installs and Vite builds"
+    },
+    {
+      "name": "AI trust",
+      "goal": "No silent fallbacks; clear provenance for live vs offline vs cached"
+    }
+  ],
+  "tools": [
+    {
+      "name": "OS network remediation",
+      "command": "powershell -NoProfile -ExecutionPolicy Bypass -File e:\\grid\\windows_ai_network_remediation.ps1 -DryRun"
+    },
+    {
+      "name": "OS network remediation (apply)",
+      "command": "powershell -NoProfile -ExecutionPolicy Bypass -File e:\\grid\\windows_ai_network_remediation.ps1 -Apply"
+    },
+    {
+      "name": "Run all tests",
+      "command": "python -m pytest tests -v --tb=short"
+    }
+  ]
+}

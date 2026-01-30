@@ -1,0 +1,4 @@
+# file: E:\grid\application\mothership\models\subscription.py
+# hypothesis_version: 6.150.0
+
+['api_key_id', 'cost_units', 'endpoint', 'id', 'metadata', 'timestamp', 'user_id']

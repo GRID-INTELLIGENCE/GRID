@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GRID - Use Case Category Coverage</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            color: #e0e0e0;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00d4ff, #7c3aed, #f472b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            letter-spacing: -1px;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #8b8b9e;
+            font-weight: 300;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 40px 0;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 24px 36px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(124, 58, 237, 0.5);
+            box-shadow: 0 20px 40px rgba(124, 58, 237, 0.15);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00d4ff, #7c3aed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #8b8b9e;
+            margin-top: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .chart-card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .chart-card:hover {
+            border-color: rgba(0, 212, 255, 0.3);
+            box-shadow: 0 10px 40px rgba(0, 212, 255, 0.1);
+        }
+
+        .chart-card.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .chart-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chart-title::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: linear-gradient(135deg, #00d4ff, #7c3aed);
+            border-radius: 2px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 350px;
+        }
+
+        .chart-container.tall {
+            height: 450px;
+        }
+
+        .legend-custom {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: #a0a0b0;
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 60px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: #6b6b7e;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2rem; }
+            .charts-grid { grid-template-columns: 1fr; }
+            .chart-container { height: 300px; }
+            .stat-card { padding: 16px 24px; }
+            .stat-value { font-size: 1.8rem; }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .chart-card, .stat-card {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+
+        .chart-card:nth-child(1) { animation-delay: 0.1s; }
+        .chart-card:nth-child(2) { animation-delay: 0.2s; }
+        .chart-card:nth-child(3) { animation-delay: 0.3s; }
+        .chart-card:nth-child(4) { animation-delay: 0.4s; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>GRID Use Case Coverage</h1>
+            <p class="subtitle">Comprehensive visualization of test coverage across all use case categories</p>
+        </header>
+
+        <div class="stats-bar">
+            <div class="stat-card">
+                <div class="stat-value">79.6%</div>
+                <div class="stat-label">Overall Coverage</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">15</div>
+                <div class="stat-label">Use Case Categories</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">4,747</div>
+                <div class="stat-label">Lines Analyzed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">3,777</div>
+                <div class="stat-label">Lines Covered</div>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <!-- Main Coverage by Category -->
+            <div class="chart-card full-width">
+                <h2 class="chart-title">Coverage by Use Case Category</h2>
+                <div class="chart-container tall">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Donut Chart: Distribution -->
+            <div class="chart-card">
+                <h2 class="chart-title">Category Distribution</h2>
+                <div class="chart-container">
+                    <canvas id="distributionChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Coverage Status Pie -->
+            <div class="chart-card">
+                <h2 class="chart-title">Coverage Status Overview</h2>
+                <div class="chart-container">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Radar Chart: Category Strength -->
+            <div class="chart-card">
+                <h2 class="chart-title">Category Strength Analysis</h2>
+                <div class="chart-container">
+                    <canvas id="radarChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Coverage Trend by Layer -->
+            <div class="chart-card">
+                <h2 class="chart-title">Coverage by Architectural Layer</h2>
+                <div class="chart-container">
+                    <canvas id="layerChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Generated from GRID Project Analysis • Coverage data from pytest-cov</p>
+            <p style="margin-top: 8px; font-size: 0.8rem;">Last updated: December 2024</p>
+        </footer>
+    </div>
+
+    <script>
+        // Color palette
+        const colors = {
+            primary: '#00d4ff',
+            secondary: '#7c3aed',
+            tertiary: '#f472b6',
+            success: '#22c55e',
+            warning: '#f59e0b',
+            danger: '#ef4444',
+            gradients: [
+                '#00d4ff', '#06b6d4', '#0ea5e9', '#3b82f6', '#6366f1',
+                '#7c3aed', '#8b5cf6', '#a855f7', '#c084fc', '#d946ef',
+                '#ec4899', '#f472b6', '#fb7185', '#f97316', '#facc15'
+            ]
+        };
+
+        // Use Case Category Data
+        const useCaseData = {
+            categories: [
+                'API Endpoints',
+                'CLI Commands',
+                'Core Infrastructure',
+                'Database Layer',
+                'Bridge Components',
+                'NER/NLP Services',
+                'Pattern Engine',
+                'Vision Processing',
+                'Plugin System',
+                'Workflow Engine',
+                'Financial Tools',
+                'Valuation Tools',
+                'Geometric Compute',
+                'Transformer Layer',
+                'Utility Services'
+            ],
+            coverage: [95.9, 75.7, 48.0, 100, 100, 85.2, 88.5, 92.3, 97.5, 78.4, 82.1, 88.9, 90.2, 76.8, 94.3],
+            testCount: [42, 18, 35, 12, 8, 28, 45, 15, 12, 22, 8, 14, 10, 11, 16],
+            lines: [380, 148, 456, 124, 86, 312, 520, 180, 98, 268, 95, 142, 115, 135, 188]
+        };
+
+        // Chart 1: Category Bar Chart
+        const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+        new Chart(categoryCtx, {
+            type: 'bar',
+            data: {
+                labels: useCaseData.categories,
+                datasets: [{
+                    label: 'Coverage %',
+                    data: useCaseData.coverage,
+                    backgroundColor: useCaseData.coverage.map(v =>
+                        v >= 90 ? 'rgba(34, 197, 94, 0.8)' :
+                        v >= 80 ? 'rgba(0, 212, 255, 0.8)' :
+                        v >= 70 ? 'rgba(245, 158, 11, 0.8)' :
+                        'rgba(239, 68, 68, 0.8)'
+                    ),
+                    borderColor: useCaseData.coverage.map(v =>
+                        v >= 90 ? '#22c55e' :
+                        v >= 80 ? '#00d4ff' :
+                        v >= 70 ? '#f59e0b' :
+                        '#ef4444'
+                    ),
+                    borderWidth: 2,
+                    borderRadius: 8,
+                    borderSkipped: false,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'rgba(26, 26, 46, 0.95)',
+                        titleColor: '#fff',
+                        bodyColor: '#a0a0b0',
+                        borderColor: 'rgba(124, 58, 237, 0.5)',
+                        borderWidth: 1,
+                        padding: 16,
+                        displayColors: false,
+                        callbacks: {
+                            label: (ctx) => `Coverage: ${ctx.raw}%`
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: {
+                            color: '#8b8b9e',
+                            maxRotation: 45,
+                            minRotation: 45,
+                            font: { size: 11 }
+                        },
+                        grid: { display: false }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            color: '#8b8b9e',
+                            callback: (v) => v + '%'
+                        },
+                        grid: {
+                            color: 'rgba(255,255,255,0.05)',
+                            drawBorder: false
+                        }
+                    }
+                }
+            }
+        });
+
+        // Chart 2: Distribution Donut
+        const distributionCtx = document.getElementById('distributionChart').getContext('2d');
+        new Chart(distributionCtx, {
+            type: 'doughnut',
+            data: {
+                labels: useCaseData.categories.slice(0, 8),
+                datasets: [{
+                    data: useCaseData.lines.slice(0, 8),
+                    backgroundColor: colors.gradients.slice(0, 8).map(c => c + 'cc'),
+                    borderColor: colors.gradients.slice(0, 8),
+                    borderWidth: 2,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '60%',
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            color: '#a0a0b0',
+                            padding: 15,
+                            font: { size: 11 },
+                            usePointStyle: true,
+                            pointStyle: 'rectRounded'
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(26, 26, 46, 0.95)',
+                        titleColor: '#fff',
+                        bodyColor: '#a0a0b0',
+                        borderColor: 'rgba(124, 58, 237, 0.5)',
+                        borderWidth: 1,
+                        padding: 12,
+                        callbacks: {
+                            label: (ctx) => `${ctx.label}: ${ctx.raw} lines`
+                        }
+                    }
+                }
+            }
+        });
+
+        // Chart 3: Status Pie
+        const statusCtx = document.getElementById('statusChart').getContext('2d');
+        new Chart(statusCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Excellent (≥90%)', 'Good (80-89%)', 'Fair (70-79%)', 'Needs Work (<70%)'],
+                datasets: [{
+                    data: [
+                        useCaseData.coverage.filter(v => v >= 90).length,
+                        useCaseData.coverage.filter(v => v >= 80 && v < 90).length,
+                        useCaseData.coverage.filter(v => v >= 70 && v < 80).length,
+                        useCaseData.coverage.filter(v => v < 70).length
+                    ],
+                    backgroundColor: [
+                        'rgba(34, 197, 94, 0.8)',
+                        'rgba(0, 212, 255, 0.8)',
+                        'rgba(245, 158, 11, 0.8)',
+                        'rgba(239, 68, 68, 0.8)'
+                    ],
+                    borderColor: ['#22c55e', '#00d4ff', '#f59e0b', '#ef4444'],
+                    borderWidth: 2,
+                    hoverOffset: 15
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#a0a0b0',
+                            padding: 20,
+                            font: { size: 12 },
+                            usePointStyle: true
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(26, 26, 46, 0.95)',
+                        titleColor: '#fff',
+                        bodyColor: '#a0a0b0',
+                        borderColor: 'rgba(124, 58, 237, 0.5)',
+                        borderWidth: 1,
+                        callbacks: {
+                            label: (ctx) => `${ctx.label}: ${ctx.raw} categories`
+                        }
+                    }
+                }
+            }
+        });
+
+        // Chart 4: Radar Chart
+        const radarCtx = document.getElementById('radarChart').getContext('2d');
+        new Chart(radarCtx, {
+            type: 'radar',
+            data: {
+                labels: ['API', 'CLI', 'Core', 'Database', 'NER/NLP', 'Pattern', 'Vision', 'Plugins'],
+                datasets: [{
+                    label: 'Coverage',
+                    data: [95.9, 75.7, 48.0, 100, 85.2, 88.5, 92.3, 97.5],
+                    backgroundColor: 'rgba(0, 212, 255, 0.2)',
+                    borderColor: '#00d4ff',
+                    borderWidth: 2,
+                    pointBackgroundColor: '#00d4ff',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: '#00d4ff'
+                }, {
+                    label: 'Target (80%)',
+                    data: [80, 80, 80, 80, 80, 80, 80, 80],
+                    backgroundColor: 'rgba(124, 58, 237, 0.1)',
+                    borderColor: 'rgba(124, 58, 237, 0.5)',
+                    borderWidth: 1,
+                    borderDash: [5, 5],
+                    pointRadius: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            color: '#8b8b9e',
+                            backdropColor: 'transparent',
+                            stepSize: 20
+                        },
+                        grid: {
+                            color: 'rgba(255,255,255,0.1)'
+                        },
+                        pointLabels: {
+                            color: '#a0a0b0',
+                            font: { size: 11 }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#a0a0b0',
+                            padding: 20,
+                            usePointStyle: true
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(26, 26, 46, 0.95)',
+                        titleColor: '#fff',
+                        bodyColor: '#a0a0b0',
+                        borderColor: 'rgba(124, 58, 237, 0.5)',
+                        borderWidth: 1
+                    }
+                }
+            }
+        });
+
+        // Chart 5: Layer Chart
+        const layerCtx = document.getElementById('layerChart').getContext('2d');
+        new Chart(layerCtx, {
+            type: 'polarArea',
+            data: {
+                labels: ['Presentation (API/CLI)', 'Business Logic (Services)', 'Data Layer (DB/Models)', 'Infrastructure (Core)', 'Extensions (Plugins)'],
+                datasets: [{
+                    data: [85.8, 87.3, 100, 48.0, 97.5],
+                    backgroundColor: [
+                        'rgba(0, 212, 255, 0.7)',
+                        'rgba(124, 58, 237, 0.7)',
+                        'rgba(34, 197, 94, 0.7)',
+                        'rgba(245, 158, 11, 0.7)',
+                        'rgba(236, 72, 153, 0.7)'
+                    ],
+                    borderColor: ['#00d4ff', '#7c3aed', '#22c55e', '#f59e0b', '#ec4899'],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            display: false
+                        },
+                        grid: {
+                            color: 'rgba(255,255,255,0.1)'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            color: '#a0a0b0',
+                            padding: 12,
+                            font: { size: 10 },
+                            usePointStyle: true
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(26, 26, 46, 0.95)',
+                        titleColor: '#fff',
+                        bodyColor: '#a0a0b0',
+                        borderColor: 'rgba(124, 58, 237, 0.5)',
+                        borderWidth: 1,
+                        callbacks: {
+                            label: (ctx) => `${ctx.label}: ${ctx.raw}%`
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

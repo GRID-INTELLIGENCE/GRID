@@ -1,0 +1,42 @@
+graph TB
+    subgraph "Core API :8080"
+        MAIN[Main Application]
+        MAIN --> HEALTH["/health"]
+        MAIN --> RES["/api/v1/resonance/"]
+        MAIN --> AGENT["/api/v1/agentic/"]
+        MAIN --> SKILL["/api/v1/skills/"]
+    end
+
+    subgraph "MCP Servers"
+        MCP1[Database MCP :8081]
+        MCP2[Filesystem MCP :8082]
+        MCP3[Memory MCP :8083]
+
+        MCP1 --> HEALTH1["/health"]
+        MCP2 --> HEALTH2["/health"]
+        MCP3 --> HEALTH3["/health"]
+    end
+
+    subgraph "Key Endpoints"
+        RES --> DEF[definitive]
+        RES --> PROC[process]
+        AGENT --> CASES[cases]
+        AGENT --> EXEC[execute]
+        SKILL --> HEALTH4[health]
+        SKILL --> INTEL[intelligence]
+    end
+
+    style MAIN fill:#e1f5fe
+    style MCP1 fill:#e8f5e8
+    style MCP2 fill:#e8f5e8
+    style MCP3 fill:#e8f5e8
+    style HEALTH fill:#fff3e0
+    style RES fill:#fff3e0
+    style AGENT fill:#fff3e0
+    style SKILL fill:#fff3e0
+    style DEF fill:#fce4ec
+    style PROC fill:#fce4ec
+    style CASES fill:#fce4ec
+    style EXEC fill:#fce4ec
+    style HEALTH4 fill:#fce4ec
+    style INTEL fill:#fce4ec

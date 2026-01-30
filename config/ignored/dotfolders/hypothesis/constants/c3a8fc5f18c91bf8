@@ -1,0 +1,4 @@
+# file: E:\grid\application\mothership\schemas\payment.py
+# hypothesis_version: 6.150.0
+
+['Additional metadata', 'Amount in cents', 'Currency code', 'Payment description', 'Raw webhook payload', 'Reason for refund', 'Subscription tier', 'USD', 'active', 'cancelled', 'completed', 'enterprise', 'expired', 'failed', 'free', 'partially_refunded', 'past_due', 'pending', 'processing', 'professional', 'refunded', 'starter', 'stripe', 'trialing', 'unpaid']

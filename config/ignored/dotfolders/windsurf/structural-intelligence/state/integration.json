@@ -1,0 +1,46 @@
+{
+  "generated_at": "2025-12-17T12:50:15.238318+00:00",
+  "total_integrations": 5,
+  "open_mismatches": 0,
+  "resolution_queue_size": 0,
+  "integrations_by_status": {
+    "active": 5,
+    "inactive": 0,
+    "degraded": 0,
+    "error": 0
+  },
+  "success_rate": 100,
+  "top_mismatch_types": [],
+  "last_routing_query": "search tools utilities",
+  "last_routing_timestamp": "2026-01-09T05:23:11.476559",
+  "route_count": 1,
+  "routing_history": [
+    {
+      "path": "E:\\grid\\grid",
+      "timestamp": "2026-01-09T05:23:10.667579",
+      "updates": {
+        "last_routing_query": "find agent routing system in grid agentic",
+        "last_routing_timestamp": "2026-01-09T05:23:10.667571",
+        "route_count": 2
+      }
+    },
+    {
+      "path": "E:\\grid\\application\\canvas\\api.py",
+      "timestamp": "2026-01-09T05:23:11.072486",
+      "updates": {
+        "last_routing_query": "locate API endpoints application",
+        "last_routing_timestamp": "2026-01-09T05:23:11.072475",
+        "route_count": 2
+      }
+    },
+    {
+      "path": "E:\\grid\\tools",
+      "timestamp": "2026-01-09T05:23:11.476568",
+      "updates": {
+        "last_routing_query": "search tools utilities",
+        "last_routing_timestamp": "2026-01-09T05:23:11.476559",
+        "route_count": 1
+      }
+    }
+  ]
+}

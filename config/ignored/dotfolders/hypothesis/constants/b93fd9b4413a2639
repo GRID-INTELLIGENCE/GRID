@@ -1,0 +1,4 @@
+# file: E:\grid\application\resonance\api\dependencies.py
+# hypothesis_version: 6.150.0
+
+['Auth', 'RateLimited', 'ResonanceServiceDep', 'anonymous', 'authenticated', 'fallback', 'method', 'permissions', 'read', 'user_id', 'write']

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Moonlit Jazz Club</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            overflow: hidden;
+            background: #0a0a0f;
+            font-family: 'Georgia', serif;
+        }
+
+        .scene {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(to bottom, #1a1a2e 0%, #0f0f1e 50%, #050508 100%);
+        }
+
+        /* Smoke particles */
+        .smoke {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(200,200,220,0.12) 0%, transparent 70%);
+            border-radius: 50%;
+            filter: blur(15px);
+            animation: float 20s infinite ease-in-out;
+            opacity: 0.25;
+        }
+
+        .smoke:nth-child(1) { left: 10%; top: 30%; animation-delay: 0s; animation-duration: 25s; }
+        .smoke:nth-child(2) { left: 70%; top: 40%; animation-delay: 5s; animation-duration: 30s; }
+        .smoke:nth-child(3) { left: 40%; top: 20%; animation-delay: 10s; animation-duration: 28s; }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -40px) scale(1.1); }
+            66% { transform: translate(-20px, -20px) scale(0.9); }
+        }
+
+        /* Stage */
+        .stage {
+            position: absolute;
+            bottom: 15%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 500px;
+            height: 150px;
+            background: linear-gradient(to bottom, #2a1810, #1a0f08);
+            border-radius: 10px 10px 0 0;
+            box-shadow: 0 -20px 60px rgba(255, 200, 100, 0.3);
+        }
+
+        /* Stage light */
+        .spotlight {
+            position: absolute;
+            top: -200px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 150px solid transparent;
+            border-right: 150px solid transparent;
+            border-top: 200px solid rgba(255, 220, 150, 0.2);
+            filter: blur(3px);
+            animation: spotPulse 4s infinite ease-in-out;
+        }
+
+        @keyframes spotPulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 0.8; }
+        }
+
+        /* Musicians */
+        .musician {
+            position: absolute;
+            bottom: 20px;
+        }
+
+        .pianist {
+            left: 30px;
+            width: 80px;
+            height: 90px;
+            background: #1a1a2e;
+            border-radius: 10px 10px 0 0;
+            animation: sway 3s infinite ease-in-out;
+        }
+
+        .pianist::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: 25px;
+            width: 30px;
+            height: 30px;
+            background: #d4a574;
+            border-radius: 50%;
+        }
+
+        .saxophonist {
+            right: 100px;
+            width: 70px;
+            height: 100px;
+            background: #2a2a3e;
+            border-radius: 10px 10px 0 0;
+            animation: sway 2.5s infinite ease-in-out;
+            animation-delay: 0.5s;
+        }
+
+        .saxophonist::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: 20px;
+            width: 30px;
+            height: 30px;
+            background: #c49a6c;
+            border-radius: 50%;
+        }
+
+        .saxophonist::after {
+            content: '';
+            position: absolute;
+            top: 10px;
+            right: -30px;
+            width: 40px;
+            height: 15px;
+            background: linear-gradient(to right, #d4af37, #aa8c2f);
+            border-radius: 0 10px 10px 0;
+            transform: rotate(-20deg);
+        }
+
+        @keyframes sway {
+            0%, 100% { transform: rotate(-2deg); }
+            50% { transform: rotate(2deg); }
+        }
+
+        /* Piano */
+        .piano {
+            position: absolute;
+            left: 20px;
+            bottom: 20px;
+            width: 100px;
+            height: 40px;
+            background: #0a0a0f;
+            border-radius: 5px;
+        }
+
+        /* Musical notes */
+        .note {
+            position: absolute;
+            font-size: 30px;
+            color: rgba(255, 220, 150, 0.6);
+            animation: noteFloat 4s infinite ease-in-out;
+        }
+
+        .note:nth-child(1) { left: 20%; top: 40%; animation-delay: 0s; }
+        .note:nth-child(2) { left: 60%; top: 35%; animation-delay: 1s; }
+        .note:nth-child(3) { left: 80%; top: 45%; animation-delay: 2s; }
+        .note:nth-child(4) { left: 40%; top: 30%; animation-delay: 1.5s; }
+
+        @keyframes noteFloat {
+            0% { transform: translateY(0) scale(0); opacity: 0; }
+            10% { opacity: 0.8; }
+            50% { transform: translateY(-100px) scale(1); opacity: 0.6; }
+            100% { transform: translateY(-200px) scale(0.8); opacity: 0; }
+        }
+
+        /* Tables */
+        .table {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, #3a2520 0%, #1a1210 100%);
+            border-radius: 50%;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+        }
+
+        .table::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 15px;
+            height: 15px;
+            background: radial-gradient(circle, rgba(255,200,100,0.4), transparent);
+            border-radius: 50%;
+            animation: candleFlicker 2s infinite ease-in-out;
+        }
+
+        @keyframes candleFlicker {
+            0%, 100% { opacity: 0.8; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+        }
+
+        .table1 { bottom: 35%; left: 15%; }
+        .table2 { bottom: 30%; right: 20%; }
+        .table3 { bottom: 45%; left: 25%; }
+
+        /* Moon */
+        .moon {
+            position: absolute;
+            top: 10%;
+            right: 15%;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle at 30% 30%, #fffef0, #e8e6d0);
+            border-radius: 50%;
+            box-shadow: 0 0 60px rgba(255,255,240,0.4),
+                        inset -10px -10px 20px rgba(200,200,180,0.3);
+            animation: moonGlow 6s infinite ease-in-out;
+        }
+
+        @keyframes moonGlow {
+            0%, 100% { box-shadow: 0 0 60px rgba(255,255,240,0.4), inset -10px -10px 20px rgba(200,200,180,0.3); }
+            50% { box-shadow: 0 0 80px rgba(255,255,240,0.6), inset -10px -10px 20px rgba(200,200,180,0.3); }
+        }
+
+        /* Title */
+        .title {
+            position: absolute;
+            top: 8%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 48px;
+            color: rgba(255, 220, 150, 0.8);
+            text-shadow: 0 0 20px rgba(255, 220, 150, 0.4);
+            letter-spacing: 3px;
+            font-weight: 300;
+            font-style: italic;
+        }
+
+        /* Ambient particles */
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(255, 220, 150, 0.6);
+            border-radius: 50%;
+            animation: sparkle 3s infinite ease-in-out;
+        }
+
+        .particle:nth-child(1) { left: 30%; top: 50%; animation-delay: 0s; }
+        .particle:nth-child(2) { left: 70%; top: 60%; animation-delay: 1s; }
+        .particle:nth-child(3) { left: 50%; top: 40%; animation-delay: 2s; }
+        .particle:nth-child(4) { left: 25%; top: 70%; animation-delay: 1.5s; }
+        .particle:nth-child(5) { left: 80%; top: 55%; animation-delay: 0.7s; }
+
+        @keyframes sparkle {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(2); }
+        }
+    </style>
+</head>
+<body>
+    <div class="scene">
+        <div class="moon"></div>
+        <div class="title">Moonlit Sessions</div>
+
+        <div class="smoke"></div>
+        <div class="smoke"></div>
+        <div class="smoke"></div>
+
+        <div class="note">♪</div>
+        <div class="note">♫</div>
+        <div class="note">♪</div>
+        <div class="note">♬</div>
+
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+
+        <div class="table table1"></div>
+        <div class="table table2"></div>
+        <div class="table table3"></div>
+
+        <div class="stage">
+            <div class="spotlight"></div>
+            <div class="piano"></div>
+            <div class="musician pianist"></div>
+            <div class="musician saxophonist"></div>
+        </div>
+    </div>
+</body>
+</html>
