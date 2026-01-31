@@ -20,6 +20,9 @@ from enum import Enum
 from typing import Any, Callable, Optional, Awaitable
 from collections import defaultdict
 
+from .domain_routing import expand_domains, infer_domain, normalize_domains, resolve_target_domains
+from .event_schemas import validate_event
+
 logger = logging.getLogger(__name__)
 
 
@@ -51,6 +54,10 @@ class Event:
     timestamp: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
     priority: int = EventPriority.NORMAL.value
     version: str = "1.0"
+
+    def __post_init__(self) -> None:
+        self.source_domain = infer_domain(self.event_type, default=EventDomain.ALL.value)
+        self.target_domains = resolve_target_domains(self.target_domains, self.event_type)
     
     def to_dict(self) -> dict:
         return asdict(self)
@@ -134,10 +141,11 @@ class DynamicEventBus:
             handler: Async function to handle events
             domain: Only receive events from this domain
         """
-        if domain == "all":
+        normalized_domain = (domain or "all").lower()
+        if normalized_domain == "all":
             self._handlers[event_type].append(handler)
         else:
-            self._domain_handlers[domain][event_type].append(handler)
+            self._domain_handlers[normalized_domain][event_type].append(handler)
         
         logger.debug(f"Subscribed to '{event_type}' in domain '{domain}'")
     
@@ -148,12 +156,13 @@ class DynamicEventBus:
         domain: str = "all"
     ) -> None:
         """Unsubscribe from event type"""
-        if domain == "all":
+        normalized_domain = (domain or "all").lower()
+        if normalized_domain == "all":
             if handler in self._handlers[event_type]:
                 self._handlers[event_type].remove(handler)
         else:
-            if handler in self._domain_handlers[domain][event_type]:
-                self._domain_handlers[domain][event_type].remove(handler)
+            if handler in self._domain_handlers[normalized_domain][event_type]:
+                self._domain_handlers[normalized_domain][event_type].remove(handler)
     
     async def publish(
         self,
@@ -167,6 +176,16 @@ class DynamicEventBus:
             event: Event to publish
             wait_for_handlers: If True, wait for all handlers to complete
         """
+        event.target_domains = resolve_target_domains(event.target_domains, event.event_type)
+        validation = validate_event(event.event_type, event.payload)
+        if not validation.is_valid:
+            logger.warning(
+                "Rejected event '%s': %s",
+                event.event_type,
+                validation.message,
+            )
+            return
+
         # Add to history
         self._event_history.append(event)
         if len(self._event_history) > self._max_history:
@@ -259,20 +278,57 @@ class DynamicEventBus:
         
         logger.debug(f"Event '{event.event_type}' dispatched to {handlers_called} handlers")
     
+    @staticmethod
+    def _pattern_match(event_type: str, pattern: str) -> bool:
+        if pattern == "*":
+            return True
+        if pattern.endswith(".*"):
+            return event_type.startswith(pattern[:-2])
+        return event_type == pattern
+
     def _get_matching_handlers(self, event: Event) -> list[EventHandler]:
         """Get all handlers matching event type and domain"""
         handlers = []
-        
+
         # Global handlers (all domains)
-        handlers.extend(self._handlers.get(event.event_type, []))
-        handlers.extend(self._handlers.get("*", []))  # Wildcard
-        
+        for pattern, pattern_handlers in self._handlers.items():
+            if self._pattern_match(event.event_type, pattern):
+                handlers.extend(pattern_handlers)
+
         # Domain-specific handlers
-        for domain in event.target_domains:
-            handlers.extend(self._domain_handlers[domain].get(event.event_type, []))
-            handlers.extend(self._domain_handlers[domain].get("*", []))
-        
+        for domain in expand_domains(event.target_domains):
+            domain_handlers = self._domain_handlers[domain]
+            for pattern, pattern_handlers in domain_handlers.items():
+                if self._pattern_match(event.event_type, pattern):
+                    handlers.extend(pattern_handlers)
+
         return handlers
+
+    def get_event_history(self, limit: Optional[int] = None) -> list[Event]:
+        """Return recent event history for replay/debug."""
+        if limit:
+            return list(self._event_history[-limit:])
+        return list(self._event_history)
+
+    async def replay_events(
+        self,
+        handler: EventHandler,
+        event_type: str = "*",
+        domain: str = "all",
+        limit: Optional[int] = None,
+    ) -> int:
+        """Replay historical events to a handler for bootstrapping."""
+        matched = 0
+        history = self.get_event_history(limit)
+        normalized_domains = expand_domains(normalize_domains([domain])) if domain != "all" else None
+        for event in history:
+            if not self._pattern_match(event.event_type, event_type):
+                continue
+            if normalized_domains and not set(expand_domains(event.target_domains)).intersection(normalized_domains):
+                continue
+            await handler(event)
+            matched += 1
+        return matched
     
     def get_stats(self) -> dict[str, Any]:
         """Get event bus statistics"""

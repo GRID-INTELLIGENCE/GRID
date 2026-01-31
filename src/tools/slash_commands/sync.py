@@ -66,7 +66,7 @@ class SyncCommand(KnowledgeCommand):
 
             return CommandResult(
                 success=summary["overall_success"],
-                message=summary["message"],
+                message=summary["status"],
                 data={
                     "sync_results": results,
                     "summary": summary,

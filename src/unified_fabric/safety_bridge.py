@@ -17,9 +17,10 @@ import importlib.util
 import sys
 from pathlib import Path
 
-from . import Event, EventDomain, get_event_bus, init_event_bus
+from . import Event, EventDomain, EventResponse, get_event_bus, init_event_bus
 from .safety_router import SafetyReport, SafetyDecision, get_safety_router
 from .audit import get_audit_logger, AuditEventType
+from .cross_project_validator import get_policy_validator
 
 logger = logging.getLogger(__name__)
 
@@ -75,6 +76,7 @@ class AISafetyBridge:
         self._safety_router = get_safety_router()
         self._audit_logger = get_audit_logger()
         self._event_bus = get_event_bus()
+        self._policy_validator = get_policy_validator()
         self._cache: dict[str, tuple[SafetyReport, float]] = {}
         self._wellness_safety: Optional[Any] = None
         self._initialized = False
@@ -149,6 +151,19 @@ class AISafetyBridge:
             metadata={"request_type": request.get("type", "unknown")}
         )
         return await self.validate(content, context)
+
+    def _build_context_from_payload(self, payload: dict[str, Any]) -> SafetyContext:
+        context_payload = payload.get("context") if isinstance(payload, dict) else {}
+        if not isinstance(context_payload, dict):
+            context_payload = {}
+        return SafetyContext(
+            project=context_payload.get("project", payload.get("project", "unknown")),
+            domain=context_payload.get("domain", payload.get("domain", "unknown")),
+            user_id=context_payload.get("user_id", payload.get("user_id", "system")),
+            request_id=context_payload.get("request_id"),
+            correlation_id=context_payload.get("correlation_id"),
+            metadata=context_payload.get("metadata", {}),
+        )
     
     async def validate_coinbase_action(
         self,
@@ -374,18 +389,27 @@ class AISafetyBridge:
         context: SafetyContext
     ):
         """Broadcast safety event to subscribers"""
-        event = Event(
-            event_type=f"safety.distributed.{report.threat_level.value}",
-            payload={
-                "project": context.project,
-                "domain": context.domain,
-                "decision": report.decision.value,
-                "violation_count": len(report.violations)
-            },
+        payload = {
+            "project": context.project,
+            "domain": context.domain,
+            "decision": report.decision.value,
+            "threat_level": report.threat_level.value,
+            "violation_count": len(report.violations),
+        }
+        primary = Event(
+            event_type="safety.violation_detected",
+            payload=payload,
             source_domain=EventDomain.SAFETY.value,
-            target_domains=["all"]
+            target_domains=["all"],
         )
-        await self._event_bus.publish(event)
+        legacy = Event(
+            event_type=f"safety.distributed.{report.threat_level.value}",
+            payload=payload,
+            source_domain=EventDomain.SAFETY.value,
+            target_domains=["all"],
+        )
+        await self._event_bus.publish(primary)
+        await self._event_bus.publish(legacy)
     
     def _subscribe_to_events(self):
         """Subscribe to relevant events"""
@@ -396,9 +420,68 @@ class AISafetyBridge:
         async def handle_coinbase_action(event: Event):
             if event.event_type == "coinbase.action":
                 await self.validate_coinbase_action(event.payload)
-        
+
+        async def handle_validation_request(event: Event) -> Optional[EventResponse]:
+            payload = event.payload or {}
+            policy_result = self._policy_validator.validate_payload(payload)
+            if not policy_result.allowed:
+                violation_event = Event(
+                    event_type="safety.violation_detected",
+                    payload={
+                        "violation_type": "policy_violation",
+                        "severity": policy_result.severity,
+                        "reason": policy_result.reason,
+                        "details": payload,
+                    },
+                    source_domain=EventDomain.SAFETY.value,
+                    target_domains=["all"],
+                )
+                await self._event_bus.publish(violation_event)
+                if self.config.enable_audit:
+                    await self._audit_logger.log(
+                        event_type=AuditEventType.SAFETY_VIOLATION,
+                        project_id="unified_fabric",
+                        domain="safety",
+                        action="policy_violation",
+                        status="blocked",
+                        details={"reason": policy_result.reason, "payload": payload},
+                    )
+                return EventResponse(success=False, error=policy_result.reason, event_id=event.event_id)
+
+            context = self._build_context_from_payload(payload)
+            content = str(payload.get("content", payload))
+            report = await self.validate(content, context)
+            result_event = Event(
+                event_type="safety.validation_completed",
+                payload={
+                    "decision": report.decision.value,
+                    "threat_level": report.threat_level.value,
+                    "violation_count": len(report.violations),
+                    "request_id": context.request_id,
+                    "correlation_id": context.correlation_id,
+                },
+                source_domain=EventDomain.SAFETY.value,
+                target_domains=event.target_domains,
+            )
+            await self._event_bus.publish(result_event)
+            return EventResponse(success=report.is_safe, data=result_event.payload, event_id=event.event_id)
+
+        async def handle_audit_replication(event: Event) -> Optional[EventResponse]:
+            payload = event.payload or {}
+            await self._audit_logger.log(
+                event_type=AuditEventType.SYSTEM_EVENT,
+                project_id=payload.get("project_id", "external"),
+                domain=payload.get("domain", "safety"),
+                action="audit_replication",
+                status="received",
+                details=payload,
+            )
+            return EventResponse(success=True, data={"status": "replicated"}, event_id=event.event_id)
+
         self._event_bus.subscribe("grid.*", handle_grid_request, domain="grid")
         self._event_bus.subscribe("coinbase.*", handle_coinbase_action, domain="coinbase")
+        self._event_bus.subscribe("safety.validation_required", handle_validation_request, domain="safety")
+        self._event_bus.subscribe("safety.audit_replication", handle_audit_replication, domain="safety")
     
     def clear_cache(self):
         """Clear safety cache to recover memory"""
