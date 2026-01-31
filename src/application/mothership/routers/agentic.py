@@ -34,7 +34,6 @@ KNOWLEDGE_BASE_PATH = Path("tools/agent_prompts")
 REFERENCE_OUTPUT_PATH = Path(".case_references")
 
 
-@asynccontextmanager
 async def get_async_session() -> AsyncIterator[AsyncSession]:
     """Get async database session."""
     sessionmaker = get_async_sessionmaker()
