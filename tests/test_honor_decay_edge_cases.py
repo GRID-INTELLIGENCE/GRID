@@ -11,13 +11,18 @@ arena_path = Path(__file__).parent.parent / "archive" / "misc" / "Arena" / "the_
 if str(arena_path) not in sys.path:
     sys.path.insert(0, str(arena_path))
 
-from the_chase.overwatch.rewards import (
-    Achievement,
-    AchievementType,
-    CharacterRewardState,
-    RewardEscalator,
-    RewardLevel,
-)
+import pytest
+
+try:
+    from the_chase.overwatch.rewards import (
+        Achievement,
+        AchievementType,
+        CharacterRewardState,
+        RewardEscalator,
+        RewardLevel,
+    )
+except ImportError:
+    pytest.skip("Optional dependency 'the_chase' not available", allow_module_level=True)
 
 
 def test_incremental_decay():

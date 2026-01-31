@@ -235,7 +235,7 @@ class AISafetyManager:
                 try:
                     body_content = await request.body()
                     body_content = body_content.decode('utf-8', errors='ignore')
-                except:
+                except Exception:
                     pass
 
             # Check for SQL injection patterns
@@ -469,18 +469,18 @@ class AISafetyManager:
             # This would integrate with ML models for anomaly detection
             # For now, implement basic heuristics
 
-            client_ip = getattr(request.client, 'host', None) if request.client else None
-            user_agent = request.headers.get('User-Agent', '')
-            path = request.url.path
+            _client_ip = getattr(request.client, 'host', None) if request.client else None
+            _user_agent = request.headers.get('User-Agent', '')
+            _path = request.url.path
 
             anomalies = []
 
             # Check for suspicious user agents
             suspicious_agents = ['curl', 'wget', 'python-requests', 'postman']
-            if any(agent.lower() in user_agent.lower() for agent in suspicious_agents):
+            if any(agent.lower() in _user_agent.lower() for agent in suspicious_agents):
                 anomalies.append({
                     "type": "suspicious_user_agent",
-                    "user_agent": user_agent
+                    "user_agent": _user_agent
                 })
 
             # Check for unusual request patterns
@@ -525,7 +525,7 @@ class AISafetyManager:
                 body = await request.body()
                 return body.decode('utf-8', errors='ignore')
             return ""
-        except:
+        except Exception:
             return ""
 
     async def _log_safety_check(self, request, checks: list[SafetyCheck], overall_safe: bool):

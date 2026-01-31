@@ -89,9 +89,9 @@ GRID uses GitHub Actions for automated CI/CD, aligned with industry best practic
 
 | Job | Description | Dependencies |
 |-----|-------------|--------------|
-| `lint` | Code quality (Black, isort, Ruff, mypy) | None |
+| `lint` | Code quality (Black, Ruff, mypy) | None |
 | `security` | Security scanning (Bandit, pip-audit) | None |
-| `test` | Unit tests (Python 3.10, 3.11, 3.12) | `lint` |
+| `test` | Unit tests (Python 3.13) | `lint` |
 | `integration` | Integration tests (main branch only) | `test` |
 | `build` | Package building and verification | `test` |
 | `docs` | Documentation checks | None |
@@ -101,9 +101,9 @@ GRID uses GitHub Actions for automated CI/CD, aligned with industry best practic
 
 | OS | Python Versions |
 |----|-----------------|
-| Ubuntu | 3.10, 3.11, 3.12 |
-| Windows | 3.11 |
-| macOS | 3.11 |
+| Ubuntu | 3.13 |
+| Windows | 3.13 |
+| macOS | 3.13 |
 
 ### Release Pipeline
 
@@ -287,12 +287,11 @@ git push origin v0.3.0
 
 ```bash
 # Fix formatting locally
-black .
-isort .
+uv run black .
 
 # Check and auto-fix
-ruff check .
-ruff check --fix .
+uv run ruff check .
+uv run ruff check . --fix
 ```
 
 ### Test Failures

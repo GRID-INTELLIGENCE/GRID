@@ -12,6 +12,8 @@ import chromadb
 import numpy as np
 from sentence_transformers import SentenceTransformer
 
+from .enrichment import RAGMetadataEnricher
+
 logger = logging.getLogger(__name__)
 
 
@@ -27,6 +29,7 @@ class RetrievalConfig:
     rerank_top_k: int = 5
     enable_hybrid_search: bool = True
     enable_semantic_chunking: bool = True
+    enable_kg_enrichment: bool = True
 
 
 @dataclass
@@ -51,6 +54,7 @@ class EnhancedRAG:
         self.client = chromadb.PersistentClient(path=db_path)
         self.collection = self.client.get_or_create_collection("documents")
         self.logger = logging.getLogger(f"{__name__}.EnhancedRAG")
+        self.enricher = RAGMetadataEnricher() if config.enable_kg_enrichment else None
 
     def enhanced_chunking(self, text: str) -> list[tuple[str, ChunkMetadata]]:
         """Improved text chunking with semantic awareness"""
@@ -390,9 +394,15 @@ class EnhancedRAG:
             doc_id = f"{metadata.get('doc_id', 'doc')}_{i}"
 
             # Combine document metadata with chunk metadata
+            chunk_dict_metadata = chunk_metadata.__dict__
+            
+            # Apply KG enrichment if enabled
+            if self.enricher:
+                chunk_dict_metadata = self.enricher.enrich_metadata(chunk_text, chunk_dict_metadata)
+
             combined_metadata = {
                 **metadata,
-                **chunk_metadata.__dict__,
+                **chunk_dict_metadata,
                 "indexed_at": datetime.now().isoformat(),
                 "chunk_preview": chunk_text[:200],  # Preview for search results
             }

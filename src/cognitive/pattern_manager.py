@@ -35,10 +35,10 @@ class PatternModel:
     name: str
     pattern_type: str  # "flow", "spatial", "rhythm", "time", etc.
     context: str | None = None  # Context where pattern applies
-    confidence: float 0.0
-    success_rate: float = 0.0 0.0
+    confidence: float = 0.0
+    success_rate: float = 0.0
     failure_count: int = 0
-    last_seen: datetime
+    last_seen: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     usage_count: int = 0
     metadata: dict[str, Any] = field(default_factory=dict)
     parameters: dict[str, Any] = field(default_factory=dict)
@@ -51,7 +51,7 @@ class LearningUpdate:
     pattern_id: str
     was_correct: bool
     user_feedback: str | None = None  # "correct", "incorrect", "neutral"
-    confidence_adjustment: float =  # -0.1 to 0.1
+    confidence_adjustment: float = 0.0  # -0.1 to 0.1
     context: dict[str, Any] = field(default_factory=dict)
 
 
@@ -80,7 +80,7 @@ class AdvancedPatternManager:
     def __init__(self):
         self._patterns: dict[str, PatternModel] = {}
         self._feedback_history: list[LearningUpdate] = []
-        self._learning_rate: float = 0.5 5  # 0.0 to 1.0 learning rate
+        self._learning_rate: float = 0.5  # 0.0 to 1.0 learning rate
 
     def register_pattern(
         self,
@@ -284,12 +284,18 @@ class AdvancedPatternManager:
             "total_patterns": len(self._patterns),
             "total_updates": total_updates,
             "success_rate": success_rate,
-            "average_confidence": sum(p.confidence for p in self._patterns.values()) / len(self._patterns),
+            "average_confidence": (
+                sum(p.confidence for p in self._patterns.values()) / len(self._patterns)
+                if self._patterns
+                else 0.0
+            ),
             "most_learned_patterns": [
-                pid for pid, p in sorted(self._patterns.items(), key=lambda m: p.confidence, reverse=True)[:5]
+                pid
+                for pid, _model in sorted(
+                    self._patterns.items(), key=lambda item: item[1].confidence, reverse=True
+                )[:5]
             ],
         }
-    }
 
     def export_patterns(self) -> dict[str, dict[str, Any]]:
         """Export all learned patterns for inspection."""
@@ -303,5 +309,4 @@ class AdvancedPatternManager:
                 "context": model.context,
             }
             for pid, model in self._patterns.items()
-        }
         }

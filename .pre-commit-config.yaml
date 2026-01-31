@@ -77,38 +77,39 @@ repos:
       # Block common API key patterns
       - id: check-api-keys
         name: "🚫 Check for API key patterns"
-        entry: python -c "
-import re
-import sys
+        entry: |
+          python -c "
+          import re
+          import sys
 
-patterns = [
-    (r'sk-[a-zA-Z0-9]{20,}', 'OpenAI API key'),
-    (r'sk_live_[a-zA-Z0-9]{20,}', 'Stripe live key'),
-    (r'sk_test_[a-zA-Z0-9]{20,}', 'Stripe test key'),
-    (r'ghp_[a-zA-Z0-9]{36}', 'GitHub personal access token'),
-    (r'gho_[a-zA-Z0-9]{36}', 'GitHub OAuth token'),
-    (r'github_pat_[a-zA-Z0-9_]{22,}', 'GitHub fine-grained PAT'),
-    (r'xox[baprs]-[a-zA-Z0-9-]{10,}', 'Slack token'),
-    (r'AKIA[0-9A-Z]{16}', 'AWS access key'),
-    (r'dapi[a-f0-9]{32}', 'Databricks token'),
-    (r'AIza[0-9A-Za-z_-]{35}', 'Google API key'),
-]
+          patterns = [
+              (r'sk-[a-zA-Z0-9]{20,}', 'OpenAI API key'),
+              (r'sk_live_[a-zA-Z0-9]{20,}', 'Stripe live key'),
+              (r'sk_test_[a-zA-Z0-9]{20,}', 'Stripe test key'),
+              (r'ghp_[a-zA-Z0-9]{36}', 'GitHub personal access token'),
+              (r'gho_[a-zA-Z0-9]{36}', 'GitHub OAuth token'),
+              (r'github_pat_[a-zA-Z0-9_]{22,}', 'GitHub fine-grained PAT'),
+              (r'xox[baprs]-[a-zA-Z0-9-]{10,}', 'Slack token'),
+              (r'AKIA[0-9A-Z]{16}', 'AWS access key'),
+              (r'dapi[a-f0-9]{32}', 'Databricks token'),
+              (r'AIza[0-9A-Za-z_-]{35}', 'Google API key'),
+          ]
 
-found = False
-for filepath in sys.argv[1:]:
-    try:
-        with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
-            content = f.read()
-            for pattern, name in patterns:
-                matches = re.findall(pattern, content)
-                if matches:
-                    print(f'❌ {filepath}: Found potential {name}')
-                    found = True
-    except Exception:
-        pass
+          found = False
+          for filepath in sys.argv[1:]:
+              try:
+                  with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+                      content = f.read()
+                      for pattern, name in patterns:
+                          matches = re.findall(pattern, content)
+                          if matches:
+                              print(f'❌ {filepath}: Found potential {name}')
+                              found = True
+              except Exception:
+                  pass
 
-sys.exit(1 if found else 0)
-"
+          sys.exit(1 if found else 0)
+          "
         language: python
         types: [text]
         exclude: |
@@ -121,55 +122,56 @@ sys.exit(1 if found else 0)
       # Block hardcoded passwords
       - id: check-hardcoded-passwords
         name: "🔑 Check for hardcoded passwords"
-        entry: python -c "
-import re
-import sys
+        entry: |
+          python -c "
+          import re
+          import sys
 
-# Patterns that suggest hardcoded passwords
-patterns = [
-    r'password\s*[=:]\s*[\"\\'][^\"\\'\s]{8,}[\"\\']',
-    r'passwd\s*[=:]\s*[\"\\'][^\"\\'\s]{8,}[\"\\']',
-    r'pwd\s*[=:]\s*[\"\\'][^\"\\'\s]{8,}[\"\\']',
-    r'secret\s*[=:]\s*[\"\\'][^\"\\'\s]{8,}[\"\\']',
-    r'api_key\s*[=:]\s*[\"\\'][^\"\\'\s]{16,}[\"\\']',
-    r'apikey\s*[=:]\s*[\"\\'][^\"\\'\s]{16,}[\"\\']',
-    r'auth_token\s*[=:]\s*[\"\\'][^\"\\'\s]{16,}[\"\\']',
-    r'bearer\s+[a-zA-Z0-9_-]{20,}',
-]
+          # Patterns that suggest hardcoded passwords
+          patterns = [
+              r'password\s*[=:]\s*[\"\\'][^\"\\'\s]{8,}[\"\\']',
+              r'passwd\s*[=:]\s*[\"\\'][^\"\\'\s]{8,}[\"\\']',
+              r'pwd\s*[=:]\s*[\"\\'][^\"\\'\s]{8,}[\"\\']',
+              r'secret\s*[=:]\s*[\"\\'][^\"\\'\s]{8,}[\"\\']',
+              r'api_key\s*[=:]\s*[\"\\'][^\"\\'\s]{16,}[\"\\']',
+              r'apikey\s*[=:]\s*[\"\\'][^\"\\'\s]{16,}[\"\\']',
+              r'auth_token\s*[=:]\s*[\"\\'][^\"\\'\s]{16,}[\"\\']',
+              r'bearer\s+[a-zA-Z0-9_-]{20,}',
+          ]
 
-# Allowlist patterns (test files, examples, etc.)
-allowlist = [
-    r'password.*example',
-    r'password.*test',
-    r'password.*dummy',
-    r'password.*fake',
-    r'password.*placeholder',
-    r'your[_-]?password',
-    r'<password>',
-    r'\$\{.*password.*\}',
-    r'os\.environ',
-    r'getenv',
-]
+          # Allowlist patterns (test files, examples, etc.)
+          allowlist = [
+              r'password.*example',
+              r'password.*test',
+              r'password.*dummy',
+              r'password.*fake',
+              r'password.*placeholder',
+              r'your[_-]?password',
+              r'<password>',
+              r'\$\{.*password.*\}',
+              r'os\.environ',
+              r'getenv',
+          ]
 
-found = False
-for filepath in sys.argv[1:]:
-    try:
-        with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
-            for line_num, line in enumerate(f, 1):
-                line_lower = line.lower()
-                # Skip if matches allowlist
-                if any(re.search(p, line_lower) for p in allowlist):
-                    continue
-                for pattern in patterns:
-                    if re.search(pattern, line_lower):
-                        print(f'❌ {filepath}:{line_num}: Potential hardcoded credential')
-                        found = True
-                        break
-    except Exception:
-        pass
+          found = False
+          for filepath in sys.argv[1:]:
+              try:
+                  with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+                      for line_num, line in enumerate(f, 1):
+                          line_lower = line.lower()
+                          # Skip if matches allowlist
+                          if any(re.search(p, line_lower) for p in allowlist):
+                              continue
+                          for pattern in patterns:
+                              if re.search(pattern, line_lower):
+                                  print(f'❌ {filepath}:{line_num}: Potential hardcoded credential')
+                                  found = True
+                                  break
+              except Exception:
+                  pass
 
-sys.exit(1 if found else 0)
-"
+          sys.exit(1 if found else 0)
+          "
         language: python
         types: [python]
         exclude: |
@@ -182,56 +184,58 @@ sys.exit(1 if found else 0)
       # Block private keys
       - id: check-private-keys
         name: "🔒 Check for private keys"
-        entry: python -c "
-import sys
+        entry: |
+          python -c "
+          import sys
 
-markers = [
-    b'-----BEGIN RSA PRIVATE KEY-----',
-    b'-----BEGIN DSA PRIVATE KEY-----',
-    b'-----BEGIN EC PRIVATE KEY-----',
-    b'-----BEGIN OPENSSH PRIVATE KEY-----',
-    b'-----BEGIN PGP PRIVATE KEY BLOCK-----',
-    b'-----BEGIN PRIVATE KEY-----',
-    b'-----BEGIN ENCRYPTED PRIVATE KEY-----',
-]
+          markers = [
+              b'-----BEGIN RSA PRIVATE KEY-----',
+              b'-----BEGIN DSA PRIVATE KEY-----',
+              b'-----BEGIN EC PRIVATE KEY-----',
+              b'-----BEGIN OPENSSH PRIVATE KEY-----',
+              b'-----BEGIN PGP PRIVATE KEY BLOCK-----',
+              b'-----BEGIN PRIVATE KEY-----',
+              b'-----BEGIN ENCRYPTED PRIVATE KEY-----',
+          ]
 
-found = False
-for filepath in sys.argv[1:]:
-    try:
-        with open(filepath, 'rb') as f:
-            content = f.read()
-            for marker in markers:
-                if marker in content:
-                    print(f'❌ {filepath}: Contains private key!')
-                    found = True
-                    break
-    except Exception:
-        pass
+          found = False
+          for filepath in sys.argv[1:]:
+              try:
+                  with open(filepath, 'rb') as f:
+                      content = f.read()
+                      for marker in markers:
+                          if marker in content:
+                              print(f'❌ {filepath}: Contains private key!')
+                              found = True
+                              break
+              except Exception:
+                  pass
 
-sys.exit(1 if found else 0)
-"
+          sys.exit(1 if found else 0)
+          "
         language: python
         types: [text]
 
       # Block .env files from being committed
       - id: check-env-files
         name: "📁 Block .env files"
-        entry: python -c "
-import sys
-import os
+        entry: |
+          python -c "
+          import sys
+          import os
 
-blocked_patterns = ['.env', 'user_env', 'credentials', 'secrets.json', 'secrets.yaml']
-found = False
+          blocked_patterns = ['.env', 'user_env', 'credentials', 'secrets.json', 'secrets.yaml']
+          found = False
 
-for filepath in sys.argv[1:]:
-    basename = os.path.basename(filepath).lower()
-    for pattern in blocked_patterns:
-        if pattern in basename and 'example' not in basename and 'template' not in basename:
-            print(f'❌ {filepath}: Environment/secrets file should not be committed!')
-            found = True
+          for filepath in sys.argv[1:]:
+              basename = os.path.basename(filepath).lower()
+              for pattern in blocked_patterns:
+                  if pattern in basename and 'example' not in basename and 'template' not in basename:
+                      print(f'❌ {filepath}: Environment/secrets file should not be committed!')
+                      found = True
 
-sys.exit(1 if found else 0)
-"
+          sys.exit(1 if found else 0)
+          "
         language: python
         types: [text]
 
@@ -246,10 +250,10 @@ sys.exit(1 if found else 0)
       - id: bandit
         name: "🐍 Bandit security lint"
         args:
-          - "-ll"  # Only medium and above severity
-          - "-ii"  # Only medium and above confidence
+          - "-ll" # Only medium and above severity
+          - "-ii" # Only medium and above confidence
           - "--skip"
-          - "B101,B311"  # Skip assert and random warnings
+          - "B101,B311" # Skip assert and random warnings
           - "-r"
         exclude: |
           (?x)^(
@@ -291,7 +295,8 @@ sys.exit(1 if found else 0)
       # Prevent committing to protected branches
       - id: no-commit-to-branch
         name: "🌳 Protect main branches"
-        args: ["--branch", "main", "--branch", "master", "--branch", "production"]
+        args:
+          ["--branch", "main", "--branch", "master", "--branch", "production"]
 
       # Check YAML syntax (misconfigurations can be security issues)
       - id: check-yaml
@@ -324,53 +329,54 @@ sys.exit(1 if found else 0)
       # Check for hardcoded paths (Windows/Linux specific)
       - id: check-hardcoded-paths
         name: "📍 Check for hardcoded user paths"
-        entry: python -c "
-import re
-import sys
+        entry: |
+          python -c "
+          import re
+          import sys
 
-# Patterns that indicate hardcoded user-specific paths
-patterns = [
-    r'C:\\\\Users\\\\[a-zA-Z0-9_]+',
-    r'C:/Users/[a-zA-Z0-9_]+',
-    r'/home/[a-zA-Z0-9_]+',
-    r'/Users/[a-zA-Z0-9_]+',
-    r'E:\\\\[a-zA-Z]+\\\\',
-    r'E:/[a-zA-Z]+/',
-]
+          # Patterns that indicate hardcoded user-specific paths
+          patterns = [
+              r'C:\\\\Users\\\\[a-zA-Z0-9_]+',
+              r'C:/Users/[a-zA-Z0-9_]+',
+              r'/home/[a-zA-Z0-9_]+',
+              r'/Users/[a-zA-Z0-9_]+',
+              r'E:\\\\([a-zA-Z]+)\\\\',
+              r'E:/([a-zA-Z]+)/',
+          ]
 
-# Allowlist (comments, strings that are clearly examples)
-allowlist = [
-    r'#.*',
-    r'\"\"\".*\"\"\"',
-    r'expanduser',
-    r'Path\.home',
-    r'os\.environ',
-    r'example',
-    r'<username>',
-]
+          # Allowlist (comments, strings that are clearly examples)
+          allowlist = [
+              r'#.*',
+              r'\"\"\".*\"\"\"',
+              r'expanduser',
+              r'Path\.home',
+              r'os\.environ',
+              r'example',
+              r'<username>',
+          ]
 
-found = False
-for filepath in sys.argv[1:]:
-    try:
-        with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
-            for line_num, line in enumerate(f, 1):
-                # Skip comments
-                stripped = line.strip()
-                if stripped.startswith('#') or stripped.startswith('//'):
-                    continue
-                # Skip allowlisted patterns
-                if any(re.search(p, line, re.IGNORECASE) for p in allowlist):
-                    continue
-                for pattern in patterns:
-                    if re.search(pattern, line):
-                        print(f'⚠️ {filepath}:{line_num}: Hardcoded path detected')
-                        found = True
-                        break
-    except Exception:
-        pass
+          found = False
+          for filepath in sys.argv[1:]:
+              try:
+                  with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+                      for line_num, line in enumerate(f, 1):
+                          # Skip comments
+                          stripped = line.strip()
+                          if stripped.startswith('#') or stripped.startswith('//'):
+                              continue
+                          # Skip allowlisted patterns
+                          if any(re.search(p, line, re.IGNORECASE) for p in allowlist):
+                              continue
+                          for pattern in patterns:
+                              if re.search(pattern, line):
+                                  print(f'⚠️ {filepath}:{line_num}: Hardcoded path detected')
+                                  found = True
+                                  break
+              except Exception:
+                  pass
 
-sys.exit(1 if found else 0)
-"
+          sys.exit(1 if found else 0)
+          "
         language: python
         types: [python]
         exclude: |
@@ -382,36 +388,37 @@ sys.exit(1 if found else 0)
       # Check for debug mode enabled
       - id: check-debug-mode
         name: "🐛 Check for debug mode"
-        entry: python -c "
-import re
-import sys
+        entry: |
+          python -c "
+          import re
+          import sys
 
-patterns = [
-    (r'DEBUG\s*=\s*True', 'DEBUG=True'),
-    (r'debug\s*=\s*True', 'debug=True'),
-    (r'logging\.DEBUG', 'DEBUG logging level'),
-]
+          patterns = [
+              (r'DEBUG\s*=\s*True', 'DEBUG=True'),
+              (r'debug\s*=\s*True', 'debug=True'),
+              (r'logging\.DEBUG', 'DEBUG logging level'),
+          ]
 
-found = False
-for filepath in sys.argv[1:]:
-    try:
-        with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
-            content = f.read()
-            # Skip if this is clearly a config/settings file
-            if 'settings' in filepath.lower() or 'config' in filepath.lower():
-                continue
-            for pattern, name in patterns:
-                if re.search(pattern, content):
-                    # Check it's not in a comment or conditional
-                    for line_num, line in enumerate(content.split('\n'), 1):
-                        if re.search(pattern, line) and not line.strip().startswith('#'):
-                            print(f'⚠️ {filepath}:{line_num}: {name} found - disable for production')
-                            found = True
-    except Exception:
-        pass
+          found = False
+          for filepath in sys.argv[1:]:
+              try:
+                  with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+                      content = f.read()
+                      # Skip if this is clearly a config/settings file
+                      if 'settings' in filepath.lower() or 'config' in filepath.lower():
+                          continue
+                      for pattern, name in patterns:
+                          if re.search(pattern, content):
+                              # Check it's not in a comment or conditional
+                              for line_num, line in enumerate(content.split('\n'), 1):
+                                  if re.search(pattern, line) and not line.strip().startswith('#'):
+                                      print(f'⚠️ {filepath}:{line_num}: {name} found - disable for production')
+                                      found = True
+              except Exception:
+                  pass
 
-sys.exit(1 if found else 0)
-"
+          sys.exit(1 if found else 0)
+          "
         language: python
         types: [python]
         exclude: |

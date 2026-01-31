@@ -13,6 +13,7 @@ and compliance features.
 import asyncio
 import logging
 import os
+import re
 from datetime import datetime
 from typing import Any
 
@@ -164,7 +165,7 @@ class ArenaAIService:
             except Exception as e:
                 processing_time = asyncio.get_event_loop().time() - start_time
                 await self.monitoring.record_error(req, str(e), processing_time)
-                raise HTTPException(status_code=500, detail="Internal service error")
+                raise HTTPException(status_code=500, detail="Internal service error") from e
 
         @self.app.get("/models")
         async def list_models():
@@ -252,7 +253,7 @@ class ArenaAIService:
     async def register_with_discovery(self):
         """Register this service with the service discovery system."""
         try:
-            registration_data = {
+            _registration_data = {
                 "service_name": self.service_name,
                 "url": self.service_url,
                 "health_url": self.health_url,

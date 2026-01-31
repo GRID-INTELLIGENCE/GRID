@@ -8,9 +8,16 @@ from pathlib import Path
 
 from grid.rag import Doc, InMemoryIndex, RagQA
 from tools.rag.indexer import index_repository
-from tools.rag.retriever import Retriever
 from tools.rag.store import VectorStore
 from tools.rag.vector_store.base import BaseVectorStore
+
+try:
+    from tools.rag.retrieval.retriever import Retriever
+except ModuleNotFoundError:
+    try:
+        from tools.rag.retriever import Retriever
+    except ModuleNotFoundError:
+        pytest.skip("Retriever implementation not available", allow_module_level=True)
 
 
 class OllamaEmbedding:

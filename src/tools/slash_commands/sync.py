@@ -8,6 +8,8 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
 
+from grid.knowledge import Entity, EntityId, PersistentJSONKnowledgeStore
+from grid.knowledge.graph_schema import RelationType
 from .base import CommandContext, CommandResult, KnowledgeCommand
 
 logger = logging.getLogger(__name__)
@@ -110,9 +112,10 @@ class SyncCommand(KnowledgeCommand):
                 logger.error("No RAG system available")
                 self.rag_system = None
 
-        # Initialize knowledge graph (mock for now)
-        self.knowledge_graph = MockKnowledgeGraph()
-        logger.info("Initialized knowledge graph")
+        # Initialize knowledge graph (Persistent JSON store)
+        self.knowledge_graph = PersistentKnowledgeGraphWrapper()
+        self.knowledge_graph.connect()
+        logger.info("Initialized persistent knowledge graph")
 
     async def _update_rag_index(self, quick_mode: bool = False) -> dict[str, Any]:
         """Update RAG vector database"""
@@ -205,6 +208,9 @@ class SyncCommand(KnowledgeCommand):
 
                 for connection in graph_updates["new_connections"]:
                     self.knowledge_graph.add_connection(connection)
+
+                # Persist changes
+                self.knowledge_graph.disconnect()
 
             return {
                 "success": True,
@@ -547,28 +553,57 @@ INTEGRATION:
         return ["read_files", "write_files", "modify_knowledge"]
 
 
-# Mock knowledge graph for demonstration
-class MockKnowledgeGraph:
-    """Mock knowledge graph implementation"""
+# Wrapper to bridge SyncCommand requirements with PersistentJSONKnowledgeStore
+class PersistentKnowledgeGraphWrapper:
+    """Wrapper for PersistentJSONKnowledgeStore to match SyncCommand interface"""
 
     def __init__(self):
-        self.nodes = {}
-        self.edges = []
+        self.store = PersistentJSONKnowledgeStore()
+
+    def connect(self):
+        self.store.connect()
+
+    def disconnect(self):
+        self.store.disconnect()
 
     def add_node(self, node_info: dict):
-        """Add a node to the graph"""
-        self.nodes[node_info["name"]] = node_info
+        """Add a library/capability node to the persistent graph"""
+        # Map node_info to Entity
+        entity = Entity(
+            id=node_info["name"],
+            entity_type="Skill",  # Libraries are essentially Skill containers
+            properties={
+                "file_path": node_info.get("file_path"),
+                "capabilities": node_info.get("capabilities", []),
+                "centrality": node_info.get("centrality_estimate", 0.5),
+                "discovered_at": node_info.get("discovered_at"),
+            },
+        )
+        self.store.store_entity(entity)
 
     def add_connection(self, connection: dict):
-        """Add a connection to the graph"""
-        self.edges.append(connection)
+        """Add a connection to the persistent graph"""
+        # Map connection to Relationship
+        from_id = EntityId(connection["source"])
+        to_id = EntityId(connection["target"])
+        self.store.create_relationship(
+            from_id=from_id,
+            to_id=to_id,
+            relationship_type=RelationType.RELATED_TO,
+            properties={
+                "type": connection.get("type"),
+                "strength": connection.get("strength"),
+                "shared_capabilities": connection.get("shared_capabilities", []),
+            },
+        )
 
     def get_stats(self) -> dict[str, Any]:
-        """Get graph statistics"""
+        """Convert store statistics to SyncCommand format"""
+        stats = self.store.get_graph_statistics()
         return {
-            "total_nodes": len(self.nodes),
-            "total_edges": len(self.edges),
-            "avg_connectivity": len(self.edges) / max(len(self.nodes), 1),
+            "total_nodes": stats["total_entities"],
+            "total_edges": stats["total_relationships"],
+            "avg_connectivity": stats["total_relationships"] / max(stats["total_entities"], 1),
         }
 
 

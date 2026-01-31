@@ -178,13 +178,13 @@ class AuthManager:
             logger.error(f"Service token authentication error: {str(e)}")
             return {"authenticated": False, "error": str(e)}
 
-    def authorize(self, user_permissions: List[str], required_permissions: List[str]) -> bool:
+    def authorize(self, user_permissions: list[str], required_permissions: list[str]) -> bool:
         """
         Check if user has required permissions.
 
         Args:
-            user_permissions: List of user's permissions
-            required_permissions: List of required permissions
+            user_permissions: list of user's permissions
+            required_permissions: list of required permissions
 
         Returns:
             True if authorized, False otherwise
@@ -194,15 +194,15 @@ class AuthManager:
 
         return all(perm in user_permissions for perm in required_permissions)
 
-    def generate_jwt_token(self, user_id: str, permissions: List[str] = None,
-                          roles: List[str] = None, expires_in: int = 3600) -> str:
+    def generate_jwt_token(self, user_id: str, permissions: list[str] = None,
+                          roles: list[str] = None, expires_in: int = 3600) -> str:
         """
         Generate a JWT token for authenticated users.
 
         Args:
             user_id: User identifier
-            permissions: List of user permissions
-            roles: List of user roles
+            permissions: list of user permissions
+            roles: list of user roles
             expires_in: Token expiration time in seconds
 
         Returns:
@@ -225,7 +225,7 @@ class AuthManager:
         token = jwt.encode(payload, self.jwt_secret, algorithm=self.jwt_algorithm)
         return token
 
-    def generate_service_token(self, service_name: str, permissions: List[str] = None,
+    def generate_service_token(self, service_name: str, permissions: list[str] = None,
                               expires_in: int = 3600) -> str:
         """
         Generate a service-to-service token.
@@ -316,12 +316,12 @@ class RBACManager:
             "*": "All permissions"
         }
 
-    def get_role_permissions(self, role: str) -> List[str]:
+    def get_role_permissions(self, role: str) -> list[str]:
         """Get permissions for a role."""
         role_data = self.roles.get(role, {})
         return role_data.get("permissions", [])
 
-    def has_permission(self, user_roles: List[str], permission: str) -> bool:
+    def has_permission(self, user_roles: list[str], permission: str) -> bool:
         """Check if user roles include the required permission."""
         for role in user_roles:
             role_permissions = self.get_role_permissions(role)

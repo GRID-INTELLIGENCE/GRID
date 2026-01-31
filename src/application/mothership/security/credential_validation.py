@@ -102,26 +102,40 @@ class CredentialValidationService:
     async def _query_user(self, username: str) -> User | None:
         """Query user from database by username.
 
-        In production, this would query PostgreSQL or similar.
-        For now, uses in-memory store with case-insensitive lookup.
+        Uses GridPostgresAdapter for production database queries.
+        Falls back to in-memory store for testing/demo.
         """
         # Case-insensitive username lookup
         username_lower = username.lower()
 
-        # Check in-memory store first
+        # Check in-memory store first (for testing)
         for user in self._user_store.values():
             if user.username.lower() == username_lower:
                 return user
 
-        # TODO: In production, query database here
-        # Example with asyncpg:
-        # async with db_pool.acquire() as conn:
-        #     row = await conn.fetchrow(
-        #         "SELECT * FROM users WHERE LOWER(username) = LOWER($1)",
-        #         username
-        #     )
-        #     if row:
-        #         return User.from_db_row(row)
+        # Query PostgreSQL via adapter
+        try:
+            from grid.integration.postgres_adapter import get_postgres_adapter
+
+            adapter = get_postgres_adapter()
+            row = await adapter.query_user_by_username(username)
+            if row:
+                # Convert DB row to User object
+                user = User(
+                    user_id=row.get("user_id"),
+                    username=row.get("username"),
+                    email=row.get("email"),
+                    org_id=row.get("org_id"),
+                    status=UserStatus(row.get("status", "active")),
+                )
+                user.metadata["password_hash"] = row.get("password_hash")
+                if row.get("metadata"):
+                    user.metadata.update(row["metadata"])
+                return user
+        except ImportError:
+            logger.debug("PostgreSQL adapter not available, using in-memory store only")
+        except Exception as e:
+            logger.warning(f"PostgreSQL query failed: {e}")
 
         return None
 

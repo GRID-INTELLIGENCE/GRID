@@ -19,14 +19,17 @@ if str(arena_path) not in sys.path:
     sys.path.insert(0, str(arena_path))
 
 import pytest
-from the_chase.core.cache import CacheLayer, CacheMeta, MemoryTier
-from the_chase.overwatch.rewards import (
-    Achievement,
-    AchievementType,
-    CharacterRewardState,
-    RewardEscalator,
-    RewardLevel,
-)
+try:
+    from the_chase.core.cache import CacheLayer, CacheMeta, MemoryTier
+    from the_chase.overwatch.rewards import (
+        Achievement,
+        AchievementType,
+        CharacterRewardState,
+        RewardEscalator,
+        RewardLevel,
+    )
+except ImportError:
+    pytest.skip("Optional dependency 'the_chase' not available", allow_module_level=True)
 
 
 class TestHonorDecay:

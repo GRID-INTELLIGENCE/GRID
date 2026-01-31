@@ -20,6 +20,10 @@ Usage:
 
 from __future__ import annotations
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 __version__ = "1.0.0"
 
 # Data Connectors
@@ -41,14 +45,19 @@ from .data_connectors import (
 )
 
 # Databricks Connector
-from .databricks_connector import (
-    DatabricksConfig,
-    DatabricksClient,
-    DatabricksQuery,
-    create_databricks_connector,
-    test_databricks_connection,
-    execute_databricks_query
-)
+try:
+    from .databricks_connector import (
+        DatabricksConfig,
+        DatabricksClient,
+        DatabricksQuery,
+        create_databricks_connector,
+        test_databricks_connection,
+        execute_databricks_query
+    )
+    DATABRICKS_AVAILABLE = True
+except ImportError:
+    DATABRICKS_AVAILABLE = False
+    logger.warning("Databricks dependencies not found. Databricks tools will be unavailable.")
 
 # Lazy imports to avoid dependency issues
 __all__ = [

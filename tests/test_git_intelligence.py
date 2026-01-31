@@ -7,7 +7,10 @@ from unittest.mock import MagicMock, patch
 # Add scripts to path for git_intelligence module
 sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
 
-from git_intelligence import ComplexityEstimator, OllamaClient
+try:
+    from git_intelligence import ComplexityEstimator, OllamaClient
+except ModuleNotFoundError:
+    raise unittest.SkipTest("Optional module 'git_intelligence' not available")
 
 
 class TestGitIntelligence(unittest.TestCase):

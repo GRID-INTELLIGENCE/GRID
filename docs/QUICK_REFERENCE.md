@@ -1,25 +1,230 @@
-# Test & CI/CD Quick Reference Card
+# GRID Quick Reference - Developer & Operator Guide
 
-**Last Updated:** November 30, 2025
+## Developer Quick Reference
+
+### Core Commands
+```powershell
+# Basic analysis
+python -m grid analyze "Your text here"
+
+# JSON output
+python -m grid analyze "Your text here" --output json
+
+# Show timing
+python -m grid analyze "Your text here" --timings
+
+# From file
+python -m grid analyze --file input.txt --output yaml
+
+# With RAG
+python -m grid analyze "Your text here" --use-rag
+
+# Full benchmark suite
+python scripts/benchmark_grid.py
+
+# List skills
+python -m grid skills list
+
+# Run a skill
+python -m grid skills run transform.schema_map --args-json "{text:'...', target_schema:'default', use_llm:false}"
+
+# Build curated RAG index
+python -m tools.rag.cli index . --rebuild --curate
+
+# Query RAG
+python -m tools.rag.cli query "Where is the skills registry implemented?"
+```
+
+### Performance Targets
+| Scenario | Target | Command |
+|----------|--------|---------|
+| Small text | < 15ms | `analyze TEXT --timings` |
+| Medium text | < 50ms | `analyze TEXT --max-entities 15 --timings` |
+| Large text | < 200ms | `analyze TEXT --max-entities 10 --use-rag --timings` |
+| Accuracy focus | P95 < 100ms | `analyze TEXT --confidence 0.5 --max-entities 50` |
+| Speed focus | P50 < 20ms | `analyze TEXT --confidence 0.9 --max-entities 5` |
+
+### Common Issues
+| Problem | Solution |
+|---------|----------|
+| "No module named grid" | Run from `e:\grid` root |
+| "IndentationError in logging" | ✅ Fixed (renamed file) |
+| Slow performance | Use `--max-entities 5` and `--confidence 0.9` |
+| Need OpenAI | Set `OPENAI_API_KEY` env var or use `--openai-key` |
+
+### VS Code Tasks
+Press `Ctrl+Shift+B` and select:
+- `█ PERF · Benchmark GRID (Full Suite)` - Full perf test (~2 min)
+- `█ PERF · Analyze Quick` - Small input baseline (~10ms)
+- `█ PERF · Analyze with RAG` - Test RAG enhancement (~50ms)
 
 ---
 
-## 🚀 Quick Start (5 minutes)
+## Operator Quick Reference
+
+### Knowledge Management
+```powershell
+# Full synchronization (updates RAG + knowledge graph)
+python -m tools.slash_commands.sync
+
+# RAG index only
+python -m tools.slash_commands.sync --rag-only
+
+# Knowledge graph only
+python -m tools.slash_commands.sync --graph-only
+
+# Quick sync (recent changes only)
+python -m tools.slash_commands.sync --quick
+
+# Quality check
+python -m tools.slash_commands.sync --quality
+```
+
+### RAG Operations
+```powershell
+# Build index from docs
+python -m tools.rag.cli index docs/ --rebuild
+
+# Query with RAG
+python -m tools.rag.cli query "What are the core components?"
+
+# Get RAG stats
+python -m tools.rag.cli stats
+```
+
+### Knowledge Graph
+```powershell
+# Refresh graph
+python -m tools.knowledge_graph.refresh
+
+# Get graph stats
+python -m tools.knowledge_graph.stats
+
+# Visualize graph
+python -m tools.knowledge_graph.visualize
+```
+
+---
+
+## Environment Setup
+
+### Python Environment
+```powershell
+# Setup environment (Python 3.13.11)
+uv venv --python 3.13 --clear && .\.venv\Scripts\Activate.ps1 && uv sync --group dev --group test
+
+# Linting/Formatting
+ruff check .              # Lint
+ruff check --fix .        # Auto-fix
+black .                   # Format
+mypy src/                 # Type check
+```
+
+### Key Dependencies
+- **Python**: 3.13.11 (enforced)
+- **FastAPI**: >=0.104.0
+- **scikit-learn**: ==1.8.0
+- **ChromaDB**: >=1.4.1
+- **Pydantic**: v2
+
+---
+
+## Troubleshooting
+
+### Common Issues
+| Problem | Solution |
+|---------|----------|
+| Import errors | Check Python version (3.13.11) |
+| Missing dependencies | Run `uv sync --group dev --group test` |
+| RAG not working | Verify ChromaDB installation |
+| Graph issues | Check knowledge graph configuration |
+
+### Performance Issues
+- Use `--max-entities 5` for faster analysis
+- Set `--confidence 0.9` for speed focus
+- Run with `--timings` to identify bottlenecks
+
+---
+
+## File Structure Reference
+
+### Key Directories
+- `src/grid/` - Core intelligence layer
+- `src/application/` - FastAPI application
+- `src/cognitive/` - Cognitive patterns
+- `src/tools/` - RAG system, utilities
+- `docs/` - Documentation
+- `tests/` - Test suite
+
+### Configuration Files
+- `pyproject.toml` - Project config
+- `DEPENDENCY_MATRIX.md` - Version constraints
+- `AGENTS.md` - Agent behavior guidelines
+
+---
+
+## Support Resources
+
+### Documentation
+- **Architecture**: `docs/architecture.md`
+- **Setup**: `docs/INSTALLATION.md`
+- **Development**: `docs/DEVELOPMENT_GUIDE.md`
+- **API**: `docs/API_DOCUMENTATION.md`
+
+### Tools
+- **RAG System**: `tools/rag/`
+- **Knowledge Graph**: `tools/knowledge_graph/`
+- **Skills**: `tools/skills/`
+
+### Quick Links
+- View architecture: `docs/ARCHITECTURE_EXECUTIVE_SUMMARY.md`
+- Check dependencies: `DEPENDENCY_MATRIX.md`
+- Agent guidelines: `AGENTS.md`
+
+---
+
+## Quality Status Indicators
+
+### Sync Quality
+- **Excellent** (0.8-1.0): Full RAG + graph with high connectivity
+- **Good** (0.6-0.8): RAG working, moderate graph connectivity
+- **Fair** (0.4-0.6): Partial RAG or limited graph
+- **Poor** (0-0.4): No RAG chunks or graph nodes
+
+### RAG Quality Factors
+- **Total chunks**: > 50 for good quality
+- **Semantic density**: > 0.5 average
+- **Chunk diversity**: > 3 chunk types
+
+### Graph Quality Factors
+- **Total nodes**: > 10 for good connectivity
+- **Edge density**: > 0.1 for strong connections
+- **Avg connectivity**: > 2 for good knowledge flow
+
+---
+
+## Test & CI/CD Quick Reference
+
+**Last Updated:** February 1, 2026
+
+---
+
+### 🚀 Quick Start (5 minutes)
 
 ```bash
 # 1. Setup environment
-python -m venv venv
-source venv/bin/activate
-pip install -e ".[dev,test]"
+uv venv --python 3.13
+.venv\\Scripts\\Activate.ps1
+uv sync --group dev --group test
 
 # 2. Run tests
-pytest tests/ -v
+uv run pytest tests/ -v
 
 # 3. Check coverage
-pytest tests/ --cov=src --cov-report=term-missing
+uv run pytest tests/ -v --cov=src --cov-report=term-missing
 
 # 4. Analyze results
-python scripts/analyze_tests.py
+uv run python scripts/analyze_tests.py
 
 # 5. Push to GitHub
 git add .
@@ -29,83 +234,83 @@ git push
 
 ---
 
-## 📋 Common Commands
+### 📋 Common Commands
 
-### Running Tests
+#### Running Tests
 
 ```bash
 # All tests
-pytest tests/ -v
+uv run pytest tests/ -v
 
 # Unit tests only
-pytest tests/unit/ -v
+uv run pytest tests/unit/ -v
 
 # Integration tests only
-pytest tests/integration/ -v
+uv run pytest tests/integration/ -v
 
 # Specific test file
-pytest tests/unit/core/test_documentation_index.py -v
+uv run pytest tests/unit/core/test_documentation_index.py -v
 
 # Specific test function
-pytest tests/unit/core/test_documentation_index.py::TestDocumentationIndex::test_count_by_category -v
+uv run pytest tests/unit/core/test_documentation_index.py::TestDocumentationIndex::test_count_by_category -v
 
 # Tests matching pattern
-pytest tests/ -k "documentation" -v
+uv run pytest tests/ -k "documentation" -v
 
 # Tests with specific marker
-pytest tests/ -m "critical" -v
+uv run pytest tests/ -m "critical" -v
 
 # Stop on first failure
-pytest tests/ -v -x
+uv run pytest tests/ -v -x
 
 # Show slowest 10 tests
-pytest tests/ -v --durations=10
+uv run pytest tests/ -v --durations=10
 
-# Parallel execution
-pytest tests/ -n auto -v
+# Parallel execution (opt-in)
+uv run pytest tests/ -n auto -v
 ```
 
-### Coverage
+#### Coverage
 
 ```bash
 # Generate coverage report
-pytest tests/ --cov=src --cov-report=term-missing
+uv run pytest tests/ --cov=src --cov-report=term-missing
 
 # Generate HTML report
-pytest tests/ --cov=src --cov-report=html
+uv run pytest tests/ --cov=src --cov-report=html
 open htmlcov/index.html
 
 # Check coverage threshold
-pytest tests/ --cov=src --cov-fail-under=80
+uv run pytest tests/ --cov=src --cov-fail-under=80
 ```
 
-### Debugging
+#### Debugging
 
 ```bash
 # Verbose output
-pytest tests/ -vv
+uv run pytest tests/ -vv
 
 # Show print statements
-pytest tests/ -v -s
+uv run pytest tests/ -v -s
 
 # Drop into debugger
-pytest tests/ -v --pdb
+uv run pytest tests/ -v --pdb
 
 # Show local variables
-pytest tests/ -v -l
+uv run pytest tests/ -v -l
 
 # Detailed traceback
-pytest tests/ -v --tb=long
+uv run pytest tests/ -v --tb=long
 ```
 
-### Analysis
+#### Analysis
 
 ```bash
 # Analyze test context
-python scripts/analyze_tests.py
+uv run python scripts/analyze_tests.py
 
 # Capture failures
-python scripts/capture_failures.py
+uv run python scripts/capture_failures.py
 
 # View reports
 cat test_context_report.json
@@ -114,7 +319,7 @@ cat test_failures.json
 
 ---
 
-## 🔧 Test Markers
+### 🔧 Test Markers
 
 ```python
 @pytest.mark.unit              # Fast, isolated
@@ -122,7 +327,6 @@ cat test_failures.json
 @pytest.mark.slow              # > 1 second
 @pytest.mark.critical          # Must pass
 @pytest.mark.flaky             # May fail intermittently
-@pytest.mark.asyncio           # Async tests
 @pytest.mark.database          # Needs database
 @pytest.mark.event_bus         # Event bus tests
 @pytest.mark.physics           # Physics tests
@@ -133,7 +337,7 @@ cat test_failures.json
 
 ---
 
-## 📊 Test Structure
+### 📊 Test Structure
 
 ```
 tests/
@@ -159,15 +363,15 @@ tests/
 
 ---
 
-## 🔄 CI/CD Workflows
+### 🔄 CI/CD Workflows
 
-### Main Pipeline (main-ci.yml)
+#### Main Pipeline (main-ci.yml)
 
 **Triggers:** Push to main/develop, PRs
 
 **Jobs:**
-1. Lint (flake8, mypy, black, isort)
-2. Unit Tests (Python 3.10, 3.11, 3.12)
+1. Lint (ruff, mypy, black)
+2. Unit Tests (Python 3.13)
 3. Integration Tests
 4. Coverage Check (>= 80%)
 5. Critical Tests
@@ -175,7 +379,7 @@ tests/
 
 **Time:** ~10-15 minutes
 
-### Fast Feedback (fast-feedback.yml)
+#### Fast Feedback (fast-feedback.yml)
 
 **Triggers:** PRs only
 
@@ -186,7 +390,7 @@ tests/
 
 ---
 
-## 📈 Fixtures
+### 📈 Fixtures
 
 ```python
 # Documentation
@@ -222,7 +426,7 @@ def deterministic_seed():
 
 ---
 
-## 🎯 Test Example
+### 🎯 Test Example
 
 ```python
 import pytest
@@ -250,7 +454,7 @@ class TestDocumentationIndex:
 
 ---
 
-## 🐛 Debugging Workflow
+### 🐛 Debugging Workflow
 
 ```
 Test fails locally
@@ -274,7 +478,7 @@ Commit and push
 
 ---
 
-## 📊 Monitoring
+### 📊 Monitoring
 
 ```bash
 # View workflow runs
@@ -295,32 +499,33 @@ gh run rerun <run-id>
 
 ---
 
-## ✅ Pre-Push Checklist
+### ✅ Pre-Push Checklist
 
-- [ ] All tests pass: `pytest tests/ -v`
-- [ ] Coverage >= 80%: `pytest tests/ --cov=src`
-- [ ] No lint errors: `flake8 src tests`
-- [ ] Type check passes: `mypy src`
-- [ ] No failures: `python scripts/capture_failures.py`
+- [ ] All tests pass: `uv run pytest tests/ -v`
+- [ ] Coverage >= 80%: `uv run pytest tests/ --cov=src`
+- [ ] No lint errors: `uv run ruff check .`
+- [ ] Formatting OK: `uv run black --check .`
+- [ ] Type check passes: `uv run mypy src`
+- [ ] No failures: `uv run python scripts/capture_failures.py`
 - [ ] Commit message clear
 - [ ] Branch up to date
 
 ---
 
-## 🚨 Troubleshooting
+### 🚨 Troubleshooting
 
 | Issue | Solution |
 |-------|----------|
-| Tests fail locally | Run `pytest tests/ -vv -s --tb=long` |
+| Tests fail locally | Run `uv run pytest tests/ -vv -s --tb=long` |
 | Coverage low | Add tests for uncovered code |
-| CI/CD slow | Use `pytest -n auto` for parallel |
+| CI/CD slow | Opt-in to parallel execution with `uv run pytest -n auto` |
 | Flaky tests | Mark with `@pytest.mark.flaky` |
 | Import errors | Check `sys.path` in conftest.py |
 | Database issues | Use in-memory SQLite in tests |
 
 ---
 
-## 📚 Documentation
+### 📚 Documentation
 
 - `TEST_CI_CD_CONTEXT.md` - Full guide (700+ lines)
 - `IMPLEMENTATION_GUIDE.md` - Step-by-step
@@ -329,19 +534,19 @@ gh run rerun <run-id>
 
 ---
 
-## 🎯 Success Metrics
+### 🎯 Success Metrics
 
 | Metric | Target | Command |
 |--------|--------|---------|
-| Tests Pass | 100% | `pytest tests/ -v` |
-| Coverage | >= 80% | `pytest tests/ --cov=src` |
-| Execution | < 5 min | `pytest tests/ --durations=10` |
-| Lint | 0 errors | `flake8 src tests` |
-| Types | 0 errors | `mypy src` |
+| Tests Pass | 100% | `uv run pytest tests/ -v` |
+| Coverage | >= 80% | `uv run pytest tests/ --cov=src` |
+| Execution | < 5 min | `uv run pytest tests/ --durations=10` |
+| Lint | 0 errors | `uv run ruff check .` |
+| Types | 0 errors | `uv run mypy src` |
 
 ---
 
-## 🔗 Quick Links
+### 🔗 Quick Links
 
 - [Pytest Docs](https://docs.pytest.org/)
 - [GitHub Actions](https://docs.github.com/en/actions)
@@ -350,10 +555,10 @@ gh run rerun <run-id>
 
 ---
 
-## 💡 Pro Tips
+### 💡 Pro Tips
 
 1. **Use markers** - Organize tests with `@pytest.mark.unit`, etc.
-2. **Parallel execution** - `pytest -n auto` for speed
+2. **Parallel execution (opt-in)** - Use `pytest -n auto` only when you understand concurrency risks
 3. **Deterministic seeds** - Use `seed=42` for reproducibility
 4. **Fixtures** - Reuse test setup with fixtures
 5. **Parametrize** - Test multiple inputs with `@pytest.mark.parametrize`
@@ -363,6 +568,43 @@ gh run rerun <run-id>
 
 ---
 
+## 📚 Operator Guidance
+
+- **Test isolation**: Ensure tests are independent and don't interfere with each other.
+- **Test naming**: Use descriptive names for tests and test functions.
+- **Test structure**: Organize tests into logical groups and use fixtures for setup and teardown.
+- **Test debugging**: Use `--pdb` and `--tb=long` for debugging test failures.
+
+---
+
 **Ready to test! 🚀**
 
+<<<<<<< E:/grid/docs/QUICK_REFERENCE.md
 Print this card and keep it handy!
+||||||| C:/Users/irfan/.windsurf/worktrees/grid/grid-41d47f67/docs/QUICK_REFERENCE.md.base
+Print this card and keep it handy!
+=======
+Print this card and keep it handy!
+<<<<<<< E:/grid/docs/QUICK_REFERENCE.md
+
+---
+
+## See also
+
+- `TESTING.md`
+- `CI_CD_GUIDE.md`
+- `CLI_REFERENCE.md`
+- `GRID_QUICK_REFERENCE.md`
+>>>>>>> C:/Users/irfan/.windsurf/worktrees/grid/grid-41d47f67/docs/QUICK_REFERENCE.md
+||||||| C:/Users/irfan/.windsurf/worktrees/grid/grid-41d47f67/docs/QUICK_REFERENCE.md.base
+=======
+
+---
+
+## See also
+
+- `TESTING.md`
+- `CI_CD_GUIDE.md`
+- `CLI_REFERENCE.md`
+- `GRID_QUICK_REFERENCE.md`
+>>>>>>> C:/Users/irfan/.windsurf/worktrees/grid/grid-41d47f67/docs/QUICK_REFERENCE.md

@@ -79,7 +79,6 @@ class TemporalDistribution:
     event_frequency: float  # events per second
     by_hour: dict[int, int] = field(default_factory=dict)
     by_day_of_week: dict[int, int] = field(default_factory=dict)
-    by_hour: int, list[str] = field(default_factory=dict)
     peak_hour: int
     peak_count: int
     quiet_hours: list[int]
@@ -129,7 +128,7 @@ class AdvancedTimeManager:
                 pattern_type=TemporalPattern.RANDOM,
                 pattern_name="insufficient_data",
                 confidence=0.0,
-            frequency=EventFrequency.VARIABLE,
+                frequency=EventFrequency.VARIABLE,
                 description=f"Need at least {min_events} events",
             )
 
@@ -158,7 +157,7 @@ class AdvancedTimeManager:
         # Calculate amplitude (for regularity)
         if len(intervals) >= 5:
             interval_values = [intervals[i] for i in range(5)]
-            amplitude = max(interval_values) - min(interval_values))
+            amplitude = max(interval_values) - min(interval_values)
         else:
             amplitude = 0.0
 
@@ -169,7 +168,7 @@ class AdvancedTimeManager:
             y_values = intervals
             try:
                 slope, intercept = self._calculate_trend_slope(x_indices, y_values)
-            else:
+            except Exception:
                 slope, intercept = 0.0, 0.0
         else:
             slope, intercept = 0.0, 0.0

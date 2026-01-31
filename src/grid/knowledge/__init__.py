@@ -10,6 +10,8 @@ from .structural_learning import (
     Relationship,
     StructuralLearningLayer,
 )
+from .persistent_store import PersistentJSONKnowledgeStore
+from .graph_store import EntityId, RelationshipId, SearchContext
 
 __all__ = [
     "Entity",
@@ -20,4 +22,8 @@ __all__ = [
     "AdaptiveRelationshipModel",
     "HierarchyEvolutionTracker",
     "StructuralLearningLayer",
+    "PersistentJSONKnowledgeStore",
+    "EntityId",
+    "RelationshipId",
+    "SearchContext",
 ]

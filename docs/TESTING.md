@@ -10,16 +10,16 @@ This document describes how to run tests locally, understand test organization, 
 
 ```bash
 # Run all tests
-pytest
+uv run pytest
 
 # Run with coverage
-pytest --cov=src --cov-report=html
+uv run pytest --cov=src --cov-report=html
 
 # Run specific test categories
-pytest -m unit          # Fast unit tests
-pytest -m integration   # Integration tests
-pytest -m e2e          # End-to-end tests
-pytest -m fast         # Fast tests (<1s)
+uv run pytest -m unit          # Fast unit tests
+uv run pytest -m integration   # Integration tests
+uv run pytest -m e2e          # End-to-end tests
+uv run pytest -m fast         # Fast tests (<1s)
 ```
 
 ### Using Makefile
@@ -125,7 +125,7 @@ Tests run in deterministic order using:
 
 - Target coverage: **80%**
 - Coverage is enforced in CI
-- Run `pytest --cov=src` to check coverage locally
+- Run `uv run pytest --cov=src` to check coverage locally
 
 ### Test Timeouts
 
@@ -147,9 +147,9 @@ See [CI_CD.md](CI_CD.md) for more details.
 
 ### Tests Fail Locally But Pass in CI
 
-1. Check Python version matches CI (3.10, 3.11, 3.12)
-2. Run `python scripts/simulate_ci.py` to match CI environment
-3. Ensure dependencies are installed: `pip install -e ".[dev,api,ml]"`
+1. Check Python version matches CI (3.13)
+2. Run `uv run python scripts/simulate_ci.py` to match CI environment
+3. Ensure dependencies are installed: `uv sync --group dev --group test`
 
 ### Flaky Tests
 
@@ -160,13 +160,13 @@ See [CI_CD.md](CI_CD.md) for more details.
 
 ### Slow Tests
 
-1. Identify slow tests: `pytest --durations=10`
+1. Identify slow tests: `uv run pytest --durations=10`
 2. Mark as `@pytest.mark.slow`
 3. Consider optimization or mocking
 
 ### Coverage Issues
 
-1. Check coverage report: `pytest --cov=src --cov-report=html`
+1. Check coverage report: `uv run pytest --cov=src --cov-report=html`
 2. Open `htmlcov/index.html` in browser
 3. Add tests for uncovered code
 4. Use `# pragma: no cover` for intentionally uncovered code

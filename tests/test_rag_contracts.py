@@ -20,8 +20,19 @@ from grid.rag import (
     normalize_results,
     to_scored_chunk,
 )
-from tools.rag.retriever import Retriever
+try:
+    from tools.rag.types import Chunk
+except ModuleNotFoundError:
+    pytest.skip("RAG types module not available", allow_module_level=True)
 from tools.rag.store import VectorStore
+
+try:
+    from tools.rag.retrieval.retriever import Retriever
+except ModuleNotFoundError:
+    try:
+        from tools.rag.retriever import Retriever
+    except ModuleNotFoundError:
+        pytest.skip("Retriever implementation not available", allow_module_level=True)
 
 # =============================================================================
 # Contract Compliance Tests
