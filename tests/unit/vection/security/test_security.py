@@ -1,6 +1,5 @@
 """Tests for Vection security functionality."""
 
-from unittest.mock import AsyncMock, patch
 
 import pytest
 

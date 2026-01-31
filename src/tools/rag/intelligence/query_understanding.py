@@ -8,10 +8,10 @@ it reaches the retrieval layer.
 
 import logging
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from .entity_extractor import Entity, EntityExtractor
-from .intent_classifier import Intent, IntentClassifier, IntentResult
+from .intent_classifier import Intent, IntentClassifier
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -24,12 +24,12 @@ class UnderstoodQuery:
     original_query: str
     intent: Intent
     intent_confidence: float
-    entities: List[Entity]
-    search_terms: List[str]
-    expanded_queries: List[str]
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    entities: list[Entity]
+    search_terms: list[str]
+    expanded_queries: list[str]
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for logging or API responses."""
         return {
             "query": self.original_query,
@@ -91,7 +91,7 @@ class QueryUnderstandingLayer:
             metadata={"all_intent_scores": intent_res.all_scores},
         )
 
-    def _generate_expansions(self, query: str, intent: Intent, entities: List[Entity]) -> List[str]:
+    def _generate_expansions(self, query: str, intent: Intent, entities: list[Entity]) -> list[str]:
         """
         Generate variations of the query to improve retrieval recall.
         """

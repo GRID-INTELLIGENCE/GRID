@@ -21,8 +21,8 @@ __author__ = "GRID AI Assistant"
 
 from .core.config import KnowledgeBaseConfig
 from .core.database import KnowledgeBaseDB
-from .ingestion.pipeline import DataIngestionPipeline
 from .embeddings.engine import EmbeddingEngine
+from .ingestion.pipeline import DataIngestionPipeline
 from .search.retriever import VectorRetriever
 
 __all__ = [

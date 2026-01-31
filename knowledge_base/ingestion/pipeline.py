@@ -6,27 +6,26 @@ Handles ingestion of data from various sources into the knowledge base.
 Supports files, URLs, APIs, and streaming data.
 """
 
-import logging
 import hashlib
-import uuid
-import subprocess
 import json
-from typing import Dict, List, Any, Optional, Iterator, Callable
-from pathlib import Path
+import logging
+import subprocess
 from abc import ABC, abstractmethod
+from collections.abc import Iterator
 from dataclasses import dataclass, field
-from datetime import datetime
-import yaml
-
-import requests
+from pathlib import Path
+from typing import Any
 from urllib.parse import urlparse
-import PyPDF2
-import docx
-from bs4 import BeautifulSoup
-import nbformat
 
-from ..core.database import KnowledgeBaseDB
+import docx
+import nbformat
+import PyPDF2
+import requests
+import yaml
+from bs4 import BeautifulSoup
+
 from ..core.config import KnowledgeBaseConfig
+from ..core.database import KnowledgeBaseDB
 
 logger = logging.getLogger(__name__)
 
@@ -44,17 +43,17 @@ class SourceConfig:
     """Source configuration from manifest."""
     path: str
     profile: str
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
 
 @dataclass
 class IngestionManifest:
     """Ingestion manifest configuration."""
-    profiles: Dict[str, ChunkingProfile] = field(default_factory=dict)
-    sources: List[SourceConfig] = field(default_factory=list)
-    security: Dict[str, Any] = field(default_factory=dict)
-    sync: Dict[str, Any] = field(default_factory=dict)
-    feedback: Dict[str, Any] = field(default_factory=dict)
+    profiles: dict[str, ChunkingProfile] = field(default_factory=dict)
+    sources: list[SourceConfig] = field(default_factory=list)
+    security: dict[str, Any] = field(default_factory=dict)
+    sync: dict[str, Any] = field(default_factory=dict)
+    feedback: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -66,7 +65,7 @@ class DocumentData:
     source_type: str
     source_path: str
     file_type: str
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
 
 @dataclass
@@ -75,7 +74,7 @@ class IngestionResult:
     document_id: str
     chunks_created: int
     success: bool
-    error_message: Optional[str] = None
+    error_message: str | None = None
 
 
 class DataConnector(ABC):
@@ -92,7 +91,7 @@ class DataConnector(ABC):
         pass
 
     @abstractmethod
-    def get_metadata(self) -> Dict[str, Any]:
+    def get_metadata(self) -> dict[str, Any]:
         """Get connector metadata."""
         pass
 
@@ -100,7 +99,7 @@ class DataConnector(ABC):
 class FileConnector(DataConnector):
     """Connector for local file system."""
 
-    def __init__(self, directory: str, file_patterns: List[str] = None, manifest_path: Optional[str] = None):
+    def __init__(self, directory: str, file_patterns: list[str] = None, manifest_path: str | None = None):
         self.directory = Path(directory)
         self.file_patterns = file_patterns or ["*.txt", "*.md", "*.pdf", "*.docx"]
         self.supported_extensions = {
@@ -110,14 +109,14 @@ class FileConnector(DataConnector):
         self.manifest_path = manifest_path
         self.manifest = self._load_manifest() if manifest_path else None
 
-    def _load_manifest(self) -> Optional[IngestionManifest]:
+    def _load_manifest(self) -> IngestionManifest | None:
         """Load ingestion manifest from YAML file."""
         try:
             manifest_path = Path(self.manifest_path)
             if not manifest_path.exists():
                 return None
 
-            with open(manifest_path, 'r') as f:
+            with open(manifest_path) as f:
                 data = yaml.safe_load(f)
 
             # Parse profiles
@@ -167,7 +166,7 @@ class FileConnector(DataConnector):
                     except Exception as e:
                         logger.error(f"Error processing {file_path}: {e}")
 
-    def _process_file(self, file_path: Path) -> Optional[DocumentData]:
+    def _process_file(self, file_path: Path) -> DocumentData | None:
         """Process a single file."""
         content = ""
         file_type = file_path.suffix.lower()
@@ -228,7 +227,7 @@ class FileConnector(DataConnector):
             metadata=metadata
         )
 
-    def _get_git_metadata(self, file_path: Path) -> Optional[Dict[str, Any]]:
+    def _get_git_metadata(self, file_path: Path) -> dict[str, Any] | None:
         """Get git metadata for a file."""
         try:
             # Get git commit SHA
@@ -290,7 +289,7 @@ class FileConnector(DataConnector):
             text += paragraph.text + "\n"
         return text
 
-    def get_metadata(self) -> Dict[str, Any]:
+    def get_metadata(self) -> dict[str, Any]:
         return {
             "type": "file",
             "directory": str(self.directory),
@@ -301,7 +300,7 @@ class FileConnector(DataConnector):
 class WebConnector(DataConnector):
     """Connector for web URLs."""
 
-    def __init__(self, urls: List[str], headers: Dict[str, str] = None):
+    def __init__(self, urls: list[str], headers: dict[str, str] = None):
         self.urls = urls
         self.headers = headers or {"User-Agent": "KnowledgeBase/1.0"}
 
@@ -326,7 +325,7 @@ class WebConnector(DataConnector):
             except Exception as e:
                 logger.error(f"Error fetching {url}: {e}")
 
-    def _fetch_url(self, url: str) -> Optional[DocumentData]:
+    def _fetch_url(self, url: str) -> DocumentData | None:
         """Fetch content from a single URL."""
         response = requests.get(url, headers=self.headers, timeout=30)
         response.raise_for_status()
@@ -360,7 +359,7 @@ class WebConnector(DataConnector):
             }
         )
 
-    def get_metadata(self) -> Dict[str, Any]:
+    def get_metadata(self) -> dict[str, Any]:
         return {
             "type": "web",
             "urls": self.urls,
@@ -371,8 +370,8 @@ class WebConnector(DataConnector):
 class APIConnector(DataConnector):
     """Connector for REST APIs."""
 
-    def __init__(self, base_url: str, endpoints: List[str],
-                 headers: Dict[str, str] = None, auth_token: str = None):
+    def __init__(self, base_url: str, endpoints: list[str],
+                 headers: dict[str, str] = None, auth_token: str = None):
         self.base_url = base_url.rstrip('/')
         self.endpoints = endpoints
         self.headers = headers or {"Content-Type": "application/json"}
@@ -398,7 +397,7 @@ class APIConnector(DataConnector):
             except Exception as e:
                 logger.error(f"Error fetching {endpoint}: {e}")
 
-    def _fetch_endpoint(self, endpoint: str) -> Optional[DocumentData]:
+    def _fetch_endpoint(self, endpoint: str) -> DocumentData | None:
         """Fetch data from a single endpoint."""
         url = f"{self.base_url}/{endpoint.lstrip('/')}"
 
@@ -433,7 +432,7 @@ class APIConnector(DataConnector):
             }
         )
 
-    def get_metadata(self) -> Dict[str, Any]:
+    def get_metadata(self) -> dict[str, Any]:
         return {
             "type": "api",
             "base_url": self.base_url,
@@ -448,7 +447,7 @@ class TextProcessor:
         self.chunk_size = chunk_size
         self.overlap = overlap
 
-    def chunk_text(self, text: str) -> List[str]:
+    def chunk_text(self, text: str) -> list[str]:
         """Split text into overlapping chunks."""
         if len(text) <= self.chunk_size:
             return [text]
@@ -486,7 +485,7 @@ class TextProcessor:
 
         return chunks
 
-    def get_chunking_profile(self, profile_name: str, manifest: Optional[IngestionManifest] = None) -> 'ChunkingProfile':
+    def get_chunking_profile(self, profile_name: str, manifest: IngestionManifest | None = None) -> 'ChunkingProfile':
         """Get chunking profile by name."""
         if manifest and profile_name in manifest.profiles:
             return manifest.profiles[profile_name]
@@ -497,10 +496,10 @@ class TextProcessor:
 class DataIngestionPipeline:
     """Main data ingestion pipeline."""
 
-    def __init__(self, config: KnowledgeBaseConfig, db: KnowledgeBaseDB, manifest_path: Optional[str] = None):
+    def __init__(self, config: KnowledgeBaseConfig, db: KnowledgeBaseDB, manifest_path: str | None = None):
         self.config = config
         self.db = db
-        self.connectors: List[DataConnector] = []
+        self.connectors: list[DataConnector] = []
         self.manifest_path = manifest_path
         self.manifest = self._load_manifest() if manifest_path else None
         self.processor = TextProcessor()
@@ -511,14 +510,14 @@ class DataIngestionPipeline:
         }
         self.last_ingested_sha = self._load_last_ingested_sha()
 
-    def _load_manifest(self) -> Optional[IngestionManifest]:
+    def _load_manifest(self) -> IngestionManifest | None:
         """Load ingestion manifest from YAML file."""
         try:
             manifest_path = Path(self.manifest_path)
             if not manifest_path.exists():
                 return None
 
-            with open(manifest_path, 'r') as f:
+            with open(manifest_path) as f:
                 data = yaml.safe_load(f)
 
             # Parse profiles
@@ -552,7 +551,7 @@ class DataIngestionPipeline:
             logger.error(f"Error loading manifest: {e}")
             return None
 
-    def _load_last_ingested_sha(self) -> Optional[str]:
+    def _load_last_ingested_sha(self) -> str | None:
         """Load last ingested commit SHA from database."""
         try:
             with self.db.session() as cursor:
@@ -589,7 +588,7 @@ class DataIngestionPipeline:
         except Exception as e:
             logger.error(f"Could not save last ingested SHA: {e}")
 
-    def get_changed_files(self, since_sha: Optional[str] = None) -> List[Path]:
+    def get_changed_files(self, since_sha: str | None = None) -> list[Path]:
         """Get list of files changed since last ingestion."""
         try:
             if not since_sha:
@@ -660,7 +659,7 @@ class DataIngestionPipeline:
         else:
             logger.error(f"Failed to connect: {connector.get_metadata()}")
 
-    def run_ingestion(self) -> Dict[str, Any]:
+    def run_ingestion(self) -> dict[str, Any]:
         """Run the complete ingestion pipeline."""
         logger.info("Starting data ingestion pipeline")
 
@@ -734,7 +733,7 @@ class DataIngestionPipeline:
                 error_message=str(e)
             )
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get ingestion statistics."""
         return {
             **self.ingestion_stats,

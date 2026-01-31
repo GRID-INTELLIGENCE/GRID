@@ -105,7 +105,7 @@ class SkillVersionManager:
 
             if proc.returncode == 0:
                 return stdout.decode("utf-8", errors="replace").strip()
-        except asyncio.TimeoutError:
+        except TimeoutError:
             self._logger.warning(f"Async git SHA lookup timed out for {file_path}")
         except Exception as e:
             self._logger.debug(f"Async git SHA lookup failed: {e}")

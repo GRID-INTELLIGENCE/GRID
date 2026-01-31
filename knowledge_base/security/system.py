@@ -6,16 +6,17 @@ Comprehensive security system providing authentication, authorization,
 rate limiting, and data protection for the GRID Knowledge Base.
 """
 
-import logging
-import time
 import hashlib
+import logging
+import re
 import secrets
-from typing import Dict, List, Any, Optional, Callable
+import time
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from functools import wraps
+from typing import Any
+
 import jwt
-import re
 
 from ..core.config import KnowledgeBaseConfig
 
@@ -31,8 +32,8 @@ class User:
     role: str = "user"
     is_active: bool = True
     created_at: datetime = field(default_factory=datetime.now)
-    last_login: Optional[datetime] = None
-    permissions: List[str] = field(default_factory=list)
+    last_login: datetime | None = None
+    permissions: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -42,11 +43,11 @@ class APIKey:
     name: str
     user_id: str
     key_hash: str
-    permissions: List[str]
+    permissions: list[str]
     is_active: bool = True
     created_at: datetime = field(default_factory=datetime.now)
-    expires_at: Optional[datetime] = None
-    last_used: Optional[datetime] = None
+    expires_at: datetime | None = None
+    last_used: datetime | None = None
 
 
 @dataclass
@@ -79,7 +80,7 @@ class JWTManager:
 
         return jwt.encode(payload, self.config.security.jwt_secret, algorithm=self.config.security.jwt_algorithm)
 
-    def verify_token(self, token: str) -> Optional[Dict[str, Any]]:
+    def verify_token(self, token: str) -> dict[str, Any] | None:
         """Verify and decode JWT token."""
         try:
             payload = jwt.decode(token, self.config.security.jwt_secret,
@@ -93,7 +94,7 @@ class JWTManager:
         except jwt.InvalidTokenError:
             return None
 
-    def get_user_from_token(self, token: str) -> Optional[User]:
+    def get_user_from_token(self, token: str) -> User | None:
         """Extract user information from token."""
         payload = self.verify_token(token)
         if not payload:
@@ -112,11 +113,11 @@ class APIKeyManager:
     """API key management and validation."""
 
     def __init__(self):
-        self.keys: Dict[str, APIKey] = {}
+        self.keys: dict[str, APIKey] = {}
         # In production, this would be stored in a database
 
-    def create_key(self, name: str, user_id: str, permissions: List[str],
-                  expires_days: Optional[int] = None) -> str:
+    def create_key(self, name: str, user_id: str, permissions: list[str],
+                  expires_days: int | None = None) -> str:
         """Create a new API key."""
         # Generate secure random key
         raw_key = secrets.token_urlsafe(32)
@@ -142,7 +143,7 @@ class APIKeyManager:
         logger.info(f"API key created: {name} for user {user_id}")
         return raw_key  # Return the actual key only once
 
-    def validate_key(self, provided_key: str) -> Optional[APIKey]:
+    def validate_key(self, provided_key: str) -> APIKey | None:
         """Validate an API key."""
         # Hash the provided key
         key_hash = hashlib.sha256(provided_key.encode()).hexdigest()
@@ -169,7 +170,7 @@ class APIKeyManager:
             return True
         return False
 
-    def list_user_keys(self, user_id: str) -> List[Dict[str, Any]]:
+    def list_user_keys(self, user_id: str) -> list[dict[str, Any]]:
         """List API keys for a user."""
         user_keys = []
         for api_key in self.keys.values():
@@ -191,8 +192,8 @@ class RateLimiter:
     """Rate limiting system."""
 
     def __init__(self):
-        self.requests: Dict[str, List[float]] = {}
-        self.blocked: Dict[str, float] = {}
+        self.requests: dict[str, list[float]] = {}
+        self.blocked: dict[str, float] = {}
 
     def check_limit(self, identifier: str, rule: RateLimitRule) -> bool:
         """Check if request is within rate limits."""
@@ -268,7 +269,7 @@ class AccessControl:
             ]
         }
 
-    def has_permission(self, user_permissions: List[str], required_permission: str) -> bool:
+    def has_permission(self, user_permissions: list[str], required_permission: str) -> bool:
         """Check if user has required permission."""
         # Check exact match
         if required_permission in user_permissions:
@@ -283,7 +284,7 @@ class AccessControl:
 
         return False
 
-    def get_role_permissions(self, role: str) -> List[str]:
+    def get_role_permissions(self, role: str) -> list[str]:
         """Get permissions for a role."""
         return self.role_permissions.get(role, [])
 
@@ -322,7 +323,7 @@ class DataProtection:
         return text
 
     @staticmethod
-    def validate_content_safety(text: str) -> Dict[str, Any]:
+    def validate_content_safety(text: str) -> dict[str, Any]:
         """Validate content for safety and compliance."""
         issues = []
 
@@ -361,8 +362,8 @@ class SecurityMiddleware:
             window_seconds=config.security.rate_limit_window
         )
 
-    def authenticate_request(self, token: Optional[str] = None,
-                           api_key: Optional[str] = None) -> Optional[User]:
+    def authenticate_request(self, token: str | None = None,
+                           api_key: str | None = None) -> User | None:
         """Authenticate a request."""
         if not self.config.security.enable_auth:
             # Return anonymous user
@@ -406,15 +407,15 @@ class SecurityMiddleware:
 
         return self.access_control.has_permission(user.permissions, required_permission)
 
-    def validate_content(self, content: str) -> Dict[str, Any]:
+    def validate_content(self, content: str) -> dict[str, Any]:
         """Validate content for security."""
         return DataProtection.validate_content_safety(content)
 
-    def create_api_key(self, name: str, user_id: str, permissions: List[str]) -> str:
+    def create_api_key(self, name: str, user_id: str, permissions: list[str]) -> str:
         """Create an API key."""
         return self.api_key_manager.create_key(name, user_id, permissions)
 
-    def get_user_api_keys(self, user_id: str) -> List[Dict[str, Any]]:
+    def get_user_api_keys(self, user_id: str) -> list[dict[str, Any]]:
         """Get API keys for a user."""
         return self.api_key_manager.list_user_keys(user_id)
 
@@ -422,7 +423,7 @@ class SecurityMiddleware:
         """Revoke an API key."""
         return self.api_key_manager.revoke_key(key_id)
 
-    def get_security_status(self) -> Dict[str, Any]:
+    def get_security_status(self) -> dict[str, Any]:
         """Get security system status."""
         return {
             "authentication_enabled": self.config.security.enable_auth,

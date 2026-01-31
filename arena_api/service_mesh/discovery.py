@@ -16,13 +16,12 @@ Key Features:
 
 import asyncio
 import logging
-from typing import Dict, Any, Optional, List, Set
-from datetime import datetime, timedelta
-import json
-import aiohttp
-import os
-from dataclasses import dataclass, asdict
 import time
+from dataclasses import asdict, dataclass
+from datetime import datetime, timedelta
+from typing import Any
+
+import aiohttp
 
 logger = logging.getLogger(__name__)
 
@@ -33,12 +32,12 @@ class ServiceInstance:
     service_name: str
     url: str
     health_url: str
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
     registered_at: datetime
     last_heartbeat: datetime
     status: str = "unknown"  # unknown, healthy, unhealthy, down
     version: str = "1.0.0"
-    tags: List[str] = None
+    tags: list[str] = None
 
     def __post_init__(self):
         if self.tags is None:
@@ -60,8 +59,8 @@ class ServiceDiscovery:
     """
 
     def __init__(self):
-        self.services: Dict[str, List[ServiceInstance]] = {}
-        self.service_health: Dict[str, ServiceHealth] = {}
+        self.services: dict[str, list[ServiceInstance]] = {}
+        self.service_health: dict[str, ServiceHealth] = {}
         self.heartbeat_interval = 30  # seconds
         self.health_check_interval = 60  # seconds
         self.max_consecutive_failures = 3
@@ -97,7 +96,7 @@ class ServiceDiscovery:
 
         logger.info("Service discovery system stopped")
 
-    async def register_service(self, service_data: Dict[str, Any]) -> Dict[str, Any]:
+    async def register_service(self, service_data: dict[str, Any]) -> dict[str, Any]:
         """
         Register a new service instance.
 
@@ -171,7 +170,7 @@ class ServiceDiscovery:
                 "error": str(e)
             }
 
-    async def deregister_service(self, service_name: str, instance_id: str) -> Dict[str, Any]:
+    async def deregister_service(self, service_name: str, instance_id: str) -> dict[str, Any]:
         """
         Deregister a service instance.
 
@@ -220,7 +219,7 @@ class ServiceDiscovery:
                 "error": str(e)
             }
 
-    async def get_services(self) -> Dict[str, List[Dict[str, Any]]]:
+    async def get_services(self) -> dict[str, list[dict[str, Any]]]:
         """
         Get all registered services with their instances.
 
@@ -238,7 +237,7 @@ class ServiceDiscovery:
             ]
         return result
 
-    async def get_service_instances(self, service_name: str) -> List[Dict[str, Any]]:
+    async def get_service_instances(self, service_name: str) -> list[dict[str, Any]]:
         """
         Get all instances of a specific service.
 
@@ -261,7 +260,7 @@ class ServiceDiscovery:
 
         return instances
 
-    async def get_healthy_instances(self, service_name: str) -> List[Dict[str, Any]]:
+    async def get_healthy_instances(self, service_name: str) -> list[dict[str, Any]]:
         """
         Get only healthy instances of a service.
 
@@ -277,7 +276,7 @@ class ServiceDiscovery:
             if instance.get("health", {}).get("status") == "healthy"
         ]
 
-    async def update_heartbeat(self, service_name: str, instance_id: str) -> Dict[str, Any]:
+    async def update_heartbeat(self, service_name: str, instance_id: str) -> dict[str, Any]:
         """
         Update heartbeat for a service instance.
 
@@ -451,7 +450,7 @@ class ServiceDiscovery:
         """Cleanup resources."""
         await self.stop()
 
-    def get_service_stats(self) -> Dict[str, Any]:
+    def get_service_stats(self) -> dict[str, Any]:
         """Get statistics about registered services."""
         total_services = len(self.services)
         total_instances = sum(len(instances) for instances in self.services.values())

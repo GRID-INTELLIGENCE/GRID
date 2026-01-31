@@ -13,14 +13,15 @@ Key Features:
 - AI safety compliance checks
 """
 
-import jwt
-import logging
-from typing import Dict, Any, Optional, Tuple
-from datetime import datetime, timedelta
 import hashlib
-import secrets
+import logging
 import os
-from fastapi import Request, HTTPException
+import secrets
+from datetime import datetime, timedelta
+from typing import Any
+
+import jwt
+from fastapi import Request
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +36,7 @@ class AuthManager:
         self.api_keys = self._load_api_keys()
         self.service_tokens = {}
 
-    def _load_api_keys(self) -> Dict[str, Dict[str, Any]]:
+    def _load_api_keys(self) -> dict[str, dict[str, Any]]:
         """Load API keys from configuration."""
         # In production, load from secure storage
         return {
@@ -51,7 +52,7 @@ class AuthManager:
             }
         }
 
-    async def authenticate(self, request: Request) -> Dict[str, Any]:
+    async def authenticate(self, request: Request) -> dict[str, Any]:
         """
         Authenticate a request using available methods.
 
@@ -90,7 +91,7 @@ class AuthManager:
                 "permissions": []
             }
 
-    async def _authenticate_jwt(self, request: Request) -> Dict[str, Any]:
+    async def _authenticate_jwt(self, request: Request) -> dict[str, Any]:
         """Authenticate using JWT token."""
         try:
             auth_header = request.headers.get("Authorization", "")
@@ -121,7 +122,7 @@ class AuthManager:
             logger.error(f"JWT authentication error: {str(e)}")
             return {"authenticated": False, "error": str(e)}
 
-    async def _authenticate_api_key(self, request: Request) -> Dict[str, Any]:
+    async def _authenticate_api_key(self, request: Request) -> dict[str, Any]:
         """Authenticate using API key."""
         try:
             api_key = request.headers.get("X-API-Key") or request.query_params.get("api_key")
@@ -149,7 +150,7 @@ class AuthManager:
             logger.error(f"API key authentication error: {str(e)}")
             return {"authenticated": False, "error": str(e)}
 
-    async def _authenticate_service_token(self, request: Request) -> Dict[str, Any]:
+    async def _authenticate_service_token(self, request: Request) -> dict[str, Any]:
         """Authenticate service-to-service calls."""
         try:
             service_token = request.headers.get("X-Service-Token")
@@ -252,7 +253,7 @@ class AuthManager:
 
         return token
 
-    def validate_service_token(self, token: str) -> Optional[Dict[str, Any]]:
+    def validate_service_token(self, token: str) -> dict[str, Any] | None:
         """
         Validate a service token.
 
@@ -282,7 +283,7 @@ class RBACManager:
         self.roles = self._load_roles()
         self.permissions = self._load_permissions()
 
-    def _load_roles(self) -> Dict[str, Dict[str, Any]]:
+    def _load_roles(self) -> dict[str, dict[str, Any]]:
         """Load role definitions."""
         return {
             "admin": {
@@ -303,7 +304,7 @@ class RBACManager:
             }
         }
 
-    def _load_permissions(self) -> Dict[str, str]:
+    def _load_permissions(self) -> dict[str, str]:
         """Load permission definitions."""
         return {
             "read": "Read access to resources",

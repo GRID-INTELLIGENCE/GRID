@@ -6,22 +6,21 @@ Comprehensive performance testing and benchmarking suite for the GRID
 Knowledge Base system. Tests search, generation, and ingestion performance.
 """
 
-import logging
-import time
-import asyncio
-import statistics
-from typing import List, Dict, Any, Optional, Callable
-from dataclasses import dataclass, field
-from datetime import datetime
 import concurrent.futures
 import json
+import logging
+import statistics
+import time
+from dataclasses import dataclass, field
+from datetime import datetime
+from typing import Any
 
 from ..core.config import KnowledgeBaseConfig
 from ..core.database import KnowledgeBaseDB
 from ..embeddings.engine import EmbeddingEngine
 from ..embeddings.llm_generator import LLMGenerator
-from ..search.retriever import VectorRetriever
 from ..ingestion.pipeline import DataIngestionPipeline
+from ..search.retriever import VectorRetriever
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +38,7 @@ class PerformanceResult:
     p95_latency: float
     p99_latency: float
     errors: int
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -300,7 +299,7 @@ class IngestionBenchmark:
             # Generate sample document
             doc_id = f"bench_doc_{int(time.time() * 1000000) + operations}"
             title = f"Sample Document {operations}"
-            content = f"This is a sample document for performance testing. " * 50  # ~2500 chars
+            content = "This is a sample document for performance testing. " * 50  # ~2500 chars
 
             op_start = time.time()
             try:
@@ -402,9 +401,9 @@ class PerformanceTestSuite:
         self.ingestion_benchmark = IngestionBenchmark(ingestion_pipeline)
 
         # Test results
-        self.results: List[PerformanceResult] = []
+        self.results: list[PerformanceResult] = []
 
-    def run_full_suite(self, benchmark_config: Optional[BenchmarkConfig] = None) -> Dict[str, Any]:
+    def run_full_suite(self, benchmark_config: BenchmarkConfig | None = None) -> dict[str, Any]:
         """Run the complete performance test suite."""
         if not benchmark_config:
             benchmark_config = BenchmarkConfig()
@@ -451,7 +450,7 @@ class PerformanceTestSuite:
         logger.info(f"Performance test suite completed in {suite_duration:.2f}s")
         return report
 
-    def run_single_test(self, test_name: str, benchmark_config: Optional[BenchmarkConfig] = None) -> PerformanceResult:
+    def run_single_test(self, test_name: str, benchmark_config: BenchmarkConfig | None = None) -> PerformanceResult:
         """Run a single performance test."""
         if not benchmark_config:
             benchmark_config = BenchmarkConfig()
@@ -465,9 +464,10 @@ class PerformanceTestSuite:
         else:
             raise ValueError(f"Unknown test: {test_name}")
 
-    def get_system_info(self) -> Dict[str, Any]:
+    def get_system_info(self) -> dict[str, Any]:
         """Get system information for performance context."""
         import platform
+
         import psutil
 
         return {
@@ -486,7 +486,7 @@ class PerformanceTestSuite:
             }
         }
 
-    def _result_to_dict(self, result: PerformanceResult) -> Dict[str, Any]:
+    def _result_to_dict(self, result: PerformanceResult) -> dict[str, Any]:
         """Convert performance result to dictionary."""
         return {
             "test_name": result.test_name,
@@ -503,7 +503,7 @@ class PerformanceTestSuite:
             "metadata": result.metadata
         }
 
-    def _generate_summary(self, results: List[PerformanceResult]) -> Dict[str, Any]:
+    def _generate_summary(self, results: list[PerformanceResult]) -> dict[str, Any]:
         """Generate performance summary."""
         total_operations = sum(r.operations for r in results)
         total_errors = sum(r.errors for r in results)
@@ -532,7 +532,7 @@ class PerformanceTestSuite:
             "test_count": len(results)
         }
 
-    def _generate_recommendations(self, results: List[PerformanceResult]) -> List[str]:
+    def _generate_recommendations(self, results: list[PerformanceResult]) -> list[str]:
         """Generate performance optimization recommendations."""
         recommendations = []
 

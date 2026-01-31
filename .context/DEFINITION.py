@@ -14,7 +14,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any
 
 # =============================================================================
 # COGNITION PATTERNS
@@ -65,7 +65,7 @@ class CognitionPattern:
     """Integrative thinking pattern - combining concepts to form new ideas."""
 
     @classmethod
-    def all_patterns(cls) -> List[str]:
+    def all_patterns(cls) -> list[str]:
         """Return all cognition patterns."""
         return [
             cls.FLOW,
@@ -80,7 +80,7 @@ class CognitionPattern:
         ]
 
     @classmethod
-    def get_relationships(cls) -> Dict[str, List[str]]:
+    def get_relationships(cls) -> dict[str, list[str]]:
         """Get relationships between cognition patterns."""
         return {
             cls.FLOW: [cls.RHYTHM, cls.TIME],
@@ -195,7 +195,7 @@ class CognitiveTrace:
     timestamp: float
     """When the event occurred (Unix timestamp)."""
 
-    content: Dict[str, Any]
+    content: dict[str, Any]
     """The content and details of the event."""
 
     activation_strength: float
@@ -204,7 +204,7 @@ class CognitiveTrace:
     decay_rate: float = 0.1
     """Rate at which activation decays over time (0.0-1.0)."""
 
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     """Additional metadata about the event."""
 
     def get_current_activation(self, current_time: float) -> float:
@@ -225,16 +225,16 @@ class CognitiveState:
     - Recent cognitive traces
     """
 
-    working_memory: List[Any] = field(default_factory=list)
+    working_memory: list[Any] = field(default_factory=list)
     """Current contents of working memory (limited capacity)."""
 
     attention_focus: str = ""
     """Current object of attention."""
 
-    background_factors: Dict[BackgroundFactor, float] = field(default_factory=dict)
+    background_factors: dict[BackgroundFactor, float] = field(default_factory=dict)
     """Current levels of background factors (0.0-1.0)."""
 
-    recent_traces: List[CognitiveTrace] = field(default_factory=list)
+    recent_traces: list[CognitiveTrace] = field(default_factory=list)
     """Recent cognitive events (limited to last 10)."""
 
     current_domain: ActivityDomain = ActivityDomain.SOFTWARE_DEVELOPMENT
@@ -287,13 +287,13 @@ class Scenario:
     domain: ActivityDomain
     """Domain of activity for this scenario."""
 
-    active_factors: Dict[BackgroundFactor, float] = field(default_factory=dict)
+    active_factors: dict[BackgroundFactor, float] = field(default_factory=dict)
     """Background factors active in this scenario."""
 
-    relevant_patterns: List[str] = field(default_factory=list)
+    relevant_patterns: list[str] = field(default_factory=list)
     """Cognition patterns relevant to this scenario."""
 
-    expected_events: List[CognitiveEvent] = field(default_factory=list)
+    expected_events: list[CognitiveEvent] = field(default_factory=list)
     """Expected cognitive events in this scenario."""
 
     def __post_init__(self):
@@ -326,22 +326,22 @@ class ContextReport:
     domain: ActivityDomain
     """Current activity domain."""
 
-    state_snapshot: Dict[BackgroundFactor, float]
+    state_snapshot: dict[BackgroundFactor, float]
     """Snapshot of background factor values."""
 
     performance_prediction: float
     """Predicted performance level (0.0-1.0)."""
 
-    risk_factors: List[str]
+    risk_factors: list[str]
     """Identified risk factors affecting performance."""
 
-    recommendations: List[str]
+    recommendations: list[str]
     """Recommendations for improving performance."""
 
-    optimal_tasks: List[str]
+    optimal_tasks: list[str]
     """Tasks well-suited to current cognitive state."""
 
-    avoid_tasks: List[str]
+    avoid_tasks: list[str]
     """Tasks poorly suited to current cognitive state."""
 
     role_in_development: str
@@ -353,7 +353,7 @@ class ContextReport:
 # =============================================================================
 
 
-def perceive(stimulus: Any, state: CognitiveState) -> Tuple[CognitiveTrace, CognitiveState]:
+def perceive(stimulus: Any, state: CognitiveState) -> tuple[CognitiveTrace, CognitiveState]:
     """
     Process sensory input and create a perception event.
 
@@ -395,7 +395,7 @@ def perceive(stimulus: Any, state: CognitiveState) -> Tuple[CognitiveTrace, Cogn
     return trace, new_state
 
 
-def shift_attention(target: str, state: CognitiveState) -> Tuple[CognitiveTrace, CognitiveState]:
+def shift_attention(target: str, state: CognitiveState) -> tuple[CognitiveTrace, CognitiveState]:
     """
     Shift attention focus to a new target.
 
@@ -441,7 +441,7 @@ def shift_attention(target: str, state: CognitiveState) -> Tuple[CognitiveTrace,
     return trace, new_state
 
 
-def match_pattern(input_data: Any, pattern: str, state: CognitiveState) -> Tuple[CognitiveTrace, CognitiveState]:
+def match_pattern(input_data: Any, pattern: str, state: CognitiveState) -> tuple[CognitiveTrace, CognitiveState]:
     """
     Match input data against a known pattern.
 
@@ -488,7 +488,7 @@ def match_pattern(input_data: Any, pattern: str, state: CognitiveState) -> Tuple
 
 def tag_emotion(
     content: str, valence: float, intensity: float, state: CognitiveState
-) -> Tuple[CognitiveTrace, CognitiveState]:
+) -> tuple[CognitiveTrace, CognitiveState]:
     """
     Assign emotional tags to content.
 
@@ -546,7 +546,7 @@ def tag_emotion(
     return trace, new_state
 
 
-def prepare_motor(action: str, state: CognitiveState) -> Tuple[CognitiveTrace, CognitiveState]:
+def prepare_motor(action: str, state: CognitiveState) -> tuple[CognitiveTrace, CognitiveState]:
     """
     Prepare for motor action (physical or virtual).
 

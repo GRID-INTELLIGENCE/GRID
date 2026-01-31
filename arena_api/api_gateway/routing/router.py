@@ -15,11 +15,8 @@ Key Features:
 
 import asyncio
 import logging
-from typing import Dict, Any, Optional, List, Tuple
-from urllib.parse import urlparse, urljoin
-import aiohttp
-import json
 from datetime import datetime, timedelta
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +38,7 @@ class DynamicRouter:
         """Inject service discovery dependency."""
         self.service_discovery = service_discovery
 
-    async def route_request(self, request, path: str) -> Dict[str, Any]:
+    async def route_request(self, request, path: str) -> dict[str, Any]:
         """
         Route an incoming request to the appropriate service.
 
@@ -88,7 +85,7 @@ class DynamicRouter:
                 "status_code": 500
             }
 
-    def _parse_service_path(self, path: str) -> Tuple[str, str]:
+    def _parse_service_path(self, path: str) -> tuple[str, str]:
         """
         Parse the request path to determine service name and path.
 
@@ -102,7 +99,7 @@ class DynamicRouter:
         service_path = '/' + '/'.join(parts[1:])
         return service_name, service_path
 
-    async def _get_service_instances(self, service_name: str) -> List[Dict[str, Any]]:
+    async def _get_service_instances(self, service_name: str) -> list[dict[str, Any]]:
         """Get healthy instances of a service."""
         if not self.service_discovery:
             logger.warning("Service discovery not available")
@@ -132,7 +129,7 @@ class CircuitBreaker:
         self.last_failure_time = {}
         self.state = {}  # closed, open, half_open
 
-    async def call_service(self, instance: Dict[str, Any], request_data: Dict[str, Any]) -> Dict[str, Any]:
+    async def call_service(self, instance: dict[str, Any], request_data: dict[str, Any]) -> dict[str, Any]:
         """
         Call a service instance with circuit breaker protection.
         """
@@ -178,7 +175,7 @@ class CircuitBreaker:
         """Record a service call failure."""
         self.failure_counts[instance_id] = self.failure_counts.get(instance_id, 0) + 1
 
-    async def _make_http_call(self, instance: Dict[str, Any], request_data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _make_http_call(self, instance: dict[str, Any], request_data: dict[str, Any]) -> dict[str, Any]:
         """
         Make HTTP call to service instance.
         This is a placeholder - actual implementation would use aiohttp or similar.
@@ -204,7 +201,7 @@ class LoadBalancer:
     def __init__(self):
         self.current_index = {}
 
-    def select_instance(self, instances: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def select_instance(self, instances: list[dict[str, Any]]) -> dict[str, Any]:
         """
         Select a service instance using round-robin algorithm.
         """
@@ -225,7 +222,7 @@ class RequestTransformer:
     Transform requests before routing to services.
     """
 
-    async def transform(self, request, service_name: str, service_path: str) -> Dict[str, Any]:
+    async def transform(self, request, service_name: str, service_path: str) -> dict[str, Any]:
         """
         Transform the request for the target service.
         """

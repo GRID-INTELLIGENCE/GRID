@@ -59,7 +59,7 @@ class OllamaEmbedding(EmbeddingProvider):
             vector = json.loads(stdout.decode())
             # Convert to sparse dict (keep only significant values)
             return {str(i): v for i, v in enumerate(vector) if abs(v) > 0.01}
-        except asyncio.TimeoutError:
+        except TimeoutError:
             raise RuntimeError("Ollama embedding timed out after 30s")
 
     async def async_embed(self, text: str) -> dict[str, float]:

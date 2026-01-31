@@ -52,7 +52,7 @@ class OllamaLLM(LLMProvider):
         except Exception as e:
             logger.warning(f"Ollama LLM error: {e}")
             return f"Error: Could not generate response using {self.model}"
-    
+
     async def async_generate(self, prompt: str, **kwargs: Any) -> str:
         """Generate text using Ollama (async version).
 
@@ -83,7 +83,7 @@ class OllamaLLM(LLMProvider):
             else:
                 logger.warning(f"Ollama subprocess failed: {stderr.decode('utf-8', errors='replace')}")
                 return f"Error: Ollama returned non-zero exit code for {self.model}"
-        except asyncio.TimeoutError:
+        except TimeoutError:
             logger.warning(f"Ollama async LLM timed out after 60s for model {self.model}")
             return f"Error: Request timed out for {self.model}"
         except Exception as e:
@@ -123,7 +123,7 @@ class OpenAILLM(LLMProvider):
         client = self._get_client()
         if client is None:
             return "Error: OpenAI library not installed or no API key provided"
-        
+
         try:
             response = client.chat.completions.create(
                 model=self.model,
@@ -159,9 +159,9 @@ class SimpleLLM(LLMProvider):
             if question_start > 8:
                 question = prompt[question_start:].strip()
                 return f"Based on the provided context, here's an answer to: {question}\n\nThis is a simple fallback response. For better answers, please configure an LLM provider like Ollama or OpenAI."
-        
+
         return "This is a simple fallback LLM response. Please configure an actual LLM provider for better results."
-    
+
     def stream(self, prompt: str, system: str | None = None, temperature: float = 0.7, **kwargs: Any) -> Any:
         """Stream simple response.
         
@@ -179,7 +179,7 @@ class SimpleLLM(LLMProvider):
         words = response.split()
         for word in words:
             yield word + " "
-    
+
     async def async_generate(self, prompt: str, system: str | None = None, temperature: float = 0.7, max_tokens: int | None = None, **kwargs: Any) -> str:
         """Async wrapper for sync generate.
         
@@ -194,7 +194,7 @@ class SimpleLLM(LLMProvider):
             Simple fallback response
         """
         return self.generate(prompt, system, temperature, max_tokens, **kwargs)
-    
+
     async def async_stream(self, prompt: str, system: str | None = None, temperature: float = 0.7, **kwargs: Any) -> Any:
         """Async stream wrapper.
         

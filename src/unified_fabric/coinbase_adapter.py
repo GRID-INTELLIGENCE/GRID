@@ -9,14 +9,15 @@ Features:
 - Revenue pipeline auditing
 """
 import logging
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
-from datetime import datetime, UTC
-from typing import Any, Optional, Callable, Awaitable
+from datetime import UTC, datetime
 from enum import Enum
+from typing import Any
 
 from . import Event, EventDomain, get_event_bus
-from .safety_bridge import get_safety_bridge, SafetyContext
-from .audit import get_audit_logger, AuditEventType
+from .audit import AuditEventType, get_audit_logger
+from .safety_bridge import SafetyContext, get_safety_bridge
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +49,7 @@ class PortfolioAction:
     asset: str
     amount: float
     user_id: str
-    price: Optional[float] = None
+    price: float | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
     timestamp: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
     action_id: str = field(default_factory=lambda: f"act_{datetime.now(UTC).timestamp():.0f}")
@@ -74,7 +75,7 @@ class ActionResult:
     action_id: str
     message: str
     blocked_by_safety: bool = False
-    safety_reason: Optional[str] = None
+    safety_reason: str | None = None
     execution_time_ms: float = 0.0
 
 
@@ -87,7 +88,7 @@ class CoinbaseIntegrationAdapter:
     - Trading signals → Safety validation → Revenue pipeline
     - Revenue events → Audit trail
     """
-    
+
     def __init__(self):
         self._safety_bridge = get_safety_bridge()
         self._event_bus = get_event_bus()
@@ -95,19 +96,19 @@ class CoinbaseIntegrationAdapter:
         self._action_handlers: dict[ActionType, Callable] = {}
         self._signal_handlers: list[Callable] = []
         self._initialized = False
-    
+
     async def initialize(self):
         """Initialize the adapter"""
         if self._initialized:
             return
-        
+
         # Subscribe to relevant events
         self._event_bus.subscribe("coinbase.action.*", self._handle_action_event, domain="coinbase")
         self._event_bus.subscribe("coinbase.signal.*", self._handle_signal_event, domain="coinbase")
-        
+
         self._initialized = True
         logger.info("CoinbaseIntegrationAdapter initialized")
-    
+
     async def execute_action(
         self,
         action: PortfolioAction
@@ -122,7 +123,7 @@ class CoinbaseIntegrationAdapter:
             ActionResult with success/failure status
         """
         start_time = datetime.now(UTC)
-        
+
         # Safety validation first
         report = await self._safety_bridge.validate_coinbase_action(
             {
@@ -133,7 +134,7 @@ class CoinbaseIntegrationAdapter:
             },
             action.user_id
         )
-        
+
         if report.should_block:
             return ActionResult(
                 success=False,
@@ -142,22 +143,22 @@ class CoinbaseIntegrationAdapter:
                 blocked_by_safety=True,
                 safety_reason=report.violations[0].description if report.violations else "Safety violation"
             )
-        
+
         # Execute the action
         try:
             result = await self._execute_internal(action)
-            
+
             # Log to audit
             await self._audit_action(action, result)
-            
+
             # Broadcast event
             await self._broadcast_action_event(action, result)
-            
+
             elapsed = (datetime.now(UTC) - start_time).total_seconds() * 1000
             result.execution_time_ms = elapsed
-            
+
             return result
-            
+
         except Exception as e:
             logger.error(f"Action execution failed: {e}")
             return ActionResult(
@@ -165,7 +166,7 @@ class CoinbaseIntegrationAdapter:
                 action_id=action.action_id,
                 message=f"Execution failed: {str(e)}"
             )
-    
+
     async def process_signal(
         self,
         signal: TradingSignal
@@ -189,30 +190,30 @@ class CoinbaseIntegrationAdapter:
                 metadata={"signal_id": signal.signal_id}
             )
         )
-        
+
         if report.should_block:
             logger.warning(f"Signal blocked by safety: {signal.signal_id}")
             return False
-        
+
         # Dispatch to signal handlers
         for handler in self._signal_handlers:
             try:
                 await handler(signal)
             except Exception as e:
                 logger.error(f"Signal handler error: {e}")
-        
+
         # Broadcast event
         await self._broadcast_signal_event(signal)
-        
+
         return True
-    
+
     async def create_revenue_event(
         self,
         revenue_type: str,
         amount: float,
         asset: str,
         user_id: str,
-        metadata: Optional[dict] = None
+        metadata: dict | None = None
     ) -> str:
         """
         Create a safety-validated revenue event.
@@ -238,10 +239,10 @@ class CoinbaseIntegrationAdapter:
             },
             user_id
         )
-        
+
         if report.should_block:
             raise ValueError(f"Revenue event blocked: {report.violations}")
-        
+
         # Log to audit
         request_id = await self._audit_logger.log(
             event_type=AuditEventType.SYSTEM_EVENT,
@@ -257,7 +258,7 @@ class CoinbaseIntegrationAdapter:
                 **(metadata or {})
             }
         )
-        
+
         # Broadcast event
         event = Event(
             event_type=f"coinbase.revenue.{revenue_type}",
@@ -272,11 +273,11 @@ class CoinbaseIntegrationAdapter:
             target_domains=["all"]
         )
         await self._event_bus.publish(event)
-        
+
         logger.info(f"Revenue event created: {revenue_type} ${amount} {asset}")
-        
+
         return request_id
-    
+
     def register_action_handler(
         self,
         action_type: ActionType,
@@ -284,14 +285,14 @@ class CoinbaseIntegrationAdapter:
     ):
         """Register a handler for specific action type"""
         self._action_handlers[action_type] = handler
-    
+
     def register_signal_handler(
         self,
         handler: Callable[[TradingSignal], Awaitable[None]]
     ):
         """Register a trading signal handler"""
         self._signal_handlers.append(handler)
-    
+
     async def _execute_internal(
         self,
         action: PortfolioAction
@@ -300,16 +301,16 @@ class CoinbaseIntegrationAdapter:
         # Check for custom handler
         if action.action_type in self._action_handlers:
             return await self._action_handlers[action.action_type](action)
-        
+
         # Default mock execution
         logger.info(f"Executing {action.action_type.value}: {action.amount} {action.asset}")
-        
+
         return ActionResult(
             success=True,
             action_id=action.action_id,
             message=f"{action.action_type.value.upper()} {action.amount} {action.asset} executed"
         )
-    
+
     async def _audit_action(
         self,
         action: PortfolioAction,
@@ -328,7 +329,7 @@ class CoinbaseIntegrationAdapter:
                 "message": result.message
             }
         )
-    
+
     async def _broadcast_action_event(
         self,
         action: PortfolioAction,
@@ -349,7 +350,7 @@ class CoinbaseIntegrationAdapter:
             target_domains=["all"]
         )
         await self._event_bus.publish(event)
-    
+
     async def _broadcast_signal_event(
         self,
         signal: TradingSignal
@@ -368,18 +369,18 @@ class CoinbaseIntegrationAdapter:
             target_domains=["all"]
         )
         await self._event_bus.publish(event)
-    
+
     async def _handle_action_event(self, event: Event):
         """Handle incoming action events"""
         logger.debug(f"Received action event: {event.event_type}")
-    
+
     async def _handle_signal_event(self, event: Event):
         """Handle incoming signal events"""
         logger.debug(f"Received signal event: {event.event_type}")
 
 
 # Singleton instance
-_coinbase_adapter: Optional[CoinbaseIntegrationAdapter] = None
+_coinbase_adapter: CoinbaseIntegrationAdapter | None = None
 
 
 def get_coinbase_adapter() -> CoinbaseIntegrationAdapter:

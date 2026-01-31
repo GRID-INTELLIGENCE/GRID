@@ -12,7 +12,7 @@ Provides REST endpoints for knowledge base operations:
 import logging
 import os
 import time
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -34,10 +34,10 @@ class SearchRequest(BaseModel):
     """Search request model."""
 
     query: str = Field(..., description="Search query text")
-    limit: Optional[int] = Field(10, description="Maximum results to return")
-    threshold: Optional[float] = Field(0.7, description="Similarity threshold")
-    use_hybrid: Optional[bool] = Field(True, description="Use hybrid search")
-    include_sources: Optional[bool] = Field(True, description="Include source information")
+    limit: int | None = Field(10, description="Maximum results to return")
+    threshold: float | None = Field(0.7, description="Similarity threshold")
+    use_hybrid: bool | None = Field(True, description="Use hybrid search")
+    include_sources: bool | None = Field(True, description="Include source information")
 
 
 class SearchResponse(BaseModel):
@@ -45,8 +45,8 @@ class SearchResponse(BaseModel):
 
     query: str
     total_results: int
-    results: List[Dict[str, Any]]
-    sources: Optional[List[Dict[str, Any]]] = None
+    results: list[dict[str, Any]]
+    sources: list[dict[str, Any]] | None = None
     processing_time: float
 
 
@@ -56,8 +56,8 @@ class IngestRequest(BaseModel):
     content: str = Field(..., description="Document content")
     title: str = Field(..., description="Document title")
     source_type: str = Field("manual", description="Source type")
-    source_path: Optional[str] = Field(None, description="Source file path")
-    metadata: Optional[Dict[str, Any]] = Field(None, description="Additional metadata")
+    source_path: str | None = Field(None, description="Source file path")
+    metadata: dict[str, Any] | None = Field(None, description="Additional metadata")
 
 
 class IngestResponse(BaseModel):
@@ -73,9 +73,9 @@ class GenerateRequest(BaseModel):
     """Text generation request model."""
 
     query: str = Field(..., description="Question to answer")
-    context_limit: Optional[int] = Field(5, description="Maximum context results")
-    temperature: Optional[float] = Field(None, description="Generation temperature")
-    max_tokens: Optional[int] = Field(None, description="Maximum tokens to generate")
+    context_limit: int | None = Field(5, description="Maximum context results")
+    temperature: float | None = Field(None, description="Generation temperature")
+    max_tokens: int | None = Field(None, description="Maximum tokens to generate")
 
 
 class GenerateResponse(BaseModel):
@@ -83,19 +83,19 @@ class GenerateResponse(BaseModel):
 
     answer: str
     confidence_score: float
-    sources: List[Dict[str, Any]]
-    token_usage: Dict[str, int]
+    sources: list[dict[str, Any]]
+    token_usage: dict[str, int]
     processing_time: float
 
 
 class SystemStats(BaseModel):
     """System statistics response model."""
 
-    documents: Dict[str, Any]
-    chunks: Dict[str, Any]
-    embeddings: Dict[str, Any]
-    search: Dict[str, Any]
-    generation: Dict[str, Any]
+    documents: dict[str, Any]
+    chunks: dict[str, Any]
+    embeddings: dict[str, Any]
+    search: dict[str, Any]
+    generation: dict[str, Any]
 
 
 def create_api_app(

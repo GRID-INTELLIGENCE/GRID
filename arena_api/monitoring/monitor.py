@@ -17,15 +17,15 @@ Key Features:
 
 import asyncio
 import logging
-import time
-import json
-from typing import Dict, Any, Optional, List, Tuple
-from datetime import datetime, timedelta
-from collections import defaultdict, deque
-import statistics
 import os
+import statistics
+import time
+from collections import defaultdict, deque
 from dataclasses import dataclass, field
+from datetime import datetime
 from enum import Enum
+from typing import Any
+
 import aiohttp
 
 logger = logging.getLogger(__name__)
@@ -43,7 +43,7 @@ class MetricData:
     name: str
     value: float
     timestamp: datetime
-    tags: Dict[str, str] = field(default_factory=dict)
+    tags: dict[str, str] = field(default_factory=dict)
     metric_type: MetricType = MetricType.GAUGE
 
 @dataclass
@@ -53,10 +53,10 @@ class RequestMetrics:
     path: str
     status_code: int
     response_time: float
-    user_id: Optional[str] = None
-    service_name: Optional[str] = None
-    client_ip: Optional[str] = None
-    user_agent: Optional[str] = None
+    user_id: str | None = None
+    service_name: str | None = None
+    client_ip: str | None = None
+    user_agent: str | None = None
 
 class MonitoringManager:
     """
@@ -85,7 +85,7 @@ class MonitoringManager:
         self.dashboard_url = os.getenv("ARENA_DASHBOARD_URL")
         self.metrics_endpoint = os.getenv("ARENA_METRICS_ENDPOINT")
 
-    def _load_alert_thresholds(self) -> Dict[str, Any]:
+    def _load_alert_thresholds(self) -> dict[str, Any]:
         """Load alert threshold configurations."""
         return {
             "response_time_p95": 2.0,  # seconds
@@ -158,7 +158,7 @@ class MonitoringManager:
             self.metrics_buffer.append(metrics)
 
             # Update counters
-            self.counters[f"requests_total"] += 1
+            self.counters["requests_total"] += 1
             self.counters[f"requests_method_{method.lower()}"] += 1
             self.counters[f"requests_status_{status_code}"] += 1
 
@@ -248,7 +248,7 @@ class MonitoringManager:
         except Exception as e:
             logger.error(f"Error recording rate limit violation: {str(e)}")
 
-    async def record_security_event(self, event_type: str, details: Dict[str, Any],
+    async def record_security_event(self, event_type: str, details: dict[str, Any],
                                   severity: str = "INFO"):
         """
         Record security-related events.
@@ -377,7 +377,7 @@ class MonitoringManager:
             logger.error(f"Error checking rate limit alerts: {str(e)}")
 
     async def _create_alert(self, alert_type: str, message: str, severity: str,
-                          details: Dict[str, Any]):
+                          details: dict[str, Any]):
         """Create an alert."""
         try:
             alert = {
@@ -402,7 +402,7 @@ class MonitoringManager:
         except Exception as e:
             logger.error(f"Error creating alert: {str(e)}")
 
-    async def _send_alert_to_dashboard(self, alert: Dict[str, Any]):
+    async def _send_alert_to_dashboard(self, alert: dict[str, Any]):
         """Send alert to external dashboard."""
         try:
             async with aiohttp.ClientSession() as session:
@@ -504,7 +504,7 @@ class MonitoringManager:
                 logger.error(f"Metrics export error: {str(e)}")
                 await asyncio.sleep(60)
 
-    def get_metrics_summary(self) -> Dict[str, Any]:
+    def get_metrics_summary(self) -> dict[str, Any]:
         """Get a summary of current metrics."""
         return {
             "counters": dict(self.counters),
@@ -517,7 +517,7 @@ class MonitoringManager:
             }
         }
 
-    def get_recent_alerts(self, limit: int = 10) -> List[Dict[str, Any]]:
+    def get_recent_alerts(self, limit: int = 10) -> list[dict[str, Any]]:
         """Get recent alerts."""
         alerts = list(self.alerts_buffer)
         return alerts[-limit:] if len(alerts) > limit else alerts

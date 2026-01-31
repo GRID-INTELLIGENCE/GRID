@@ -11,13 +11,14 @@ Features:
 import asyncio
 import logging
 import time
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
-from datetime import datetime, UTC
-from typing import Any, Optional, Callable, Awaitable
+from datetime import UTC, datetime
 from functools import wraps
+from typing import Any
 
 from . import Event, EventDomain, get_event_bus
-from .safety_bridge import get_safety_bridge, SafetyContext, SafetyBlockedException
+from .safety_bridge import SafetyBlockedException, SafetyContext, get_safety_bridge
 from .safety_router import SafetyDecision
 
 logger = logging.getLogger(__name__)
@@ -39,7 +40,7 @@ class RouterResponse:
     """Standard router response structure"""
     success: bool
     data: Any = None
-    error: Optional[str] = None
+    error: str | None = None
     safety_checked: bool = False
     processing_time_ms: float = 0.0
     request_id: str = ""
@@ -47,7 +48,7 @@ class RouterResponse:
 
 def async_safety_wrapper(
     route_type: str = "dynamic",
-    on_block: Optional[Callable] = None
+    on_block: Callable | None = None
 ):
     """
     Decorator to wrap router handlers with async safety validation.
@@ -61,15 +62,15 @@ def async_safety_wrapper(
         @wraps(func)
         async def wrapper(*args, **kwargs):
             start_time = time.perf_counter()
-            
+
             # Extract request content
             request = kwargs.get("request")
             if not request and args:
                 request = args[0]
-            
+
             content = ""
             user_id = "system"
-            
+
             if isinstance(request, dict):
                 content = str(request.get("content", request.get("query", request)))
                 user_id = request.get("user_id", "system")
@@ -78,7 +79,7 @@ def async_safety_wrapper(
                 user_id = request.user_id
             elif request:
                 content = str(request)
-            
+
             # Validate with safety bridge
             bridge = get_safety_bridge()
             context = SafetyContext(
@@ -86,32 +87,32 @@ def async_safety_wrapper(
                 domain=route_type,
                 user_id=user_id
             )
-            
+
             report = await bridge.validate(content, context)
-            
+
             if report.should_block:
                 if on_block:
                     return on_block(report)
                 raise SafetyBlockedException(report)
-            
+
             # Execute original handler
             result = await func(*args, **kwargs)
-            
+
             elapsed = (time.perf_counter() - start_time) * 1000
-            
+
             # Wrap result if needed
             if isinstance(result, RouterResponse):
                 result.safety_checked = True
                 result.processing_time_ms = elapsed
                 return result
-            
+
             return RouterResponse(
                 success=True,
                 data=result,
                 safety_checked=True,
                 processing_time_ms=elapsed
             )
-        
+
         return wrapper
     return decorator
 
@@ -125,26 +126,26 @@ class AsyncRouterIntegration:
     2. Event-driven request queuing
     3. Non-blocking response handling
     """
-    
+
     def __init__(self):
         self._safety_bridge = get_safety_bridge()
         self._event_bus = get_event_bus()
         self._pending_requests: dict[str, asyncio.Future] = {}
         self._handlers: dict[str, Callable] = {}
         self._initialized = False
-    
+
     async def initialize(self):
         """Initialize the router integration"""
         if self._initialized:
             return
-        
+
         # Subscribe to router events
         self._event_bus.subscribe("grid.route.*", self._handle_route_event, domain="grid")
         self._event_bus.subscribe("grid.response.*", self._handle_response_event, domain="grid")
-        
+
         self._initialized = True
         logger.info("AsyncRouterIntegration initialized")
-    
+
     async def route_async(
         self,
         request: RouterRequest,
@@ -161,7 +162,7 @@ class AsyncRouterIntegration:
             RouterResponse with result
         """
         start_time = time.perf_counter()
-        
+
         # Safety validation
         context = SafetyContext(
             project="grid",
@@ -169,9 +170,9 @@ class AsyncRouterIntegration:
             user_id=request.user_id,
             request_id=request.request_id
         )
-        
+
         report = await self._safety_bridge.validate(request.content, context)
-        
+
         if report.should_block:
             return RouterResponse(
                 success=False,
@@ -179,7 +180,7 @@ class AsyncRouterIntegration:
                 safety_checked=True,
                 request_id=request.request_id
             )
-        
+
         # Check for registered handler
         if request.route_type in self._handlers:
             try:
@@ -199,11 +200,11 @@ class AsyncRouterIntegration:
                     safety_checked=True,
                     request_id=request.request_id
                 )
-        
+
         # Use event-based routing
         future: asyncio.Future = asyncio.get_event_loop().create_future()
         self._pending_requests[request.request_id] = future
-        
+
         # Publish route event
         event = Event(
             event_type=f"grid.route.{request.route_type}",
@@ -219,11 +220,11 @@ class AsyncRouterIntegration:
             target_domains=["grid"]
         )
         await self._event_bus.publish(event)
-        
+
         try:
             result = await asyncio.wait_for(future, timeout=timeout)
             elapsed = (time.perf_counter() - start_time) * 1000
-            
+
             return RouterResponse(
                 success=True,
                 data=result,
@@ -231,7 +232,7 @@ class AsyncRouterIntegration:
                 processing_time_ms=elapsed,
                 request_id=request.request_id
             )
-        except asyncio.TimeoutError:
+        except TimeoutError:
             return RouterResponse(
                 success=False,
                 error=f"Timeout after {timeout}s",
@@ -240,7 +241,7 @@ class AsyncRouterIntegration:
             )
         finally:
             self._pending_requests.pop(request.request_id, None)
-    
+
     def register_handler(
         self,
         route_type: str,
@@ -249,12 +250,12 @@ class AsyncRouterIntegration:
         """Register a handler for a route type"""
         self._handlers[route_type] = handler
         logger.info(f"Registered handler for route type: {route_type}")
-    
+
     async def _handle_route_event(self, event: Event):
         """Handle incoming route events"""
         route_type = event.event_type.split(".")[-1]
         logger.debug(f"Route event received: {route_type}")
-    
+
     async def _handle_response_event(self, event: Event):
         """Handle response events to resolve pending requests"""
         request_id = event.payload.get("request_id")
@@ -262,7 +263,7 @@ class AsyncRouterIntegration:
             future = self._pending_requests[request_id]
             if not future.done():
                 future.set_result(event.payload.get("data"))
-    
+
     def resolve_request(self, request_id: str, data: Any):
         """Manually resolve a pending request"""
         if request_id in self._pending_requests:
@@ -283,7 +284,7 @@ def create_dynamic_router_hook():
             user_id=user_id
         )
         report = await bridge.validate(str(request), context)
-        
+
         return {
             "safety_checked": True,
             "allowed": not report.should_block,
@@ -303,7 +304,7 @@ def create_cognitive_router_hook():
             user_id=user_id
         )
         report = await bridge.validate(str(request), context)
-        
+
         return {
             "safety_checked": True,
             "allowed": not report.should_block,
@@ -314,7 +315,7 @@ def create_cognitive_router_hook():
 
 
 # Singleton instance
-_router_integration: Optional[AsyncRouterIntegration] = None
+_router_integration: AsyncRouterIntegration | None = None
 
 
 def get_router_integration() -> AsyncRouterIntegration:

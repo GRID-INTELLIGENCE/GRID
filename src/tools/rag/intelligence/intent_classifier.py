@@ -7,10 +7,8 @@ user's goal (e.g., finding a definition vs. understanding an implementation).
 """
 
 import logging
-import os
 from dataclasses import dataclass
 from enum import Enum
-from typing import Dict, List, Optional, Union
 
 import torch
 from transformers import pipeline
@@ -39,7 +37,7 @@ class IntentResult:
 
     intent: Intent
     confidence: float
-    all_scores: Dict[str, float]
+    all_scores: dict[str, float]
     query: str
 
 
@@ -55,7 +53,7 @@ class IntentClassifier:
     def __init__(
         self,
         model_name: str = "cross-encoder/nli-deberta-v3-small",
-        device: Optional[str] = None,
+        device: str | None = None,
         use_gpu: bool = True,
     ):
         """

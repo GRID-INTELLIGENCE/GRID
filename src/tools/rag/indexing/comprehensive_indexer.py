@@ -26,12 +26,12 @@ import json
 import os
 import re
 import sys
-import time
+from collections.abc import Generator
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Dict, Generator, List, Optional, Tuple
+from typing import Any
 
 # Rich imports for beautiful CLI
 try:
@@ -101,13 +101,13 @@ class ChunkMetadata:
 
     # NLP context
     summary: str  # Brief description of chunk content
-    symbols: List[str]  # Functions, classes, variables defined
-    imports: List[str]  # Dependencies
-    references: List[str]  # Cross-references to other files/symbols
+    symbols: list[str]  # Functions, classes, variables defined
+    imports: list[str]  # Dependencies
+    references: list[str]  # Cross-references to other files/symbols
 
     # Hierarchy
-    parent_section: Optional[str] = None  # e.g., class name for methods
-    document_title: Optional[str] = None  # File-level title/description
+    parent_section: str | None = None  # e.g., class name for methods
+    document_title: str | None = None  # File-level title/description
 
     # Quality metrics
     semantic_density: float = 0.0  # How information-dense
@@ -116,7 +116,7 @@ class ChunkMetadata:
     # Timestamps
     indexed_at: str = field(default_factory=lambda: datetime.now().isoformat())
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for storage (ChromaDB compatible)."""
         # ChromaDB only accepts str, int, float, bool, or None
         # Convert lists to comma-separated strings
@@ -143,7 +143,7 @@ class IndexingStats:
     """Comprehensive indexing statistics."""
 
     start_time: datetime = field(default_factory=datetime.now)
-    end_time: Optional[datetime] = None
+    end_time: datetime | None = None
 
     # File counts
     total_files: int = 0
@@ -166,7 +166,7 @@ class IndexingStats:
     avg_semantic_density: float = 0.0
 
     # Skip reasons
-    skip_reasons: Dict[str, int] = field(default_factory=dict)
+    skip_reasons: dict[str, int] = field(default_factory=dict)
 
     # Embedding info
     embedding_model: str = ""
@@ -270,7 +270,7 @@ class NLPChunker:
         self,
         file_path: Path,
         content: str,
-    ) -> Generator[Tuple[str, ChunkMetadata], None, None]:
+    ) -> Generator[tuple[str, ChunkMetadata]]:
         """
         Chunk a file with NLP-aware boundaries and rich metadata.
 
@@ -328,7 +328,7 @@ class NLPChunker:
         doc_title: str,
         min_size: int,
         max_size: int,
-    ) -> Generator[Tuple[str, ChunkMetadata], None, None]:
+    ) -> Generator[tuple[str, ChunkMetadata]]:
         """Chunk Python code with class/function awareness."""
         lines = content.split("\n")
 
@@ -403,8 +403,8 @@ class NLPChunker:
 
     def _find_python_boundaries(
         self,
-        lines: List[str],
-    ) -> List[Tuple[int, int, str, Optional[str]]]:
+        lines: list[str],
+    ) -> list[tuple[int, int, str, str | None]]:
         """Find class and function boundaries in Python code."""
         boundaries = []
         current_class = None
@@ -443,7 +443,7 @@ class NLPChunker:
 
     def _find_block_end(
         self,
-        lines: List[str],
+        lines: list[str],
         start: int,
         base_indent: int,
     ) -> int:
@@ -462,7 +462,7 @@ class NLPChunker:
 
         return len(lines) - 1
 
-    def _extract_python_imports(self, content: str) -> List[str]:
+    def _extract_python_imports(self, content: str) -> list[str]:
         """Extract import statements from Python code."""
         imports = []
         for match in self.python_import_pattern.finditer(content):
@@ -478,7 +478,7 @@ class NLPChunker:
         doc_title: str,
         min_size: int,
         max_size: int,
-    ) -> Generator[Tuple[str, ChunkMetadata], None, None]:
+    ) -> Generator[tuple[str, ChunkMetadata]]:
         """Chunk Markdown by headers."""
         lines = content.split("\n")
         sections = []
@@ -542,7 +542,7 @@ class NLPChunker:
         doc_title: str,
         min_size: int,
         max_size: int,
-    ) -> Generator[Tuple[str, ChunkMetadata], None, None]:
+    ) -> Generator[tuple[str, ChunkMetadata]]:
         """Generic code chunking (for JS, Rust, etc.)."""
         yield from self._chunk_by_size(file_path, content, content_type, doc_title, min_size, max_size, [])
 
@@ -554,7 +554,7 @@ class NLPChunker:
         doc_title: str,
         min_size: int,
         max_size: int,
-    ) -> Generator[Tuple[str, ChunkMetadata], None, None]:
+    ) -> Generator[tuple[str, ChunkMetadata]]:
         """Generic chunking by size with overlap."""
         yield from self._chunk_by_size(file_path, content, content_type, doc_title, min_size, max_size, [])
 
@@ -566,8 +566,8 @@ class NLPChunker:
         doc_title: str,
         min_size: int,
         max_size: int,
-        imports: List[str],
-    ) -> Generator[Tuple[str, ChunkMetadata], None, None]:
+        imports: list[str],
+    ) -> Generator[tuple[str, ChunkMetadata]]:
         """Chunk by size with smart boundaries (paragraph/line breaks)."""
         lines = content.split("\n")
         current_chunk_lines = []
@@ -611,8 +611,8 @@ class NLPChunker:
         doc_title: str,
         start_line: int,
         end_line: int,
-        imports: List[str],
-    ) -> Generator[Tuple[str, ChunkMetadata], None, None]:
+        imports: list[str],
+    ) -> Generator[tuple[str, ChunkMetadata]]:
         """Emit a single chunk with metadata."""
         chunk_id = self._generate_chunk_id(str(file_path), start_line, chunk_text)
         symbols = self._extract_symbols(chunk_text, content_type)
@@ -643,10 +643,10 @@ class NLPChunker:
         doc_title: str,
         start_line: int,
         end_line: int,
-        symbols: List[str],
-        imports: List[str],
-        parent: Optional[str],
-    ) -> Generator[Tuple[str, ChunkMetadata], None, None]:
+        symbols: list[str],
+        imports: list[str],
+        parent: str | None,
+    ) -> Generator[tuple[str, ChunkMetadata]]:
         """Split a large chunk into smaller pieces."""
         lines = chunk_text.split("\n")
         num_lines = len(lines)
@@ -686,7 +686,7 @@ class NLPChunker:
 
             yield sub_text, metadata
 
-    def _extract_symbols(self, text: str, content_type: ContentType) -> List[str]:
+    def _extract_symbols(self, text: str, content_type: ContentType) -> list[str]:
         """Extract defined symbols from text."""
         symbols = []
 
@@ -700,7 +700,7 @@ class NLPChunker:
 
         return symbols[:10]  # Limit
 
-    def _extract_references(self, text: str) -> List[str]:
+    def _extract_references(self, text: str) -> list[str]:
         """Extract references to other files/symbols."""
         references = []
 
@@ -723,7 +723,7 @@ class NLPChunker:
     def _generate_summary(
         self,
         text: str,
-        symbols: List[str],
+        symbols: list[str],
         content_type: ContentType,
     ) -> str:
         """Generate a brief summary of the chunk content."""
@@ -832,14 +832,14 @@ class HuggingFaceEmbedder:
         except ImportError:
             raise ImportError("sentence-transformers is required. Install with: pip install sentence-transformers")
 
-    def embed(self, text: str) -> List[float]:
+    def embed(self, text: str) -> list[float]:
         """Embed a single text."""
         if self.model is None:
             raise RuntimeError("Model not loaded")
         embedding = self.model.encode(text, convert_to_numpy=True)
         return embedding.tolist()
 
-    def embed_batch(self, texts: List[str]) -> List[List[float]]:
+    def embed_batch(self, texts: list[str]) -> list[list[float]]:
         """Embed a batch of texts."""
         if self.model is None:
             raise RuntimeError("Model not loaded")
@@ -851,14 +851,14 @@ class HuggingFaceEmbedder:
         )
         return embeddings.tolist()
 
-    async def async_embed(self, text: str) -> List[float]:
+    async def async_embed(self, text: str) -> list[float]:
         """Async embed (runs sync in executor)."""
         import asyncio
 
         loop = asyncio.get_event_loop()
         return await loop.run_in_executor(None, self.embed, text)
 
-    async def async_embed_batch(self, texts: List[str]) -> List[List[float]]:
+    async def async_embed_batch(self, texts: list[str]) -> list[list[float]]:
         """Async batch embed."""
         import asyncio
 
@@ -985,9 +985,9 @@ class RichProgressDisplay:
 
 def get_files_to_index(
     repo_path: Path,
-    exclude_patterns: Optional[List[str]] = None,
-    include_patterns: Optional[List[str]] = None,
-) -> Generator[Path, None, None]:
+    exclude_patterns: list[str] | None = None,
+    include_patterns: list[str] | None = None,
+) -> Generator[Path]:
     """Get all files to index from repository."""
     exclude_patterns = exclude_patterns or []
     include_patterns = include_patterns or []
@@ -1245,7 +1245,7 @@ def index_codebase(
     path: str = ".",
     model: str = "auto",
     rebuild: bool = False,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     🔍 Index a codebase for intelligent RAG - Simple workflow function.
 
@@ -1354,8 +1354,8 @@ def quality_index(path: str = ".") -> bool:
 
 def incremental_index(
     path: str = ".",
-    files: Optional[List[str]] = None,
-) -> Dict[str, Any]:
+    files: list[str] | None = None,
+) -> dict[str, Any]:
     """
     📝 Incremental index - add/update specific files without full rebuild.
 
@@ -1379,7 +1379,7 @@ def index_exists(db_path: str = ".rag_db_comprehensive") -> bool:
     return Path(db_path).exists() and any(Path(db_path).iterdir())
 
 
-def get_index_stats(db_path: str = ".rag_db_comprehensive") -> Dict[str, Any]:
+def get_index_stats(db_path: str = ".rag_db_comprehensive") -> dict[str, Any]:
     """Get statistics about an existing index."""
     try:
         from tools.rag.vector_store.chromadb_store import ChromaDBVectorStore

@@ -15,7 +15,7 @@ import asyncpg
 
 # Real MCP imports - optional dependency
 from mcp.server import Server  # type: ignore
-from mcp.server.models import InitializationOptions  # type: ignore  
+from mcp.server.models import InitializationOptions  # type: ignore
 from mcp.server.stdio import stdio_server  # type: ignore
 from mcp.types import (  # type: ignore
     CallToolResult,
@@ -23,7 +23,6 @@ from mcp.types import (  # type: ignore
     TextContent,
     Tool,
 )
-import asyncpg  # type: ignore
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

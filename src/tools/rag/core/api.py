@@ -3,8 +3,8 @@
 This module provides the main interfaces developers use for RAG functionality.
 """
 
-from .engine import RAGEngine, create_persistent_engine, create_on_demand_engine, create_conversational_engine
 from .config import RAGConfig
+from .engine import RAGEngine, create_conversational_engine, create_on_demand_engine, create_persistent_engine
 
 
 def query(question: str, mode: str = "persistent", **kwargs) -> dict:

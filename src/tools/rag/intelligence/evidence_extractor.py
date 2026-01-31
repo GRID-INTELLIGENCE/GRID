@@ -12,7 +12,7 @@ import logging
 import re
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -53,20 +53,20 @@ class Evidence:
     # Source attribution
     source_chunk_id: str
     source_file: str
-    source_line_start: Optional[int] = None
-    source_line_end: Optional[int] = None
+    source_line_start: int | None = None
+    source_line_end: int | None = None
 
     # Context
     surrounding_context: str = ""  # Text around the evidence
     is_code: bool = False
-    code_language: Optional[str] = None
+    code_language: str | None = None
 
     # Relationships
-    supports_claims: List[str] = field(default_factory=list)
-    contradicts_claims: List[str] = field(default_factory=list)
-    references: List[str] = field(default_factory=list)  # Other files/symbols referenced
+    supports_claims: list[str] = field(default_factory=list)
+    contradicts_claims: list[str] = field(default_factory=list)
+    references: list[str] = field(default_factory=list)  # Other files/symbols referenced
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for serialization."""
         return {
             "id": self.id,
@@ -96,19 +96,19 @@ class EvidenceSet:
     """Collection of evidence extracted from retrieval results."""
 
     query: str
-    evidence: List[Evidence]
+    evidence: list[Evidence]
     total_chunks_processed: int
-    extraction_metadata: Dict[str, Any] = field(default_factory=dict)
+    extraction_metadata: dict[str, Any] = field(default_factory=dict)
 
     @property
-    def strong_evidence(self) -> List[Evidence]:
+    def strong_evidence(self) -> list[Evidence]:
         """Get only strong evidence."""
         return [e for e in self.evidence if e.strength == EvidenceStrength.STRONG]
 
     @property
-    def by_type(self) -> Dict[EvidenceType, List[Evidence]]:
+    def by_type(self) -> dict[EvidenceType, list[Evidence]]:
         """Group evidence by type."""
-        result: Dict[EvidenceType, List[Evidence]] = {}
+        result: dict[EvidenceType, list[Evidence]] = {}
         for e in self.evidence:
             if e.evidence_type not in result:
                 result[e.evidence_type] = []
@@ -116,9 +116,9 @@ class EvidenceSet:
         return result
 
     @property
-    def by_source(self) -> Dict[str, List[Evidence]]:
+    def by_source(self) -> dict[str, list[Evidence]]:
         """Group evidence by source file."""
-        result: Dict[str, List[Evidence]] = {}
+        result: dict[str, list[Evidence]] = {}
         for e in self.evidence:
             if e.source_file not in result:
                 result[e.source_file] = []
@@ -137,7 +137,7 @@ class EvidenceSet:
         """Check if there are contradictory evidence pieces."""
         return any(e.strength == EvidenceStrength.CONTRADICTORY for e in self.evidence)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for serialization."""
         return {
             "query": self.query,
@@ -219,7 +219,7 @@ class EvidenceExtractor:
         self.max_evidence_length = max_evidence_length
 
         # Compile patterns for efficiency
-        self._compiled_patterns: Dict[EvidenceType, List[re.Pattern]] = {
+        self._compiled_patterns: dict[EvidenceType, list[re.Pattern]] = {
             EvidenceType.DEFINITION: [re.compile(p, re.IGNORECASE | re.MULTILINE) for p in self.DEFINITION_PATTERNS],
             EvidenceType.IMPLEMENTATION: [re.compile(p, re.MULTILINE) for p in self.IMPLEMENTATION_PATTERNS],
             EvidenceType.EXAMPLE: [re.compile(p, re.IGNORECASE) for p in self.EXAMPLE_PATTERNS],
@@ -232,10 +232,10 @@ class EvidenceExtractor:
     def extract(
         self,
         query: str,
-        documents: List[str],
-        metadatas: List[Dict[str, Any]],
-        ids: List[str],
-        distances: Optional[List[float]] = None,
+        documents: list[str],
+        metadatas: list[dict[str, Any]],
+        ids: list[str],
+        distances: list[float] | None = None,
     ) -> EvidenceSet:
         """
         Extract evidence from retrieved documents.
@@ -250,7 +250,7 @@ class EvidenceExtractor:
         Returns:
             EvidenceSet containing all extracted evidence
         """
-        all_evidence: List[Evidence] = []
+        all_evidence: list[Evidence] = []
         query_terms = self._extract_query_terms(query)
 
         for i, (doc, meta, chunk_id) in enumerate(zip(documents, metadatas, ids)):
@@ -293,12 +293,12 @@ class EvidenceExtractor:
         chunk_text: str,
         chunk_id: str,
         source_file: str,
-        metadata: Dict[str, Any],
-        query_terms: List[str],
+        metadata: dict[str, Any],
+        query_terms: list[str],
         base_relevance: float,
-    ) -> List[Evidence]:
+    ) -> list[Evidence]:
         """Extract evidence pieces from a single chunk."""
-        evidence_list: List[Evidence] = []
+        evidence_list: list[Evidence] = []
 
         # Split into segments (paragraphs, code blocks, etc.)
         segments = self._segment_chunk(chunk_text)
@@ -352,13 +352,13 @@ class EvidenceExtractor:
 
         return evidence_list
 
-    def _segment_chunk(self, text: str) -> List[Tuple[str, bool, Optional[str]]]:
+    def _segment_chunk(self, text: str) -> list[tuple[str, bool, str | None]]:
         """
         Split chunk into segments (prose paragraphs, code blocks).
 
         Returns list of (text, is_code, language) tuples.
         """
-        segments: List[Tuple[str, bool, Optional[str]]] = []
+        segments: list[tuple[str, bool, str | None]] = []
 
         # Find code blocks first
         code_pattern = re.compile(r"```(\w*)\n(.*?)```", re.DOTALL)
@@ -440,7 +440,7 @@ class EvidenceExtractor:
 
         return EvidenceType.ASSERTION
 
-    def _calculate_term_overlap(self, text: str, query_terms: List[str]) -> float:
+    def _calculate_term_overlap(self, text: str, query_terms: list[str]) -> float:
         """Calculate how many query terms appear in the text."""
         if not query_terms:
             return 0.5
@@ -467,7 +467,7 @@ class EvidenceExtractor:
 
         return EvidenceStrength.WEAK
 
-    def _extract_query_terms(self, query: str) -> List[str]:
+    def _extract_query_terms(self, query: str) -> list[str]:
         """Extract significant terms from query for matching."""
         # Remove common words and extract meaningful terms
         stop_words = {
@@ -511,7 +511,7 @@ class EvidenceExtractor:
 
         return list(set(terms))
 
-    def _extract_references(self, text: str) -> List[str]:
+    def _extract_references(self, text: str) -> list[str]:
         """Extract file paths, symbols, and cross-references from text."""
         references = []
 
@@ -543,14 +543,14 @@ class EvidenceExtractor:
         content_hash = hashlib.md5(content.encode()).hexdigest()[:8]
         return f"ev_{chunk_id}_{segment_idx}_{content_hash}"
 
-    def _deduplicate_evidence(self, evidence_list: List[Evidence]) -> List[Evidence]:
+    def _deduplicate_evidence(self, evidence_list: list[Evidence]) -> list[Evidence]:
         """Remove duplicate or highly similar evidence pieces."""
         if not evidence_list:
             return []
 
         # Simple deduplication by content hash
         seen_hashes: set = set()
-        unique: List[Evidence] = []
+        unique: list[Evidence] = []
 
         for ev in evidence_list:
             # Normalize content for comparison
@@ -563,7 +563,7 @@ class EvidenceExtractor:
 
         return unique
 
-    def _detect_contradictions(self, evidence_list: List[Evidence]) -> None:
+    def _detect_contradictions(self, evidence_list: list[Evidence]) -> None:
         """
         Detect potentially contradictory evidence.
 

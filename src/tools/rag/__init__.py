@@ -10,7 +10,7 @@ Provides unified RAG system with:
 
 from .config import ModelMode, RAGConfig
 from .embeddings import OllamaEmbeddingProvider, get_embedding_provider
-from .engine import RAGEngine, create_persistent_engine, create_on_demand_engine, create_conversational_engine
+from .engine import RAGEngine, create_conversational_engine, create_on_demand_engine, create_persistent_engine
 
 # Backward compatibility exports
 from .indexer import chunk_text, index_repository, read_file_content
@@ -27,8 +27,8 @@ except Exception as e:
     route_models = None  # type: ignore
 
 # Legacy exports for backward compatibility
-from .engine import create_persistent_engine as RAGEngine  # type: ignore
 from .engine import create_on_demand_engine as OnDemandRAGEngine  # type: ignore
+from .engine import create_persistent_engine as RAGEngine  # type: ignore
 
 # Optional ChromaDB dependency
 try:

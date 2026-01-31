@@ -4,15 +4,14 @@ Combines persistent indexing, on-demand querying, and conversational features.
 """
 
 import logging
-import time
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
-from .config import ModelMode, RAGConfig
+from .config import RAGConfig
 from .embeddings.factory import get_embedding_provider
-from .indexer import index_repository, chunk_text, read_file_content
+from .indexer import chunk_text, index_repository, read_file_content
 from .llm.factory import get_llm_provider
-from .utils import check_ollama_connection, find_embedding_model, find_llm_model
+from .utils import check_ollama_connection
 from .vector_store.base import BaseVectorStore
 
 logger = logging.getLogger(__name__)

@@ -8,7 +8,6 @@ from user queries to help ground the RAG search in specific parts of the codebas
 import logging
 import re
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Set
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -59,7 +58,7 @@ class EntityExtractor:
             "Databricks": "DEPENDENCY",
         }
 
-    def extract(self, query: str) -> List[Entity]:
+    def extract(self, query: str) -> list[Entity]:
         """
         Extract all identifiable code entities from a query string.
 
@@ -72,8 +71,8 @@ class EntityExtractor:
         if not query:
             return []
 
-        entities: List[Entity] = []
-        seen_spans: Set[tuple] = set()
+        entities: list[Entity] = []
+        seen_spans: set[tuple] = set()
 
         # 1. Check for backtick references first (highest confidence)
         for match in re.finditer(self.patterns["CODE_REF"], query):
@@ -111,7 +110,7 @@ class EntityExtractor:
         # Sort by start position
         return sorted(entities, key=lambda x: x.start)
 
-    def get_search_terms(self, entities: List[Entity]) -> List[str]:
+    def get_search_terms(self, entities: list[Entity]) -> list[str]:
         """
         Convert extracted entities into optimized search keywords for the vector store.
         """

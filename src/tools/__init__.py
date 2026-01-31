@@ -22,6 +22,34 @@ from __future__ import annotations
 
 __version__ = "1.0.0"
 
+# Data Connectors
+from .data_connectors import (
+    BaseConnectorConfig,
+    BaseDataClient,
+    QueryInterface,
+    QueryResult,
+    ConnectorRegistry,
+    ConnectorHandler,
+    ConnectorStatus,
+    ConnectorError,
+    ConfigurationError,
+    ConnectionError,
+    QueryExecutionError,
+    connector_registry,
+    get_connector,
+    register_connector
+)
+
+# Databricks Connector
+from .databricks_connector import (
+    DatabricksConfig,
+    DatabricksClient,
+    DatabricksQuery,
+    create_databricks_connector,
+    test_databricks_connection,
+    execute_databricks_query
+)
+
 # Lazy imports to avoid dependency issues
 __all__ = [
     "PulseMonitor",
@@ -31,6 +59,26 @@ __all__ = [
     "SensoryConfiguration",
     "ToolsIntegration",
     "get_tools_integration",
+    "BaseConnectorConfig",
+    "BaseDataClient",
+    "QueryInterface",
+    "QueryResult",
+    "ConnectorRegistry",
+    "ConnectorHandler",
+    "ConnectorStatus",
+    "ConnectorError",
+    "ConfigurationError",
+    "ConnectionError",
+    "QueryExecutionError",
+    "connector_registry",
+    "get_connector",
+    "register_connector",
+    "DatabricksConfig",
+    "DatabricksClient",
+    "DatabricksQuery",
+    "create_databricks_connector",
+    "test_databricks_connection",
+    "execute_databricks_query"
 ]
 
 

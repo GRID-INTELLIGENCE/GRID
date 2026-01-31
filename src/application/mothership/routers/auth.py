@@ -16,7 +16,7 @@ from application.mothership.dependencies import Auth, RateLimited, RequestContex
 from application.mothership.schemas import ApiResponse, ResponseMeta
 from application.mothership.security.credential_validation import validate_production_credentials
 from application.mothership.security.jwt import get_jwt_manager
-from application.mothership.security.token_revocation import get_token_validator, revoke_token_by_jti
+from application.mothership.security.token_revocation import get_token_validator
 
 logger = logging.getLogger(__name__)
 

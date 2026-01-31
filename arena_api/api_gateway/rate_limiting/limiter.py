@@ -13,14 +13,12 @@ Key Features:
 - Real-time monitoring and adjustment
 """
 
-import asyncio
 import logging
-from typing import Dict, Any, Optional, List, Tuple
-from datetime import datetime, timedelta
 import time
-import json
 from collections import defaultdict, deque
-from fastapi import Request, HTTPException
+from typing import Any
+
+from fastapi import Request
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +39,7 @@ class RateLimiter:
         """Inject monitoring dependency."""
         self.monitoring = monitoring
 
-    async def check_rate_limit(self, request: Request) -> Dict[str, Any]:
+    async def check_rate_limit(self, request: Request) -> dict[str, Any]:
         """
         Check if request should be rate limited.
 
@@ -102,7 +100,7 @@ class RateLimiter:
         # Fall back to direct client IP
         return request.client.host if request.client else "unknown"
 
-    def _get_user_id(self, request: Request) -> Optional[str]:
+    def _get_user_id(self, request: Request) -> str | None:
         """Extract user ID from request."""
         # Check various places where user ID might be
         user_id = request.headers.get("X-User-ID")
@@ -113,7 +111,7 @@ class RateLimiter:
         # For now, return None - auth manager handles this
         return None
 
-    def _get_service_name(self, request: Request) -> Optional[str]:
+    def _get_service_name(self, request: Request) -> str | None:
         """Extract service name from request path."""
         path = request.url.path
         parts = path.strip('/').split('/')
@@ -121,7 +119,7 @@ class RateLimiter:
             return parts[0]
         return None
 
-    async def _check_ip_limit(self, ip: str) -> Dict[str, Any]:
+    async def _check_ip_limit(self, ip: str) -> dict[str, Any]:
         """Check rate limit for IP address."""
         # Use sliding window for IP limits
         window_key = f"ip:{ip}"
@@ -156,7 +154,7 @@ class RateLimiter:
             "reset_time": current_time + remaining_time
         }
 
-    async def _check_user_limit(self, user_id: str) -> Dict[str, Any]:
+    async def _check_user_limit(self, user_id: str) -> dict[str, Any]:
         """Check rate limit for user."""
         if not user_id:
             return {"allowed": True}
@@ -187,7 +185,7 @@ class RateLimiter:
             "reset_time": time.time() + 1
         }
 
-    async def _check_service_limit(self, service_name: str) -> Dict[str, Any]:
+    async def _check_service_limit(self, service_name: str) -> dict[str, Any]:
         """Check rate limit for service."""
         if not service_name:
             return {"allowed": True}
@@ -215,7 +213,7 @@ class RateLimiter:
             "reset_time": (int(time.time() // 60) + 1) * 60
         }
 
-    async def _record_violation(self, request: Request, limit_info: Dict[str, Any]):
+    async def _record_violation(self, request: Request, limit_info: dict[str, Any]):
         """Record a rate limit violation."""
         if self.monitoring:
             await self.monitoring.record_rate_limit_violation(
@@ -246,7 +244,7 @@ class RateLimiter:
         """Set custom rate limit for a service."""
         self.service_limits[service_name] = requests_per_minute
 
-    def get_limit_status(self, identifier: str, limit_type: str = "ip") -> Dict[str, Any]:
+    def get_limit_status(self, identifier: str, limit_type: str = "ip") -> dict[str, Any]:
         """Get current limit status for an identifier."""
         if limit_type == "ip":
             window_key = f"ip:{identifier}"
@@ -288,7 +286,7 @@ class TokenBucket:
         self.tokens = capacity
         self.last_refill = time.time()
 
-    def consume(self, tokens: int = 1) -> Tuple[bool, float]:
+    def consume(self, tokens: int = 1) -> tuple[bool, float]:
         """
         Consume tokens from the bucket.
 
@@ -322,7 +320,7 @@ class AdaptiveRateLimiter:
         self.system_load = 0.0
         self.adjustment_factors = {}
 
-    async def check_adaptive_limit(self, request: Request) -> Dict[str, Any]:
+    async def check_adaptive_limit(self, request: Request) -> dict[str, Any]:
         """Check rate limit with adaptive adjustments."""
         # Get base limit check
         base_result = await self.base_limiter.check_rate_limit(request)

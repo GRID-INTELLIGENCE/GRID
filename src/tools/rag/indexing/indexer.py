@@ -6,7 +6,7 @@ import os
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from ..embeddings.base import BaseEmbeddingProvider
 from ..utils import get_agent_ignore_patterns
@@ -633,7 +633,7 @@ def update_index(
     embedding_provider: BaseEmbeddingProvider | None = None,
     exclude_dirs: list[str] | set[str] | None = None,
     include_patterns: list[str] | None = None,
-    config: "RAGConfig | None" = None,
+    config: RAGConfig | None = None,
     quiet: bool = False,
 ) -> BaseVectorStore:
     """Update an existing index with new/modified files (true incremental).

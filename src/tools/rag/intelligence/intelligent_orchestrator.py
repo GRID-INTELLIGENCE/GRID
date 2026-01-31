@@ -13,15 +13,15 @@ This is the top-level coordinator for the intelligent RAG system.
 
 import logging
 import time
-from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from dataclasses import dataclass
+from typing import Any
 
 from tools.rag.types import LLMProvider
 
-from .evidence_extractor import EvidenceExtractor, EvidenceSet, create_evidence_extractor
+from .evidence_extractor import create_evidence_extractor
 from .query_understanding import QueryUnderstandingLayer, UnderstoodQuery
-from .reasoning_engine import ReasoningChain, ReasoningEngine, create_reasoning_engine
-from .response_synthesizer import ResponseSynthesizer, SynthesizedResponse, create_response_synthesizer
+from .reasoning_engine import create_reasoning_engine
+from .response_synthesizer import create_response_synthesizer
 from .retrieval_orchestrator import RetrievalOrchestrator
 
 logger = logging.getLogger(__name__)
@@ -54,7 +54,7 @@ class IntelligentRAGMetrics:
     has_knowledge_gaps: bool = False
     evidence_coverage: float = 0.0  # % of evidence used in reasoning
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for logging."""
         return {
             "timing": {
@@ -95,7 +95,7 @@ class IntelligentRAGOrchestrator:
     def __init__(
         self,
         retrieval_orchestrator: RetrievalOrchestrator,
-        llm_provider: Optional[LLMProvider] = None,
+        llm_provider: LLMProvider | None = None,
         use_query_understanding: bool = True,
         use_evidence_extraction: bool = True,
         use_reasoning: bool = True,
@@ -155,7 +155,7 @@ class IntelligentRAGOrchestrator:
         temperature: float = 0.3,
         include_reasoning: bool = False,
         include_metrics: bool = False,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Execute the complete intelligent RAG pipeline.
 
@@ -351,7 +351,7 @@ class IntelligentRAGOrchestrator:
         temperature: float = 0.3,
         include_reasoning: bool = False,
         include_metrics: bool = False,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Synchronous wrapper for query method.
 
@@ -396,7 +396,7 @@ class IntelligentRAGOrchestrator:
                 )
             )
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get statistics about the intelligent RAG system."""
         return {
             "features": {
@@ -415,7 +415,7 @@ class IntelligentRAGOrchestrator:
 
 def create_intelligent_orchestrator(
     retrieval_orchestrator: RetrievalOrchestrator,
-    llm_provider: Optional[LLMProvider] = None,
+    llm_provider: LLMProvider | None = None,
     enable_all_features: bool = True,
 ) -> IntelligentRAGOrchestrator:
     """
@@ -441,7 +441,6 @@ def create_intelligent_orchestrator(
 
 # --- Test harness ---
 if __name__ == "__main__":
-    import asyncio
 
     logging.basicConfig(
         level=logging.INFO,

@@ -6,20 +6,20 @@ Dynamic component management with watch-like precision coordination.
 """
 
 from .pool import (
-    ComponentPool, 
-    get_component_pool,
     Component,
+    ComponentPool,
     ComponentState,
     ComponentType,
     ProcessorComponent,
-    ValidatorComponent
+    ValidatorComponent,
+    get_component_pool,
 )
 
 __all__ = [
     "ComponentPool",
     "get_component_pool",
     "Component",
-    "ComponentState", 
+    "ComponentState",
     "ComponentType",
     "ProcessorComponent",
     "ValidatorComponent"

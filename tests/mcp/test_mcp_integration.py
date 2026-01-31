@@ -11,9 +11,7 @@ import json
 import os
 import subprocess
 import sys
-import time
 from pathlib import Path
-from typing import Any
 
 # Add GRID to path
 grid_root = Path(__file__).parent.parent.parent
@@ -285,7 +283,7 @@ class MCPTestSuite:
                 self.passed += 1
                 return True
             else:
-                print_error(f"Invalid structure, missing keys")
+                print_error("Invalid structure, missing keys")
                 self.failed += 1
                 return False
 

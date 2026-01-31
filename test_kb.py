@@ -7,12 +7,14 @@ Tests document ingestion, search functionality, and LLM generation.
 """
 
 import time
+
 from knowledge_base.core.config import KnowledgeBaseConfig
-from knowledge_base.core.database import KnowledgeBaseDB, DocumentData
-from knowledge_base.ingestion.pipeline import DataIngestionPipeline
+from knowledge_base.core.database import DocumentData, KnowledgeBaseDB
 from knowledge_base.embeddings.engine import EmbeddingEngine
-from knowledge_base.search.retriever import VectorRetriever
 from knowledge_base.embeddings.llm_generator import LLMGenerator
+from knowledge_base.ingestion.pipeline import DataIngestionPipeline
+from knowledge_base.search.retriever import VectorRetriever
+
 
 def main():
     print('🚀 Starting comprehensive Knowledge Base test...')

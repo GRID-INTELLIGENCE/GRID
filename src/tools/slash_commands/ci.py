@@ -97,7 +97,7 @@ class CICommand(PipelineCommand):
             stdout = stdout_bytes.decode("utf-8", errors="replace") if stdout_bytes else ""
             stderr = stderr_bytes.decode("utf-8", errors="replace") if stderr_bytes else ""
             return proc.returncode or 0, stdout, stderr
-        except asyncio.TimeoutError:
+        except TimeoutError:
             proc.kill()
             await proc.wait()
             raise
@@ -120,7 +120,7 @@ class CICommand(PipelineCommand):
                 "duration": time.time(),
             }
 
-        except asyncio.TimeoutError:
+        except TimeoutError:
             return {"success": False, "error": "Pre-commit hooks timed out after 5 minutes", "duration": time.time()}
         except Exception as e:
             return {"success": False, "error": str(e), "duration": time.time()}
@@ -153,7 +153,7 @@ class CICommand(PipelineCommand):
                 "duration": time.time(),
             }
 
-        except asyncio.TimeoutError:
+        except TimeoutError:
             return {"success": False, "error": "Unit tests timed out after 3 minutes", "duration": time.time()}
         except Exception as e:
             return {"success": False, "error": str(e), "duration": time.time()}
@@ -201,7 +201,7 @@ class CICommand(PipelineCommand):
                 "duration": time.time(),
             }
 
-        except asyncio.TimeoutError:
+        except TimeoutError:
             return {"success": False, "error": "RAG contract tests timed out after 2 minutes", "duration": time.time()}
         except Exception as e:
             return {"success": False, "error": str(e), "duration": time.time()}

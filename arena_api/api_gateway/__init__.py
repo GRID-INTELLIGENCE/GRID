@@ -16,26 +16,28 @@ Key Features:
 - AI safety compliance
 """
 
-from fastapi import FastAPI, Request, Response, HTTPException, Depends
+import asyncio
+import json
+import logging
+import os
+import time
+from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
+
+from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from starlette.middleware.base import BaseHTTPMiddleware
-import asyncio
-import logging
-import time
-from typing import Dict, Any, Optional, List
-from datetime import datetime, timedelta
-import json
-import os
+
+from .ai_safety.safety import AISafetyManager
+from .authentication.auth import AuthManager
+from .monitoring.monitor import MonitoringManager
+from .rate_limiting.limiter import RateLimiter
 
 # Import our custom modules
 from .routing.router import DynamicRouter
-from .authentication.auth import AuthManager
-from .rate_limiting.limiter import RateLimiter
 from .service_discovery.discovery import ServiceDiscovery
-from .monitoring.monitor import MonitoringManager
-from .ai_safety.safety import AISafetyManager
 
 # Configure logging
 logging.basicConfig(
@@ -128,7 +130,7 @@ class ArenaAPIGateway:
             return {"services": services}
 
         @self.app.post("/services/register")
-        async def register_service(service_data: Dict[str, Any]):
+        async def register_service(service_data: dict[str, Any]):
             """Register a new service."""
             result = await self.service_discovery.register_service(service_data)
             return {"result": result}

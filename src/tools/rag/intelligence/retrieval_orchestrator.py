@@ -8,12 +8,12 @@ This module orchestrates the multi-stage retrieval process:
 """
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
 
-from tools.rag.retrieval.cross_encoder_reranker import create_cross_encoder_reranker
-from tools.rag.retrieval.hybrid_retriever import create_hybrid_retriever
 from tools.rag.intelligence.multi_hop_retriever import create_multi_hop_retriever
 from tools.rag.intelligence.query_understanding import UnderstoodQuery
+from tools.rag.retrieval.cross_encoder_reranker import create_cross_encoder_reranker
+from tools.rag.retrieval.hybrid_retriever import create_hybrid_retriever
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +52,7 @@ class RetrievalOrchestrator:
 
         logger.info("RetrievalOrchestrator initialized with Multi-Stage Pipeline.")
 
-    async def retrieve(self, understood: UnderstoodQuery, top_k: Optional[int] = None) -> Dict[str, Any]:
+    async def retrieve(self, understood: UnderstoodQuery, top_k: int | None = None) -> dict[str, Any]:
         """
         Execute the intelligent retrieval pipeline.
 

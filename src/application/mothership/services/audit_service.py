@@ -13,8 +13,8 @@ from __future__ import annotations
 
 import json
 import logging
-from datetime import UTC, datetime
-from typing import TYPE_CHECKING, Any, Callable
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Any
 
 logger = logging.getLogger(__name__)
 
@@ -52,10 +52,10 @@ class MothershipAuditService:
     - SIEM callback support for real-time alerting
     - Graceful degradation if Vection not available
     """
-    
+
     def __init__(
         self,
-        db_session_factory: Callable[[], "AsyncSession"] | None = None,
+        db_session_factory: Callable[[], AsyncSession] | None = None,
         config: Any | None = None,
         enable_db_persistence: bool = True,
         enable_hash_chain: bool = True,
@@ -73,7 +73,7 @@ class MothershipAuditService:
         self.enable_db_persistence = enable_db_persistence and db_session_factory is not None
         self.enable_hash_chain = enable_hash_chain
         self._callbacks: list[Callable[[dict[str, Any]], None]] = []
-        
+
         # Initialize Vection logger if available
         self._vection_logger: Any | None = None
         if VECTION_AVAILABLE and AuditLogger is not None:
@@ -95,11 +95,11 @@ class MothershipAuditService:
                 self._vection_logger = None
         else:
             logger.info("Vection AuditLogger not available, using fallback logging")
-        
+
         # In-memory fallback if Vection not available
         self._fallback_log: list[dict[str, Any]] = []
         self._max_fallback_entries = 10000
-    
+
     def _map_severity(self, violations: list[Any], allowed: bool) -> str:
         """Map security audit entry to severity level."""
         if not allowed:
@@ -113,12 +113,12 @@ class MothershipAuditService:
                     return "error"
             return "warning"
         return "info"
-    
-    def _map_to_security_event_type(self, entry: "SecurityAuditEntry") -> Any:
+
+    def _map_to_security_event_type(self, entry: SecurityAuditEntry) -> Any:
         """Map SecurityAuditEntry to Vection SecurityEventType."""
         if not VECTION_AVAILABLE or SecurityEventType is None:
             return None
-            
+
         if not entry.allowed:
             return SecurityEventType.ACCESS_DENIED
         if entry.violations:
@@ -126,8 +126,8 @@ class MothershipAuditService:
         if entry.sanitization_applied:
             return SecurityEventType.INPUT_SANITIZED
         return SecurityEventType.ACCESS_GRANTED
-    
-    def log_security_event(self, entry: "SecurityAuditEntry") -> None:
+
+    def log_security_event(self, entry: SecurityAuditEntry) -> None:
         """
         Log a security audit entry from SecurityEnforcer.
         
@@ -151,7 +151,7 @@ class MothershipAuditService:
             "latency_ms": round(entry.latency_ms, 2),
             "timestamp": entry.timestamp.isoformat(),
         }
-        
+
         # Add violation details
         if entry.violations:
             audit_data["violations"] = [
@@ -162,13 +162,13 @@ class MothershipAuditService:
                 }
                 for v in entry.violations
             ]
-        
+
         # Log via Vection if available (hash-chained)
         if self._vection_logger is not None and VECTION_AVAILABLE:
             try:
                 event_type = self._map_to_security_event_type(entry)
                 severity_str = self._map_severity(entry.violations, entry.allowed)
-                
+
                 # Map to Vection EventSeverity
                 severity = EventSeverity.INFO
                 if EventSeverity is not None:
@@ -180,7 +180,7 @@ class MothershipAuditService:
                         "critical": EventSeverity.CRITICAL,
                     }
                     severity = severity_map.get(severity_str, EventSeverity.INFO)
-                
+
                 self._vection_logger.log_event(
                     event_type=event_type,
                     session_id=entry.request_id,
@@ -194,34 +194,34 @@ class MothershipAuditService:
                 self._log_fallback(audit_data)
         else:
             self._log_fallback(audit_data)
-        
+
         # Persist to database asynchronously
         if self.enable_db_persistence and self.db_session_factory:
             self._queue_db_persist(entry, audit_data)
-        
+
         # Notify callbacks (for SIEM integration)
         for callback in self._callbacks:
             try:
                 callback(audit_data)
             except Exception as e:
                 logger.warning(f"Audit callback failed: {e}")
-    
+
     def _log_fallback(self, audit_data: dict[str, Any]) -> None:
         """Fallback in-memory logging when Vection not available."""
         self._fallback_log.append(audit_data)
         if len(self._fallback_log) > self._max_fallback_entries:
             self._fallback_log = self._fallback_log[-self._max_fallback_entries:]
-        
+
         # Also log to standard logger
         if not audit_data.get("allowed", True):
             logger.warning(f"Security audit (fallback): {json.dumps(audit_data)}")
-    
-    def _queue_db_persist(self, entry: "SecurityAuditEntry", audit_data: dict[str, Any]) -> None:
+
+    def _queue_db_persist(self, entry: SecurityAuditEntry, audit_data: dict[str, Any]) -> None:
         """Queue database persistence (fire-and-forget for non-blocking)."""
         # Note: In production, this should use a proper async task queue
         # For now, we log the intent and the data is available in Vection logs
         logger.debug(f"Audit entry queued for DB persistence: {entry.request_id}")
-    
+
     def add_callback(self, callback: Callable[[dict[str, Any]], None]) -> None:
         """
         Add a callback for real-time audit event notifications.
@@ -232,12 +232,12 @@ class MothershipAuditService:
             callback: Function called with audit data dict for each event
         """
         self._callbacks.append(callback)
-    
+
     def remove_callback(self, callback: Callable[[dict[str, Any]], None]) -> None:
         """Remove a previously added callback."""
         if callback in self._callbacks:
             self._callbacks.remove(callback)
-    
+
     def get_stats(self) -> dict[str, Any]:
         """Get audit service statistics."""
         stats = {
@@ -248,15 +248,15 @@ class MothershipAuditService:
             "callback_count": len(self._callbacks),
             "fallback_entries": len(self._fallback_log),
         }
-        
+
         if self._vection_logger is not None:
             try:
                 stats["vection_stats"] = self._vection_logger.get_stats()
             except Exception:
                 pass
-        
+
         return stats
-    
+
     def get_recent_entries(self, limit: int = 100) -> list[dict[str, Any]]:
         """Get recent audit entries from fallback log."""
         return self._fallback_log[-limit:]
@@ -272,7 +272,7 @@ def get_audit_service() -> MothershipAuditService | None:
 
 
 def initialize_audit_service(
-    db_session_factory: Callable[[], "AsyncSession"] | None = None,
+    db_session_factory: Callable[[], AsyncSession] | None = None,
     enable_db_persistence: bool = True,
     enable_hash_chain: bool = True,
 ) -> MothershipAuditService:

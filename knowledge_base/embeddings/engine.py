@@ -6,21 +6,20 @@ Handles generation and management of vector embeddings for document chunks.
 Supports OpenAI embeddings with batch processing and caching.
 """
 
-import logging
 import asyncio
 import hashlib
-from typing import List, Dict, Any, Optional, Tuple
-from dataclasses import dataclass
-from concurrent.futures import ThreadPoolExecutor
-import time
 import json
+import logging
+import time
+from concurrent.futures import ThreadPoolExecutor
+from dataclasses import dataclass
+from typing import Any
 
-import openai
-from openai import OpenAI
 import numpy as np
+from openai import OpenAI
 
-from ..core.database import KnowledgeBaseDB
 from ..core.config import KnowledgeBaseConfig
+from ..core.database import KnowledgeBaseDB
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +28,7 @@ logger = logging.getLogger(__name__)
 class EmbeddingResult:
     """Result of embedding generation."""
     text: str
-    embedding: List[float]
+    embedding: list[float]
     token_count: int
     model: str
     processing_time: float
@@ -46,7 +45,7 @@ class EmbeddingEngine:
         self.client = OpenAI(api_key=config.embeddings.api_key)
 
         # Initialize cache
-        self.embedding_cache: Dict[str, List[float]] = {}
+        self.embedding_cache: dict[str, list[float]] = {}
 
         # Thread pool for batch processing
         self.executor = ThreadPoolExecutor(max_workers=4)
@@ -97,7 +96,7 @@ class EmbeddingEngine:
             logger.error(f"Embedding generation failed: {e}")
             raise
 
-    def generate_embeddings_batch(self, texts: List[str]) -> List[EmbeddingResult]:
+    def generate_embeddings_batch(self, texts: list[str]) -> list[EmbeddingResult]:
         """Generate embeddings for multiple texts in batch."""
         if not texts:
             return []
@@ -173,7 +172,7 @@ class EmbeddingEngine:
 
         return results
 
-    async def generate_embeddings_async(self, texts: List[str]) -> List[EmbeddingResult]:
+    async def generate_embeddings_async(self, texts: list[str]) -> list[EmbeddingResult]:
         """Generate embeddings asynchronously."""
         loop = asyncio.get_event_loop()
         return await loop.run_in_executor(
@@ -226,7 +225,7 @@ class EmbeddingEngine:
         return updated_count
 
     def search_similar(self, query: str, limit: int = 10,
-                      threshold: float = 0.7) -> List[Tuple[str, float, Dict[str, Any]]]:
+                      threshold: float = 0.7) -> list[tuple[str, float, dict[str, Any]]]:
         """Find chunks similar to query using embeddings."""
         # Generate embedding for query
         query_result = self.generate_embedding(query)
@@ -273,7 +272,7 @@ class EmbeddingEngine:
         similar_chunks.sort(key=lambda x: x[1], reverse=True)
         return similar_chunks[:limit]
 
-    def get_embedding_stats(self) -> Dict[str, Any]:
+    def get_embedding_stats(self) -> dict[str, Any]:
         """Get embedding statistics."""
         total_chunks = self.db.get_chunk_count()
 
@@ -298,7 +297,7 @@ class EmbeddingEngine:
         self.embedding_cache.clear()
         logger.info("Embedding cache cleared")
 
-    def preload_common_embeddings(self, common_texts: List[str]) -> None:
+    def preload_common_embeddings(self, common_texts: list[str]) -> None:
         """Preload embeddings for commonly used texts."""
         if not common_texts:
             return

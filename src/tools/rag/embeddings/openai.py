@@ -5,8 +5,6 @@ from __future__ import annotations
 import os
 from typing import Any, cast
 
-import numpy as np
-
 from .base import BaseEmbeddingProvider
 
 

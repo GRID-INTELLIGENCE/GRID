@@ -8,14 +8,12 @@ knowledge base retrieval. Supports hybrid search and result ranking.
 
 import logging
 import time
-from typing import List, Dict, Any, Optional, Tuple, Iterator
-from dataclasses import dataclass
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
+from typing import Any
 
-import numpy as np
-
-from ..core.database import KnowledgeBaseDB, SearchResult
 from ..core.config import KnowledgeBaseConfig
+from ..core.database import KnowledgeBaseDB
 from ..embeddings.engine import EmbeddingEngine
 
 logger = logging.getLogger(__name__)
@@ -28,7 +26,7 @@ class SearchQuery:
     limit: int = 10
     threshold: float = 0.7
     use_hybrid: bool = True
-    filters: Optional[Dict[str, Any]] = None
+    filters: dict[str, Any] | None = None
     rerank: bool = True
 
 
@@ -37,11 +35,11 @@ class RankedResult:
     """Ranked search result with metadata."""
     content: str
     score: float
-    metadata: Dict[str, Any]
-    document_title: Optional[str] = None
-    document_id: Optional[str] = None
-    chunk_id: Optional[str] = None
-    source_type: Optional[str] = None
+    metadata: dict[str, Any]
+    document_title: str | None = None
+    document_id: str | None = None
+    chunk_id: str | None = None
+    source_type: str | None = None
     rank: int = 0
 
 
@@ -49,7 +47,7 @@ class SearchStrategy(ABC):
     """Abstract base class for search strategies."""
 
     @abstractmethod
-    def search(self, query: SearchQuery) -> List[RankedResult]:
+    def search(self, query: SearchQuery) -> list[RankedResult]:
         """Execute search and return ranked results."""
         pass
 
@@ -61,7 +59,7 @@ class VectorSearchStrategy(SearchStrategy):
         self.embedding_engine = embedding_engine
         self.db = db
 
-    def search(self, query: SearchQuery) -> List[RankedResult]:
+    def search(self, query: SearchQuery) -> list[RankedResult]:
         """Search using vector similarity."""
         start_time = time.time()
 
@@ -96,7 +94,7 @@ class VectorSearchStrategy(SearchStrategy):
 
         return results[:query.limit]
 
-    def _get_document_info(self, document_id: Optional[str]) -> Dict[str, Any]:
+    def _get_document_info(self, document_id: str | None) -> dict[str, Any]:
         """Get document information."""
         if not document_id:
             return {}
@@ -122,7 +120,7 @@ class KeywordSearchStrategy(SearchStrategy):
     def __init__(self, db: KnowledgeBaseDB):
         self.db = db
 
-    def search(self, query: SearchQuery) -> List[RankedResult]:
+    def search(self, query: SearchQuery) -> list[RankedResult]:
         """Search using keyword-based approach."""
         with self.db.session() as cursor:
             # Simple keyword search using LIKE
@@ -157,7 +155,7 @@ class KeywordSearchStrategy(SearchStrategy):
 
         return results
 
-    def _get_document_info(self, document_id: str) -> Dict[str, Any]:
+    def _get_document_info(self, document_id: str) -> dict[str, Any]:
         """Get document information."""
         with self.db.session() as session:
             doc = session.query(self.db.Document).filter(
@@ -182,7 +180,7 @@ class HybridSearchStrategy(SearchStrategy):
         self.vector_strategy = vector_strategy
         self.keyword_strategy = keyword_strategy
 
-    def search(self, query: SearchQuery) -> List[RankedResult]:
+    def search(self, query: SearchQuery) -> list[RankedResult]:
         """Execute hybrid search combining vector and keyword results."""
         start_time = time.time()
 
@@ -202,9 +200,9 @@ class HybridSearchStrategy(SearchStrategy):
 
         return combined_results
 
-    def _merge_results(self, vector_results: List[RankedResult],
-                      keyword_results: List[RankedResult],
-                      limit: int) -> List[RankedResult]:
+    def _merge_results(self, vector_results: list[RankedResult],
+                      keyword_results: list[RankedResult],
+                      limit: int) -> list[RankedResult]:
         """Merge results from different strategies."""
         # Use a dict to deduplicate by chunk_id
         merged = {}
@@ -233,8 +231,8 @@ class HybridSearchStrategy(SearchStrategy):
 
         return results[:limit]
 
-    def _rerank_results(self, results: List[RankedResult],
-                       query: SearchQuery) -> List[RankedResult]:
+    def _rerank_results(self, results: list[RankedResult],
+                       query: SearchQuery) -> list[RankedResult]:
         """Re-rank results using additional criteria."""
         # Simple re-ranking based on content length and position
         for result in results:
@@ -274,9 +272,9 @@ class VectorRetriever:
             "total_results_returned": 0
         }
 
-    def search(self, query_text: str, limit: Optional[int] = None,
-               use_hybrid: Optional[bool] = None, threshold: Optional[float] = None,
-               filters: Optional[Dict[str, Any]] = None) -> List[RankedResult]:
+    def search(self, query_text: str, limit: int | None = None,
+               use_hybrid: bool | None = None, threshold: float | None = None,
+               filters: dict[str, Any] | None = None) -> list[RankedResult]:
         """Execute search query."""
         start_time = time.time()
 
@@ -325,7 +323,7 @@ class VectorRetriever:
 
         return results
 
-    def search_with_sources(self, query_text: str, **kwargs) -> Dict[str, Any]:
+    def search_with_sources(self, query_text: str, **kwargs) -> dict[str, Any]:
         """Search and return results with source information."""
         results = self.search(query_text, **kwargs)
 
@@ -353,7 +351,7 @@ class VectorRetriever:
             "search_stats": self.search_stats.copy()
         }
 
-    def get_search_stats(self) -> Dict[str, Any]:
+    def get_search_stats(self) -> dict[str, Any]:
         """Get search statistics."""
         return {
             **self.search_stats,

@@ -52,32 +52,32 @@ async def _check_database_connectivity(db_url: str, timeout: float = 5.0) -> tup
     """
     if not db_url:
         return False, "Database URL not configured"
-    
+
     try:
         # For SQLite, just check if it's a valid path format
         if db_url.startswith("sqlite"):
             return True, "SQLite database configured"
-        
+
         # For other databases, try to create a connection
         from sqlalchemy import text
         from sqlalchemy.ext.asyncio import create_async_engine
-        
+
         # Convert sync URL to async if needed
         async_url = db_url
         if db_url.startswith("postgresql://"):
             async_url = db_url.replace("postgresql://", "postgresql+asyncpg://")
-        
+
         engine = create_async_engine(async_url, pool_pre_ping=True)
-        
+
         try:
             check_task = asyncio.create_task(_db_ping(engine))
             await asyncio.wait_for(check_task, timeout=timeout)
         finally:
             await engine.dispose()
-        
+
         return True, "Database connection successful"
-        
-    except asyncio.TimeoutError:
+
+    except TimeoutError:
         return False, f"Database connection timed out after {timeout}s"
     except ImportError as e:
         return False, f"Database driver not available: {e}"
@@ -105,20 +105,20 @@ async def _check_redis_connectivity(redis_url: str, timeout: float = 5.0) -> tup
     """
     if not redis_url:
         return False, "Redis URL not configured"
-    
+
     try:
         import redis.asyncio as aioredis
-        
+
         client = aioredis.from_url(redis_url)
-        
+
         try:
             await asyncio.wait_for(client.ping(), timeout=timeout)
         finally:
             await client.close()
-        
+
         return True, "Redis connection successful"
-        
-    except asyncio.TimeoutError:
+
+    except TimeoutError:
         return False, f"Redis connection timed out after {timeout}s"
     except ImportError:
         return False, "Redis client not available (redis package not installed)"
@@ -139,24 +139,24 @@ async def _check_gemini_connectivity(api_key: str, timeout: float = 5.0) -> tupl
     """
     if not api_key:
         return False, "Gemini API key not configured"
-    
+
     try:
         import httpx
-        
+
         async with httpx.AsyncClient(timeout=timeout) as client:
             response = await client.get(
                 "https://generativelanguage.googleapis.com/v1/models",
                 headers={"x-goog-api-key": api_key},
             )
-            
+
             if response.status_code == 200:
                 return True, "Gemini API reachable"
             elif response.status_code == 401:
                 return False, "Gemini API key invalid"
             else:
                 return False, f"Gemini API returned status {response.status_code}"
-                
-    except asyncio.TimeoutError:
+
+    except TimeoutError:
         return False, f"Gemini API timed out after {timeout}s"
     except ImportError:
         return False, "HTTP client not available (httpx package not installed)"
@@ -179,12 +179,12 @@ async def _check_webhook_endpoints(
     """
     if not endpoints:
         return True, "No webhook endpoints configured", {}
-    
+
     try:
         import httpx
-        
+
         results: dict[str, bool] = {}
-        
+
         async with httpx.AsyncClient(timeout=timeout) as client:
             for endpoint in endpoints:
                 try:
@@ -194,15 +194,15 @@ async def _check_webhook_endpoints(
                     results[endpoint] = response.status_code < 500
                 except Exception:
                     results[endpoint] = False
-        
+
         healthy_count = sum(1 for v in results.values() if v)
         all_healthy = healthy_count == len(results)
-        
+
         if all_healthy:
             return True, f"All {len(results)} webhook endpoints reachable", results
         else:
             return False, f"{healthy_count}/{len(results)} webhook endpoints reachable", results
-            
+
     except ImportError:
         return False, "HTTP client not available", {}
     except Exception as e:

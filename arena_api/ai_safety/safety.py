@@ -18,14 +18,10 @@ Key Features:
 import asyncio
 import logging
 import re
-import json
-from typing import Dict, Any, Optional, List, Tuple, Set
-from datetime import datetime, timedelta
-import hashlib
-import os
 from dataclasses import dataclass
+from datetime import datetime, timedelta
 from enum import Enum
-import aiohttp
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -50,9 +46,9 @@ class SafetyCheck:
     check_name: str
     passed: bool
     severity: SafetyLevel
-    details: Dict[str, Any]
+    details: dict[str, Any]
     timestamp: datetime
-    recommendations: List[str] = None
+    recommendations: list[str] = None
 
     def __post_init__(self):
         if self.recommendations is None:
@@ -79,7 +75,7 @@ class AISafetyManager:
         self.compliance_violations = []
         self.audit_log = []
 
-    def _load_compliance_rules(self) -> Dict[str, Any]:
+    def _load_compliance_rules(self) -> dict[str, Any]:
         """Load compliance rules for different standards."""
         return {
             "hipaa": {
@@ -102,7 +98,7 @@ class AISafetyManager:
             }
         }
 
-    def _load_safety_patterns(self) -> Dict[str, List[str]]:
+    def _load_safety_patterns(self) -> dict[str, list[str]]:
         """Load patterns for detecting unsafe content."""
         return {
             "harmful_content": [
@@ -121,7 +117,7 @@ class AISafetyManager:
             ]
         }
 
-    def _load_bias_detectors(self) -> Dict[str, Any]:
+    def _load_bias_detectors(self) -> dict[str, Any]:
         """Load bias detection configurations."""
         return {
             "gender_bias": {
@@ -139,7 +135,7 @@ class AISafetyManager:
         """Inject monitoring dependency."""
         self.monitoring = monitoring
 
-    async def check_request(self, request) -> Dict[str, Any]:
+    async def check_request(self, request) -> dict[str, Any]:
         """
         Perform comprehensive safety check on incoming request.
 
@@ -532,7 +528,7 @@ class AISafetyManager:
         except:
             return ""
 
-    async def _log_safety_check(self, request, checks: List[SafetyCheck], overall_safe: bool):
+    async def _log_safety_check(self, request, checks: list[SafetyCheck], overall_safe: bool):
         """Log safety check results."""
         try:
             log_entry = {
@@ -587,7 +583,7 @@ class AISafetyManager:
                 logger.error(f"Safety monitoring error: {str(e)}")
                 await asyncio.sleep(60)
 
-    def get_safety_report(self) -> Dict[str, Any]:
+    def get_safety_report(self) -> dict[str, Any]:
         """Generate safety and compliance report."""
         recent_checks = [check for check in self.safety_checks
                         if (datetime.utcnow() - check.timestamp) < timedelta(days=7)]
@@ -601,7 +597,7 @@ class AISafetyManager:
             "recent_audit_entries": len(self.audit_log[-100:])
         }
 
-    def get_compliance_violations(self, days: int = 30) -> List[Dict[str, Any]]:
+    def get_compliance_violations(self, days: int = 30) -> list[dict[str, Any]]:
         """Get compliance violations from the last N days."""
         cutoff = datetime.utcnow() - timedelta(days=days)
         return [

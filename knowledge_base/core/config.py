@@ -6,9 +6,9 @@ Centralized configuration management for the GRID Knowledge Base system.
 """
 
 import os
-from typing import Optional, Dict, Any
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
 
 @dataclass
@@ -16,7 +16,7 @@ class DatabaseConfig:
     """Database configuration for vector storage."""
     host: str = "dbc-9747ff30-23c5.cloud.databricks.com"
     http_path: str = "/sql/1.0/warehouses/b23086e70499319a"
-    token: Optional[str] = None
+    token: str | None = None
     connection_timeout: int = 30
     pool_size: int = 5
     max_overflow: int = 10
@@ -28,7 +28,7 @@ class EmbeddingConfig:
     model: str = "text-embedding-3-large"
     provider: str = "openai"
     dimensions: int = 3072
-    api_key: Optional[str] = None
+    api_key: str | None = None
     batch_size: int = 100
     max_tokens: int = 8191
 
@@ -48,7 +48,7 @@ class LLMConfig:
     """LLM configuration for generation."""
     model: str = "gpt-4-turbo-preview"
     provider: str = "openai"
-    api_key: Optional[str] = None
+    api_key: str | None = None
     temperature: float = 0.3
     max_tokens: int = 1000
     streaming: bool = True
@@ -58,7 +58,7 @@ class LLMConfig:
 class SecurityConfig:
     """Security and access control configuration."""
     enable_auth: bool = True
-    jwt_secret: Optional[str] = None
+    jwt_secret: str | None = None
     jwt_algorithm: str = "HS256"
     jwt_expiration: int = 3600  # 1 hour
     rate_limit_requests: int = 100
@@ -141,7 +141,7 @@ class KnowledgeBaseConfig:
         if errors:
             raise ValueError(f"Configuration validation failed: {', '.join(errors)}")
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert configuration to dictionary."""
         return {
             "name": self.name,

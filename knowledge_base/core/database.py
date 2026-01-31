@@ -6,12 +6,11 @@ Databricks-backed database interface for the GRID Knowledge Base.
 No SQLite fallback; uses databricks-sql-connector directly.
 """
 
-import logging
 import json
-from typing import List, Dict, Any, Optional
+import logging
 from contextlib import contextmanager
 from dataclasses import dataclass
-from datetime import datetime
+from typing import Any
 
 from databricks import sql
 
@@ -29,7 +28,7 @@ class DocumentData:
     source_type: str
     source_path: str
     file_type: str
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
 
 @dataclass
@@ -39,9 +38,9 @@ class SearchResult:
     chunk_id: str
     content: str
     score: float
-    metadata: Dict[str, Any]
-    document_title: Optional[str] = None
-    source_type: Optional[str] = None
+    metadata: dict[str, Any]
+    document_title: str | None = None
+    source_type: str | None = None
 
 
 class KnowledgeBaseDB:
@@ -154,7 +153,7 @@ class KnowledgeBaseDB:
         source_type: str = "manual",
         source_path: str = "",
         file_type: str = "txt",
-        metadata: Optional[Dict] = None,
+        metadata: dict | None = None,
     ) -> None:
         """Add or replace a document."""
         with self.session() as cursor:
@@ -194,9 +193,9 @@ class KnowledgeBaseDB:
         document_id: str,
         content: str,
         chunk_index: int,
-        embedding: List[float],
+        embedding: list[float],
         token_count: int,
-        metadata: Optional[Dict] = None,
+        metadata: dict | None = None,
     ) -> None:
         """Add or replace a chunk."""
         with self.session() as cursor:
@@ -230,8 +229,8 @@ class KnowledgeBaseDB:
             )
 
     def search_similar_chunks(
-        self, embedding: List[float], limit: int = 10, threshold: float = 0.7
-    ) -> List[SearchResult]:
+        self, embedding: list[float], limit: int = 10, threshold: float = 0.7
+    ) -> list[SearchResult]:
         """Placeholder similarity: returns recent chunks (no vector search in DB)."""
         with self.session() as cursor:
             cursor.execute(
@@ -267,7 +266,7 @@ class KnowledgeBaseDB:
         user_id: str = "",
         results_count: int = 0,
         response_time: float = 0.0,
-        metadata: Optional[Dict] = None,
+        metadata: dict | None = None,
     ) -> None:
         """Log a search query."""
         import uuid
@@ -299,7 +298,7 @@ class KnowledgeBaseDB:
             cursor.execute("SELECT COUNT(*) FROM kb_chunks")
             return cursor.fetchone()[0]
 
-    def get_recent_documents(self, limit: int = 10) -> List[Dict[str, Any]]:
+    def get_recent_documents(self, limit: int = 10) -> list[dict[str, Any]]:
         with self.session() as cursor:
             cursor.execute(
                 """
@@ -325,7 +324,7 @@ class KnowledgeBaseDB:
         chunk_id: str,
         user_id: str,
         rating: int,
-        comments: Optional[str] = None,
+        comments: str | None = None,
     ) -> None:
         """Add feedback for a chunk."""
         import uuid
@@ -341,7 +340,7 @@ class KnowledgeBaseDB:
 
     def get_chunk_feedback(
         self, chunk_id: str, limit: int = 10
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """Get feedback for a specific chunk."""
         with self.session() as cursor:
             cursor.execute(
@@ -367,11 +366,11 @@ class KnowledgeBaseDB:
 
     def search_similar_chunks(
         self,
-        embedding: List[float],
+        embedding: list[float],
         limit: int = 10,
         threshold: float = 0.7,
-        filters: Optional[Dict[str, Any]] = None,
-    ) -> List[SearchResult]:
+        filters: dict[str, Any] | None = None,
+    ) -> list[SearchResult]:
         """Search for similar chunks with optional hierarchical filters."""
         with self.session() as cursor:
             # Build query with filters

@@ -9,7 +9,7 @@ Part of Phase 3: Reasoning Layer
 
 import logging
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from tools.rag.types import LLMProvider
 
@@ -30,14 +30,14 @@ class SynthesizedResponse:
     confidence: float
 
     # Source attribution
-    sources: List[Dict[str, Any]] = field(default_factory=list)
-    citations: List[str] = field(default_factory=list)
+    sources: list[dict[str, Any]] = field(default_factory=list)
+    citations: list[str] = field(default_factory=list)
 
     # Metadata
     show_reasoning: bool = False
-    generation_metadata: Dict[str, Any] = field(default_factory=dict)
+    generation_metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for API responses."""
         result = {
             "query": self.query,
@@ -93,7 +93,7 @@ class ResponseSynthesizer:
 
     def __init__(
         self,
-        llm_provider: Optional[LLMProvider] = None,
+        llm_provider: LLMProvider | None = None,
         use_llm_polish: bool = True,
         max_prompt_tokens: int = 4000,
     ):
@@ -177,7 +177,7 @@ class ResponseSynthesizer:
 
         return response
 
-    def _generate_citations(self, evidence: List[Evidence]) -> tuple[List[str], List[Dict[str, Any]]]:
+    def _generate_citations(self, evidence: list[Evidence]) -> tuple[list[str], list[dict[str, Any]]]:
         """Generate citation strings and source metadata."""
         citations = []
         sources = []
@@ -206,7 +206,7 @@ class ResponseSynthesizer:
     async def _llm_synthesize(
         self,
         reasoning_chain: ReasoningChain,
-        evidence: List[Evidence],
+        evidence: list[Evidence],
         temperature: float,
     ) -> str:
         """Use LLM to synthesize a polished response."""
@@ -233,7 +233,7 @@ class ResponseSynthesizer:
             logger.error(f"LLM synthesis failed: {e}. Falling back to template.")
             return self._template_synthesize(reasoning_chain, evidence)
 
-    def _template_synthesize(self, reasoning_chain: ReasoningChain, evidence: List[Evidence]) -> str:
+    def _template_synthesize(self, reasoning_chain: ReasoningChain, evidence: list[Evidence]) -> str:
         """Template-based synthesis (no LLM required)."""
         # Use the conclusion from reasoning chain as base
         answer_parts = []
@@ -265,7 +265,7 @@ class ResponseSynthesizer:
 
         return answer
 
-    def _build_synthesis_prompt(self, reasoning_chain: ReasoningChain, evidence: List[Evidence]) -> str:
+    def _build_synthesis_prompt(self, reasoning_chain: ReasoningChain, evidence: list[Evidence]) -> str:
         """Build prompt for LLM synthesis."""
         # Estimate token budget (rough: 4 chars = 1 token)
         max_chars = self.max_prompt_tokens * 4
@@ -317,7 +317,7 @@ class ResponseSynthesizer:
 
 
 def create_response_synthesizer(
-    llm_provider: Optional[LLMProvider] = None,
+    llm_provider: LLMProvider | None = None,
     use_llm_polish: bool = True,
     max_prompt_tokens: int = 4000,
 ) -> ResponseSynthesizer:

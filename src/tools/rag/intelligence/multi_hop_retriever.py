@@ -8,7 +8,7 @@ to build a more complete context for complex queries.
 
 import logging
 import re
-from typing import Any, Dict, List, Optional, Set
+from typing import Any
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -45,7 +45,7 @@ class MultiHopRetriever:
             "backtick_ref": r"`([^`]+)`",
         }
 
-    async def async_retrieve(self, query: str, top_k: int = 10) -> Dict[str, Any]:
+    async def async_retrieve(self, query: str, top_k: int = 10) -> dict[str, Any]:
         """
         Perform multi-hop retrieval starting from an initial query.
         """
@@ -104,7 +104,7 @@ class MultiHopRetriever:
             "hops_performed": hop + 1 if "hop" in locals() else 0,
         }
 
-    def _extract_references(self, documents: List[str]) -> List[str]:
+    def _extract_references(self, documents: list[str]) -> list[str]:
         """Extract potential search terms from document content."""
         references = set()
 

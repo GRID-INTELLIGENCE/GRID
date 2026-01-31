@@ -542,7 +542,7 @@ async def intelligent_query_command(args):
             print(json.dumps(result, indent=2))
         else:
             # Pretty print results
-            print(f"\n📝 Answer:")
+            print("\n📝 Answer:")
             print("-" * 70)
             print(result["answer"])
             print("-" * 70)
@@ -571,14 +571,14 @@ async def intelligent_query_command(args):
                     print(f"   {content}")
 
                 if reasoning.get("warnings"):
-                    print(f"\n⚠️  Warnings:")
+                    print("\n⚠️  Warnings:")
                     for warning in reasoning["warnings"]:
                         print(f"  • {warning}")
 
             # Metrics (if requested)
             if args.show_metrics and "metrics" in result:
                 metrics = result["metrics"]
-                print(f"\n📊 Pipeline Metrics:")
+                print("\n📊 Pipeline Metrics:")
                 print("-" * 70)
 
                 if "timing" in metrics:

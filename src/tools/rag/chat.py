@@ -69,9 +69,10 @@ import io
 import json
 import sys
 import time
+from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, AsyncIterator
+from typing import TYPE_CHECKING, Any
 
 # Fix Windows console encoding for Unicode
 if sys.platform == "win32":
@@ -92,8 +93,6 @@ _default_rag_db = str(_grid_root / ".rag_db")
 
 # Type checking imports (not executed at runtime)
 if TYPE_CHECKING:
-    from tools.rag.intelligence.query_understanding import QueryUnderstandingLayer
-    from tools.rag.intelligence.retrieval_orchestrator import RetrievalOrchestrator
     from tools.rag.rag_engine import RAGEngine
 
 

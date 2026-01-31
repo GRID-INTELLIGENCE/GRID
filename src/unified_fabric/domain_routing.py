@@ -5,7 +5,7 @@ Utilities for resolving event domains and routing decisions.
 """
 from __future__ import annotations
 
-from typing import Iterable
+from collections.abc import Iterable
 
 SAFETY_DOMAIN = "safety"
 GRID_DOMAIN = "grid"

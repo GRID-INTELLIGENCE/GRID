@@ -248,10 +248,10 @@ class GridIntelligenceAdapter:
 
         # Try different embedding methods - API may vary
         if hasattr(self._embedding_client, "embed_batch"):
-            embed_batch_fn = getattr(self._embedding_client, "embed_batch")
+            embed_batch_fn = self._embedding_client.embed_batch
             return await embed_batch_fn(texts)
         elif hasattr(self._embedding_client, "embed"):
-            embed_fn = getattr(self._embedding_client, "embed")
+            embed_fn = self._embedding_client.embed
             results = []
             for text in texts:
                 emb = await embed_fn(text)

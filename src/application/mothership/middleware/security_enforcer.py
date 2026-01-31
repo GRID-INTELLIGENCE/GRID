@@ -562,7 +562,7 @@ class SecurityEnforcerMiddleware(BaseHTTPMiddleware):
         """Set the audit service for persistent logging."""
         self.audit_service = audit_service
         logger.info("Audit service configured for SecurityEnforcer")
-    
+
     def _log_audit_entry(self, entry: SecurityAuditEntry) -> None:
         """Log an audit entry."""
         if not self.audit_logging:
@@ -577,7 +577,7 @@ class SecurityEnforcerMiddleware(BaseHTTPMiddleware):
                 self._log_audit_entry_fallback(entry)
         else:
             self._log_audit_entry_fallback(entry)
-    
+
     def _log_audit_entry_fallback(self, entry: SecurityAuditEntry) -> None:
         """Fallback in-memory audit logging."""
         # Add to in-memory log

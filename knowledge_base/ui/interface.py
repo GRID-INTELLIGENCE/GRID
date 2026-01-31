@@ -6,8 +6,6 @@ Simple HTML/JavaScript interface for interacting with the Knowledge Base API.
 Provides search, ingestion, and management capabilities.
 """
 
-import os
-from pathlib import Path
 
 
 def create_kb_interface(api_base_url: str = "http://localhost:8000") -> str:

@@ -8,15 +8,15 @@ Integrates with OpenAI GPT models for conversational AI capabilities.
 
 import logging
 import time
-from typing import List, Dict, Any, Optional, AsyncGenerator
+from collections.abc import AsyncGenerator
 from dataclasses import dataclass
-from datetime import datetime
+from typing import Any
 
 import openai
 from openai import OpenAI
 
 from ..core.config import KnowledgeBaseConfig
-from ..search.retriever import VectorRetriever, RankedResult
+from ..search.retriever import RankedResult
 
 logger = logging.getLogger(__name__)
 
@@ -25,10 +25,10 @@ logger = logging.getLogger(__name__)
 class GenerationRequest:
     """Request for text generation."""
     query: str
-    context: List[RankedResult]
-    system_prompt: Optional[str] = None
-    temperature: Optional[float] = None
-    max_tokens: Optional[int] = None
+    context: list[RankedResult]
+    system_prompt: str | None = None
+    temperature: float | None = None
+    max_tokens: int | None = None
     streaming: bool = False
 
 
@@ -36,9 +36,9 @@ class GenerationRequest:
 class GenerationResult:
     """Result of text generation."""
     answer: str
-    sources: List[Dict[str, Any]]
+    sources: list[dict[str, Any]]
     confidence_score: float
-    token_usage: Dict[str, int]
+    token_usage: dict[str, int]
     processing_time: float
     model: str
 
@@ -47,8 +47,8 @@ class PromptBuilder:
     """Builds prompts for LLM generation."""
 
     @staticmethod
-    def build_qa_prompt(query: str, context: List[RankedResult],
-                       system_prompt: Optional[str] = None) -> str:
+    def build_qa_prompt(query: str, context: list[RankedResult],
+                       system_prompt: str | None = None) -> str:
         """Build question-answering prompt."""
 
         # Default system prompt
@@ -81,8 +81,8 @@ Answer:"""
 Summary:"""
 
     @staticmethod
-    def build_chat_prompt(messages: List[Dict[str, str]],
-                         context: List[RankedResult]) -> str:
+    def build_chat_prompt(messages: list[dict[str, str]],
+                         context: list[RankedResult]) -> str:
         """Build conversational prompt with context."""
         context_text = PromptBuilder._format_context(context)
 
@@ -105,7 +105,7 @@ Assistant:"""
         return prompt
 
     @staticmethod
-    def _format_context(context: List[RankedResult]) -> str:
+    def _format_context(context: list[RankedResult]) -> str:
         """Format retrieved results into context text."""
         if not context:
             return "No relevant context found."
@@ -212,7 +212,7 @@ class LLMGenerator:
                 model=self.config.llm.model
             )
 
-    async def generate_answer_stream(self, request: GenerationRequest) -> AsyncGenerator[str, None]:
+    async def generate_answer_stream(self, request: GenerationRequest) -> AsyncGenerator[str]:
         """Generate answer with streaming."""
         if not self.config.llm.streaming:
             # Fall back to non-streaming
@@ -270,7 +270,7 @@ class LLMGenerator:
             logger.error(f"Summarization failed: {e}")
             return f"Error summarizing text: {str(e)}"
 
-    def _calculate_confidence(self, answer: str, context: List[RankedResult]) -> float:
+    def _calculate_confidence(self, answer: str, context: list[RankedResult]) -> float:
         """Calculate confidence score for the answer."""
         if not context:
             return 0.1  # Low confidence with no context
@@ -297,7 +297,7 @@ class LLMGenerator:
 
         return round(confidence, 2)
 
-    def _format_sources(self, context: List[RankedResult]) -> List[Dict[str, Any]]:
+    def _format_sources(self, context: list[RankedResult]) -> list[dict[str, Any]]:
         """Format context results as sources."""
         sources = []
         for result in context:
@@ -326,7 +326,7 @@ class LLMGenerator:
             (prev_avg * (count - 1)) + processing_time
         ) / count
 
-    def get_generation_stats(self) -> Dict[str, Any]:
+    def get_generation_stats(self) -> dict[str, Any]:
         """Get generation statistics."""
         return {
             **self.generation_stats,

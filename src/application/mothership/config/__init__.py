@@ -215,7 +215,7 @@ class SecuritySettings:
     rate_limit_requests: int = 100
     rate_limit_window_seconds: int = 60
     max_request_size_bytes: int = 10 * 1024 * 1024  # 10MB default
-    
+
     # Explicit security mode fields (previously accessed via getattr fallbacks)
     strict_mode: bool = False  # Enable strict security mode (blocks violations instead of logging)
     input_sanitization_enabled: bool = True  # Enable input sanitization for all requests

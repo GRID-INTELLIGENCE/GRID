@@ -6,16 +6,17 @@ Comprehensive monitoring system for tracking usage, performance, and health
 metrics of the GRID Knowledge Base system.
 """
 
+import json
 import logging
-import time
+import platform
 import threading
-from typing import Dict, List, Any, Optional, Callable
+import time
+from collections import deque
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-from collections import defaultdict, deque
-import json
+from typing import Any
+
 import psutil
-import platform
 
 from ..core.config import KnowledgeBaseConfig
 
@@ -27,7 +28,7 @@ class MetricPoint:
     """Individual metric data point."""
     timestamp: datetime
     value: float
-    tags: Dict[str, str] = field(default_factory=dict)
+    tags: dict[str, str] = field(default_factory=dict)
 
 
 @dataclass
@@ -35,9 +36,9 @@ class MetricSeries:
     """Time series data for a metric."""
     name: str
     points: deque = field(default_factory=lambda: deque(maxlen=1000))
-    tags: Dict[str, str] = field(default_factory=dict)
+    tags: dict[str, str] = field(default_factory=dict)
 
-    def add_point(self, value: float, tags: Optional[Dict[str, str]] = None) -> None:
+    def add_point(self, value: float, tags: dict[str, str] | None = None) -> None:
         """Add a data point to the series."""
         point = MetricPoint(
             timestamp=datetime.now(),
@@ -46,12 +47,12 @@ class MetricSeries:
         )
         self.points.append(point)
 
-    def get_recent_points(self, hours: int = 24) -> List[MetricPoint]:
+    def get_recent_points(self, hours: int = 24) -> list[MetricPoint]:
         """Get points from the last N hours."""
         cutoff = datetime.now() - timedelta(hours=hours)
         return [p for p in self.points if p.timestamp >= cutoff]
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get statistics for this metric series."""
         points = list(self.points)
         if not points:
@@ -72,7 +73,7 @@ class MetricsCollector:
 
     def __init__(self, config: KnowledgeBaseConfig):
         self.config = config
-        self.metrics: Dict[str, MetricSeries] = {}
+        self.metrics: dict[str, MetricSeries] = {}
         self._lock = threading.Lock()
 
         # Initialize standard metrics
@@ -128,7 +129,7 @@ class MetricsCollector:
         thread.start()
         logger.info("Background metrics collection started")
 
-    def record_metric(self, name: str, value: float, tags: Optional[Dict[str, str]] = None) -> None:
+    def record_metric(self, name: str, value: float, tags: dict[str, str] | None = None) -> None:
         """Record a metric value."""
         with self._lock:
             if name not in self.metrics:
@@ -136,11 +137,11 @@ class MetricsCollector:
 
             self.metrics[name].add_point(value, tags)
 
-    def get_metric(self, name: str) -> Optional[MetricSeries]:
+    def get_metric(self, name: str) -> MetricSeries | None:
         """Get a metric series."""
         return self.metrics.get(name)
 
-    def get_all_metrics(self) -> Dict[str, Dict[str, Any]]:
+    def get_all_metrics(self) -> dict[str, dict[str, Any]]:
         """Get all metrics with their statistics."""
         result = {}
         with self._lock:
@@ -150,7 +151,7 @@ class MetricsCollector:
 
         return result
 
-    def get_metric_history(self, name: str, hours: int = 24) -> List[Dict[str, Any]]:
+    def get_metric_history(self, name: str, hours: int = 24) -> list[dict[str, Any]]:
         """Get historical data for a metric."""
         series = self.get_metric(name)
         if not series:
@@ -173,7 +174,7 @@ class EventLogger:
         self._lock = threading.Lock()
 
     def log_event(self, event_type: str, message: str,
-                 level: str = "INFO", metadata: Optional[Dict[str, Any]] = None) -> None:
+                 level: str = "INFO", metadata: dict[str, Any] | None = None) -> None:
         """Log an event."""
         event = {
             "timestamp": datetime.now().isoformat(),
@@ -190,12 +191,12 @@ class EventLogger:
         log_method = getattr(logger, level.lower(), logger.info)
         log_method(f"[{event_type}] {message}")
 
-    def get_recent_events(self, count: int = 100) -> List[Dict[str, Any]]:
+    def get_recent_events(self, count: int = 100) -> list[dict[str, Any]]:
         """Get recent events."""
         with self._lock:
             return list(self.events)[-count:]
 
-    def get_events_by_type(self, event_type: str) -> List[Dict[str, Any]]:
+    def get_events_by_type(self, event_type: str) -> list[dict[str, Any]]:
         """Get events of a specific type."""
         with self._lock:
             return [e for e in self.events if e["type"] == event_type]
@@ -207,7 +208,7 @@ class PerformanceMonitor:
     def __init__(self, metrics_collector: MetricsCollector):
         self.metrics = metrics_collector
 
-    def get_search_performance_report(self) -> Dict[str, Any]:
+    def get_search_performance_report(self) -> dict[str, Any]:
         """Generate search performance report."""
         search_requests = self.metrics.get_metric("kb.search.requests")
         search_latency = self.metrics.get_metric("kb.search.latency")
@@ -226,7 +227,7 @@ class PerformanceMonitor:
 
         return report
 
-    def get_generation_performance_report(self) -> Dict[str, Any]:
+    def get_generation_performance_report(self) -> dict[str, Any]:
         """Generate AI generation performance report."""
         gen_requests = self.metrics.get_metric("kb.generation.requests")
         gen_latency = self.metrics.get_metric("kb.generation.latency")
@@ -247,7 +248,7 @@ class PerformanceMonitor:
 
         return report
 
-    def get_system_health_report(self) -> Dict[str, Any]:
+    def get_system_health_report(self) -> dict[str, Any]:
         """Generate system health report."""
         cpu_metric = self.metrics.get_metric("kb.system.cpu_percent")
         memory_metric = self.metrics.get_metric("kb.system.memory_percent")
@@ -270,7 +271,7 @@ class AnalyticsDashboard:
         self.events = event_logger
         self.performance = performance_monitor
 
-    def get_dashboard_data(self) -> Dict[str, Any]:
+    def get_dashboard_data(self) -> dict[str, Any]:
         """Get comprehensive dashboard data."""
         return {
             "timestamp": datetime.now().isoformat(),
@@ -281,7 +282,7 @@ class AnalyticsDashboard:
             "metrics_summary": self.metrics.get_all_metrics()
         }
 
-    def get_usage_trends(self, days: int = 7) -> Dict[str, Any]:
+    def get_usage_trends(self, days: int = 7) -> dict[str, Any]:
         """Get usage trends over time."""
         trends = {
             "search_requests": self.metrics.get_metric_history("kb.search.requests", days * 24),
@@ -292,7 +293,7 @@ class AnalyticsDashboard:
 
         return trends
 
-    def generate_report(self, report_type: str = "daily") -> Dict[str, Any]:
+    def generate_report(self, report_type: str = "daily") -> dict[str, Any]:
         """Generate a comprehensive report."""
         if report_type == "daily":
             hours = 24
@@ -397,7 +398,7 @@ class MonitoringSystem:
             }
         )
 
-    def get_health_status(self) -> Dict[str, Any]:
+    def get_health_status(self) -> dict[str, Any]:
         """Get overall system health status."""
         health_data = self.analytics.get_dashboard_data()
 

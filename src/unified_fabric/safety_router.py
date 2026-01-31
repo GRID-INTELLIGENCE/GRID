@@ -9,15 +9,14 @@ Key Features:
 - Broadcasts safety events to event bus
 - AI SAFETY as the governing layer
 """
-import asyncio
 import logging
 import time
 from dataclasses import dataclass, field
-from datetime import datetime, UTC
-from typing import Any, Optional
+from datetime import UTC, datetime
 from enum import Enum
+from typing import Any
 
-from . import Event, EventDomain, get_event_bus, EventResponse
+from . import Event, EventDomain, EventResponse, get_event_bus
 
 logger = logging.getLogger(__name__)
 
@@ -59,11 +58,11 @@ class SafetyReport:
     processing_time_ms: float = 0.0
     request_id: str = ""
     domain: str = ""
-    
+
     @property
     def is_safe(self) -> bool:
         return self.decision in [SafetyDecision.ALLOW, SafetyDecision.WARN]
-    
+
     @property
     def should_block(self) -> bool:
         return self.decision == SafetyDecision.BLOCK
@@ -76,14 +75,14 @@ class SafetyFirstRouter:
     Implements the "AI SAFETY first" principle by intercepting
     all requests and validating before routing to target systems.
     """
-    
+
     def __init__(self):
         self._content_patterns: dict[str, list[str]] = self._load_patterns()
         self._rate_limits: dict[str, int] = {}  # user_id -> request_count
         self._rate_window_sec = 60
         self._max_requests_per_window = 100
         self._initialized = False
-        
+
     def _load_patterns(self) -> dict[str, list[str]]:
         """Load safety detection patterns"""
         return {
@@ -94,32 +93,32 @@ class SafetyFirstRouter:
                 "social security", "credit card", "password", "private key"
             ],
             "injection": [
-                "ignore previous", "system prompt", "you are now", 
+                "ignore previous", "system prompt", "you are now",
                 "disregard instructions", "jailbreak"
             ],
             "medical_risk": [
                 "suicide", "self harm", "overdose", "kill myself"
             ]
         }
-    
+
     async def initialize(self):
         """Initialize the safety router"""
         if self._initialized:
             return
-        
+
         # Subscribe to safety events
         bus = get_event_bus()
         bus.subscribe("safety.*", self._handle_safety_event, domain="all")
-        
+
         self._initialized = True
         logger.info("SafetyFirstRouter initialized")
-    
+
     async def validate(
         self,
         content: str,
         domain: str,
         user_id: str = "anonymous",
-        context: Optional[dict] = None
+        context: dict | None = None
     ) -> SafetyReport:
         """
         Validate content before processing.
@@ -135,7 +134,7 @@ class SafetyFirstRouter:
         """
         start_time = time.perf_counter()
         violations: list[SafetyViolation] = []
-        
+
         # Step 1: Rate limit check
         if not self._check_rate_limit(user_id):
             violations.append(SafetyViolation(
@@ -144,19 +143,19 @@ class SafetyFirstRouter:
                 confidence=1.0,
                 description=f"Rate limit exceeded for user {user_id[:8]}..."
             ))
-        
+
         # Step 2: Content pattern check
         violations.extend(self._check_patterns(content))
-        
+
         # Step 3: Domain-specific checks
         if domain == EventDomain.COINBASE.value:
             violations.extend(await self._check_financial_safety(content, context))
-        
+
         # Determine decision
         decision, threat_level = self._make_decision(violations)
-        
+
         processing_time = (time.perf_counter() - start_time) * 1000
-        
+
         report = SafetyReport(
             decision=decision,
             threat_level=threat_level,
@@ -164,13 +163,13 @@ class SafetyFirstRouter:
             processing_time_ms=processing_time,
             domain=domain
         )
-        
+
         # Broadcast safety event if violations found
         if violations:
             await self._broadcast_safety_event(report)
-        
+
         return report
-    
+
     async def validate_portfolio_action(
         self,
         action: dict[str, Any],
@@ -179,7 +178,7 @@ class SafetyFirstRouter:
         """Validate portfolio-related actions"""
         content = str(action)
         return await self.validate(content, EventDomain.COINBASE.value, user_id, action)
-    
+
     async def validate_trading_signal(
         self,
         signal: dict[str, Any],
@@ -188,7 +187,7 @@ class SafetyFirstRouter:
         """Validate trading signal generation"""
         content = str(signal)
         return await self.validate(content, EventDomain.COINBASE.value, user_id, signal)
-    
+
     async def validate_navigation(
         self,
         nav_request: dict[str, Any],
@@ -197,7 +196,7 @@ class SafetyFirstRouter:
         """Validate GRID navigation request"""
         content = str(nav_request)
         return await self.validate(content, EventDomain.GRID.value, user_id, nav_request)
-    
+
     def _check_rate_limit(self, user_id: str) -> bool:
         """Check if user is within rate limits"""
         current = self._rate_limits.get(user_id, 0)
@@ -205,12 +204,12 @@ class SafetyFirstRouter:
             return False
         self._rate_limits[user_id] = current + 1
         return True
-    
+
     def _check_patterns(self, content: str) -> list[SafetyViolation]:
         """Check content against safety patterns"""
         violations = []
         normalized = content.lower()
-        
+
         for category, patterns in self._content_patterns.items():
             for pattern in patterns:
                 if pattern in normalized:
@@ -222,17 +221,17 @@ class SafetyFirstRouter:
                         description=f"Pattern detected: {pattern}",
                         evidence={"pattern": pattern, "category": category}
                     ))
-        
+
         return violations
-    
+
     async def _check_financial_safety(
         self,
         content: str,
-        context: Optional[dict]
+        context: dict | None
     ) -> list[SafetyViolation]:
         """Financial domain-specific safety checks"""
         violations = []
-        
+
         # Check for unrealistic claims
         if context and context.get("expected_return", 0) > 100:
             violations.append(SafetyViolation(
@@ -241,9 +240,9 @@ class SafetyFirstRouter:
                 confidence=0.9,
                 description="Unrealistic return expectation detected"
             ))
-        
+
         return violations
-    
+
     def _make_decision(
         self,
         violations: list[SafetyViolation]
@@ -251,28 +250,28 @@ class SafetyFirstRouter:
         """Determine safety decision based on violations"""
         if not violations:
             return SafetyDecision.ALLOW, ThreatLevel.NONE
-        
+
         # Check for critical violations
         critical = [v for v in violations if v.severity == ThreatLevel.CRITICAL]
         if critical:
             return SafetyDecision.BLOCK, ThreatLevel.CRITICAL
-        
+
         high = [v for v in violations if v.severity == ThreatLevel.HIGH]
         if len(high) >= 2:
             return SafetyDecision.BLOCK, ThreatLevel.HIGH
         elif high:
             return SafetyDecision.ESCALATE, ThreatLevel.HIGH
-        
+
         medium = [v for v in violations if v.severity == ThreatLevel.MEDIUM]
         if medium:
             return SafetyDecision.WARN, ThreatLevel.MEDIUM
-        
+
         return SafetyDecision.ALLOW, ThreatLevel.LOW
-    
+
     async def _broadcast_safety_event(self, report: SafetyReport):
         """Broadcast safety event to all subscribers"""
         bus = get_event_bus()
-        
+
         event = Event(
             event_type=f"safety.violation.{report.threat_level.value}",
             payload={
@@ -284,17 +283,17 @@ class SafetyFirstRouter:
             source_domain=EventDomain.SAFETY.value,
             target_domains=["all"]
         )
-        
+
         await bus.publish(event)
-    
-    async def _handle_safety_event(self, event: Event) -> Optional[EventResponse]:
+
+    async def _handle_safety_event(self, event: Event) -> EventResponse | None:
         """Handle incoming safety events"""
         logger.info(f"Safety event received: {event.event_type}")
         return None
 
 
 # Singleton instance
-_safety_router: Optional[SafetyFirstRouter] = None
+_safety_router: SafetyFirstRouter | None = None
 
 
 def get_safety_router() -> SafetyFirstRouter:

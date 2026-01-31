@@ -18,7 +18,7 @@ import json
 import logging
 import sys
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 # Add grid root to path
 grid_root = Path(__file__).parent.parent.parent.parent
@@ -62,7 +62,7 @@ def print_separator(title: str = "") -> None:
         print("─" * 80)
 
 
-def print_result(result: Dict[str, Any], show_reasoning: bool = True, show_metrics: bool = True) -> None:
+def print_result(result: dict[str, Any], show_reasoning: bool = True, show_metrics: bool = True) -> None:
     """Pretty print query result."""
     print_separator("📝 ANSWER")
     print(result.get("answer", "No answer provided"))
@@ -161,7 +161,7 @@ async def run_test_query(
     temperature: float = 0.3,
     show_reasoning: bool = True,
     show_metrics: bool = True,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Run a single test query."""
     print(f"\n🔍 Query: {query}")
     print_separator()

@@ -10,7 +10,7 @@ Part of Phase 3: Reasoning Layer
 import logging
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from .evidence_extractor import Evidence, EvidenceSet, EvidenceStrength, EvidenceType
 
@@ -35,11 +35,11 @@ class ReasoningStep:
     step_number: int
     step_type: ReasoningStepType
     content: str  # The reasoning text
-    supporting_evidence: List[str] = field(default_factory=list)  # Evidence IDs
+    supporting_evidence: list[str] = field(default_factory=list)  # Evidence IDs
     confidence: float = 1.0  # 0.0 to 1.0
-    leads_to: Optional[int] = None  # Next step number
+    leads_to: int | None = None  # Next step number
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for serialization."""
         return {
             "step": self.step_number,
@@ -55,13 +55,13 @@ class ReasoningChain:
     """Complete chain-of-thought reasoning process."""
 
     query: str
-    steps: List[ReasoningStep]
+    steps: list[ReasoningStep]
     final_answer: str
     overall_confidence: float
-    evidence_used: List[str] = field(default_factory=list)  # Evidence IDs
-    evidence_unused: List[str] = field(default_factory=list)  # Evidence IDs not used
-    warnings: List[str] = field(default_factory=list)  # Uncertainty warnings
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    evidence_used: list[str] = field(default_factory=list)  # Evidence IDs
+    evidence_unused: list[str] = field(default_factory=list)  # Evidence IDs not used
+    warnings: list[str] = field(default_factory=list)  # Uncertainty warnings
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     @property
     def is_confident(self) -> bool:
@@ -73,7 +73,7 @@ class ReasoningChain:
         """Check if there are knowledge gaps."""
         return any(step.step_type == ReasoningStepType.UNCERTAINTY for step in self.steps)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for serialization."""
         return {
             "query": self.query,
@@ -157,9 +157,9 @@ class ReasoningEngine:
             ReasoningChain with complete reasoning process
         """
         query = evidence_set.query
-        steps: List[ReasoningStep] = []
+        steps: list[ReasoningStep] = []
         step_counter = 1
-        warnings: List[str] = []
+        warnings: list[str] = []
 
         logger.info(f"Starting reasoning for query: '{query}'")
 
@@ -240,7 +240,7 @@ class ReasoningEngine:
         return chain
 
     def _create_observation_step(
-        self, step_num: int, evidence_set: EvidenceSet, strong_evidence: List[Evidence]
+        self, step_num: int, evidence_set: EvidenceSet, strong_evidence: list[Evidence]
     ) -> ReasoningStep:
         """Create initial observation step."""
         if not strong_evidence:
@@ -278,7 +278,7 @@ class ReasoningEngine:
             confidence=0.6,
         )
 
-    def _infer_from_definitions(self, step_num: int, definitions: List[Evidence]) -> Optional[ReasoningStep]:
+    def _infer_from_definitions(self, step_num: int, definitions: list[Evidence]) -> ReasoningStep | None:
         """Infer from definition-type evidence."""
         if not definitions:
             return None
@@ -299,7 +299,7 @@ class ReasoningEngine:
             confidence=best_def.confidence,
         )
 
-    def _infer_from_implementations(self, step_num: int, implementations: List[Evidence]) -> Optional[ReasoningStep]:
+    def _infer_from_implementations(self, step_num: int, implementations: list[Evidence]) -> ReasoningStep | None:
         """Infer from implementation-type evidence (code)."""
         if not implementations:
             return None
@@ -321,7 +321,7 @@ class ReasoningEngine:
             confidence=min(1.0, len(implementations) / 3.0),
         )
 
-    def _infer_from_examples(self, step_num: int, examples: List[Evidence]) -> Optional[ReasoningStep]:
+    def _infer_from_examples(self, step_num: int, examples: list[Evidence]) -> ReasoningStep | None:
         """Infer from example-type evidence."""
         if not examples:
             return None
@@ -437,7 +437,7 @@ class ReasoningEngine:
 
         return conclusion_step, final_answer
 
-    def _calculate_overall_confidence(self, evidence_set: EvidenceSet, steps: List[ReasoningStep]) -> float:
+    def _calculate_overall_confidence(self, evidence_set: EvidenceSet, steps: list[ReasoningStep]) -> float:
         """Calculate overall confidence in the reasoning chain."""
         # Start with evidence confidence
         evidence_confidence = evidence_set.average_confidence
@@ -480,7 +480,6 @@ def create_reasoning_engine(
 
 # --- Test harness ---
 if __name__ == "__main__":
-    import sys
 
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 

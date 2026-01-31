@@ -13,19 +13,19 @@ and compliance features.
 import asyncio
 import logging
 import os
-from typing import Dict, Any, Optional, List
 from datetime import datetime
-import json
-import aiohttp
-from fastapi import FastAPI, HTTPException, Request, Depends
+from typing import Any
+
+import uvicorn
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
-import uvicorn
+
+from ...ai_safety.safety import AISafetyManager
 
 # Import Arena components
 from ...api_gateway.authentication.auth import AuthManager
 from ...monitoring.monitor import MonitoringManager
-from ...ai_safety.safety import AISafetyManager
 from ...service_mesh.discovery import ServiceDiscovery
 
 logger = logging.getLogger(__name__)
@@ -224,7 +224,7 @@ class ArenaAIService:
 
         return base_response
 
-    async def _check_output_safety(self, text: str) -> Dict[str, Any]:
+    async def _check_output_safety(self, text: str) -> dict[str, Any]:
         """
         Check the safety of generated output.
         """

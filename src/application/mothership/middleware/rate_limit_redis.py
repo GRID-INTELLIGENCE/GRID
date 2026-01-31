@@ -76,7 +76,7 @@ class CognitiveRedisRateLimitMiddleware(BaseHTTPMiddleware):
         # If CognitiveEngine class wasn't available at import, return default
         if CognitiveEngine is None:
             return 1.0
-            
+
         if not self.cognitive_engine:
             return 1.0
 
