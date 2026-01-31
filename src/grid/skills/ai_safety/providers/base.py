@@ -90,7 +90,9 @@ def provider_handler_factory(
             }
 
         try:
-            violations = check_func(content, **args)
+            # Remove content from kwargs to avoid duplicate
+            kwargs = {k: v for k, v in args.items() if k != "content"}
+            violations = check_func(content, **kwargs)
             return {
                 "success": True,
                 "violations": [v.to_dict() for v in violations],

@@ -21,8 +21,10 @@ class TestDatabricksClientAuthentication:
 
     def test_client_requires_host_or_profile(self):
         """Client should require either host or profile."""
-        with pytest.raises(ValueError):
-            DatabricksClient(token="test-token")
+        with patch("src.integration.databricks.client.WorkspaceClient"):
+            with patch.dict(os.environ, {"DATABRICKS_HOST": "", "databricks": "", "DATABRICKS_TOKEN": ""}, clear=False):
+                with pytest.raises(ValueError):
+                    DatabricksClient(token="test-token")
 
     def test_client_requires_token_or_profile(self):
         """Client should require either token or profile."""
@@ -55,7 +57,7 @@ class TestDatabricksClientAuthentication:
             client = DatabricksClient()
             assert client.token == "env-token"
 
-    @patch.dict(os.environ, {"DATABRICKS_HOST": "https://test.cloud.databricks.com", "databricks": "databricks-api-key"})
+    @patch.dict(os.environ, {"DATABRICKS_HOST": "https://test.cloud.databricks.com", "databricks": "databricks-api-key", "DATABRICKS_TOKEN": ""})
     def test_client_uses_databricks_env_var(self):
         """Client should use generic 'databricks' environment variable for API key."""
         with patch("src.integration.databricks.client.WorkspaceClient") as mock_ws:

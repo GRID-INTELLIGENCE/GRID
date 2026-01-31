@@ -166,7 +166,9 @@ def openai_handler(args: dict[str, Any]) -> dict[str, Any]:
             "message": "No content provided",
         }
 
-    violations = check_openai_safety(content, **args)
+    # Remove content from kwargs to avoid duplicate
+    kwargs = {k: v for k, v in args.items() if k != "content"}
+    violations = check_openai_safety(content, **kwargs)
 
     return {
         "success": True,

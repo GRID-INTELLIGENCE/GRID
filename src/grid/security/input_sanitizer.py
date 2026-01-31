@@ -244,7 +244,7 @@ class InputSanitizer:
 
         # Step 1: Normalize unicode
         if self.config.normalize_unicode:
-            normalized = unicodedata.normalize("NFKC", text)
+            normalized = unicodedata.normalize("NFC", text)
             if normalized != text:
                 modifications.append("unicode_normalized")
                 text = normalized
@@ -312,7 +312,7 @@ class InputSanitizer:
         # Determine if input is safe
         is_safe = max_severity in [ThreatSeverity.NONE, ThreatSeverity.LOW]
         if self.config.strict_mode:
-            is_safe = max_severity == ThreatSeverity.NONE
+            is_safe = max_severity == ThreatSeverity.NONE and not modifications
 
         return SanitizationResult(
             original_length=original_length,

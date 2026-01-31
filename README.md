@@ -20,6 +20,8 @@ GRID (Geometric Resonance Intelligence Driver) is a comprehensive framework for 
 
 ### Major Enhancements:
 
+- ✅ **Authentication & Security** - Production credential validation with bcrypt, JWT token revocation list, account lockout protection
+- ✅ **Billing & Usage** - Tier-based subscription management with automatic overage calculation
 - ✅ **Security Hardening** - Comprehensive path traversal protection and validation
 - ✅ **Advanced RAG System** - 4-phase optimization with semantic chunking, hybrid search, cross-encoder reranking
 - ✅ **Enhanced Testing** - 137+ tests passing with 15/15 Unified Fabric cases
@@ -30,6 +32,7 @@ GRID (Geometric Resonance Intelligence Driver) is a comprehensive framework for 
 
 ### New Capabilities:
 
+- **Automatic Overage Billing**: Usage-based charges when exceeding tier limits (relationship analysis, entity extraction)
 - **Path Traversal Protection**: Robust security validation for all file operations
 - **Semantic Chunking**: Context-aware document splitting for better RAG coherence
 - **Hybrid Search**: BM25 + Vector fusion for improved recall and precision
@@ -86,6 +89,7 @@ uv sync --group dev --group test
 
 ### New Systems (2026)
 
+- **🔐 Authentication & Billing**: JWT-based auth with token revocation, tier-based subscriptions with usage tracking
 - **🤖 Agentic System**: Event-driven case management with continuous learning
 - **🏗️ DDD Architecture**: Domain-driven design with service layer decoupling
 - **📁 Organized Structure**: Clean root directory with logical organization
@@ -188,6 +192,33 @@ curl -X POST http://localhost:8080/api/v1/resonance/process \
   -H "Content-Type: application/json" \
   -d '{"query": "create a new service", "activity_type": "code"}'
 ```
+
+### 🔐 Authentication & Billing (NEW)
+
+Secure authentication and subscription management with usage tracking:
+
+```bash
+# Authenticate and get tokens
+curl -X POST http://localhost:8080/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username": "user", "password": "pass", "scopes": ["read", "write"]}'
+
+# Validate token
+curl http://localhost:8080/api/v1/auth/validate \
+  -H "Authorization: Bearer <access_token>"
+
+# Logout (revokes token)
+curl -X POST http://localhost:8080/api/v1/auth/logout \
+  -H "Authorization: Bearer <access_token>"
+```
+
+**Features:**
+- **Production Credential Validation**: bcrypt password hashing with PostgreSQL integration
+- **JWT Token Management**: Access/refresh tokens with automatic expiration
+- **Token Revocation List**: JWT blacklisting for secure logout
+- **Account Protection**: Failed attempt tracking and automatic lockout
+- **Usage Tracking**: Per-user resource consumption monitoring
+- **Overage Calculation**: Automatic billing for usage beyond tier limits
 
 ### 🤖 Agentic System (NEW)
 
@@ -305,7 +336,7 @@ Optimized pre-push hook ensures:
 
 ### Test Coverage
 
-- **137+ tests passing** across unit, integration, and agentic systems
+- **168+ tests passing** across unit, integration, and agentic systems (31 new auth/billing tests)
 - **100% pass rate** for new Unified Fabric core modules
 - **Comprehensive coverage** for core intelligence, agentic system, and DDD patterns
 - **CI/CD pipeline** with automated validation and deployment

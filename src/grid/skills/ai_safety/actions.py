@@ -286,9 +286,26 @@ def actions_handler(args: dict[str, Any]) -> dict[str, Any]:
 
     # Reconstruct violation object
     try:
+        # Convert string values to enums
+        category_str = violation_dict.get("category", "harmful_content")
+        severity_str = violation_dict.get("severity", "medium")
+
+        # Map string to enum
+        category = SafetyCategory.HARMFUL_CONTENT
+        for cat in SafetyCategory:
+            if cat.value == category_str:
+                category = cat
+                break
+
+        severity = ThreatLevel.MEDIUM
+        for sev in ThreatLevel:
+            if sev.value == severity_str:
+                severity = sev
+                break
+
         violation = SafetyViolation(
-            category=violation_dict.get("category", "harmful_content"),
-            severity=violation_dict.get("severity", "medium"),
+            category=category,
+            severity=severity,
             confidence=violation_dict.get("confidence", 0.7),
             description=violation_dict.get("description", ""),
             evidence=violation_dict.get("evidence", {}),

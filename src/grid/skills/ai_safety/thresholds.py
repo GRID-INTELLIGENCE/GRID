@@ -142,6 +142,7 @@ def thresholds_handler(args: dict[str, Any]) -> dict[str, Any]:
         return {
             "success": True,
             "violations": [],
+            "violation_count": 0,
             "message": "No metrics provided",
         }
 
@@ -177,7 +178,7 @@ def thresholds_handler(args: dict[str, Any]) -> dict[str, Any]:
 
                 if severity != ThreatLevel.NONE:
                     violation = SafetyViolation(
-                        category="threshold_violation",
+                        category=SafetyCategory.BEHAVIORAL_ANOMALY,
                         severity=severity,
                         confidence=0.8,
                         description=f"Threshold violation for {metric_name}",

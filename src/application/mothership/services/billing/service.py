@@ -112,13 +112,51 @@ class BillingService:
             base_amount = self.settings.billing.pro_monthly_price
 
         # Calculate overage
-        await self.usage_meter.get_tier_limits(tier)
-        overage_amount = 0
+        limits = await self.usage_meter.get_tier_limits(tier)
+        usage_records = await self.usage_repo.get_by_user(user_id, start_date=period_start, end_date=period_end)
 
-        # TODO: Calculate overage based on usage vs limits
-        # For now, just create invoice with base amount
+        # Calculate usage by endpoint type
+        usage_by_type = {}
+        for record in usage_records:
+            endpoint_type = self._map_endpoint_to_type(record.endpoint)
+            usage_by_type[endpoint_type] = usage_by_type.get(endpoint_type, 0) + record.cost_units
+
+        # Calculate overage charges
+        overage_amount = 0
+        overage_line_items = []
+
+        for usage_type, usage_units in usage_by_type.items():
+            limit = limits.get(usage_type, 0)
+            if usage_units > limit:
+                overage_units = usage_units - limit
+                overage_cost_cents = overage_units * self._get_overage_cost_cents(usage_type)
+                overage_amount += overage_cost_cents
+
+                overage_line_items.append({
+                    "description": f"Overage: {usage_type.replace('_', ' ').title()} ({overage_units} units)",
+                    "amount_cents": overage_cost_cents,
+                    "usage_type": usage_type,
+                    "units_used": usage_units,
+                    "limit": limit,
+                    "overage_units": overage_units
+                })
 
         total_amount = base_amount + overage_amount
+
+        # Create invoice
+        # Create line items
+        line_items = []
+
+        # Add base subscription charge if applicable
+        if base_amount > 0:
+            line_items.append({
+                "description": f"{tier.value.title()} subscription",
+                "amount_cents": base_amount,
+                "type": "subscription"
+            })
+
+        # Add overage charges
+        line_items.extend(overage_line_items)
 
         # Create invoice
         invoice = Invoice(
@@ -131,13 +169,55 @@ class BillingService:
             period_start=period_start,
             period_end=period_end,
             due_date=now + timedelta(days=14),
-            line_items=[
-                {"description": f"{tier.value.title()} subscription", "amount_cents": base_amount},
-            ],
+            line_items=line_items,
         )
 
         await self.invoice_repo.add(invoice)
         return invoice
+
+    def _map_endpoint_to_type(self, endpoint: str) -> str:
+        """
+        Map endpoint path to usage type for billing.
+
+        Args:
+            endpoint: API endpoint path
+
+        Returns:
+            Usage type string (relationship_analysis, entity_extraction, etc.)
+        """
+        if "relationship" in endpoint:
+            return "relationship_analysis"
+        elif "entity" in endpoint or "ner" in endpoint:
+            return "entity_extraction"
+        elif "batch" in endpoint:
+            return "batch_analysis"
+        elif "scenario" in endpoint:
+            return "scenario_analysis"
+        else:
+            return "entity_extraction"  # Default
+
+    def _get_overage_cost_cents(self, usage_type: str) -> int:
+        """
+        Get overage cost per unit for a usage type.
+
+        Args:
+            usage_type: Usage type string
+
+        Returns:
+            Cost in cents per unit
+        """
+        billing_settings = self.settings.billing
+
+        if usage_type == "relationship_analysis":
+            return billing_settings.relationship_analysis_overage_cents
+        elif usage_type == "entity_extraction":
+            return billing_settings.entity_extraction_overage_cents
+        elif usage_type == "batch_analysis":
+            return billing_settings.relationship_analysis_overage_cents * 10  # Batch costs more
+        elif usage_type == "scenario_analysis":
+            return billing_settings.relationship_analysis_overage_cents * 5  # Scenario costs medium
+        else:
+            return billing_settings.entity_extraction_overage_cents  # Default
 
     async def get_usage_summary(self, user_id: str, period_days: int = 30) -> dict[str, Any]:
         """

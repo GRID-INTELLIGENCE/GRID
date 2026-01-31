@@ -173,6 +173,7 @@ def rules_handler(args: dict[str, Any]) -> dict[str, Any]:
         return {
             "success": True,
             "violations": [],
+            "violation_count": 0,
             "message": "No content provided",
         }
 
