@@ -25,6 +25,7 @@ GRID (Geometric Resonance Intelligence Driver) is a comprehensive framework for 
 - ✅ **Enhanced Testing** - 9/9 security tests passing with proper validation patterns
 - ✅ **Windows Compatibility** - Fixed pre-commit hooks and cross-platform path handling
 - ✅ **Performance Monitoring** - Real-time system metrics and optimization
+- ✅ **Dynamic Unified Fabric** - Event-driven architecture with distributed AI Safety across E:/
 
 ### New Capabilities:
 
@@ -33,6 +34,8 @@ GRID (Geometric Resonance Intelligence Driver) is a comprehensive framework for 
 - **Hybrid Search**: BM25 + Vector fusion for improved recall and precision
 - **Cross-Encoder Reranking**: 33-40% precision improvement with ms-marco-MiniLM-L6-v2
 - **Evaluation Metrics**: Automated Context Relevance scoring and quality tracking
+- **Distributed AI Safety**: `AISafetyBridge` for cross-project safety validation (wellness_studio → E:/)
+- **Automatic Revenue Pipeline**: End-to-end signal-to-execution flow with multi-system auditing
 
 ## Installation
 
@@ -85,6 +88,7 @@ uv sync --group dev --group test
 - **🤖 Agentic System**: Event-driven case management with continuous learning
 - **🏗️ DDD Architecture**: Domain-driven design with service layer decoupling
 - **📁 Organized Structure**: Clean root directory with logical organization
+- **🏗️ Unified Fabric**: High-performance async event bus and distributed safety layer
 - **🐳 Docker Stack**: Health checks and Windows compatibility
 
 ### Visualization & Tools
@@ -141,7 +145,8 @@ src/
 │   └── io/                # Input/output handling
 ├── application/           # FastAPI applications
 ├── tools/                  # Development tools (RAG, utilities)
-└── cognitive/              # Cognitive architecture
+├── cognitive/              # Cognitive architecture
+└── unified_fabric/         # Event-driven core & AI Safety bridge
 ```
 
 ## Skills + RAG (Quickstart)
@@ -211,6 +216,23 @@ curl http://localhost:8080/api/v1/agentic/experience
 5. **CaseCompleted** → Case is completed with outcome and experience data
 
 See [`docs/AGENTIC_SYSTEM_USAGE.md`](docs/AGENTIC_SYSTEM_USAGE.md) for complete usage instructions and [`docs/AGENTIC_SYSTEM.md`](docs/AGENTIC_SYSTEM.md) for system documentation.
+
+### 🕸️ Unified Fabric & Watchmaker Mechanism (NEW)
+
+The Unified Fabric provides a high-performance, asynchronous event bus and a distributed AI Safety bridge that connects GRID cognitive analysis with Coinbase financial execution.
+
+**Key Features:**
+- **AISafetyBridge**: Distributes safety validation from `wellness_studio` to all `E:/` projects.
+- **Async Router Hooks**: De-blocks synchronous GRID routers with non-blocking safety checks.
+- **Revenue Pipeline**: Automated flow from trading signals to portfolio execution with multi-system auditing.
+
+**Run the Watchmaker Scenario:**
+```powershell
+# Demonstrates the full dynamic flow (Analysis -> Safety -> Trading -> Revenue)
+python example_scenario.py
+```
+
+See `src/unified_fabric/` for implementation details.
 
 ## 🐳 Docker Stack (NEW)
 
