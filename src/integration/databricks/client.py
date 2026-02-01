@@ -80,7 +80,7 @@ class DatabricksClient:
             logger.info("Successfully connected to Databricks workspace")
         except Exception as e:
             logger.error(f"Failed to connect to Databricks workspace: {e}")
-            raise
+            raise ConnectionError(f"Failed to connect to Databricks workspace: {e}") from e
 
     @property
     def workspace(self) -> WorkspaceClient:
