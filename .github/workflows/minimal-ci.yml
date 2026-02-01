@@ -1,5 +1,7 @@
-name: Minimal CI
+name: Minimal CI (Free Tier)
 
+# This workflow runs on GitHub Actions free tier (2000 minutes/month)
+# No premium features - lightweight and efficient
 on:
   push:
     branches: [ main ]
