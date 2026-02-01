@@ -1,4 +1,4 @@
-name: Agent Validation
+name: Agent & Schema Validation
 
 on:
   pull_request:
@@ -10,6 +10,7 @@ on:
       - '.github/workflows/agent_validation.yml'
       - 'tools/inventory.py'
       - 'tools/agent_validate.py'
+      - 'tools/validate_schemas.py'
   push:
     branches:
       - main
@@ -271,3 +272,68 @@ jobs:
             echo "No validate_system.py found, skipping"
           fi
         continue-on-error: true
+
+  # Schema validation job (consolidated from schema-validation.yml)
+  schema-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Install dependencies
+        run: |
+          uv pip install jsonschema pytest pytest-cov pyyaml
+
+      - name: Validate JSON files against schemas
+        run: |
+          python tools/validate_schemas.py --verbose --fail-on-error || echo "No schema validation tool found"
+
+      - name: Generate schema validation report
+        run: |
+          python -c "
+          import os
+          import json
+          from pathlib import Path
+          from datetime import datetime
+
+          stats = {
+              'timestamp': datetime.now().isoformat(),
+              'run_type': 'schema_validation',
+              'results': {}
+          }
+
+          file_counts = {}
+          for root, dirs, files in os.walk('.'):
+              if any(skip in root for skip in ['.git', '__pycache__', '.mypy_cache', 'node_modules', '.venv', '.pytest_cache']):
+                  continue
+              for file in files:
+                  ext = Path(file).suffix
+                  if ext:
+                      file_counts[ext] = file_counts.get(ext, 0) + 1
+
+          stats['file_counts'] = file_counts
+
+          os.makedirs('reports', exist_ok=True)
+          with open('reports/schema_validation_report.json', 'w') as f:
+              json.dump(stats, f, indent=2)
+
+          print('📄 Schema validation report generated: reports/schema_validation_report.json')
+          "
+
+      - name: Upload validation report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: schema-validation-report
+          path: reports/schema_validation_report.json

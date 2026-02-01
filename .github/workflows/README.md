@@ -4,75 +4,108 @@ This directory contains automated testing and quality gates for the GRID project
 
 ## Workflows Overview
 
-### 1. **ci-test.yml** – Test Execution with Coverage
+### 1. **ci-main.yml** – Primary CI/CD Pipeline
 
-Runs comprehensive test suite across Python 3.11, 3.12, and 3.13.
-
-**Triggers:**
-
-- Push to `main` or `develop` branches
-- Pull requests to `main` or `develop` branches
-- Manual workflow dispatch (via Actions tab)
-
-**Key Steps:**
-
-- ✅ Matrix test across Python 3.11, 3.12, 3.13 (parallel execution)
-- ✅ Unit tests + integration tests
-- ✅ Coverage reporting (fails if <80%)
-- ✅ Uploads coverage to Codecov
-- ✅ Generates HTML coverage report
-- ✅ HTML test report with details
-
-**Coverage Requirements:**
-
-- Minimum: **80%** of `grid/`, `src/`, `tools/` modules
-- Reports archived as artifacts for download
-- Coverage trends tracked in Codecov dashboard
-
-**Duration:** ~5-8 minutes per Python version (15-24 min total)
-
----
-
-### 2. **ci-quality.yml** – Code Quality Gates
-
-Enforces code formatting, linting, type checking, and security standards.
+Comprehensive quality checks, security, tests, and build verification.
 
 **Triggers:**
-
-- Push to `main` or `develop` branches
+- Push to `main`, `develop`, `feature/**`, `release/**`, `hotfix/**`, `architecture/**` branches
 - Pull requests to `main` or `develop` branches
 - Manual workflow dispatch
 
-**Quality Checks:**
+**Key Jobs:**
+- ✅ **secrets-scan**: Heuristic secret scanning
+- ✅ **smoke-test**: Quick environment verification and import checks
+- ✅ **lint**: Code quality (ruff, black, mypy, pre-commit)
+- ✅ **security**: Security scanning (bandit, pip-audit)
+- ✅ **test**: Matrix tests across Python 3.11, 3.12, 3.13 with coverage
+- ✅ **integration**: Integration tests (main branch only)
+- ✅ **build**: Package building and verification
+- ✅ **verify-dist**: Distribution package verification
+- ✅ **verify-deployment**: MCP server and Ghost Registry verification (main branch only)
 
-| Tool           | Purpose                    | Failure Action               |
-| -------------- | -------------------------- | ---------------------------- |
-| **Black**      | Code formatting            | Report diff, continue        |
-| **Ruff**       | Linting & style            | Report violations, continue  |
-| **mypy**       | Type checking              | Report errors, continue      |
-| **Bandit**     | Security scanning          | Report issues, always passes |
-| **Safety**     | Dependency vulnerabilities | Report issues, always passes |
-| **pre-commit** | Local hooks suite          | Fail if violations           |
+**Coverage Requirements:**
+- Minimum: **80%** of `grid/`, `src/`, `tools/` modules
+- Reports archived as artifacts
 
-**Duration:** ~2-3 minutes
+**Duration:** ~20-30 minutes total
 
 ---
 
-### 3. **ci.yml** – Main Orchestration
+### 2. **agent_validation.yml** – Agent & Schema Validation
 
-Calls specialized workflows and verifies services are functional.
+Validates agent contracts and schemas.
 
-**Flow:**
+**Triggers:**
+- Pull requests affecting `manifest.json`, `modules/`, `contracts/`, or validation tools
+- Push to `main` or `develop` branches
 
-```
-ci.yml (main orchestrator)
-├── ci-quality.yml (code quality checks)
-├── ci-test.yml (test suite with coverage)
-└── verify-services (MCP servers, Ghost Registry handlers)
-    └── all-checks (summary: pass/fail)
-```
+**Key Jobs:**
+- unit_test: Unit tests for agent components
+- contract_test: OpenAPI and JSON schema validation
+- integration_test: Integration tests
+- analyze: Contract coverage analysis (isolated, non-blocking)
+- schema-validation: Schema validation (consolidated from schema-validation.yml)
 
-**Duration:** ~20-30 minutes total (parallel quality + test, then verification)
+**Duration:** ~5-10 minutes
+
+---
+
+### 3. **skills-quality.yml** – Skills Continuous Quality
+
+Continuous quality monitoring for skills with auto-tuning capabilities.
+
+**Triggers:**
+- Schedule: Every 4 hours
+- Manual workflow dispatch
+- Push/PR to `src/grid/skills/**` or `tests/skills/**`
+
+**Key Jobs:**
+- unit-tests: Unit tests with coverage (80% threshold)
+- integration-tests: Integration tests
+- signal-quality-check: NSR (noise-to-signal ratio) analysis
+- performance-regression-check: Performance degradation detection
+- nightly-full-tests: Complete test suite (scheduled runs)
+- threshold-tuning: Auto-tune NSR thresholds (scheduled runs)
+
+**Duration:** ~15-60 minutes (varies by schedule)
+
+---
+
+### 4. **docker-build.yml** – Docker Image Building
+
+Builds Docker images and runs security scanning.
+
+**Triggers:**
+- Push to `main` or `architecture/**` branches
+- Tags matching `v*`
+- Pull requests to `main`
+- Manual workflow dispatch
+
+**Key Jobs:**
+- build: Multi-platform Docker image building
+- scan: Trivy vulnerability scanning (non-blocking)
+
+**Duration:** ~10-15 minutes
+
+---
+
+### 5. **release.yml** – Release & Publishing
+
+Automated release workflow for versioning, changelog generation, and PyPI publishing.
+
+**Triggers:**
+- Tags matching `v*.*.*`
+- Manual workflow dispatch with version bump options
+
+**Key Jobs:**
+- prepare: Version determination and changelog generation
+- test: Tests before release
+- build: Package building
+- publish-pypi: Publish to PyPI
+- release: Create GitHub release
+
+**Duration:** ~10-15 minutes
 
 ---
 
@@ -90,7 +123,7 @@ git push origin feature-branch
 ### Manually from Actions Tab
 
 1. Go to **Actions** tab on GitHub
-2. Select a workflow (e.g., "Code Quality Checks")
+2. Select a workflow
 3. Click **Run workflow**
 4. Select branch and click **Run**
 
@@ -98,13 +131,13 @@ git push origin feature-branch
 
 ```bash
 # Run specific workflow
-gh workflow run ci-test.yml --ref main
+gh workflow run ci-main.yml --ref main
 
 # List all workflows
 gh workflow list
 
 # View workflow runs
-gh run list --workflow ci-test.yml
+gh run list --workflow ci-main.yml
 ```
 
 ---
@@ -115,9 +148,8 @@ gh run list --workflow ci-test.yml
 
 ```
 ✓ Require status checks to pass before merging:
-  - All Checks Passed (ci.yml)
-  - Code Quality (ci-quality.yml)
-  - Test Summary (ci-test.yml)
+  - All Checks Passed (ci-main.yml)
+  - Agent & Schema Validation (agent_validation.yml)
 
 ✓ Require code review: minimum 1 approval
 
@@ -143,19 +175,17 @@ gh run list --workflow ci-test.yml
 
 1. Check **Details** → **Run tests** step
 2. Look for test failures in output
-3. Click **View logs** for full output
-4. Run locally: `pytest tests/ -v`
+3. Run locally: `pytest tests/ -v`
 
 ### Workflow Failed: "Coverage below 80%"
 
-1. Check **Details** → **Check coverage threshold** step
-2. Download **coverage-reports** artifact
-3. Review `htmlcov/index.html` (HTML report)
-4. Add tests for uncovered code
+1. Download **coverage-reports** artifact
+2. Review `htmlcov/index.html` (HTML report)
+3. Add tests for uncovered code
 
 ### Workflow Failed: "Format check"
 
-1. Run locally: `black src/ tests/ scripts/`
+1. Run locally: `uv run black src/ tests/ scripts/`
 2. Format will auto-fix files
 3. Commit formatted changes
 4. Re-push
@@ -163,7 +193,7 @@ gh run list --workflow ci-test.yml
 ### Workflow Failed: "Type check"
 
 1. Check **Details** → **Type check with mypy** step
-2. Run locally: `mypy src/ --ignore-missing-imports`
+2. Run locally: `uv run mypy src/ --ignore-missing-imports`
 3. Add type annotations to flagged code
 4. Re-push
 
@@ -180,15 +210,20 @@ gh run list --workflow ci-test.yml
 
 Each workflow run generates downloadable artifacts:
 
-### ci-test.yml
-
+### ci-main.yml
 - `coverage-reports-*.zip` – HTML coverage reports
 - `test-report-*.html` – Detailed test results
+- `security-reports` – Bandit findings
+- `dist-packages` – Built distribution packages
 
-### ci-quality.yml
+### agent_validation.yml
+- `inventory` – Agent inventory report
+- `schema-validation-report` – Schema validation results
 
-- `quality-reports/` – mypy JSON reports
-- `security-reports/` – Bandit & Safety findings
+### skills-quality.yml
+- `integration-test-results` – Integration test results
+- `signal-quality-report` – NSR analysis
+- `nightly-test-results` – Scheduled test results
 
 ### How to Download
 
@@ -208,15 +243,15 @@ Workflows inherit environment from `pyproject.toml` and `.env` files.
 ```bash
 PYTHONDONTWRITEBYTECODE=1    # Skip .pyc generation
 PYTHONUNBUFFERED=1           # Unbuffered output
-PYTEST_TIMEOUT=300           # 5 min timeout per test
+GRID_ENVIRONMENT=testing     # Environment mode
 ```
 
 **To add secrets (e.g., API keys):**
 
 1. Go to **Settings → Secrets and variables → Actions**
 2. Click **New repository secret**
-3. Add secret (e.g., `DATABRICKS_TOKEN`)
-4. Reference in workflow: `${{ secrets.DATABRICKS_TOKEN }}`
+3. Add secret (e.g., `MOTHERSHIP_TEST_SECRET_KEY`)
+4. Reference in workflow: `${{ secrets.MOTHERSHIP_TEST_SECRET_KEY }}`
 
 ---
 
@@ -230,16 +265,9 @@ PYTEST_TIMEOUT=300           # 5 min timeout per test
 ### Example Badge Markdown
 
 ```markdown
-![Tests](https://github.com/YOUR_ORG/grid/actions/workflows/ci-test.yml/badge.svg)
-![Quality](https://github.com/YOUR_ORG/grid/actions/workflows/ci-quality.yml/badge.svg)
+![CI](https://github.com/YOUR_ORG/grid/actions/workflows/ci-main.yml/badge.svg)
+![Agent Validation](https://github.com/YOUR_ORG/grid/actions/workflows/agent_validation.yml/badge.svg)
 ```
-
-### Codecov Integration
-
-Coverage reports auto-upload to [codecov.io](https://codecov.io)
-
-- View trends at `https://codecov.io/gh/YOUR_ORG/grid`
-- Badge available for README
 
 ---
 
@@ -250,19 +278,16 @@ Coverage reports auto-upload to [codecov.io](https://codecov.io)
 1. **Run locally before pushing:**
 
    ```bash
-   make test        # Run tests locally
-   make lint        # Run linting
-   make format      # Auto-format code
+   uv run pytest tests/ -v      # Run tests
+   uv run ruff check src/       # Run linting
+   uv run black src/ tests/     # Format code
+   uv run mypy src/             # Type check
    ```
 
 2. **Fix issues before PR:**
    - Failed tests: Run `pytest` and fix
-   - Format: Run `black src/ tests/`
-   - Type errors: Run `mypy src/` and fix
-
-3. **Use `workflow_call` for reusability:**
-   - Other workflows can call `ci-test.yml` and `ci-quality.yml`
-   - See `ci.yml` for example
+   - Format: Run `black` to auto-fix
+   - Type errors: Run `mypy` and fix
 
 ### For Reviewers
 
@@ -296,14 +321,16 @@ Coverage reports auto-upload to [codecov.io](https://codecov.io)
 
 | Workflow       | Trigger | Duration  | Fail Action  |
 | -------------- | ------- | --------- | ------------ |
-| ci-test.yml    | push/PR | 15-24 min | Blocks merge |
-| ci-quality.yml | push/PR | 2-3 min   | Advisory     |
-| ci.yml         | push/PR | 20-30 min | Blocks merge |
+| ci-main.yml    | push/PR | 20-30 min | Blocks merge |
+| agent_validation.yml | push/PR | 5-10 min | Advisory     |
+| skills-quality.yml | schedule | 15-60 min | Advisory     |
+| docker-build.yml | push/tag | 10-15 min | Advisory     |
+| release.yml    | tag/dispatch | 10-15 min | Publishes    |
 
 ---
 
 ## Support
 
-- **Documentation:** See `.github/workflows/*.yml` for inline comments
+- **Documentation:** See inline comments in workflow files
 - **Issues:** File GitHub issue with workflow failure details
 - **Questions:** Consult project README or team documentation
