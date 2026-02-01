@@ -196,7 +196,7 @@ jobs:
           uv run mypy src/ --ignore-missing-imports || true
 
       - name: "Pre-commit hooks"
-        uses: pre-commit/action@v3
+        uses: pre-commit/action@v4
         continue-on-error: true
 
   # =========================================================================
