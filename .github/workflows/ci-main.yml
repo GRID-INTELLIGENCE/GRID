@@ -185,7 +185,7 @@ jobs:
 
       - name: "Lint (ruff)"
         run: |
-          uv run ruff check .
+          uv run ruff check . --exclude ".venv_locked/**"
 
       - name: "Format check (black)"
         run: |
