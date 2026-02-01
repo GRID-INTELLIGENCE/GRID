@@ -327,7 +327,7 @@ class TestNavigationRequestValidation:
         authenticated_user: dict[str, str],
     ) -> None:
         """Test navigation with invalid max_alternatives."""
-        invalid_values = [-1, 0, 1000]
+        invalid_values = [-1, 0, 10]
 
         for value in invalid_values:
             response = client.post(
