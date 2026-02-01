@@ -72,7 +72,7 @@ jobs:
 
       - name: "Install tools"
         run: |
-          uv pip install toml
+          python -m pip install toml
 
       - name: "Determine Version"
         id: version
@@ -192,7 +192,7 @@ jobs:
 
       - name: "Install build tools"
         run: |
-          uv pip install build twine toml
+          python -m pip install build twine toml
 
       - name: "Update Version"
         if: github.event_name == 'workflow_dispatch'
