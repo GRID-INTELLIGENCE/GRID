@@ -461,12 +461,19 @@ class HealthCheckResponse(BaseSchema):
     checks: dict[str, bool] = Field(default_factory=dict)
 
 
+class DependencyHealth(BaseSchema):
+    """Health status for a single dependency."""
+
+    healthy: bool = True
+    message: str = ""
+
+
 class ReadinessResponse(BaseSchema):
     """Readiness probe response schema."""
 
     ready: bool = True
     message: str = ""
-    dependencies: dict[str, bool] = Field(default_factory=dict)
+    dependencies: dict[str, DependencyHealth | bool] = Field(default_factory=dict)
 
 
 class LivenessResponse(BaseSchema):
