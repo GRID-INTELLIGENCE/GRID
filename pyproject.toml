@@ -162,10 +162,6 @@ packages = [
     "src/application",
     "src/cognitive",
     "src/tools",
-    "src/grid/agentic",
-    "src/grid/context",
-    "src/grid/workflow",
-    "src/grid/io",
 ]
 exclude = [
     "src/api/**",
