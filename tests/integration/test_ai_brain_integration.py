@@ -81,6 +81,9 @@ class TestKnowledgeGraphBridge:
         """Create knowledge graph bridge for testing"""
         ai_brain = AIBrain()
         bridge = KnowledgeGraphBridge(ai_brain)
+        # Explicitly clear any state to ensure test isolation
+        bridge.spatial_index.clear()
+        bridge.graph.clear()
         return bridge
 
     @pytest.mark.asyncio
