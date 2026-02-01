@@ -337,7 +337,6 @@ async def run_health_server(host: str = "0.0.0.0", port: int = 8080):
 
 async def main():
     """Main server function with health endpoint."""
-    # In Docker daemon mode, run only the health server
     # MCP stdio transport requires interactive mode
     await run_health_server()
 

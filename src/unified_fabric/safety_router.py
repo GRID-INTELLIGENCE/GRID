@@ -9,6 +9,7 @@ Key Features:
 - Broadcasts safety events to event bus
 - AI SAFETY as the governing layer
 """
+
 import logging
 import time
 from dataclasses import dataclass, field
@@ -23,6 +24,7 @@ logger = logging.getLogger(__name__)
 
 class SafetyDecision(Enum):
     """Safety validation decision"""
+
     ALLOW = "allow"
     WARN = "warn"
     BLOCK = "block"
@@ -31,6 +33,7 @@ class SafetyDecision(Enum):
 
 class ThreatLevel(Enum):
     """Threat severity levels"""
+
     NONE = "none"
     LOW = "low"
     MEDIUM = "medium"
@@ -41,6 +44,7 @@ class ThreatLevel(Enum):
 @dataclass
 class SafetyViolation:
     """Individual safety violation detected"""
+
     category: str
     severity: ThreatLevel
     confidence: float
@@ -52,6 +56,7 @@ class SafetyViolation:
 @dataclass
 class SafetyReport:
     """Safety validation result"""
+
     decision: SafetyDecision
     threat_level: ThreatLevel
     violations: list[SafetyViolation] = field(default_factory=list)
@@ -71,7 +76,7 @@ class SafetyReport:
 class SafetyFirstRouter:
     """
     Central safety router for all cross-system requests.
-    
+
     Implements the "AI SAFETY first" principle by intercepting
     all requests and validating before routing to target systems.
     """
@@ -86,19 +91,10 @@ class SafetyFirstRouter:
     def _load_patterns(self) -> dict[str, list[str]]:
         """Load safety detection patterns"""
         return {
-            "harmful": [
-                "violence", "attack", "weapon", "kill", "harm"
-            ],
-            "privacy": [
-                "social security", "credit card", "password", "private key"
-            ],
-            "injection": [
-                "ignore previous", "system prompt", "you are now",
-                "disregard instructions", "jailbreak"
-            ],
-            "medical_risk": [
-                "suicide", "self harm", "overdose", "kill myself"
-            ]
+            "harmful": ["violence", "attack", "weapon", "kill", "harm"],
+            "privacy": ["social security", "credit card", "password", "private key"],
+            "injection": ["ignore previous", "system prompt", "you are now", "disregard instructions", "jailbreak"],
+            "medical_risk": ["suicide", "self harm", "overdose", "kill myself"],
         }
 
     async def initialize(self):
@@ -114,21 +110,17 @@ class SafetyFirstRouter:
         logger.info("SafetyFirstRouter initialized")
 
     async def validate(
-        self,
-        content: str,
-        domain: str,
-        user_id: str = "anonymous",
-        context: dict | None = None
+        self, content: str, domain: str, user_id: str = "anonymous", context: dict | None = None
     ) -> SafetyReport:
         """
         Validate content before processing.
-        
+
         Args:
             content: Content to validate
             domain: Target domain (safety, grid, coinbase)
             user_id: User identifier for rate limiting
             context: Additional context
-            
+
         Returns:
             SafetyReport with decision and violations
         """
@@ -137,12 +129,14 @@ class SafetyFirstRouter:
 
         # Step 1: Rate limit check
         if not self._check_rate_limit(user_id):
-            violations.append(SafetyViolation(
-                category="rate_limit",
-                severity=ThreatLevel.MEDIUM,
-                confidence=1.0,
-                description=f"Rate limit exceeded for user {user_id[:8]}..."
-            ))
+            violations.append(
+                SafetyViolation(
+                    category="rate_limit",
+                    severity=ThreatLevel.MEDIUM,
+                    confidence=1.0,
+                    description=f"Rate limit exceeded for user {user_id[:8]}...",
+                )
+            )
 
         # Step 2: Content pattern check
         violations.extend(self._check_patterns(content))
@@ -161,7 +155,7 @@ class SafetyFirstRouter:
             threat_level=threat_level,
             violations=violations,
             processing_time_ms=processing_time,
-            domain=domain
+            domain=domain,
         )
 
         # Broadcast safety event if violations found
@@ -170,29 +164,17 @@ class SafetyFirstRouter:
 
         return report
 
-    async def validate_portfolio_action(
-        self,
-        action: dict[str, Any],
-        user_id: str
-    ) -> SafetyReport:
+    async def validate_portfolio_action(self, action: dict[str, Any], user_id: str) -> SafetyReport:
         """Validate portfolio-related actions"""
         content = str(action)
         return await self.validate(content, EventDomain.COINBASE.value, user_id, action)
 
-    async def validate_trading_signal(
-        self,
-        signal: dict[str, Any],
-        user_id: str
-    ) -> SafetyReport:
+    async def validate_trading_signal(self, signal: dict[str, Any], user_id: str) -> SafetyReport:
         """Validate trading signal generation"""
         content = str(signal)
         return await self.validate(content, EventDomain.COINBASE.value, user_id, signal)
 
-    async def validate_navigation(
-        self,
-        nav_request: dict[str, Any],
-        user_id: str
-    ) -> SafetyReport:
+    async def validate_navigation(self, nav_request: dict[str, Any], user_id: str) -> SafetyReport:
         """Validate GRID navigation request"""
         content = str(nav_request)
         return await self.validate(content, EventDomain.GRID.value, user_id, nav_request)
@@ -214,39 +196,36 @@ class SafetyFirstRouter:
             for pattern in patterns:
                 if pattern in normalized:
                     severity = ThreatLevel.CRITICAL if category in ["injection", "medical_risk"] else ThreatLevel.MEDIUM
-                    violations.append(SafetyViolation(
-                        category=category,
-                        severity=severity,
-                        confidence=0.8,
-                        description=f"Pattern detected: {pattern}",
-                        evidence={"pattern": pattern, "category": category}
-                    ))
+                    violations.append(
+                        SafetyViolation(
+                            category=category,
+                            severity=severity,
+                            confidence=0.8,
+                            description=f"Pattern detected: {pattern}",
+                            evidence={"pattern": pattern, "category": category},
+                        )
+                    )
 
         return violations
 
-    async def _check_financial_safety(
-        self,
-        content: str,
-        context: dict | None
-    ) -> list[SafetyViolation]:
+    async def _check_financial_safety(self, content: str, context: dict | None) -> list[SafetyViolation]:
         """Financial domain-specific safety checks"""
         violations = []
 
         # Check for unrealistic claims
         if context and context.get("expected_return", 0) > 100:
-            violations.append(SafetyViolation(
-                category="financial_risk",
-                severity=ThreatLevel.HIGH,
-                confidence=0.9,
-                description="Unrealistic return expectation detected"
-            ))
+            violations.append(
+                SafetyViolation(
+                    category="financial_risk",
+                    severity=ThreatLevel.HIGH,
+                    confidence=0.9,
+                    description="Unrealistic return expectation detected",
+                )
+            )
 
         return violations
 
-    def _make_decision(
-        self,
-        violations: list[SafetyViolation]
-    ) -> tuple[SafetyDecision, ThreatLevel]:
+    def _make_decision(self, violations: list[SafetyViolation]) -> tuple[SafetyDecision, ThreatLevel]:
         """Determine safety decision based on violations"""
         if not violations:
             return SafetyDecision.ALLOW, ThreatLevel.NONE
@@ -278,10 +257,10 @@ class SafetyFirstRouter:
                 "decision": report.decision.value,
                 "threat_level": report.threat_level.value,
                 "violation_count": len(report.violations),
-                "domain": report.domain
+                "domain": report.domain,
             },
             source_domain=EventDomain.SAFETY.value,
-            target_domains=["all"]
+            target_domains=["all"],
         )
 
         await bus.publish(event)

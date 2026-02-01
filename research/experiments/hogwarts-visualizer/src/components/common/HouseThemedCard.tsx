@@ -23,8 +23,6 @@ export const HouseThemedCard: React.FC<HouseThemedCardProps> = ({
     ${className}
   `;
 
-  const borderColor = `border-[${colors.border}]`;
-  const textColor = `text-[${colors.text}]`;
 
   return (
     <div

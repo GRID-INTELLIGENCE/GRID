@@ -29,5 +29,5 @@ __all__ = [
     "SafetyCategory",
     "ContentModerator",
     "BehaviorAnalyzer",
-    "ThreatDetector"
+    "ThreatDetector",
 ]

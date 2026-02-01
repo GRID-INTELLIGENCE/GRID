@@ -1,6 +1,5 @@
 """Prompt manager for custom user prompts."""
 
-
 from .models import Prompt, PromptContext, PromptPriority, PromptSource
 from .prompt_store import PromptStore
 

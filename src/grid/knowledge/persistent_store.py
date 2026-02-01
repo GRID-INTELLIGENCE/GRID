@@ -2,6 +2,7 @@
 Persistent JSON Knowledge Store for GRID.
 Lightweight graph storage using local JSON files for persistence.
 """
+
 from __future__ import annotations
 
 import json
@@ -20,6 +21,7 @@ from .graph_store import Entity, EntityId, Relationship, RelationshipId, SearchC
 
 logger = logging.getLogger(__name__)
 
+
 class PersistentJSONKnowledgeStore:
     """
     JSON-based knowledge graph storage.
@@ -30,24 +32,24 @@ class PersistentJSONKnowledgeStore:
         if storage_path is None:
             # Default to a location in the project
             storage_path = Path("dev/knowledge_graph.json")
-        
+
         self.storage_path = Path(storage_path)
         self.storage_path.parent.mkdir(parents=True, exist_ok=True)
-        
+
         self.entities: dict[str, Entity] = {}
         self.relationships: dict[str, Relationship] = {}
         self._schema = get_kg_schema()
         self._initialized = False
-        
+
         logger.info(f"PersistentJSONKnowledgeStore initialized at {self.storage_path}")
 
     def connect(self) -> None:
         """Load data from disk if available."""
         if self.storage_path.exists():
             try:
-                with open(self.storage_path, "r", encoding="utf-8") as f:
+                with open(self.storage_path, encoding="utf-8") as f:
                     data = json.load(f)
-                    
+
                 # Hydrate entities
                 for eid, edata in data.get("entities", {}).items():
                     self.entities[eid] = Entity(
@@ -58,7 +60,7 @@ class PersistentJSONKnowledgeStore:
                         updated_at=datetime.fromisoformat(edata["updated_at"]),
                         labels=set(edata.get("labels", [])),
                     )
-                
+
                 # Hydrate relationships
                 for rid, rdata in data.get("relationships", {}).items():
                     self.relationships[rid] = Relationship(
@@ -70,10 +72,12 @@ class PersistentJSONKnowledgeStore:
                         created_at=datetime.fromisoformat(rdata["created_at"]),
                         updated_at=datetime.fromisoformat(rdata["updated_at"]),
                     )
-                logger.info(f"Loaded {len(self.entities)} entities and {len(self.relationships)} relationships from disk.")
+                logger.info(
+                    f"Loaded {len(self.entities)} entities and {len(self.relationships)} relationships from disk."
+                )
             except Exception as e:
                 logger.error(f"Failed to load knowledge graph from {self.storage_path}: {e}")
-        
+
         self._initialized = True
 
     def disconnect(self) -> None:
@@ -86,7 +90,7 @@ class PersistentJSONKnowledgeStore:
             data = {
                 "entities": {eid: e.to_dict() for eid, e in self.entities.items()},
                 "relationships": {rid: r.to_dict() for rid, r in self.relationships.items()},
-                "last_updated": datetime.now().isoformat()
+                "last_updated": datetime.now().isoformat(),
             }
             with open(self.storage_path, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2)
@@ -97,12 +101,12 @@ class PersistentJSONKnowledgeStore:
     def store_entity(self, entity: Entity) -> EntityId:
         if not self._initialized:
             self.connect()
-        
+
         # Schema validation
         is_valid, errors = self._schema.validate_entity(entity.entity_type, entity.properties)
         if not is_valid:
             raise ValueError(f"Entity validation failed: {errors}")
-            
+
         self.entities[entity.entity_id] = entity
         self._save_to_disk()
         return EntityId(entity.entity_id)
@@ -116,7 +120,7 @@ class PersistentJSONKnowledgeStore:
     ) -> RelationshipId:
         if not self._initialized:
             self.connect()
-        
+
         rel_id = str(uuid4())
         now = datetime.now()
         relationship = Relationship(
@@ -126,7 +130,7 @@ class PersistentJSONKnowledgeStore:
             relationship_type=relationship_type,
             properties=properties or {},
             created_at=now,
-            updated_at=now
+            updated_at=now,
         )
         self.relationships[rel_id] = relationship
         self._save_to_disk()
@@ -145,20 +149,20 @@ class PersistentJSONKnowledgeStore:
         for entity in self.entities.values():
             if context.entity_types and entity.entity_type not in context.entity_types:
                 continue
-            
+
             # Simple keyword match in properties
             found = False
             for val in entity.properties.values():
                 if query.lower() in str(val).lower():
                     found = True
                     break
-            
+
             if found or query.lower() in entity.entity_id.lower():
                 results.append(entity)
-        
+
         # Sort and limit
         # ... logic omitted for brevity, but follows core patterns ...
-        return results[:context.limit]
+        return results[: context.limit]
 
     def get_graph_statistics(self) -> dict[str, Any]:
         if not self._initialized:
@@ -167,18 +171,18 @@ class PersistentJSONKnowledgeStore:
         for entity in self.entities.values():
             etype = entity.entity_type.value
             entity_counts[etype] = entity_counts.get(etype, 0) + 1
-            
+
         rel_counts = {}
         for rel in self.relationships.values():
             rtype = rel.relationship_type.value
             rel_counts[rtype] = rel_counts.get(rtype, 0) + 1
-            
+
         return {
             "total_entities": len(self.entities),
             "total_relationships": len(self.relationships),
             "entity_counts": entity_counts,
             "relationship_counts": rel_counts,
-            "storage_path": str(self.storage_path)
+            "storage_path": str(self.storage_path),
         }
 
     def __enter__(self):

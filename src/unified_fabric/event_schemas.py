@@ -3,10 +3,12 @@ Unified Fabric - Event Schemas
 ===============================
 Defines event schema metadata for cross-project validation.
 """
+
 from __future__ import annotations
 
 from collections.abc import Iterable
 from dataclasses import dataclass, field
+from typing import Any
 
 
 @dataclass(frozen=True)
@@ -56,7 +58,7 @@ def get_schema(event_type: str) -> EventSchema | None:
     return None
 
 
-def validate_event(event_type: str, payload: dict) -> ValidationResult:
+def validate_event(event_type: str, payload: dict[str, Any]) -> ValidationResult:
     """Validate an event payload against a registered schema."""
     schema = get_schema(event_type)
     if schema is None:

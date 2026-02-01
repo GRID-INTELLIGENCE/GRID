@@ -15,15 +15,9 @@ from fastapi import Depends, Header, HTTPException, Query, Request, status
 from fastapi.security import APIKeyHeader, HTTPAuthorizationCredentials, HTTPBearer
 
 from .config import MothershipSettings, get_settings
-from .exceptions import (
-    ResourceNotFoundError,
-)
+from .exceptions import ResourceNotFoundError
 from .models import Session
-from .repositories import (
-    StateStore,
-    get_state_store,
-    get_unit_of_work,
-)
+from .repositories import StateStore, get_state_store, get_unit_of_work
 from .repositories.db import DbUnitOfWork
 from .services import CockpitService
 
@@ -204,14 +198,14 @@ async def verify_authentication(
     # 1. Try JWT authentication (Highest Priority)
     if bearer_token:
         try:
-            return verify_jwt_token(bearer_token, require_valid=True)
+            return await verify_jwt_token(bearer_token, require_valid=True)
         except Exception as e:
             logger.warning(f"JWT verification failed: {e}")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail=str(e) if settings.is_development else "Invalid or expired authentication token",
                 headers={"WWW-Authenticate": "Bearer"},
-            )
+            ) from e
 
     # 2. API Key authentication
     if api_key:
@@ -222,7 +216,7 @@ async def verify_authentication(
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail=str(e) if settings.is_development else "Invalid API Key",
-            )
+            ) from e
 
     # 3. Development mode bypass
     if settings.is_development and os.getenv("MOTHERSHIP_ALLOW_UNAUTHENTICATED_DEV") == "1":

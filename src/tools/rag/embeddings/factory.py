@@ -15,9 +15,7 @@ class EmbeddingProviderType(str, Enum):
     SIMPLE = "simple"  # Simple fallback (word frequency)
 
 
-def get_embedding_provider(
-    provider_type: str | None = None, config: RAGConfig | None = None
-) -> BaseEmbeddingProvider:
+def get_embedding_provider(provider_type: str | None = None, config: RAGConfig | None = None) -> BaseEmbeddingProvider:
     """Get an embedding provider.
 
     Args:

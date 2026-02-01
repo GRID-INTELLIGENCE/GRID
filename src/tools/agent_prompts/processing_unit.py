@@ -18,18 +18,18 @@ from pathlib import Path
 from typing import Any
 
 try:
-    from .advanced_protocols import AdvancedProtocolHandler
-    from .case_filing import CaseCategory, CaseFilingSystem, CaseStructure
-    from .reference_generator import ReferenceGenerator
+    from .advanced_protocols import AdvancedProtocolHandler  # type: ignore[import-not-found]
+    from .case_filing import CaseCategory, CaseFilingSystem, CaseStructure  # type: ignore[import-not-found]
+    from .reference_generator import ReferenceGenerator  # type: ignore[import-not-found]
 except ImportError:
     # For standalone execution
     import sys
     from pathlib import Path
 
     sys.path.insert(0, str(Path(__file__).parent))
-    from advanced_protocols import AdvancedProtocolHandler
-    from case_filing import CaseCategory, CaseFilingSystem, CaseStructure
-    from reference_generator import ReferenceGenerator
+    from advanced_protocols import AdvancedProtocolHandler  # type: ignore[import-not-found]
+    from case_filing import CaseCategory, CaseFilingSystem, CaseStructure  # type: ignore[import-not-found]
+    from reference_generator import ReferenceGenerator  # type: ignore[import-not-found]
 
 # Optional imports for abrasive analysis integration
 try:

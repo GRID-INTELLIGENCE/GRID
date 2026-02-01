@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 # Load environment variables from .env file
 try:
     from dotenv import load_dotenv
+
     env_path = Path(__file__).parent.parent.parent.parent.parent / ".env"
     load_dotenv(env_path)
     logger.info(f"Loaded environment variables from {env_path}")
@@ -147,41 +148,28 @@ class DatabricksConnector:
         if self._engine is not None:
             return self._engine
 
-        try:
-            # Import databricks SQL connector
-            try:
-                from databricks import sql
-            except ImportError:
-                raise ImportError(
-                    "databricks-sql-connector is not installed. " "Install with: pip install databricks-sql-connector"
-                )
+        from importlib.util import find_spec
+        if find_spec("databricks.sql") is None:
+            raise ImportError(
+                "databricks-sql-connector is not installed. " "Install with: pip install databricks-sql-connector"
+            ) from None
 
-            # Build connection string for Databricks
-            # Use working hostname instead of original
-            connection_string = (
-                f"databricks://token:{self.access_token}@" f"{self.working_hostname}:443{self.http_path}"
-            )
+        # Build connection string for Databricks
+        # Use working hostname instead of original
+        connection_string = (
+            f"databricks://token:{self.access_token}@" f"{self.working_hostname}:443{self.http_path}"
+        )
 
-            # Create engine with appropriate settings
-            self._engine = create_engine(
-                connection_string,
-                pool_pre_ping=True,  # Verify connections before using
-                pool_size=5,
-                max_overflow=10,
-                echo=False,  # Don't log SQL queries (security)
-            )
-            logger.info(f"Databricks engine created for {self.working_hostname}{self.http_path}")
-            return self._engine
-        except Exception as e:
-            # Redact token from error messages
-            error_msg = str(e)
-            error_msg = re.sub(
-                r"token:[^\s@]+",
-                lambda m: f"token:{_redact_token(m.group(0).split(':')[1])}",
-                error_msg,
-            )
-            logger.error(f"Failed to create Databricks engine: {error_msg}")
-            raise
+        # Create engine with appropriate settings
+        self._engine = create_engine(
+            connection_string,
+            pool_pre_ping=True,  # Verify connections before using
+            pool_size=5,
+            max_overflow=10,
+            echo=False,  # Don't log SQL queries (security)
+        )
+        logger.info(f"Databricks engine created for {self.working_hostname}{self.http_path}")
+        return self._engine
 
     def validate_connection(self) -> bool:
         """Validate Databricks connection with retry logic.
@@ -195,7 +183,7 @@ class DatabricksConnector:
         for attempt in range(max_retries):
             try:
                 # Use databricks connector directly for validation
-                from databricks import sql
+                from databricks import sql  # noqa: F401
 
                 with sql.connect(
                     server_hostname=self.working_hostname,

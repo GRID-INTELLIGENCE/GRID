@@ -22,7 +22,6 @@
 - Added cache directories (`.ruff_cache/`, `.pyright/`)
 - Added IDE specific dirs (`.cursor/`, `.windsurf/`)
 
-### 3. **.dockerignore** (Docker build context exclusions)
 - Added note about reorganization
 - Updated data file patterns to reflect new `data/` location
 - Updated `logs/` patterns for new log directory
@@ -39,8 +38,6 @@
 | .gitignore | Added `analysis_report/` patterns | Reports now organized |
 | .cursorignore | Excluded `data/` | Too large for AI context (reorganized) |
 | .cursorignore | Added note about reorganization | Context awareness |
-| .dockerignore | Updated data file paths | Reflect new locations |
-| .dockerignore | Simplified patterns | Matches new structure |
 
 ## Impact
 
@@ -61,7 +58,6 @@
 - Archive/old code (`archival/`, `research_snapshots/`)
 - IDE directories (`.cursor/`, `.windsurf/`)
 
-### What Gets Excluded from Docker Build
 ✅ Reduce image size:
 - Data files (no raw data in production)
 - Logs (ephemeral, not needed in image)
@@ -115,7 +111,6 @@ analysis_report/*.html
 - Redundant entries consolidated
 - Simplified patterns
 
-### .dockerignore Updates
 
 **Key Changes**:
 - Better organization with categories
@@ -132,8 +127,6 @@ To verify ignore files are working correctly:
 git status
 git ls-files | head -20
 
-# Check Docker build context
-docker build --dry-run . 2>&1 | grep -i ignore
 
 # Verify no sensitive data would be included
 git ls-files | grep -E "(\.env|password|secret|key)" | wc -l
@@ -147,14 +140,12 @@ git ls-files | grep -E "(\.env|password|secret|key)" | wc -l
 - Ignore patterns referenced root-level files
 - Difficult to maintain consistency
 - Large context bloat in AI tools
-- Docker builds included unnecessary files
 
 ### After Reorganization + Updated Ignore Files
 ✅ Files organized in proper directories
 ✅ Ignore patterns aligned with structure
 ✅ Consistent and maintainable
 ✅ Reduced context for AI tools
-✅ Smaller Docker build context
 ✅ Better cache performance
 ✅ Clearer intent in each ignore file
 
@@ -164,22 +155,18 @@ These ignore files work together with:
 - `.vscode/settings.json` - Editor exclusions
 - `.vscode/tasks.json` - Build context awareness
 - `pyproject.toml` - Python build exclusions
-- `Dockerfile` - Docker build patterns
 
 ## Git Commit Guidance
 
 When committing these changes:
 
 ```bash
-git add .gitignore .cursorignore .dockerignore
 git commit -m "chore: update ignore files for Jan 1 2026 reorganization
 
 - .gitignore: updated data/logs references to match reorganized structure
 - .cursorignore: added reorganization notes and research_snapshots exclusion
-- .dockerignore: aligned patterns with new directory organization
 
 All ignore files now properly exclude reorganized directories and
-generated artifacts from Git, AI context, and Docker builds."
 ```
 
 ---

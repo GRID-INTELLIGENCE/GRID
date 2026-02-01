@@ -1,6 +1,5 @@
 """Tests for AI Safety Actions Skill."""
 
-import pytest
 
 from grid.skills.ai_safety.actions import (
     actions_handler,

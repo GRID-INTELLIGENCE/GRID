@@ -4,17 +4,18 @@ from datetime import datetime, timedelta
 from typing import Any
 
 
-def with_temporal_context(func: Callable) -> Callable:
+def with_temporal_context(func: Callable[..., Any]) -> Callable[..., Any]:
     """
     Decorator that adds temporal context to function execution.
     Measures execution time and applies time-based adaptations.
     """
+
     def wrapper(*args, **kwargs):
         start_time = time.perf_counter()
 
         # Extract temporal context if available
-        temporal_ctx = kwargs.get('temporal_context', {})
-        time_sensitivity = temporal_ctx.get('time_sensitivity', 0.5)
+        temporal_ctx = kwargs.get("temporal_context", {})
+        time_sensitivity = temporal_ctx.get("time_sensitivity", 0.5)
 
         # Execute function
         result = func(*args, **kwargs)
@@ -27,23 +28,23 @@ def with_temporal_context(func: Callable) -> Callable:
         if time_sensitivity > 0.7:
             # Compress time-sensitive results
             if isinstance(result, dict):
-                result['time_compression'] = True
-                result['original_duration'] = duration
-                result['compressed_duration'] = duration * 0.7
+                result["time_compression"] = True
+                result["original_duration"] = duration
+                result["compressed_duration"] = duration * 0.7
 
         elif time_sensitivity < 0.3:
             # Expand time-insensitive results
             if isinstance(result, dict):
-                result['time_expansion'] = True
-                result['original_duration'] = duration
-                result['expanded_duration'] = duration * 1.3
+                result["time_expansion"] = True
+                result["original_duration"] = duration
+                result["expanded_duration"] = duration * 1.3
 
         return result
 
     return wrapper
 
 
-def detect_temporal_pattern(events: list[dict]) -> dict:
+def detect_temporal_pattern(events: list[dict[str, Any]]) -> dict[str, Any]:
     """
     Detect temporal patterns in event sequences.
     Identifies cycles, intervals, and anomalies.
@@ -52,11 +53,8 @@ def detect_temporal_pattern(events: list[dict]) -> dict:
         return {"pattern": "insufficient_data"}
 
     # Calculate intervals
-    timestamps = [e['timestamp'] for e in events if 'timestamp' in e]
-    intervals = [
-        (timestamps[i] - timestamps[i-1]).total_seconds()
-        for i in range(1, len(timestamps))
-    ]
+    timestamps = [e["timestamp"] for e in events if "timestamp" in e]
+    intervals = [(timestamps[i] - timestamps[i - 1]).total_seconds() for i in range(1, len(timestamps))]
 
     # Calculate statistics
     avg_interval = sum(intervals) / len(intervals)

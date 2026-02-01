@@ -14,7 +14,9 @@ import time
 from pathlib import Path
 
 # Add Arena path to sys.path
-arena_path = Path(__file__).parent.parent / "archive" / "misc" / "Arena" / "the_chase" / "python" / "src"
+arena_path = Path(__file__).parent.parent / "Arena" / "the_chase" / "python" / "src"
+if not (arena_path / "the_chase").exists():
+    raise ImportError("the_chase path does not exist")
 if str(arena_path) not in sys.path:
     sys.path.insert(0, str(arena_path))
 

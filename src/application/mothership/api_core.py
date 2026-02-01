@@ -32,10 +32,7 @@ from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import Enum
-from typing import (
-    Any,
-    TypeVar,
-)
+from typing import Any, TypeVar
 
 from fastapi import HTTPException, status
 
@@ -638,7 +635,7 @@ async def summon_handler(
         raise HTTPException(
             status_code=status.HTTP_504_GATEWAY_TIMEOUT,
             detail=error_msg,
-        )
+        ) from None
 
     except HTTPException:
         # Re-raise HTTP exceptions without wrapping
@@ -659,7 +656,7 @@ async def summon_handler(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Handler execution failed: {error_msg}",
-        )
+        ) from e
 
 
 def summon_handler_sync(
@@ -758,7 +755,7 @@ def load_handlers_from_config(config_path: str) -> int:
     from pathlib import Path
 
     try:
-        import yaml
+        import yaml  # type: ignore[import-untyped]
     except ImportError:
         logger.error("PyYAML not installed, cannot load config")
         return 0

@@ -43,29 +43,45 @@ def check_llama_safety(content: str, **kwargs: Any) -> list[SafetyViolation]:
         # Input guard - check user prompts
         unsafe_patterns = {
             "harmful_instructions": [
-                "how do i", "how to", "instructions for",
-                "steps to", "guide for making",
+                "how do i",
+                "how to",
+                "instructions for",
+                "steps to",
+                "guide for making",
             ],
             "jailbreak_attempts": [
-                "ignore previous", "disregard instructions",
-                "new mode", "developer mode", "DAN",
-                "do anything now", "jailbreak",
+                "ignore previous",
+                "disregard instructions",
+                "new mode",
+                "developer mode",
+                "DAN",
+                "do anything now",
+                "jailbreak",
             ],
             "role_play_exploits": [
-                "pretend to be", "act as", "roleplay as",
-                "you are now", "simulate being",
+                "pretend to be",
+                "act as",
+                "roleplay as",
+                "you are now",
+                "simulate being",
             ],
         }
     else:
         # Output guard - check model responses
         unsafe_patterns = {
             "harmful_content": [
-                "here is how", "step 1:", "ingredients:",
-                "materials needed", "procedure:",
+                "here is how",
+                "step 1:",
+                "ingredients:",
+                "materials needed",
+                "procedure:",
             ],
             "biased_output": [
-                "all people", "everyone knows", "obviously",
-                "clearly superior", "inferior race",
+                "all people",
+                "everyone knows",
+                "obviously",
+                "clearly superior",
+                "inferior race",
             ],
         }
 

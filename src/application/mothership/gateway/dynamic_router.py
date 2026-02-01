@@ -31,6 +31,7 @@ logger = logging.getLogger(__name__)
 
 class RequestPriority(Enum):
     """Request priority levels for dynamic routing."""
+
     LOW = "low"
     NORMAL = "normal"
     HIGH = "high"
@@ -39,6 +40,7 @@ class RequestPriority(Enum):
 
 class SafetyLevel(Enum):
     """AI Safety evaluation levels."""
+
     SAFE = "safe"
     WARNING = "warning"
     DANGEROUS = "dangerous"
@@ -48,6 +50,7 @@ class SafetyLevel(Enum):
 @dataclass
 class SafetyScore:
     """AI Safety evaluation result."""
+
     level: SafetyLevel
     score: float  # 0.0 to 1.0
     reasons: list[str] = field(default_factory=list)
@@ -62,13 +65,14 @@ class SafetyScore:
             "score": self.score,
             "reasons": self.reasons,
             "metadata": self.metadata,
-            "timestamp": datetime.now(UTC).isoformat()
+            "timestamp": datetime.now(UTC).isoformat(),
         }
 
 
 @dataclass
 class WorkerMetrics:
     """Worker performance metrics."""
+
     worker_id: str
     active_requests: int
     total_processed: int
@@ -98,13 +102,11 @@ class AISafetyInterface:
     async def evaluate_request(self, request: Request) -> SafetyScore:
         """Evaluate request for safety concerns."""
         # Mock implementation - would integrate with actual AI Safety system
-        content = await self._extract_content(request)
+        await self._extract_content(request)
 
         # Simulate safety analysis
         safety_score = SafetyScore(
-            level=SafetyLevel.SAFE,
-            score=0.95,
-            reasons=["Content appears safe", "No policy violations detected"]
+            level=SafetyLevel.SAFE, score=0.95, reasons=["Content appears safe", "No policy violations detected"]
         )
 
         return safety_score
@@ -114,7 +116,7 @@ class AISafetyInterface:
         try:
             if request.method == "POST":
                 body = await request.body()
-                return body.decode('utf-8', errors='ignore')
+                return body.decode("utf-8", errors="ignore")
             return request.url.path
         except Exception as e:
             logger.warning(f"Failed to extract content: {e}")
@@ -140,18 +142,14 @@ class WorkerPool:
         """Get the best available worker based on metrics."""
         async with self._lock:
             available_workers = [
-                (worker_id, metrics)
-                for worker_id, metrics in self.workers.items()
-                if metrics.is_available
+                (worker_id, metrics) for worker_id, metrics in self.workers.items() if metrics.is_available
             ]
 
             if not available_workers:
                 # Try to scale up if no workers available
                 await self._scale_up_if_needed()
                 available_workers = [
-                    (worker_id, metrics)
-                    for worker_id, metrics in self.workers.items()
-                    if metrics.is_available
+                    (worker_id, metrics) for worker_id, metrics in self.workers.items() if metrics.is_available
                 ]
 
             if not available_workers:
@@ -183,9 +181,8 @@ class WorkerPool:
                 worker.active_requests -= 1
                 worker.total_processed += 1
                 worker.avg_response_time = (
-                    (worker.avg_response_time * (worker.total_processed - 1) + processing_time)
-                    / worker.total_processed
-                )
+                    worker.avg_response_time * (worker.total_processed - 1) + processing_time
+                ) / worker.total_processed
 
             return result
 
@@ -193,10 +190,7 @@ class WorkerPool:
             async with self._lock:
                 worker.active_requests -= 1
                 # Update error rate
-                worker.error_rate = (
-                    (worker.error_rate * worker.total_processed + 1.0)
-                    / (worker.total_processed + 1.0)
-                )
+                worker.error_rate = (worker.error_rate * worker.total_processed + 1.0) / (worker.total_processed + 1.0)
             raise e
 
     async def _add_worker(self, worker_id: str):
@@ -209,7 +203,7 @@ class WorkerPool:
             error_rate=0.0,
             last_activity=datetime.now(UTC),
             cpu_usage=0.0,
-            memory_usage=0.0
+            memory_usage=0.0,
         )
         logger.info(f"Added worker {worker_id} to pool")
 
@@ -229,14 +223,16 @@ class WorkerPool:
             "status": "processed",
             "timestamp": datetime.now(UTC).isoformat(),
             "request_path": request.url.path,
-            "method": request.method
+            "method": request.method,
         }
 
     def get_pool_stats(self) -> dict[str, Any]:
         """Get worker pool statistics."""
         total_active = sum(w.active_requests for w in self.workers.values())
         total_processed = sum(w.total_processed for w in self.workers.values())
-        avg_response_time = sum(w.avg_response_time for w in self.workers.values()) / len(self.workers) if self.workers else 0
+        avg_response_time = (
+            sum(w.avg_response_time for w in self.workers.values()) / len(self.workers) if self.workers else 0
+        )
 
         return {
             "total_workers": len(self.workers),
@@ -247,17 +243,17 @@ class WorkerPool:
                 worker_id: {
                     "active_requests": metrics.active_requests,
                     "efficiency_score": metrics.efficiency_score,
-                    "is_available": metrics.is_available
+                    "is_available": metrics.is_available,
                 }
                 for worker_id, metrics in self.workers.items()
-            }
+            },
         }
 
 
 class DynamicRouter:
     """
     Dynamic request router with AI Safety integration and load balancing.
-    
+
     Transforms static broadband dial-up architecture into responsive system.
     """
 
@@ -279,7 +275,7 @@ class DynamicRouter:
     async def route_request(self, request: Request) -> Response:
         """
         Route request through dynamic pipeline with AI Safety evaluation.
-        
+
         Pipeline:
         1. AI Safety evaluation
         2. Request prioritization
@@ -305,10 +301,7 @@ class DynamicRouter:
 
             if not worker_id:
                 self.request_stats["no_workers_available"] += 1
-                raise HTTPException(
-                    status_code=503,
-                    detail="No workers available to process request"
-                )
+                raise HTTPException(status_code=503, detail="No workers available to process request")
 
             # Step 3: Process request
             result = await self.worker_pool.process_request(worker_id, request)
@@ -323,14 +316,14 @@ class DynamicRouter:
                     "data": result,
                     "safety": safety_score.to_dict(),
                     "worker_id": worker_id,
-                    "processing_time": response_time
+                    "processing_time": response_time,
                 }
             )
 
         except Exception as e:
             self.request_stats["failed_requests"] += 1
             logger.error(f"Request routing failed: {e}")
-            raise HTTPException(status_code=500, detail="Internal routing error")
+            raise HTTPException(status_code=500, detail="Internal routing error") from e
 
     def _create_safety_response(self, safety_score: SafetyScore) -> JSONResponse:
         """Create response for blocked requests."""
@@ -341,8 +334,8 @@ class DynamicRouter:
             content={
                 "success": False,
                 "safety": safety_score.to_dict(),
-                "message": f"Request {safety_score.level.value} due to safety concerns"
-            }
+                "message": f"Request {safety_score.level.value} due to safety concerns",
+            },
         )
 
     def get_router_stats(self) -> dict[str, Any]:
@@ -350,7 +343,7 @@ class DynamicRouter:
         return {
             "request_stats": dict(self.request_stats),
             "worker_pool": self.worker_pool.get_pool_stats(),
-            "initialized": self._initialized
+            "initialized": self._initialized,
         }
 
 

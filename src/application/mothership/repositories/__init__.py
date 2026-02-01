@@ -14,33 +14,14 @@ from collections.abc import AsyncIterator, Callable
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Dict,
-    Generic,
-    List,
-    Optional,
-    TypeVar,
-)
+from typing import TYPE_CHECKING, Any, Generic, TypeVar
 
 from ..models import utc_now
-from ..models.cockpit import (
-    Alert as CockpitAlert,
-)
-from ..models.cockpit import (
-    CockpitState as CockpitStateModel,
-)
-from ..models.cockpit import (
-    Component as CockpitComponent,
-)
-from ..models.cockpit import (
-    Session as CockpitSession,
-)
-from ..models.cockpit import (
-    Task,
-    TaskStatus,
-)
+from ..models.cockpit import Alert as CockpitAlert
+from ..models.cockpit import CockpitState as CockpitStateModel
+from ..models.cockpit import Component as CockpitComponent
+from ..models.cockpit import Session as CockpitSession
+from ..models.cockpit import Task, TaskStatus
 
 if TYPE_CHECKING:
     from ..models.cockpit import AlertSeverity as CockpitAlertSeverity

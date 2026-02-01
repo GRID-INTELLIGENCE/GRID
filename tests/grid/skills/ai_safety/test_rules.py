@@ -1,6 +1,5 @@
 """Tests for AI Safety Rules Skill."""
 
-import pytest
 
 from grid.skills.ai_safety.base import SafetyCategory, ThreatLevel
 from grid.skills.ai_safety.rules import evaluate_rules, load_rules, rules_handler

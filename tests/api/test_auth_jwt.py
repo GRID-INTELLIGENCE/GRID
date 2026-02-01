@@ -427,13 +427,13 @@ class TestSecurityHardening:
             json={},  # Ensure Content-Type is set
         )
 
-        # Token still works (stateless JWT) - TODO: implement token blacklist
+        # Token is now correctly invalidated (using blacklist)
         response = client.get(
             "/api/v1/auth/validate",
             headers={"Authorization": f"Bearer {access_token}"},
         )
-        # Currently passes because we don't have blacklist implemented yet
-        assert response.status_code == 200
+        # Correctly fails with 401 because token is revoked
+        assert response.status_code == 401
 
     def test_malformed_token_rejected(self, client: TestClient) -> None:
         """Test that malformed tokens are rejected."""

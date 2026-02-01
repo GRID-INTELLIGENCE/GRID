@@ -11,6 +11,7 @@ Usage:
 
 import sys
 from pathlib import Path
+from typing import Any
 
 src_path = Path(__file__).parent.parent
 if str(src_path) not in sys.path:
@@ -19,7 +20,7 @@ if str(src_path) not in sys.path:
 from grid.progress.motivator import MotivationEngine
 
 
-def quick_check():
+def quick_check() -> Any:
     """
     Ultra-simple momentum check - under 3 seconds.
 
@@ -34,9 +35,9 @@ def quick_check():
     current = engine.current_gear(metrics.rpm)
     next_gear = engine.next_gear(metrics.rpm)
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("GRID MOMENTUM CHECK")
-    print("="*60)
+    print("=" * 60)
     print(f"\nCURRENT:  {current} Gear | {metrics.rpm:5d} RPM")
     print(f"TESTS:    {metrics.test_passing:3d}/{metrics.test_count:3d} passing ({metrics.test_pass_rate:5.1f}%)")
     print("\nERRORS:")
@@ -50,14 +51,13 @@ def quick_check():
     # Progress bar
     current_specs = engine.GEARS[current]
     next_specs = engine.GEARS[next_gear]
-    progress = ((metrics.rpm - current_specs["rpm_min"])
-                / (next_specs["rpm_max"] - current_specs["rpm_min"]) * 100)
+    progress = (metrics.rpm - current_specs["rpm_min"]) / (next_specs["rpm_max"] - current_specs["rpm_min"]) * 100
     progress = max(0, min(100, progress))
 
     bar = "=" * int(progress / 5) + "-" * (20 - int(progress / 5))
     print(f"\nPROGRESS: [{bar}] {progress:.0f}%")
 
-    print("\n" + "="*60 + "\n")
+    print("\n" + "=" * 60 + "\n")
 
     return metrics
 

@@ -23,6 +23,7 @@ import re
 import sys
 from dataclasses import dataclass
 from pathlib import Path
+from re import Match
 
 
 @dataclass
@@ -111,7 +112,7 @@ class PydanticV2Migrator:
         # Pattern: class Config: followed by config attributes
         pattern = r"(\s+)class Config:\s*\n((?:\1    .+\n)*)"
 
-        def replace_config(match: re.Match) -> str:
+        def replace_config(match: Match[str]) -> str:
             indent = match.group(1)
             config_body = match.group(2)
 

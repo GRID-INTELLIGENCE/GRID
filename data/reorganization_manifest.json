@@ -32,16 +32,10 @@
       "destination": "E:\\grid\\scripts\\setup_venv.sh",
       "timestamp": "2026-01-01T15:01:37.487072"
     },
-    "verify-docker-setup.ps1": {
       "status": "moved",
-      "source": "E:\\grid\\verify-docker-setup.ps1",
-      "destination": "E:\\grid\\scripts\\verify-docker-setup.ps1",
       "timestamp": "2026-01-01T15:01:37.487321"
     },
-    "verify-docker-setup.sh": {
       "status": "moved",
-      "source": "E:\\grid\\verify-docker-setup.sh",
-      "destination": "E:\\grid\\scripts\\verify-docker-setup.sh",
       "timestamp": "2026-01-01T15:01:37.487563"
     },
     "async_stress_harness.py": {
@@ -176,10 +170,7 @@
       "destination": "E:\\grid\\docs\\FINAL_SESSION_SUMMARY.md",
       "timestamp": "2026-01-01T15:01:37.510812"
     },
-    "DOCKER_DEPLOYMENT_COMPLETE.md": {
       "status": "moved",
-      "source": "E:\\grid\\DOCKER_DEPLOYMENT_COMPLETE.md",
-      "destination": "E:\\grid\\docs\\DOCKER_DEPLOYMENT_COMPLETE.md",
       "timestamp": "2026-01-01T15:01:37.511095"
     },
     "full_test_run.txt": {

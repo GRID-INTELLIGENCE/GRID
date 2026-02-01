@@ -3,6 +3,7 @@ Unified Fabric - Domain Routing Helpers
 ======================================
 Utilities for resolving event domains and routing decisions.
 """
+
 from __future__ import annotations
 
 from collections.abc import Iterable

@@ -82,9 +82,9 @@ class AuditLogger:
     def _init_cloud_logging(self) -> None:
         """Initialize Google Cloud Logging client."""
         try:
-            from google.cloud import logging as cloud_logging
-            from google.cloud.logging import Client
-            from google.cloud.logging.handlers import CloudLoggingHandler
+            from google.cloud import logging as cloud_logging  # type: ignore[import-untyped]
+            from google.cloud.logging import Client  # type: ignore[import-untyped]
+            from google.cloud.logging.handlers import CloudLoggingHandler  # type: ignore[import-untyped]
 
             # Initialize client
             self.client = Client()

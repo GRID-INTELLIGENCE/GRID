@@ -22,5 +22,5 @@ __all__ = [
     "ComponentState",
     "ComponentType",
     "ProcessorComponent",
-    "ValidatorComponent"
+    "ValidatorComponent",
 ]

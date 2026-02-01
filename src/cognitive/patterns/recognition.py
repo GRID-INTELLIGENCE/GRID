@@ -461,7 +461,7 @@ class SpatialPattern(PatternRecognizer):
             # Check distance patterns
             avg_dist = sum(distances) / len(distances)
             variance = sum((d - avg_dist) ** 2 for d in distances) / len(distances)
-            consistency = 1.0 - min(variance / (avg_dist ** 2 + 1), 1.0)
+            consistency = 1.0 - min(variance / (avg_dist**2 + 1), 1.0)
         else:
             consistency = 0.0
 
@@ -536,7 +536,7 @@ class SpatialPattern(PatternRecognizer):
         x_sum = sum(math.cos(d) for d in directions)
         y_sum = sum(math.sin(d) for d in directions)
 
-        magnitude = math.sqrt(x_sum ** 2 + y_sum ** 2)
+        magnitude = math.sqrt(x_sum**2 + y_sum**2)
         return magnitude / len(directions)
 
     def _generate_explanation(self, score: float, features: dict[str, Any]) -> str:
@@ -594,8 +594,7 @@ class RhythmPattern(PatternRecognizer):
 
             if len(parsed_timestamps) > 1:
                 interval_data = [
-                    (parsed_timestamps[i] - parsed_timestamps[i - 1])
-                    for i in range(1, len(parsed_timestamps))
+                    (parsed_timestamps[i] - parsed_timestamps[i - 1]) for i in range(1, len(parsed_timestamps))
                 ]
             else:
                 interval_data = []
@@ -836,7 +835,9 @@ class ColorPattern(PatternRecognizer):
     def _generate_explanation(self, score: float, color: str, features: dict[str, Any]) -> str:
         """Generate human-readable explanation."""
         if score > 0.7:
-            return f"Rich {color} pattern - strong multidimensional fusion with {features['dimension_count']} dimensions."
+            return (
+                f"Rich {color} pattern - strong multidimensional fusion with {features['dimension_count']} dimensions."
+            )
         elif score > 0.4:
             return f"Moderate {color} pattern - some dimensional interplay."
         else:
@@ -965,16 +966,18 @@ class RepetitionPattern(PatternRecognizer):
                 continue
 
             for i in range(len(elements) - seq_len + 1):
-                seq = tuple(elements[i:i + seq_len])
+                seq = tuple(elements[i : i + seq_len])
 
                 # Look for this sequence elsewhere
                 for j in range(i + seq_len, len(elements) - seq_len + 1):
-                    if tuple(elements[j:j + seq_len]) == seq:
-                        repeating.append({
-                            "sequence": " ".join(seq),
-                            "start_indices": [i, j],
-                            "length": seq_len,
-                        })
+                    if tuple(elements[j : j + seq_len]) == seq:
+                        repeating.append(
+                            {
+                                "sequence": " ".join(seq),
+                                "start_indices": [i, j],
+                                "length": seq_len,
+                            }
+                        )
                         break
 
         return repeating[:10]  # Limit results
@@ -1044,7 +1047,12 @@ class DeviationPattern(PatternRecognizer):
             "deviation_score": deviation_score,
             "anomaly_count": len(anomalies),
             "anomalies": anomalies,
-            "baseline_mean": sum(list(self.value_history)[-self.baseline_window:]) / min(self.baseline_window, len(self.value_history)) if self.value_history else 0.0,
+            "baseline_mean": (
+                sum(list(self.value_history)[-self.baseline_window :])
+                / min(self.baseline_window, len(self.value_history))
+                if self.value_history
+                else 0.0
+            ),
         }
 
         explanation = self._generate_explanation(deviation_score, features)
@@ -1090,8 +1098,8 @@ class DeviationPattern(PatternRecognizer):
             return 0.0, []
 
         # Use first half as baseline
-        baseline = values[:self.baseline_window]
-        test_values = values[self.baseline_window:]
+        baseline = values[: self.baseline_window]
+        test_values = values[self.baseline_window :]
 
         # Calculate baseline statistics
         mean = sum(baseline) / len(baseline)
@@ -1102,12 +1110,14 @@ class DeviationPattern(PatternRecognizer):
         for i, val in enumerate(test_values):
             z_score = abs((val - mean) / std_dev) if std_dev > 0 else 0
             if z_score > 2.0:
-                anomalies.append({
-                    "index": self.baseline_window + i,
-                    "value": val,
-                    "expected": mean,
-                    "z_score": z_score,
-                })
+                anomalies.append(
+                    {
+                        "index": self.baseline_window + i,
+                        "value": val,
+                        "expected": mean,
+                        "z_score": z_score,
+                    }
+                )
 
         # Deviation score based on anomaly proportion
         deviation_score = min(1.0, len(anomalies) / len(test_values) * 3) if len(test_values) > 0 else 0.0
@@ -1345,17 +1355,31 @@ class TimePattern(PatternRecognizer):
 
     # Era-based relevance scores from Coffee House canon
     ERA_RELEVANCE_SCORES = {
-        "modern": 0.8,          # Contemporary era
-        "historical": 0.9,      # Historical period range
+        "modern": 0.8,  # Contemporary era
+        "historical": 0.9,  # Historical period range
         "specific_year": 0.95,  # Single year match
-        "range": 0.85,          # Specific range match
+        "range": 0.85,  # Specific range match
     }
 
     # Temporal theme detection keywords
     TEMPORAL_KEYWORDS = {
-        "history", "timeline", "evolution", "past", "future", "time",
-        "era", "period", "century", "decade", "year", "chronology",
-        "historical", "ancient", "modern", "contemporary", "retro",
+        "history",
+        "timeline",
+        "evolution",
+        "past",
+        "future",
+        "time",
+        "era",
+        "period",
+        "century",
+        "decade",
+        "year",
+        "chronology",
+        "historical",
+        "ancient",
+        "modern",
+        "contemporary",
+        "retro",
     }
 
     def __init__(self):
@@ -1466,8 +1490,8 @@ class TimePattern(PatternRecognizer):
         sum_xy = sum(xi * yi for xi, yi in zip(x, values, strict=False))
         sum_x2 = sum(xi * xi for xi in x)
 
-        if sum_x2 - (sum_x ** 2) / n != 0:
-            slope = (sum_xy - (sum_x * sum_y) / n) / (sum_x2 - (sum_x ** 2) / n)
+        if sum_x2 - (sum_x**2) / n != 0:
+            slope = (sum_xy - (sum_x * sum_y) / n) / (sum_x2 - (sum_x**2) / n)
             # Normalize trend
             trend = math.tanh(slope * 10)  # Scale and normalize to [-1, 1]
         else:
@@ -1573,8 +1597,8 @@ class TimePattern(PatternRecognizer):
             )
 
         # Pattern 1: Specific year "1950", "2023", etc.
-        year_match = re.search(r'\b(19|20)\d{2}\b', query)
-        if year_match and not ("-" in query and re.search(r'\b(19|20)\d{2}\s*-\s*(19|20)\d{2}\b', query)):
+        year_match = re.search(r"\b(19|20)\d{2}\b", query)
+        if year_match and not ("-" in query and re.search(r"\b(19|20)\d{2}\s*-\s*(19|20)\d{2}\b", query)):
             year = int(year_match.group())
             return TemporalIntent(
                 query=query,
@@ -1585,7 +1609,7 @@ class TimePattern(PatternRecognizer):
             )
 
         # Pattern 2: Year range "1950-1960", "1980s"
-        range_match = re.search(r'\b(19|20)\d{2}\s*-\s*(19|20)\d{2}\b', query)
+        range_match = re.search(r"\b(19|20)\d{2}\s*-\s*(19|20)\d{2}\b", query)
         if range_match:
             start_year = int(range_match.group().split("-")[0])
             end_year = int(range_match.group().split("-")[1])
@@ -1666,9 +1690,8 @@ class TimePattern(PatternRecognizer):
         # Extract temporal metadata from document
         doc_year = document_metadata.get("year")
         doc_era = document_metadata.get("era", "unknown")
-        document_metadata.get("decade")
 
-        datetime.now().year
+
 
         # Modern era: documents from last ~15 years
         if temporal_intent.era_type == "modern":
@@ -1755,7 +1778,7 @@ class TimePattern(PatternRecognizer):
 
         # Resonance curve: Gaussian e^(-distance^2 / (2 * Q_factor^2))
         # Higher Q = narrower resonance peak (more specific)
-        resonance = math.exp(-(distance ** 2) / (2 * (q_factor ** 2)))
+        resonance = math.exp(-(distance**2) / (2 * (q_factor**2)))
 
         # Apply damping based on recency for modern queries
         decay = 1.0
@@ -1834,8 +1857,8 @@ class TimePattern(PatternRecognizer):
         # Detect temporal expressions
         import re
 
-        years = re.findall(r'\b(19|20)\d{2}\b', text)
-        decades = re.findall(r'\b(\d{2})s\b', text)
+        years = re.findall(r"\b(19|20)\d{2}\b", text)
+        decades = re.findall(r"\b(\d{2})s\b", text)
         era_terms = [term for term in ["modern", "historical", "ancient", "contemporary"] if term in text_lower]
 
         # Calculate theme score
@@ -1971,19 +1994,23 @@ class CombinationPattern(PatternRecognizer):
 
             pair_counts = Counter(pairs)
             for (p1, p2), count in pair_counts.most_common(5):
-                combos.append({
-                    "patterns": [p1, p2],
-                    "frequency": count,
-                })
+                combos.append(
+                    {
+                        "patterns": [p1, p2],
+                        "frequency": count,
+                    }
+                )
 
         # Look for high-score combinations
         if scores:
             high_scores = {k: v for k, v in scores.items() if v > 0.7}
             if len(high_scores) >= 2:
-                combos.append({
-                    "patterns": list(high_scores.keys()),
-                    "strength": sum(high_scores.values()) / len(high_scores),
-                })
+                combos.append(
+                    {
+                        "patterns": list(high_scores.keys()),
+                        "strength": sum(high_scores.values()) / len(high_scores),
+                    }
+                )
 
         return combos
 
@@ -2100,9 +2127,7 @@ class PatternMatcher:
         """
         detected = [name for name, det in results.items() if det.detected]
         high_confidence = [
-            name
-            for name, det in results.items()
-            if det.get_confidence_level() == PatternConfidence.HIGH
+            name for name, det in results.items() if det.get_confidence_level() == PatternConfidence.HIGH
         ]
 
         avg_confidence = sum(det.confidence for det in results.values()) / len(results) if results else 0.0

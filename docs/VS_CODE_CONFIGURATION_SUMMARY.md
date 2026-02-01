@@ -32,7 +32,6 @@ Created comprehensive project status documents in `.vscode/`:
 - ✅ Updated file exclusions to be aware of reorganized structure
 - ✅ Added optional visibility for `data/`, `logs/`, `artifacts/` directories
 - ✅ Enhanced search exclusions for better performance
-- ✅ Added Docker file format support
 - ✅ Added workspace startup configuration
 - ✅ Improved git configuration
 
@@ -66,7 +65,6 @@ Created comprehensive project status documents in `.vscode/`:
 
 ### 4. VS Code Extensions (`extensions.json`)
 **Additions**:
-- Docker support (`ms-azuretools.vscode-docker`)
 - GitLens for advanced git integration (`eamodio.gitlens`)
 - GitHub Copilot (optional AI assistance)
 - Remote Development extension pack

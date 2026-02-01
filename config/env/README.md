@@ -17,8 +17,6 @@ Environment files are organized here by **environment type** for easy management
 ### Production
 - `.env.production` - Production environment configuration
 
-### Docker
-- `.env.docker` - Docker container environment configuration
 
 ### Virtual Environment
 - `.env.venv` - Virtual environment specific configuration
@@ -44,10 +42,7 @@ cp config/env/.env.staging .env
 cp config/env/.env.production .env
 ```
 
-**Docker:**
 ```bash
-# Docker Compose will use .env.docker automatically
-docker-compose --env-file config/env/.env.docker up
 ```
 
 ## Root-Level Files

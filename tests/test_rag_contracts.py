@@ -13,15 +13,10 @@ import pytest
 
 pytest.importorskip("chromadb")
 
-from grid.rag import (
-    BaseIndex,
-    InMemoryIndex,
-    ScoredChunk,
-    normalize_results,
-    to_scored_chunk,
-)
+from grid.rag import BaseIndex, InMemoryIndex, ScoredChunk, normalize_results, to_scored_chunk
+
 try:
-    from tools.rag.types import Chunk
+    import tools.rag.types  # noqa: F401
 except ModuleNotFoundError:
     pytest.skip("RAG types module not available", allow_module_level=True)
 from tools.rag.store import VectorStore
@@ -45,7 +40,8 @@ class TestScoredChunkContract:
     def test_scored_chunk_is_frozen(self) -> None:
         """ScoredChunk should be immutable."""
         chunk = ScoredChunk(chunk_id="c1", text="hello", score=0.9)
-        with pytest.raises(Exception):  # FrozenInstanceError
+        from dataclasses import FrozenInstanceError
+        with pytest.raises(FrozenInstanceError):
             chunk.text = "modified"  # type: ignore
 
     def test_scored_chunk_requires_numeric_score(self) -> None:

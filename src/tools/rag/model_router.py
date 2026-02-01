@@ -113,6 +113,7 @@ async def route_ensemble_models(
     if query_kind in {"architecture", "code"}:
         try:
             import grid.knowledge.multi_model_orchestrator
+
             orchestrator = grid.knowledge.multi_model_orchestrator.MultiModelOrchestrator(workspace_root=workspace_root)
             return await orchestrator.reason_ensemble(query)
         except ImportError:

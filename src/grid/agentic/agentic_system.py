@@ -48,9 +48,7 @@ class AgenticSystem:
         self.agent_executor = AgentExecutor(knowledge_base_path)
 
         # Use environment variable for skill store path or default to home directory
-        self.skill_store_path = Path(
-            os.getenv("GRID_SKILL_STORE_PATH", str(Path.home() / ".grid" / "knowledge"))
-        )
+        self.skill_store_path = Path(os.getenv("GRID_SKILL_STORE_PATH", str(Path.home() / ".grid" / "knowledge")))
         self.skill_retriever = SkillRetriever(self.skill_store_path)
         self.memo_generator = MemoGenerator()
 
@@ -172,7 +170,7 @@ class AgenticSystem:
                             "agent_role": agent_role,
                             "task": task,
                             "duration": execution_time,
-                            "outcome": outcome
+                            "outcome": outcome,
                         },
                     )
                     await self.cognitive_engine.track_interaction(outcome_interaction)
@@ -225,7 +223,7 @@ class AgenticSystem:
                             "error": str(e),
                             "agent_role": agent_role,
                             "duration": execution_time,
-                            "outcome": "failure"
+                            "outcome": "failure",
                         },
                     )
                     await self.cognitive_engine.track_interaction(error_interaction)

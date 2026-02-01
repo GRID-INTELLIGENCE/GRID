@@ -1,13 +1,14 @@
-import sqlite3
-import pandas as pd
-import logging
-import uuid
 import json
+import logging
+import sqlite3
+import uuid
 from datetime import datetime
-from typing import List
 from pathlib import Path
 
+import pandas as pd  # type: ignore[import-untyped]
+
 logger = logging.getLogger(__name__)
+
 
 class ResonanceQueryEngine:
     """
@@ -22,7 +23,7 @@ class ResonanceQueryEngine:
     def _init_db(self):
         """Ensure the schema is ready for querying."""
         with sqlite3.connect(self.db_path) as conn:
-            conn.executescript('''
+            conn.executescript("""
                 CREATE TABLE IF NOT EXISTS activity_log (
                     id TEXT PRIMARY KEY,
                     type TEXT,
@@ -40,7 +41,7 @@ class ResonanceQueryEngine:
                     created_at TIMESTAMP,
                     FOREIGN KEY (activity_id) REFERENCES activity_log (id)
                 );
-            ''')
+            """)
 
     def execute_query(self, sql: str) -> pd.DataFrame:
         """
@@ -55,7 +56,7 @@ class ResonanceQueryEngine:
             logger.error(f"SQL Execution Error: {e}")
             raise
 
-    def ingest_batch(self, events: List[dict]):
+    def ingest_batch(self, events: list[dict]):
         """Ingest a batch of events from the Bridge or WAL."""
         with sqlite3.connect(self.db_path) as conn:
             for event in events:
@@ -67,10 +68,11 @@ class ResonanceQueryEngine:
                         event.get("type"),
                         event.get("impact", 0.5),
                         json.dumps(event.get("data", {})),
-                        event.get("timestamp", datetime.utcnow().isoformat())
-                    )
+                        event.get("timestamp", datetime.utcnow().isoformat()),
+                    ),
                 )
             conn.commit()
+
 
 # Example Investigative SQLs
 QUERIES = {
@@ -95,5 +97,5 @@ QUERIES = {
             AVG(impact) OVER (ORDER BY created_at ROWS BETWEEN 5 PRECEDING AND CURRENT ROW) as rolling_impact
         FROM telemetry_events
         WHERE activity_id = ?
-    """
+    """,
 }

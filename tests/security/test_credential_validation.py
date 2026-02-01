@@ -1,15 +1,12 @@
 """Tests for credential validation service."""
 
 import pytest
-from datetime import datetime, UTC
-from unittest.mock import AsyncMock, patch
+from unittest.mock import patch
 
 from application.mothership.security.credential_validation import (
     CredentialValidationService,
-    AuthResult,
-    get_credential_validator,
 )
-from grid.organization.models import User, UserStatus
+from grid.organization.models import UserStatus
 
 
 @pytest.fixture

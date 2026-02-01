@@ -1,9 +1,10 @@
 import numpy as np
-from typing import Dict, List
+
 
 class GravitationalPoint:
     def __init__(self, position: np.ndarray):
         self.position = position
+
 
 class AttractionForce:
     def __init__(self, strength: float = 1.0):
@@ -14,14 +15,16 @@ class AttractionForce:
         distance = np.linalg.norm(direction)
         if distance == 0:
             return np.zeros_like(p1)
-        return self.strength * direction / (distance ** 2)
+        return self.strength * direction / (distance**2)
+
 
 class OrbitPath:
     def __init__(self):
-        self.path: List[np.ndarray] = []
+        self.path: list[np.ndarray] = []
 
     def add_position(self, position: np.ndarray):
         self.path.append(position)
+
 
 class EquilibriumState:
     def __init__(self, tolerance: float = 0.01):
@@ -29,6 +32,7 @@ class EquilibriumState:
 
     def is_in_equilibrium(self, force: np.ndarray) -> bool:
         return np.linalg.norm(force) < self.tolerance
+
 
 class GravitationalSystem:
     def __init__(self, gravitational_point: GravitationalPoint, attraction_force: AttractionForce):

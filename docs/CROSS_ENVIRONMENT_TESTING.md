@@ -56,26 +56,17 @@ tox -e format
 tox -e lint
 ```
 
-### 2. Docker Testing (Isolated environments)
 
 ```bash
 # Build multi-python test images
-docker build -f Dockerfile.test -t grid-test:latest .
 
 # Run tests in isolated Python 3.14 environment
-docker run --rm grid-test:latest
 
 # Test with Python 3.10
-docker build -f Dockerfile.test --target py310 -t grid-test:py310 .
-docker run --rm grid-test:py310
 
 # Test with Python 3.9
-docker build -f Dockerfile.test --target py39 -t grid-test:py39 .
-docker run --rm grid-test:py39
 
 # Test with Python 3.8
-docker build -f Dockerfile.test --target py38 -t grid-test:py38 .
-docker run --rm grid-test:py38
 ```
 
 ### 3. Windows/Linux/macOS Compatibility
@@ -200,7 +191,6 @@ GRID_AI_MODEL configuration tested on:
 - ✅ Windows (set GRID_AI_MODEL=...)
 - ✅ Linux (export GRID_AI_MODEL=...)
 - ✅ macOS (export GRID_AI_MODEL=...)
-- ✅ Docker (ENV in Dockerfile or -e flag)
 - ✅ CI/CD (GitHub Actions matrix)
 
 All environment configurations work identically across platforms.
@@ -209,7 +199,6 @@ All environment configurations work identically across platforms.
 
 1. **Run local tests**: `pytest tests/ -v`
 2. **Multi-version testing**: `tox`
-3. **Docker testing**: `docker build -f Dockerfile.test && docker run --rm ...`
 4. **CI/CD integration**: Add .github/workflows/test.yml for automated testing
 5. **Monitor coverage**: Maintain >30% code coverage across versions
 

@@ -9,7 +9,6 @@
     "tamasfe.even-better-toml",
     "redhat.vscode-yaml",
     "ms-vscode.vscode-json",
-    "ms-azuretools.vscode-docker",
     "eamodio.gitlens",
     "GitHub.copilot",
     "GitHub.copilot-chat",

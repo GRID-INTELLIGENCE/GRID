@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 
 class MetricType(Enum):
     """Performance metric types."""
+
     EXECUTION_TIME = "execution_time"
     MEMORY_USAGE = "memory_usage"
     CPU_USAGE = "cpu_usage"
@@ -37,6 +38,7 @@ class MetricType(Enum):
 
 class AlertLevel(Enum):
     """Performance alert levels."""
+
     INFO = "info"
     WARNING = "warning"
     ERROR = "error"
@@ -46,6 +48,7 @@ class AlertLevel(Enum):
 @dataclass
 class PerformanceMetric:
     """Individual performance metric."""
+
     metric_id: str
     skill_id: str
     metric_type: MetricType
@@ -72,6 +75,7 @@ class PerformanceMetric:
 @dataclass
 class PerformanceAlert:
     """Performance alert."""
+
     alert_id: str
     skill_id: str
     metric_type: MetricType
@@ -102,6 +106,7 @@ class PerformanceAlert:
 @dataclass
 class PerformanceReport:
     """Performance analysis report."""
+
     report_id: str
     skill_id: str
     period_start: datetime
@@ -450,9 +455,7 @@ class SkillsPerformanceAnalytics:
             return
 
         self._monitoring_active = True
-        self._monitoring_task = asyncio.create_task(
-            self._monitoring_loop(interval_seconds)
-        )
+        self._monitoring_task = asyncio.create_task(self._monitoring_loop(interval_seconds))
         logger.info("Performance monitoring started")
 
     def stop_monitoring(self) -> None:
@@ -506,9 +509,7 @@ class SkillsPerformanceAnalytics:
 
             logger.warning(f"Performance alert generated: {alert.message}")
 
-    def _is_threshold_exceeded(
-        self, metric_type: MetricType, value: float, threshold: float
-    ) -> bool:
+    def _is_threshold_exceeded(self, metric_type: MetricType, value: float, threshold: float) -> bool:
         """Check if metric value exceeds threshold."""
         # Different metrics have different threshold logic
         if metric_type in [MetricType.EXECUTION_TIME, MetricType.LATENCY, MetricType.ERROR_RATE]:
@@ -545,9 +546,7 @@ class SkillsPerformanceAnalytics:
         else:
             return "stable"
 
-    def _analyze_trends(
-        self, skill_id: str, start_time: datetime, end_time: datetime
-    ) -> dict[str, Any]:
+    def _analyze_trends(self, skill_id: str, start_time: datetime, end_time: datetime) -> dict[str, Any]:
         """Analyze performance trends."""
         trends = {}
 
@@ -577,9 +576,7 @@ class SkillsPerformanceAnalytics:
 
         return trends
 
-    def _detect_anomalies(
-        self, skill_id: str, start_time: datetime, end_time: datetime
-    ) -> list[dict[str, Any]]:
+    def _detect_anomalies(self, skill_id: str, start_time: datetime, end_time: datetime) -> list[dict[str, Any]]:
         """Detect performance anomalies."""
         anomalies = []
 
@@ -601,19 +598,19 @@ class SkillsPerformanceAnalytics:
 
             for metric in metrics:
                 if metric.value < lower_bound or metric.value > upper_bound:
-                    anomalies.append({
-                        "metric_type": metric_type.value,
-                        "timestamp": metric.timestamp.isoformat(),
-                        "value": metric.value,
-                        "expected_range": [lower_bound, upper_bound],
-                        "severity": "high" if abs(metric.value - statistics.mean(values)) > 2 * iqr else "medium",
-                    })
+                    anomalies.append(
+                        {
+                            "metric_type": metric_type.value,
+                            "timestamp": metric.timestamp.isoformat(),
+                            "value": metric.value,
+                            "expected_range": [lower_bound, upper_bound],
+                            "severity": "high" if abs(metric.value - statistics.mean(values)) > 2 * iqr else "medium",
+                        }
+                    )
 
         return anomalies
 
-    def _generate_recommendations(
-        self, summary: dict[str, Any], anomalies: list[dict[str, Any]]
-    ) -> list[str]:
+    def _generate_recommendations(self, summary: dict[str, Any], anomalies: list[dict[str, Any]]) -> list[str]:
         """Generate performance optimization recommendations."""
         recommendations = []
 
@@ -622,27 +619,20 @@ class SkillsPerformanceAnalytics:
             if metric_name == MetricType.EXECUTION_TIME.value:
                 if metric_data["mean"] > 5.0:  # 5 seconds
                     recommendations.append(
-                        "Consider optimizing skill execution time (current avg: "
-                        f"{metric_data['mean']:.2f}s)"
+                        "Consider optimizing skill execution time (current avg: " f"{metric_data['mean']:.2f}s)"
                     )
 
             elif metric_name == MetricType.ERROR_RATE.value:
                 if metric_data["mean"] > 0.1:  # 10% error rate
-                    recommendations.append(
-                        "High error rate detected, review error handling and input validation"
-                    )
+                    recommendations.append("High error rate detected, review error handling and input validation")
 
             elif metric_name == MetricType.MEMORY_USAGE.value:
                 if metric_data["mean"] > 512:  # 512MB
-                    recommendations.append(
-                        "High memory usage detected, consider memory optimization"
-                    )
+                    recommendations.append("High memory usage detected, consider memory optimization")
 
         # Anomaly-based recommendations
         if len(anomalies) > 5:
-            recommendations.append(
-                "Multiple performance anomalies detected, consider comprehensive performance review"
-            )
+            recommendations.append("Multiple performance anomalies detected, consider comprehensive performance review")
 
         # Trend-based recommendations
         for metric_name, metric_data in summary.get("metrics", {}).items():
@@ -651,9 +641,7 @@ class SkillsPerformanceAnalytics:
                 MetricType.ERROR_RATE.value,
                 MetricType.MEMORY_USAGE.value,
             ]:
-                recommendations.append(
-                    f"Concerning upward trend in {metric_name}, investigate root cause"
-                )
+                recommendations.append(f"Concerning upward trend in {metric_name}, investigate root cause")
 
         return recommendations
 

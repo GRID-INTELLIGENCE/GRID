@@ -109,9 +109,7 @@ class CognitiveRouter:
             Route with routing decision and adaptations
         """
         # Determine primary route based on multiple factors
-        route_type, confidence = self._determine_route_type(
-            cognitive_state, profile, detected_patterns
-        )
+        route_type, confidence = self._determine_route_type(cognitive_state, profile, detected_patterns)
 
         # Generate adaptations
         adaptations = self.get_adaptations(cognitive_state, profile)
@@ -146,7 +144,9 @@ class CognitiveRouter:
         if cognitive_state.estimated_load > self.load_heavy_threshold:
             scores[RouteType.HEAVY] = (cognitive_state.estimated_load - self.load_heavy_threshold) / 3.0
         elif cognitive_state.estimated_load < self.load_light_threshold:
-            scores[RouteType.LIGHT] = (self.load_light_threshold - cognitive_state.estimated_load) / self.load_light_threshold
+            scores[RouteType.LIGHT] = (
+                self.load_light_threshold - cognitive_state.estimated_load
+            ) / self.load_light_threshold
 
         # 3. Expertise score
         expertise_score = self.expert_thresholds.get(profile.expertise_level, 0.5)
@@ -265,45 +265,57 @@ class CognitiveRouter:
 
         # Route-specific parameters
         if route.route_type == RouteType.FAST:
-            params.update({
-                "max_tokens": 500,
-                "temperature": 0.7,
-                "detail_level": "minimal",
-            })
+            params.update(
+                {
+                    "max_tokens": 500,
+                    "temperature": 0.7,
+                    "detail_level": "minimal",
+                }
+            )
         elif route.route_type == RouteType.DELIBERATE:
-            params.update({
-                "max_tokens": 2000,
-                "temperature": 0.5,
-                "detail_level": "high",
-            })
+            params.update(
+                {
+                    "max_tokens": 2000,
+                    "temperature": 0.5,
+                    "detail_level": "high",
+                }
+            )
         elif route.route_type == RouteType.HEAVY:
-            params.update({
-                "max_tokens": 300,
-                "temperature": 0.6,
-                "detail_level": "minimal",
-                "use_scaffolding": True,
-            })
+            params.update(
+                {
+                    "max_tokens": 300,
+                    "temperature": 0.6,
+                    "detail_level": "minimal",
+                    "use_scaffolding": True,
+                }
+            )
         elif route.route_type == RouteType.LIGHT:
-            params.update({
-                "max_tokens": 1500,
-                "temperature": 0.8,
-                "detail_level": "medium",
-            })
+            params.update(
+                {
+                    "max_tokens": 1500,
+                    "temperature": 0.8,
+                    "detail_level": "medium",
+                }
+            )
         elif route.route_type == RouteType.NOVICE:
-            params.update({
-                "max_tokens": 1000,
-                "temperature": 0.6,
-                "detail_level": "high",
-                "include_examples": True,
-                "step_by_step": True,
-            })
+            params.update(
+                {
+                    "max_tokens": 1000,
+                    "temperature": 0.6,
+                    "detail_level": "high",
+                    "include_examples": True,
+                    "step_by_step": True,
+                }
+            )
         elif route.route_type == RouteType.EXPERT:
-            params.update({
-                "max_tokens": 1000,
-                "temperature": 0.9,
-                "detail_level": "low",
-                "minimal_explanation": True,
-            })
+            params.update(
+                {
+                    "max_tokens": 1000,
+                    "temperature": 0.9,
+                    "detail_level": "low",
+                    "minimal_explanation": True,
+                }
+            )
 
         return params
 
@@ -374,9 +386,7 @@ class CognitiveRequestHandler:
         # Route the request
         route = self.router.route(request, cognitive_state, profile, detected_patterns)
 
-        logger.debug(
-            f"Routing request via {route.route_type.value}: {route.description}"
-        )
+        logger.debug(f"Routing request via {route.route_type.value}: {route.description}")
 
         # Get processing parameters
         params = self.router.get_processing_parameters(route, request)

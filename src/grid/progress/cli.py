@@ -11,7 +11,7 @@ if str(src_path) not in sys.path:
 from grid.progress.motivator import MotivationEngine, save_progress
 
 
-def main():
+def main() -> int:
     """Run the motivator."""
     engine = MotivationEngine()
 

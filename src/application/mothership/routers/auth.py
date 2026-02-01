@@ -108,7 +108,7 @@ async def login(
                 "Authentication failed for user: %s, reason: %s (request_id=%s)",
                 request.username,
                 auth_result.error_code,
-                request_id
+                request_id,
             )
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,

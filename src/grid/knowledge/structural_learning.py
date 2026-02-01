@@ -264,9 +264,7 @@ class AdaptiveRelationshipModel:
 
         return rel
 
-    def adapt_relationship_strength(
-        self, source_id: str, target_id: str, new_strength: float
-    ) -> Relationship | None:
+    def adapt_relationship_strength(self, source_id: str, target_id: str, new_strength: float) -> Relationship | None:
         """Adapt relationship strength based on interactions.
 
         Args:

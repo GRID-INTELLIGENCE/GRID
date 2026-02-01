@@ -197,10 +197,12 @@ class ProfileStore:
         profile = await self.get_or_create_profile(user_id)
 
         # Record interaction in history
-        profile.interaction_history.append({
-            **interaction,
-            "recorded_at": datetime.now().isoformat(),
-        })
+        profile.interaction_history.append(
+            {
+                **interaction,
+                "recorded_at": datetime.now().isoformat(),
+            }
+        )
 
         # Limit history size (keep last 100 interactions)
         if len(profile.interaction_history) > 100:
@@ -242,9 +244,7 @@ class ProfileStore:
         """
         # Count successes by category
         category_successes = sum(
-            1
-            for i in profile.interaction_history
-            if i.get("category") == category and i.get("outcome") == "success"
+            1 for i in profile.interaction_history if i.get("category") == category and i.get("outcome") == "success"
         )
 
         # Update domain expertise
@@ -327,9 +327,7 @@ class ProfileStore:
         """
         # Get recent load values
         recent_loads = [
-            i.get("cognitive_load", 5.0)
-            for i in profile.interaction_history[-20:]
-            if "cognitive_load" in i
+            i.get("cognitive_load", 5.0) for i in profile.interaction_history[-20:] if "cognitive_load" in i
         ]
 
         if not recent_loads:
@@ -401,10 +399,7 @@ class ProfileStore:
         recent_avg_duration = sum(i.get("duration", 0) for i in recent) / len(recent) if recent else 0
 
         # Domain expertise breakdown
-        domain_expertise = {
-            domain: level.value
-            for domain, level in profile.domain_expertise.items()
-        }
+        domain_expertise = {domain: level.value for domain, level in profile.domain_expertise.items()}
 
         return {
             "user_id": user_id,
@@ -451,11 +446,7 @@ class ProfileStore:
             }
 
         # Calculate metrics
-        success_rate = sum(
-            1
-            for i in interactions
-            if i.get("outcome") == "success"
-        ) / len(interactions)
+        success_rate = sum(1 for i in interactions if i.get("outcome") == "success") / len(interactions)
 
         # Look for consistency in decision patterns
         decisions = [i for i in interactions if i.get("action") == "decision"]
@@ -465,7 +456,7 @@ class ProfileStore:
             if durations:
                 avg_duration = sum(durations) / len(durations)
                 variance = sum((d - avg_duration) ** 2 for d in durations) / len(durations)
-                consistency = max(0, 1 - variance / (avg_duration ** 2 + 1))
+                consistency = max(0, 1 - variance / (avg_duration**2 + 1))
             else:
                 consistency = 0.5
         else:
@@ -474,8 +465,7 @@ class ProfileStore:
         # Update mental model confidence
         target_confidence = (success_rate + consistency) / 2
         profile.model_confidence = (
-            profile.model_confidence * (1 - self._learning_rate)
-            + target_confidence * self._learning_rate
+            profile.model_confidence * (1 - self._learning_rate) + target_confidence * self._learning_rate
         )
 
         # Evolve model version if confidence is high enough
@@ -544,7 +534,7 @@ class ProfileStore:
         tolerance_factor = profile.cognitive_load_tolerance
 
         # Weighted average
-        recommended = (base_complexity * 0.3 + expertise_factor * 0.4 + tolerance_factor * 0.3)
+        recommended = base_complexity * 0.3 + expertise_factor * 0.4 + tolerance_factor * 0.3
 
         return max(0.0, min(1.0, recommended))
 

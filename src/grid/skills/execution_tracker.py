@@ -224,13 +224,16 @@ class SkillExecutionTracker:
 
     def _shutdown_flush(self) -> None:
         """Best-effort flush on shutdown."""
+        if not self._batch_buffer:
+            return
         try:
             with self._flush_lock:
-                if self._batch_buffer:
-                    self._logger.info(f"Shutdown flush: {len(self._batch_buffer)} records")
-                    self._flush_batch()
-        except Exception as e:
-            self._logger.error(f"Shutdown flush failed: {e}")
+                # Use print instead of logger if handles might be closed
+                print(f"SkillExecutionTracker: Shutdown flush of {len(self._batch_buffer)} records...")
+                self._flush_batch()
+        except Exception:
+            # Silent fail on shutdown to avoid I/O errors on closed loggers
+            pass
 
     def get_execution_history(self, skill_id: str | None = None, limit: int = 100) -> list[SkillExecutionRecord]:
         """Get execution history from memory."""

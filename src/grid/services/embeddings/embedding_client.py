@@ -65,7 +65,10 @@ class OllamaEmbeddingClient(EmbeddingClient):
                 embeddings = response.get("embeddings", [])
 
                 return EmbeddingResponse(
-                    embeddings=embeddings, model=target_model, latency_ms=latency_ms, metadata=cast(dict[str, Any], response)
+                    embeddings=embeddings,
+                    model=target_model,
+                    latency_ms=latency_ms,
+                    metadata=cast(dict[str, Any], response),
                 )
             except Exception as e:
                 logger.error(f"Ollama embedding failed: {e}")

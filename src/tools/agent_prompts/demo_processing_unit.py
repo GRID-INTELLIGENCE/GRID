@@ -5,12 +5,13 @@ This demonstrates the complete workflow from raw input to reference file generat
 """
 
 from pathlib import Path
+from typing import Any, Optional
 
-from continuous_learning import ContinuousLearningSystem
-from processing_unit import ProcessingUnit
+from continuous_learning import ContinuousLearningSystem  # type: ignore[import-not-found]
+from processing_unit import ProcessingUnit  # type: ignore[import-not-found]
 
 
-def demo_basic_processing():
+def demo_basic_processing() -> Any:
     """Demonstrate basic case processing."""
     print("=" * 60)
     print("DEMO: Basic Case Processing")
@@ -48,7 +49,7 @@ def demo_basic_processing():
     return result
 
 
-def demo_rare_case():
+def demo_rare_case() -> Any:
     """Demonstrate rare case handling."""
     print("\n" + "=" * 60)
     print("DEMO: Rare Case Processing")
@@ -88,7 +89,7 @@ def demo_rare_case():
     return result
 
 
-def demo_enrichment():
+def demo_enrichment() -> Any:
     """Demonstrate user enrichment."""
     print("\n" + "=" * 60)
     print("DEMO: User Enrichment")
@@ -122,7 +123,7 @@ def demo_enrichment():
     return result
 
 
-def demo_continuous_learning():
+def demo_continuous_learning() -> None:
     """Demonstrate continuous learning."""
     print("\n" + "=" * 60)
     print("DEMO: Continuous Learning")
@@ -133,7 +134,7 @@ def demo_continuous_learning():
     # Record some case completions
     print("\n5. Recording case completions...")
 
-    from case_filing import CaseFilingSystem
+    from case_filing import CaseFilingSystem  # type: ignore[import-not-found]
 
     filing_system = CaseFilingSystem()
 
@@ -170,7 +171,7 @@ def demo_continuous_learning():
             print(f"     - {insight}")
 
 
-def main():
+def main() -> int:
     """Run all demos."""
     print("\n" + "=" * 60)
     print("PROCESSING UNIT SYSTEM - DEMONSTRATION")

@@ -13,7 +13,7 @@ sys.path.insert(0, str(grid_root / "src"))
 try:
     from mcp.server import Server
     from mcp.server.stdio import stdio_server
-    from mcp.types import CallToolResult, ListResourcesResult, ReadResourceResult, Resource, TextContent, Tool
+    from mcp.types import CallToolResult, TextContent, Tool
 except ImportError:
     print("MCP library not found. Please install: pip install mcp")
     sys.exit(1)

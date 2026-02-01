@@ -23,7 +23,7 @@ except ImportError:
     sys.exit(1)
 
 
-def demonstrate_score_filtering():
+def demonstrate_score_filtering() -> None:
     """Show how results are filtered by min_score threshold."""
     print("=" * 80)
     print("DEMONSTRATION 1: Score Threshold Filtering")
@@ -87,7 +87,7 @@ def demonstrate_score_filtering():
     print()
 
 
-def demonstrate_processing_order():
+def demonstrate_processing_order() -> None:
     """Show how results are processed in score order."""
     print("=" * 80)
     print("DEMONSTRATION 2: Processing Results in Score Order")
@@ -132,7 +132,7 @@ def demonstrate_processing_order():
     print()
 
 
-def demonstrate_cross_checking():
+def demonstrate_cross_checking() -> None:
     """Show cross-checking behavior for conflicts."""
     print("=" * 80)
     print("DEMONSTRATION 3: Cross-Checking Similar Matches")
@@ -183,7 +183,7 @@ def demonstrate_cross_checking():
     print()
 
 
-def demonstrate_rag_fallback():
+def demonstrate_rag_fallback() -> None:
     """Show RAG engine behavior when no results found."""
     print("=" * 80)
     print("DEMONSTRATION 4: RAG Engine Fallback (No Results Found)")
@@ -192,13 +192,11 @@ def demonstrate_rag_fallback():
 
     print("When RAG engine finds no documents, it returns:")
     print("-" * 80)
-    print(
-        """{
+    print("""{
     "answer": "No relevant documents found in the knowledge base.",
     "sources": [],
     "context": ""
-}"""
-    )
+}""")
     print()
 
     print("This is different from returning a low-quality first result.")
@@ -213,7 +211,7 @@ def demonstrate_rag_fallback():
     print()
 
 
-def demonstrate_instruction_variation():
+def demonstrate_instruction_variation() -> None:
     """Show how instructions vary based on query type and results."""
     print("=" * 80)
     print("DEMONSTRATION 5: Instruction Variation Based on Context")
@@ -265,7 +263,7 @@ def demonstrate_instruction_variation():
         print()
 
 
-def demonstrate_threshold_impact():
+def demonstrate_threshold_impact() -> None:
     """Show practical impact of threshold selection."""
     print("=" * 80)
     print("DEMONSTRATION 6: Practical Impact of Threshold Selection")
@@ -328,7 +326,7 @@ def demonstrate_threshold_impact():
     print()
 
 
-def main():
+def main() -> int:
     """Run all demonstrations."""
     print("\n" + "=" * 80)
     print("DEEP SEARCH RESULTS: How System Handles Unsatisfying First Results")

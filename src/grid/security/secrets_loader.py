@@ -228,7 +228,7 @@ class SecretManager:
         """Retrieve secret from GCP Secret Manager."""
         try:
             if self._gcp_client is None:
-                from google.cloud import secretmanager
+                from google.cloud import secretmanager  # type: ignore[import-untyped]
 
                 self._gcp_client = secretmanager.SecretManagerServiceClient()
 

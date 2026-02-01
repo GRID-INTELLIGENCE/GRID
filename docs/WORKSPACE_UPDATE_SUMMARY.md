@@ -72,7 +72,6 @@
 - tamasfe.even-better-toml (pyproject.toml)
 - redhat.vscode-yaml (config files)
 - ms-vscode.vscode-json (JSON files)
-- ms-azuretools.vscode-docker (Docker)
 - ms-vscode.makefile-tools (build tools)
 
 **Developer Tools**:

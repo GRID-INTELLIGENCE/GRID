@@ -134,7 +134,7 @@ def observed_async_retry(
     return decorator
 
 
-def observed_fallback(
+def observed_fallback[T](
     operation_name: str,
     fallback_func: Callable[..., T],
     exceptions: tuple[type[Exception], ...] | None = None,
@@ -185,7 +185,7 @@ def observed_fallback(
     return decorator
 
 
-def observed_async_fallback(
+def observed_async_fallback[T](
     operation_name: str,
     fallback_func: Callable[..., Awaitable[T]],
     exceptions: tuple[type[Exception], ...] | None = None,

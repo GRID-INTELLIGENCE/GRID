@@ -191,3 +191,48 @@ finally:
 ---
 
 **Status**: Implementation complete, pending `databricks-sql-connector` installation
+
+---
+
+# Resonance Telemetry Bridge
+
+In addition to the SQL backend, the **Resonance** system features a specialized high-performance bridge for real-time telemetry and automated tuning loops.
+
+## 🌉 Architecture
+The `DatabricksBridge` (`src/application/resonance/databricks_bridge.py`) decouples high-frequency simulation loops from network latency.
+
+1.  **Async Buffer**: Events are pushed to an `asyncio.Queue` immediately (microsecond latency).
+2.  **Local Persistence**: Events are backed up to `resonance_telemetry_events.jsonl` to prevent data loss.
+3.  **Background Sync**: A dedicated worker thread flushes events to Databricks using the `databricks-sdk`.
+
+## 📡 Telemetry Flow
+1.  **Event Generation**: Arena "Capture", "Reward", or "Movement" events occur.
+2.  **Bridge Logging**: `bridge.log_event("ARENA_EVENT", context)` is called.
+3.  **Sync**: 
+    - **POST**: Authenticated `WorkspaceClient` calls verify connectivity and log data.
+    - **GET**: The bridge polls for new "Tuning Instructions" (e.g., modifying pursuit physics).
+
+## 🛠 Usage
+The bridge is integrated into the `ResonanceService` but can be verified independently via the Chase Demo:
+
+```bash
+# Enable Databricks Sync
+uv run python Arena/the_chase/resonance_chase_demo.py --databricks
+```
+
+## ⚙️ Configuration
+Requires standard environment variables:
+- `DATABRICKS_HOST`
+- `DATABRICKS_TOKEN`
+
+**Override for Testing**:
+To force network sync even in restricted environments, set:
+```bash
+$env:ALLOW_DATABRICKS_SYNC="true"
+```
+
+## 🧪 Verification
+Unit tests cover the queuing and persistence logic:
+```bash
+uv run pytest tests/application/resonance/test_databricks_bridge.py
+```

@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-import yaml
+import yaml  # type: ignore[import-untyped]
 
 
 class EUFLEBridge:
@@ -27,7 +27,7 @@ class EUFLEBridge:
 
     def sync_settings(self) -> dict[str, Any]:
         """Synchronize settings between EUFLE and GRID."""
-        results = {"status": "initiated", "synced_items": [], "errors": []}
+        results: dict[str, Any] = {"status": "initiated", "synced_items": [], "errors": []}
 
         # 1. Sync Models Inventory
         models_inventory_source = self.eufle_path / "models_inventory.yaml"

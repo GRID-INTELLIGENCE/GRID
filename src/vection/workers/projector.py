@@ -454,11 +454,7 @@ class Projector:
         self._last_decay = now
 
         # Remove stale session inputs
-        stale_sessions = [
-            sid
-            for sid, inp in self._session_inputs.items()
-            if now - inp.timestamp > 3600  # 1 hour
-        ]
+        stale_sessions = [sid for sid, inp in self._session_inputs.items() if now - inp.timestamp > 3600]  # 1 hour
         for sid in stale_sessions:
             del self._session_inputs[sid]
             if sid in self._direction_history:

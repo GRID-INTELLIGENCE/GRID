@@ -14,14 +14,14 @@ from pathlib import Path
 from typing import Any
 
 try:
-    from .case_filing import CaseCategory, CaseStructure
+    from .case_filing import CaseCategory, CaseStructure  # type: ignore[import-not-found]
 except ImportError:
     # For standalone execution
     import sys
     from pathlib import Path
 
     sys.path.insert(0, str(Path(__file__).parent))
-    from case_filing import CaseStructure
+    from case_filing import CaseStructure  # type: ignore[import-not-found]
 
 
 class ContinuousLearningSystem:

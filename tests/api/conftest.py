@@ -14,7 +14,7 @@ from fastapi.testclient import TestClient
 
 from application.resonance.api.dependencies import reset_resonance_service
 from application.resonance.api.router import router
-from application.resonance.api.service import ResonanceService
+from application.resonance.services.resonance_service import ResonanceService
 
 
 @pytest.fixture

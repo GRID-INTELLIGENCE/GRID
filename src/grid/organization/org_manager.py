@@ -1,6 +1,5 @@
 """Organization manager for multi-org/multi-user operations."""
 
-
 from .discipline import DisciplineManager
 from .models import Organization, OrganizationRole, User, UserRole, UserStatus
 

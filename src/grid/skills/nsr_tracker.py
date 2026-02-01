@@ -78,7 +78,7 @@ class NSRTracker:
         avg_execution_time = sum(m.execution_time for m in self.metrics) / total_executions
 
         # Skill breakdown
-        skill_counts = {}
+        skill_counts: dict[str, int] = {}
         for metric in self.metrics:
             skill_counts[metric.skill_name] = skill_counts.get(metric.skill_name, 0) + 1
 
@@ -90,7 +90,7 @@ class NSRTracker:
             "skill_breakdown": skill_counts,
         }
 
-    def _load_metrics(self):
+    def _load_metrics(self) -> None:
         """Load metrics from storage."""
         if self.storage_path.exists():
             try:
@@ -100,13 +100,13 @@ class NSRTracker:
             except Exception:
                 self.metrics = []
 
-    def _save_metrics(self):
+    def _save_metrics(self) -> None:
         """Save metrics to storage."""
         self.storage_path.parent.mkdir(parents=True, exist_ok=True)
         with open(self.storage_path, "w") as f:
             json.dump([asdict(m) for m in self.metrics], f, indent=2)
 
-    def clear_metrics(self):
+    def clear_metrics(self) -> None:
         """Clear all metrics."""
         self.metrics = []
         self._save_metrics()

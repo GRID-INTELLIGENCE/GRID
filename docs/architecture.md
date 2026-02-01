@@ -2,8 +2,8 @@
 
 **GRID (Geometric Resonance Intelligence Driver)** - Comprehensive Architecture Overview
 
-Version: 2.2.0  
-Last Updated: January 2026  
+Version: 2.2.0
+Last Updated: January 2026
 Status: Production Ready
 
 ---
@@ -62,37 +62,37 @@ graph TB
         RAG[RAG Engine<br/>Local-First AI]
         CHROMADB[(ChromaDB<br/>Vector Store)]
         OLLAMA[Ollama<br/>Local LLMs]
-        POSTGRES[(PostgreSQL<br/>Database)]
-        REDIS[(Redis<br/>Cache)]
+        SQLITE[(SQLite<br/>Local DB)]
+        CACHE[(Memory/File<br/>Local Cache)]
     end
 
     CLI --> MOTHERSHIP
     API --> MOTHERSHIP
     SERVICE --> MOTHERSHIP
-    
+
     MOTHERSHIP --> ESSENCE
     MOTHERSHIP --> AGENTIC
     RESONANCE --> PATTERNS
     CANVAS --> AWARENESS
-    
+
     ESSENCE --> PATTERNS
     PATTERNS --> AWARENESS
     AWARENESS --> EVOLUTION
     SKILLS --> PATTERNS
     AGENTIC --> ESSENCE
-    
+
     MOTHERSHIP --> RAG
     RESONANCE --> RAG
-    
+
     RAG --> CHROMADB
     RAG --> OLLAMA
-    
+
     DECISION --> ESSENCE
     COGNITIVE_LOAD --> AWARENESS
     MENTAL_MODELS --> PATTERNS
-    
-    MOTHERSHIP --> POSTGRES
-    MOTHERSHIP --> REDIS
+
+    MOTHERSHIP --> SQLITE
+    MOTHERSHIP --> CACHE
 
     style ESSENCE fill:#4CAF50
     style PATTERNS fill:#4CAF50
@@ -147,9 +147,9 @@ graph TB
     end
 
     subgraph "Layer 6: Data"
-        DB1[(PostgreSQL<br/>Relational Data)]
+        DB1[(SQLite<br/>Local Data)]
         DB2[(ChromaDB<br/>Vector Store)]
-        DB3[(Redis<br/>Cache & Queue)]
+        DB3[(Memory<br/>Cache & Queue)]
     end
 
     EP1 --> A1
@@ -318,7 +318,7 @@ FastAPI applications with clean architecture patterns.
 graph TB
     subgraph "Mothership Application"
         MAIN[main.py<br/>Application Factory]
-        
+
         subgraph "Routers"
             R1[/api/v1/intelligence]
             R2[/api/v1/agentic]
@@ -360,10 +360,10 @@ graph TB
     R3 --> S3
     R4 --> S4
     R5 --> S5
-    
+
     S1 & S2 & S3 & S4 & S5 --> M1 & M2 & M3
     S1 & S2 & S3 & S4 & S5 --> REPO1 & REPO2 & REPO3
-    
+
     R1 & R2 & R3 & R4 --> AUTH
     AUTH --> AUTHZ
     AUTHZ --> VALID
@@ -379,7 +379,7 @@ graph TB
 graph LR
     subgraph "Resonance System"
         INPUT[Activity Input]
-        
+
         subgraph "Processing"
             AR[ActivityResonance<br/>Main Processor]
             ADSR[ADSREnvelope<br/>Attack-Decay-Sustain-Release]
@@ -430,7 +430,7 @@ graph TB
     subgraph "Intelligence Layer"
         QU[QueryUnderstandingLayer<br/>Intent Classification]
         IC[IntentClassifier<br/>NLI Model]
-        
+
         subgraph "Intent Types"
             IT1[Definition]
             IT2[Explanation]
@@ -442,7 +442,7 @@ graph TB
 
     subgraph "Retrieval Orchestrator"
         RO[RetrievalOrchestrator<br/>Multi-Stage Pipeline]
-        
+
         subgraph "Stage 1: Dense Search"
             VS[Vector Search<br/>ChromaDB]
             EMB[Embeddings<br/>nomic-embed-text-v2-moe]
@@ -482,7 +482,7 @@ graph TB
     RO --> VS
     VS --> EMB
     EMB --> CHROMA
-    
+
     RO --> BM25
     BM25 --> HYBRID
     VS --> HYBRID
@@ -494,7 +494,7 @@ graph TB
     EE --> RE
     RE --> SYNTH
     SYNTH --> OLLAMA
-    
+
     RO --> CACHE
     SYNTH --> RESULT
 
@@ -777,42 +777,42 @@ graph TB
 ```mermaid
 flowchart TD
     START([User Decision Point])
-    
+
     CONTEXT[Load Context<br/>Mental Model + History]
     CONSTRAINTS[Identify Constraints<br/>Time, Resources, Knowledge]
-    
+
     SATISFICE{Satisficing<br/>vs<br/>Optimizing?}
-    
+
     QUICK[Quick Decision<br/>Good Enough Solution]
     HEURISTICS[Apply Heuristics<br/>Rule-Based]
     FAST_RESULT[Fast Decision]
-    
+
     ANALYZE[Deep Analysis<br/>Explore Options]
     EVALUATE[Evaluate Tradeoffs<br/>Multi-Criteria]
     OPTIMAL_RESULT[Optimal Decision]
-    
+
     COGNITIVE_LOAD{Cognitive Load<br/>Too High?}
     SIMPLIFY[Simplify Problem<br/>Break Down]
-    
+
     LEARN[Update Mental Model<br/>Record Experience]
     END([Decision Made])
 
     START --> CONTEXT
     CONTEXT --> CONSTRAINTS
     CONSTRAINTS --> SATISFICE
-    
+
     SATISFICE -->|Time-Constrained| QUICK
     SATISFICE -->|Resource-Limited| QUICK
     QUICK --> HEURISTICS
     HEURISTICS --> FAST_RESULT
-    
+
     SATISFICE -->|Optimize| ANALYZE
     ANALYZE --> COGNITIVE_LOAD
     COGNITIVE_LOAD -->|Yes| SIMPLIFY
     SIMPLIFY --> ANALYZE
     COGNITIVE_LOAD -->|No| EVALUATE
     EVALUATE --> OPTIMAL_RESULT
-    
+
     FAST_RESULT --> LEARN
     OPTIMAL_RESULT --> LEARN
     LEARN --> END
@@ -876,12 +876,12 @@ graph TB
     PATTERN_MATCH --> ESSENCE_TRANSFORM
     ESSENCE_TRANSFORM --> COGNITIVE_DECISION
     COGNITIVE_DECISION --> AGENTIC_EXEC
-    
+
     AGENTIC_EXEC --> EVENT_STORE
     AGENTIC_EXEC --> STATE_STORE
     RAG_QUERY --> VECTOR_STORE
     PATTERN_MATCH --> CACHE_STORE
-    
+
     EVENT_STORE --> RESPONSE
     STATE_STORE --> RESPONSE
     RESPONSE --> RESONANCE
@@ -949,7 +949,7 @@ graph TB
 
     subgraph "Event Bus"
         BUS[Event Dispatcher<br/>Central Hub]
-        
+
         subgraph "Event Types"
             CASE_EVENTS[Case Events<br/>Created, Executed, Completed]
             STATE_EVENTS[State Events<br/>Changed, Evolved, Versioned]
@@ -974,17 +974,17 @@ graph TB
     API_PROD --> BUS
     AGENT_PROD --> BUS
     SYSTEM_PROD --> BUS
-    
+
     BUS --> CASE_EVENTS
     BUS --> STATE_EVENTS
     BUS --> PATTERN_EVENTS
     BUS --> USER_EVENTS
-    
+
     CASE_EVENTS & STATE_EVENTS & PATTERN_EVENTS & USER_EVENTS --> HANDLER1
     CASE_EVENTS & STATE_EVENTS & PATTERN_EVENTS & USER_EVENTS --> HANDLER2
     CASE_EVENTS & STATE_EVENTS & PATTERN_EVENTS & USER_EVENTS --> HANDLER3
     CASE_EVENTS & STATE_EVENTS & PATTERN_EVENTS & USER_EVENTS --> HANDLER4
-    
+
     HANDLER1 & HANDLER2 & HANDLER3 & HANDLER4 --> APPEND_ONLY
     APPEND_ONLY --> SNAPSHOT
     SNAPSHOT --> REPLAY
@@ -1050,7 +1050,6 @@ classDiagram
 
 ## Deployment Architecture
 
-Docker-based deployment with health monitoring and orchestration.
 
 ```mermaid
 graph TB
@@ -1063,7 +1062,7 @@ graph TB
         API1[Mothership API<br/>Instance 1]
         API2[Mothership API<br/>Instance 2]
         API3[Mothership API<br/>Instance 3]
-        
+
         WORKER1[Celery Worker<br/>Instance 1]
         WORKER2[Celery Worker<br/>Instance 2]
     end
@@ -1094,19 +1093,19 @@ graph TB
 
     SSL --> LB
     LB --> API1 & API2 & API3
-    
+
     API1 & API2 & API3 --> OLLAMA_SVC
     API1 & API2 & API3 --> CHROMA_SVC
     API1 & API2 & API3 --> MCP_DB & MCP_FS & MCP_MEM
     API1 & API2 & API3 --> POSTGRES_MASTER
     API1 & API2 & API3 --> REDIS_MASTER
-    
+
     WORKER1 & WORKER2 --> REDIS_MASTER
     WORKER1 & WORKER2 --> POSTGRES_MASTER
-    
+
     POSTGRES_MASTER --> POSTGRES_REPLICA
     REDIS_MASTER --> REDIS_REPLICA
-    
+
     API1 & API2 & API3 --> PROMETHEUS
     WORKER1 & WORKER2 --> PROMETHEUS
     PROMETHEUS --> GRAFANA
@@ -1118,11 +1117,9 @@ graph TB
     style PROMETHEUS fill:#FF5722
 ```
 
-### Docker Compose Stack
 
 ```mermaid
 graph TB
-    subgraph "docker-compose.yml"
         subgraph "Core Services"
             APP[mothership<br/>FastAPI App<br/>Port 8080]
             RESONANCE_SVC[resonance<br/>Activity Processor<br/>Port 8084]
@@ -1283,12 +1280,12 @@ sequenceDiagram
     activate API
     API->>PathValidator: validate_path(path, base_dir)
     activate PathValidator
-    
+
     PathValidator->>PathValidator: Normalize path
     PathValidator->>PathValidator: Check for ".." sequences
     PathValidator->>PathValidator: Resolve absolute path
     PathValidator->>PathValidator: Verify within base_dir
-    
+
     alt Path is Valid
         PathValidator-->>API: Validated path
         API->>FileSystem: Access file
@@ -1299,7 +1296,7 @@ sequenceDiagram
         API-->>Client: 400 Bad Request
         Note over Client,API: Path traversal attempt blocked
     end
-    
+
     deactivate PathValidator
     deactivate API
 ```
@@ -1365,8 +1362,6 @@ graph TB
     end
 
     subgraph "Infrastructure"
-        DOCKER_T[Docker<br/>Containerization]
-        COMPOSE[Docker Compose<br/>Orchestration]
         NGINX_T[Nginx<br/>Reverse Proxy]
     end
 
@@ -1376,7 +1371,6 @@ graph TB
     POSTGRES_T --> SQLALCHEMY & ALEMBIC & ASYNCPG
     REDIS_T --> CELERY_T
     UV --> PYTEST & RUFF & BLACK & MYPY
-    DOCKER_T --> COMPOSE
 
     style PYTHON fill:#4CAF50,stroke:#2E7D32,stroke-width:3px
     style FASTAPI fill:#2196F3,stroke:#1565C0,stroke-width:3px
@@ -1486,28 +1480,28 @@ mindmap
 ## Key Architectural Decisions
 
 ### ADR-001: Local-First AI
-**Decision**: Use local Ollama models instead of cloud APIs  
-**Rationale**: Data privacy, cost control, offline capability  
+**Decision**: Use local Ollama models instead of cloud APIs
+**Rationale**: Data privacy, cost control, offline capability
 **Status**: Implemented ✅
 
 ### ADR-002: Event-Driven Agentic System
-**Decision**: Implement event-driven case management  
-**Rationale**: Scalability, auditability, continuous learning  
+**Decision**: Implement event-driven case management
+**Rationale**: Scalability, auditability, continuous learning
 **Status**: Implemented ✅
 
 ### ADR-003: Layered Architecture
-**Decision**: Strict layer separation with dependency inversion  
-**Rationale**: Maintainability, testability, modularity  
+**Decision**: Strict layer separation with dependency inversion
+**Rationale**: Maintainability, testability, modularity
 **Status**: Implemented ✅
 
 ### ADR-004: 9 Cognition Patterns
-**Decision**: Use geometric resonance patterns for intelligence  
-**Rationale**: Human-aligned pattern recognition  
+**Decision**: Use geometric resonance patterns for intelligence
+**Rationale**: Human-aligned pattern recognition
 **Status**: Core Feature ✅
 
 ### ADR-005: ChromaDB for Vector Store
-**Decision**: Use ChromaDB for local vector storage  
-**Rationale**: Python-native, local-first, performant  
+**Decision**: Use ChromaDB for local vector storage
+**Rationale**: Python-native, local-first, performant
 **Status**: Implemented ✅
 
 ---
@@ -1566,6 +1560,6 @@ GRID is a **production-ready, cognitive-aware framework** that combines:
 - [Agentic System Documentation](AGENTIC_SYSTEM.md)
 - [Security Architecture](security/SECURITY_ARCHITECTURE.md)
 
-**Version**: 2.2.0  
-**Last Updated**: January 2026  
+**Version**: 2.2.0
+**Last Updated**: January 2026
 **Maintainer**: GRID Core Team

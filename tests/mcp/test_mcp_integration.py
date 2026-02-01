@@ -87,12 +87,17 @@ class MCPTestSuite:
         # Test MCP library
         print_test("MCP library")
         try:
-            import mcp
-
-            print_success()
-            self.passed += 1
-        except ImportError:
-            print_error("MCP not installed. Run: pip install mcp")
+            import importlib.util
+            spec = importlib.util.find_spec("mcp")
+            if spec is not None:
+                print_success()
+                self.passed += 1
+            else:
+                print_error("MCP not installed. Run: pip install mcp")
+                self.failed += 1
+                all_passed = False
+        except Exception as e:
+            print_error(f"Error checking MCP: {e}")
             self.failed += 1
             all_passed = False
 

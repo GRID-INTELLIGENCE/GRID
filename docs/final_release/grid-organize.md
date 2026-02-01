@@ -15,7 +15,6 @@ The GRID directory structure is designed for **Cognitive Grounding**, ensuring t
 ### 2. The Operational Layer
 - **`application/`**: Frontend dashboard (React/TypeScript) for synthesis visualization.
 - **`backend/`**: API handlers and high-concurrency request management.
-- **`infra/`**: Docker, Makefile, and deployment specifications.
 
 ### 3. The Contextual Layer
 - **`.context/`**: High-signal summaries for AI grounding.

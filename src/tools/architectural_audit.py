@@ -3,11 +3,10 @@ Architectural Divergence Analyzer
 Analyzes modules for divergence from Mothership architectural pattern
 """
 
-from __future__ import annotations
-
 import ast
 import re
 from pathlib import Path
+from typing import Any
 
 
 class ArchitecturalDivergenceAnalyzer:
@@ -44,7 +43,7 @@ class ArchitecturalDivergenceAnalyzer:
             "application/resonance/repositories",
         ]
 
-    def analyze_module(self, module_path: Path) -> dict[str, any]:
+    def analyze_module(self, module_path: Path) -> dict[str, Any]:
         """
         Analyze a module for architectural divergence.
 
@@ -172,9 +171,7 @@ class ArchitecturalDivergenceAnalyzer:
         issues = []
 
         # Check for Mothership imports
-        any(
-            pattern in content for pattern in ["from application.mothership", "from application.exceptions"]
-        )
+        any(pattern in content for pattern in ["from application.mothership", "from application.exceptions"])
 
         # Check for direct database access (should go through repositories)
         if "from sqlalchemy" in content or "import sqlalchemy" in content:
@@ -320,7 +317,7 @@ class ArchitecturalDivergenceAnalyzer:
         return results
 
 
-def main():
+def main() -> None:
     """Example usage."""
     analyzer = ArchitecturalDivergenceAnalyzer()
 

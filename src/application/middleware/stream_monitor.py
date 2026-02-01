@@ -1,16 +1,16 @@
 import time
 
-from prometheus_client import Histogram
+from prometheus_client import Histogram  # type: ignore[import-not-found]
 
 # Pre-hook: Initialize metrics
 STREAM_DURATION = Histogram("stream_duration_seconds", "Stream connection duration")
 
 
 class StreamMonitorMiddleware:
-    def __init__(self, app):
+    def __init__(self, app) -> None:
         self.app = app
 
-    async def __call__(self, scope, receive, send):
+    async def __call__(self, scope, receive, send) -> None:
         if scope["type"] != "http":
             await self.app(scope, receive, send)
             return
@@ -24,7 +24,7 @@ class StreamMonitorMiddleware:
             start_time = time.time()
             bytes_sent = 0
 
-            async def monitored_send(message):
+            async def monitored_send(message) -> None:
                 nonlocal bytes_sent
                 if message["type"] == "http.response.body":
                     bytes_sent += len(message.get("body", b""))

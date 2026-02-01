@@ -6,7 +6,6 @@ designed for recursive efficiency in financial agency tasks.
 """
 
 
-
 class YahooFinanceScopes:
     # RECURSIVE DATA FETCHING: Optimized for depth-first financial analysis
     MARKET_SUMMARY = "finance.market_summary"  # High-level indices

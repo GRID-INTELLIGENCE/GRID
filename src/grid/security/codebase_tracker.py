@@ -10,15 +10,11 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
+
 class ActivityEvent:
     """Represents a codebase activity event."""
-    def __init__(
-        self,
-        event_type: str,
-        path: str,
-        details: dict[str, Any] | None = None,
-        severity: str = "info"
-    ):
+
+    def __init__(self, event_type: str, path: str, details: dict[str, Any] | None = None, severity: str = "info"):
         self.timestamp = datetime.now(UTC).isoformat()
         self.event_type = event_type
         self.path = path
@@ -31,8 +27,9 @@ class ActivityEvent:
             "event_type": self.event_type,
             "path": self.path,
             "details": self.details,
-            "severity": self.severity
+            "severity": self.severity,
         }
+
 
 class CodebaseTracker:
     """Monitors codebase for activity changes."""
@@ -49,9 +46,7 @@ class CodebaseTracker:
             if not self.git_dir.exists():
                 return None
             return subprocess.check_output(
-                ["git", "-C", str(self.root_dir), "rev-parse", "HEAD"],
-                text=True,
-                stderr=subprocess.STDOUT
+                ["git", "-C", str(self.root_dir), "rev-parse", "HEAD"], text=True, stderr=subprocess.STDOUT
             ).strip()
         except Exception:
             return None
@@ -69,11 +64,7 @@ class CodebaseTracker:
         # Check for modified files (quick poll)
         modified_files = self._get_modified_files()
         for file_path in modified_files:
-            events.append(ActivityEvent(
-                event_type="file_modified",
-                path=file_path,
-                details={"polled": True}
-            ))
+            events.append(ActivityEvent(event_type="file_modified", path=file_path, details={"polled": True}))
 
         self._last_checked_time = time.time()
         return events
@@ -82,8 +73,7 @@ class CodebaseTracker:
         """Capture details about a new commit."""
         try:
             show_output = subprocess.check_output(
-                ["git", "-C", str(self.root_dir), "show", "--name-only", "--format=%s", commit_hash],
-                text=True
+                ["git", "-C", str(self.root_dir), "show", "--name-only", "--format=%s", commit_hash], text=True
             ).splitlines()
 
             message = show_output[0]
@@ -96,26 +86,19 @@ class CodebaseTracker:
                     "message": message,
                     "files": files,
                     "author": subprocess.check_output(
-                        ["git", "-C", str(self.root_dir), "show", "-s", "--format=%an", commit_hash],
-                        text=True
-                    ).strip()
+                        ["git", "-C", str(self.root_dir), "show", "-s", "--format=%an", commit_hash], text=True
+                    ).strip(),
                 },
-                severity="info"
+                severity="info",
             )
         except Exception as e:
-            return ActivityEvent(
-                event_type="error",
-                path="git",
-                details={"error": str(e)},
-                severity="error"
-            )
+            return ActivityEvent(event_type="error", path="git", details={"error": str(e)}, severity="error")
 
     def _get_modified_files(self) -> list[str]:
         """Get list of files modified since last check using git status."""
         try:
             output = subprocess.check_output(
-                ["git", "-C", str(self.root_dir), "status", "--porcelain"],
-                text=True
+                ["git", "-C", str(self.root_dir), "status", "--porcelain"], text=True
             ).splitlines()
 
             modified = []
@@ -127,6 +110,7 @@ class CodebaseTracker:
             return modified
         except Exception:
             return []
+
 
 if __name__ == "__main__":
     # Basic self-test

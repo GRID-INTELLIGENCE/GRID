@@ -288,9 +288,7 @@ class Circuit:
             "recovery_timeout_seconds": self.config.recovery_timeout_seconds,
             "half_open_successes": self.half_open_successes,
             "half_open_requests": self.half_open_requests,
-            "opened_at": (
-                datetime.fromtimestamp(self.opened_at, tz=UTC).isoformat() if self.opened_at else None
-            ),
+            "opened_at": (datetime.fromtimestamp(self.opened_at, tz=UTC).isoformat() if self.opened_at else None),
             "metrics": self.metrics.to_dict(),
         }
 

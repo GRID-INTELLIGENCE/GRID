@@ -61,7 +61,6 @@ mkdocs==1.5.3
 mkdocs-material==9.4.8
 
 # Container & Orchestration
-docker==6.1.3
 kubernetes==28.1.0
 
 # AI/ML Safety (additional dependencies)

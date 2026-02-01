@@ -421,9 +421,11 @@ def generate_pattern_summary(
         "detected_patterns": detected,
         "high_confidence_patterns": high_confidence,
         "pattern_explanations": explanations,
-        "composite_insight": composite.short_description
-        if (len(detected) >= 2 and (composite := get_composite_explanation(tuple(detected))))
-        else None,
+        "composite_insight": (
+            composite.short_description
+            if (len(detected) >= 2 and (composite := get_composite_explanation(tuple(detected))))
+            else None
+        ),
     }
 
 

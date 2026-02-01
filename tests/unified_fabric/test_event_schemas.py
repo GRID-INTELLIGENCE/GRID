@@ -1,7 +1,6 @@
 """
 Tests for Unified Fabric - Event Schemas
 """
-import pytest
 from unified_fabric.event_schemas import (
     EventSchema,
     register_schema,

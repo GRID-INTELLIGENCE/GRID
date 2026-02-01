@@ -116,20 +116,24 @@ class ScaffoldingEngine:
 
         # Critical load - maximum scaffolding
         if cognitive_load > 8.0:
-            strategies.extend([
-                ScaffoldingStrategy.HINTS,
-                ScaffoldingStrategy.STEP_BY_STEP,
-                ScaffoldingStrategy.CHUNKING,
-                ScaffoldingStrategy.PROGRESSIVE_DISCLOSURE,
-            ])
+            strategies.extend(
+                [
+                    ScaffoldingStrategy.HINTS,
+                    ScaffoldingStrategy.STEP_BY_STEP,
+                    ScaffoldingStrategy.CHUNKING,
+                    ScaffoldingStrategy.PROGRESSIVE_DISCLOSURE,
+                ]
+            )
 
         # High load - moderate scaffolding
         elif cognitive_load > 6.0:
-            strategies.extend([
-                ScaffoldingStrategy.EXAMPLES,
-                ScaffoldingStrategy.EXPLANATIONS,
-                ScaffoldingStrategy.CHUNKING,
-            ])
+            strategies.extend(
+                [
+                    ScaffoldingStrategy.EXAMPLES,
+                    ScaffoldingStrategy.EXPLANATIONS,
+                    ScaffoldingStrategy.CHUNKING,
+                ]
+            )
 
         # Medium load - minimal scaffolding
         elif cognitive_load > 4.0:
@@ -137,10 +141,12 @@ class ScaffoldingEngine:
 
         # Novice users get extra scaffolding regardless of load
         if profile and profile.expertise_level.value in ["novice", "beginner"]:
-            strategies.extend([
-                ScaffoldingStrategy.WORKED_EXAMPLES,
-                ScaffoldingStrategy.EXPLANATIONS,
-            ])
+            strategies.extend(
+                [
+                    ScaffoldingStrategy.WORKED_EXAMPLES,
+                    ScaffoldingStrategy.EXPLANATIONS,
+                ]
+            )
 
         # Code content gets specific strategies
         if content_type == "code":
@@ -320,9 +326,7 @@ class ScaffoldingEngine:
     ) -> ScaffoldingAction:
         """Apply progressive disclosure - show initial items first."""
         if isinstance(content, list):
-            result = self.scaffolding_manager.progressive_disclosure(
-                content, profile
-            )
+            result = self.scaffolding_manager.progressive_disclosure(content, profile)
             showing = len(result["initial"])
             return ScaffoldingAction(
                 strategy=ScaffoldingStrategy.PROGRESSIVE_DISCLOSURE,

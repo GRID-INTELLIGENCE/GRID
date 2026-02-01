@@ -258,7 +258,6 @@ Three production-ready endpoints exposed:
 With foundation (Path A) and features (Path B) complete, consider:
 1. **Performance Optimization**: Profile and optimize hot paths
 2. **Monitoring & Observability**: Add telemetry and logging
-3. **Deployment**: Containerization (Docker) and orchestration
 4. **Security**: API key management, rate limiting, CORS
 5. **Advanced Features**: Custom model integrations, knowledge graph extensions
 

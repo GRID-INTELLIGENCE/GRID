@@ -79,7 +79,7 @@ async def route_query(request: RoutingRequest) -> RoutingResponse:
         )
     except Exception as e:
         logger.error(f"Routing failed: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Routing failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Routing failed: {str(e)}") from e
 
 
 @router.get("/integration-state", response_model=IntegrationStateResponse)
@@ -101,7 +101,7 @@ async def get_integration_state() -> IntegrationStateResponse:
         return IntegrationStateResponse(state=state)
     except Exception as e:
         logger.error(f"Failed to get integration state: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Failed to get integration state: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get integration state: {str(e)}") from e
 
 
 @router.get("/wheel")
@@ -145,4 +145,4 @@ async def get_wheel_visualization(format: str = "json") -> dict[str, Any]:
 
     except Exception as e:
         logger.error(f"Failed to get wheel visualization: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Failed to get wheel visualization: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get wheel visualization: {str(e)}") from e

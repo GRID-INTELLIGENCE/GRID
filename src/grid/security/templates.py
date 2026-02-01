@@ -90,10 +90,9 @@ PRODUCTION_CONFIG = {
     "GRID_SESSION_TIMEOUT": "3600",
 }
 
-# Docker Production Configuration
-DOCKER_PRODUCTION_CONFIG = {
+# Container Production Configuration
+CONTAINER_CONFIG = {
     **PRODUCTION_CONFIG,
-    # Docker-specific
     "GRID_CONTAINER_MODE": "true",
     "GRID_HEALTH_ENDPOINT": "/health",
     "GRID_GRACEFUL_SHUTDOWN_TIMEOUT": "30",
@@ -136,11 +135,10 @@ def generate_env_file(config: dict[str, Any], output_path: str) -> None:
     print(f"Generated environment file: {env_file}")
 
 
-def generate_docker_compose(config: dict[str, Any], output_path: str) -> None:
-    """Generate docker-compose.yml with GRID configuration."""
-    docker_compose = f"""version: '3.8'
 
-services:
+def generate_docker_compose(config: dict[str, Any], output_path: str) -> None:
+    """Generate docker-compose.yml file from configuration."""
+    compose_content = f"""services:
   grid:
     image: grid:latest
     container_name: grid-production
@@ -180,7 +178,7 @@ volumes:
 """
 
     compose_file = Path(output_path)
-    compose_file.write_text(docker_compose)
+    compose_file.write_text(compose_content)
     print(f"Generated docker-compose file: {compose_file}")
 
 
@@ -307,8 +305,6 @@ def main() -> None:
     generate_env_file(STAGING_CONFIG, ".env.staging")
     generate_env_file(PRODUCTION_CONFIG, ".env.production")
 
-    # Generate Docker configuration
-    generate_docker_compose(DOCKER_PRODUCTION_CONFIG, "docker-compose.prod.yml")
 
     # Generate Kubernetes manifests
     generate_kubernetes_manifests(KUBERNETES_CONFIG, "k8s/")
@@ -316,7 +312,6 @@ def main() -> None:
     print("\nConfiguration templates generated successfully!")
     print("\nDeployment instructions:")
     print("1. Development: cp .env.development .env")
-    print("2. Staging: cp .env.staging .env && docker-compose -f docker-compose.staging.yml up")
     print("3. Production: cp .env.production .env && kubectl apply -f k8s/")
 
 

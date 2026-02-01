@@ -123,9 +123,7 @@ class SafetyMonitor:
 
         # Calculate safety score and threat level
         overall_score = calculate_safety_score(violations)
-        threat_level = determine_threat_level(
-            overall_score, violations, self.config.safety_thresholds
-        )
+        threat_level = determine_threat_level(overall_score, violations, self.config.safety_thresholds)
 
         processing_time = time.time() - start_time
 
@@ -137,12 +135,14 @@ class SafetyMonitor:
             session.violations_detected += len(violations)
 
         # Add to history
-        session.history.append({
-            "timestamp": datetime.now(UTC).isoformat(),
-            "content_hash": content_hash,
-            "threat_level": threat_level.value,
-            "violation_count": len(violations),
-        })
+        session.history.append(
+            {
+                "timestamp": datetime.now(UTC).isoformat(),
+                "content_hash": content_hash,
+                "threat_level": threat_level.value,
+                "violation_count": len(violations),
+            }
+        )
 
         return SafetyReport(
             overall_score=overall_score,
@@ -196,11 +196,7 @@ class SafetyMonitor:
         Returns:
             List of session statistics.
         """
-        return [
-            session.to_dict()
-            for session in self.sessions.values()
-            if session.active
-        ]
+        return [session.to_dict() for session in self.sessions.values() if session.active]
 
 
 # Global monitor instance

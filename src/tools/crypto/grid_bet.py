@@ -10,7 +10,7 @@ Feature Overview:
 """
 
 
-def get_grid_bet_overview():
+def get_grid_bet_overview() -> None:
     features = [
         {"name": "Dynamic Odds Engine", "status": "Conceptual", "weight": 0.9},
         {"name": "Recursive Hedging", "status": "Proposed", "weight": 0.85},

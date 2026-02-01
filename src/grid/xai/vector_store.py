@@ -61,6 +61,7 @@ class SimpleEmbedding(BaseEmbedding):
     def embed(self, text: str) -> list[float]:
         """Create a simple deterministic embedding from text hash."""
         import hashlib
+
         hash_obj = hashlib.md5(text.encode())
         hash_int = int(hash_obj.hexdigest(), 16)
 
@@ -187,13 +188,13 @@ class ChromaDenseVectorStore(DenseVectorStore):
         """
         try:
             import chromadb
+
             self._client = chromadb.Client()
             self._collection = self._client.get_or_create_collection(
-                name="grid_embeddings",
-                metadata={"hnsw:space": "cosine"}
+                name="grid_embeddings", metadata={"hnsw:space": "cosine"}
             )
-        except ImportError:
-            raise ImportError("chromadb is required for ChromaDenseVectorStore")
+        except ImportError as e:
+            raise ImportError("chromadb is required for ChromaDenseVectorStore") from e
 
         self._embedding = SimpleEmbedding(embedding_dim=embedding_dim)
 

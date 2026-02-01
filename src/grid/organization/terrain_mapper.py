@@ -16,7 +16,7 @@ class TerrainMapper:
 
     def map_terrain(self) -> dict[str, Any]:
         """Index the repository and identify relationships."""
-        terrain = {"packages": {}, "relationships": [], "boundaries": {}}
+        terrain: dict[str, Any] = {"packages": {}, "relationships": [], "boundaries": {}}
 
         for p in self.root_path.rglob("*.py"):
             try:

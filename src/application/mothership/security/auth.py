@@ -62,7 +62,7 @@ def verify_api_key(api_key: str | None, require_valid: bool = True) -> dict[str,
     """
     Verify API key authentication with strict validation and RBAC integration.
     """
-    settings = get_settings()
+    get_settings()
 
     if not api_key:
         if require_valid:
@@ -113,7 +113,7 @@ def verify_api_key(api_key: str | None, require_valid: bool = True) -> dict[str,
     raise AuthenticationError("Invalid or unauthorized API key")
 
 
-def verify_jwt_token(token: str | None, require_valid: bool = True) -> dict[str, Any]:
+async def verify_jwt_token(token: str | None, require_valid: bool = True) -> dict[str, Any]:
     """
     Verify JWT Bearer token authentication using implementation from jwt.py.
     """
@@ -138,27 +138,6 @@ def verify_jwt_token(token: str | None, require_valid: bool = True) -> dict[str,
     try:
         # Strict validation
         payload = jwt_manager.verify_token(token, expected_type="access")
-
-        # Map scope 'role' or similar to RBAC Role
-        if hasattr(payload, "role"):
-            role_name = payload.role
-        elif payload.metadata and "role" in payload.metadata:
-            role_name = payload.metadata["role"]
-        else:
-            role_name = Role.READER.value
-        try:
-            role = Role(role_name.lower())
-        except (ValueError, AttributeError):
-            role = Role.READER
-
-        return {
-            "authenticated": True,
-            "method": "bearer",
-            "user_id": payload.user_id if hasattr(payload, "user_id") else payload.sub,
-            "role": role.value,
-            "permissions": get_permissions_for_role(role),
-            "token_payload": payload.model_dump() if hasattr(payload, "model_dump") else {},
-        }
     except Exception as e:
         logger.warning(f"JWT verification failed: {str(e)}")
         if require_valid:
@@ -171,8 +150,48 @@ def verify_jwt_token(token: str | None, require_valid: bool = True) -> dict[str,
             "error": "token_invalid",
         }
 
+    # Check for token revocation
+    from .token_revocation import get_token_validator
 
-def verify_authentication_required(
+    # Convert to dict for validator
+    payload_dict = payload.model_dump() if hasattr(payload, "model_dump") else {}
+    is_valid, error = await get_token_validator().validate_token(payload_dict)
+    if not is_valid:
+        logger.warning(f"JWT revocation check failed: {error}")
+        if require_valid:
+            raise AuthenticationError(f"Token invalid: {error}")
+        return {
+            "authenticated": False,
+            "method": "none",
+            "role": Role.ANONYMOUS.value,
+            "permissions": get_permissions_for_role(Role.ANONYMOUS),
+            "error": "token_revoked",
+        }
+
+    # Map scope 'role' or similar to RBAC Role
+    if hasattr(payload, "role"):
+        role_name = payload.role
+    elif payload.metadata and "role" in payload.metadata:
+        role_name = payload.metadata["role"]
+    else:
+        role_name = Role.READER.value
+
+    try:
+        role = Role(role_name.lower())
+    except (ValueError, AttributeError):
+        role = Role.READER
+
+    return {
+        "authenticated": True,
+        "method": "bearer",
+        "user_id": payload.user_id if hasattr(payload, "user_id") else payload.sub,
+        "role": role.value,
+        "permissions": get_permissions_for_role(role),
+        "token_payload": payload.model_dump() if hasattr(payload, "model_dump") else {},
+    }
+
+
+async def verify_authentication_required(
     api_key: str | None = None,
     bearer_token: str | None = None,
     allow_development_bypass: bool = False,
@@ -185,7 +204,7 @@ def verify_authentication_required(
     # 1. Try JWT token (preferred)
     if bearer_token:
         try:
-            return verify_jwt_token(bearer_token, require_valid=True)
+            return await verify_jwt_token(bearer_token, require_valid=True)
         except AuthenticationError:
             # If JWT is provided but invalid, we fail even if API key is present
             # to prevent fallback abuse.

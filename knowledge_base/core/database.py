@@ -228,37 +228,6 @@ class KnowledgeBaseDB:
                 ),
             )
 
-    def search_similar_chunks(
-        self, embedding: list[float], limit: int = 10, threshold: float = 0.7
-    ) -> list[SearchResult]:
-        """Placeholder similarity: returns recent chunks (no vector search in DB)."""
-        with self.session() as cursor:
-            cursor.execute(
-                """
-                SELECT id, document_id, content, extra_metadata
-                FROM kb_chunks
-                ORDER BY created_at DESC
-                LIMIT ?
-                """,
-                (limit,),
-            )
-            rows = cursor.fetchall()
-
-        results = []
-        for row in rows:
-            chunk_id, document_id, content, metadata_str = row
-            metadata = json.loads(metadata_str) if metadata_str else {}
-            results.append(
-                SearchResult(
-                    document_id=document_id,
-                    chunk_id=chunk_id,
-                    content=content,
-                    score=0.8,
-                    metadata=metadata,
-                )
-            )
-
-        return results[:limit]
 
     def log_search_query(
         self,

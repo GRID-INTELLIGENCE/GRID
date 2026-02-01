@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 class UserRow(Protocol):
     """Protocol for user database row."""
+
     user_id: str
     username: str
     email: str | None
@@ -26,7 +27,7 @@ class UserRow(Protocol):
 
 class GridPostgresAdapter:
     """Async PostgreSQL adapter for user database queries.
-    
+
     Uses asyncpg for high-performance async access.
     Gracefully degrades to None if database unavailable.
     """
@@ -41,21 +42,15 @@ class GridPostgresAdapter:
             return True
 
         try:
-            import asyncpg
+            import asyncpg  # type: ignore[import-untyped]
+
             from grid.security.secrets_loader import get_secret
 
             dsn = self._connection_string or get_secret(
-                "DATABASE_URL",
-                required=False,
-                default="postgresql://localhost:5432/grid"
+                "DATABASE_URL", required=False, default="postgresql://localhost:5432/grid"
             )
-            
-            self._pool = await asyncpg.create_pool(
-                dsn,
-                min_size=2,
-                max_size=10,
-                command_timeout=30
-            )
+
+            self._pool = await asyncpg.create_pool(dsn, min_size=2, max_size=10, command_timeout=30)
             logger.info("PostgreSQL connection pool established")
             return True
 
@@ -68,7 +63,7 @@ class GridPostgresAdapter:
 
     async def query_user_by_username(self, username: str) -> dict[str, Any] | None:
         """Query user by username (case-insensitive).
-        
+
         Returns:
             User dict or None if not found
         """
@@ -80,10 +75,10 @@ class GridPostgresAdapter:
                 row = await conn.fetchrow(
                     """
                     SELECT user_id, username, email, password_hash, status, org_id, metadata
-                    FROM users 
+                    FROM users
                     WHERE LOWER(username) = LOWER($1)
                     """,
-                    username
+                    username,
                 )
                 if row:
                     return dict(row)
@@ -99,10 +94,7 @@ class GridPostgresAdapter:
 
         try:
             async with self._pool.acquire() as conn:
-                row = await conn.fetchrow(
-                    "SELECT * FROM users WHERE user_id = $1",
-                    user_id
-                )
+                row = await conn.fetchrow("SELECT * FROM users WHERE user_id = $1", user_id)
                 if row:
                     return dict(row)
                 return None
@@ -117,10 +109,7 @@ class GridPostgresAdapter:
 
         try:
             async with self._pool.acquire() as conn:
-                await conn.execute(
-                    "UPDATE users SET last_login = NOW() WHERE user_id = $1",
-                    user_id
-                )
+                await conn.execute("UPDATE users SET last_login = NOW() WHERE user_id = $1", user_id)
                 return True
         except Exception as e:
             logger.error(f"Update last login failed: {e}")

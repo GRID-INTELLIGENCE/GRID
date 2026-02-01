@@ -26,6 +26,7 @@ logger = logging.getLogger(__name__)
 
 class ThreatLevel(str, Enum):
     """Threat severity levels."""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -34,6 +35,7 @@ class ThreatLevel(str, Enum):
 
 class ThreatType(str, Enum):
     """Types of security threats."""
+
     SQL_INJECTION = "sql_injection"
     XSS = "xss"
     CSRF = "csrf"
@@ -203,39 +205,27 @@ class SecurityMonitor:
         body = request_data.get("body", "")
 
         # 1. SQL Injection Detection
-        sql_alerts = self._detect_sql_injection(
-            source_ip, user_agent, query_params, body, request_data
-        )
+        sql_alerts = self._detect_sql_injection(source_ip, user_agent, query_params, body, request_data)
         alerts.extend(sql_alerts)
 
         # 2. XSS Detection
-        xss_alerts = self._detect_xss(
-            source_ip, user_agent, query_params, body, request_data
-        )
+        xss_alerts = self._detect_xss(source_ip, user_agent, query_params, body, request_data)
         alerts.extend(xss_alerts)
 
         # 3. Malicious User Agent Detection
-        ua_alerts = self._detect_malicious_user_agent(
-            source_ip, user_agent, request_data
-        )
+        ua_alerts = self._detect_malicious_user_agent(source_ip, user_agent, request_data)
         alerts.extend(ua_alerts)
 
         # 4. Rate Limit Abuse Detection
-        rate_alerts = self._detect_rate_limit_abuse(
-            source_ip, user_agent, request_data
-        )
+        rate_alerts = self._detect_rate_limit_abuse(source_ip, user_agent, request_data)
         alerts.extend(rate_alerts)
 
         # 5. Anomalous Access Patterns
-        pattern_alerts = self._detect_anomalous_patterns(
-            source_ip, user_agent, method, path, request_data
-        )
+        pattern_alerts = self._detect_anomalous_patterns(source_ip, user_agent, method, path, request_data)
         alerts.extend(pattern_alerts)
 
         # 6. Suspicious Payload Detection
-        payload_alerts = self._detect_suspicious_payload(
-            source_ip, user_agent, body, request_data
-        )
+        payload_alerts = self._detect_suspicious_payload(source_ip, user_agent, body, request_data)
         alerts.extend(payload_alerts)
 
         # Store alerts and update tracking
@@ -259,7 +249,7 @@ class SecurityMonitor:
         start_time = time.time()
 
         vulnerabilities = []
-        severity_counts = defaultdict(int)
+        severity_counts: defaultdict[str, int] = defaultdict(int)
 
         # Scan Python files for common vulnerabilities
         for py_file in codebase_path.rglob("*.py"):
@@ -327,12 +317,14 @@ class SecurityMonitor:
 
             missing_perms = [p for p in action_permissions if p not in user_permissions]
             if missing_perms:
-                violations.append({
-                    "type": "privilege_escalation",
-                    "action": action.get("action", "unknown"),
-                    "missing_permissions": missing_perms,
-                    "timestamp": action.get("timestamp"),
-                })
+                violations.append(
+                    {
+                        "type": "privilege_escalation",
+                        "action": action.get("action", "unknown"),
+                        "missing_permissions": missing_perms,
+                        "timestamp": action.get("timestamp"),
+                    }
+                )
                 permissions_checked.extend(action_permissions)
 
         # 2. Check for unusual access patterns
@@ -341,21 +333,25 @@ class SecurityMonitor:
             if resource.get("sensitivity_level", 0) > 7:  # High sensitivity
                 user_sensitivity = user_context.get("max_sensitivity_allowed", 5)
                 if resource["sensitivity_level"] > user_sensitivity:
-                    violations.append({
-                        "type": "unauthorized_access",
-                        "resource": resource["name"],
-                        "sensitivity_level": resource["sensitivity_level"],
-                        "allowed_level": user_sensitivity,
-                        "timestamp": resource.get("access_timestamp"),
-                    })
+                    violations.append(
+                        {
+                            "type": "unauthorized_access",
+                            "resource": resource["name"],
+                            "sensitivity_level": resource["sensitivity_level"],
+                            "allowed_level": user_sensitivity,
+                            "timestamp": resource.get("access_timestamp"),
+                        }
+                    )
 
         # 3. Check for role conflicts
         if "admin" in roles and "service_account" in roles:
-            violations.append({
-                "type": "role_conflict",
-                "conflicting_roles": ["admin", "service_account"],
-                "description": "Service accounts should not have admin privileges",
-            })
+            violations.append(
+                {
+                    "type": "role_conflict",
+                    "conflicting_roles": ["admin", "service_account"],
+                    "description": "Service accounts should not have admin privileges",
+                }
+            )
 
         # Calculate compliance score
         violation_weight = {
@@ -409,34 +405,38 @@ class SecurityMonitor:
         # Check query parameters
         for param_name, param_value in query_params.items():
             if isinstance(param_value, str) and self._matches_sql_injection(param_value):
-                alerts.append(self._create_threat_alert(
+                alerts.append(
+                    self._create_threat_alert(
+                        ThreatType.SQL_INJECTION,
+                        ThreatLevel.HIGH,
+                        f"SQL injection detected in query parameter: {param_name}",
+                        source_ip,
+                        user_agent,
+                        request_data,
+                        {
+                            "parameter": param_name,
+                            "value": param_value[:100],  # Truncate for storage
+                            "patterns_matched": [p for p in self._sql_injection_patterns if p.search(param_value)],
+                        },
+                    )
+                )
+
+        # Check request body
+        if body and self._matches_sql_injection(body):
+            alerts.append(
+                self._create_threat_alert(
                     ThreatType.SQL_INJECTION,
                     ThreatLevel.HIGH,
-                    f"SQL injection detected in query parameter: {param_name}",
+                    "SQL injection detected in request body",
                     source_ip,
                     user_agent,
                     request_data,
                     {
-                        "parameter": param_name,
-                        "value": param_value[:100],  # Truncate for storage
-                        "patterns_matched": [p for p in self._sql_injection_patterns if p.search(param_value)],
+                        "body_sample": body[:200],  # Truncate for storage
+                        "patterns_matched": [p for p in self._sql_injection_patterns if p.search(body)],
                     },
-                ))
-
-        # Check request body
-        if body and self._matches_sql_injection(body):
-            alerts.append(self._create_threat_alert(
-                ThreatType.SQL_INJECTION,
-                ThreatLevel.HIGH,
-                "SQL injection detected in request body",
-                source_ip,
-                user_agent,
-                request_data,
-                {
-                    "body_sample": body[:200],  # Truncate for storage
-                    "patterns_matched": [p for p in self._sql_injection_patterns if p.search(body)],
-                },
-            ))
+                )
+            )
 
         return alerts
 
@@ -454,34 +454,38 @@ class SecurityMonitor:
         # Check query parameters
         for param_name, param_value in query_params.items():
             if isinstance(param_value, str) and self._matches_xss(param_value):
-                alerts.append(self._create_threat_alert(
+                alerts.append(
+                    self._create_threat_alert(
+                        ThreatType.XSS,
+                        ThreatLevel.MEDIUM,
+                        f"XSS detected in query parameter: {param_name}",
+                        source_ip,
+                        user_agent,
+                        request_data,
+                        {
+                            "parameter": param_name,
+                            "value": param_value[:100],
+                            "patterns_matched": [p for p in self._xss_patterns if p.search(param_value)],
+                        },
+                    )
+                )
+
+        # Check request body
+        if body and self._matches_xss(body):
+            alerts.append(
+                self._create_threat_alert(
                     ThreatType.XSS,
                     ThreatLevel.MEDIUM,
-                    f"XSS detected in query parameter: {param_name}",
+                    "XSS detected in request body",
                     source_ip,
                     user_agent,
                     request_data,
                     {
-                        "parameter": param_name,
-                        "value": param_value[:100],
-                        "patterns_matched": [p for p in self._xss_patterns if p.search(param_value)],
+                        "body_sample": body[:200],
+                        "patterns_matched": [p for p in self._xss_patterns if p.search(body)],
                     },
-                ))
-
-        # Check request body
-        if body and self._matches_xss(body):
-            alerts.append(self._create_threat_alert(
-                ThreatType.XSS,
-                ThreatLevel.MEDIUM,
-                "XSS detected in request body",
-                source_ip,
-                user_agent,
-                request_data,
-                {
-                    "body_sample": body[:200],
-                    "patterns_matched": [p for p in self._xss_patterns if p.search(body)],
-                },
-            ))
+                )
+            )
 
         return alerts
 
@@ -496,18 +500,20 @@ class SecurityMonitor:
 
         for pattern, threat_level in self._malicious_user_agents:
             if pattern.search(user_agent.lower()):
-                alerts.append(self._create_threat_alert(
-                    ThreatType.MALICIOUS_USER_AGENT,
-                    threat_level,
-                    f"Malicious user agent detected: {user_agent[:50]}",
-                    source_ip,
-                    user_agent,
-                    request_data,
-                    {
-                        "user_agent": user_agent,
-                        "pattern_matched": pattern.pattern,
-                    },
-                ))
+                alerts.append(
+                    self._create_threat_alert(
+                        ThreatType.MALICIOUS_USER_AGENT,
+                        threat_level,
+                        f"Malicious user agent detected: {user_agent[:50]}",
+                        source_ip,
+                        user_agent,
+                        request_data,
+                        {
+                            "user_agent": user_agent,
+                            "pattern_matched": pattern.pattern,
+                        },
+                    )
+                )
                 break
 
         return alerts
@@ -535,19 +541,21 @@ class SecurityMonitor:
             ip_requests.popleft()
 
         if len(ip_requests) > max_requests:
-            alerts.append(self._create_threat_alert(
-                ThreatType.RATE_LIMIT_ABUSE,
-                ThreatLevel.MEDIUM,
-                f"Rate limit abuse detected: {len(ip_requests)} requests in {window}s",
-                source_ip,
-                user_agent,
-                request_data,
+            alerts.append(
+                self._create_threat_alert(
+                    ThreatType.RATE_LIMIT_ABUSE,
+                    ThreatLevel.MEDIUM,
+                    f"Rate limit abuse detected: {len(ip_requests)} requests in {window}s",
+                    source_ip,
+                    user_agent,
+                    request_data,
                     {
                         "request_count": len(ip_requests),
                         "time_window": window,
                         "threshold": max_requests,
                     },
-                ))
+                )
+            )
 
         return alerts
 
@@ -576,19 +584,21 @@ class SecurityMonitor:
 
         for pattern in suspicious_paths:
             if re.search(pattern, path, re.IGNORECASE):
-                alerts.append(self._create_threat_alert(
-                    ThreatType.ANOMALOUS_ACCESS,
-                    ThreatLevel.MEDIUM,
-                    f"Suspicious path access: {path}",
-                    source_ip,
-                    user_agent,
-                    request_data,
-                    {
-                        "path": path,
-                        "method": method,
-                        "pattern_matched": pattern,
-                    },
-                ))
+                alerts.append(
+                    self._create_threat_alert(
+                        ThreatType.ANOMALOUS_ACCESS,
+                        ThreatLevel.MEDIUM,
+                        f"Suspicious path access: {path}",
+                        source_ip,
+                        user_agent,
+                        request_data,
+                        {
+                            "path": path,
+                            "method": method,
+                            "pattern_matched": pattern,
+                        },
+                    )
+                )
                 break
 
         return alerts
@@ -601,7 +611,7 @@ class SecurityMonitor:
         request_data: dict[str, Any],
     ) -> list[ThreatAlert]:
         """Detect suspicious payload patterns."""
-        alerts = []
+        alerts: list[ThreatAlert] = []
 
         if not body:
             return alerts
@@ -618,19 +628,21 @@ class SecurityMonitor:
 
         for pattern, threat_level, description in suspicious_patterns:
             if re.search(pattern, body, re.IGNORECASE):
-                alerts.append(self._create_threat_alert(
-                    ThreatType.SUSPICIOUS_PAYLOAD,
-                    threat_level,
-                    f"Suspicious payload: {description}",
-                    source_ip,
-                    user_agent,
-                    request_data,
-                    {
-                        "description": description,
-                        "body_sample": body[:200],
-                        "pattern_matched": pattern,
-                    },
-                ))
+                alerts.append(
+                    self._create_threat_alert(
+                        ThreatType.SUSPICIOUS_PAYLOAD,
+                        threat_level,
+                        f"Suspicious payload: {description}",
+                        source_ip,
+                        user_agent,
+                        request_data,
+                        {
+                            "description": description,
+                            "body_sample": body[:200],
+                            "pattern_matched": pattern,
+                        },
+                    )
+                )
 
         return alerts
 
@@ -805,14 +817,16 @@ class SecurityMonitor:
                             var_name = target.id.lower()
                             if any(secret in var_name for secret in ["password", "secret", "key", "token"]):
                                 if isinstance(node.value, ast.Constant) and isinstance(node.value.value, str):
-                                    vulnerabilities.append({
-                                        "type": "hardcoded_secret",
-                                        "severity": "high",
-                                        "file": str(file_path),
-                                        "line": node.lineno,
-                                        "variable": var_name,
-                                        "description": f"Hardcoded {var_name} detected",
-                                    })
+                                    vulnerabilities.append(
+                                        {
+                                            "type": "hardcoded_secret",
+                                            "severity": "high",
+                                            "file": str(file_path),
+                                            "line": node.lineno,
+                                            "variable": var_name,
+                                            "description": f"Hardcoded {var_name} detected",
+                                        }
+                                    )
 
                 # Dangerous function calls
                 if isinstance(node, ast.Call):
@@ -820,27 +834,31 @@ class SecurityMonitor:
                         func_name = node.func.id.lower()
                         dangerous_funcs = ["eval", "exec", "compile", "__import__"]
                         if func_name in dangerous_funcs:
-                            vulnerabilities.append({
-                                "type": "dangerous_function",
-                                "severity": "high",
-                                "file": str(file_path),
-                                "line": node.lineno,
-                                "function": func_name,
-                                "description": f"Use of dangerous function: {func_name}",
-                            })
+                            vulnerabilities.append(
+                                {
+                                    "type": "dangerous_function",
+                                    "severity": "high",
+                                    "file": str(file_path),
+                                    "line": node.lineno,
+                                    "function": func_name,
+                                    "description": f"Use of dangerous function: {func_name}",
+                                }
+                            )
 
                 # SQL injection risks
                 if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
                     if node.func.attr.lower() in ["execute", "executemany"]:
                         if isinstance(node.func.value, ast.Name):
                             if "sql" in node.func.value.id.lower():
-                                vulnerabilities.append({
-                                    "type": "sql_injection_risk",
-                                    "severity": "medium",
-                                    "file": str(file_path),
-                                    "line": node.lineno,
-                                    "description": "Potential SQL injection - use parameterized queries",
-                                })
+                                vulnerabilities.append(
+                                    {
+                                        "type": "sql_injection_risk",
+                                        "severity": "medium",
+                                        "file": str(file_path),
+                                        "line": node.lineno,
+                                        "description": "Potential SQL injection - use parameterized queries",
+                                    }
+                                )
 
         except Exception as e:
             logger.warning(f"Failed to parse {file_path}: {e}")
@@ -866,14 +884,16 @@ class SecurityMonitor:
             for pattern, severity in secret_patterns:
                 matches = re.finditer(pattern, content, re.IGNORECASE)
                 for match in matches:
-                    vulnerabilities.append({
-                        "type": "exposed_secret",
-                        "severity": severity,
-                        "file": str(file_path),
-                        "line": content[:match.start()].count('\n') + 1,
-                        "description": "Potential exposed secret in configuration",
-                        "match": match.group()[:50],
-                    })
+                    vulnerabilities.append(
+                        {
+                            "type": "exposed_secret",
+                            "severity": severity,
+                            "file": str(file_path),
+                            "line": content[: match.start()].count("\n") + 1,
+                            "description": "Potential exposed secret in configuration",
+                            "match": match.group()[:50],
+                        }
+                    )
 
             # Check for insecure configurations
             insecure_patterns = [
@@ -884,12 +904,14 @@ class SecurityMonitor:
 
             for pattern, severity, description in insecure_patterns:
                 if re.search(pattern, content, re.IGNORECASE):
-                    vulnerabilities.append({
-                        "type": "insecure_configuration",
-                        "severity": severity,
-                        "file": str(file_path),
-                        "description": description,
-                    })
+                    vulnerabilities.append(
+                        {
+                            "type": "insecure_configuration",
+                            "severity": severity,
+                            "file": str(file_path),
+                            "description": description,
+                        }
+                    )
 
         except Exception as e:
             logger.warning(f"Failed to scan config {file_path}: {e}")
@@ -911,7 +933,7 @@ class SecurityMonitor:
     def get_security_stats(self) -> dict[str, Any]:
         """Get security monitoring statistics."""
         # Count recent alerts by type and level
-        alert_counts = defaultdict(lambda: defaultdict(int))
+        alert_counts: defaultdict[str, defaultdict[str, int]] = defaultdict(lambda: defaultdict(int))
         for alert in self._recent_alerts:
             alert_counts[alert.threat_type.value][alert.threat_level.value] += 1
 

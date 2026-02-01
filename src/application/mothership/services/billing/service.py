@@ -132,14 +132,16 @@ class BillingService:
                 overage_cost_cents = overage_units * self._get_overage_cost_cents(usage_type)
                 overage_amount += overage_cost_cents
 
-                overage_line_items.append({
-                    "description": f"Overage: {usage_type.replace('_', ' ').title()} ({overage_units} units)",
-                    "amount_cents": overage_cost_cents,
-                    "usage_type": usage_type,
-                    "units_used": usage_units,
-                    "limit": limit,
-                    "overage_units": overage_units
-                })
+                overage_line_items.append(
+                    {
+                        "description": f"Overage: {usage_type.replace('_', ' ').title()} ({overage_units} units)",
+                        "amount_cents": overage_cost_cents,
+                        "usage_type": usage_type,
+                        "units_used": usage_units,
+                        "limit": limit,
+                        "overage_units": overage_units,
+                    }
+                )
 
         total_amount = base_amount + overage_amount
 
@@ -149,11 +151,13 @@ class BillingService:
 
         # Add base subscription charge if applicable
         if base_amount > 0:
-            line_items.append({
-                "description": f"{tier.value.title()} subscription",
-                "amount_cents": base_amount,
-                "type": "subscription"
-            })
+            line_items.append(
+                {
+                    "description": f"{tier.value.title()} subscription",
+                    "amount_cents": base_amount,
+                    "type": "subscription",
+                }
+            )
 
         # Add overage charges
         line_items.extend(overage_line_items)

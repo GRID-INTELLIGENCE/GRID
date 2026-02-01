@@ -14,14 +14,15 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
 
-from ..ai_ml.intelligence_system import AISafetyLevel, DataSensitivity, FrontierIntelligenceSystem
-from ..api_gateway.gateway import APIGateway, RouteConfig, ServiceEndpoint
-from ..event_bus.event_system import EventBus, EventPriority
-from ..service_mesh.mesh import ServiceMesh, ServiceRegistration, ServiceType
+from ..ai_ml.intelligence_system import AISafetyLevel, DataSensitivity, FrontierIntelligenceSystem  # type: ignore[import-not-found]
+from ..api_gateway.gateway import APIGateway, RouteConfig, ServiceEndpoint  # type: ignore[import-not-found]
+from ..event_bus.event_system import EventBus, EventPriority  # type: ignore[import-not-found]
+from ..service_mesh.mesh import ServiceMesh, ServiceRegistration, ServiceType  # type: ignore[import-not-found]
 
 
 class OrchestratorState(Enum):
     """Orchestrator states."""
+
     INITIALIZING = "initializing"
     STARTING = "starting"
     RUNNING = "running"
@@ -33,6 +34,7 @@ class OrchestratorState(Enum):
 @dataclass
 class ServiceConfig:
     """Service configuration."""
+
     name: str
     type: ServiceType
     host: str
@@ -46,6 +48,7 @@ class ServiceConfig:
 @dataclass
 class OrchestratorConfig:
     """Orchestrator configuration."""
+
     gateway_port: int = 8000
     mesh_registry_port: int = 8500
     redis_url: str = "redis://localhost:6379"
@@ -62,7 +65,7 @@ class OrchestratorConfig:
 class ArenaOrchestrator:
     """
     Main orchestrator for the modernized arena architecture.
-    
+
     Integrates:
     - API Gateway for request routing and load balancing
     - Service Mesh for service discovery and communication
@@ -91,7 +94,7 @@ class ArenaOrchestrator:
             "requests_failed": 0,
             "events_processed": 0,
             "ai_predictions": 0,
-            "active_services": 0
+            "active_services": 0,
         }
 
         # Health monitoring
@@ -171,7 +174,7 @@ class ArenaOrchestrator:
             port=service_config.port,
             version=service_config.version,
             metadata=service_config.metadata,
-            health_check_url=service_config.health_check_path
+            health_check_url=service_config.health_check_path,
         )
 
         instance_id = await self.service_mesh.register_service(registration)
@@ -185,7 +188,7 @@ class ArenaOrchestrator:
         endpoint = ServiceEndpoint(
             name=service_config.name,
             url=f"http://{service_config.host}:{service_config.port}",
-            health_check_path=service_config.health_check_path
+            health_check_path=service_config.health_check_path,
         )
         self.api_gateway.register_service(endpoint)
 
@@ -205,35 +208,19 @@ class ArenaOrchestrator:
         logging.info(f"Service deregistered: {service_name}")
         return True
 
-    async def call_service(
-        self,
-        service_name: str,
-        endpoint: str,
-        method: str = "GET",
-        **kwargs
-    ) -> Any:
+    async def call_service(self, service_name: str, endpoint: str, method: str = "GET", **kwargs) -> Any:
         """Call a service through the service mesh."""
-        return await self.service_mesh.call_service(
-            service_name,
-            endpoint,
-            method,
-            **kwargs
-        )
+        return await self.service_mesh.call_service(service_name, endpoint, method, **kwargs)
 
     async def publish_event(
         self,
         event_type: str,
         data: dict[str, Any],
         source: str = "orchestrator",
-        priority: EventPriority = EventPriority.NORMAL
+        priority: EventPriority = EventPriority.NORMAL,
     ) -> str:
         """Publish an event through the event bus."""
-        event_id = await self.event_bus.publish(
-            event_type,
-            data,
-            source,
-            priority
-        )
+        event_id = await self.event_bus.publish(event_type, data, source, priority)
 
         self.metrics["events_processed"] += 1
         return event_id
@@ -243,18 +230,13 @@ class ArenaOrchestrator:
         model_name: str,
         input_data: dict[str, Any],
         safety_level: AISafetyLevel = AISafetyLevel.PERMITTED,
-        data_sensitivity: DataSensitivity = DataSensitivity.PUBLIC
+        data_sensitivity: DataSensitivity = DataSensitivity.PUBLIC,
     ) -> Any:
         """Make an AI prediction."""
         if not self.intelligence_system:
             raise Exception("AI/ML system not enabled")
 
-        response = await self.intelligence_system.predict(
-            model_name,
-            input_data,
-            safety_level,
-            data_sensitivity
-        )
+        response = await self.intelligence_system.predict(model_name, input_data, safety_level, data_sensitivity)
 
         self.metrics["ai_predictions"] += 1
         return response
@@ -262,17 +244,10 @@ class ArenaOrchestrator:
     async def get_system_status(self) -> dict[str, Any]:
         """Get comprehensive system status."""
         status = {
-            "orchestrator": {
-                "state": self.state.value,
-                "uptime": time.time() - self.metrics["start_time"]
-            },
-            "services": {
-                "registered": len(self.services),
-                "active": len(self.service_instances),
-                "details": {}
-            },
+            "orchestrator": {"state": self.state.value, "uptime": time.time() - self.metrics["start_time"]},
+            "services": {"registered": len(self.services), "active": len(self.service_instances), "details": {}},
             "components": {},
-            "metrics": self.metrics.copy()
+            "metrics": self.metrics.copy(),
         }
 
         # Service details
@@ -281,7 +256,7 @@ class ArenaOrchestrator:
                 "type": config.type.value,
                 "host": f"{config.host}:{config.port}",
                 "version": config.version,
-                "active": name in self.service_instances
+                "active": name in self.service_instances,
             }
 
         # Component status
@@ -302,10 +277,7 @@ class ArenaOrchestrator:
 
     async def _start_event_bus(self):
         """Start the event bus."""
-        self.event_bus = EventBus(
-            redis_url=self.config.redis_url,
-            rabbitmq_url=self.config.rabbitmq_url
-        )
+        self.event_bus = EventBus(redis_url=self.config.redis_url, rabbitmq_url=self.config.rabbitmq_url)
         await self.event_bus.start()
         logging.info("Event bus started")
 
@@ -325,9 +297,7 @@ class ArenaOrchestrator:
         """Start the AI/ML system."""
         if self.config.enable_ai_ml:
             self.intelligence_system = FrontierIntelligenceSystem(
-                region=self.config.region,
-                redis_url=self.config.redis_url,
-                event_bus=self.event_bus
+                region=self.config.region, redis_url=self.config.redis_url, event_bus=self.event_bus
             )
             await self.intelligence_system.start()
             logging.info("AI/ML system started")
@@ -342,7 +312,7 @@ class ArenaOrchestrator:
             port=self.config.gateway_port,
             version="1.0.0",
             health_check_path="/health",
-            metadata={"component": "orchestrator"}
+            metadata={"component": "orchestrator"},
         )
 
         await self.register_service(orchestrator_config)
@@ -361,10 +331,7 @@ class ArenaOrchestrator:
 
     async def _perform_health_checks(self):
         """Perform health checks on all components."""
-        health_status = {
-            "timestamp": time.time(),
-            "components": {}
-        }
+        health_status = {"timestamp": time.time(), "components": {}}
 
         # Check API Gateway
         if self.api_gateway:
@@ -385,7 +352,7 @@ class ArenaOrchestrator:
         # Check Event Bus
         if self.event_bus:
             try:
-                metrics = await self.event_bus.get_metrics()
+                await self.event_bus.get_metrics()
                 health_status["components"]["event_bus"] = "healthy"
             except Exception as e:
                 health_status["components"]["event_bus"] = f"unhealthy: {e}"
@@ -393,7 +360,7 @@ class ArenaOrchestrator:
         # Check AI/ML System
         if self.intelligence_system:
             try:
-                metrics = await self.intelligence_system.get_metrics()
+                await self.intelligence_system.get_metrics()
                 health_status["components"]["intelligence_system"] = "healthy"
             except Exception as e:
                 health_status["components"]["intelligence_system"] = f"unhealthy: {e}"
@@ -405,14 +372,10 @@ class ArenaOrchestrator:
 # Example Usage
 # ============================================================================
 
+
 async def example_orchestrator_setup():
     """Example setup of arena orchestrator."""
-    config = OrchestratorConfig(
-        gateway_port=8000,
-        mesh_registry_port=8500,
-        enable_ai_ml=True,
-        region="southeast_asia"
-    )
+    config = OrchestratorConfig(gateway_port=8000, mesh_registry_port=8500, enable_ai_ml=True, region="southeast_asia")
 
     orchestrator = ArenaOrchestrator(config)
     await orchestrator.start()
@@ -425,12 +388,8 @@ async def example_orchestrator_setup():
         port=8080,
         version="1.0.0",
         routes=[
-            RouteConfig(
-                path="/api/v1/grid",
-                service_name="grid-service",
-                methods=["GET", "POST", "PUT", "DELETE"]
-            )
-        ]
+            RouteConfig(path="/api/v1/grid", service_name="grid-service", methods=["GET", "POST", "PUT", "DELETE"])
+        ],
     )
 
     await orchestrator.register_service(grid_config)
@@ -442,23 +401,14 @@ async def example_orchestrator_setup():
         host="localhost",
         port=8081,
         version="1.0.0",
-        routes=[
-            RouteConfig(
-                path="/api/v1/coinbase",
-                service_name="coinbase-service",
-                methods=["GET", "POST"]
-            )
-        ]
+        routes=[RouteConfig(path="/api/v1/coinbase", service_name="coinbase-service", methods=["GET", "POST"])],
     )
 
     await orchestrator.register_service(coinbase_config)
 
     # Publish events
     await orchestrator.publish_event(
-        "system.started",
-        {"services": len(orchestrator.services)},
-        source="orchestrator",
-        priority=EventPriority.HIGH
+        "system.started", {"services": len(orchestrator.services)}, source="orchestrator", priority=EventPriority.HIGH
     )
 
     # Get system status
@@ -469,6 +419,7 @@ async def example_orchestrator_setup():
 
 
 if __name__ == "__main__":
+
     async def main():
         orchestrator = await example_orchestrator_setup()
 

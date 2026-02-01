@@ -1,5 +1,4 @@
 """
-from datetime import timezone
 Payment API router.
 
 Endpoints for payment processing, subscriptions, and billing.
@@ -8,22 +7,14 @@ Endpoints for payment processing, subscriptions, and billing.
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 
 from ..dependencies import RequiredAuth, Settings, UoW
 from ..exceptions import IntegrationError, ResourceNotFoundError
-from ..models.payment import (
-    PaymentGateway as PaymentGatewayEnum,
-)
-from ..models.payment import (
-    PaymentStatus,
-    PaymentTransaction,
-    Subscription,
-    SubscriptionStatus,
-    SubscriptionTier,
-)
+from ..models.payment import PaymentGateway as PaymentGatewayEnum
+from ..models.payment import PaymentStatus, PaymentTransaction, Subscription, SubscriptionStatus, SubscriptionTier
 from ..schemas.payment import (
     CancelSubscriptionRequest,
     CreatePaymentRequest,
@@ -291,7 +282,7 @@ async def refund_payment(
             transaction_id=transaction.id,
             amount_cents=refund_result.get("amount", request.amount_cents or transaction.amount_cents),
             status=refund_result.get("status", "completed"),
-            created_at=datetime.now(timezone.utc),
+            created_at=datetime.now(UTC),
         )
     except IntegrationError as e:
         raise HTTPException(
@@ -324,7 +315,7 @@ async def create_subscription(
         )
 
         # Calculate period dates
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         period_end = now + timedelta(days=settings.billing.billing_cycle_days)
 
         subscription = Subscription(

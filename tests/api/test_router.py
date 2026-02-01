@@ -85,7 +85,7 @@ class TestGetContext:
 
     def test_get_context_missing_query(self, client: TestClient) -> None:
         """Test context retrieval without query parameter."""
-        response = client.get("/api/v1/resonance/context")
+        response = client.get("/api/v1/resonance/context/query")
 
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 

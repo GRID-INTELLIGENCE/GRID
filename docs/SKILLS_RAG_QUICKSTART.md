@@ -238,7 +238,6 @@ Manifest file can be newline-delimited paths (relative to repo root) or a JSON l
 **Solution**:
 ```powershell
 # Pull the recommended embedding model
-docker exec grid-ollama ollama pull nomic-embed-text-v2-moe:latest
 
 # Or if using local Ollama
 ollama pull nomic-embed-text-v2-moe:latest

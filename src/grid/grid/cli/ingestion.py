@@ -66,9 +66,7 @@ class FileIngestionManager:
         }
 
 
-def ingest_multiple_files(
-    file_paths: list[str], manager: FileIngestionManager | None = None
-) -> list[dict[str, Any]]:
+def ingest_multiple_files(file_paths: list[str], manager: FileIngestionManager | None = None) -> list[dict[str, Any]]:
     """Ingest multiple files and return their contents with metadata."""
     if manager is None:
         manager = FileIngestionManager()

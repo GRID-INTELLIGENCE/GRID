@@ -15,12 +15,9 @@ try:
         XAIAdaptiveProcessor,
         XAICache,
         XAILoadBalancer,
-        adaptive_processor,
-        cache,
-        load_balancer,
     )
     from grid.xai.stream_adapter import StreamChunk, StreamProgress, XAIStreamAdapter
-    from grid.xai.threading_framework import WorkerStats, WorkerThread, XAIThreadPool, resource_manager, thread_pool
+    from grid.xai.threading_framework import XAIThreadPool
     XAI_AVAILABLE = True
 except ImportError as e:
     print(f"XAI modules not available: {e}")

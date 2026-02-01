@@ -96,12 +96,11 @@ class EnhancedDatabricksConnector:
         if self._engine is not None:
             return self._engine
 
-        try:
-            from databricks import sql
-        except ImportError:
+        from importlib.util import find_spec
+        if find_spec("databricks.sql") is None:
             raise ImportError(
                 "databricks-sql-connector is not installed. " "Install with: pip install databricks-sql-connector"
-            )
+            ) from None
 
         # Use working hostname
         connection_string = f"databricks://token:{self.access_token}@" f"{self.working_hostname}:443{self.http_path}"

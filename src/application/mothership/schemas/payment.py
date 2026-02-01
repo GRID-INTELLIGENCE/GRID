@@ -61,9 +61,7 @@ class CreatePaymentRequest(BaseSchema):
     amount_cents: int = Field(..., description="Amount in cents", gt=0)
     currency: str = Field(default="USD", description="Currency code")
     description: str = Field(..., description="Payment description")
-    gateway: PaymentGatewaySchema | None = Field(
-        None, description="Payment gateway (defaults to configured gateway)"
-    )
+    gateway: PaymentGatewaySchema | None = Field(None, description="Payment gateway (defaults to configured gateway)")
     metadata: dict[str, Any] | None = Field(None, description="Additional metadata")
 
 
@@ -81,9 +79,7 @@ class CreateSubscriptionRequest(BaseSchema):
 
     tier: SubscriptionTierSchema = Field(..., description="Subscription tier")
     payment_method_id: str | None = Field(None, description="Payment method ID from gateway")
-    gateway: PaymentGatewaySchema | None = Field(
-        None, description="Payment gateway (defaults to configured gateway)"
-    )
+    gateway: PaymentGatewaySchema | None = Field(None, description="Payment gateway (defaults to configured gateway)")
     metadata: dict[str, Any] | None = Field(None, description="Additional metadata")
 
 

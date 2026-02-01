@@ -68,7 +68,6 @@ grid/
 ├── .github/               # CI/CD workflows
 ├── requirements.txt       # Dependencies
 ├── pyproject.toml        # Project configuration
-├── Dockerfile            # Container configuration
 ├── Makefile              # Build commands
 └── README.md             # Project documentation
 ```
@@ -135,7 +134,6 @@ cd my-new-app
 - Review documentation and examples
 
 ### 4. Deployment
-- Use Docker for containerization
 - Leverage CI/CD pipelines for automation
 - Follow deployment guides and best practices
 

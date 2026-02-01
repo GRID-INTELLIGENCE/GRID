@@ -134,11 +134,7 @@ make install
 # Run development workflow
 make dev
 
-# Build Docker image
-make docker-build
 
-# Run Docker container
-make docker-run
 ```
 
 ## Project Structure

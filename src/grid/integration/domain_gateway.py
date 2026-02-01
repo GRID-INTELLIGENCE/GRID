@@ -440,7 +440,7 @@ class GridObservationAdapter:
     def _load_tracing(self) -> None:
         """Attempt to load the tracing system."""
         try:
-            from grid.tracing import TraceManager, TraceOrigin, get_trace_manager
+            from grid.tracing import get_trace_manager
 
             self._trace_manager = get_trace_manager()
             logger.info("Connected to GRID tracing system")
@@ -476,7 +476,7 @@ class GridObservationAdapter:
         if self._trace_manager:
             try:
                 # Store metric in trace metadata
-                trace = self._trace_manager.create_trace(
+                self._trace_manager.create_trace(
                     action_type="metric",
                     action_name=name,
                     metadata={"value": value, "tags": tags},

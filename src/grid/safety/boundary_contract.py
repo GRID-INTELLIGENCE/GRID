@@ -11,6 +11,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
+from typing import Any
 
 
 class PermissionScope(str, Enum):
@@ -121,7 +122,7 @@ class BoundaryContract:
         boundaries = [0.3, 0.6, 0.8, 1.0]
         return any(abs(gradient - b) < tolerance for b in boundaries)
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         """Serialize the contract to a dictionary."""
         return {
             "owner": self.owner.value,

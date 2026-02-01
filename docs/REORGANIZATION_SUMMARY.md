@@ -21,7 +21,6 @@
 
 #### New Directory Structure
 - `docs/reports/` - Session summaries, status reports, project reports
-- `docs/deployment/` - Docker deployment documentation
 - `docs/architecture/` - Architecture and design documents
 - `docs/security/` - Security architecture documentation
 
@@ -40,12 +39,6 @@
 - COMMIT_MESSAGE.txt
 
 **Deployment:**
-- DOCKER_AUTH_TROUBLESHOOTING.md
-- DOCKER_DEPLOYMENT_COMPLETE.md
-- DOCKER_INTEGRATION_COMPLETE.md
-- DOCKER_LOGIN_INSTRUCTIONS.md
-- DOCKER_STATUS_AND_NEXT_STEPS.md
-- PENDING_DOCKER_TASKS.md
 
 **Architecture:**
 - RESONANCE_OPTIMIZATION_PLAN.md
@@ -65,7 +58,6 @@ Created stub files at old locations pointing to new paths:
 - FINAL_SESSION_SUMMARY.md
 - STABILIZATION_REPORT.md
 - RESONANCE_OPTIMIZATION_PLAN.md
-- DOCKER_DEPLOYMENT_COMPLETE.md
 
 ### Phase D: Security Boundary Hardening ✅
 
@@ -162,7 +154,6 @@ These files are hardcoded in tests/scripts and must stay at repo root:
   - `/.welcome/` - Onboarding documents
   - `/light_of_the_seven/` - Cognitive layer
   - `/application/resonance/` - Resonance API module
-- **Added**: Docker configuration ownership (`docker-compose*.yml`, `Dockerfile*`)
 - **Added**: Governance file ownership (`budget_rules.json`)
 - **File**: `CODEOWNERS`
 
@@ -189,6 +180,5 @@ These files are hardcoded in tests/scripts and must stay at repo root:
 
 - [ ] Run fresh performance benchmarks (update `PERFORMANCE_REPORT_JAN_04.md`)
 - [ ] Validate `terrain_map.json` against current package structure
-- [ ] Fix Docker documentation service name mismatch (`mothership-api` vs actual services)
 - [ ] Validate frontend directory structure or document intentional stub-only state
 - [ ] Update architecture docs if misaligned with current codebase

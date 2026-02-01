@@ -107,9 +107,7 @@ class DatabricksClustersManager:
             True if successful
         """
         try:
-            self.client.workspace.clusters.resize(
-                cluster_id=cluster_id, num_workers=num_workers
-            )
+            self.client.workspace.clusters.resize(cluster_id=cluster_id, num_workers=num_workers)
             logger.info(f"Resized cluster {cluster_id} to {num_workers} workers")
             return True
         except Exception as e:

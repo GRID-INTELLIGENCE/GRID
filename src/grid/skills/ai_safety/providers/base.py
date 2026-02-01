@@ -80,6 +80,7 @@ def provider_handler_factory(
     Returns:
         SimpleSkill instance.
     """
+
     def handler(args: dict[str, Any]) -> dict[str, Any]:
         content = args.get("content", "")
         if not content:

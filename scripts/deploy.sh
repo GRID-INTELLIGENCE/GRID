@@ -1,6 +1,5 @@
 #!/bin/bash
 # Deployment Script for Enhanced RAG Server
-# Non-Docker deployment using uv and Python 3.13
 
 set -e
 

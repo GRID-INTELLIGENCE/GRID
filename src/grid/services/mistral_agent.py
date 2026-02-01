@@ -31,7 +31,7 @@ _Mistral = None
 _mistral_import_error: str | None = None
 
 try:
-    from mistralai import Mistral as _Mistral
+    from mistralai import Mistral as _Mistral  # type: ignore[import-not-found]
 except ImportError:
     _mistral_import_error = "mistralai package not installed. Run: pip install mistralai"
 

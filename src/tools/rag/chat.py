@@ -210,7 +210,7 @@ class RetrievedContext:
     def context_text(self) -> str:
         """Format context for LLM prompt."""
         parts = []
-        for i, (doc, meta) in enumerate(zip(self.documents, self.metadatas), 1):
+        for i, (doc, meta) in enumerate(zip(self.documents, self.metadatas, strict=False), 1):
             path = meta.get("path", "unknown")
             parts.append(f"[{i}] {path}\n{doc}")
         return "\n\n---\n\n".join(parts)
@@ -219,7 +219,7 @@ class RetrievedContext:
     def source_summary(self) -> str:
         """Get a brief summary of sources."""
         sources = []
-        for i, (meta, dist) in enumerate(zip(self.metadatas, self.distances), 1):
+        for i, (meta, dist) in enumerate(zip(self.metadatas, self.distances, strict=False), 1):
             path = meta.get("path", "unknown")
             chunk = meta.get("chunk_index", "?")
             sources.append(f"  {i}. {path} (chunk {chunk}, dist: {dist:.3f})")
@@ -342,14 +342,11 @@ class RAGChatSession:
 
     def _build_system_prompt(self, context: RetrievedContext) -> str:
         """Build system prompt with RAG context."""
-        base_prompt = (
-            self.config.system_prompt
-            or """You are a knowledgeable assistant for the GRID project codebase.
+        base_prompt = self.config.system_prompt or """You are a knowledgeable assistant for the GRID project codebase.
 You have access to relevant code snippets and documentation from the project.
 Answer questions accurately based on the provided context.
 If the context doesn't contain enough information, say so honestly.
 When referencing code, mention the file path."""
-        )
 
         if context.documents:
             intent_context = f"\nDetected Intent: {context.intent}\n" if context.intent != "other" else ""

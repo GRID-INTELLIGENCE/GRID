@@ -37,18 +37,25 @@ def check_xai_safety(content: str, **kwargs: Any) -> list[SafetyViolation]:
         return violations
 
     # xAI risk categories
-    risk_categories = kwargs.get("risk_categories", ["all"])
+    kwargs.get("risk_categories", ["all"])
 
     # Misinformation detection
     misinformation_patterns = [
-        "fake news", "conspiracy", "hoax", "false claim",
-        "misleading", "deceptive information",
+        "fake news",
+        "conspiracy",
+        "hoax",
+        "false claim",
+        "misleading",
+        "deceptive information",
     ]
 
     # Truth-seeking violation patterns
     truth_violations = [
-        "ignore facts", "disregard evidence", "suppress truth",
-        "hide information", "cover up",
+        "ignore facts",
+        "disregard evidence",
+        "suppress truth",
+        "hide information",
+        "cover up",
     ]
 
     normalized_content = content.lower()

@@ -29,7 +29,7 @@ except ImportError:
 
 # psutil is optional - used for process monitoring
 try:
-    import psutil
+    import psutil  # type: ignore[import-untyped]
 
     HAS_PSUTIL = True
 except ImportError:

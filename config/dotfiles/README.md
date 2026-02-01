@@ -16,7 +16,6 @@ This directory contains organized copies of all dotfiles used in the GRID projec
 - `.agentignore` - Excludes from AI agent context (prevents processing)
 - `.cascadeignore` - Excludes from AI cascade context
 - `.cursorignore` - Excludes from Cursor AI context
-- `.dockerignore` - Excludes from Docker build context
 - `.gitignore` - Excludes from Git version control
 
 ### Configuration Files
@@ -30,7 +29,6 @@ This directory contains organized copies of all dotfiles used in the GRID projec
 
 Some files **MUST remain at root** because tools require them there:
 - `.gitignore` - Git requires at repository root
-- `.dockerignore` - Docker requires at build context root
 - `.cursorignore` - Cursor requires at workspace root
 - `.agentignore` - Agent tools require at project root
 - `.cursorrules` - Cursor requires at workspace root
@@ -43,7 +41,6 @@ Environment files are organized in `config/env/`:
 - `.env.development` → `config/env/.env.development`
 - `.env.staging` → `config/env/.env.staging`
 - `.env.production` → `config/env/.env.production`
-- `.env.docker` → `config/env/.env.docker`
 - `.env.venv` → `config/env/.env.venv`
 
 **Note**: The main `.env` file stays at root for local development convenience.
@@ -58,7 +55,6 @@ Environment files are organized in `config/env/`:
 ### Reference Only (Stored Here)
 - `.agentignore` - Reference when configuring agents
 - `.cascadeignore` - Reference when configuring cascade
-- `.dockerignore` - Reference when building Docker images
 - `.mypy.ini` - Reference when type checking
 - `.pre-commit-config.yaml` - Reference when committing
 
@@ -66,7 +62,6 @@ Environment files are organized in `config/env/`:
 - `.env.development` - Development environment
 - `.env.staging` - Staging environment
 - `.env.production` - Production environment
-- `.env.docker` - Docker container environment
 - `.env.venv` - Virtual environment configuration
 
 ## Syncing with Root

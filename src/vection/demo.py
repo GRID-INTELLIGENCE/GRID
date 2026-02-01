@@ -293,7 +293,7 @@ async def demo_grid_integration() -> None:
     print_section("GRID Integration Bridge")
 
     try:
-        from vection.interfaces.grid_bridge import EnrichedCognitiveState, GridVectionBridge
+        from vection.interfaces.grid_bridge import GridVectionBridge
 
         bridge = GridVectionBridge()
 

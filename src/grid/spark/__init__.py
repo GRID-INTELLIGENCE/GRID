@@ -17,8 +17,8 @@ Usage:
         issues = nav.diagnose("path/to/file.py")
 """
 
-from collections.abc import Iterator
-from typing import TYPE_CHECKING, Any, ContextManager
+from collections.abc import ContextManager, Iterator
+from typing import TYPE_CHECKING, Any
 
 from .core import Spark, SparkPhase, SparkResult
 from .personas import AgenticPersona, NavigatorPersona, Persona, ReasoningPersona, ResonancePersona

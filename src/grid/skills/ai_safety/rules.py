@@ -67,7 +67,7 @@ def load_rules(rule_set_path: str | None = None) -> list[dict[str, Any]]:
             logger.warning(f"Rule file not found: {rule_set_path}")
             return default_rules
 
-        with open(rule_path, "r", encoding="utf-8") as f:
+        with open(rule_path, encoding="utf-8") as f:
             if rule_path.suffix.lower() == ".json":
                 rules = json.load(f)
             else:

@@ -102,7 +102,7 @@ def get_async_engine() -> AsyncEngine:
         # Store sync engine for Databricks
         import application.mothership.db.engine as engine_module
 
-        engine_module._databricks_sync_engine = sync_engine
+        engine_module._databricks_sync_engine = sync_engine  # type: ignore[assignment]
 
         logger.warning("Databricks is synchronous - async operations will use sync engine via asyncio.to_thread")
 

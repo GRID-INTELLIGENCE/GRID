@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class StreamChunk:
     """Single chunk in a streaming XAI response."""
+
     chunk_id: str
     content: str
     sequence_number: int
@@ -30,6 +31,7 @@ class StreamChunk:
 @dataclass
 class StreamProgress:
     """Progress tracking for streaming responses."""
+
     total_chunks: int = 0
     processed_chunks: int = 0
     start_time: datetime = None
@@ -83,7 +85,7 @@ class XAIStreamAdapter:
         response_stream: Any,
         stream_id: str,
         explanation_generator: Callable | None = None,
-        progress_callback: Callable | None = None
+        progress_callback: Callable | None = None,
     ) -> list[StreamChunk]:
         """
         Process a streaming XAI response into chunks.
@@ -106,19 +108,19 @@ class XAIStreamAdapter:
                     await self.pause_event.wait()
 
                 # Process chunk based on response format
-                if hasattr(chunk_data, 'content'):
+                if hasattr(chunk_data, "content"):
                     chunk = StreamChunk(
                         chunk_id=f"{stream_id}_{len(chunks)}",
                         content=chunk_data.content,
                         sequence_number=len(chunks),
-                        metadata=chunk_data.get('metadata', {})
+                        metadata=chunk_data.get("metadata", {}),
                     )
-                elif hasattr(chunk_data, 'text'):
+                elif hasattr(chunk_data, "text"):
                     chunk = StreamChunk(
                         chunk_id=f"{stream_id}_{len(chunks)}",
                         content=chunk_data.text,
                         sequence_number=len(chunks),
-                        metadata={}
+                        metadata={},
                     )
                 else:
                     # Handle other response formats
@@ -126,7 +128,7 @@ class XAIStreamAdapter:
                         chunk_id=f"{stream_id}_{len(chunks)}",
                         content=str(chunk_data),
                         sequence_number=len(chunks),
-                        metadata={"type": "raw_response"}
+                        metadata={"type": "raw_response"},
                     )
 
                 chunks.append(chunk)
@@ -151,7 +153,7 @@ class XAIStreamAdapter:
                 await asyncio.sleep(0.01)
 
                 # Check if stream is complete
-                if hasattr(chunk_data, 'done') and chunk_data.done:
+                if hasattr(chunk_data, "done") and chunk_data.done:
                     chunk.is_complete = True
                     progress.estimated_completion = (datetime.now() - progress.start_time).total_seconds()
                     break
@@ -212,7 +214,8 @@ class XAIStreamAdapter:
         Clean up completed streams from memory.
         """
         completed_streams = [
-            stream_id for stream_id, progress in self.active_streams.items()
+            stream_id
+            for stream_id, progress in self.active_streams.items()
             if progress.processed_chunks >= progress.total_chunks
         ]
 
@@ -233,7 +236,7 @@ class XAIStreamAdapter:
             "total_chunks_processed": total_processed,
             "average_chunks_per_stream": total_processed / active_count if active_count > 0 else 0,
             "is_paused": self.is_paused,
-            "max_concurrent_streams": self.max_concurrent_streams
+            "max_concurrent_streams": self.max_concurrent_streams,
         }
 
 
@@ -255,7 +258,7 @@ try:
             response_stream: Any,
             stream_id: str,
             context: dict[str, Any] = None,
-            progress_callback: Callable | None = None
+            progress_callback: Callable | None = None,
         ) -> dict[str, Any]:
             """
             Process streaming response with enhanced explanations.
@@ -264,7 +267,7 @@ try:
                 response_stream=response_stream,
                 stream_id=stream_id,
                 explanation_generator=self._generate_explanation,
-                progress_callback=progress_callback
+                progress_callback=progress_callback,
             )
 
             # Generate comprehensive explanation
@@ -272,14 +275,14 @@ try:
                 decision_id=stream_id,
                 context=context,
                 detected_patterns=[],  # Could be extracted from response
-                cognitive_state={}  # Could be derived from context
+                cognitive_state={},  # Could be derived from context
             )
 
             return {
                 "stream_id": stream_id,
                 "chunks": len(chunks),
                 "explanation": final_explanation,
-                "performance_metrics": self.get_performance_metrics()
+                "performance_metrics": self.get_performance_metrics(),
             }
 
         async def _generate_explanation(self, chunk: StreamChunk, progress: StreamProgress) -> dict[str, Any]:
@@ -291,8 +294,8 @@ try:
                 result={"content": chunk.content, "metadata": chunk.metadata},
                 cognitive_state={
                     "load": progress.processed_chunks / progress.total_chunks,
-                    "processing_mode": "streaming"
-                }
+                    "processing_mode": "streaming",
+                },
             )
 
 except ImportError:
@@ -308,7 +311,7 @@ except ImportError:
             response_stream: Any,
             stream_id: str,
             context: dict[str, Any] = None,
-            progress_callback: Callable | None = None
+            progress_callback: Callable | None = None,
         ) -> dict[str, Any]:
             """
             Process streaming response with fallback explanations.
@@ -317,7 +320,7 @@ except ImportError:
                 response_stream=response_stream,
                 stream_id=stream_id,
                 explanation_generator=None,  # No explanation generator
-                progress_callback=progress_callback
+                progress_callback=progress_callback,
             )
 
             # Simple fallback explanation
@@ -332,5 +335,5 @@ except ImportError:
                 "stream_id": stream_id,
                 "chunks": len(chunks),
                 "explanation": fallback_explanation,
-                "performance_metrics": self.get_performance_metrics()
+                "performance_metrics": self.get_performance_metrics(),
             }

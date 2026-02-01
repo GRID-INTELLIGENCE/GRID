@@ -23,7 +23,6 @@ This codemap provides a high-signal overview of the GRID project’s file geogra
 
 ## 🚢 Delivery & Release
 - **[docs/deployment](file:///e:/grid/docs/deployment)**, **[docs/final_release](file:///e:/grid/docs/final_release)**: Production-ready documentation.
-- **[DOCKER_QUICKSTART.md](file:///e:/grid/docs/DOCKER_QUICKSTART.md)**: Containerization guide.
 - **[RESONANCE_1_0_RELEASE.md](file:///e:/grid/docs/RESONANCE_1_0_RELEASE.md)**: Official release notes.
 - **[STABILIZATION_REPORT.md](file:///e:/grid/docs/STABILIZATION_REPORT.md)**: Audit of test resolutions and architectural stability.
 - **[Makefile](file:///e:/grid/Makefile)**: Top-level build and automation tasks.

@@ -412,9 +412,7 @@ class ToggleKit:
             raise ValueError(f"Unsupported format: {format}")
 
 
-def create_toggle_kit(
-    config_path: str | None = None, features: dict[str, dict[str, Any]] | None = None
-) -> ToggleKit:
+def create_toggle_kit(config_path: str | None = None, features: dict[str, dict[str, Any]] | None = None) -> ToggleKit:
     """Factory function to create and configure a ToggleKit instance."""
     kit = ToggleKit(config_path)
 

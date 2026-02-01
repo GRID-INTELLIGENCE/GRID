@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 
 class ServiceStatus(Enum):
     """Service health status."""
+
     HEALTHY = "healthy"
     DEGRADED = "degraded"
     UNHEALTHY = "unhealthy"
@@ -34,6 +35,7 @@ class ServiceStatus(Enum):
 @dataclass
 class ServiceEndpoint:
     """Service endpoint configuration."""
+
     name: str
     url: str
     weight: int = 1
@@ -50,6 +52,7 @@ class ServiceEndpoint:
 @dataclass
 class RouteConfig:
     """Route configuration."""
+
     path: str
     service_name: str
     methods: list[str]
@@ -61,6 +64,7 @@ class RouteConfig:
 @dataclass
 class CircuitBreakerState:
     """Circuit breaker state."""
+
     failure_count: int = 0
     last_failure_time: float = 0
     state: str = "CLOSED"  # CLOSED, OPEN, HALF_OPEN
@@ -175,8 +179,7 @@ class APIGateway:
 
         self.services[service.name].append(service)
         self.circuit_breakers[service.name] = CircuitBreaker(
-            failure_threshold=service.circuit_breaker_threshold,
-            timeout=service.circuit_breaker_timeout
+            failure_threshold=service.circuit_breaker_threshold, timeout=service.circuit_breaker_timeout
         )
 
         logger.info(f"Service registered: {service.name} at {service.url}")
@@ -205,10 +208,7 @@ class APIGateway:
                 for endpoint in endpoints:
                     try:
                         health_url = f"{endpoint.url}{endpoint.health_check_path}"
-                        response = await client.get(
-                            health_url,
-                            timeout=5.0
-                        )
+                        response = await client.get(health_url, timeout=5.0)
 
                         if response.status_code == 200:
                             endpoint.status = ServiceStatus.HEALTHY
@@ -230,10 +230,7 @@ class APIGateway:
         if service_name not in self.services:
             return None
 
-        healthy_endpoints = [
-            ep for ep in self.services[service_name]
-            if ep.status == ServiceStatus.HEALTHY
-        ]
+        healthy_endpoints = [ep for ep in self.services[service_name] if ep.status == ServiceStatus.HEALTHY]
 
         if not healthy_endpoints:
             return None
@@ -244,6 +241,7 @@ class APIGateway:
             return healthy_endpoints[0]
 
         import random
+
         rand = random.uniform(0, total_weight)
         current_weight = 0
 
@@ -254,19 +252,14 @@ class APIGateway:
 
         return healthy_endpoints[0]
 
-    async def _forward_request(
-        self,
-        request: Request,
-        endpoint: ServiceEndpoint,
-        path: str
-    ) -> Response:
+    async def _forward_request(self, request: Request, endpoint: ServiceEndpoint, path: str) -> Response:
         """Forward request to service endpoint."""
         circuit_breaker = self.circuit_breakers.get(endpoint.name)
 
         if circuit_breaker and not circuit_breaker.call_allowed():
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail=f"Circuit breaker open for service: {endpoint.name}"
+                detail=f"Circuit breaker open for service: {endpoint.name}",
             )
 
         # Prepare request
@@ -279,11 +272,7 @@ class APIGateway:
         try:
             async with httpx.AsyncClient(timeout=endpoint.timeout) as client:
                 response = await client.request(
-                    method=request.method,
-                    url=url,
-                    headers=headers,
-                    content=body,
-                    params=request.query_params
+                    method=request.method, url=url, headers=headers, content=body, params=request.query_params
                 )
 
                 if circuit_breaker:
@@ -294,26 +283,18 @@ class APIGateway:
 
                 # Create response
                 return Response(
-                    content=response.content,
-                    status_code=response.status_code,
-                    headers=dict(response.headers)
+                    content=response.content, status_code=response.status_code, headers=dict(response.headers)
                 )
 
         except httpx.TimeoutException:
             if circuit_breaker:
                 circuit_breaker.record_failure()
-            raise HTTPException(
-                status_code=status.HTTP_504_GATEWAY_TIMEOUT,
-                detail=f"Service timeout: {endpoint.name}"
-            )
+            raise HTTPException(status_code=status.HTTP_504_GATEWAY_TIMEOUT, detail=f"Service timeout: {endpoint.name}") from None
         except Exception as e:
             if circuit_breaker:
                 circuit_breaker.record_failure()
             logger.error(f"Request forwarding failed: {e}")
-            raise HTTPException(
-                status_code=status.HTTP_502_BAD_GATEWAY,
-                detail=f"Service unavailable: {endpoint.name}"
-            )
+            raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=f"Service unavailable: {endpoint.name}") from e
 
     async def route_request(self, request: Request) -> Response:
         """Route incoming request."""
@@ -328,10 +309,7 @@ class APIGateway:
                 break
 
         if not route:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Route not found"
-            )
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Route not found")
 
         # Rate limiting
         if self.rate_limiter and route.rate_limit:
@@ -339,21 +317,18 @@ class APIGateway:
             key = f"rate_limit:{client_ip}:{route.path}"
 
             if not await self.rate_limiter.is_allowed(key, route.rate_limit):
-                raise HTTPException(
-                    status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                    detail="Rate limit exceeded"
-                )
+                raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail="Rate limit exceeded")
 
         # Select endpoint
         endpoint = self._select_endpoint(route.service_name)
         if not endpoint:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail=f"No healthy endpoints for service: {route.service_name}"
+                detail=f"No healthy endpoints for service: {route.service_name}",
             )
 
         # Forward request
-        remaining_path = path[len(route.path):]
+        remaining_path = path[len(route.path) :]
         return await self._forward_request(request, endpoint, remaining_path)
 
     def get_service_status(self) -> dict[str, Any]:
@@ -366,14 +341,18 @@ class APIGateway:
                         "url": ep.url,
                         "status": ep.status.value,
                         "last_health_check": ep.last_health_check,
-                        "circuit_breaker_failures": ep.circuit_breaker_failures
+                        "circuit_breaker_failures": ep.circuit_breaker_failures,
                     }
                     for ep in endpoints
                 ],
-                "circuit_breaker": {
-                    "state": self.circuit_breakers[service_name].state.state,
-                    "failure_count": self.circuit_breakers[service_name].state.failure_count
-                } if service_name in self.circuit_breakers else None
+                "circuit_breaker": (
+                    {
+                        "state": self.circuit_breakers[service_name].state.state,
+                        "failure_count": self.circuit_breakers[service_name].state.failure_count,
+                    }
+                    if service_name in self.circuit_breakers
+                    else None
+                ),
             }
         return status
 
@@ -381,6 +360,7 @@ class APIGateway:
 # ============================================================================
 # FastAPI Application Factory
 # ============================================================================
+
 
 def create_gateway_app() -> FastAPI:
     """Create FastAPI application for API Gateway."""
@@ -397,7 +377,7 @@ def create_gateway_app() -> FastAPI:
         title="Arena API Gateway",
         description="Dynamic API Gateway for Arena Architecture Modernization",
         version="1.0.0",
-        lifespan=lifespan
+        lifespan=lifespan,
     )
 
     # Middleware
@@ -424,39 +404,30 @@ def create_gateway_app() -> FastAPI:
 # Example Usage
 # ============================================================================
 
+
 async def example_setup():
     """Example setup of API Gateway."""
     app, gateway = create_gateway_app()
 
     # Register services
-    gateway.register_service(ServiceEndpoint(
-        name="grid-service",
-        url="http://localhost:8080",
-        weight=2,
-        health_check_path="/health"
-    ))
+    gateway.register_service(
+        ServiceEndpoint(name="grid-service", url="http://localhost:8080", weight=2, health_check_path="/health")
+    )
 
-    gateway.register_service(ServiceEndpoint(
-        name="coinbase-service",
-        url="http://localhost:8081",
-        weight=1,
-        health_check_path="/health"
-    ))
+    gateway.register_service(
+        ServiceEndpoint(name="coinbase-service", url="http://localhost:8081", weight=1, health_check_path="/health")
+    )
 
     # Register routes
-    gateway.register_route(RouteConfig(
-        path="/api/v1/grid",
-        service_name="grid-service",
-        methods=["GET", "POST", "PUT", "DELETE"],
-        rate_limit=100
-    ))
+    gateway.register_route(
+        RouteConfig(
+            path="/api/v1/grid", service_name="grid-service", methods=["GET", "POST", "PUT", "DELETE"], rate_limit=100
+        )
+    )
 
-    gateway.register_route(RouteConfig(
-        path="/api/v1/coinbase",
-        service_name="coinbase-service",
-        methods=["GET", "POST"],
-        rate_limit=50
-    ))
+    gateway.register_route(
+        RouteConfig(path="/api/v1/coinbase", service_name="coinbase-service", methods=["GET", "POST"], rate_limit=50)
+    )
 
     return app
 
@@ -466,9 +437,4 @@ if __name__ == "__main__":
 
     app, _ = example_setup()
 
-    uvicorn.run(
-        app,
-        host="0.0.0.0",
-        port=8000,
-        log_level="info"
-    )
+    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")

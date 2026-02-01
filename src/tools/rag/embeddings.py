@@ -60,7 +60,7 @@ class OllamaEmbedding(EmbeddingProvider):
             # Convert to sparse dict (keep only significant values)
             return {str(i): v for i, v in enumerate(vector) if abs(v) > 0.01}
         except TimeoutError:
-            raise RuntimeError("Ollama embedding timed out after 30s")
+            raise RuntimeError("Ollama embedding timed out after 30s") from None
 
     async def async_embed(self, text: str) -> dict[str, float]:
         """Get embeddings using Ollama (native async)."""

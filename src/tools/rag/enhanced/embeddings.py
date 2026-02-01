@@ -395,7 +395,7 @@ class EnhancedRAG:
 
             # Combine document metadata with chunk metadata
             chunk_dict_metadata = chunk_metadata.__dict__
-            
+
             # Apply KG enrichment if enabled
             if self.enricher:
                 chunk_dict_metadata = self.enricher.enrich_metadata(chunk_text, chunk_dict_metadata)

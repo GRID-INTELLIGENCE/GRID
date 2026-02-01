@@ -19,9 +19,9 @@ from ..activity_resonance import (
 )
 from ..adsr_envelope import EnvelopeMetrics
 from ..context_provider import ContextSnapshot
+from ..databricks_bridge import DatabricksBridge
 from ..path_visualizer import PathTriage
 from ..repositories.resonance_repository import ResonanceRepository
-from ..databricks_bridge import DatabricksBridge
 
 logger = logging.getLogger(__name__)
 
@@ -50,9 +50,10 @@ class ResonanceService:
         self._activity_events: dict[str, list[ActivityEvent]] = {}
         self._websocket_connections: dict[str, list[Any]] = {}  # activity_id -> connections
         self.databricks_bridge = DatabricksBridge()
-        
+
         # Initialize Databricks Bridge
         import asyncio
+
         try:
             loop = asyncio.get_event_loop()
             if loop.is_running():
@@ -133,15 +134,19 @@ class ResonanceService:
 
         # Get envelope metrics for richer telemetry
         envelope_metrics = resonance.envelope.get_metrics()
-        
+
         # Log to Databricks
-        await self.databricks_bridge.log_event("ACTIVITY_PROCESSED", {
-            "activity_id": activity_id,
-            "type": activity_type,
-            "query": query,
-            "feedback": feedback.__dict__ if hasattr(feedback, "__dict__") else str(feedback),
-            "envelope": envelope_metrics.__dict__ if envelope_metrics else None
-        }, impact=0.9)
+        await self.databricks_bridge.log_event(
+            "ACTIVITY_PROCESSED",
+            {
+                "activity_id": activity_id,
+                "type": activity_type,
+                "query": query,
+                "feedback": feedback.__dict__ if hasattr(feedback, "__dict__") else str(feedback),
+                "envelope": envelope_metrics.__dict__ if envelope_metrics else None,
+            },
+            impact=0.9,
+        )
 
         return activity_id, feedback
 

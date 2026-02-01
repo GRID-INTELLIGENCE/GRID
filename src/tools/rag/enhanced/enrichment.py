@@ -1,6 +1,7 @@
 """
 RAG Metadata Enrichment - Cross-referencing RAG chunks with Knowledge Graph entities.
 """
+
 import json
 import logging
 import re
@@ -9,6 +10,7 @@ from typing import Any
 from grid.knowledge import PersistentJSONKnowledgeStore
 
 logger = logging.getLogger(__name__)
+
 
 class RAGMetadataEnricher:
     """Enriches RAG metadata with Knowledge Graph entity references."""
@@ -43,16 +45,12 @@ class RAGMetadataEnricher:
 
         mentions = []
         text_lower = text.lower()
-        
+
         for name, eid in self.entity_map.items():
             # Use word boundaries for matching
             pattern = rf"\b{re.escape(name)}\b"
             if re.search(pattern, text_lower):
-                mentions.append({
-                    "entity_id": eid,
-                    "name": name,
-                    "type": self.store.entities[eid].entity_type.value
-                })
+                mentions.append({"entity_id": eid, "name": name, "type": self.store.entities[eid].entity_type.value})
 
         if mentions:
             metadata["kg_entities"] = json.dumps(mentions)

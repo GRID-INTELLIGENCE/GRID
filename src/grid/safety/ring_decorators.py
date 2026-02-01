@@ -263,6 +263,7 @@ def require_ring(min_ring: PrivilegeRing) -> Callable[[F], F]:
                     f"but current ring is {current.name} (Ring {current.value})"
                 )
             return func(*args, **kwargs)
+
         return cast(F, wrapper)
 
     return decorator

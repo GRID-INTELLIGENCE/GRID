@@ -43,53 +43,57 @@ class AISafetyConfig:
     enable_provider_failover: bool = True
 
     # Safety thresholds
-    safety_thresholds: dict[str, float] = field(default_factory=lambda: {
-        "safe": 0.8,
-        "warning": 0.6,
-        "danger": 0.4,
-    })
+    safety_thresholds: dict[str, float] = field(
+        default_factory=lambda: {
+            "safe": 0.8,
+            "warning": 0.6,
+            "danger": 0.4,
+        }
+    )
 
     # Default severity threshold for actions
     default_severity_threshold: ThreatLevel = ThreatLevel.MEDIUM
 
     # Provider configurations
-    providers: dict[str, ProviderConfig] = field(default_factory=lambda: {
-        "openai": ProviderConfig(
-            name="openai",
-            api_key_env="OPENAI_API_KEY",
-            api_endpoint="https://api.openai.com/v1/moderations",
-        ),
-        "anthropic": ProviderConfig(
-            name="anthropic",
-            api_key_env="ANTHROPIC_API_KEY",
-            api_endpoint="https://api.anthropic.com/v1/messages",
-        ),
-        "google": ProviderConfig(
-            name="google",
-            api_key_env="GEMINI_API_KEY",
-            api_endpoint="https://generativelanguage.googleapis.com/v1beta",
-        ),
-        "xai": ProviderConfig(
-            name="xai",
-            api_key_env="XAI_API_KEY",
-            api_endpoint="https://api.x.ai/v1",
-        ),
-        "mistral": ProviderConfig(
-            name="mistral",
-            api_key_env="MISTRAL_API_KEY",
-            api_endpoint="https://api.mistral.ai/v1",
-        ),
-        "nvidia": ProviderConfig(
-            name="nvidia",
-            api_key_env="NVIDIA_API_KEY",
-            api_endpoint="https://api.nvidia.com/v1",
-        ),
-        "llama": ProviderConfig(
-            name="llama",
-            api_key_env="LLAMA_API_KEY",
-            api_endpoint=None,  # Local inference by default
-        ),
-    })
+    providers: dict[str, ProviderConfig] = field(
+        default_factory=lambda: {
+            "openai": ProviderConfig(
+                name="openai",
+                api_key_env="OPENAI_API_KEY",
+                api_endpoint="https://api.openai.com/v1/moderations",
+            ),
+            "anthropic": ProviderConfig(
+                name="anthropic",
+                api_key_env="ANTHROPIC_API_KEY",
+                api_endpoint="https://api.anthropic.com/v1/messages",
+            ),
+            "google": ProviderConfig(
+                name="google",
+                api_key_env="GEMINI_API_KEY",
+                api_endpoint="https://generativelanguage.googleapis.com/v1beta",
+            ),
+            "xai": ProviderConfig(
+                name="xai",
+                api_key_env="XAI_API_KEY",
+                api_endpoint="https://api.x.ai/v1",
+            ),
+            "mistral": ProviderConfig(
+                name="mistral",
+                api_key_env="MISTRAL_API_KEY",
+                api_endpoint="https://api.mistral.ai/v1",
+            ),
+            "nvidia": ProviderConfig(
+                name="nvidia",
+                api_key_env="NVIDIA_API_KEY",
+                api_endpoint="https://api.nvidia.com/v1",
+            ),
+            "llama": ProviderConfig(
+                name="llama",
+                api_key_env="LLAMA_API_KEY",
+                api_endpoint=None,  # Local inference by default
+            ),
+        }
+    )
 
     # Monitoring settings
     monitoring_enabled: bool = True
@@ -110,18 +114,10 @@ class AISafetyConfig:
         config = cls()
 
         # Load feature flags
-        config.enable_content_moderation = (
-            os.getenv("AI_SAFETY_ENABLE_CONTENT_MODERATION", "true").lower() == "true"
-        )
-        config.enable_behavior_analysis = (
-            os.getenv("AI_SAFETY_ENABLE_BEHAVIOR_ANALYSIS", "true").lower() == "true"
-        )
-        config.enable_threat_detection = (
-            os.getenv("AI_SAFETY_ENABLE_THREAT_DETECTION", "true").lower() == "true"
-        )
-        config.enable_provider_failover = (
-            os.getenv("AI_SAFETY_ENABLE_PROVIDER_FAILOVER", "true").lower() == "true"
-        )
+        config.enable_content_moderation = os.getenv("AI_SAFETY_ENABLE_CONTENT_MODERATION", "true").lower() == "true"
+        config.enable_behavior_analysis = os.getenv("AI_SAFETY_ENABLE_BEHAVIOR_ANALYSIS", "true").lower() == "true"
+        config.enable_threat_detection = os.getenv("AI_SAFETY_ENABLE_THREAT_DETECTION", "true").lower() == "true"
+        config.enable_provider_failover = os.getenv("AI_SAFETY_ENABLE_PROVIDER_FAILOVER", "true").lower() == "true"
 
         # Load thresholds
         safe_threshold = os.getenv("AI_SAFETY_THRESHOLD_SAFE")

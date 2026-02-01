@@ -8,7 +8,6 @@ This directory contains **12 comprehensive Mermaid diagrams** visualizing the GR
 
 - **Type**: Graph TB (Top to Bottom)
 - **Shows**: Complete system flow from User Interface → Application → Core Intelligence → Data Storage → Infrastructure
-- **Key Components**: Web Dashboard, CLI, FastAPI, Mothership App, Agentic System, Resonance API, Skills System, Databases, Docker Stack
 
 ### 🤖 **Agentic Workflow** (`agentic_workflow.png`)
 
@@ -31,7 +30,6 @@ This directory contains **12 comprehensive Mermaid diagrams** visualizing the GR
 - **Layers**: Discovery → Execution → Intelligence → Management → API
 - **Features**: Auto-registration, performance guarding, A/B testing, version rollback
 
-### 🐳 **Docker Infrastructure** (`docker_infrastructure.png`)
 
 - **Type**: Graph TB
 - **Shows**: Complete containerized architecture
@@ -158,7 +156,6 @@ Get-ChildItem -Filter "*.mmd" | ForEach-Object {
 
 - **Clean organization** with logical structure
 - **Modern tooling** (UV, Ruff, Black, MyPy)
-- **Containerized deployment** with Docker stack
 
 ---
 

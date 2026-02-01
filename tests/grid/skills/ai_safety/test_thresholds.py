@@ -1,6 +1,5 @@
 """Tests for AI Safety Thresholds Skill."""
 
-import pytest
 
 from grid.skills.ai_safety.base import ThreatLevel
 from grid.skills.ai_safety.thresholds import (

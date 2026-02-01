@@ -8,6 +8,7 @@ Goals:
 - Centralize safety validation
 - Enable async processing
 """
+
 import importlib.util
 import logging
 import sys
@@ -28,6 +29,7 @@ logger = logging.getLogger(__name__)
 
 class SafetySource(Enum):
     """Source of safety validation"""
+
     WELLNESS_STUDIO = "wellness_studio"
     UNIFIED_FABRIC = "unified_fabric"
     HYBRID = "hybrid"
@@ -36,6 +38,7 @@ class SafetySource(Enum):
 @dataclass
 class SafetyBridgeConfig:
     """Configuration for safety bridge"""
+
     source: SafetySource = SafetySource.UNIFIED_FABRIC
     wellness_studio_path: str = "C:/Users/irfan/CascadeProjects/windsurf-project-2/wellness_studio"
     enable_async: bool = True
@@ -48,6 +51,7 @@ class SafetyBridgeConfig:
 @dataclass
 class SafetyContext:
     """Context for safety validation"""
+
     project: str
     domain: str
     user_id: str
@@ -59,12 +63,12 @@ class SafetyContext:
 class AISafetyBridge:
     r"""
     Bridge for distributing AI Safety across E:\ projects.
-    
+
     Connects wellness_studio safety features to:
     - E:\grid - GRID cognitive routers
     - E:\coinbase - Coinbase portfolio/trading
     - Other E:\ projects
-    
+
     Features:
     - Async non-blocking validation
     - Event-driven safety alerts
@@ -99,18 +103,14 @@ class AISafetyBridge:
         self._initialized = True
         logger.info(f"AISafetyBridge initialized with source: {self.config.source.value}")
 
-    async def validate(
-        self,
-        content: str,
-        context: SafetyContext
-    ) -> SafetyReport:
+    async def validate(self, content: str, context: SafetyContext) -> SafetyReport:
         """
         Validate content with safety checks.
-        
+
         Args:
             content: Content to validate
             context: Safety context with project/domain info
-            
+
         Returns:
             SafetyReport with decision
         """
@@ -138,18 +138,11 @@ class AISafetyBridge:
 
         return report
 
-    async def validate_grid_request(
-        self,
-        request: dict[str, Any],
-        user_id: str = "system"
-    ) -> SafetyReport:
+    async def validate_grid_request(self, request: dict[str, Any], user_id: str = "system") -> SafetyReport:
         """Validate a GRID router request"""
         content = str(request.get("content", request.get("query", request)))
         context = SafetyContext(
-            project="grid",
-            domain="grid",
-            user_id=user_id,
-            metadata={"request_type": request.get("type", "unknown")}
+            project="grid", domain="grid", user_id=user_id, metadata={"request_type": request.get("type", "unknown")}
         )
         return await self.validate(content, context)
 
@@ -166,49 +159,35 @@ class AISafetyBridge:
             metadata=context_payload.get("metadata", {}),
         )
 
-    async def validate_coinbase_action(
-        self,
-        action: dict[str, Any],
-        user_id: str = "system"
-    ) -> SafetyReport:
+    async def validate_coinbase_action(self, action: dict[str, Any], user_id: str = "system") -> SafetyReport:
         """Validate a Coinbase portfolio action"""
         content = str(action)
         context = SafetyContext(
             project="coinbase",
             domain="coinbase",
             user_id=user_id,
-            metadata={"action_type": action.get("type", "unknown")}
+            metadata={"action_type": action.get("type", "unknown")},
         )
         return await self.validate(content, context)
 
-    async def validate_revenue_event(
-        self,
-        event: dict[str, Any],
-        user_id: str = "system"
-    ) -> SafetyReport:
+    async def validate_revenue_event(self, event: dict[str, Any], user_id: str = "system") -> SafetyReport:
         """Validate a revenue pipeline event"""
         content = str(event)
-        context = SafetyContext(
-            project="coinbase",
-            domain="revenue",
-            user_id=user_id,
-            metadata=event
-        )
+        context = SafetyContext(project="coinbase", domain="revenue", user_id=user_id, metadata=event)
         return await self.validate(content, context)
 
     def create_async_hook(
         self,
         on_block: Callable[[SafetyReport], Awaitable[Any]] | None = None,
-        on_warn: Callable[[SafetyReport], Awaitable[Any]] | None = None
+        on_warn: Callable[[SafetyReport], Awaitable[Any]] | None = None,
     ) -> Callable:
         """
         Create an async hook for GRID routers.
-        
+
         Returns decorator that wraps router handlers with safety.
         """
-        async def safety_hook(
-            handler: Callable[..., Awaitable[Any]]
-        ) -> Callable[..., Awaitable[Any]]:
+
+        async def safety_hook(handler: Callable[..., Awaitable[Any]]) -> Callable[..., Awaitable[Any]]:
             async def wrapped(*args, **kwargs):
                 # Extract request from args
                 request = kwargs.get("request") or (args[0] if args else {})
@@ -216,8 +195,7 @@ class AISafetyBridge:
 
                 # Validate
                 report = await self.validate_grid_request(
-                    request if isinstance(request, dict) else {"content": str(request)},
-                    user_id
+                    request if isinstance(request, dict) else {"content": str(request)}, user_id
                 )
 
                 # Handle based on decision
@@ -233,39 +211,26 @@ class AISafetyBridge:
                 return await handler(*args, **kwargs)
 
             return wrapped
+
         return safety_hook
 
-    async def _validate_internal(
-        self,
-        content: str,
-        context: SafetyContext
-    ) -> SafetyReport:
+    async def _validate_internal(self, content: str, context: SafetyContext) -> SafetyReport:
         """Internal validation logic"""
         if self.config.source == SafetySource.WELLNESS_STUDIO:
             return await self._validate_with_wellness(content, context)
         elif self.config.source == SafetySource.HYBRID:
             # Run both and merge
-            unified = await self._safety_router.validate(
-                content, context.domain, context.user_id
-            )
+            unified = await self._safety_router.validate(content, context.domain, context.user_id)
             wellness = await self._validate_with_wellness(content, context)
             return self._merge_reports(unified, wellness)
         else:
-            return await self._safety_router.validate(
-                content, context.domain, context.user_id
-            )
+            return await self._safety_router.validate(content, context.domain, context.user_id)
 
-    async def _validate_with_wellness(
-        self,
-        content: str,
-        context: SafetyContext
-    ) -> SafetyReport:
+    async def _validate_with_wellness(self, content: str, context: SafetyContext) -> SafetyReport:
         """Validate using wellness_studio safety"""
         if not self._wellness_safety:
             # Fallback to unified fabric
-            return await self._safety_router.validate(
-                content, context.domain, context.user_id
-            )
+            return await self._safety_router.validate(content, context.domain, context.user_id)
 
         # Use loaded wellness_studio module
         try:
@@ -273,9 +238,7 @@ class AISafetyBridge:
             return self._convert_wellness_result(result)
         except Exception as e:
             logger.warning(f"Wellness safety failed, using fallback: {e}")
-            return await self._safety_router.validate(
-                content, context.domain, context.user_id
-            )
+            return await self._safety_router.validate(content, context.domain, context.user_id)
 
     async def _load_wellness_safety(self):
         """Load wellness_studio safety modules"""
@@ -287,10 +250,7 @@ class AISafetyBridge:
                 sys.path.insert(0, str(safety_path.parent))
 
             # Try to import ai_safety module
-            spec = importlib.util.spec_from_file_location(
-                "ai_safety",
-                safety_path / "ai_safety.py"
-            )
+            spec = importlib.util.spec_from_file_location("ai_safety", safety_path / "ai_safety.py")
             if spec and spec.loader:
                 module = importlib.util.module_from_spec(spec)
                 spec.loader.exec_module(module)
@@ -304,22 +264,11 @@ class AISafetyBridge:
         # Adapt based on wellness_studio's return format
         from .safety_router import SafetyDecision, SafetyReport, ThreatLevel
 
-        if hasattr(result, 'is_safe') and not result.is_safe:
-            return SafetyReport(
-                decision=SafetyDecision.BLOCK,
-                threat_level=ThreatLevel.HIGH,
-                violations=[]
-            )
-        return SafetyReport(
-            decision=SafetyDecision.ALLOW,
-            threat_level=ThreatLevel.NONE
-        )
+        if hasattr(result, "is_safe") and not result.is_safe:
+            return SafetyReport(decision=SafetyDecision.BLOCK, threat_level=ThreatLevel.HIGH, violations=[])
+        return SafetyReport(decision=SafetyDecision.ALLOW, threat_level=ThreatLevel.NONE)
 
-    def _merge_reports(
-        self,
-        unified: SafetyReport,
-        wellness: SafetyReport
-    ) -> SafetyReport:
+    def _merge_reports(self, unified: SafetyReport, wellness: SafetyReport) -> SafetyReport:
         """Merge two safety reports (most restrictive wins)"""
         from .safety_router import ThreatLevel
 
@@ -342,11 +291,7 @@ class AISafetyBridge:
         wellness_idx = threat_order.index(wellness.threat_level) if wellness.threat_level in threat_order else 0
         merged_threat = threat_order[max(unified_idx, wellness_idx)]
 
-        return SafetyReport(
-            decision=merged_decision,
-            threat_level=merged_threat,
-            violations=merged_violations
-        )
+        return SafetyReport(decision=merged_decision, threat_level=merged_threat, violations=merged_violations)
 
     def _make_cache_key(self, content: str, context: SafetyContext) -> str:
         """Create cache key for content"""
@@ -364,11 +309,7 @@ class AISafetyBridge:
 
         return report
 
-    async def _audit_validation(
-        self,
-        report: SafetyReport,
-        context: SafetyContext
-    ):
+    async def _audit_validation(self, report: SafetyReport, context: SafetyContext):
         """Log validation to audit trail"""
         await self._audit_logger.log(
             event_type=AuditEventType.SAFETY_CHECK,
@@ -378,17 +319,10 @@ class AISafetyBridge:
             status=report.decision.value,
             user_id=context.user_id,
             correlation_id=context.correlation_id,
-            details={
-                "threat_level": report.threat_level.value,
-                "violation_count": len(report.violations)
-            }
+            details={"threat_level": report.threat_level.value, "violation_count": len(report.violations)},
         )
 
-    async def _broadcast_safety_event(
-        self,
-        report: SafetyReport,
-        context: SafetyContext
-    ):
+    async def _broadcast_safety_event(self, report: SafetyReport, context: SafetyContext):
         """Broadcast safety event to subscribers"""
         payload = {
             "project": context.project,
@@ -414,6 +348,7 @@ class AISafetyBridge:
 
     def _subscribe_to_events(self):
         """Subscribe to relevant events"""
+
         async def handle_grid_request(event: Event):
             if event.event_type == "grid.request":
                 await self.validate_grid_request(event.payload)
@@ -497,12 +432,13 @@ class AISafetyBridge:
             "cached_results": len(self._cache),
             "async_enabled": self.config.enable_async,
             "audit_enabled": self.config.enable_audit,
-            "events_enabled": self.config.enable_events
+            "events_enabled": self.config.enable_events,
         }
 
 
 class SafetyBlockedException(Exception):
     """Exception raised when safety blocks a request"""
+
     def __init__(self, report: SafetyReport):
         self.report = report
         super().__init__(f"Request blocked: {report.threat_level.value}")

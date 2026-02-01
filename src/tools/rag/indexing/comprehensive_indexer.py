@@ -35,10 +35,8 @@ from typing import Any
 
 # Rich imports for beautiful CLI
 try:
-    from rich import print as rprint
     from rich.console import Console
     from rich.layout import Layout
-    from rich.live import Live
     from rich.panel import Panel
     from rich.progress import (
         BarColumn,
@@ -52,7 +50,6 @@ try:
     )
     from rich.table import Table
     from rich.text import Text
-    from rich.tree import Tree
 
     RICH_AVAILABLE = True
 except ImportError:
@@ -257,7 +254,6 @@ class NLPChunker:
         # Config
         elif suffix in (".json", ".yaml", ".yml", ".toml", ".ini", ".cfg"):
             return ContentType.CONFIG
-        elif name in ("dockerfile", "makefile", ".gitignore", ".env"):
             return ContentType.CONFIG
 
         # Data
@@ -346,7 +342,7 @@ class NLPChunker:
             return
 
         # Chunk by class/function
-        for i, (start_line, end_line, symbol_name, parent) in enumerate(boundaries):
+        for _i, (start_line, end_line, symbol_name, parent) in enumerate(boundaries):
             chunk_lines = lines[start_line : end_line + 1]
             chunk_text = "\n".join(chunk_lines)
 
@@ -829,8 +825,8 @@ class HuggingFaceEmbedder:
             self.model = SentenceTransformer(self.model_name, device=device)
             self.dimension = self.MODEL_DIMS.get(self.model_name, 384)
 
-        except ImportError:
-            raise ImportError("sentence-transformers is required. Install with: pip install sentence-transformers")
+        except ImportError as e:
+            raise ImportError("sentence-transformers is required. Install with: pip install sentence-transformers") from e
 
     def embed(self, text: str) -> list[float]:
         """Embed a single text."""
@@ -1119,7 +1115,7 @@ async def comprehensive_index(
 
     batch_size = 50  # Embedding batch size
 
-    for i, file_path in enumerate(files):
+    for _i, file_path in enumerate(files):
         rel_path = file_path.relative_to(repo)
 
         if display:

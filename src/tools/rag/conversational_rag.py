@@ -9,7 +9,7 @@ from .rag_engine import RAGEngine
 
 class ConversationalRAGEngine(RAGEngine):
     """Enhanced RAG engine with conversational capabilities.
-    
+
     Extends the base RAG engine with:
     - Conversation memory and session management
     - Multi-hop reasoning for complex queries
@@ -18,7 +18,7 @@ class ConversationalRAGEngine(RAGEngine):
 
     def __init__(self, config: RAGConfig | None = None):
         """Initialize conversational RAG engine.
-        
+
         Args:
             config: RAG configuration (default: from environment)
         """
@@ -28,16 +28,12 @@ class ConversationalRAGEngine(RAGEngine):
 
         # Initialize conversation memory
         self.conversation_memory = ConversationMemory(
-            max_sessions=100,
-            session_ttl_hours=self.config.conversation_memory_size * 24  # Convert days to hours
+            max_sessions=100, session_ttl_hours=self.config.conversation_memory_size * 24  # Convert days to hours
         )
 
         # Initialize multi-hop reasoning engine
         if self.config.multi_hop_enabled:
-            self.multi_hop_engine = MultiHopReasoningEngine(
-                self,
-                max_depth=self.config.multi_hop_max_depth
-            )
+            self.multi_hop_engine = MultiHopReasoningEngine(self, max_depth=self.config.multi_hop_max_depth)
         else:
             self.multi_hop_engine = None
 
@@ -48,7 +44,7 @@ class ConversationalRAGEngine(RAGEngine):
             "multi_hop_queries": 0,
             "session_average_turns": 0.0,
             "auto_indexing_attempts": 0,
-            "auto_indexing_successes": 0
+            "auto_indexing_successes": 0,
         }
 
         # Auto-index essential documentation (commented out for performance)
@@ -56,10 +52,10 @@ class ConversationalRAGEngine(RAGEngine):
 
     async def _generate_fallback_answer(self, query: str) -> str:
         """Generate a fallback answer when no documents are found.
-        
+
         Args:
             query: The user's query
-        
+
         Returns:
             Generated answer based on general knowledge
         """
@@ -90,10 +86,10 @@ class ConversationalRAGEngine(RAGEngine):
         include_sources: bool = True,
         session_id: str | None = None,
         use_conversation: bool = True,
-        enable_multi_hop: bool | None = None
+        enable_multi_hop: bool | None = None,
     ) -> dict[str, Any]:
         """Query the conversational RAG system.
-        
+
         Args:
             query_text: Query text
             top_k: Number of documents to retrieve
@@ -102,7 +98,7 @@ class ConversationalRAGEngine(RAGEngine):
             session_id: Optional session ID for conversation continuity
             use_conversation: Whether to use conversation context
             enable_multi_hop: Whether to enable multi-hop reasoning
-        
+
         Returns:
             Dictionary with enhanced conversational response
         """
@@ -114,9 +110,7 @@ class ConversationalRAGEngine(RAGEngine):
         if use_conversation and session_id and self.config.conversation_enabled:
             session = self.conversation_memory.get_session(session_id)
             if session and session.turns:
-                conversation_context = session.get_context_for_query(
-                    self.config.conversation_context_window
-                )
+                conversation_context = session.get_context_for_query(self.config.conversation_context_window)
 
         # Enhance query with conversation context
         enhanced_query = self._enhance_query_with_context(query_text, conversation_context)
@@ -136,10 +130,9 @@ class ConversationalRAGEngine(RAGEngine):
         # Implement fallback mechanism when no sources found
         if not result.get("sources") or len(result["sources"]) == 0:
             result["answer"] = await self._generate_fallback_answer(query_text)
-            result["sources"] = [{
-                "text": "General knowledge fallback",
-                "metadata": {"source": "fallback", "confidence": 0.5}
-            }]
+            result["sources"] = [
+                {"text": "General knowledge fallback", "metadata": {"source": "fallback", "confidence": 0.5}}
+            ]
             result["fallback_used"] = True
         else:
             result["fallback_used"] = False
@@ -150,9 +143,7 @@ class ConversationalRAGEngine(RAGEngine):
         # Store conversation turn if session exists
         if session_id and use_conversation and self.config.conversation_enabled:
             turn = ConversationTurn(
-                user_query=query_text,
-                system_response=result["answer"],
-                retrieved_sources=result.get("sources", [])
+                user_query=query_text, system_response=result["answer"], retrieved_sources=result.get("sources", [])
             )
             self.conversation_memory.add_turn(session_id, turn)
 
@@ -174,18 +165,18 @@ class ConversationalRAGEngine(RAGEngine):
             "session_id": session_id,
             "session_active": session_id is not None,
             "context_used": bool(conversation_context),
-            "turn_count": turn_count
+            "turn_count": turn_count,
         }
 
         return result
 
     def create_session(self, session_id: str, metadata: dict[str, Any] | None = None) -> str:
         """Create a new conversation session.
-        
+
         Args:
             session_id: Unique session identifier
             metadata: Optional session metadata
-        
+
         Returns:
             Session ID
         """
@@ -194,10 +185,10 @@ class ConversationalRAGEngine(RAGEngine):
 
     def get_session_info(self, session_id: str) -> dict[str, Any] | None:
         """Get information about a session.
-        
+
         Args:
             session_id: Session identifier
-        
+
         Returns:
             Session information dictionary
         """
@@ -206,10 +197,10 @@ class ConversationalRAGEngine(RAGEngine):
 
     def delete_session(self, session_id: str) -> bool:
         """Delete a conversation session.
-        
+
         Args:
             session_id: Session identifier
-        
+
         Returns:
             True if session was deleted
         """
@@ -217,23 +208,20 @@ class ConversationalRAGEngine(RAGEngine):
 
     def get_conversation_stats(self) -> dict[str, Any]:
         """Get conversation statistics.
-        
+
         Returns:
             Conversation metrics and memory statistics
         """
         memory_stats = self.conversation_memory.get_stats()
-        return {
-            **self.conversation_metrics,
-            "memory_stats": memory_stats
-        }
+        return {**self.conversation_metrics, "memory_stats": memory_stats}
 
     def _enhance_query_with_context(self, query: str, context: str) -> str:
         """Enhance query with conversation context.
-        
+
         Args:
             query: Original user query
             context: Conversation context
-        
+
         Returns:
             Enhanced query
         """
@@ -251,10 +239,10 @@ Current query: {query}"""
 
     def _improve_citation_quality(self, sources: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """Improve citation quality and attribution.
-        
+
         Args:
             sources: Original sources
-        
+
         Returns:
             Enhanced sources with better metadata
         """
@@ -268,7 +256,7 @@ Current query: {query}"""
                 **metadata,
                 "citation_score": self._calculate_citation_score(source),
                 "context_relevance": self._calculate_context_relevance(source),
-                "confidence": metadata.get("confidence", 0.5)
+                "confidence": metadata.get("confidence", 0.5),
             }
 
             # Add citation formatting
@@ -276,7 +264,7 @@ Current query: {query}"""
                 **source,
                 "metadata": enhanced_metadata,
                 "citation": self._format_citation(source),
-                "confidence": enhanced_metadata["confidence"]
+                "confidence": enhanced_metadata["confidence"],
             }
 
             enhanced_sources.append(enhanced_source)
@@ -288,10 +276,10 @@ Current query: {query}"""
 
     def _calculate_citation_score(self, source: dict[str, Any]) -> float:
         """Calculate citation quality score.
-        
+
         Args:
             source: Source information
-        
+
         Returns:
             Citation score (0.0-1.0)
         """
@@ -318,10 +306,10 @@ Current query: {query}"""
 
     def _calculate_context_relevance(self, source: dict[str, Any]) -> float:
         """Calculate context relevance score.
-        
+
         Args:
             source: Source information
-        
+
         Returns:
             Relevance score (0.0-1.0)
         """
@@ -331,10 +319,10 @@ Current query: {query}"""
 
     def _format_citation(self, source: dict[str, Any]) -> str:
         """Format citation for display.
-        
+
         Args:
             source: Source information
-        
+
         Returns:
             Formatted citation string
         """
@@ -350,7 +338,7 @@ Current query: {query}"""
 
     def _update_conversation_metrics(self) -> None:
         """Update conversation metrics.
-        
+
         Calculates:
         - Average turns per session
         - Active session count
@@ -377,7 +365,7 @@ Current query: {query}"""
             "docs/ARCHITECTURE.md",
             "docs/ARCHITECTURE_STRATEGY.md",
             "docs/CONVERSATIONAL_RAG_SUMMARY.md",
-            "docs/mcp/RAG_API_ENHANCEMENT_PLAN.md"
+            "docs/mcp/RAG_API_ENHANCEMENT_PLAN.md",
         ]
 
         for path in essential_paths:
@@ -397,16 +385,18 @@ Current query: {query}"""
                 except Exception as e:
                     logger.warning(f"Failed to index {path}: {e}")
 
-        logger.info(f"Auto-indexing complete: {self.conversation_metrics['auto_indexing_successes']}/{self.conversation_metrics['auto_indexing_attempts']} successful")
+        logger.info(
+            f"Auto-indexing complete: {self.conversation_metrics['auto_indexing_successes']}/{self.conversation_metrics['auto_indexing_attempts']} successful"
+        )
 
 
 # Factory function for easy instantiation
 def create_conversational_rag_engine(config: RAGConfig | None = None) -> ConversationalRAGEngine:
     """Create a new conversational RAG engine.
-    
+
     Args:
         config: Optional RAG configuration
-    
+
     Returns:
         ConversationalRAGEngine instance
     """

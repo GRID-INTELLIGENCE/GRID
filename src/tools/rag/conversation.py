@@ -79,7 +79,7 @@ class ConversationMemory:
 
     def __init__(self, max_sessions: int = 100, session_ttl_hours: int = 24):
         """Initialize conversation memory.
-        
+
         Args:
             max_sessions: Maximum number of sessions to keep in memory
             session_ttl_hours: Time-to-live for sessions in hours
@@ -140,7 +140,9 @@ class ConversationMemory:
             "session_ttl_hours": self.session_ttl_hours,
             "access_order_count": len(self.access_order),
             "oldest_session": min(s.created_at for s in self.sessions.values()).isoformat() if self.sessions else None,
-            "newest_session": max(s.last_accessed for s in self.sessions.values()).isoformat() if self.sessions else None,
+            "newest_session": (
+                max(s.last_accessed for s in self.sessions.values()).isoformat() if self.sessions else None
+            ),
         }
 
     def _cleanup(self) -> None:
@@ -169,7 +171,7 @@ class MultiHopReasoningEngine:
 
     def __init__(self, base_rag_engine, max_depth: int = 2):
         """Initialize multi-hop reasoning engine.
-        
+
         Args:
             base_rag_engine: The base RAG engine to use for retrieval
             max_depth: Maximum depth for hop traversal
@@ -177,57 +179,49 @@ class MultiHopReasoningEngine:
         self.base_rag_engine = base_rag_engine
         self.max_depth = max_depth
 
-    async def chain_retrieve(self, query: str, session_id: str = None) -> dict[str, Any]:
+    async def chain_retrieve(self, query: str, session_id: str | None = None) -> dict[str, Any]:
         """Perform multi-hop retrieval for complex queries.
-        
+
         Args:
             query: The user's query
             session_id: Optional session ID for conversation context
-        
+
         Returns:
             Enhanced query result with multi-hop reasoning
         """
         # Use conversation context if available
         conversation_context = ""
-        if session_id and hasattr(self.base_rag_engine, 'conversation_memory'):
+        if session_id and hasattr(self.base_rag_engine, "conversation_memory"):
             session = self.base_rag_engine.conversation_memory.get_session(session_id)
             if session:
                 conversation_context = session.get_context_for_query()
 
         # Step 1: Initial retrieval
-        initial_result = await self.base_rag_engine.query(
-            query,
-            conversation_context=conversation_context
-        )
+        initial_result = await self.base_rag_engine.query(query, conversation_context=conversation_context)
 
         # Step 2: Analyze retrieved content for follow-up questions
         follow_up_queries = self._generate_follow_up_queries(query, initial_result)
 
         # Step 3: Execute follow-up queries
         additional_context = []
-        for follow_up_query in follow_up_queries[:self.max_depth-1]:
+        for follow_up_query in follow_up_queries[: self.max_depth - 1]:
             follow_up_result = await self.base_rag_engine.query(follow_up_query)
             if follow_up_result["sources"]:
                 additional_context.extend(follow_up_result["sources"])
 
         # Step 4: Synthesize final answer
         if additional_context:
-            enhanced_context = self._combine_contexts(
-                initial_result["sources"],
-                additional_context
-            )
+            enhanced_context = self._combine_contexts(initial_result["sources"], additional_context)
 
             # Re-generate answer with enhanced context
-            final_answer = await self._generate_final_answer(
-                query, enhanced_context, conversation_context
-            )
+            final_answer = await self._generate_final_answer(query, enhanced_context, conversation_context)
 
             return {
                 "answer": final_answer,
                 "sources": enhanced_context,
                 "multi_hop": True,
-                "hops_performed": len(follow_up_queries[:self.max_depth-1]) + 1,
-                "follow_up_queries": follow_up_queries[:self.max_depth-1],
+                "hops_performed": len(follow_up_queries[: self.max_depth - 1]) + 1,
+                "follow_up_queries": follow_up_queries[: self.max_depth - 1],
             }
 
         return initial_result
@@ -237,10 +231,9 @@ class MultiHopReasoningEngine:
         # Simple heuristic: extract entities and concepts from retrieved content
         # In production, this could use an LLM to generate sophisticated follow-ups
 
-        sources_text = " ".join([
-            doc.get("metadata", {}).get("path", "") + ": " + doc.get("text", "")
-            for doc in result.get("sources", [])
-        ])
+        " ".join(
+            [doc.get("metadata", {}).get("path", "") + ": " + doc.get("text", "") for doc in result.get("sources", [])]
+        )
 
         # Extract potential follow-up topics
         follow_ups = []
@@ -275,10 +268,9 @@ class MultiHopReasoningEngine:
     async def _generate_final_answer(self, query: str, contexts: list[dict], conversation_context: str) -> str:
         """Generate final answer with enhanced context."""
         # Combine all context sources
-        combined_context = "\n".join([
-            f"Source: {ctx.get('metadata', {}).get('path', 'Unknown')}\n{ctx.get('text', '')}"
-            for ctx in contexts
-        ])
+        combined_context = "\n".join(
+            [f"Source: {ctx.get('metadata', {}).get('path', 'Unknown')}\n{ctx.get('text', '')}" for ctx in contexts]
+        )
 
         prompt = f"""Based on the following comprehensive context, please answer the query.
 
@@ -293,7 +285,7 @@ Query: {query}
 Answer:"""
 
         # Use the LLM provider to generate answer
-        if hasattr(self.base_rag_engine, 'llm_provider'):
+        if hasattr(self.base_rag_engine, "llm_provider"):
             answer = await self.base_rag_engine.llm_provider.async_generate(prompt)
             return answer
 

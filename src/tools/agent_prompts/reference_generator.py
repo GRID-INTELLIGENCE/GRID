@@ -12,13 +12,13 @@ from pathlib import Path
 from typing import Any
 
 try:
-    from .case_filing import CaseCategory, CaseStructure
+    from .case_filing import CaseCategory, CaseStructure  # type: ignore[import-not-found]
 except ImportError:
     # For standalone execution
     import sys
 
     sys.path.insert(0, str(Path(__file__).parent))
-    from case_filing import CaseCategory, CaseStructure
+    from case_filing import CaseCategory, CaseStructure  # type: ignore[import-not-found]
 
 try:
     from application.mothership.config.inference_abrasiveness import (

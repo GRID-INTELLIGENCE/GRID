@@ -12,7 +12,6 @@
 4. Source-of-fault diagnosis (what was wrong in v1.0)
 5. Migration/validation checklist
 6. Next steps
-7. Docker integration (safe, local-first)
 
 ---
 
@@ -181,15 +180,9 @@
 │   │   └── config/                  # Configuration schemas                   │
 │   │                                                                           │
 │   ├── 📂 config/                   # CONFIGURATION FILES                     │
-│   │   ├── docker/                  # Docker configurations                   │
-│   │   │   ├── Dockerfile                                                     │
-│   │   │   ├── Dockerfile.slim                                                │
-│   │   │   ├── docker-compose.yml                                             │
-│   │   │   └── docker-compose.prod.yml                                        │
 │   │   │                                                                       │
 │   │   └── env/                     # Environment configurations              │
 │   │       ├── .env.example                                                   │
-│   │       └── .env.docker                                                    │
 │   │                                                                           │
 │   ├── 📂 data/                     # DATA FILES                              │
 │   │   ├── samples/                 # Sample data                             │
@@ -231,7 +224,6 @@
 | `docs/guides/` | Documentation | User guides | `INSTALLATION.md` |
 | `scripts/build/` | Automation | Build scripts | `build.py` |
 | `scripts/deploy/` | Automation | Deployment scripts | `deploy.sh` |
-| `config/docker/` | Configuration | Docker files | `Dockerfile`, `docker-compose.yml` |
 | `assets/` | Static | Images, media, templates | `images/`, `media/` |
 | `archive/` | Archival | Deprecated code | `legacy/`, `datakit/` |
 
@@ -299,9 +291,6 @@ proposal:
     shared_types:
       target: src/shared/types/
       source_examples: [python/schema_validator.py, python/type_validator.py]
-    config_docker:
-      target: config/docker/
-      source_examples: [Dockerfile*, docker-compose*.yml]
   migration_rules:
     - prefer copy then remove after validation
     - add __init__.py for every new package
@@ -373,7 +362,6 @@ faulty_source:
 | Python Classes | `PascalCase` | `UserService` |
 | TypeScript/React | `PascalCase.tsx` | `Dashboard.tsx` |
 | Test Files | `test_*.py` or `*.test.ts` | `test_user_service.py` |
-| Config Files | `kebab-case` | `docker-compose.yml` |
 | Documentation | `SCREAMING_SNAKE_CASE.md` | `ARCHITECTURE.md` |
 
 ### Directory Naming
@@ -475,9 +463,6 @@ proposal:
     shared_types:
       target: src/shared/types/
       source_examples: [python/schema_validator.py, python/type_validator.py]
-    config_docker:
-      target: config/docker/
-      source_examples: [Dockerfile*, docker-compose*.yml]
   migration_rules:
     - prefer copy then remove after validation
     - add __init__.py for every new package

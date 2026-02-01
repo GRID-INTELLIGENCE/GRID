@@ -27,6 +27,7 @@ try:
         EventSeverity,
         SecurityEventType,
     )
+
     VECTION_AVAILABLE = True
 except ImportError:
     VECTION_AVAILABLE = False
@@ -45,7 +46,7 @@ if TYPE_CHECKING:
 class MothershipAuditService:
     """
     Bridges SecurityEnforcer audit entries to persistent, tamper-evident logging.
-    
+
     Features:
     - Hash-chaining via Vection AuditLogger (tamper-evident)
     - Database persistence via AuditLogRow
@@ -62,7 +63,7 @@ class MothershipAuditService:
     ):
         """
         Initialize the audit service.
-        
+
         Args:
             db_session_factory: Factory function to create async DB sessions
             config: AuditLoggerConfig for Vection logger (optional)
@@ -107,9 +108,9 @@ class MothershipAuditService:
         if violations:
             # Check for critical violations
             for v in violations:
-                if hasattr(v, 'severity') and v.severity == "critical":
+                if hasattr(v, "severity") and v.severity == "critical":
                     return "critical"
-                if hasattr(v, 'severity') and v.severity == "high":
+                if hasattr(v, "severity") and v.severity == "high":
                     return "error"
             return "warning"
         return "info"
@@ -130,7 +131,7 @@ class MothershipAuditService:
     def log_security_event(self, entry: SecurityAuditEntry) -> None:
         """
         Log a security audit entry from SecurityEnforcer.
-        
+
         Args:
             entry: SecurityAuditEntry from the middleware
         """
@@ -210,7 +211,7 @@ class MothershipAuditService:
         """Fallback in-memory logging when Vection not available."""
         self._fallback_log.append(audit_data)
         if len(self._fallback_log) > self._max_fallback_entries:
-            self._fallback_log = self._fallback_log[-self._max_fallback_entries:]
+            self._fallback_log = self._fallback_log[-self._max_fallback_entries :]
 
         # Also log to standard logger
         if not audit_data.get("allowed", True):
@@ -225,9 +226,9 @@ class MothershipAuditService:
     def add_callback(self, callback: Callable[[dict[str, Any]], None]) -> None:
         """
         Add a callback for real-time audit event notifications.
-        
+
         Useful for SIEM integration or real-time alerting.
-        
+
         Args:
             callback: Function called with audit data dict for each event
         """
@@ -278,14 +279,14 @@ def initialize_audit_service(
 ) -> MothershipAuditService:
     """
     Initialize the global audit service.
-    
+
     Should be called during application startup.
-    
+
     Args:
         db_session_factory: Factory for async DB sessions
         enable_db_persistence: Whether to persist to database
         enable_hash_chain: Whether to enable hash-chaining
-        
+
     Returns:
         MothershipAuditService instance
     """

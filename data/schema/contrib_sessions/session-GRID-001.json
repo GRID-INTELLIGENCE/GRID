@@ -265,7 +265,6 @@
     "src\\tools\\optimizer.py": {
       "num_lines": 71
     },
-    "src\\transformer\\Dockerfile": {
       "num_lines": 19
     },
     "src\\transformer\\main.py": {

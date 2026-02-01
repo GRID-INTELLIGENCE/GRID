@@ -36,22 +36,33 @@ def check_nvidia_safety(content: str, **kwargs: Any) -> list[SafetyViolation]:
         logger.debug("NVIDIA provider not enabled")
         return violations
 
-    guardrail_config = kwargs.get("guardrail_config", {})
+    kwargs.get("guardrail_config", {})
 
     # NVIDIA-style guardrail checks
     # Enterprise-focused safety categories
     enterprise_risks = {
         "data_exfiltration": [
-            "confidential", "proprietary", "trade secret",
-            "internal only", "not for distribution",
+            "confidential",
+            "proprietary",
+            "trade secret",
+            "internal only",
+            "not for distribution",
         ],
         "compliance_violation": [
-            "hipaa", "gdpr violation", "pci-dss", "sox",
-            "regulatory violation", "non-compliant",
+            "hipaa",
+            "gdpr violation",
+            "pci-dss",
+            "sox",
+            "regulatory violation",
+            "non-compliant",
         ],
         "security_risk": [
-            "exploit", "vulnerability", "zero-day", "cve-",
-            "security flaw", "breach method",
+            "exploit",
+            "vulnerability",
+            "zero-day",
+            "cve-",
+            "security flaw",
+            "breach method",
         ],
     }
 

@@ -282,7 +282,11 @@ def check_model_health(
                         status=ModelHealthStatus.HEALTHY,
                         is_available=True,
                         last_checked=now,
-                        details={"matched_as": "fuzzy", "available_as": model, "total_available": len(available_models)},
+                        details={
+                            "matched_as": "fuzzy",
+                            "available_as": model,
+                            "total_available": len(available_models),
+                        },
                     )
 
             # Model not found

@@ -63,11 +63,6 @@ class ChromaDBVectorStore(BaseVectorStore):
                 metadata={"hnsw:space": "cosine"},
             )
 
-    def delete(self, ids: list[str]) -> None:
-        """Delete documents by IDs."""
-        if ids:
-            self.collection.delete(ids=ids)
-
     def add(
         self,
         ids: list[str],

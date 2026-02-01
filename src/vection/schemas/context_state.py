@@ -445,9 +445,11 @@ class VectionContext:
             "dominant_anchors": [a.to_dict() for a in self.get_dominant_anchors()],
             "salience_map": {k: round(v, 3) for k, v in self.salience_map.items()},
             "projections": self.projections,
-            "velocity": self.cognitive_velocity.to_dict()
-            if self.has_velocity and hasattr(self.cognitive_velocity, "to_dict")
-            else None,
+            "velocity": (
+                self.cognitive_velocity.to_dict()
+                if self.has_velocity and hasattr(self.cognitive_velocity, "to_dict")
+                else None
+            ),
             "metadata": self.metadata,
         }
 

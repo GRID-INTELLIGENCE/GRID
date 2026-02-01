@@ -60,8 +60,8 @@ class RAGEntityContextManager:
     """Manages entity-driven context for RAG operations."""
 
     def __init__(self) -> None:
-        self.entity_cache = {}
-        self.context_history = []
+        self.entity_cache: dict[str, Any] = {}
+        self.context_history: list[dict[str, Any]] = []
 
     def enhance_query_with_entities(self, query: str, entities: list[Any]) -> dict[str, Any]:
         """Enhance RAG query with entity context.

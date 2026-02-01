@@ -12,16 +12,16 @@ from typing import Any
 from application.mothership.repositories.agentic import AgenticRepository
 
 try:
-    from .case_filing import CaseStructure
-    from .continuous_learning import ContinuousLearningSystem
+    from .case_filing import CaseStructure  # type: ignore[import-not-found]
+    from .continuous_learning import ContinuousLearningSystem  # type: ignore[import-not-found]
 except ImportError:
     # For standalone execution
     import sys
     from pathlib import Path
 
     sys.path.insert(0, str(Path(__file__).parent))
-    from case_filing import CaseStructure
-    from continuous_learning import ContinuousLearningSystem
+    from case_filing import CaseStructure  # type: ignore[import-not-found]
+    from continuous_learning import ContinuousLearningSystem  # type: ignore[import-not-found]
 
 logger = logging.getLogger(__name__)
 

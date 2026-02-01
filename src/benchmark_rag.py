@@ -11,7 +11,7 @@ from tools.rag.config import RAGConfig
 from tools.rag.rag_engine import RAGEngine
 
 
-async def benchmark():
+async def benchmark() -> None:
     config = RAGConfig.from_env()
     engine = RAGEngine(config=config)
 

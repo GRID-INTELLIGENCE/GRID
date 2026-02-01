@@ -42,7 +42,7 @@ __all__ = [
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
+    pass  # Future type-only imports go here
 
 # Lazy imports to avoid circular dependencies
 _Vection: Any = None

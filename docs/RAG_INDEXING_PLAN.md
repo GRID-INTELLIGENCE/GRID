@@ -809,7 +809,6 @@ logger.info(
 │ Top Queries (Last 7 days)                               │
 │ 1. "GRID architecture"                       45 queries │
 │ 2. "RAG implementation"                      32 queries │
-│ 3. "Docker deployment"                       28 queries │
 ├─────────────────────────────────────────────────────────┤
 │ Alerts                                                   │
 │ ⚠️  Quality score dropped below 80% (current: 78%)      │

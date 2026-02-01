@@ -7,7 +7,7 @@ It also defines types (Doc, InMemoryIndex, RagQA) that tests expect.
 import hashlib
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any
 
 # Re-export core tools.rag functionality
 # Use tools bridge for better integration, fallback to direct import for backward compatibility

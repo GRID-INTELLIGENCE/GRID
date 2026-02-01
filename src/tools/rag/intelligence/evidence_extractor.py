@@ -253,7 +253,7 @@ class EvidenceExtractor:
         all_evidence: list[Evidence] = []
         query_terms = self._extract_query_terms(query)
 
-        for i, (doc, meta, chunk_id) in enumerate(zip(documents, metadatas, ids)):
+        for i, (doc, meta, chunk_id) in enumerate(zip(documents, metadatas, ids, strict=False)):
             distance = distances[i] if distances else 0.5
             source_file = meta.get("source", meta.get("file_path", "unknown"))
 

@@ -11,11 +11,10 @@ from __future__ import annotations
 import logging
 from collections import Counter, defaultdict
 from dataclasses import dataclass, field
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any, Callable
 from statistics import mean, stdev
-from itertools import groupby
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -169,9 +168,9 @@ class AdvancedTimeManager:
             try:
                 slope, intercept = self._calculate_trend_slope(x_indices, y_values)
             except Exception:
-                slope, intercept = 0.0, 0.0
+                slope, _intercept = 0.0, 0.0
         else:
-            slope, intercept = 0.0, 0.0
+            slope, _intercept = 0.0, 0.0
 
         # Determine pattern type
         pattern_type, pattern_name, confidence = self._classify_pattern(
@@ -199,7 +198,9 @@ class AdvancedTimeManager:
             trend_slope=slope,
             trend_direction=self._get_trend_direction(slope),
             phase=phase,
-            description=self._generate_pattern_description(interval_mode, most_common_interval, amplitude, slope, phase),
+            description=self._generate_pattern_description(
+                interval_mode, most_common_interval, amplitude, slope, phase
+            ),
             features={
                 "interval_stats": {
                     "mean_interval_seconds": mean(intervals),
@@ -370,25 +371,22 @@ class AdvancedTimeManager:
         time_span_seconds = (last_event - first_event).total_seconds()
 
         # Count events by hour
-        hour_counts: defaultdict(int)
+        hour_counts: dict[int, int] = defaultdict(int)
         for event in self._events:
             hour = event.timestamp.hour
             hour_counts[hour] += 1
 
         # Count events by day of week
-        day_counts = defaultdict(int)
+        day_counts: dict[int, int] = defaultdict(int)
         for event in self._events:
             day_of_week = event.timestamp.weekday()  # 0=Monday, 6=Sunday
             day_counts[day_of_week] += 1
 
-        # Find peak hour
-        peak_hour = max(hour_counts.items(), key=lambda x: x[1])[0]
+        # Find peak hour and count
+        peak_hour, peak_count = max(hour_counts.items(), key=lambda x: x[1])
 
         # Find quiet hours (hours with < 10% of peak)
-        quiet_hours = [
-            h for h, count in sorted(hour_counts.items())
-            if count < peak_count * 0.1
-        ]
+        quiet_hours = [h for h, count in sorted(hour_counts.items()) if count < peak_count * 0.1]
 
         # Calculate variance
         hourly_values = list(hour_counts.values())

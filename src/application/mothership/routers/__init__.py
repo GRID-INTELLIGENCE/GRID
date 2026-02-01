@@ -22,7 +22,7 @@ from __future__ import annotations
 import logging
 from importlib import import_module
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from fastapi import APIRouter
 
@@ -41,7 +41,7 @@ def _load_api_routes_config() -> dict[str, Any] | None:
         return None
 
     try:
-        import yaml
+        import yaml  # type: ignore[import-untyped]
     except Exception:  # pragma: no cover - PyYAML not installed
         return None
 

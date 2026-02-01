@@ -1,7 +1,6 @@
 #!/bin/sh
 set -e
 
-# Docker Entrypoint Script for GRID Mothership API
 # This script runs before the main application to validate configuration and dependencies
 
 echo "=========================================="

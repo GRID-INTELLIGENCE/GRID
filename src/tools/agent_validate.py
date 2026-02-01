@@ -17,8 +17,8 @@ except ImportError:
     jsonschema = None
 
 try:
-    import yaml
-    from openapi_spec_validator import validate_spec
+    import yaml  # type: ignore[import-untyped]
+    from openapi_spec_validator import validate_spec  # type: ignore[import-untyped]
 except ImportError:
     yaml = None
     validate_spec = None

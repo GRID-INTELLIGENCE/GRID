@@ -455,7 +455,7 @@ Development mode allows unauthenticated access.
 
     if settings.telemetry.metrics_enabled:
         try:
-            from prometheus_fastapi_instrumentator import Instrumentator
+            from prometheus_fastapi_instrumentator import Instrumentator  # type: ignore[import-not-found]
 
             instrumentator = Instrumentator(
                 should_group_status_codes=True,

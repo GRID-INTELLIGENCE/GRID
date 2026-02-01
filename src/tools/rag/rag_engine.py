@@ -32,7 +32,7 @@ class RAGEngine:
     Orchestrates embedding, retrieval, and generation with proper local-only operation.
     """
 
-    def __init__(self, config: RAGConfig | None = None):
+    def __init__(self, config: RAGConfig | None = None) -> None:
         """Initialize RAG engine.
 
         Args:

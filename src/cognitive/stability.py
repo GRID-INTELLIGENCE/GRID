@@ -80,11 +80,7 @@ class StabilityMetrics:
         Returns:
             True if stable
         """
-        avg_metrics = (
-            self.coherence_score
-            + self.entanglement_ratio
-            + self.persistence_index
-        ) / 3.0
+        avg_metrics = (self.coherence_score + self.entanglement_ratio + self.persistence_index) / 3.0
 
         return avg_metrics >= threshold
 
@@ -223,7 +219,7 @@ class StabilityAnalyzer:
         # Calculate rolling coherence
         for i in range(1, len(vectors)):
             # Check coherence of last `window_size` vectors
-            window = vectors[max(0, i - 5):i + 1]
+            window = vectors[max(0, i - 5) : i + 1]
             if len(window) < 2:
                 continue
 
@@ -252,8 +248,8 @@ class StabilityAnalyzer:
             max_len = max(matrix1.shape[0], matrix2.shape[0])
             padded1 = np.zeros((max_len, matrix1.shape[1]))
             padded2 = np.zeros((max_len, matrix2.shape[1]))
-            padded1[:matrix1.shape[0]] = matrix1
-            padded2[:matrix2.shape[0]] = matrix2
+            padded1[: matrix1.shape[0]] = matrix1
+            padded2[: matrix2.shape[0]] = matrix2
             matrix1, matrix2 = padded1, padded2
 
         # Calculate cosine similarity for each position
@@ -469,13 +465,15 @@ def detect_coherence_breakdown(
         # Calculate pairwise coherence
         similarities = []
         for j in range(1, len(window)):
-            sim = np.mean([
-                np.dot(
-                    window[j - 1].units[k].to_vector(),
-                    window[j].units[k].to_vector() if k < len(window[j].units) else np.zeros(32),
-                )
-                for k in range(min(len(window[j - 1].units), len(window[j].units)))
-            ])
+            sim = np.mean(
+                [
+                    np.dot(
+                        window[j - 1].units[k].to_vector(),
+                        window[j].units[k].to_vector() if k < len(window[j].units) else np.zeros(32),
+                    )
+                    for k in range(min(len(window[j - 1].units), len(window[j].units)))
+                ]
+            )
             similarities.append(sim)
 
         avg_coherence = sum(similarities) / len(similarities) if similarities else 1.0

@@ -31,6 +31,7 @@ def get_rag_engine() -> ConversationalRAGEngine:
 
 # Pydantic models for streaming API
 
+
 class RAGQueryRequest(BaseModel):
     """Request model for RAG queries."""
 
@@ -81,7 +82,7 @@ class StreamChunk:
 @router.post("/query/stream")
 async def query_rag_stream(request: RAGQueryRequest) -> StreamingResponse:
     """Stream RAG query results with real-time updates.
-    
+
     Streams different stages of the RAG process:
     1. Retrieval started
     2. Documents retrieved
@@ -100,21 +101,17 @@ async def query_rag_stream(request: RAGQueryRequest) -> StreamingResponse:
             data={
                 "query": request.query,
                 "session_id": request.session_id,
-                "timestamp": asyncio.get_event_loop().time()
-            }
+                "timestamp": asyncio.get_event_loop().time(),
+            },
         ).to_json() + "\n"
 
         # Stage 2: Retrieval process
-        yield StreamChunk(
-            type="retrieval_started",
-            data={"query": request.query}
-        ).to_json() + "\n"
+        yield StreamChunk(type="retrieval_started", data={"query": request.query}).to_json() + "\n"
 
         # Stage 3: Simulate retrieval progress
         for progress in range(0, 101, 20):
             yield StreamChunk(
-                type="retrieval_progress",
-                data={"progress": progress, "status": f"Retrieving documents... {progress}%"}
+                type="retrieval_progress", data={"progress": progress, "status": f"Retrieving documents... {progress}%"}
             ).to_json() + "\n"
             await asyncio.sleep(0.1)  # Simulate work
 
@@ -126,7 +123,7 @@ async def query_rag_stream(request: RAGQueryRequest) -> StreamingResponse:
                 temperature=request.temperature,
                 session_id=request.session_id,
                 use_conversation=request.enable_conversation,
-                enable_multi_hop=request.enable_multi_hop
+                enable_multi_hop=request.enable_multi_hop,
             )
 
             # Stage 5: Documents retrieved
@@ -137,11 +134,11 @@ async def query_rag_stream(request: RAGQueryRequest) -> StreamingResponse:
                     "sources_preview": [
                         {
                             "path": source.get("metadata", {}).get("path", "Unknown"),
-                            "confidence": source.get("confidence", 0.0)
+                            "confidence": source.get("confidence", 0.0),
                         }
                         for source in result.get("sources", [])[:3]
-                    ]
-                }
+                    ],
+                },
             ).to_json() + "\n"
 
             # Stage 6: Answer generation
@@ -150,8 +147,8 @@ async def query_rag_stream(request: RAGQueryRequest) -> StreamingResponse:
                     type="multi_hop_completed",
                     data={
                         "hops": result.get("hops_performed", 1),
-                        "follow_up_queries": result.get("follow_up_queries", [])
-                    }
+                        "follow_up_queries": result.get("follow_up_queries", []),
+                    },
                 ).to_json() + "\n"
 
             # Stage 7: Stream answer
@@ -163,8 +160,8 @@ async def query_rag_stream(request: RAGQueryRequest) -> StreamingResponse:
                         "chunk": chunk,
                         "chunk_number": i + 1,
                         "total_chunks": (len(answer) // 50) + 1,
-                        "progress": min(100, int((i + 1) / ((len(answer) // 50) + 1) * 100))
-                    }
+                        "progress": min(100, int((i + 1) / ((len(answer) // 50) + 1) * 100)),
+                    },
                 ).to_json() + "\n"
                 await asyncio.sleep(0.05)  # Simulate streaming
 
@@ -175,15 +172,12 @@ async def query_rag_stream(request: RAGQueryRequest) -> StreamingResponse:
                     "answer": result.get("answer", ""),
                     "sources": result.get("sources", []),
                     "conversation_metadata": result.get("conversation_metadata", {}),
-                    "multi_hop_used": result.get("multi_hop_used", False)
-                }
+                    "multi_hop_used": result.get("multi_hop_used", False),
+                },
             ).to_json() + "\n"
 
         except Exception as e:
-            yield StreamChunk(
-                type="error",
-                data={"error": str(e), "query": request.query}
-            ).to_json() + "\n"
+            yield StreamChunk(type="error", data={"error": str(e), "query": request.query}).to_json() + "\n"
 
     return StreamingResponse(
         generate_stream(),
@@ -191,7 +185,7 @@ async def query_rag_stream(request: RAGQueryRequest) -> StreamingResponse:
         headers={
             "Transfer-Encoding": "chunked",
             "X-Content-Type-Options": "nosniff",
-        }
+        },
     )
 
 
@@ -205,10 +199,7 @@ async def query_rag_batch(requests: list[RAGQueryRequest]) -> dict[str, Any]:
 
         total_queries = len(requests)
 
-        yield StreamChunk(
-            type="batch_started",
-            data={"total_queries": total_queries}
-        ).to_json() + "\n"
+        yield StreamChunk(type="batch_started", data={"total_queries": total_queries}).to_json() + "\n"
 
         results = []
         for i, request in enumerate(requests):
@@ -219,8 +210,8 @@ async def query_rag_batch(requests: list[RAGQueryRequest]) -> dict[str, Any]:
                     "current": i + 1,
                     "total": total_queries,
                     "progress": int((i + 1) / total_queries * 100),
-                    "query": request.query
-                }
+                    "query": request.query,
+                },
             ).to_json() + "\n"
 
             # Execute query
@@ -231,27 +222,16 @@ async def query_rag_batch(requests: list[RAGQueryRequest]) -> dict[str, Any]:
                     temperature=request.temperature,
                     session_id=request.session_id,
                     use_conversation=request.enable_conversation,
-                    enable_multi_hop=request.enable_multi_hop
+                    enable_multi_hop=request.enable_multi_hop,
                 )
 
-                results.append({
-                    "query": request.query,
-                    **result
-                })
+                results.append({"query": request.query, **result})
 
             except Exception as e:
-                results.append({
-                    "query": request.query,
-                    "error": str(e)
-                })
+                results.append({"query": request.query, "error": str(e)})
 
             yield StreamChunk(
-                type="query_completed",
-                data={
-                    "index": i,
-                    "query": request.query,
-                    "success": "error" not in results[-1]
-                }
+                type="query_completed", data={"index": i, "query": request.query, "success": "error" not in results[-1]}
             ).to_json() + "\n"
 
         # Final batch result
@@ -261,8 +241,8 @@ async def query_rag_batch(requests: list[RAGQueryRequest]) -> dict[str, Any]:
                 "total_queries": total_queries,
                 "successful_queries": sum(1 for r in results if "error" not in r),
                 "failed_queries": sum(1 for r in results if "error" in r),
-                "results": results
-            }
+                "results": results,
+            },
         ).to_json() + "\n"
 
     return StreamingResponse(
@@ -271,7 +251,7 @@ async def query_rag_batch(requests: list[RAGQueryRequest]) -> dict[str, Any]:
         headers={
             "Transfer-Encoding": "chunked",
             "X-Content-Type-Options": "nosniff",
-        }
+        },
     )
 
 
@@ -285,23 +265,17 @@ async def create_rag_session(request: RAGSessionCreateRequest) -> RAGSessionResp
         session_info = engine.get_session_info(session_id)
 
         if not session_info:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to create session"
-            )
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to create session")
 
         return RAGSessionResponse(
             session_id=session_info["session_id"],
             metadata=session_info["metadata"],
             turn_count=session_info["turn_count"],
-            created_at=session_info["created_at"]
+            created_at=session_info["created_at"],
         )
 
     except ValueError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
 @router.get("/sessions/{session_id}")
@@ -312,16 +286,13 @@ async def get_rag_session(session_id: str) -> RAGSessionResponse:
     session_info = engine.get_session_info(session_id)
 
     if not session_info:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Session {session_id} not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Session {session_id} not found")
 
     return RAGSessionResponse(
         session_id=session_info["session_id"],
         metadata=session_info["metadata"],
         turn_count=session_info["turn_count"],
-        created_at=session_info["created_at"]
+        created_at=session_info["created_at"],
     )
 
 
@@ -333,10 +304,7 @@ async def delete_rag_session(session_id: str) -> dict[str, Any]:
     success = engine.delete_session(session_id)
 
     if not success:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Session {session_id} not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Session {session_id} not found")
 
     return {"status": "success", "message": f"Session {session_id} deleted"}
 
@@ -354,18 +322,19 @@ async def get_rag_stats() -> dict[str, Any]:
             "type": "ConversationalRAGEngine",
             "conversation_enabled": engine.config.conversation_enabled,
             "multi_hop_enabled": engine.config.multi_hop_enabled,
-            "memory_size": engine.config.conversation_memory_size
-        }
+            "memory_size": engine.config.conversation_memory_size,
+        },
     }
 
 
 # Utility functions
 
+
 def chunk_text(text: str, chunk_size: int = 50) -> list[str]:
     """Split text into chunks for streaming."""
     chunks = []
     for i in range(0, len(text), chunk_size):
-        chunks.append(text[i:i+chunk_size])
+        chunks.append(text[i : i + chunk_size])
     return chunks
 
 
@@ -386,45 +355,37 @@ async def rag_websocket_endpoint(websocket, session_id: str):
                 query = message.get("query", "")
 
                 if not query:
-                    await websocket.send_text(json.dumps({
-                        "type": "error",
-                        "error": "No query provided"
-                    }))
+                    await websocket.send_text(json.dumps({"type": "error", "error": "No query provided"}))
                     continue
 
                 # Execute query
-                result = await engine.query(
-                    query_text=query,
-                    session_id=session_id,
-                    use_conversation=True
-                )
+                result = await engine.query(query_text=query, session_id=session_id, use_conversation=True)
 
                 # Send response
-                await websocket.send_text(json.dumps({
-                    "type": "result",
-                    "query": query,
-                    "answer": result.get("answer", ""),
-                    "sources_count": len(result.get("sources", [])),
-                    "session_id": session_id
-                }))
+                await websocket.send_text(
+                    json.dumps(
+                        {
+                            "type": "result",
+                            "query": query,
+                            "answer": result.get("answer", ""),
+                            "sources_count": len(result.get("sources", [])),
+                            "session_id": session_id,
+                        }
+                    )
+                )
 
             elif message.get("type") == "session_info":
                 # Provide session information
                 session_info = engine.get_session_info(session_id)
-                await websocket.send_text(json.dumps({
-                    "type": "session_info",
-                    "session_id": session_id,
-                    "info": session_info or {}
-                }))
+                await websocket.send_text(
+                    json.dumps({"type": "session_info", "session_id": session_id, "info": session_info or {}})
+                )
 
             elif message.get("type") == "close":
                 break
 
     except Exception as e:
         logger.error(f"WebSocket error: {e}")
-        await websocket.send_text(json.dumps({
-            "type": "error",
-            "error": str(e)
-        }))
+        await websocket.send_text(json.dumps({"type": "error", "error": str(e)}))
     finally:
         await websocket.close()

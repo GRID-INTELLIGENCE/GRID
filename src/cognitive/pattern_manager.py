@@ -9,11 +9,10 @@ Implements machine learning from pattern matches with:
 from __future__ import annotations
 
 import logging
-from collections import Counter, defaultdict
 from dataclasses import dataclass, field
-from datetime import UTC, datetime, timedelta, timezone
+from datetime import UTC, datetime
 from enum import Enum
-from typing import Any, Callable
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +37,7 @@ class PatternModel:
     confidence: float = 0.0
     success_rate: float = 0.0
     failure_count: int = 0
-    last_seen: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    last_seen: datetime = field(default_factory=lambda: datetime.now(UTC))
     usage_count: int = 0
     metadata: dict[str, Any] = field(default_factory=dict)
     parameters: dict[str, Any] = field(default_factory=dict)
@@ -201,14 +200,16 @@ class AdvancedPatternManager:
             # Check feature match
             match_score = self._calculate_feature_match(features, model.parameters)
             if match_score > model.confidence * 0.8:
-                matches.append({
-                    "pattern_id": pattern_id,
-                    "matched": True,
-                    "pattern_name": model.name,
-                    "context": model.context,
-                    "confidence": match_score,
-                    "features": features,
-                })
+                matches.append(
+                    {
+                        "pattern_id": pattern_id,
+                        "matched": True,
+                        "pattern_name": model.name,
+                        "context": model.context,
+                        "confidence": match_score,
+                        "features": features,
+                    }
+                )
 
         if not matches:
             return None
@@ -234,7 +235,7 @@ class AdvancedPatternManager:
             # Simple similarity score
             if isinstance(observed_value, (int, float)):
                 diff = abs(observed_value - param_value) / (abs(param_value) + 1)
-                score += (1.0 / (diff + 0.1))
+                score += 1.0 / (diff + 0.1)
             elif isinstance(observed_value, str):
                 if observed_value.lower() == str(param_value).lower():
                     score += 0.8
@@ -285,15 +286,11 @@ class AdvancedPatternManager:
             "total_updates": total_updates,
             "success_rate": success_rate,
             "average_confidence": (
-                sum(p.confidence for p in self._patterns.values()) / len(self._patterns)
-                if self._patterns
-                else 0.0
+                sum(p.confidence for p in self._patterns.values()) / len(self._patterns) if self._patterns else 0.0
             ),
             "most_learned_patterns": [
                 pid
-                for pid, _model in sorted(
-                    self._patterns.items(), key=lambda item: item[1].confidence, reverse=True
-                )[:5]
+                for pid, _model in sorted(self._patterns.items(), key=lambda item: item[1].confidence, reverse=True)[:5]
             ],
         }
 

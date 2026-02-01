@@ -136,7 +136,6 @@ python -m vision_ui.cli summarize-multi \
 ### Combined Team Structure
 - **Backend:** Grid workflow + Vision summarization
 - **Frontend:** Rich CLI + future web UI
-- **DevOps:** Shared CI/CD, Docker containerization
 - **Docs:** Unified documentation site
 
 ---

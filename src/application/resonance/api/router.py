@@ -79,6 +79,11 @@ RESONANCE_TAGS_METADATA = [
 router = APIRouter()
 router.include_router(performance_router)
 
+# Include tuning API router (Phase 5 integration)
+from application.resonance.tuning_api import router as tuning_router
+
+router.include_router(tuning_router)
+
 
 def _get_service() -> CoreResonanceService:
     """Get a shared ResonanceService instance (Mothership pattern)."""
@@ -275,6 +280,32 @@ async def process_activity(
 
 @router.get(
     "/context",
+    response_model=ContextResponse,
+    summary="Get Current Context State",
+    description="Get the current resonance context state (no query required).",
+    tags=["resonance"],
+)
+async def get_current_context(
+    service: ResonanceServiceDep,
+) -> ContextResponse:
+    """Get current context state without requiring a query."""
+    try:
+        snapshot = await service.get_context(
+            query="system:current_state",
+            context_type="general",
+            max_length=200,
+        )
+        return _convert_context_snapshot(snapshot)
+    except Exception as e:
+        logger.error(f"Error getting current context: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"Service temporarily unavailable: {str(e)}",
+        ) from e
+
+
+@router.get(
+    "/context/query",
     response_model=ContextResponse,
     summary="Get Fast Context",
     description="Get fast, concise context for a query (left side - application/).",

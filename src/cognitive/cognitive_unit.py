@@ -100,18 +100,20 @@ class CognitiveUnit:
             raise ValueError("Vector size must be at least 7 for all components")
 
         # Concatenate component vectors
-        components = np.concatenate([
-            self.vision.to_vector(),
-            self.sound.to_vector(),
-            self.locomotion.to_vector(),
-        ])
+        components = np.concatenate(
+            [
+                self.vision.to_vector(),
+                self.sound.to_vector(),
+                self.locomotion.to_vector(),
+            ]
+        )
 
         # Pad or truncate to desired size
         if len(components) > vector_size:
             return components[:vector_size]
         else:
             result = np.zeros(vector_size, dtype=np.float32)
-            result[:len(components)] = components
+            result[: len(components)] = components
             return result
 
     def serialize(self) -> dict[str, Any]:
@@ -548,7 +550,7 @@ def detect_drift_apex(trajectory: list[LocomotionComponent]) -> tuple[float, flo
         else:
             # Perpendicular distance formula
             numerator = abs(dy * point_x - dx * point_y + end_x * start_y - end_y * start_x)
-            denominator = math.sqrt(dx ** 2 + dy ** 2)
+            denominator = math.sqrt(dx**2 + dy**2)
             drift = numerator / denominator
 
         if drift > max_drift:
@@ -577,7 +579,9 @@ def apply_rdp_simplification(
     # Find the point with maximum distance from line
     start, end = points[0], points[-1]
 
-    def perpendicular_distance(point: tuple[float, float], line_start: tuple[float, float], line_end: tuple[float, float]) -> float:
+    def perpendicular_distance(
+        point: tuple[float, float], line_start: tuple[float, float], line_end: tuple[float, float]
+    ) -> float:
         """Calculate perpendicular distance from point to line."""
         x0, y0 = point
         x1, y1 = line_start
@@ -589,7 +593,7 @@ def apply_rdp_simplification(
         if dx == 0 and dy == 0:
             return math.sqrt((x0 - x1) ** 2 + (y0 - y1) ** 2)
 
-        return abs(dy * x0 - dx * y0 + x2 * y1 - y2 * x1) / math.sqrt(dx ** 2 + dy ** 2)
+        return abs(dy * x0 - dx * y0 + x2 * y1 - y2 * x1) / math.sqrt(dx**2 + dy**2)
 
     # Find point with maximum distance
     max_dist = 0.0
@@ -603,7 +607,7 @@ def apply_rdp_simplification(
 
     # If max distance is greater than epsilon, recursively simplify
     if max_dist > epsilon:
-        left = apply_rdp_simplification(points[:max_index + 1], epsilon)
+        left = apply_rdp_simplification(points[: max_index + 1], epsilon)
         right = apply_rdp_simplification(points[max_index:], epsilon)
         return left[:-1] + right
     else:

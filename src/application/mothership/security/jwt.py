@@ -12,15 +12,10 @@ import os
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
-from jose import JWTError, jwt
+from jose import JWTError, jwt  # type: ignore[import-untyped]
 from pydantic import BaseModel, Field
 
-from .secret_validation import (
-    SecretStrength,
-    SecretValidationError,
-    generate_secure_secret,
-    validate_secret_strength,
-)
+from .secret_validation import SecretStrength, SecretValidationError, generate_secure_secret, validate_secret_strength
 
 logger = logging.getLogger(__name__)
 
@@ -174,10 +169,13 @@ class JWTManager:
         else:
             expire = now + timedelta(minutes=self.access_token_expire_minutes)
 
+        import uuid
+
         payload = {
             "sub": subject,
             "exp": int(expire.timestamp()),
             "iat": int(now.timestamp()),
+            "jti": str(uuid.uuid4()),
             "type": "access",
         }
 
@@ -220,10 +218,13 @@ class JWTManager:
         else:
             expire = now + timedelta(days=self.refresh_token_expire_days)
 
+        import uuid
+
         payload = {
             "sub": subject,
             "exp": int(expire.timestamp()),
             "iat": int(now.timestamp()),
+            "jti": str(uuid.uuid4()),
             "type": "refresh",
         }
 

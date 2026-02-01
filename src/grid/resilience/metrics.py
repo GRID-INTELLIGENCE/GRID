@@ -175,9 +175,7 @@ class RetryMetrics:
             "total_operations_tracked": self.total_operations_tracked,
             "aggregate_success_rate_pct": round(self.aggregate_success_rate(), 2),
             "aggregate_fallback_rate_pct": round(self.aggregate_fallback_rate(), 2),
-            "operations": {
-                name: metric.to_dict() for name, metric in self.operations.items()
-            },
+            "operations": {name: metric.to_dict() for name, metric in self.operations.items()},
         }
 
 

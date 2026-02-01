@@ -1,16 +1,18 @@
 """
 Cross-Project Entity Linking - Normalizing and linking entities across namespaces.
 """
+
 import logging
 import re
-from typing import List
 
-from .graph_store import Entity, EntityId
-from .persistent_store import PersistentJSONKnowledgeStore
-from .graph_schema import RelationType
 from unified_fabric.cross_project_validator import get_policy_validator
 
+from .graph_schema import RelationType
+from .graph_store import Entity, EntityId
+from .persistent_store import PersistentJSONKnowledgeStore
+
 logger = logging.getLogger(__name__)
+
 
 class EntityLinker:
     """
@@ -26,13 +28,13 @@ class EntityLinker:
     def normalize_name(self, name: str) -> str:
         """Normalize entity name for comparison."""
         # Remove special chars and lowercase
-        return re.sub(r'[^a-zA-Z0-9]', '', name).lower()
+        return re.sub(r"[^a-zA-Z0-9]", "", name).lower()
 
-    def find_potential_matches(self, entity: Entity) -> List[Entity]:
+    def find_potential_matches(self, entity: Entity) -> list[Entity]:
         """Find potential duplicate entities in the store."""
         matches = []
         target_name = self.normalize_name(entity.properties.get("name", ""))
-        
+
         if not target_name:
             return []
 
@@ -76,10 +78,10 @@ class EntityLinker:
             properties={
                 "link_type": "SAME_AS",
                 "confidence": confidence,
-                "reason": "Automatic name normalization match"
-            }
+                "reason": "Automatic name normalization match",
+            },
         )
-        
+
         logger.info(f"Linked entities: {entity_a.entity_id} <-> {entity_b.entity_id} ({confidence})")
         return True
 

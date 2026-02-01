@@ -8,6 +8,7 @@ Features:
 - Event-driven trading signals
 - Revenue pipeline auditing
 """
+
 import logging
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
@@ -24,6 +25,7 @@ logger = logging.getLogger(__name__)
 
 class ActionType(Enum):
     """Coinbase action types"""
+
     BUY = "buy"
     SELL = "sell"
     REBALANCE = "rebalance"
@@ -35,6 +37,7 @@ class ActionType(Enum):
 
 class SignalType(Enum):
     """Trading signal types"""
+
     ENTRY = "entry"
     EXIT = "exit"
     HOLD = "hold"
@@ -45,6 +48,7 @@ class SignalType(Enum):
 @dataclass
 class PortfolioAction:
     """Portfolio action request"""
+
     action_type: ActionType
     asset: str
     amount: float
@@ -58,6 +62,7 @@ class PortfolioAction:
 @dataclass
 class TradingSignal:
     """Trading signal"""
+
     signal_type: SignalType
     asset: str
     confidence: float
@@ -71,6 +76,7 @@ class TradingSignal:
 @dataclass
 class ActionResult:
     """Result of a portfolio action"""
+
     success: bool
     action_id: str
     message: str
@@ -82,7 +88,7 @@ class ActionResult:
 class CoinbaseIntegrationAdapter:
     """
     Adapter for integrating Coinbase with unified fabric.
-    
+
     Connects:
     - Portfolio actions → Safety validation → Event bus
     - Trading signals → Safety validation → Revenue pipeline
@@ -109,16 +115,13 @@ class CoinbaseIntegrationAdapter:
         self._initialized = True
         logger.info("CoinbaseIntegrationAdapter initialized")
 
-    async def execute_action(
-        self,
-        action: PortfolioAction
-    ) -> ActionResult:
+    async def execute_action(self, action: PortfolioAction) -> ActionResult:
         """
         Execute a portfolio action with safety validation.
-        
+
         Args:
             action: Portfolio action to execute
-            
+
         Returns:
             ActionResult with success/failure status
         """
@@ -126,13 +129,8 @@ class CoinbaseIntegrationAdapter:
 
         # Safety validation first
         report = await self._safety_bridge.validate_coinbase_action(
-            {
-                "type": action.action_type.value,
-                "asset": action.asset,
-                "amount": action.amount,
-                "price": action.price
-            },
-            action.user_id
+            {"type": action.action_type.value, "asset": action.asset, "amount": action.amount, "price": action.price},
+            action.user_id,
         )
 
         if report.should_block:
@@ -141,7 +139,7 @@ class CoinbaseIntegrationAdapter:
                 action_id=action.action_id,
                 message="Action blocked by safety",
                 blocked_by_safety=True,
-                safety_reason=report.violations[0].description if report.violations else "Safety violation"
+                safety_reason=report.violations[0].description if report.violations else "Safety violation",
             )
 
         # Execute the action
@@ -161,22 +159,15 @@ class CoinbaseIntegrationAdapter:
 
         except Exception as e:
             logger.error(f"Action execution failed: {e}")
-            return ActionResult(
-                success=False,
-                action_id=action.action_id,
-                message=f"Execution failed: {str(e)}"
-            )
+            return ActionResult(success=False, action_id=action.action_id, message=f"Execution failed: {str(e)}")
 
-    async def process_signal(
-        self,
-        signal: TradingSignal
-    ) -> bool:
+    async def process_signal(self, signal: TradingSignal) -> bool:
         """
         Process a trading signal with safety validation.
-        
+
         Args:
             signal: Trading signal to process
-            
+
         Returns:
             True if signal was processed successfully
         """
@@ -184,11 +175,8 @@ class CoinbaseIntegrationAdapter:
         report = await self._safety_bridge.validate(
             f"Trading signal: {signal.signal_type.value} {signal.asset} confidence={signal.confidence}",
             SafetyContext(
-                project="coinbase",
-                domain="trading",
-                user_id=signal.user_id,
-                metadata={"signal_id": signal.signal_id}
-            )
+                project="coinbase", domain="trading", user_id=signal.user_id, metadata={"signal_id": signal.signal_id}
+            ),
         )
 
         if report.should_block:
@@ -208,36 +196,24 @@ class CoinbaseIntegrationAdapter:
         return True
 
     async def create_revenue_event(
-        self,
-        revenue_type: str,
-        amount: float,
-        asset: str,
-        user_id: str,
-        metadata: dict | None = None
+        self, revenue_type: str, amount: float, asset: str, user_id: str, metadata: dict | None = None
     ) -> str:
         """
         Create a safety-validated revenue event.
-        
+
         Args:
             revenue_type: Type of revenue (dividend, staking, trading)
             amount: Revenue amount
             asset: Asset symbol
             user_id: User identifier
             metadata: Additional metadata
-            
+
         Returns:
             Revenue event ID
         """
         # Validate revenue event
         report = await self._safety_bridge.validate_revenue_event(
-            {
-                "type": revenue_type,
-                "amount": amount,
-                "asset": asset,
-                "user_id": user_id,
-                **(metadata or {})
-            },
-            user_id
+            {"type": revenue_type, "amount": amount, "asset": asset, "user_id": user_id, **(metadata or {})}, user_id
         )
 
         if report.should_block:
@@ -251,12 +227,7 @@ class CoinbaseIntegrationAdapter:
             action=f"revenue_{revenue_type}",
             status="success",
             user_id=user_id,
-            details={
-                "revenue_type": revenue_type,
-                "amount": amount,
-                "asset": asset,
-                **(metadata or {})
-            }
+            details={"revenue_type": revenue_type, "amount": amount, "asset": asset, **(metadata or {})},
         )
 
         # Broadcast event
@@ -267,10 +238,10 @@ class CoinbaseIntegrationAdapter:
                 "amount": amount,
                 "asset": asset,
                 "user_id": user_id,
-                "request_id": request_id
+                "request_id": request_id,
             },
             source_domain=EventDomain.COINBASE.value,
-            target_domains=["all"]
+            target_domains=["all"],
         )
         await self._event_bus.publish(event)
 
@@ -279,24 +250,16 @@ class CoinbaseIntegrationAdapter:
         return request_id
 
     def register_action_handler(
-        self,
-        action_type: ActionType,
-        handler: Callable[[PortfolioAction], Awaitable[ActionResult]]
+        self, action_type: ActionType, handler: Callable[[PortfolioAction], Awaitable[ActionResult]]
     ):
         """Register a handler for specific action type"""
         self._action_handlers[action_type] = handler
 
-    def register_signal_handler(
-        self,
-        handler: Callable[[TradingSignal], Awaitable[None]]
-    ):
+    def register_signal_handler(self, handler: Callable[[TradingSignal], Awaitable[None]]):
         """Register a trading signal handler"""
         self._signal_handlers.append(handler)
 
-    async def _execute_internal(
-        self,
-        action: PortfolioAction
-    ) -> ActionResult:
+    async def _execute_internal(self, action: PortfolioAction) -> ActionResult:
         """Execute action internally"""
         # Check for custom handler
         if action.action_type in self._action_handlers:
@@ -308,14 +271,10 @@ class CoinbaseIntegrationAdapter:
         return ActionResult(
             success=True,
             action_id=action.action_id,
-            message=f"{action.action_type.value.upper()} {action.amount} {action.asset} executed"
+            message=f"{action.action_type.value.upper()} {action.amount} {action.asset} executed",
         )
 
-    async def _audit_action(
-        self,
-        action: PortfolioAction,
-        result: ActionResult
-    ):
+    async def _audit_action(self, action: PortfolioAction, result: ActionResult):
         """Log action to audit trail"""
         await self._audit_logger.log_portfolio_action(
             action=action.action_type.value,
@@ -326,15 +285,11 @@ class CoinbaseIntegrationAdapter:
                 "asset": action.asset,
                 "amount": action.amount,
                 "action_id": action.action_id,
-                "message": result.message
-            }
+                "message": result.message,
+            },
         )
 
-    async def _broadcast_action_event(
-        self,
-        action: PortfolioAction,
-        result: ActionResult
-    ):
+    async def _broadcast_action_event(self, action: PortfolioAction, result: ActionResult):
         """Broadcast action event"""
         event = Event(
             event_type=f"coinbase.action.{action.action_type.value}",
@@ -344,17 +299,14 @@ class CoinbaseIntegrationAdapter:
                 "asset": action.asset,
                 "amount": action.amount,
                 "success": result.success,
-                "user_id": action.user_id
+                "user_id": action.user_id,
             },
             source_domain=EventDomain.COINBASE.value,
-            target_domains=["all"]
+            target_domains=["all"],
         )
         await self._event_bus.publish(event)
 
-    async def _broadcast_signal_event(
-        self,
-        signal: TradingSignal
-    ):
+    async def _broadcast_signal_event(self, signal: TradingSignal):
         """Broadcast signal event"""
         event = Event(
             event_type=f"coinbase.signal.{signal.signal_type.value}",
@@ -363,10 +315,10 @@ class CoinbaseIntegrationAdapter:
                 "signal_type": signal.signal_type.value,
                 "asset": signal.asset,
                 "confidence": signal.confidence,
-                "reasoning": signal.reasoning
+                "reasoning": signal.reasoning,
             },
             source_domain=EventDomain.COINBASE.value,
-            target_domains=["all"]
+            target_domains=["all"],
         )
         await self._event_bus.publish(event)
 

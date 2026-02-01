@@ -49,7 +49,7 @@ class GCPSecretsProvider(CloudSecretsProvider):
 
     def __init__(self, project_id: str = None):
         try:
-            from google.cloud import secretmanager
+            from google.cloud import secretmanager  # type: ignore[import-untyped]
 
             self.client = secretmanager.SecretManagerServiceAsyncClient()
             self.project_id = project_id or os.getenv("GOOGLE_CLOUD_PROJECT")
@@ -148,7 +148,7 @@ def load_secrets_config() -> dict:
     config_path = Path(__file__).parent.parent.parent.parent / "config" / "secrets_manager.yaml"
 
     if config_path.exists():
-        import yaml
+        import yaml  # type: ignore[import-untyped]
 
         with open(config_path) as f:
             return yaml.safe_load(f)

@@ -84,9 +84,7 @@ class XAIExplainer:
             explanation["pattern_context"] = self._process_patterns(detected_patterns)
 
         # Generate resonance explanation with patterns
-        detected_pattern_names = [
-            p.get("pattern_name") for p in (detected_patterns or []) if p.get("detected")
-        ]
+        detected_pattern_names = [p.get("pattern_name") for p in (detected_patterns or []) if p.get("detected")]
         explanation["resonance_explanation"] = explain_resonance_with_patterns(
             context.get("resonance", 0.0),
             detected_pattern_names,
@@ -186,8 +184,11 @@ class XAIExplainer:
             flow_state = load > 3.0 and load < 7.0
             explanation["flow_state"] = {
                 "maintained": flow_state,
-                "explanation": "Optimal cognitive balance was maintained during execution" if flow_state
-                else "Cognitive balance was not optimal during execution",
+                "explanation": (
+                    "Optimal cognitive balance was maintained during execution"
+                    if flow_state
+                    else "Cognitive balance was not optimal during execution"
+                ),
             }
 
         return explanation
@@ -261,10 +262,7 @@ class XAIExplainer:
             Processed pattern information
         """
         detected = [p for p in patterns if p.get("detected", False)]
-        high_confidence = [
-            p for p in detected
-            if p.get("confidence", 0) > 0.7
-        ]
+        high_confidence = [p for p in detected if p.get("confidence", 0) > 0.7]
 
         return {
             "total_detected": len(detected),
@@ -535,9 +533,7 @@ class XAIExplainer:
             momentum = features.get("momentum", "balanced")
 
             coffee_explanation = (
-                f"Flow detected in {coffee_mode} mode. "
-                f"Processing: {processing_mode}, "
-                f"Momentum: {momentum}. "
+                f"Flow detected in {coffee_mode} mode. " f"Processing: {processing_mode}, " f"Momentum: {momentum}. "
             )
             if coffee_mode == "Espresso":
                 coffee_explanation += "Ultra-focused precision with rapid decision-making."
@@ -599,9 +595,7 @@ class XAIExplainer:
             pattern_explanations = []
             for pattern in detected_patterns:
                 if pattern.get("detected"):
-                    pattern_explanations.append(
-                        self.explain_pattern_with_coffee_metaphor(pattern)
-                    )
+                    pattern_explanations.append(self.explain_pattern_with_coffee_metaphor(pattern))
             explanation["pattern_explanations"] = pattern_explanations
 
         # Add comprehensive narrative combining all elements

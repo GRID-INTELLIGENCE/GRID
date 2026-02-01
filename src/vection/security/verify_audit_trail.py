@@ -30,7 +30,7 @@ def load_audit_events(file_path: str) -> list[AuditEvent]:
 
     events = []
     try:
-        with open(path, encoding='utf-8') as f:
+        with open(path, encoding="utf-8") as f:
             for line in f:
                 line = line.strip()
                 if line:
@@ -85,7 +85,7 @@ def verify_audit_trail(file_path: str, verbose: bool = False) -> bool:
     return is_valid
 
 
-def main():
+def main() -> None:
     """Main CLI entry point."""
     parser = argparse.ArgumentParser(
         description="Verify GRID audit trail integrity",
@@ -94,17 +94,10 @@ def main():
 Examples:
   python -m vection.security.verify_audit_trail audit.log
   python -m vection.security.verify_audit_trail --verbose audit.log
-        """
+        """,
     )
-    parser.add_argument(
-        'file',
-        help='Path to the audit log file'
-    )
-    parser.add_argument(
-        '--verbose', '-v',
-        action='store_true',
-        help='Print detailed verification information'
-    )
+    parser.add_argument("file", help="Path to the audit log file")
+    parser.add_argument("--verbose", "-v", action="store_true", help="Print detailed verification information")
 
     args = parser.parse_args()
 
@@ -120,5 +113,5 @@ Examples:
         sys.exit(1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

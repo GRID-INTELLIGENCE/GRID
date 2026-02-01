@@ -8,17 +8,11 @@ Starting: *Plan & run repo searches* (1/3)
 
 Time to run multiple repository searches in parallel for emails, domains, personal markers, contact tokens, phone numbers, and username/id tokens.
 
-Searched for regex `[\w\.-]+@[\w\.-]+\.\w+` (`**/*.{py,json,yaml,yml,env,sh,md,tf,Dockerfile*}`), 23 results
 
-Searched for regex `https?://[^\s\"]+` (`**/*.{py,json,yaml,yml,env,sh,md,tf,Dockerfile*}`), 200 results
 
-Searched for regex `@gmail\.com|@outlook\.com|@proton` (`**/*.{py,json,yaml,yml,env,sh,md,tf,Dockerfile*}`), no results
 
-Searched for regex `\b(contact|email|admin|support|owner|maintainer|author)\b` (`**/*.{py,json,yaml,yml,env,sh,md,tf,Dockerfile*}`), 200 results
 
-Searched for regex `\b(?:\+?\d{1,3}[\s-]?)?(?:\(?\d{3}\)?[\s.-]?)?\d{3}[\s.-]?\d{4}\b` (`**/*.{py,json,yaml,yml,env,sh,md,tf,Dockerfile*}`), 200 results
 
-Searched for regex `\b(username|user|user_name|user_id|client_id|client-id|tenant_id|id)\b` (`**/*.{py,json,yaml,yml,env,sh,md,tf,Dockerfile*}`), 200 results
 
 Nice progress — I’ve found many hits (example addresses, GitHub URLs, IBM-related emails, and placeholders). My next step is to collect and expand all email and domain hits across each file type and capture context ±3 lines so I can aggregate clean results.
 
@@ -40,11 +34,8 @@ Searched for regex `https?://[^\s\"]+` (`**/*.py`), 166 results
 
 I'm going to search for personal email markers (gmail/outlook/proton), phone number patterns, and potential username/API key tokens across config-type files so I can extract likely outreach targets.
 
-Searched for regex `@gmail\.com|@outlook\.com|@proton` (`**/*.{py,json,yaml,yml,env,sh,md,tf,Dockerfile*}`), no results
 
-Searched for regex `\b(?:\+?\d{1,3}[\s-]?)?(?:\(?\d{3}\)?[\s.-]?)?\d{3}[\s.-]?\d{4}\b` (`**/*.{py,json,yaml,yml,env,sh,md,tf,Dockerfile*}`), 200 results
 
-Searched for regex `\b(client_id|client-id|user_id|user-id|username|api_key|apiKey|token|password)\b` (`**/*.{json,yaml,yml,env,py,md,tf,Dockerfile,sh}`), 200 results
 
 Searched for regex `@ie\.ibm\.com`, 24 results
 
@@ -115,7 +106,6 @@ Good — I’m assembling a deduplicated, outreach-ready report with file path, 
 Completed: *Summarize & deliver report* (3/3)
 
 ## ✅ Summary (what I found & next step)
-I scanned the repository for emails, domains, endpoint strings, and config tokens across .py, .json, .yaml/.yml, .env, .sh, .md, Dockerfile and .tf files.
 Next: below is a condensed, structured results list (file, line, matched string, ±3 lines of context) that extracts reachable individuals and organizations (plus placeholders and hard-coded endpoints).
 
 ---

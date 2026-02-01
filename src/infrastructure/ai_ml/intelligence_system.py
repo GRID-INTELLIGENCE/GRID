@@ -16,11 +16,12 @@ from datetime import datetime
 from enum import Enum
 from typing import Any
 
-from ..event_bus.event_system import Event, EventBus, EventHandler, EventResult
+from ..event_bus.event_system import Event, EventBus, EventHandler, EventResult, EventStatus  # type: ignore[import-not-found]
 
 
 class AISafetyLevel(Enum):
     """AI safety levels."""
+
     PERMITTED = "permitted"
     RESTRICTED = "restricted"
     PROHIBITED = "prohibited"
@@ -28,6 +29,7 @@ class AISafetyLevel(Enum):
 
 class DataSensitivity(Enum):
     """Data sensitivity levels."""
+
     PUBLIC = "public"
     SENSITIVE = "sensitive"
     CRITICAL = "critical"
@@ -35,6 +37,7 @@ class DataSensitivity(Enum):
 
 class ModelType(Enum):
     """Model types."""
+
     PREDICTIVE = "predictive"
     CLASSIFICATION = "classification"
     CLUSTERING = "clustering"
@@ -45,6 +48,7 @@ class ModelType(Enum):
 @dataclass
 class AIRequest:
     """AI inference request."""
+
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
     model_name: str = ""
     model_type: ModelType = ModelType.PREDICTIVE
@@ -60,6 +64,7 @@ class AIRequest:
 @dataclass
 class AIResponse:
     """AI inference response."""
+
     request_id: str
     model_name: str
     predictions: dict[str, Any] | None = None
@@ -75,6 +80,7 @@ class AIResponse:
 @dataclass
 class ModelMetadata:
     """Model metadata."""
+
     name: str
     version: str
     type: ModelType
@@ -94,10 +100,10 @@ class AISafetyGuard:
 
     def __init__(self):
         self.blocked_patterns = [
-            r'\b(password|token|secret|key)\b',
-            r'\b(social_security|ssn)\b',
-            r'\b(credit_card|card_number)\b',
-            r'\b(bank_account|account_number)\b'
+            r"\b(password|token|secret|key)\b",
+            r"\b(social_security|ssn)\b",
+            r"\b(credit_card|card_number)\b",
+            r"\b(bank_account|account_number)\b",
         ]
         self.max_input_size = 10000  # characters
         self.max_output_size = 5000  # characters
@@ -137,8 +143,7 @@ class AISafetyGuard:
             # Add safety disclaimer
             if response.safety_level != AISafetyLevel.PROHIBITED:
                 response.explanation = (
-                    f"{response.explanation or ''}\n"
-                    "[AI Safety: This response has been filtered and sanitized]"
+                    f"{response.explanation or ''}\n" "[AI Safety: This response has been filtered and sanitized]"
                 )
 
         return response
@@ -187,6 +192,7 @@ class FeatureStore:
         """Start feature store."""
         try:
             import redis.asyncio as redis
+
             self.redis_client = redis.from_url(self.redis_url)
             await self.redis_client.ping()
             logging.info("Feature store connected to Redis")
@@ -228,11 +234,7 @@ class FeatureStore:
         for feature_name, value in features.items():
             try:
                 key = f"features:{entity_id}:{feature_name}"
-                await self.redis_client.setex(
-                    key,
-                    ttl,
-                    json.dumps(value)
-                )
+                await self.redis_client.setex(key, ttl, json.dumps(value))
             except Exception as e:
                 logging.error(f"Failed to set feature {feature_name}: {e}")
 
@@ -251,7 +253,7 @@ class ExperimentTracker:
         model_name: str,
         parameters: dict[str, Any],
         metrics: dict[str, float],
-        tags: list[str] | None = None
+        tags: list[str] | None = None,
     ):
         """Log an experiment."""
         async with self._lock:
@@ -264,7 +266,7 @@ class ExperimentTracker:
                 "parameters": parameters,
                 "metrics": metrics,
                 "tags": tags or [],
-                "timestamp": time.time()
+                "timestamp": time.time(),
             }
 
             self.experiments[experiment_id] = experiment
@@ -276,8 +278,7 @@ class ExperimentTracker:
     async def get_best_model(self, experiment_name: str, metric: str = "accuracy") -> str | None:
         """Get best model for an experiment."""
         experiments = [
-            exp for exp in self.experiments.values()
-            if exp["name"] == experiment_name and metric in exp["metrics"]
+            exp for exp in self.experiments.values() if exp["name"] == experiment_name and metric in exp["metrics"]
         ]
 
         if not experiments:
@@ -290,12 +291,12 @@ class ExperimentTracker:
         """Persist experiment to disk."""
         import os
 
-        import aiofiles
+        import aiofiles  # type: ignore[import-untyped]
 
         os.makedirs(self.storage_path, exist_ok=True)
 
         filename = f"{self.storage_path}/{experiment['id']}.json"
-        async with aiofiles.open(filename, 'w') as f:
+        async with aiofiles.open(filename, "w") as f:
             await f.write(json.dumps(experiment, indent=2))
 
 
@@ -308,7 +309,7 @@ class FrontierIntelligenceSystem:
         self,
         region: str = "southeast_asia",
         redis_url: str = "redis://localhost:6379",
-        event_bus: EventBus | None = None
+        event_bus: EventBus | None = None,
     ):
         self.region = region
         self.event_bus = event_bus
@@ -339,7 +340,7 @@ class FrontierIntelligenceSystem:
                 "currencies": ["USD", "SGD", "MYR", "THB", "VND", "IDR", "PHP"],
                 "regulations": ["PDPA", "PDPO", "PDPA"],
                 "data_residency": True,
-                "model_bias_protection": True
+                "model_bias_protection": True,
             }
         }
         return configs.get(region, configs["southeast_asia"])
@@ -370,7 +371,7 @@ class FrontierIntelligenceSystem:
         input_data: dict[str, Any],
         safety_level: AISafetyLevel = AISafetyLevel.PERMITTED,
         data_sensitivity: DataSensitivity = DataSensitivity.PUBLIC,
-        **kwargs
+        **kwargs,
     ) -> AIResponse:
         """Make a prediction."""
         request = AIRequest(
@@ -378,7 +379,7 @@ class FrontierIntelligenceSystem:
             input_data=input_data,
             safety_level=safety_level,
             data_sensitivity=data_sensitivity,
-            parameters=kwargs
+            parameters=kwargs,
         )
 
         # Add to queue
@@ -389,11 +390,7 @@ class FrontierIntelligenceSystem:
         while request.id not in self.response_cache:
             await asyncio.sleep(0.01)
             if time.time() - start_time > request.timeout:
-                return AIResponse(
-                    request_id=request.id,
-                    model_name=model_name,
-                    error="Request timeout"
-                )
+                return AIResponse(request_id=request.id, model_name=model_name, error="Request timeout")
 
         response = self.response_cache.pop(request.id)
         return response
@@ -403,10 +400,7 @@ class FrontierIntelligenceSystem:
         while self.processing:
             try:
                 # Get request from queue
-                request = await asyncio.wait_for(
-                    self.request_queue.get(),
-                    timeout=1.0
-                )
+                request = await asyncio.wait_for(self.request_queue.get(), timeout=1.0)
 
                 # Process request
                 response = await self._process_request(request)
@@ -437,16 +431,14 @@ class FrontierIntelligenceSystem:
                     request_id=request.id,
                     model_name=request.model_name,
                     error=f"Safety validation failed: {error_msg}",
-                    safety_assessment=AISafetyLevel.PROHIBITED
+                    safety_assessment=AISafetyLevel.PROHIBITED,
                 )
 
             # Get model
             model = self.model_registry.get_model(request.model_name)
             if not model:
                 return AIResponse(
-                    request_id=request.id,
-                    model_name=request.model_name,
-                    error=f"Model not found: {request.model_name}"
+                    request_id=request.id, model_name=request.model_name, error=f"Model not found: {request.model_name}"
                 )
 
             # Get model metadata
@@ -457,24 +449,17 @@ class FrontierIntelligenceSystem:
                 return AIResponse(
                     request_id=request.id,
                     model_name=request.model_name,
-                    error=f"Insufficient safety level for model: {request.model_name}"
+                    error=f"Insufficient safety level for model: {request.model_name}",
                 )
 
             # Get features if needed
             features = {}
             if metadata.data_requirements:
                 entity_id = request.input_data.get("entity_id", "default")
-                features = await self.feature_store.get_features(
-                    entity_id,
-                    metadata.data_requirements
-                )
+                features = await self.feature_store.get_features(entity_id, metadata.data_requirements)
 
             # Prepare input
-            model_input = {
-                **request.input_data,
-                **features,
-                **request.parameters
-            }
+            model_input = {**request.input_data, **features, **request.parameters}
 
             # Make prediction
             predictions = await self._predict_with_model(model, model_input)
@@ -488,7 +473,7 @@ class FrontierIntelligenceSystem:
                 explanation=predictions.get("explanation"),
                 safety_assessment=metadata.safety_level,
                 model_version=metadata.version,
-                processing_time=time.time() - start_time
+                processing_time=time.time() - start_time,
             )
 
             # Sanitize output
@@ -501,7 +486,7 @@ class FrontierIntelligenceSystem:
                 request_id=request.id,
                 model_name=request.model_name,
                 error=str(e),
-                processing_time=time.time() - start_time
+                processing_time=time.time() - start_time,
             )
 
     async def _predict_with_model(self, model: Any, input_data: dict[str, Any]) -> dict[str, Any]:
@@ -516,7 +501,7 @@ class FrontierIntelligenceSystem:
         return {
             "predictions": {"result": "mock_prediction"},
             "confidence": 0.85,
-            "explanation": "Mock model prediction"
+            "explanation": "Mock model prediction",
         }
 
     async def get_metrics(self) -> dict[str, Any]:
@@ -527,11 +512,12 @@ class FrontierIntelligenceSystem:
             "requests_failed": self.requests_failed,
             "success_rate": (
                 self.requests_processed / (self.requests_processed + self.requests_failed)
-                if (self.requests_processed + self.requests_failed) > 0 else 0
+                if (self.requests_processed + self.requests_failed) > 0
+                else 0
             ),
             "models_registered": len(self.model_registry.models),
             "queue_size": self.request_queue.qsize(),
-            "regional_config": self.regional_config
+            "regional_config": self.regional_config,
         }
 
 
@@ -558,7 +544,7 @@ class AIRequestHandler(EventHandler):
                     model_name=request_data["model_name"],
                     input_data=request_data["input_data"],
                     safety_level=AISafetyLevel(request_data.get("safety_level", "permitted")),
-                    data_sensitivity=DataSensitivity(request_data.get("data_sensitivity", "public"))
+                    data_sensitivity=DataSensitivity(request_data.get("data_sensitivity", "public")),
                 )
 
                 # Publish response event
@@ -569,16 +555,16 @@ class AIRequestHandler(EventHandler):
                             "request_id": response.request_id,
                             "predictions": response.predictions,
                             "confidence": response.confidence,
-                            "error": response.error
+                            "error": response.error,
                         },
-                        source="intelligence_system"
+                        source="intelligence_system",
                     )
 
                 return EventResult(
                     event_id=event.id,
                     status=EventStatus.COMPLETED,
                     result={"response_id": response.request_id},
-                    processing_time=time.time() - start_time
+                    processing_time=time.time() - start_time,
                 )
 
             elif event.type == "ai.model.update":
@@ -588,21 +574,19 @@ class AIRequestHandler(EventHandler):
                     event_id=event.id,
                     status=EventStatus.COMPLETED,
                     result={"model_updated": True},
-                    processing_time=time.time() - start_time
+                    processing_time=time.time() - start_time,
                 )
 
         except Exception as e:
             return EventResult(
-                event_id=event.id,
-                status=EventStatus.FAILED,
-                error=str(e),
-                processing_time=time.time() - start_time
+                event_id=event.id, status=EventStatus.FAILED, error=str(e), processing_time=time.time() - start_time
             )
 
 
 # ============================================================================
 # Example Usage
 # ============================================================================
+
 
 async def example_intelligence_setup():
     """Example setup of intelligence system."""
@@ -611,14 +595,12 @@ async def example_intelligence_setup():
     await event_bus.start()
 
     # Create intelligence system
-    intelligence = FrontierIntelligenceSystem(
-        region="southeast_asia",
-        event_bus=event_bus
-    )
+    intelligence = FrontierIntelligenceSystem(region="southeast_asia", event_bus=event_bus)
     await intelligence.start()
 
     # Register a mock model
     from unittest.mock import Mock
+
     mock_model = Mock()
     mock_model.predict.return_value = {"result": 0.85}
 
@@ -634,7 +616,7 @@ async def example_intelligence_setup():
         performance_metrics={"accuracy": 0.92},
         created_at=datetime.now(),
         updated_at=datetime.now(),
-        tags=["risk", "finance"]
+        tags=["risk", "finance"],
     )
 
     intelligence.model_registry.register_model(metadata, mock_model)
@@ -643,7 +625,7 @@ async def example_intelligence_setup():
     response = await intelligence.predict(
         model_name="risk_assessment",
         input_data={"entity_id": "user123", "income": 50000},
-        safety_level=AISafetyLevel.PERMITTED
+        safety_level=AISafetyLevel.PERMITTED,
     )
 
     print(f"Prediction response: {response}")
@@ -656,6 +638,7 @@ async def example_intelligence_setup():
 
 
 if __name__ == "__main__":
+
     async def main():
         intelligence = await example_intelligence_setup()
 

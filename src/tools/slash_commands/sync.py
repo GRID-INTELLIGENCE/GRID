@@ -10,6 +10,7 @@ from typing import Any
 
 from grid.knowledge import Entity, EntityId, PersistentJSONKnowledgeStore
 from grid.knowledge.graph_schema import RelationType
+
 from .base import CommandContext, CommandResult, KnowledgeCommand
 
 logger = logging.getLogger(__name__)

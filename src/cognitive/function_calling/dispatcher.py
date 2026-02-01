@@ -26,7 +26,7 @@ class FunctionCallDispatcher:
         *args,
         cognitive_state: dict | None = None,
         temporal_context: dict | None = None,
-        **kwargs
+        **kwargs,
     ) -> dict[str, Any]:
         """
         Dispatch a function call with context awareness.
@@ -41,38 +41,18 @@ class FunctionCallDispatcher:
             Result dictionary with output and metadata
         """
         if function_name not in self.function_registry:
-            return {
-                "success": False,
-                "error": f"Function '{function_name}' not registered"
-            }
+            return {"success": False, "error": f"Function '{function_name}' not registered"}
 
         try:
             # Prepare context
-            context = {
-                "cognitive": cognitive_state or {},
-                "temporal": temporal_context or {}
-            }
+            context = {"cognitive": cognitive_state or {}, "temporal": temporal_context or {}}
 
             # Execute function
             result = self.function_registry[function_name](*args, **kwargs, context=context)
 
             # Generate explanation
-            explanation = self.xai_generator.explain_function_call(
-                function_name,
-                args,
-                kwargs,
-                result
-            )
+            explanation = self.xai_generator.explain_function_call(function_name, args, kwargs, result)
 
-            return {
-                "success": True,
-                "result": result,
-                "explanation": explanation,
-                "context": context
-            }
+            return {"success": True, "result": result, "explanation": explanation, "context": context}
         except Exception as e:
-            return {
-                "success": False,
-                "error": str(e),
-                "context": context
-            }
+            return {"success": False, "error": str(e), "context": context}

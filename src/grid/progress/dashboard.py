@@ -18,6 +18,7 @@ import json
 import sys
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 src_path = Path(__file__).parent.parent
 if str(src_path) not in sys.path:
@@ -33,10 +34,10 @@ class ShiftDashboard:
         """Initialize dashboard."""
         self.project_root = project_root or Path(__file__).parent.parent.parent.parent
         self.engine = MotivationEngine(self.project_root)
-        self.milestones = []
+        self.milestones: list[dict[str, Any]] = []
         self._load_milestones()
 
-    def _load_milestones(self):
+    def _load_milestones(self) -> None:
         """Load existing milestones from history."""
         history_file = self.project_root / "progress_history.json"
         if history_file.exists():
@@ -48,7 +49,7 @@ class ShiftDashboard:
                 except (json.JSONDecodeError, ValueError):
                     pass
 
-    def log_milestone(self, description: str):
+    def log_milestone(self, description: str) -> None:
         """Log a milestone during the shift."""
         milestone = {
             "timestamp": datetime.now().isoformat(),
@@ -58,13 +59,13 @@ class ShiftDashboard:
         self.milestones.append(milestone)
         self._save_milestones()
 
-    def _save_milestones(self):
+    def _save_milestones(self) -> None:
         """Save milestones to file."""
         history_file = self.project_root / "progress_history.json"
         with open(history_file, "w") as f:
             json.dump(self.milestones, f, indent=2)
 
-    def print_status(self):
+    def print_status(self) -> None:
         """Print current dashboard status."""
         metrics = self.engine.measure_current_state()
 
@@ -80,7 +81,10 @@ class ShiftDashboard:
         # Current metrics
         current_gear = self.engine.current_gear(metrics.rpm)
         print(f"\n🎯 CURRENT STATUS: {current_gear} GEAR ({metrics.rpm} RPM)")
-        print(f"\n   Test Pass Rate:     {metrics.test_passing:3d}/{metrics.test_count:3d} ({metrics.test_pass_rate:5.1f}%) ", end="")
+        print(
+            f"\n   Test Pass Rate:     {metrics.test_passing:3d}/{metrics.test_count:3d} ({metrics.test_pass_rate:5.1f}%) ",
+            end="",
+        )
         self._print_bar(metrics.test_pass_rate)
         print(f"   Type Coverage:      {metrics.type_coverage:5.1f}% ", end="")
         self._print_bar(metrics.type_coverage)

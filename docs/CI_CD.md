@@ -12,7 +12,6 @@ This document has been superseded by the comprehensive CI/CD Guide.
 |----------|------|---------|
 | Main CI | `.github/workflows/main.yaml` | Lint, test, security, build |
 | Release | `.github/workflows/release.yaml` | Version bumping, publishing |
-| Docker | `.github/workflows/build.yaml` | Docker image build |
 
 ### Run Locally
 

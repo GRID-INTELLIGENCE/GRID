@@ -3,10 +3,12 @@ Unified Fabric - Cross-Project Policy Validator
 ==============================================
 Simple policy enforcement for cross-project safety events.
 """
+
 from __future__ import annotations
 
 from collections.abc import Iterable
 from dataclasses import dataclass
+from typing import Any
 
 
 @dataclass(frozen=True)
@@ -29,7 +31,7 @@ class CrossProjectPolicyValidator:
         self.allowed_projects = {p.lower() for p in (allowed_projects or {"grid", "coinbase", "wellness_studio"})}
         self.allowed_domains = {d.lower() for d in (allowed_domains or {"safety", "grid", "coinbase", "revenue"})}
 
-    def validate_context(self, context: dict) -> PolicyValidationResult:
+    def validate_context(self, context: dict[str, Any]) -> PolicyValidationResult:
         """Validate basic context requirements."""
         project = str(context.get("project", "")).lower()
         domain = str(context.get("domain", "")).lower()
@@ -50,7 +52,7 @@ class CrossProjectPolicyValidator:
 
         return PolicyValidationResult(allowed=True)
 
-    def validate_payload(self, payload: dict) -> PolicyValidationResult:
+    def validate_payload(self, payload: dict[str, Any]) -> PolicyValidationResult:
         """Validate payload context if present."""
         context = payload.get("context") if isinstance(payload, dict) else None
         if isinstance(context, dict):

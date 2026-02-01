@@ -70,11 +70,7 @@ class ExplanationGenerator:
         return base
 
     def explain_function_call(
-        self,
-        function_name: str,
-        args: tuple,
-        kwargs: dict,
-        result: Any
+        self, function_name: str, args: tuple[Any, ...], kwargs: dict[str, Any], result: Any
     ) -> str:
         """
         Generate explanation for function call execution.

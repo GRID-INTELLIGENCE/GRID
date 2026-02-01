@@ -8,7 +8,7 @@ import logging
 import time
 from typing import Any
 
-from celery import Celery
+from celery import Celery  # type: ignore[import-untyped]
 
 from application.mothership.config import get_settings
 
@@ -22,12 +22,12 @@ app = Celery("mothership_tasks", broker=settings.database.redis_url, backend=set
 @app.task(name="agentic.execute_case")
 def execute_case_task(case_id: str, agent_role: str, task: str) -> dict[str, Any]:
     """Background task to execute an agentic case.
-    
+
     Args:
         case_id: Unique identifier for the case
         agent_role: Role of the agent executing the case
         task: Task description to execute
-        
+
     Returns:
         Dictionary with case_id and status
     """
@@ -45,10 +45,10 @@ def execute_case_task(case_id: str, agent_role: str, task: str) -> dict[str, Any
 @app.task(name="pipeline.harvest")
 def harvest_task(run_id: str) -> dict[str, Any]:
     """Background task for repository harvesting.
-    
+
     Args:
         run_id: Unique identifier for the harvest run
-        
+
     Returns:
         Dictionary with run_id and harvested status
     """

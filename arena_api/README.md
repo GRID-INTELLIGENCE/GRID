@@ -194,10 +194,7 @@ ai:
 
 ## Deployment
 
-### Docker Build
 ```bash
-docker build -t arena-api .
-docker run -p 8000:8000 arena-api
 ```
 
 ### Kubernetes Deployment
@@ -209,7 +206,6 @@ kubectl apply -f k8s/
 The GitHub Actions pipeline provides:
 - Automated testing and linting
 - Security scanning
-- Docker image building
 - Multi-environment deployment
 - Performance testing
 

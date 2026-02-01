@@ -7657,8 +7657,6 @@
         "docs\\.venv\\Lib\\site-packages\\pre_commit\\languages\\conda.py",
         "docs\\.venv\\Lib\\site-packages\\pre_commit\\languages\\coursier.py",
         "docs\\.venv\\Lib\\site-packages\\pre_commit\\languages\\dart.py",
-        "docs\\.venv\\Lib\\site-packages\\pre_commit\\languages\\docker.py",
-        "docs\\.venv\\Lib\\site-packages\\pre_commit\\languages\\docker_image.py",
         "docs\\.venv\\Lib\\site-packages\\pre_commit\\languages\\dotnet.py",
         "docs\\.venv\\Lib\\site-packages\\pre_commit\\languages\\fail.py",
         "docs\\.venv\\Lib\\site-packages\\pre_commit\\languages\\golang.py",

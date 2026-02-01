@@ -357,9 +357,7 @@ class InteractionTracker:
         error_events = [e for e in events if e.outcome in ["failure", "error"]]
         retry_events = [e for e in events if e.action == ActionType.RETRY]
 
-        patterns["frustration_level"] = (
-            len(negative_events) + len(error_events) + len(retry_events) * 2
-        ) / len(events)
+        patterns["frustration_level"] = (len(negative_events) + len(error_events) + len(retry_events) * 2) / len(events)
 
         # Detect engagement patterns (time spent per interaction)
         durations = [e.duration for e in events if e.duration > 0]
@@ -379,7 +377,9 @@ class InteractionTracker:
             first_rate = first_success / len(first_half) if first_half else 0
             second_rate = second_success / len(second_half) if second_half else 0
 
-            patterns["learning_trend"] = "improving" if second_rate > first_rate else "stable" if second_rate == first_rate else "declining"
+            patterns["learning_trend"] = (
+                "improving" if second_rate > first_rate else "stable" if second_rate == first_rate else "declining"
+            )
             patterns["success_rate_change"] = second_rate - first_rate
 
         # Detect domain preferences

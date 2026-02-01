@@ -16,18 +16,19 @@ from collections import defaultdict
 from collections.abc import Callable
 from dataclasses import asdict, dataclass, field
 from enum import Enum
-from typing import Any, Generic, TypeVar
+from typing import Any, TypeVar
 
-import aio_pika
-import aiofiles
+import aio_pika  # type: ignore[import-not-found]
+import aiofiles  # type: ignore[import-not-found,import-untyped]
 import redis.asyncio as redis
 from aio_pika import DeliveryMode, ExchangeType, Message
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class EventPriority(Enum):
     """Event priority levels."""
+
     LOW = 1
     NORMAL = 2
     HIGH = 3
@@ -36,6 +37,7 @@ class EventPriority(Enum):
 
 class EventStatus(Enum):
     """Event processing status."""
+
     PENDING = "pending"
     PROCESSING = "processing"
     COMPLETED = "completed"
@@ -46,6 +48,7 @@ class EventStatus(Enum):
 @dataclass
 class Event:
     """Base event structure."""
+
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
     type: str = ""
     source: str = ""
@@ -62,19 +65,20 @@ class Event:
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         data = asdict(self)
-        data['priority'] = self.priority.value
+        data["priority"] = self.priority.value
         return data
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> 'Event':
+    def from_dict(cls, data: dict[str, Any]) -> "Event":
         """Create from dictionary."""
-        data['priority'] = EventPriority(data['priority'])
+        data["priority"] = EventPriority(data["priority"])
         return cls(**data)
 
 
 @dataclass
 class EventResult:
     """Event processing result."""
+
     event_id: str
     status: EventStatus
     result: dict[str, Any] | None = None
@@ -83,7 +87,7 @@ class EventResult:
     timestamp: float = field(default_factory=time.time)
 
 
-class EventHandler(ABC, Generic[T]):
+class EventHandler[T](ABC):
     """Abstract event handler."""
 
     @abstractmethod
@@ -136,19 +140,13 @@ class EventStore:
 
     async def get_events_by_type(self, event_type: str, limit: int = 100) -> list[Event]:
         """Get events by type."""
-        events = [
-            event for event in self.events.values()
-            if event.type == event_type
-        ]
+        events = [event for event in self.events.values() if event.type == event_type]
         events.sort(key=lambda e: e.timestamp, reverse=True)
         return events[:limit]
 
     async def get_events_by_source(self, source: str, limit: int = 100) -> list[Event]:
         """Get events by source."""
-        events = [
-            event for event in self.events.values()
-            if event.source == source
-        ]
+        events = [event for event in self.events.values() if event.source == source]
         events.sort(key=lambda e: e.timestamp, reverse=True)
         return events[:limit]
 
@@ -166,7 +164,7 @@ class EventStore:
         """Persist event to disk."""
         try:
             filename = f"{self.storage_path}/events/{event.id}.json"
-            async with aiofiles.open(filename, 'w') as f:
+            async with aiofiles.open(filename, "w") as f:
                 await f.write(json.dumps(event.to_dict(), indent=2))
         except Exception as e:
             logging.error(f"Failed to persist event: {e}")
@@ -175,7 +173,7 @@ class EventStore:
         """Persist result to disk."""
         try:
             filename = f"{self.storage_path}/results/{result.event_id}.json"
-            async with aiofiles.open(filename, 'w') as f:
+            async with aiofiles.open(filename, "w") as f:
                 await f.write(json.dumps(asdict(result), indent=2))
         except Exception as e:
             logging.error(f"Failed to persist result: {e}")
@@ -232,11 +230,7 @@ class EventRouter:
         final_results = []
         for result in results:
             if isinstance(result, Exception):
-                final_results.append(EventResult(
-                    event_id=event.id,
-                    status=EventStatus.FAILED,
-                    error=str(result)
-                ))
+                final_results.append(EventResult(event_id=event.id, status=EventStatus.FAILED, error=str(result)))
             elif isinstance(result, EventResult):
                 final_results.append(result)
 
@@ -248,11 +242,7 @@ class EventRouter:
             return await handler.handle(event)
         except Exception as e:
             logging.error(f"Handler {handler.name} failed for event {event.id}: {e}")
-            return EventResult(
-                event_id=event.id,
-                status=EventStatus.FAILED,
-                error=str(e)
-            )
+            return EventResult(event_id=event.id, status=EventStatus.FAILED, error=str(e))
 
 
 class EventBus:
@@ -264,7 +254,7 @@ class EventBus:
         self,
         redis_url: str = "redis://localhost:6379",
         rabbitmq_url: str = "amqp://localhost:5672",
-        storage_path: str = "events"
+        storage_path: str = "events",
     ):
         self.redis_client: redis.Redis | None = None
         self.rabbitmq_connection: aio_pika.Connection | None = None
@@ -301,11 +291,7 @@ class EventBus:
             self.channel = await self.rabbitmq_connection.channel()
 
             # Declare exchange
-            self.exchange = await self.channel.declare_exchange(
-                "arena_events",
-                ExchangeType.TOPIC,
-                durable=True
-            )
+            self.exchange = await self.channel.declare_exchange("arena_events", ExchangeType.TOPIC, durable=True)
 
             logging.info("RabbitMQ connected to event bus")
         except Exception as e:
@@ -313,6 +299,7 @@ class EventBus:
 
         # Create storage directories
         import os
+
         os.makedirs(f"{self.event_store.storage_path}/events", exist_ok=True)
         os.makedirs(f"{self.event_store.storage_path}/results", exist_ok=True)
 
@@ -338,7 +325,7 @@ class EventBus:
         source: str = "unknown",
         priority: EventPriority = EventPriority.NORMAL,
         correlation_id: str | None = None,
-        routing_key: str | None = None
+        routing_key: str | None = None,
     ) -> str:
         """Publish an event."""
         event = Event(
@@ -347,7 +334,7 @@ class EventBus:
             data=data,
             priority=priority,
             correlation_id=correlation_id,
-            metadata={"routing_key": routing_key or event_type}
+            metadata={"routing_key": routing_key or event_type},
         )
 
         # Store event
@@ -371,7 +358,7 @@ class EventBus:
                     json.dumps(event.to_dict()).encode(),
                     content_type="application/json",
                     delivery_mode=DeliveryMode.PERSISTENT,
-                    headers={"priority": event.priority.value}
+                    headers={"priority": event.priority.value},
                 )
 
                 routing_key = routing_key or event_type
@@ -384,10 +371,7 @@ class EventBus:
         # Publish to Redis for real-time subscribers
         if self.redis_client:
             try:
-                await self.redis_client.publish(
-                    f"events:{event_type}",
-                    json.dumps(event.to_dict())
-                )
+                await self.redis_client.publish(f"events:{event_type}", json.dumps(event.to_dict()))
             except Exception as e:
                 logging.error(f"Failed to publish to Redis: {e}")
 
@@ -406,9 +390,9 @@ class EventBus:
 
             async def listener():
                 async for message in pubsub.listen():
-                    if message['type'] == 'pmessage':
+                    if message["type"] == "pmessage":
                         try:
-                            event_data = json.loads(message['data'])
+                            event_data = json.loads(message["data"])
                             event = Event.from_dict(event_data)
                             await handler(event)
                         except Exception as e:
@@ -431,20 +415,21 @@ class EventBus:
             "events_failed": self.events_failed,
             "success_rate": (
                 self.events_processed / (self.events_processed + self.events_failed)
-                if (self.events_processed + self.events_failed) > 0 else 0
+                if (self.events_processed + self.events_failed) > 0
+                else 0
             ),
             "average_processing_time": (
-                sum(self.processing_times) / len(self.processing_times)
-                if self.processing_times else 0
+                sum(self.processing_times) / len(self.processing_times) if self.processing_times else 0
             ),
             "handlers_registered": len(self.event_router.handlers),
-            "subscribers": len(self.subscribers)
+            "subscribers": len(self.subscribers),
         }
 
 
 # ============================================================================
 # Example Event Handlers
 # ============================================================================
+
 
 class PortfolioUpdateHandler(EventHandler):
     """Handler for portfolio update events."""
@@ -459,7 +444,6 @@ class PortfolioUpdateHandler(EventHandler):
 
         try:
             # Process portfolio update
-            portfolio_data = event.data
 
             # Update analytics
             # Send notifications
@@ -471,15 +455,12 @@ class PortfolioUpdateHandler(EventHandler):
                 event_id=event.id,
                 status=EventStatus.COMPLETED,
                 result={"processed": True},
-                processing_time=processing_time
+                processing_time=processing_time,
             )
 
         except Exception as e:
             return EventResult(
-                event_id=event.id,
-                status=EventStatus.FAILED,
-                error=str(e),
-                processing_time=time.time() - start_time
+                event_id=event.id, status=EventStatus.FAILED, error=str(e), processing_time=time.time() - start_time
             )
 
 
@@ -495,7 +476,6 @@ class TradingSignalHandler(EventHandler):
         start_time = time.time()
 
         try:
-            signal_data = event.data
 
             # Validate signal
             # Check risk limits
@@ -507,21 +487,19 @@ class TradingSignalHandler(EventHandler):
                 event_id=event.id,
                 status=EventStatus.COMPLETED,
                 result={"signal_processed": True},
-                processing_time=processing_time
+                processing_time=processing_time,
             )
 
         except Exception as e:
             return EventResult(
-                event_id=event.id,
-                status=EventStatus.FAILED,
-                error=str(e),
-                processing_time=time.time() - start_time
+                event_id=event.id, status=EventStatus.FAILED, error=str(e), processing_time=time.time() - start_time
             )
 
 
 # ============================================================================
 # Example Usage
 # ============================================================================
+
 
 async def example_event_bus_setup():
     """Example setup of event bus."""
@@ -533,17 +511,13 @@ async def example_event_bus_setup():
     event_bus.register_handler(TradingSignalHandler())
 
     # Publish events
-    await event_bus.publish(
-        "portfolio.updated",
-        {"user_id": "user123", "value": 25000.0},
-        source="portfolio_service"
-    )
+    await event_bus.publish("portfolio.updated", {"user_id": "user123", "value": 25000.0}, source="portfolio_service")
 
     await event_bus.publish(
         "trading.signal.generated",
         {"symbol": "BTC", "signal": "BUY", "confidence": 0.85},
         source="trading_service",
-        priority=EventPriority.HIGH
+        priority=EventPriority.HIGH,
     )
 
     # Get metrics
@@ -554,6 +528,7 @@ async def example_event_bus_setup():
 
 
 if __name__ == "__main__":
+
     async def main():
         event_bus = await example_event_bus_setup()
 

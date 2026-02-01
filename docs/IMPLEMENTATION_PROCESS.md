@@ -341,7 +341,6 @@ End-to-End Tests
 docs/CROSS_ENVIRONMENT_TESTING.md  - Multi-platform testing guide
 docs/FUTURE_ENHANCEMENTS.md        - v2.2.0+ roadmap
 tox.ini                             - Multi-version testing config
-Dockerfile.test                     - Docker test environments
 tests/unit/test_config_edge_cases.py - Edge case tests
 CHANGELOG.md                        - v2.1.0 release notes
 ```

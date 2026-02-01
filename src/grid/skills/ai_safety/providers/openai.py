@@ -6,7 +6,6 @@ Integrates OpenAI moderation API for content safety checks.
 from __future__ import annotations
 
 import logging
-import os
 from typing import Any
 
 from grid.skills.base import SimpleSkill
@@ -88,7 +87,7 @@ def check_openai_safety(content: str, **kwargs: Any) -> list[SafetyViolation]:
 
     try:
         # Import here to avoid dependency issues
-        import requests
+        import requests  # type: ignore[import-untyped]
 
         model = kwargs.get("model", "omni-moderation-latest")
 

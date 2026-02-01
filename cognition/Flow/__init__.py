@@ -11,7 +11,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -149,7 +149,7 @@ class FlowManager:
         if not flow:
             return {}
 
-        event_types = {}
+        event_types: dict[str, int] = {}
         for event in flow.events:
             event_types[event.event_type] = event_types.get(event.event_type, 0) + 1
 

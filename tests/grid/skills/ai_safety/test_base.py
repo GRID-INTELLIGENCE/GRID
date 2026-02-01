@@ -1,6 +1,5 @@
 """Tests for AI Safety Base Module."""
 
-import pytest
 
 from grid.skills.ai_safety.base import (
     ActionResult,

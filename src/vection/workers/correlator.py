@@ -418,9 +418,7 @@ class Correlator:
     async def _decay_candidates(self) -> None:
         """Decay and remove stale candidates."""
         stale = [
-            cid
-            for cid, c in self._candidates.items()
-            if c.age_seconds > 3600 and c.confidence < 0.2  # 1 hour stale
+            cid for cid, c in self._candidates.items() if c.age_seconds > 3600 and c.confidence < 0.2  # 1 hour stale
         ]
 
         for cid in stale:

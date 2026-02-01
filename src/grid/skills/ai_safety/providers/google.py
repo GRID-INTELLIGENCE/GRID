@@ -37,24 +37,37 @@ def check_google_safety(content: str, **kwargs: Any) -> list[SafetyViolation]:
         return violations
 
     # Google's AI Principles based checks
-    safety_settings = kwargs.get("safety_settings", {})
+    kwargs.get("safety_settings", {})
 
     # Harm categories based on Google's content policy
     harm_categories = {
         "dangerous_content": [
-            "build a bomb", "make explosives", "create poison",
-            "dangerous weapon", "harm someone", "hurt people",
+            "build a bomb",
+            "make explosives",
+            "create poison",
+            "dangerous weapon",
+            "harm someone",
+            "hurt people",
         ],
         "harassment": [
-            "harass", "bully", "stalk", "threaten",
-            "intimidate", "blackmail",
+            "harass",
+            "bully",
+            "stalk",
+            "threaten",
+            "intimidate",
+            "blackmail",
         ],
         "hate_speech": [
-            "hate group", "racial slur", "ethnic hate",
-            "religious hatred", "discriminate",
+            "hate group",
+            "racial slur",
+            "ethnic hate",
+            "religious hatred",
+            "discriminate",
         ],
         "sexually_explicit": [
-            "sexual content", "explicit material", "adult content",
+            "sexual content",
+            "explicit material",
+            "adult content",
         ],
     }
 

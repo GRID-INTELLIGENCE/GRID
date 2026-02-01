@@ -8,7 +8,7 @@ and logs anomalies.
 import time
 
 try:
-    from prometheus_client import Histogram
+    from prometheus_client import Histogram  # type: ignore[import-not-found]
 
     PROMETHEUS_AVAILABLE = True
 except ImportError:
@@ -16,13 +16,13 @@ except ImportError:
 
     # Mock Histogram for testing
     class Histogram:
-        def __init__(self, *args, **kwargs):
+        def __init__(self, *args, **kwargs) -> None:
             pass
 
-        def observe(self, value):
+        def observe(self, value) -> None:
             pass
 
-        def labels(self, **kwargs):
+        def labels(self, **kwargs) -> "Histogram":
             return self
 
 
@@ -42,10 +42,10 @@ STREAM_BYTES_SENT = Histogram(
 class StreamMonitorMiddleware:
     """ASGI middleware for monitoring streaming endpoints."""
 
-    def __init__(self, app):
+    def __init__(self, app) -> None:
         self.app = app
 
-    async def __call__(self, scope, receive, send):
+    async def __call__(self, scope, receive, send) -> None:
         """ASGI interface - receives scope, receive, send."""
         if scope["type"] != "http":
             await self.app(scope, receive, send)
@@ -61,7 +61,7 @@ class StreamMonitorMiddleware:
         start_time = time.time()
         bytes_sent = 0
 
-        async def monitored_send(message):
+        async def monitored_send(message) -> None:
             nonlocal bytes_sent
             if message["type"] == "http.response.body":
                 bytes_sent += len(message.get("body", b""))

@@ -121,9 +121,7 @@ class PathVisualizer:
         self._path_cache[cache_key] = triage
         return triage
 
-    def _generate_path_options(
-        self, goal: str, context: dict[str, Any] | None, max_options: int
-    ) -> list[PathOption]:
+    def _generate_path_options(self, goal: str, context: dict[str, Any] | None, max_options: int) -> list[PathOption]:
         """Generate multiple path options for a goal."""
         options = []
 

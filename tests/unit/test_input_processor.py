@@ -7,15 +7,8 @@ import pytest
 try:
     sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../light_of_the_seven/light_of_the_seven"))
 
-    from cognitive_layer.navigation.input_processor import (
-        InputProcessingError,
-        NavigationInputProcessor,
-    )
-    from cognitive_layer.navigation.schemas.navigation_input import (
-        ComplexityLevel,
-        GoalType,
-        UrgencyLevel,
-    )
+    from cognitive_layer.navigation.input_processor import InputProcessingError, NavigationInputProcessor
+    from cognitive_layer.navigation.schemas.navigation_input import GoalType, UrgencyLevel
 
     HAS_LIGHT_OF_SEVEN = True
 except (ImportError, ModuleNotFoundError):

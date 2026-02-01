@@ -147,7 +147,6 @@ def is_text_file(path: Path, text_extensions: set[str]) -> bool:
         return True
 
     # Check for common text files without extension
-    if path.name.lower() in {"readme", "license", "changelog", "dockerfile"}:
         return True
 
     # Check for shebang

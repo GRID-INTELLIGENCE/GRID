@@ -94,7 +94,6 @@ uv sync --group dev --group test
 - **🏗️ DDD Architecture**: Domain-driven design with service layer decoupling
 - **📁 Organized Structure**: Clean root directory with logical organization
 - **🏗️ Unified Fabric**: High-performance async event bus and distributed safety layer
-- **🐳 Docker Stack**: Health checks and Windows compatibility
 
 ### Visualization & Tools
 
@@ -115,7 +114,6 @@ e:\grid/
 ├── docs/                   # Core documentation
 ├── config/                 # Configuration files
 ├── scripts/                # Build and development scripts
-├── docker/                 # Docker configurations
 ├── tools/                  # Development tools
 ├── workspace/              # MCP workspace
 └── pyproject.toml         # Project configuration
@@ -266,11 +264,9 @@ python example_scenario.py
 
 See `src/unified_fabric/` for implementation details.
 
-## 🐳 Docker Stack (NEW)
 
 ### Health Check System
 
-All MCP servers now include HTTP health endpoints for Docker monitoring:
 
 ```bash
 # Check all MCP server health
@@ -282,17 +278,13 @@ curl http://localhost:8082/health  # Filesystem MCP
 curl http://localhost:8083/health  # Memory MCP
 ```
 
-### Docker Compose
 
 ```bash
 # Development stack
-docker-compose -f docker/compose/docker-compose.yml up -d
 
 # Production stack with security
-docker-compose -f docker/compose/docker-compose-secure.yml up -d
 
 # Override configuration
-docker-compose -f docker/compose/docker-compose.override.yml up -d
 ```
 
 ## Development Workflow
@@ -305,8 +297,6 @@ We use GitHub Actions for CI/CD with comprehensive validation:
 # Watch the latest CI run
 make watch-ci
 
-# Watch the latest Docker build
-make watch-docker
 ```
 
 ### Pre-Push Validation

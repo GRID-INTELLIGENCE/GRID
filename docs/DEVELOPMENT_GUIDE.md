@@ -158,37 +158,25 @@ python -m pipeline.ocr_processor --image-path ./scans/doc.pdf
 python -m pipeline.classifier --data ./processed --model ./models/classifier.pkl
 ```
 
-## Docker Operations
 
 ### Build and Run
 
 ```bash
 # Build main GRID image
-docker build -t grid:latest .
 
 # Build with specific commit
-docker build --build-arg COMMIT_SHA=$(git rev-parse HEAD) -t grid:$(git rev-parse --short HEAD) .
 
-# Run with docker-compose
-cd e:\grid\docker\compose
-docker-compose up -d
 
 # Run specific services
-docker-compose up -d chromadb ollama
-docker-compose up postgres redis
 ```
 
-### Development Docker
 
 ```bash
 # Build with development dependencies
-docker build -f docker/Dockerfile.dev -t grid:dev .
 
 # Run with mounted source for development
-docker run -v e:\grid:/app -p 8000:8000 grid:dev
 
 # Debug container
-docker run -it --entrypoint /bin/bash grid:latest
 ```
 
 ## Service Dependencies
@@ -204,11 +192,10 @@ ollama serve
 ollama pull mistral
 ollama pull nomic-embed-text
 
-# Start PostgreSQL (if using local)
-pg_ctl -D e:\grid\data\postgres start
+# Start Postgres/Redis (Optional - if configured)
+# redis-server e:\grid\config\redis.conf
+# pg_ctl -D e:\grid\data\postgres start
 
-# Start Redis (cache)
-redis-server e:\grid\config\redis.conf
 ```
 
 ### Service Health Checks
@@ -232,9 +219,9 @@ python -c "from application.database import engine; print(engine.execute('SELECT
 ### Required Environment Variables
 
 ```bash
-# Database
-DATABASE_URL=postgresql://user:pass@localhost:5432/grid
-REDIS_URL=redis://localhost:6379/0
+# Database (Local First defaults)
+MOTHERSHIP_DATABASE_URL=sqlite:///grid.db
+# REDIS_URL=redis://localhost:6379/0 (Optional)
 
 # AI/ML
 OLLAMA_BASE_URL=http://localhost:11434
@@ -242,12 +229,8 @@ CHROMA_HOST=localhost
 CHROMA_PORT=8001
 
 # Security
-SECRET_KEY=your-secret-key
-JWT_SECRET=your-jwt-secret
+MOTHERSHIP_SECRET_KEY=dev-secret-key
 
-# Development
-DEBUG=true
-LOG_LEVEL=INFO
 ```
 
 ### Configuration Files
@@ -372,17 +355,13 @@ git tag -a v2.2.1 -m "Release version 2.2.1"
 git push origin v2.2.1
 ```
 
-### Docker Release
 
 ```bash
 # Build production image
-docker build -t grid:2.2.1 .
 
 # Tag for registry
-docker tag grid:2.2.1 registry.example.com/grid:2.2.1
 
 # Push to registry
-docker push registry.example.com/grid:2.2.1
 ```
 
 ## Integration with Other Tools

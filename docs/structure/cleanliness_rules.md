@@ -73,7 +73,6 @@ These should **always** be committed:
 - `pyproject.toml` - Python project configuration
 - `requirements.txt` - Python dependencies
 - `package.json`, `package-lock.json` - Node.js dependencies (if applicable)
-- `Dockerfile`, `docker-compose.yml` - Docker configuration
 - `.env.example` - Environment variable template
 
 ### Source Code

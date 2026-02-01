@@ -22,7 +22,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from functools import lru_cache
 from types import TracebackType
-from typing import Any, Dict, Optional, TypeVar, Union
+from typing import Any, TypeVar
 from urllib.parse import urljoin
 
 try:

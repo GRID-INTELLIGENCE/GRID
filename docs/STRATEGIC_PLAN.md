@@ -279,7 +279,6 @@ grid/
 │   └── migrations/             # Data migrations
 │
 ├── infrastructure/             # DEPLOYMENT
-│   ├── docker/
 │   ├── kubernetes/
 │   ├── terraform/
 │   └── ci/

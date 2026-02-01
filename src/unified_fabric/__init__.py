@@ -9,6 +9,7 @@ Key Features:
 - Request-reply pattern for synchronous needs
 - Event versioning and schema validation
 """
+
 import asyncio
 import json
 import logging
@@ -29,6 +30,7 @@ logger = logging.getLogger(__name__)
 
 class EventDomain(Enum):
     """Event routing domains"""
+
     SAFETY = "safety"
     GRID = "grid"
     COINBASE = "coinbase"
@@ -37,6 +39,7 @@ class EventDomain(Enum):
 
 class EventPriority(Enum):
     """Event priority levels"""
+
     LOW = 0
     NORMAL = 1
     HIGH = 2
@@ -46,6 +49,7 @@ class EventPriority(Enum):
 @dataclass
 class Event:
     """Base event structure for cross-system communication"""
+
     event_type: str
     payload: dict[str, Any]
     source_domain: str
@@ -78,6 +82,7 @@ class Event:
 @dataclass
 class EventResponse:
     """Response to a request-reply event"""
+
     success: bool
     data: Any = None
     error: str | None = None
@@ -91,7 +96,7 @@ EventHandler = Callable[[Event], Awaitable[EventResponse | None]]
 class DynamicEventBus:
     """
     Async event bus for cross-system communication.
-    
+
     Eliminates dial-up-like blocking by using pub/sub pattern.
     Each component subscribes to relevant events and processes asynchronously.
     """
@@ -128,15 +133,10 @@ class DynamicEventBus:
                 pass
         logger.info(f"EventBus '{self.bus_id}' stopped")
 
-    def subscribe(
-        self,
-        event_type: str,
-        handler: EventHandler,
-        domain: str = "all"
-    ) -> None:
+    def subscribe(self, event_type: str, handler: EventHandler, domain: str = "all") -> None:
         """
         Subscribe to events of a specific type.
-        
+
         Args:
             event_type: Event type pattern (supports wildcards: "safety.*")
             handler: Async function to handle events
@@ -150,12 +150,7 @@ class DynamicEventBus:
 
         logger.debug(f"Subscribed to '{event_type}' in domain '{domain}'")
 
-    def unsubscribe(
-        self,
-        event_type: str,
-        handler: EventHandler,
-        domain: str = "all"
-    ) -> None:
+    def unsubscribe(self, event_type: str, handler: EventHandler, domain: str = "all") -> None:
         """Unsubscribe from event type"""
         normalized_domain = (domain or "all").lower()
         if normalized_domain == "all":
@@ -165,14 +160,10 @@ class DynamicEventBus:
             if handler in self._domain_handlers[normalized_domain][event_type]:
                 self._domain_handlers[normalized_domain][event_type].remove(handler)
 
-    async def publish(
-        self,
-        event: Event,
-        wait_for_handlers: bool = False
-    ) -> None:
+    async def publish(self, event: Event, wait_for_handlers: bool = False) -> None:
         """
         Publish event to all subscribers.
-        
+
         Args:
             event: Event to publish
             wait_for_handlers: If True, wait for all handlers to complete
@@ -197,18 +188,14 @@ class DynamicEventBus:
         else:
             await self._queue.put(event)
 
-    async def request_reply(
-        self,
-        event: Event,
-        timeout: float = 5.0
-    ) -> EventResponse:
+    async def request_reply(self, event: Event, timeout: float = 5.0) -> EventResponse:
         """
         Send event and wait for response (request-reply pattern).
-        
+
         Args:
             event: Event to send
             timeout: Max time to wait for response
-            
+
         Returns:
             EventResponse from handler
         """
@@ -232,7 +219,7 @@ class DynamicEventBus:
                 success=False,
                 error=f"Timeout waiting for response after {timeout}s",
                 event_id=event.event_id,
-                response_time_ms=(time.perf_counter() - start_time) * 1000
+                response_time_ms=(time.perf_counter() - start_time) * 1000,
             )
         finally:
             self._pending_replies.pop(event.event_id, None)
@@ -339,7 +326,7 @@ class DynamicEventBus:
             "total_handlers": sum(len(h) for h in self._handlers.values()),
             "event_history_size": len(self._event_history),
             "pending_replies": len(self._pending_replies),
-            "queue_size": self._queue.qsize()
+            "queue_size": self._queue.qsize(),
         }
 
 

@@ -167,10 +167,11 @@ class HybridRetriever:
 
         docs = res.get("documents", [])
         metas = res.get("metadatas", [])
-        scores = res.get("hybrid_scores", res.get("distances", [0.0]*len(docs)))
-        ids = res.get("ids", [""]*len(docs))
+        scores = res.get("hybrid_scores", res.get("distances", [0.0] * len(docs)))
+        ids = res.get("ids", [""] * len(docs))
 
         from .types import ScoredChunk
+
         return [
             ScoredChunk(id=ids[i], text=docs[i], doc_id=ids[i], score=scores[i], metadata=metas[i])
             for i in range(len(docs))
@@ -183,12 +184,13 @@ class HybridRetriever:
 
         docs = res.get("documents", [])
         metas = res.get("metadatas", [])
-        distances = res.get("distances", [0.0]*len(docs))
-        ids = res.get("ids", [""]*len(docs))
+        distances = res.get("distances", [0.0] * len(docs))
+        ids = res.get("ids", [""] * len(docs))
 
         from .types import ScoredChunk
+
         return [
-            ScoredChunk(id=ids[i], text=docs[i], doc_id=ids[i], score=1.0/(1.0+distances[i]), metadata=metas[i])
+            ScoredChunk(id=ids[i], text=docs[i], doc_id=ids[i], score=1.0 / (1.0 + distances[i]), metadata=metas[i])
             for i in range(len(docs))
         ]
 
@@ -254,9 +256,7 @@ class HybridRetriever:
         self._is_initialized = False
 
 
-def create_hybrid_retriever(
-    vector_store: Any, embedding_provider: Any, config: Any = None
-) -> HybridRetriever | None:
+def create_hybrid_retriever(vector_store: Any, embedding_provider: Any, config: Any = None) -> HybridRetriever | None:
     """Factory function."""
     if config is None:
         from .config import RAGConfig

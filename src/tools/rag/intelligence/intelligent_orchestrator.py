@@ -253,6 +253,7 @@ class IntelligentRAGOrchestrator:
                     retrieval_results["documents"],
                     retrieval_results["metadatas"],
                     retrieval_results["ids"],
+                    strict=False,
                 )
             ):
                 evidence_list.append(

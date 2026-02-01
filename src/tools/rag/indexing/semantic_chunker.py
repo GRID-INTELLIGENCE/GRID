@@ -5,6 +5,7 @@ Uses logical boundaries (classes, functions, headers) to create semantically coh
 
 import re
 from dataclasses import dataclass
+from typing import Any
 
 
 @dataclass
@@ -12,7 +13,7 @@ class SemanticChunk:
     """A semantically coherent chunk of text."""
 
     content: str
-    metadata: dict
+    metadata: dict[str, Any]
 
 
 class SemanticChunker:
@@ -47,8 +48,8 @@ class SemanticChunker:
             pattern = r"^(\w+.*\{)"  # Generic brace-based
 
         lines = content.split("\n")
-        chunks = []
-        current_chunk_lines = []
+        chunks: list[SemanticChunk] = []
+        current_chunk_lines: list[str] = []
         current_start_line = 1
 
         for i, line in enumerate(lines, 1):
@@ -98,8 +99,8 @@ class SemanticChunker:
         """Chunk markdown files at header boundaries."""
         # Split by markdown headers (# Header)
         lines = content.split("\n")
-        chunks = []
-        current_chunk_lines = []
+        chunks: list[SemanticChunk] = []
+        current_chunk_lines: list[str] = []
         current_start_line = 1
 
         header_pattern = r"^#{1,6}\s+"

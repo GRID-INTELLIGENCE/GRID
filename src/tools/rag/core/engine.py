@@ -119,10 +119,7 @@ class RAGEngine:
         query_embedding = self.embedding_provider.embed(question)
 
         # Retrieve documents
-        results = self.vector_store.query(
-            query_embedding=query_embedding,
-            n_results=self.config.top_k
-        )
+        results = self.vector_store.query(query_embedding=query_embedding, n_results=self.config.top_k)
 
         # Generate answer
         context = "\n".join(results["documents"])
@@ -130,11 +127,7 @@ class RAGEngine:
 
         answer = self.llm_provider.generate(prompt)
 
-        return {
-            "answer": answer,
-            "sources": results["documents"],
-            "metadata": results["metadatas"]
-        }
+        return {"answer": answer, "sources": results["documents"], "metadata": results["metadatas"]}
 
     def _query_on_demand(self, question: str, docs_root: str = "docs", **kwargs) -> dict[str, Any]:
         """Query with on-demand indexing."""
@@ -159,11 +152,7 @@ class RAGEngine:
         # Create temporary vector store
         temp_store = InMemoryDenseVectorStore()
         embeddings = [self.embedding_provider.embed(doc) for doc in documents]
-        temp_store.add(
-            ids=[f"chunk_{i}" for i in range(len(documents))],
-            documents=documents,
-            embeddings=embeddings
-        )
+        temp_store.add(ids=[f"chunk_{i}" for i in range(len(documents))], documents=documents, embeddings=embeddings)
 
         # Query
         query_embedding = self.embedding_provider.embed(question)
@@ -178,7 +167,7 @@ class RAGEngine:
             "answer": answer,
             "sources": results["documents"],
             "file_count": len(files),
-            "chunk_count": len(documents)
+            "chunk_count": len(documents),
         }
 
     def _query_conversational(self, question: str, **kwargs) -> dict[str, Any]:
@@ -188,9 +177,7 @@ class RAGEngine:
 
         # Create context from recent conversation
         context_window = self.conversation_history[-6:]  # Last 3 exchanges
-        conversation_context = "\n".join([
-            f"{msg['role']}: {msg['content']}" for msg in context_window
-        ])
+        conversation_context = "\n".join([f"{msg['role']}: {msg['content']}" for msg in context_window])
 
         # Query with conversation context
         full_query = f"Conversation:\n{conversation_context}\n\nCurrent question: {question}"
@@ -215,10 +202,10 @@ class RAGEngine:
                 "embedding_provider": self.config.embedding_provider,
                 "llm_provider": self.config.llm_mode.value,
                 "vector_store": self.config.vector_store_provider,
-                "collection_name": self.config.collection_name
+                "collection_name": self.config.collection_name,
             },
             "conversation_turns": len(self.conversation_history) if self.mode == "conversational" else 0,
-            "vector_store_count": self.vector_store.count() if self.vector_store else 0
+            "vector_store_count": self.vector_store.count() if self.vector_store else 0,
         }
 
 

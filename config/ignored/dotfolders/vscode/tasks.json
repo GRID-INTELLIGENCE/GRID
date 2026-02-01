@@ -67,9 +67,7 @@
             }
         },
         {
-            "label": "🐳 Monitoring · Docker Build",
             "type": "shell",
-            "command": "make watch-docker",
             "group": "none",
             "presentation": {
                 "reveal": "always",

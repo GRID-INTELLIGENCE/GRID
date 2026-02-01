@@ -9,6 +9,7 @@ Key Features:
 - JSON-L format for easy parsing
 - Async non-blocking writes
 """
+
 import asyncio
 import json
 import logging
@@ -24,6 +25,7 @@ logger = logging.getLogger(__name__)
 
 class AuditEventType(Enum):
     """Types of audit events"""
+
     REQUEST_RECEIVED = "request_received"
     REQUEST_COMPLETED = "request_completed"
     SAFETY_CHECK = "safety_check"
@@ -40,6 +42,7 @@ class AuditEventType(Enum):
 @dataclass
 class AuditEntry:
     """Single audit log entry"""
+
     event_type: str
     project_id: str
     domain: str
@@ -62,18 +65,13 @@ class AuditEntry:
 class DistributedAuditLogger:
     """
     Centralized audit logger for cross-system observability.
-    
+
     Writes audit entries to:
     - Primary: E:/grid/logs/unified_fabric/
     - Async buffered writes for performance
     """
 
-    def __init__(
-        self,
-        log_dir: Path | None = None,
-        buffer_size: int = 50,
-        flush_interval_sec: float = 5.0
-    ):
+    def __init__(self, log_dir: Path | None = None, buffer_size: int = 50, flush_interval_sec: float = 5.0):
         self.log_dir = log_dir or Path("E:/grid/logs/unified_fabric")
         self.log_dir.mkdir(parents=True, exist_ok=True)
 
@@ -116,11 +114,11 @@ class DistributedAuditLogger:
         user_id: str | None = None,
         correlation_id: str | None = None,
         details: dict | None = None,
-        duration_ms: float | None = None
+        duration_ms: float | None = None,
     ) -> str:
         """
         Log an audit entry.
-        
+
         Returns:
             request_id for correlation
         """
@@ -133,7 +131,7 @@ class DistributedAuditLogger:
             user_id=user_id,
             correlation_id=correlation_id,
             details=details or {},
-            duration_ms=duration_ms
+            duration_ms=duration_ms,
         )
 
         async with self._lock:
@@ -151,7 +149,7 @@ class DistributedAuditLogger:
         violation_count: int,
         domain: str,
         user_id: str | None = None,
-        correlation_id: str | None = None
+        correlation_id: str | None = None,
     ) -> str:
         """Log a safety check event"""
         return await self.log(
@@ -162,19 +160,11 @@ class DistributedAuditLogger:
             status=decision,
             user_id=user_id,
             correlation_id=correlation_id,
-            details={
-                "threat_level": threat_level,
-                "violation_count": violation_count
-            }
+            details={"threat_level": threat_level, "violation_count": violation_count},
         )
 
     async def log_portfolio_action(
-        self,
-        action: str,
-        portfolio_id: str,
-        user_id: str,
-        success: bool,
-        details: dict | None = None
+        self, action: str, portfolio_id: str, user_id: str, success: bool, details: dict | None = None
     ) -> str:
         """Log a portfolio action"""
         return await self.log(
@@ -184,16 +174,11 @@ class DistributedAuditLogger:
             action=action,
             status="success" if success else "failure",
             user_id=user_id,
-            details={"portfolio_id": portfolio_id, **(details or {})}
+            details={"portfolio_id": portfolio_id, **(details or {})},
         )
 
     async def log_navigation(
-        self,
-        nav_type: str,
-        origin: str,
-        destination: str,
-        user_id: str,
-        duration_ms: float
+        self, nav_type: str, origin: str, destination: str, user_id: str, duration_ms: float
     ) -> str:
         """Log a GRID navigation request"""
         return await self.log(
@@ -204,16 +189,11 @@ class DistributedAuditLogger:
             status="success",
             user_id=user_id,
             duration_ms=duration_ms,
-            details={"origin": origin, "destination": destination}
+            details={"origin": origin, "destination": destination},
         )
 
     async def log_error(
-        self,
-        error_type: str,
-        error_message: str,
-        project_id: str,
-        domain: str,
-        user_id: str | None = None
+        self, error_type: str, error_message: str, project_id: str, domain: str, user_id: str | None = None
     ) -> str:
         """Log an error event"""
         return await self.log(
@@ -223,7 +203,7 @@ class DistributedAuditLogger:
             action="error",
             status="failure",
             user_id=user_id,
-            details={"error_type": error_type, "message": error_message}
+            details={"error_type": error_type, "message": error_message},
         )
 
     async def _flush_buffer(self):
@@ -235,13 +215,13 @@ class DistributedAuditLogger:
         self._buffer.clear()
 
         # Write to daily log file
-        date_str = datetime.now(UTC).strftime('%Y%m%d')
+        date_str = datetime.now(UTC).strftime("%Y%m%d")
         log_file = self.log_dir / f"audit_{date_str}.jsonl"
 
         try:
-            with open(log_file, 'a', encoding='utf-8') as f:
+            with open(log_file, "a", encoding="utf-8") as f:
                 for entry in entries:
-                    f.write(entry.to_json() + '\n')
+                    f.write(entry.to_json() + "\n")
         except Exception as e:
             logger.error(f"Failed to flush audit log: {e}")
             # Re-add entries to buffer
@@ -260,23 +240,20 @@ class DistributedAuditLogger:
                 logger.error(f"Flush worker error: {e}")
 
     async def get_recent_entries(
-        self,
-        limit: int = 100,
-        event_type: AuditEventType | None = None,
-        domain: str | None = None
+        self, limit: int = 100, event_type: AuditEventType | None = None, domain: str | None = None
     ) -> list[AuditEntry]:
         """Get recent audit entries with optional filtering"""
         entries = []
 
         # Read from today's log file
-        date_str = datetime.now(UTC).strftime('%Y%m%d')
+        date_str = datetime.now(UTC).strftime("%Y%m%d")
         log_file = self.log_dir / f"audit_{date_str}.jsonl"
 
         if not log_file.exists():
             return entries
 
         try:
-            with open(log_file, encoding='utf-8') as f:
+            with open(log_file, encoding="utf-8") as f:
                 for line in f:
                     try:
                         data = json.loads(line.strip())

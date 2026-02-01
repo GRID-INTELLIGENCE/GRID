@@ -22,7 +22,7 @@ import logging
 import os
 import time
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
@@ -40,11 +40,9 @@ from .routing.router import DynamicRouter
 from .service_discovery.discovery import ServiceDiscovery
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
+
 
 class ArenaAPIGateway:
     """
@@ -61,7 +59,7 @@ class ArenaAPIGateway:
             description="Dynamic API infrastructure for Arena architecture",
             version="1.0.0",
             docs_url="/docs",
-            redoc_url="/redoc"
+            redoc_url="/redoc",
         )
 
         # Initialize core components
@@ -98,16 +96,18 @@ class ArenaAPIGateway:
         # Trusted host middleware
         self.app.add_middleware(
             TrustedHostMiddleware,
-            allowed_hosts=["*"]  # Configure appropriately for production
+            allowed_hosts=["*"],  # Configure appropriately for production
         )
 
         # Custom middleware for request processing
-        self.app.add_middleware(RequestProcessingMiddleware,
-                              router=self.router,
-                              auth_manager=self.auth_manager,
-                              rate_limiter=self.rate_limiter,
-                              monitoring=self.monitoring,
-                              ai_safety=self.ai_safety)
+        self.app.add_middleware(
+            RequestProcessingMiddleware,
+            router=self.router,
+            auth_manager=self.auth_manager,
+            rate_limiter=self.rate_limiter,
+            monitoring=self.monitoring,
+            ai_safety=self.ai_safety,
+        )
 
     def _setup_routes(self):
         """Setup API routes."""
@@ -116,11 +116,7 @@ class ArenaAPIGateway:
         @self.app.get("/health")
         async def health_check():
             """Health check endpoint."""
-            return {
-                "status": "healthy",
-                "timestamp": datetime.utcnow().isoformat(),
-                "version": "1.0.0"
-            }
+            return {"status": "healthy", "timestamp": datetime.utcnow().isoformat(), "version": "1.0.0"}
 
         # Service discovery endpoints
         @self.app.get("/services")
@@ -156,6 +152,24 @@ class ArenaAPIGateway:
             # Start AI safety monitoring
             asyncio.create_task(self.ai_safety.monitor_safety())
 
+            # Register arena services
+            arena_services = [
+                {
+                    "service_name": "arena_service",
+                    "url": "http://localhost:8002",
+                    "health_url": "http://localhost:8002/health",
+                    "metadata": {"version": "1.0.0", "capabilities": ["cache", "rewards", "adsr", "honor_decay"]},
+                },
+                {
+                    "service_name": "ai_service",
+                    "url": "http://localhost:8001",
+                    "health_url": "http://localhost:8001/health",
+                    "metadata": {"version": "1.0.0", "capabilities": ["text_generation", "safety_checks"]},
+                },
+            ]
+            for service_data in arena_services:
+                await self.service_discovery.register_service(service_data)
+
             logger.info("Background tasks started")
 
         @self.app.on_event("shutdown")
@@ -164,6 +178,7 @@ class ArenaAPIGateway:
             await self.service_discovery.cleanup()
             await self.monitoring.cleanup()
             logger.info("Arena API Gateway shutdown complete")
+
 
 class RequestProcessingMiddleware(BaseHTTPMiddleware):
     """
@@ -187,26 +202,17 @@ class RequestProcessingMiddleware(BaseHTTPMiddleware):
             # 1. Rate limiting check
             rate_limit_result = await self.rate_limiter.check_rate_limit(request)
             if not rate_limit_result["allowed"]:
-                raise HTTPException(
-                    status_code=429,
-                    detail="Rate limit exceeded"
-                )
+                raise HTTPException(status_code=429, detail="Rate limit exceeded")
 
             # 2. Authentication check
             auth_result = await self.auth_manager.authenticate(request)
             if not auth_result["authenticated"]:
-                raise HTTPException(
-                    status_code=401,
-                    detail="Authentication required"
-                )
+                raise HTTPException(status_code=401, detail="Authentication required")
 
             # 3. AI Safety check
             safety_result = await self.ai_safety.check_request(request)
             if not safety_result["safe"]:
-                raise HTTPException(
-                    status_code=403,
-                    detail="Request flagged by AI safety system"
-                )
+                raise HTTPException(status_code=403, detail="Request flagged by AI safety system")
 
             # 4. Process the request
             response = await call_next(request)
@@ -217,7 +223,7 @@ class RequestProcessingMiddleware(BaseHTTPMiddleware):
                 request=request,
                 response=response,
                 processing_time=processing_time,
-                authenticated=auth_result["authenticated"]
+                authenticated=auth_result["authenticated"],
             )
 
             return response
@@ -225,12 +231,9 @@ class RequestProcessingMiddleware(BaseHTTPMiddleware):
         except Exception as e:
             # Record error metrics
             processing_time = time.time() - start_time
-            await self.monitoring.record_error(
-                request=request,
-                error=str(e),
-                processing_time=processing_time
-            )
+            await self.monitoring.record_error(request=request, error=str(e), processing_time=processing_time)
             raise
+
 
 # Global gateway instance
 gateway = ArenaAPIGateway()
@@ -240,9 +243,5 @@ app = gateway.app
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(
-        "main:app",
-        host="0.0.0.0",
-        port=int(os.getenv("ARENA_API_PORT", "8000")),
-        reload=True
-    )
+
+    uvicorn.run("main:app", host="0.0.0.0", port=int(os.getenv("ARENA_API_PORT", "8000")), reload=True)

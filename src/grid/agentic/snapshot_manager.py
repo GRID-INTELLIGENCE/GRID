@@ -164,11 +164,7 @@ class SnapshotManager:
         if not aggregate_dir.exists():
             return 1
 
-        existing_versions = [
-            int(f.stem.split('_v')[-1])
-            for f in aggregate_dir.glob("*.json")
-            if f.stem.endswith("_v")
-        ]
+        existing_versions = [int(f.stem.split("_v")[-1]) for f in aggregate_dir.glob("*.json") if f.stem.endswith("_v")]
 
         return max(existing_versions, default=0) + 1
 

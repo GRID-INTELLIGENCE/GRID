@@ -14,8 +14,8 @@ from typing import Any
 import networkx as nx
 
 from ..knowledge import PersistentJSONKnowledgeStore
-from ..knowledge.graph_store import Entity
 from ..knowledge.graph_schema import EntityType
+from ..knowledge.graph_store import Entity
 from .brain import AIBrain
 
 logger = logging.getLogger(__name__)
@@ -94,7 +94,7 @@ class KnowledgeGraphBridge:
         self.store.connect()
         stats = self.store.get_graph_statistics()
         logger.info(f"Loading {stats['total_entities']} nodes from persistent store")
-        
+
         for entity_id, entity in self.store.entities.items():
             if entity.entity_type == EntityType.CONTEXT or entity.entity_id.startswith("nav_"):
                 # Hydrate spatial index and graph
@@ -102,7 +102,7 @@ class KnowledgeGraphBridge:
                 coords = props.get("coords")
                 if coords:
                     self.spatial_index[entity_id] = tuple(coords[:2])
-                    
+
                 node = KnowledgeNode(
                     id=entity_id,
                     type=NodeType.NAVIGATION,
@@ -110,7 +110,7 @@ class KnowledgeGraphBridge:
                     relationships=[],
                     confidence=props.get("confidence", 1.0),
                     last_updated=entity.updated_at,
-                    spatial_coords=tuple(coords) if coords else None
+                    spatial_coords=tuple(coords) if coords else None,
                 )
                 self.graph.add_node(entity_id, **node.__dict__)
 
@@ -136,16 +136,16 @@ class KnowledgeGraphBridge:
             # Persist to JSON store
             entity = Entity(
                 entity_id=node_id,
-                entity_type=EntityType.CONTEXT, # Using Context for navigation points
+                entity_type=EntityType.CONTEXT,  # Using Context for navigation points
                 properties={
                     "id": node_id,
                     "name": f"Navigation Point at {coords}",
                     "coords": (*coords, 0.0),
                     "attributes": nav_data,
-                    "confidence": confidence
+                    "confidence": confidence,
                 },
                 created_at=node.last_updated,
-                updated_at=node.last_updated
+                updated_at=node.last_updated,
             )
             self.store.store_entity(entity)
 

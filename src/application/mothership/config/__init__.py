@@ -22,10 +22,13 @@ _quiet_mode = os.environ.get("GRID_QUIET", "").lower() in ("1", "true", "yes")
 from enum import Enum
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 try:
-    from .security.secret_validation import SecretValidationError, validate_secret_strength
+    from .security.secret_validation import (  # type: ignore[import-not-found]
+        SecretValidationError,
+        validate_secret_strength,
+    )
 except ImportError:
     # Fallback if security module not available
     SecretValidationError = Exception
@@ -131,7 +134,10 @@ class DatabaseSettings:
 
     # Redis for caching/pubsub and rate limiting
     redis_url: str = "redis://localhost:6379/0"
-    redis_enabled: bool = False
+    redis_enabled: bool = False  # Default to False for Local-First
+
+    # SQLite settings (Local-First)
+    sqlite_file: str = "grid.db"
 
     @classmethod
     def from_env(cls) -> DatabaseSettings:
@@ -140,6 +146,7 @@ class DatabaseSettings:
 
         # Fallback URL (SQLite by default)
         fallback_db_url = env.get("MOTHERSHIP_DB_FALLBACK_URL", "").strip() or "sqlite:///./mothership_fallback.db"
+        sqlite_file = env.get("SQLITE_DB_PATH", "grid.db")
 
         # Check for Databricks configuration
         use_databricks = _parse_bool(env.get("USE_DATABRICKS") or env.get("MOTHERSHIP_USE_DATABRICKS"))
@@ -196,7 +203,24 @@ class DatabaseSettings:
             databricks_http_path=http_path,
             databricks_access_token=access_token,
             redis_url=env.get("MOTHERSHIP_REDIS_URL", "redis://localhost:6379/0"),
-            redis_enabled=_parse_bool(env.get("MOTHERSHIP_REDIS_ENABLED")),
+            redis_enabled=_parse_bool(env.get("MOTHERSHIP_REDIS_ENABLED"), False),
+            sqlite_file=sqlite_file,
+        )
+
+
+@dataclass
+class CacheSettings:
+    """Caching configuration (Local File/Memory vs Redis)."""
+
+    backend: str = "memory"  # memory, sqlite, redis
+    ttl: int = 300
+
+    @classmethod
+    def from_env(cls) -> CacheSettings:
+        env = os.environ
+        return cls(
+            backend=env.get("CACHE_BACKEND", "memory"),
+            ttl=int(env.get("CACHE_TTL", "300")),
         )
 
 
@@ -259,11 +283,7 @@ class SecuritySettings:
         Raises:
             SecretValidationError: If fail_fast=True and in production with critical security issues
         """
-        from ..security.secret_validation import (
-            SecretStrength,
-            SecretValidationError,
-            validate_secret_strength,
-        )
+        from ..security.secret_validation import SecretStrength, SecretValidationError, validate_secret_strength
 
         if environment is None:
             environment = os.getenv("MOTHERSHIP_ENVIRONMENT", "production").lower()
@@ -499,7 +519,7 @@ class PaymentSettings:
         env = os.environ
         default_gateway = env.get("MOTHERSHIP_PAYMENT_DEFAULT_GATEWAY", "stripe")
         if default_gateway == "bkash":
-            from .utils import ghost_config_trap
+            from .utils import ghost_config_trap  # type: ignore[import-not-found]
 
             ghost_config_trap("config", "default_gateway=bkash")
             default_gateway = "stripe"  # Force to stripe after trapping
@@ -544,6 +564,14 @@ class BillingSettings:
     pro_tier_relationship_analyses: int = 10000
     pro_tier_entity_extractions: int = 100000
 
+    # Resonance Tier definitions (usage limits per month)
+    free_tier_resonance_events: int = 1000
+    free_tier_high_impact_events: int = 50
+    starter_tier_resonance_events: int = 10000
+    starter_tier_high_impact_events: int = 500
+    pro_tier_resonance_events: int = 100000
+    pro_tier_high_impact_events: int = 5000
+
     # Pricing (in cents)
     starter_monthly_price: int = 4900  # $49.00
     pro_monthly_price: int = 19900  # $199.00
@@ -551,6 +579,8 @@ class BillingSettings:
     # Overage pricing (per unit)
     relationship_analysis_overage_cents: int = 5  # $0.05
     entity_extraction_overage_cents: int = 1  # $0.01
+    resonance_event_overage_cents: int = 1  # $0.01 per event
+    high_impact_event_overage_cents: int = 5  # $0.05 per event
 
     # Billing cycle
     billing_cycle_days: int = 30
@@ -570,6 +600,14 @@ class BillingSettings:
             pro_monthly_price=int(env.get("BILLING_PRO_PRICE_CENTS", "19900")),
             relationship_analysis_overage_cents=int(env.get("BILLING_RELATIONSHIP_OVERAGE_CENTS", "5")),
             entity_extraction_overage_cents=int(env.get("BILLING_ENTITY_OVERAGE_CENTS", "1")),
+            free_tier_resonance_events=int(env.get("BILLING_FREE_RESONANCE_EVENTS", "1000")),
+            free_tier_high_impact_events=int(env.get("BILLING_FREE_HIGH_IMPACT_EVENTS", "50")),
+            starter_tier_resonance_events=int(env.get("BILLING_STARTER_RESONANCE_EVENTS", "10000")),
+            starter_tier_high_impact_events=int(env.get("BILLING_STARTER_HIGH_IMPACT_EVENTS", "500")),
+            pro_tier_resonance_events=int(env.get("BILLING_PRO_RESONANCE_EVENTS", "100000")),
+            pro_tier_high_impact_events=int(env.get("BILLING_PRO_HIGH_IMPACT_EVENTS", "5000")),
+            resonance_event_overage_cents=int(env.get("BILLING_RESONANCE_OVERAGE_CENTS", "1")),
+            high_impact_event_overage_cents=int(env.get("BILLING_HIGH_IMPACT_OVERAGE_CENTS", "5")),
             billing_cycle_days=int(env.get("BILLING_CYCLE_DAYS", "30")),
         )
 
@@ -641,6 +679,7 @@ class MothershipSettings:
     # Subsystem settings
     server: ServerSettings = field(default_factory=ServerSettings.from_env)
     database: DatabaseSettings = field(default_factory=DatabaseSettings.from_env)
+    cache: CacheSettings = field(default_factory=CacheSettings.from_env)
     security: SecuritySettings = field(default_factory=SecuritySettings.from_env)
     integrations: IntegrationSettings = field(default_factory=IntegrationSettings.from_env)
     telemetry: TelemetrySettings = field(default_factory=TelemetrySettings.from_env)

@@ -9,7 +9,7 @@ sys.path.insert(0, "src")
 from tools.rag.semantic_chunker import SemanticChunker
 
 
-def test_code_chunking():
+def test_code_chunking() -> None:
     content = """
 class MyClass:
     def method_one(self):
@@ -32,7 +32,7 @@ def top_level_function():
         print(chunk.content)
 
 
-def test_markdown_chunking():
+def test_markdown_chunking() -> None:
     content = """
 # Header 1
 Content under header 1.

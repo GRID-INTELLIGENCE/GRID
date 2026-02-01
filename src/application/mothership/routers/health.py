@@ -42,11 +42,11 @@ router = APIRouter(tags=["health"])
 async def _check_database_connectivity(db_url: str, timeout: float = 5.0) -> tuple[bool, str]:
     """
     Check database connectivity with actual connection test.
-    
+
     Args:
         db_url: Database connection URL
         timeout: Timeout in seconds
-        
+
     Returns:
         Tuple of (is_healthy, message)
     """
@@ -59,7 +59,6 @@ async def _check_database_connectivity(db_url: str, timeout: float = 5.0) -> tup
             return True, "SQLite database configured"
 
         # For other databases, try to create a connection
-        from sqlalchemy import text
         from sqlalchemy.ext.asyncio import create_async_engine
 
         # Convert sync URL to async if needed
@@ -88,6 +87,7 @@ async def _check_database_connectivity(db_url: str, timeout: float = 5.0) -> tup
 async def _db_ping(engine: Any) -> None:
     """Helper to ping database."""
     from sqlalchemy import text
+
     async with engine.connect() as conn:
         await conn.execute(text("SELECT 1"))
 
@@ -95,11 +95,11 @@ async def _db_ping(engine: Any) -> None:
 async def _check_redis_connectivity(redis_url: str, timeout: float = 5.0) -> tuple[bool, str]:
     """
     Check Redis connectivity with actual ping.
-    
+
     Args:
         redis_url: Redis connection URL
         timeout: Timeout in seconds
-        
+
     Returns:
         Tuple of (is_healthy, message)
     """
@@ -129,11 +129,11 @@ async def _check_redis_connectivity(redis_url: str, timeout: float = 5.0) -> tup
 async def _check_gemini_connectivity(api_key: str, timeout: float = 5.0) -> tuple[bool, str]:
     """
     Check Gemini API connectivity.
-    
+
     Args:
         api_key: Gemini API key
         timeout: Timeout in seconds
-        
+
     Returns:
         Tuple of (is_healthy, message)
     """
@@ -164,16 +164,14 @@ async def _check_gemini_connectivity(api_key: str, timeout: float = 5.0) -> tupl
         return False, f"Gemini API check failed: {str(e)[:100]}"
 
 
-async def _check_webhook_endpoints(
-    endpoints: list[str], timeout: float = 5.0
-) -> tuple[bool, str, dict[str, bool]]:
+async def _check_webhook_endpoints(endpoints: list[str], timeout: float = 5.0) -> tuple[bool, str, dict[str, bool]]:
     """
     Check webhook endpoint reachability.
-    
+
     Args:
         endpoints: List of webhook endpoint URLs
         timeout: Timeout in seconds per endpoint
-        
+
     Returns:
         Tuple of (all_healthy, message, endpoint_results)
     """
@@ -392,9 +390,7 @@ async def readiness(
 
     # Real database connectivity check
     if settings.database.url:
-        db_healthy, db_message = await _check_database_connectivity(
-            settings.database.url, timeout=check_timeout
-        )
+        db_healthy, db_message = await _check_database_connectivity(settings.database.url, timeout=check_timeout)
         dependencies["database"] = {"healthy": db_healthy, "message": db_message}
         if not db_healthy:
             logger.warning(f"Database readiness check failed: {db_message}")

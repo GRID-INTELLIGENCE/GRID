@@ -65,37 +65,26 @@ This suite tests:
 - Behavioral contrast in sustain/decay (rewards vs penalties)
 """
 
+import sys
 import time
+from pathlib import Path
 
 import pytest
 
-# Try to import the_chase modules, skip tests if not available
+# Early check: Skip entire module if the_chase path doesn't exist or has import issues
+the_chase_path = Path(__file__).parent.parent / "Arena" / "the_chase" / "python" / "src"
+if not (the_chase_path / "the_chase").exists():
+    pytest.skip("the_chase path does not exist", allow_module_level=True)
+
+if str(the_chase_path) not in sys.path:
+    sys.path.insert(0, str(the_chase_path))
+
+# Try import with skip on failure
 try:
-    from pathlib import Path
-
-    # Check if Arena path exists before attempting import
-    the_chase_path = Path(__file__).parent.parent / "Arena" / "the_chase" / "python" / "src"
-    if not the_chase_path.exists():
-        raise ImportError("the_chase path does not exist")
-
-    # Add to path if needed
-    import sys
-
-    if str(the_chase_path) not in sys.path:
-        sys.path.insert(0, str(the_chase_path))
-
-    from the_chase.core.cache import CacheLayer, CacheMeta, MemoryTier
-    from the_chase.overwatch.rewards import (
-        Achievement,
-        AchievementType,
-        CharacterRewardState,
-        RewardLevel,
-    )
-
-    HAS_THE_CHASE = True
-except (ImportError, ModuleNotFoundError, OSError) as e:
-    HAS_THE_CHASE = False
-    pytestmark = pytest.mark.skip(reason=f"the_chase module not available: {e}")
+    from the_chase.core.cache import CacheLayer, MemoryTier
+    from the_chase.overwatch.rewards import Achievement, AchievementType, CharacterRewardState, RewardLevel
+except (ImportError, ModuleNotFoundError, TypeError, OSError) as e:
+    pytest.skip(f"the_chase module not available: {e}", allow_module_level=True)
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # CACHE SUSTAIN/DECAY TESTS

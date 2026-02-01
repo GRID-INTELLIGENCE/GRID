@@ -22,7 +22,8 @@ Community Guidelines & Adaptation Patterns:
 """
 
 import logging
-from typing import Any, Callable, Dict, List, Optional, Protocol, typing
+from collections.abc import Callable
+from typing import Any, Protocol
 
 logger = logging.getLogger(__name__)
 
@@ -30,11 +31,11 @@ logger = logging.getLogger(__name__)
 
 
 class EventBusProtocol(Protocol):
-    async def emit(self, event_name: str, data: Dict[str, Any]) -> None: ...
+    async def emit(self, event_name: str, data: dict[str, Any]) -> None: ...
 
 
 class SkillEngineProtocol(Protocol):
-    async def call_skill(self, skill_id: str, args: Dict[str, Any]) -> Any: ...
+    async def call_skill(self, skill_id: str, args: dict[str, Any]) -> Any: ...
 
 
 # --- Adapters ---
@@ -43,14 +44,14 @@ class SkillEngineProtocol(Protocol):
 class GhostEventBus:
     """Null Object implementation for EventBus (Ghost Process)."""
 
-    async def emit(self, event_name: str, data: Dict[str, Any]) -> None:
+    async def emit(self, event_name: str, data: dict[str, Any]) -> None:
         logger.debug(f"[GhostBus] Emulated event: {event_name} -> {data}")
 
 
 class GhostSkillEngine:
     """Null Object implementation for Skill Engine."""
 
-    async def call_skill(self, skill_id: str, args: Dict[str, Any]) -> Any:
+    async def call_skill(self, skill_id: str, args: dict[str, Any]) -> Any:
         logger.warning(f"[GhostSkill] Skill call simulated: {skill_id}")
         return {"status": "simulated", "result": f"Mock result for {skill_id}"}
 
@@ -61,7 +62,7 @@ class GhostSkillEngine:
 class HookManager:
     """Simple hook system for debugging and tracing."""
 
-    _hooks: Dict[str, List[Callable]] = {}
+    _hooks: dict[str, list[Callable]] = {}
 
     @classmethod
     def register(cls, event: str, callback: Callable):
@@ -87,8 +88,8 @@ class GridBridge:
     Facade for accessing GRID services securely and loosely coupled.
     """
 
-    _event_bus: Optional[EventBusProtocol] = None
-    _skill_engine: Optional[SkillEngineProtocol] = None
+    _event_bus: EventBusProtocol | None = None
+    _skill_engine: SkillEngineProtocol | None = None
 
     @classmethod
     def initialize(cls):

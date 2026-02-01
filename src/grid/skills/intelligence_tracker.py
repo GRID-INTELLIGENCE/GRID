@@ -136,7 +136,7 @@ class IntelligenceTracker:
             return {"error": "No intelligence records found"}
 
         # Calculate metrics
-        by_type = {}
+        by_type: dict[str, int] = {}
         for record in records:
             by_type[record.decision_type.value] = by_type.get(record.decision_type.value, 0) + 1
 
@@ -153,7 +153,7 @@ class IntelligenceTracker:
 
     def _get_common_rationale(self, records: list[IntelligenceRecord]) -> list[str]:
         """Get most common rationale patterns."""
-        rationale_counts = {}
+        rationale_counts: dict[str, int] = {}
         for record in records:
             rationale = record.rationale.split()[0] if record.rationale else "unknown"
             rationale_counts[rationale] = rationale_counts.get(rationale, 0) + 1

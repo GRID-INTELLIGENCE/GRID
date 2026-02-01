@@ -29,7 +29,6 @@ All remaining dot files have been updated to reflect the January 1, 2026 file re
 **Status**: Updated with local development context and reorganized section comments
 **Changes**:
 - Header now reads: "GRID Local Development Environment Configuration"
-- Added references: ".env.local for overrides, .env.docker for containers"
 - Updated API Keys section: "Local development values - do NOT use external APIs"
 - Updated RAG section: "RAG System & Local Data Storage (ChromaDB in .rag_db/)"
 - Updated paths: `GRID_HOME=.`, `CHROMA_PERSIST_DIR=.rag_db`
@@ -37,11 +36,8 @@ All remaining dot files have been updated to reflect the January 1, 2026 file re
 - Updated API server: `API_HOST=127.0.0.1` (localhost-only for dev)
 - Updated Python Path: `PYTHONPATH=.` (simplified for local dev)
 
-### 4. ✅ `.env.docker`
 **Status**: Updated with container-specific context and section improvements
 **Changes**:
-- Header now reads: "Docker Container Environment Configuration"
-- Added reference: "docs/DOCKER_DEPLOYMENT_COMPLETE.md"
 - Improved section comments:
   - "Mothership API Server Configuration (container network)"
   - "PostgreSQL Database Configuration (container-internal)"
@@ -64,7 +60,6 @@ All remaining dot files have been updated to reflect the January 1, 2026 file re
 ### Pre-Reorganization Files (Already Updated)
 - ✅ .gitignore (439 lines, organized with data/logs/artifacts sections)
 - ✅ .cursorignore (139 lines, excludes large directories)
-- ✅ .dockerignore (142 lines, aligned with structure)
 - ✅ grid.code-workspace (14 folders, 18 extensions, enhanced settings)
 - ✅ .vscode/PROJECT_STATE.md (comprehensive status)
 - ✅ .vscode/WORKSPACE_GUIDE.md (437 lines, configuration guide)
@@ -74,7 +69,6 @@ All remaining dot files have been updated to reflect the January 1, 2026 file re
 
 ### Development vs. Container Clarity
 - `.env`: Local development with localhost bindings, simplified paths, debug logging
-- `.env.docker`: Container networking with service references, production override notes
 
 ### Documentation Consistency
 - All files now include "Updated Jan 1, 2026 - Post-Reorganization" header
@@ -83,7 +77,6 @@ All remaining dot files have been updated to reflect the January 1, 2026 file re
 
 ### Path Standardization
 - Local `.env`: Uses relative paths (`.`, `data/sessions`, `.rag_db/`)
-- Container `.env.docker`: Uses absolute container paths (`/app`, `/data/`)
 - Consistent with reorganized directory structure
 
 ## Verification Checklist
@@ -91,7 +84,6 @@ All remaining dot files have been updated to reflect the January 1, 2026 file re
 - ✅ `.pre-commit-config.yaml`: Header updated, hook descriptions improved
 - ✅ `.gitattributes`: Comprehensive header with platform notes
 - ✅ `.env`: Local dev context with reorganized paths
-- ✅ `.env.docker`: Container context with service references
 - ✅ `.editorconfig`: Previously updated with improved documentation
 
 ## Testing
@@ -104,14 +96,12 @@ pre-commit run --all-files
 
 # Test environment files
 cat .env  # Verify local paths
-cat .env.docker  # Verify container paths
 ```
 
 ## Related Documentation
 - [WORKSPACE_UPDATE_SUMMARY.md](WORKSPACE_UPDATE_SUMMARY.md) - Detailed workspace changes
 - [IGNORE_FILES_UPDATE.md](IGNORE_FILES_UPDATE.md) - Ignore file details
 - [.vscode/WORKSPACE_GUIDE.md](.vscode/WORKSPACE_GUIDE.md) - VS Code configuration
-- [DOCKER_DEPLOYMENT_COMPLETE.md](DOCKER_DEPLOYMENT_COMPLETE.md) - Docker setup guide
 
 ## Next Steps
 With all dot files now updated, the project configuration is fully aligned with the January 1, 2026 reorganization. All configuration files clearly indicate their post-reorganization status and provide improved documentation for developers.

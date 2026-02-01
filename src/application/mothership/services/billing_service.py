@@ -218,28 +218,20 @@ class BillingService:
 
         # Calculate relationship analysis overage
         if relationship_analysis_usage > limits.relationship_analyses:
-            charges.relationship_analysis_count = (
-                relationship_analysis_usage - limits.relationship_analyses
-            )
+            charges.relationship_analysis_count = relationship_analysis_usage - limits.relationship_analyses
             charges.relationship_analysis_cost_cents = (
-                charges.relationship_analysis_count
-                * self._settings.relationship_analysis_overage_cents
+                charges.relationship_analysis_count * self._settings.relationship_analysis_overage_cents
             )
 
         # Calculate entity extraction overage
         if entity_extraction_usage > limits.entity_extractions:
-            charges.entity_extraction_count = (
-                entity_extraction_usage - limits.entity_extractions
-            )
+            charges.entity_extraction_count = entity_extraction_usage - limits.entity_extractions
             charges.entity_extraction_cost_cents = (
-                charges.entity_extraction_count
-                * self._settings.entity_extraction_overage_cents
+                charges.entity_extraction_count * self._settings.entity_extraction_overage_cents
             )
 
         # Calculate totals
-        charges.total_overage_cents = (
-            charges.relationship_analysis_cost_cents + charges.entity_extraction_cost_cents
-        )
+        charges.total_overage_cents = charges.relationship_analysis_cost_cents + charges.entity_extraction_cost_cents
         charges.total_overage_dollars = charges.total_overage_cents / 100
 
         logger.info(
@@ -270,21 +262,13 @@ class BillingService:
         # Determine billing period
         if billing_period_start is None:
             # Default to start of current cycle (30 days ago)
-            billing_period_start = datetime.now(UTC) - timedelta(
-                days=self._settings.billing_cycle_days
-            )
+            billing_period_start = datetime.now(UTC) - timedelta(days=self._settings.billing_cycle_days)
 
-        billing_period_end = billing_period_start + timedelta(
-            days=self._settings.billing_cycle_days
-        )
+        billing_period_end = billing_period_start + timedelta(days=self._settings.billing_cycle_days)
 
         # Get usage for period
-        relationship_usage = await self.get_usage(
-            user_id, "relationship_analysis", since=billing_period_start
-        )
-        entity_usage = await self.get_usage(
-            user_id, "entity_extraction", since=billing_period_start
-        )
+        relationship_usage = await self.get_usage(user_id, "relationship_analysis", since=billing_period_start)
+        entity_usage = await self.get_usage(user_id, "entity_extraction", since=billing_period_start)
 
         usage = {
             "relationship_analyses": relationship_usage,

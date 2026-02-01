@@ -26,14 +26,14 @@ class OllamaLLM(LLMProvider):
 
     def generate(self, prompt: str, **kwargs: Any) -> str:
         """Generate text using Ollama (sync version).
-        
+
         Note: For async contexts, prefer async_generate() which uses
         non-blocking subprocess calls.
-        
+
         Args:
             prompt: Input prompt
             **kwargs: Additional parameters (ignored in sync version)
-            
+
         Returns:
             Generated text or error message
         """
@@ -104,6 +104,7 @@ class OpenAILLM(LLMProvider):
         if self._client is None:
             try:
                 from openai import OpenAI
+
                 self._client = OpenAI(api_key=self.api_key) if self.api_key else None
             except ImportError:
                 logger.warning("OpenAI library not installed, OpenAI provider unavailable")
@@ -112,11 +113,11 @@ class OpenAILLM(LLMProvider):
 
     def generate(self, prompt: str, **kwargs: Any) -> str:
         """Generate text using OpenAI API.
-        
+
         Args:
             prompt: Input prompt
             **kwargs: Additional parameters (temperature, max_tokens, etc.)
-            
+
         Returns:
             Generated text or error message
         """
@@ -129,7 +130,7 @@ class OpenAILLM(LLMProvider):
                 model=self.model,
                 messages=[{"role": "user", "content": prompt}],
                 temperature=kwargs.get("temperature", 0.7),
-                max_tokens=kwargs.get("max_tokens", 500)
+                max_tokens=kwargs.get("max_tokens", 500),
             )
             return response.choices[0].message.content
         except Exception as e:
@@ -140,16 +141,23 @@ class OpenAILLM(LLMProvider):
 class SimpleLLM(LLMProvider):
     """Simple rule-based LLM for fallback."""
 
-    def generate(self, prompt: str, system: str | None = None, temperature: float = 0.7, max_tokens: int | None = None, **kwargs: Any) -> str:
+    def generate(
+        self,
+        prompt: str,
+        system: str | None = None,
+        temperature: float = 0.7,
+        max_tokens: int | None = None,
+        **kwargs: Any,
+    ) -> str:
         """Generate a simple response based on prompt.
-        
+
         Args:
             prompt: Input prompt
             system: Optional system message (ignored)
             temperature: Sampling temperature (ignored)
             max_tokens: Maximum tokens (ignored)
             **kwargs: Additional parameters (ignored)
-            
+
         Returns:
             Simple fallback response
         """
@@ -164,13 +172,13 @@ class SimpleLLM(LLMProvider):
 
     def stream(self, prompt: str, system: str | None = None, temperature: float = 0.7, **kwargs: Any) -> Any:
         """Stream simple response.
-        
+
         Args:
             prompt: Input prompt
             system: Optional system message
             temperature: Sampling temperature
             **kwargs: Additional parameters
-            
+
         Yields:
             Text chunks
         """
@@ -180,30 +188,39 @@ class SimpleLLM(LLMProvider):
         for word in words:
             yield word + " "
 
-    async def async_generate(self, prompt: str, system: str | None = None, temperature: float = 0.7, max_tokens: int | None = None, **kwargs: Any) -> str:
+    async def async_generate(
+        self,
+        prompt: str,
+        system: str | None = None,
+        temperature: float = 0.7,
+        max_tokens: int | None = None,
+        **kwargs: Any,
+    ) -> str:
         """Async wrapper for sync generate.
-        
+
         Args:
             prompt: Input prompt
             system: Optional system message (ignored)
             temperature: Sampling temperature (ignored)
             max_tokens: Maximum tokens (ignored)
             **kwargs: Additional parameters (ignored)
-            
+
         Returns:
             Simple fallback response
         """
         return self.generate(prompt, system, temperature, max_tokens, **kwargs)
 
-    async def async_stream(self, prompt: str, system: str | None = None, temperature: float = 0.7, **kwargs: Any) -> Any:
+    async def async_stream(
+        self, prompt: str, system: str | None = None, temperature: float = 0.7, **kwargs: Any
+    ) -> Any:
         """Async stream wrapper.
-        
+
         Args:
             prompt: Input prompt
             system: Optional system message
             temperature: Sampling temperature
             **kwargs: Additional parameters
-            
+
         Yields:
             Text chunks
         """

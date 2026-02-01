@@ -1,15 +1,23 @@
-import pytest
-import sys
 import os
+import sys
+
 import numpy as np
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
 
 from src.application.resonance import (
-    VisualReference, ADSRParams, MermaidDiagramGenerator, ArenaIntegration,
-    ParameterPresetSystem, VectorIndex, MagnitudeCalculator, DirectionAnalyzer,
-    GravitationalSystem, GravitationalPoint, AttractionForce, RAGIntegration,
-    Parameterization
+    ADSRParams,
+    ArenaIntegration,
+    AttractionForce,
+    GravitationalPoint,
+    GravitationalSystem,
+    MermaidDiagramGenerator,
+    Parameterization,
+    ParameterPresetSystem,
+    VectorIndex,
+    VisualReference,
 )
+
 
 def test_visual_reference_creation():
     adsr = ADSRParams()

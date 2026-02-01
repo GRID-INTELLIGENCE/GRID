@@ -230,11 +230,8 @@ See `application/mothership/config.py` for privacy settings:
 
 ### 7.3. Container Security
 
-**Docker Hardening**:
-- Non-root user execution (`Dockerfile` line 52)
 - Minimal base images (Python 3.13-slim)
 - Health checks for all services
-- Network isolation via Docker networks
 
 ---
 
@@ -331,7 +328,6 @@ User Report → On-Call Engineer → Security Team → CISO (if P0/P1)
 - **Security Architecture**: `docs/security/SECURITY_ARCHITECTURE.md`
 - **Performance Metrics**: `docs/PERFORMANCE_REPORT_JAN_04.md`
 - **Configuration Guide**: `docs/CONFIGURATION.md`
-- **Docker Security**: `docs/DOCKER_QUICKSTART.md`
 
 ---
 

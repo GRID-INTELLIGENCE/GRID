@@ -18,7 +18,7 @@ class RealtimeFlow(str, Enum):
 class EmergencyRealtimeProcessor:
     """Processes emergency real-time I/O flows for rare occasions only."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize emergency real-time processor."""
         self._handlers: dict[RealtimeFlow, Callable[[dict[str, Any]], Any]] = {}
         self._throttle_limit = 10  # Max real-time operations per minute

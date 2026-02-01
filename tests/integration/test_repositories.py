@@ -52,6 +52,11 @@ TaskRepository = MockRepository
 ComponentRepository = MockRepository
 AlertRepository = MockRepository
 CockpitStateRepository = MockRepository
+AgenticRepository = MockRepository
+APIKeyRepository = MockRepository
+UsageRepository = MockRepository
+PaymentRepository = MockRepository
+DatabaseRepos = MockRepository
 
 
 class TestAgenticRepository:

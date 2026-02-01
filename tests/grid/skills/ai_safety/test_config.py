@@ -1,10 +1,7 @@
 """Tests for AI Safety Configuration."""
 
-import os
 
-import pytest
 
-from grid.skills.ai_safety.base import ThreatLevel
 from grid.skills.ai_safety.config import AISafetyConfig, ProviderConfig, get_config, reset_config
 
 

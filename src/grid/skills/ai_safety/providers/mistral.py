@@ -42,11 +42,17 @@ def check_mistral_safety(content: str, **kwargs: Any) -> list[SafetyViolation]:
     # These are language-agnostic or common across languages
     harmful_patterns = {
         "universal_symbols": [
-            "卍", "✠", "☠",  # Symbol-based hate
+            "卍",
+            "✠",
+            "☠",  # Symbol-based hate
         ],
         "code_words": [
-            "1488", "88", "14 words",  # Known hate codes
-            "kkk", "nazi", "fascist",
+            "1488",
+            "88",
+            "14 words",  # Known hate codes
+            "kkk",
+            "nazi",
+            "fascist",
         ],
     }
 

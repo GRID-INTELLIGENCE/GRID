@@ -21,9 +21,6 @@ try:
         FileAccessPattern,
         TaskPattern,
         ToolUsagePattern,
-        UserPreferences,
-        UserProfile,
-        WorkPattern,
     )
     from grid.context.user_context_manager import UserContextManager
 

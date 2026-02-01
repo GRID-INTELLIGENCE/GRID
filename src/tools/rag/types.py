@@ -26,11 +26,11 @@ class EmbeddingProvider(Protocol):
 class LLMProvider(Protocol):
     """Protocol for LLM providers."""
 
-    def generate(self, prompt: str, **kwargs) -> str:
+    def generate(self, prompt: str, **kwargs: Any) -> str:
         """Generate text completion."""
         ...
 
-    async def async_generate(self, prompt: str, **kwargs) -> str:
+    async def async_generate(self, prompt: str, **kwargs: Any) -> str:
         """Generate text completion (async)."""
         ...
 
@@ -115,9 +115,7 @@ class VectorStoreConfig:
 class ScoredChunk(Chunk):
     """Chunk with similarity score."""
 
-    def __init__(
-        self, id: str, text: str, doc_id: str, score: float, metadata: dict[str, Any] | None = None
-    ):
+    def __init__(self, id: str, text: str, doc_id: str, score: float, metadata: dict[str, Any] | None = None):
         super().__init__(id, text, doc_id, metadata)
         self.score = score
 

@@ -15,8 +15,6 @@ A comprehensive reorganization of root-level files has been completed, moving fi
 - `ENHANCEMENT_SUMMARY.py` - Analysis/reporting script
 - `setup_terminal.ps1` - Terminal setup configuration
 - `setup_venv.sh` - Virtual environment setup
-- `verify-docker-setup.ps1` - Docker verification (PowerShell)
-- `verify-docker-setup.sh` - Docker verification (Bash)
 
 ### Test Utilities → `tests/`
 - `async_stress_harness.py` - Async stress testing utility
@@ -47,7 +45,6 @@ A comprehensive reorganization of root-level files has been completed, moving fi
 - `RESONANCE_OPTIMIZATION_PLAN.md`
 - `STABILIZATION_REPORT.md`
 - `FINAL_SESSION_SUMMARY.md`
-- `DOCKER_DEPLOYMENT_COMPLETE.md`
 
 ### Schema & Artifacts
 - `cerulean_amber_light_workspace_reference.json` → `schemas/`
@@ -60,7 +57,6 @@ A comprehensive reorganization of root-level files has been completed, moving fi
 These files remain at the repository root per project requirements:
 
 - **Build Config**: `pyproject.toml`, `pyrightconfig.json`, `requirements.txt`
-- **Container Config**: `Dockerfile`, `docker-compose.yml`, `docker-compose.prod.yml`, `.dockerignore`
 - **Standard Project Files**: `README.md`, `LICENSE`, `CODE_OF_CONDUCT.md`, `CONTRIBUTING.md`
 - **Tool Configuration**: `.cursorrules`, `.gitignore`, `.env`, `grid.code-workspace`
 - **Active Database**: `grid.db`
@@ -92,7 +88,6 @@ All references to moved files have been updated in the following documentation:
    - Updated "Path-Sensitive Files" section to reflect new data organization
    - Removed benchmark files from root-level requirements
 
-6. **docs/deployment/PENDING_DOCKER_TASKS.md**
    - Updated verification script paths to `scripts/`
 
 7. **docs/ENHANCEMENT_COMPLETE.md**

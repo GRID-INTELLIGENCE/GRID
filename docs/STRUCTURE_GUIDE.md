@@ -46,7 +46,6 @@ grid/
 ├── pytest.ini             # Pytest configuration
 ├── pyproject.toml         # Project metadata and tool configuration
 ├── Makefile               # Build automation
-├── Dockerfile             # Container configuration
 └── README.md              # Project documentation
 ```
 

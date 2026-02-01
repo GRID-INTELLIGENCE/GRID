@@ -60,7 +60,7 @@ class RetryConfig:
         Returns:
             Delay in seconds, capped at max_delay.
         """
-        delay = self.initial_delay * (self.backoff_factor ** attempt)
+        delay = self.initial_delay * (self.backoff_factor**attempt)
         return min(delay, self.max_delay)
 
 
@@ -116,9 +116,7 @@ def retry(
                             config.on_retry(attempt, e)
                         time.sleep(delay)
                     else:
-                        logger.error(
-                            f"✗ All {config.max_attempts} attempts failed for {func.__name__}: {e}"
-                        )
+                        logger.error(f"✗ All {config.max_attempts} attempts failed for {func.__name__}: {e}")
 
             if last_exception:
                 raise last_exception
@@ -183,9 +181,7 @@ def async_retry(
                             config.on_retry(attempt, e)
                         await asyncio.sleep(delay)
                     else:
-                        logger.error(
-                            f"✗ All {config.max_attempts} attempts failed for {func.__name__}: {e}"
-                        )
+                        logger.error(f"✗ All {config.max_attempts} attempts failed for {func.__name__}: {e}")
 
             if last_exception:
                 raise last_exception
@@ -228,9 +224,7 @@ def fallback[T](
             try:
                 return func(*args, **kwargs)
             except exceptions as e:
-                logger.warning(
-                    f"⚡ Fallback triggered for {func.__name__} due to {e.__class__.__name__}: {e}"
-                )
+                logger.warning(f"⚡ Fallback triggered for {func.__name__} due to {e.__class__.__name__}: {e}")
                 return fallback_func(*args, **kwargs)
 
         return cast(Callable[..., T], wrapper)
@@ -272,9 +266,7 @@ def async_fallback[T](
             try:
                 return await func(*args, **kwargs)
             except exceptions as e:
-                logger.warning(
-                    f"⚡ Fallback triggered for {func.__name__} due to {e.__class__.__name__}: {e}"
-                )
+                logger.warning(f"⚡ Fallback triggered for {func.__name__} due to {e.__class__.__name__}: {e}")
                 return await fallback_func(*args, **kwargs)
 
         return cast(Callable[..., Awaitable[T]], wrapper)

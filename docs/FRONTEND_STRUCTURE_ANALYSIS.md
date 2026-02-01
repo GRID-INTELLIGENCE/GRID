@@ -26,7 +26,6 @@ frontend/
 
 ### Observations
 
-1. **Docker Configuration**: No mention of frontend service in `docker-compose.yml` or `docker-compose.prod.yml`
 2. **Architecture Docs**: No frontend architecture documentation found
 3. **Build Scripts**: No frontend build scripts in `package.json` or `Makefile`
 

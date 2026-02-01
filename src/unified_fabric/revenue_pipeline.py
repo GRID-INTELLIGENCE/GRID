@@ -8,6 +8,7 @@ Connects:
 - Safety validation at every step
 - Unified audit logging
 """
+
 import logging
 import uuid
 from collections.abc import Awaitable, Callable
@@ -26,6 +27,7 @@ logger = logging.getLogger(__name__)
 
 class RevenueType(Enum):
     """Types of revenue"""
+
     TRADING_PROFIT = "trading_profit"
     DIVIDEND = "dividend"
     STAKING_REWARD = "staking_reward"
@@ -35,6 +37,7 @@ class RevenueType(Enum):
 
 class PipelineStage(Enum):
     """Pipeline stages"""
+
     SIGNAL_RECEIVED = "signal_received"
     SAFETY_VALIDATED = "safety_validated"
     ACTION_EXECUTED = "action_executed"
@@ -46,6 +49,7 @@ class PipelineStage(Enum):
 @dataclass
 class RevenueEvent:
     """Revenue event in pipeline"""
+
     revenue_type: RevenueType
     amount: float
     asset: str
@@ -59,6 +63,7 @@ class RevenueEvent:
 @dataclass
 class PipelineResult:
     """Result of pipeline execution"""
+
     success: bool
     stages_completed: list[PipelineStage]
     revenue_amount: float = 0.0
@@ -70,11 +75,11 @@ class PipelineResult:
 class RevenuePipeline:
     """
     End-to-end revenue pipeline with safety at every stage.
-    
+
     Flow:
     1. Trading signal received
     2. Safety validation
-    3. Portfolio action execution  
+    3. Portfolio action execution
     4. Revenue calculation
     5. Audit logging
     6. Event broadcast
@@ -99,22 +104,19 @@ class RevenuePipeline:
         self._initialized = True
         logger.info("RevenuePipeline initialized")
 
-    async def process_trading_opportunity(
-        self,
-        signal: TradingSignal,
-        execute: bool = True
-    ) -> PipelineResult:
+    async def process_trading_opportunity(self, signal: TradingSignal, execute: bool = True) -> PipelineResult:
         """
         Process a trading opportunity through the full pipeline.
-        
+
         Args:
             signal: Trading signal
             execute: Whether to execute the trade
-            
+
         Returns:
             PipelineResult with outcome
         """
         import time
+
         start = time.perf_counter()
         stages: list[PipelineStage] = []
 
@@ -125,18 +127,12 @@ class RevenuePipeline:
             # Stage 2: Safety validation
             report = await self._safety_bridge.validate(
                 f"Trading: {signal.signal_type.value} {signal.asset}",
-                SafetyContext(
-                    project="coinbase",
-                    domain="revenue_pipeline",
-                    user_id=signal.user_id
-                )
+                SafetyContext(project="coinbase", domain="revenue_pipeline", user_id=signal.user_id),
             )
 
             if report.should_block:
                 return PipelineResult(
-                    success=False,
-                    stages_completed=stages,
-                    error=f"Blocked at safety: {report.threat_level.value}"
+                    success=False, stages_completed=stages, error=f"Blocked at safety: {report.threat_level.value}"
                 )
 
             stages.append(PipelineStage.SAFETY_VALIDATED)
@@ -148,11 +144,7 @@ class RevenuePipeline:
                 result = await self._coinbase_adapter.execute_action(action)
 
                 if not result.success:
-                    return PipelineResult(
-                        success=False,
-                        stages_completed=stages,
-                        error=result.message
-                    )
+                    return PipelineResult(success=False, stages_completed=stages, error=result.message)
 
                 action_id = result.action_id
                 stages.append(PipelineStage.ACTION_EXECUTED)
@@ -166,7 +158,7 @@ class RevenuePipeline:
                     amount=revenue,
                     asset=signal.asset,
                     user_id=signal.user_id,
-                    source_action_id=action_id
+                    source_action_id=action_id,
                 )
 
                 await self._record_revenue(event)
@@ -184,8 +176,8 @@ class RevenuePipeline:
                     "signal_type": signal.signal_type.value,
                     "asset": signal.asset,
                     "revenue": revenue,
-                    "stages": len(stages)
-                }
+                    "stages": len(stages),
+                },
             )
             stages.append(PipelineStage.AUDIT_LOGGED)
             stages.append(PipelineStage.COMPLETED)
@@ -197,51 +189,24 @@ class RevenuePipeline:
                 stages_completed=stages,
                 revenue_amount=revenue,
                 event_id=signal.signal_id,
-                total_time_ms=elapsed
+                total_time_ms=elapsed,
             )
 
         except Exception as e:
             logger.error(f"Pipeline error: {e}")
-            return PipelineResult(
-                success=False,
-                stages_completed=stages,
-                error=str(e)
-            )
+            return PipelineResult(success=False, stages_completed=stages, error=str(e))
 
-    async def record_dividend(
-        self,
-        asset: str,
-        amount: float,
-        user_id: str
-    ) -> str:
+    async def record_dividend(self, asset: str, amount: float, user_id: str) -> str:
         """Record a dividend revenue event"""
-        event = RevenueEvent(
-            revenue_type=RevenueType.DIVIDEND,
-            amount=amount,
-            asset=asset,
-            user_id=user_id
-        )
+        event = RevenueEvent(revenue_type=RevenueType.DIVIDEND, amount=amount, asset=asset, user_id=user_id)
         return await self._record_revenue(event)
 
-    async def record_staking_reward(
-        self,
-        asset: str,
-        amount: float,
-        user_id: str
-    ) -> str:
+    async def record_staking_reward(self, asset: str, amount: float, user_id: str) -> str:
         """Record a staking reward"""
-        event = RevenueEvent(
-            revenue_type=RevenueType.STAKING_REWARD,
-            amount=amount,
-            asset=asset,
-            user_id=user_id
-        )
+        event = RevenueEvent(revenue_type=RevenueType.STAKING_REWARD, amount=amount, asset=asset, user_id=user_id)
         return await self._record_revenue(event)
 
-    def register_revenue_handler(
-        self,
-        handler: Callable[[RevenueEvent], Awaitable[None]]
-    ):
+    def register_revenue_handler(self, handler: Callable[[RevenueEvent], Awaitable[None]]):
         """Register a revenue event handler"""
         self._revenue_handlers.append(handler)
 
@@ -259,8 +224,8 @@ class RevenuePipeline:
                 "revenue_type": event.revenue_type.value,
                 "amount": event.amount,
                 "asset": event.asset,
-                "event_id": event.event_id
-            }
+                "event_id": event.event_id,
+            },
         )
 
         # Broadcast event
@@ -271,10 +236,10 @@ class RevenuePipeline:
                 "revenue_type": event.revenue_type.value,
                 "amount": event.amount,
                 "asset": event.asset,
-                "user_id": event.user_id
+                "user_id": event.user_id,
             },
             source_domain=EventDomain.COINBASE.value,
-            target_domains=["all"]
+            target_domains=["all"],
         )
         await self._event_bus.publish(bus_event)
 
@@ -285,7 +250,9 @@ class RevenuePipeline:
             except Exception as e:
                 logger.error(f"Revenue handler error: {e}")
 
-        logger.info(f"Revenue recorded: {event.revenue_type.value} ${event.amount} {event.asset} (Audit ID: {request_id})")
+        logger.info(
+            f"Revenue recorded: {event.revenue_type.value} ${event.amount} {event.asset} (Audit ID: {request_id})"
+        )
 
         return event.event_id
 
@@ -298,7 +265,7 @@ class RevenuePipeline:
             asset=signal.asset,
             amount=signal.confidence * 100,  # Scale by confidence
             user_id=signal.user_id,
-            metadata={"signal_id": signal.signal_id}
+            metadata={"signal_id": signal.signal_id},
         )
 
     def _calculate_revenue(self, signal: TradingSignal) -> float:

@@ -61,7 +61,7 @@ class CaseStructure:
 class CaseFilingSystem:
     """Case filing system with iterative logging."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize case filing system."""
         # Category keywords mapping
         self.category_keywords: dict[CaseCategory, set[str]] = {
@@ -275,7 +275,6 @@ class CaseFilingSystem:
             "database",
             "sql",
             "nosql",
-            "docker",
             "kubernetes",
             "aws",
             "azure",

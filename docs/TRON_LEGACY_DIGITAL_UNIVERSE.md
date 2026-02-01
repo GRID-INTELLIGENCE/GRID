@@ -144,7 +144,6 @@ python -m grid analyze "Data flow visualization: From light cycles to modern das
 | Light Cycles | Real-time Data Streams | 2025 |
 | Solar Sailer | Batch Processing Jobs | 2025 |
 | Recognizers | API Gateways | 2025 |
-| Portal System | Docker/Kubernetes | 2025 |
 | Game Grid | Simulation Environments | 2025 |
 | Derezzing | Process Termination | 2025 |
 | Reprogramming | Code Refactoring | 2025 |

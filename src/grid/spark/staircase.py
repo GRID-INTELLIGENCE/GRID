@@ -32,7 +32,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any
 
-import requests
+import requests  # type: ignore[import-untyped]
 
 logger = logging.getLogger(__name__)
 

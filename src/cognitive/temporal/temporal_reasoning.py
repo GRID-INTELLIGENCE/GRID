@@ -8,6 +8,7 @@ import numpy as np
 
 class TemporalRelation(Enum):
     """Types of temporal relationships between events/facts."""
+
     BEFORE = "before"
     AFTER = "after"
     DURING = "during"
@@ -20,6 +21,7 @@ class TemporalRelation(Enum):
 
 class CrossReferenceDomain(Enum):
     """Domains for cross-referencing in temporal reasoning."""
+
     TOPIC = "topic"
     SUBJECT = "subject"
     DOMAIN = "domain"
@@ -31,6 +33,7 @@ class CrossReferenceDomain(Enum):
 @dataclass
 class TemporalFact:
     """Represents a single fact with temporal information."""
+
     subject: str
     predicate: str
     object: str
@@ -38,7 +41,7 @@ class TemporalFact:
     confidence: float = 1.0
     metadata: dict[str, Any] = field(default_factory=dict)
 
-    def temporal_distance(self, other: 'TemporalFact') -> float:
+    def temporal_distance(self, other: "TemporalFact") -> float:
         """Calculate temporal distance between facts."""
         return abs((self.timestamp - other.timestamp).total_seconds())
 
@@ -46,6 +49,7 @@ class TemporalFact:
 @dataclass
 class TemporalPath:
     """Represents a temporal path connecting facts through time."""
+
     facts: list[TemporalFact]
     relations: list[TemporalRelation]
     temporal_weight: float = 1.0
@@ -69,6 +73,7 @@ class TemporalPath:
 @dataclass
 class CrossReference:
     """Represents cross-reference between temporal elements."""
+
     source_domain: CrossReferenceDomain
     target_domain: CrossReferenceDomain
     source_entity: str
@@ -115,9 +120,9 @@ class TemporalReasoning:
     def construct_temporal_paths(self, query_subject: str) -> list[TemporalPath]:
         """Construct temporal paths starting from query subject."""
         relevant_facts = [
-            f for f in self.temporal_facts
-            if f.subject == query_subject and
-            datetime.now() - f.timestamp <= self.history_window
+            f
+            for f in self.temporal_facts
+            if f.subject == query_subject and datetime.now() - f.timestamp <= self.history_window
         ]
 
         paths = []
@@ -140,7 +145,7 @@ class TemporalReasoning:
         for fact in self.temporal_facts:
             if fact not in current_path and fact.timestamp > last_fact.timestamp:
                 temporal_distance = last_fact.temporal_distance(fact)
-                decay_weight = self.temporal_decay_factor ** temporal_distance
+                decay_weight = self.temporal_decay_factor**temporal_distance
                 candidates.append((fact, decay_weight))
 
         if not candidates:
@@ -156,7 +161,7 @@ class TemporalReasoning:
             facts=extended_path,
             relations=[relation],  # Simplified - would need full relation inference
             temporal_weight=weight,
-            path_confidence=0.8
+            path_confidence=0.8,
         )
 
     def add_cross_reference(self, reference: CrossReference) -> None:
@@ -164,9 +169,9 @@ class TemporalReasoning:
         self.cross_references.append(reference)
         self._update_cross_reference_coverage()
 
-    def perform_cross_referencing(self,
-                                source_domain: CrossReferenceDomain,
-                                target_domain: CrossReferenceDomain) -> list[CrossReference]:
+    def perform_cross_referencing(
+        self, source_domain: CrossReferenceDomain, target_domain: CrossReferenceDomain
+    ) -> list[CrossReference]:
         """Generate cross-references between domains using temporal reasoning."""
         references = []
 
@@ -176,7 +181,7 @@ class TemporalReasoning:
             if source_domain == CrossReferenceDomain.SUBJECT:
                 source_entities.add(fact.subject)
             elif source_domain == CrossReferenceDomain.TOPIC:
-                source_entities.update(fact.metadata.get('topics', []))
+                source_entities.update(fact.metadata.get("topics", []))
 
         # Find entities in target domain
         target_entities = set()
@@ -184,7 +189,7 @@ class TemporalReasoning:
             if target_domain == CrossReferenceDomain.SUBJECT:
                 target_entities.add(fact.subject)
             elif target_domain == CrossReferenceDomain.TOPIC:
-                target_entities.update(fact.metadata.get('topics', []))
+                target_entities.update(fact.metadata.get("topics", []))
 
         # Generate cross-references based on temporal co-occurrence
         for source in source_entities:
@@ -198,7 +203,7 @@ class TemporalReasoning:
                             source_entity=source,
                             target_entity=target,
                             similarity_score=similarity,
-                            temporal_alignment=self._calculate_temporal_alignment(source, target)
+                            temporal_alignment=self._calculate_temporal_alignment(source, target),
                         )
                         references.append(reference)
                         self.add_cross_reference(reference)
@@ -208,12 +213,14 @@ class TemporalReasoning:
     def _calculate_temporal_similarity(self, entity1: str, entity2: str) -> float:
         """Calculate temporal similarity between entities."""
         entity1_timestamps = [
-            f.timestamp for f in self.temporal_facts
-            if entity1 in [f.subject, f.object] or entity1 in f.metadata.get('topics', [])
+            f.timestamp
+            for f in self.temporal_facts
+            if entity1 in [f.subject, f.object] or entity1 in f.metadata.get("topics", [])
         ]
         entity2_timestamps = [
-            f.timestamp for f in self.temporal_facts
-            if entity2 in [f.subject, f.object] or entity2 in f.metadata.get('topics', [])
+            f.timestamp
+            for f in self.temporal_facts
+            if entity2 in [f.subject, f.object] or entity2 in f.metadata.get("topics", [])
         ]
 
         if not entity1_timestamps or not entity2_timestamps:
@@ -224,7 +231,7 @@ class TemporalReasoning:
         for t1 in entity1_timestamps:
             for t2 in entity2_timestamps:
                 time_diff = abs((t1 - t2).total_seconds()) / (24 * 3600)  # days
-                similarity = np.exp(-time_diff ** 2 / 2)  # Gaussian decay
+                similarity = np.exp(-(time_diff**2) / 2)  # Gaussian decay
                 similarities.append(similarity)
 
         return float(np.mean(similarities)) if similarities else 0.0
@@ -232,14 +239,8 @@ class TemporalReasoning:
     def _calculate_temporal_alignment(self, entity1: str, entity2: str) -> float:
         """Calculate temporal alignment between entities."""
         # Simplified alignment calculation
-        entity1_times = [
-            f.timestamp for f in self.temporal_facts
-            if entity1 in [f.subject, f.object]
-        ]
-        entity2_times = [
-            f.timestamp for f in self.temporal_facts
-            if entity2 in [f.subject, f.object]
-        ]
+        entity1_times = [f.timestamp for f in self.temporal_facts if entity1 in [f.subject, f.object]]
+        entity2_times = [f.timestamp for f in self.temporal_facts if entity2 in [f.subject, f.object]]
 
         if not entity1_times or not entity2_times:
             return 0.0
@@ -300,15 +301,14 @@ class TemporalReasoning:
             return 0.0
 
         # Factor in temporal recency, cross-references, and path consistency
-        recency_factor = np.mean([
-            np.exp(-abs((f.timestamp - datetime.now()).total_seconds()) / (24 * 3600))
-            for f in relevant_facts
-        ])
+        recency_factor = np.mean(
+            [np.exp(-abs((f.timestamp - datetime.now()).total_seconds()) / (24 * 3600)) for f in relevant_facts]
+        )
 
         cross_ref_factor = min(1.0, len(self.cross_references) / 10)  # Scale cross-refs
         consistency_factor = self.temporal_consistency_score
 
-        confidence = (recency_factor * 0.4 + cross_ref_factor * 0.3 + consistency_factor * 0.3)
+        confidence = recency_factor * 0.4 + cross_ref_factor * 0.3 + consistency_factor * 0.3
 
         self.decision_confidence = float(confidence)
         return confidence
@@ -325,8 +325,8 @@ class TemporalReasoning:
                 "cross_references_count": len(self.cross_references),
                 "decision_confidence": self.decision_confidence,
                 "temporal_consistency_score": self.temporal_consistency_score,
-                "cross_reference_coverage": self.cross_reference_coverage
-            }
+                "cross_reference_coverage": self.cross_reference_coverage,
+            },
         }
         self.processing_history.append(event)
 
@@ -340,5 +340,5 @@ class TemporalReasoning:
             "temporal_consistency_score": self.temporal_consistency_score,
             "cross_reference_coverage": self.cross_reference_coverage,
             "average_path_length": np.mean([len(p.facts) for p in self.temporal_paths]) if self.temporal_paths else 0,
-            "processing_events_count": len(self.processing_history)
+            "processing_events_count": len(self.processing_history),
         }

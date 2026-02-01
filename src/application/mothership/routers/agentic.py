@@ -134,6 +134,9 @@ async def create_case(
             events=["case.created", "case.categorized", "case.reference_generated"],
             created_at=result.timestamp,
             updated_at=result.timestamp,
+            completed_at="",
+            outcome="",
+            solution="",
         )
 
     except Exception as e:
@@ -165,7 +168,7 @@ async def get_case(
 
     # Get event history
     events = await agentic_system.event_bus.get_event_history(event_type=None, limit=100)
-    case_events = [e.get("event_type") for e in events if e.get("case_id") == case_id]
+    case_events: list[str] = [str(e.get("event_type", "")) for e in events if e.get("case_id") == case_id]
 
     return CaseResponse(
         case_id=case.case_id,
@@ -211,7 +214,7 @@ async def enrich_case(
             case = await agentic_system.repository.get_case(case_id)
             if case:
                 events = await agentic_system.event_bus.get_event_history(event_type=None, limit=100)
-                case_events = [e.get("event_type") for e in events if e.get("case_id") == case_id]
+                case_events: list[str] = [str(e.get("event_type", "")) for e in events if e.get("case_id") == case_id]
 
                 return CaseResponse(
                     case_id=case.case_id,
@@ -223,6 +226,9 @@ async def enrich_case(
                     events=case_events,
                     created_at=case.created_at.isoformat() if case.created_at else "",
                     updated_at=case.updated_at.isoformat() if case.updated_at else None,
+                    completed_at="",
+                    outcome="",
+                    solution="",
                 )
 
         raise HTTPException(
@@ -290,7 +296,7 @@ async def execute_case(
             )
 
         events = await agentic_system.event_bus.get_event_history(event_type=None, limit=100)
-        case_events = [e.get("event_type") for e in events if e.get("case_id") == case_id]
+        case_events: list[str] = [str(e.get("event_type", "")) for e in events if e.get("case_id") == case_id]
 
         return CaseResponse(
             case_id=case.case_id,
@@ -302,9 +308,9 @@ async def execute_case(
             events=case_events,
             created_at=case.created_at.isoformat() if case.created_at else "",
             updated_at=case.updated_at.isoformat() if case.updated_at else None,
-            completed_at=case.completed_at.isoformat() if case.completed_at else None,
-            outcome=case.outcome,
-            solution=case.solution,
+            completed_at=case.completed_at.isoformat() if case.completed_at else "",
+            outcome=case.outcome or "",
+            solution=case.solution or "",
         )
 
     except Exception as e:

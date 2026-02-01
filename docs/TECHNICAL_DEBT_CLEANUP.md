@@ -51,7 +51,6 @@ mv train_ner.py scripts/ml/
 mv scoring.py scripts/analysis/
 ```
 
-**Expected Outcome**: Root directory reduced from 30+ files to ~10 essential files (pyproject.toml, Dockerfile, Makefile, README, LICENSE)
 
 ---
 

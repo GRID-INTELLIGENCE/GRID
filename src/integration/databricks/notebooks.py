@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 class DatabricksNotebooksManager:
     """Manage Databricks notebooks."""
 
-    def __init__(self, client):
+    def __init__(self, client) -> None:
         """Initialize notebooks manager.
 
         Args:
@@ -44,9 +44,7 @@ class DatabricksNotebooksManager:
             format: Format (SOURCE, HTML, JUPYTER, DBC)
         """
         try:
-            self.client.workspace.write(
-                path=path, content=content, format=format, overwrite=True
-            )
+            self.client.workspace.write(path=path, content=content, format=format, overwrite=True)
             logger.info(f"Wrote notebook to {path}")
         except Exception as e:
             logger.error(f"Failed to write notebook {path}: {e}")

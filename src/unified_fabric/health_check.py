@@ -3,6 +3,7 @@ Unified Fabric - Health Checks
 ==============================
 Lightweight health status helpers for integration validation.
 """
+
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass

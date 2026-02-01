@@ -38,12 +38,7 @@ class TokenRevocationList:
         """Create storage key for a JTI."""
         return f"{self._key_prefix}{jti}"
 
-    async def revoke_token(
-        self,
-        jti: str,
-        expires_at: datetime | None = None,
-        reason: str | None = None
-    ) -> bool:
+    async def revoke_token(self, jti: str, expires_at: datetime | None = None, reason: str | None = None) -> bool:
         """Revoke a token by its JTI.
 
         Args:
@@ -144,11 +139,7 @@ class TokenValidator:
         """
         self._revocation_list = revocation_list or TokenRevocationList()
 
-    async def validate_token(
-        self,
-        token_payload: dict[str, Any],
-        verify_exp: bool = True
-    ) -> tuple[bool, str | None]:
+    async def validate_token(self, token_payload: dict[str, Any], verify_exp: bool = True) -> tuple[bool, str | None]:
         """Validate a token including revocation check.
 
         Args:
@@ -173,16 +164,13 @@ class TokenValidator:
             exp = token_payload.get("exp")
             if exp:
                 from datetime import datetime
+
                 if datetime.now(UTC).timestamp() > exp:
                     return False, "Token has expired"
 
         return True, None
 
-    async def revoke_token(
-        self,
-        token_payload: dict[str, Any],
-        reason: str | None = None
-    ) -> bool:
+    async def revoke_token(self, token_payload: dict[str, Any], reason: str | None = None) -> bool:
         """Revoke a token by its payload.
 
         Args:

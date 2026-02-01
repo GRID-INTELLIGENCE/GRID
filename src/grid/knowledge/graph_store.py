@@ -9,6 +9,7 @@ graph traversal, semantic search, and relationship analytics.
 from __future__ import annotations
 
 import logging
+import os
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
@@ -27,11 +28,7 @@ except ImportError:  # pragma: no cover - optional dependency
     _GraphDatabase = None  # type: ignore[assignment]
     NEO4J_AVAILABLE = False
 
-from ..knowledge.graph_schema import (
-    EntityType,
-    RelationType,
-    get_kg_schema,
-)
+from ..knowledge.graph_schema import EntityType, RelationType, get_kg_schema
 
 
 @dataclass

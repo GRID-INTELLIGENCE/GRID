@@ -30,6 +30,7 @@ logger = logging.getLogger(__name__)
 
 class ThreatLevel(Enum):
     """Threat severity levels."""
+
     NONE = "none"
     LOW = "low"
     MEDIUM = "medium"
@@ -39,6 +40,7 @@ class ThreatLevel(Enum):
 
 class ContentType(Enum):
     """Types of content to analyze."""
+
     TEXT = "text"
     IMAGE = "image"
     AUDIO = "audio"
@@ -48,6 +50,7 @@ class ContentType(Enum):
 
 class SafetyCategory(Enum):
     """Safety evaluation categories."""
+
     HARMFUL_CONTENT = "harmful_content"
     PRIVACY_VIOLATION = "privacy_violation"
     MANIPULATION = "manipulation"
@@ -60,6 +63,7 @@ class SafetyCategory(Enum):
 @dataclass
 class SafetyViolation:
     """Individual safety violation detected."""
+
     category: SafetyCategory
     severity: ThreatLevel
     confidence: float  # 0.0 to 1.0
@@ -74,13 +78,14 @@ class SafetyViolation:
             "confidence": self.confidence,
             "description": self.description,
             "evidence": self.evidence,
-            "timestamp": self.timestamp.isoformat()
+            "timestamp": self.timestamp.isoformat(),
         }
 
 
 @dataclass
 class SafetyReport:
     """Comprehensive safety evaluation report."""
+
     overall_score: float  # 0.0 to 1.0, higher is safer
     threat_level: ThreatLevel
     violations: list[SafetyViolation] = field(default_factory=list)
@@ -111,7 +116,7 @@ class SafetyReport:
             "is_safe": self.is_safe,
             "requires_review": self.requires_review,
             "should_block": self.should_block,
-            "timestamp": datetime.now(UTC).isoformat()
+            "timestamp": datetime.now(UTC).isoformat(),
         }
 
 
@@ -129,43 +134,76 @@ class ContentModerator:
         """Load Southeast Asia cultural sensitivity patterns."""
         return {
             "religious_sensitive": [
-                "mosque", "temple", "church", "buddha", "allah", "hindu",
-                "muslim", "christian", "buddhist", "prayer", "worship"
+                "mosque",
+                "temple",
+                "church",
+                "buddha",
+                "allah",
+                "hindu",
+                "muslim",
+                "christian",
+                "buddhist",
+                "prayer",
+                "worship",
             ],
             "cultural_sensitive": [
-                "family honor", "face", "respect elders", "filial piety",
-                "arranged marriage", "dowry", "caste"
+                "family honor",
+                "face",
+                "respect elders",
+                "filial piety",
+                "arranged marriage",
+                "dowry",
+                "caste",
             ],
             "political_sensitive": [
-                "government", "politics", "protest", "democracy",
-                "election", "corruption", "activism"
-            ]
+                "government",
+                "politics",
+                "protest",
+                "democracy",
+                "election",
+                "corruption",
+                "activism",
+            ],
         }
 
     def _load_mental_health_patterns(self) -> list[str]:
         """Load mental health risk patterns."""
         return [
-            "suicide", "kill myself", "end my life", "want to die",
-            "self harm", "cut myself", "depressed", "anxiety",
-            "panic attack", "mental breakdown", "can't cope"
+            "suicide",
+            "kill myself",
+            "end my life",
+            "want to die",
+            "self harm",
+            "cut myself",
+            "depressed",
+            "anxiety",
+            "panic attack",
+            "mental breakdown",
+            "can't cope",
         ]
 
     def _load_privacy_patterns(self) -> list[str]:
         """Load privacy violation patterns."""
         return [
-            "social security", "credit card", "bank account",
-            "password", "secret", "private key", "address",
-            "phone number", "email address", "personal data"
+            "social security",
+            "credit card",
+            "bank account",
+            "password",
+            "secret",
+            "private key",
+            "address",
+            "phone number",
+            "email address",
+            "personal data",
         ]
 
     def _load_harmful_patterns(self) -> list[str]:
         """Load harmful content patterns."""
-        return [
-            "violence", "kill", "hurt", "attack", "weapon",
-            "drugs", "illegal", "criminal", "abuse", "hate"
-        ]
+        return ["violence", "kill", "hurt", "attack", "weapon", "drugs", "illegal", "criminal", "abuse", "hate"]
 
-    async def analyze_content(self, content: str, content_type: ContentType = ContentType.TEXT) -> list[SafetyViolation]:
+    async def analyze_content(
+        self, content: str, content_type: ContentType = ContentType.TEXT
+    ) -> list[SafetyViolation]:
         """Analyze content for safety violations."""
         violations = []
 
@@ -192,13 +230,15 @@ class ContentModerator:
 
         for pattern in self.harmful_patterns:
             if pattern in content:
-                violations.append(SafetyViolation(
-                    category=SafetyCategory.HARMFUL_CONTENT,
-                    severity=ThreatLevel.MEDIUM,
-                    confidence=0.7,
-                    description=f"Potentially harmful content detected: {pattern}",
-                    evidence={"pattern": pattern, "context": content[:100]}
-                ))
+                violations.append(
+                    SafetyViolation(
+                        category=SafetyCategory.HARMFUL_CONTENT,
+                        severity=ThreatLevel.MEDIUM,
+                        confidence=0.7,
+                        description=f"Potentially harmful content detected: {pattern}",
+                        evidence={"pattern": pattern, "context": content[:100]},
+                    )
+                )
 
         return violations
 
@@ -207,27 +247,30 @@ class ContentModerator:
         violations = []
 
         # Check for PII patterns
-        email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
-        phone_pattern = r'\b\d{3}-\d{3}-\d{4}\b'
-        ssn_pattern = r'\b\d{3}-\d{2}-\d{4}\b'
+        email_pattern = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"
+        phone_pattern = r"\b\d{3}-\d{3}-\d{4}\b"
 
         if re.search(email_pattern, content):
-            violations.append(SafetyViolation(
-                category=SafetyCategory.PRIVACY_VIOLATION,
-                severity=ThreatLevel.MEDIUM,
-                confidence=0.8,
-                description="Email address detected in content",
-                evidence={"pattern": "email", "matches": re.findall(email_pattern, content)}
-            ))
+            violations.append(
+                SafetyViolation(
+                    category=SafetyCategory.PRIVACY_VIOLATION,
+                    severity=ThreatLevel.MEDIUM,
+                    confidence=0.8,
+                    description="Email address detected in content",
+                    evidence={"pattern": "email", "matches": re.findall(email_pattern, content)},
+                )
+            )
 
         if re.search(phone_pattern, content):
-            violations.append(SafetyViolation(
-                category=SafetyCategory.PRIVACY_VIOLATION,
-                severity=ThreatLevel.MEDIUM,
-                confidence=0.8,
-                description="Phone number detected in content",
-                evidence={"pattern": "phone", "matches": re.findall(phone_pattern, content)}
-            ))
+            violations.append(
+                SafetyViolation(
+                    category=SafetyCategory.PRIVACY_VIOLATION,
+                    severity=ThreatLevel.MEDIUM,
+                    confidence=0.8,
+                    description="Phone number detected in content",
+                    evidence={"pattern": "phone", "matches": re.findall(phone_pattern, content)},
+                )
+            )
 
         return violations
 
@@ -237,15 +280,19 @@ class ContentModerator:
 
         for keyword in self.mental_health_keywords:
             if keyword in content:
-                severity = ThreatLevel.HIGH if keyword in ["suicide", "kill myself", "end my life"] else ThreatLevel.MEDIUM
+                severity = (
+                    ThreatLevel.HIGH if keyword in ["suicide", "kill myself", "end my life"] else ThreatLevel.MEDIUM
+                )
 
-                violations.append(SafetyViolation(
-                    category=SafetyCategory.MENTAL_HEALTH_RISK,
-                    severity=severity,
-                    confidence=0.8,
-                    description=f"Mental health risk indicator: {keyword}",
-                    evidence={"keyword": keyword, "context": content[:200]}
-                ))
+                violations.append(
+                    SafetyViolation(
+                        category=SafetyCategory.MENTAL_HEALTH_RISK,
+                        severity=severity,
+                        confidence=0.8,
+                        description=f"Mental health risk indicator: {keyword}",
+                        evidence={"keyword": keyword, "context": content[:200]},
+                    )
+                )
 
         return violations
 
@@ -256,13 +303,15 @@ class ContentModerator:
         for category, patterns in self.se_asia_sensitive_terms.items():
             for pattern in patterns:
                 if pattern in content:
-                    violations.append(SafetyViolation(
-                        category=SafetyCategory.CULTURAL_SENSITIVITY,
-                        severity=ThreatLevel.LOW,
-                        confidence=0.6,
-                        description=f"Cultural sensitivity issue in {category}: {pattern}",
-                        evidence={"category": category, "pattern": pattern}
-                    ))
+                    violations.append(
+                        SafetyViolation(
+                            category=SafetyCategory.CULTURAL_SENSITIVITY,
+                            severity=ThreatLevel.LOW,
+                            confidence=0.6,
+                            description=f"Cultural sensitivity issue in {category}: {pattern}",
+                            evidence={"category": category, "pattern": pattern},
+                        )
+                    )
 
         return violations
 
@@ -285,7 +334,7 @@ class BehaviorAnalyzer:
             "timestamp": datetime.now(UTC),
             "action": action_data.get("action", "unknown"),
             "content_length": len(str(action_data.get("content", ""))),
-            "metadata": action_data
+            "metadata": action_data,
         }
 
         self.user_patterns[user_id].append(action_record)
@@ -300,30 +349,31 @@ class BehaviorAnalyzer:
 
     async def _check_frequency_anomalies(self, user_id: str) -> list[SafetyViolation]:
         """Check for unusual activity frequency."""
-        violations = []
+        violations: list[SafetyViolation] = []
 
         user_actions = self.user_patterns[user_id]
         if len(user_actions) < 10:
             return violations  # Not enough data
 
         # Calculate action frequency
-        recent_actions = [a for a in user_actions if
-                          (datetime.now(UTC) - a["timestamp"]).total_seconds() < 60]
+        recent_actions = [a for a in user_actions if (datetime.now(UTC) - a["timestamp"]).total_seconds() < 60]
 
         if len(recent_actions) > 30:  # More than 30 actions per minute
-            violations.append(SafetyViolation(
-                category=SafetyCategory.HARASSMENT,
-                severity=ThreatLevel.MEDIUM,
-                confidence=0.7,
-                description="Unusual activity frequency detected",
-                evidence={"actions_per_minute": len(recent_actions)}
-            ))
+            violations.append(
+                SafetyViolation(
+                    category=SafetyCategory.HARASSMENT,
+                    severity=ThreatLevel.MEDIUM,
+                    confidence=0.7,
+                    description="Unusual activity frequency detected",
+                    evidence={"actions_per_minute": len(recent_actions)},
+                )
+            )
 
         return violations
 
     async def _check_content_anomalies(self, user_id: str) -> list[SafetyViolation]:
         """Check for unusual content patterns."""
-        violations = []
+        violations: list[SafetyViolation] = []
 
         user_actions = self.user_patterns[user_id]
         if len(user_actions) < 5:
@@ -332,19 +382,21 @@ class BehaviorAnalyzer:
         # Check for repetitive content
         recent_content = [a["content_length"] for a in user_actions]
         if len(set(recent_content)) == 1 and len(recent_content) > 5:
-            violations.append(SafetyViolation(
-                category=SafetyCategory.MANIPULATION,
-                severity=ThreatLevel.LOW,
-                confidence=0.6,
-                description="Repetitive content pattern detected",
-                evidence={"repetitive_count": len(recent_content)}
-            ))
+            violations.append(
+                SafetyViolation(
+                    category=SafetyCategory.MANIPULATION,
+                    severity=ThreatLevel.LOW,
+                    confidence=0.6,
+                    description="Repetitive content pattern detected",
+                    evidence={"repetitive_count": len(recent_content)},
+                )
+            )
 
         return violations
 
     async def _check_time_anomalies(self, user_id: str) -> list[SafetyViolation]:
         """Check for unusual timing patterns."""
-        violations = []
+        violations: list[SafetyViolation] = []
 
         user_actions = self.user_patterns[user_id]
         if len(user_actions) < 10:
@@ -354,13 +406,15 @@ class BehaviorAnalyzer:
         unusual_hour_actions = [a for a in user_actions if a["timestamp"].hour in [2, 3, 4, 5]]
 
         if len(unusual_hour_actions) > len(user_actions) * 0.3:  # More than 30% at unusual hours
-            violations.append(SafetyViolation(
-                category=SafetyCategory.HARASSMENT,
-                severity=ThreatLevel.LOW,
-                confidence=0.5,
-                description="Unusual activity timing pattern",
-                evidence={"unusual_hour_actions": len(unusual_hour_actions)}
-            ))
+            violations.append(
+                SafetyViolation(
+                    category=SafetyCategory.HARASSMENT,
+                    severity=ThreatLevel.LOW,
+                    confidence=0.5,
+                    description="Unusual activity timing pattern",
+                    evidence={"unusual_hour_actions": len(unusual_hour_actions)},
+                )
+            )
 
         return violations
 
@@ -376,18 +430,9 @@ class ThreatDetector:
     def _load_threat_patterns(self) -> dict[str, list[str]]:
         """Load threat detection patterns."""
         return {
-            "immediate_threat": [
-                "bomb", "explosion", "attack", "kill", "murder",
-                "violence", "weapon", "gun", "knife"
-            ],
-            "self_harm": [
-                "suicide", "kill myself", "end it", "overdose",
-                "self harm", "cutting", "jump off"
-            ],
-            "harassment": [
-                "stalking", "bullying", "threat", "blackmail",
-                "extortion", "intimidation"
-            ]
+            "immediate_threat": ["bomb", "explosion", "attack", "kill", "murder", "violence", "weapon", "gun", "knife"],
+            "self_harm": ["suicide", "kill myself", "end it", "overdose", "self harm", "cutting", "jump off"],
+            "harassment": ["stalking", "bullying", "threat", "blackmail", "extortion", "intimidation"],
         }
 
     async def detect_threats(self, content: str, user_id: str) -> list[SafetyViolation]:
@@ -406,7 +451,7 @@ class ThreatDetector:
                         severity=severity,
                         confidence=0.9,
                         description=f"Threat detected: {threat_type} - {pattern}",
-                        evidence={"threat_type": threat_type, "pattern": pattern}
+                        evidence={"threat_type": threat_type, "pattern": pattern},
                     )
 
                     violations.append(violation)
@@ -436,21 +481,18 @@ class ThreatDetector:
             "threat_type": threat_type,
             "violation": violation,
             "detected_at": datetime.now(UTC),
-            "status": "active"
+            "status": "active",
         }
 
-        self.threat_history.append({
-            "threat_id": threat_id,
-            "user_id": user_id,
-            "threat_type": threat_type,
-            "detected_at": datetime.now(UTC)
-        })
+        self.threat_history.append(
+            {"threat_id": threat_id, "user_id": user_id, "threat_type": threat_type, "detected_at": datetime.now(UTC)}
+        )
 
 
 class AISafetyFramework:
     """
     Comprehensive AI Safety Framework for wellness applications.
-    
+
     Integrates content moderation, behavioral analysis, and threat detection
     with cultural context awareness for Southeast Asia markets.
     """
@@ -462,11 +504,7 @@ class AISafetyFramework:
         self._initialized = False
 
         # Configuration
-        self.safety_thresholds = {
-            "safe": 0.8,
-            "warning": 0.6,
-            "danger": 0.4
-        }
+        self.safety_thresholds = {"safe": 0.8, "warning": 0.6, "danger": 0.4}
 
     async def initialize(self):
         """Initialize the AI Safety Framework."""
@@ -479,18 +517,22 @@ class AISafetyFramework:
         self._initialized = True
         logger.info("AI Safety Framework initialized successfully")
 
-    async def evaluate_content(self, content: str, user_id: str = "anonymous",
-                             content_type: ContentType = ContentType.TEXT,
-                             context: dict[str, Any] = None) -> SafetyReport:
+    async def evaluate_content(
+        self,
+        content: str,
+        user_id: str = "anonymous",
+        content_type: ContentType = ContentType.TEXT,
+        context: dict[str, Any] | None = None,
+    ) -> SafetyReport:
         """
         Comprehensive safety evaluation of content.
-        
+
         Args:
             content: Content to evaluate
             user_id: User identifier for behavioral analysis
             content_type: Type of content
             context: Additional context for evaluation
-        
+
         Returns:
             Comprehensive safety report
         """
@@ -514,7 +556,7 @@ class AISafetyFramework:
                     "action": "content_submission",
                     "content": content,
                     "content_type": content_type.value,
-                    "context": context or {}
+                    "context": context or {},
                 }
                 behavior_violations = await self.behavior_analyzer.analyze_behavior(user_id, action_data)
                 violations.extend(behavior_violations)
@@ -533,13 +575,9 @@ class AISafetyFramework:
                 overall_score=overall_score,
                 threat_level=threat_level,
                 violations=violations,
-                metadata={
-                    "content_type": content_type.value,
-                    "user_id": user_id,
-                    "context": context or {}
-                },
+                metadata={"content_type": content_type.value, "user_id": user_id, "context": context or {}},
                 processing_time=processing_time,
-                content_hash=content_hash
+                content_hash=content_hash,
             )
 
         except Exception as e:
@@ -547,14 +585,16 @@ class AISafetyFramework:
             return SafetyReport(
                 overall_score=0.0,
                 threat_level=ThreatLevel.HIGH,
-                violations=[SafetyViolation(
-                    category=SafetyCategory.HARMFUL_CONTENT,
-                    severity=ThreatLevel.HIGH,
-                    confidence=1.0,
-                    description=f"Safety evaluation error: {str(e)}"
-                )],
+                violations=[
+                    SafetyViolation(
+                        category=SafetyCategory.HARMFUL_CONTENT,
+                        severity=ThreatLevel.HIGH,
+                        confidence=1.0,
+                        description=f"Safety evaluation error: {str(e)}",
+                    )
+                ],
                 processing_time=time.time() - start_time,
-                content_hash=""
+                content_hash="",
             )
 
     def _calculate_safety_score(self, violations: list[SafetyViolation]) -> float:
@@ -568,7 +608,7 @@ class AISafetyFramework:
             ThreatLevel.LOW: 0.1,
             ThreatLevel.MEDIUM: 0.3,
             ThreatLevel.HIGH: 0.6,
-            ThreatLevel.CRITICAL: 1.0
+            ThreatLevel.CRITICAL: 1.0,
         }
 
         total_weight = 0.0
@@ -609,16 +649,16 @@ class AISafetyFramework:
             "initialized": self._initialized,
             "content_moderator": {
                 "patterns_loaded": len(self.content_moderator.harmful_patterns),
-                "se_asia_patterns": len(self.content_moderator.se_asia_sensitive_terms)
+                "se_asia_patterns": len(self.content_moderator.se_asia_sensitive_terms),
             },
             "behavior_analyzer": {
                 "tracked_users": len(self.behavior_analyzer.user_patterns),
-                "global_actions": len(self.behavior_analyzer.global_patterns)
+                "global_actions": len(self.behavior_analyzer.global_patterns),
             },
             "threat_detector": {
                 "active_threats": len(self.threat_detector.active_threats),
-                "threat_history": len(self.threat_detector.threat_history)
-            }
+                "threat_history": len(self.threat_detector.threat_history),
+            },
         }
 
 

@@ -36,7 +36,7 @@ class RetryConfig:
 
     def get_delay(self, attempt: int) -> float:
         """Get delay for given attempt number with exponential backoff."""
-        delay = self.initial_delay * (self.exponential_base ** attempt)
+        delay = self.initial_delay * (self.exponential_base**attempt)
         return min(delay, self.max_delay)
 
 
@@ -56,8 +56,7 @@ def retry_with_backoff(max_retries: int = 3, initial_delay: float = 1.0, max_del
                     if attempt < config.max_retries:
                         delay = config.get_delay(attempt)
                         logger.warning(
-                            f"Attempt {attempt + 1} failed for {func.__name__}: {e}. "
-                            f"Retrying in {delay:.2f}s..."
+                            f"Attempt {attempt + 1} failed for {func.__name__}: {e}. " f"Retrying in {delay:.2f}s..."
                         )
                         time.sleep(delay)
                     else:

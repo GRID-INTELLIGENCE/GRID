@@ -125,7 +125,8 @@ class IntentClassifier:
             top_score = result["scores"][0]
 
             all_scores = {
-                self.label_map[label].value: score for label, score in zip(result["labels"], result["scores"])
+                self.label_map[label].value: score
+                for label, score in zip(result["labels"], result["scores"], strict=False)
             }
 
             return IntentResult(

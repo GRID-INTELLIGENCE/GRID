@@ -17,12 +17,13 @@ from dataclasses import asdict, dataclass, field
 from enum import Enum
 from typing import Any
 
-import aiofiles
-from aiohttp import ClientSession, ClientTimeout, web
+import aiofiles  # type: ignore[import-untyped]
+from aiohttp import ClientSession, ClientTimeout, web  # type: ignore[import-not-found]
 
 
 class ServiceType(Enum):
     """Service types in the mesh."""
+
     API_GATEWAY = "api_gateway"
     CORE_SERVICE = "core_service"
     AI_SERVICE = "ai_service"
@@ -33,6 +34,7 @@ class ServiceType(Enum):
 
 class ServiceState(Enum):
     """Service states."""
+
     STARTING = "starting"
     HEALTHY = "healthy"
     DEGRADED = "degraded"
@@ -44,6 +46,7 @@ class ServiceState(Enum):
 @dataclass
 class ServiceInstance:
     """Service instance metadata."""
+
     id: str
     name: str
     type: ServiceType
@@ -61,15 +64,16 @@ class ServiceInstance:
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         data = asdict(self)
-        data['type'] = self.type.value
-        data['state'] = self.state.value
-        data['tags'] = list(self.tags)
+        data["type"] = self.type.value
+        data["state"] = self.state.value
+        data["tags"] = list(self.tags)
         return data
 
 
 @dataclass
 class ServiceRegistration:
     """Service registration request."""
+
     name: str
     type: ServiceType
     host: str
@@ -104,7 +108,7 @@ class ServiceRegistry:
                 metadata=registration.metadata,
                 tags=registration.tags,
                 health_check_url=registration.health_check_url,
-                endpoints=registration.endpoints
+                endpoints=registration.endpoints,
             )
 
             self.services[registration.name].append(instance)
@@ -130,10 +134,7 @@ class ServiceRegistry:
 
             # Remove from active services
             if instance.name in self.services:
-                self.services[instance.name] = [
-                    s for s in self.services[instance.name]
-                    if s.id != service_id
-                ]
+                self.services[instance.name] = [s for s in self.services[instance.name] if s.id != service_id]
 
             del self.service_index[service_id]
 
@@ -151,10 +152,7 @@ class ServiceRegistry:
         instances = self.services.get(service_name, [])
 
         if healthy_only:
-            instances = [
-                s for s in instances
-                if s.state in [ServiceState.HEALTHY, ServiceState.DEGRADED]
-            ]
+            instances = [s for s in instances if s.state in [ServiceState.HEALTHY, ServiceState.DEGRADED]]
 
         return instances.copy()
 
@@ -199,12 +197,9 @@ class ServiceRegistry:
     async def _save_registry(self):
         """Save registry to disk."""
         try:
-            data = {
-                name: [instance.to_dict() for instance in instances]
-                for name, instances in self.services.items()
-            }
+            data = {name: [instance.to_dict() for instance in instances] for name, instances in self.services.items()}
 
-            async with aiofiles.open(self.config_file, 'w') as f:
+            async with aiofiles.open(self.config_file, "w") as f:
                 await f.write(json.dumps(data, indent=2))
         except Exception as e:
             logging.error(f"Failed to save registry: {e}")
@@ -219,19 +214,19 @@ class ServiceRegistry:
             for service_name, instances_data in data.items():
                 for instance_data in instances_data:
                     instance = ServiceInstance(
-                        id=instance_data['id'],
-                        name=instance_data['name'],
-                        type=ServiceType(instance_data['type']),
-                        host=instance_data['host'],
-                        port=instance_data['port'],
-                        version=instance_data['version'],
-                        metadata=instance_data.get('metadata', {}),
-                        tags=set(instance_data.get('tags', [])),
-                        state=ServiceState(instance_data.get('state', 'healthy')),
-                        registered_at=instance_data.get('registered_at', time.time()),
-                        last_heartbeat=instance_data.get('last_heartbeat', time.time()),
-                        health_check_url=instance_data.get('health_check_url'),
-                        endpoints=instance_data.get('endpoints', [])
+                        id=instance_data["id"],
+                        name=instance_data["name"],
+                        type=ServiceType(instance_data["type"]),
+                        host=instance_data["host"],
+                        port=instance_data["port"],
+                        version=instance_data["version"],
+                        metadata=instance_data.get("metadata", {}),
+                        tags=set(instance_data.get("tags", [])),
+                        state=ServiceState(instance_data.get("state", "healthy")),
+                        registered_at=instance_data.get("registered_at", time.time()),
+                        last_heartbeat=instance_data.get("last_heartbeat", time.time()),
+                        health_check_url=instance_data.get("health_check_url"),
+                        endpoints=instance_data.get("endpoints", []),
                     )
 
                     self.services[service_name].append(instance)
@@ -256,10 +251,7 @@ class LoadBalancer:
         if not instances:
             return None
 
-        healthy_instances = [
-            s for s in instances
-            if s.state in [ServiceState.HEALTHY, ServiceState.DEGRADED]
-        ]
+        healthy_instances = [s for s in instances if s.state in [ServiceState.HEALTHY, ServiceState.DEGRADED]]
 
         if not healthy_instances:
             return None
@@ -284,6 +276,7 @@ class LoadBalancer:
     def _random_select(self, instances: list[ServiceInstance]) -> ServiceInstance:
         """Random selection."""
         import random
+
         return random.choice(instances)
 
     def _least_connections_select(self, instances: list[ServiceInstance]) -> ServiceInstance:
@@ -394,13 +387,7 @@ class ServiceMesh:
         instances = await self.registry.discover(service_name)
         return self.load_balancer.select_instance(instances)
 
-    async def call_service(
-        self,
-        service_name: str,
-        endpoint: str,
-        method: str = "GET",
-        **kwargs
-    ) -> Any:
+    async def call_service(self, service_name: str, endpoint: str, method: str = "GET", **kwargs) -> Any:
         """Call a service endpoint."""
         instance = await self.discover_service(service_name)
         if not instance:
@@ -445,40 +432,36 @@ class ServiceMesh:
                         url = f"http://{instance.host}:{instance.port}{instance.health_check_url}"
                         async with self.session.get(url, timeout=5) as response:
                             if response.status == 200:
-                                await self.registry.update_service_state(
-                                    instance.id, ServiceState.HEALTHY
-                                )
+                                await self.registry.update_service_state(instance.id, ServiceState.HEALTHY)
                             else:
-                                await self.registry.update_service_state(
-                                    instance.id, ServiceState.DEGRADED
-                                )
+                                await self.registry.update_service_state(instance.id, ServiceState.DEGRADED)
                     else:
                         # Default health check - just update heartbeat
                         await self.registry.heartbeat(instance.id)
 
                 except Exception as e:
                     logging.warning(f"Health check failed for {service_name}: {e}")
-                    await self.registry.update_service_state(
-                        instance.id, ServiceState.UNHEALTHY
-                    )
+                    await self.registry.update_service_state(instance.id, ServiceState.UNHEALTHY)
 
     async def _start_registry_server(self):
         """Start the HTTP registry server."""
         app = web.Application()
 
-        app.add_routes([
-            web.get('/services', self._list_services),
-            web.get('/services/{service_name}', self._get_service),
-            web.post('/services/register', self._register_service),
-            web.delete('/services/{service_id}', self._deregister_service),
-            web.post('/services/{service_id}/heartbeat', self._heartbeat),
-            web.get('/health', self._health_check),
-        ])
+        app.add_routes(
+            [
+                web.get("/services", self._list_services),
+                web.get("/services/{service_name}", self._get_service),
+                web.post("/services/register", self._register_service),
+                web.delete("/services/{service_id}", self._deregister_service),
+                web.post("/services/{service_id}/heartbeat", self._heartbeat),
+                web.get("/health", self._health_check),
+            ]
+        )
 
         runner = web.AppRunner(app)
         await runner.setup()
 
-        site = web.TCPSite(runner, '0.0.0.0', self.registry_port)
+        site = web.TCPSite(runner, "0.0.0.0", self.registry_port)
         await site.start()
 
         logging.info(f"Service registry started on port {self.registry_port}")
@@ -493,7 +476,7 @@ class ServiceMesh:
 
     async def _get_service(self, request):
         """Get service instances."""
-        service_name = request.match_info['service_name']
+        service_name = request.match_info["service_name"]
         instances = await self.registry.discover(service_name)
 
         return web.json_response([instance.to_dict() for instance in instances])
@@ -503,15 +486,15 @@ class ServiceMesh:
         data = await request.json()
 
         registration = ServiceRegistration(
-            name=data['name'],
-            type=ServiceType(data['type']),
-            host=data['host'],
-            port=data['port'],
-            version=data['version'],
-            metadata=data.get('metadata', {}),
-            tags=set(data.get('tags', [])),
-            health_check_url=data.get('health_check_url'),
-            endpoints=data.get('endpoints', [])
+            name=data["name"],
+            type=ServiceType(data["type"]),
+            host=data["host"],
+            port=data["port"],
+            version=data["version"],
+            metadata=data.get("metadata", {}),
+            tags=set(data.get("tags", [])),
+            health_check_url=data.get("health_check_url"),
+            endpoints=data.get("endpoints", []),
         )
 
         instance = await self.registry.register(registration)
@@ -519,29 +502,27 @@ class ServiceMesh:
 
     async def _deregister_service(self, request):
         """Deregister a service."""
-        service_id = request.match_info['service_id']
+        service_id = request.match_info["service_id"]
         success = await self.registry.deregister(service_id)
 
-        return web.json_response({'success': success})
+        return web.json_response({"success": success})
 
     async def _heartbeat(self, request):
         """Service heartbeat."""
-        service_id = request.match_info['service_id']
+        service_id = request.match_info["service_id"]
         success = await self.registry.heartbeat(service_id)
 
-        return web.json_response({'success': success})
+        return web.json_response({"success": success})
 
     async def _health_check(self, request):
         """Registry health check."""
-        return web.json_response({
-            'status': 'healthy',
-            'services': len(self.registry.service_index)
-        })
+        return web.json_response({"status": "healthy", "services": len(self.registry.service_index)})
 
 
 # ============================================================================
 # Example Usage
 # ============================================================================
+
 
 async def example_mesh_setup():
     """Example setup of service mesh."""
@@ -549,34 +530,34 @@ async def example_mesh_setup():
     await mesh.start()
 
     # Register GRID service
-    grid_id = await mesh.register_service(ServiceRegistration(
-        name="grid-service",
-        type=ServiceType.CORE_SERVICE,
-        host="localhost",
-        port=8080,
-        version="1.0.0",
-        health_check_url="/health",
-        tags={"core", "intelligence"}
-    ))
+    await mesh.register_service(
+        ServiceRegistration(
+            name="grid-service",
+            type=ServiceType.CORE_SERVICE,
+            host="localhost",
+            port=8080,
+            version="1.0.0",
+            health_check_url="/health",
+            tags={"core", "intelligence"},
+        )
+    )
 
     # Register Coinbase service
-    coinbase_id = await mesh.register_service(ServiceRegistration(
-        name="coinbase-service",
-        type=ServiceType.DATA_SERVICE,
-        host="localhost",
-        port=8081,
-        version="1.0.0",
-        health_check_url="/health",
-        tags={"crypto", "finance"}
-    ))
+    await mesh.register_service(
+        ServiceRegistration(
+            name="coinbase-service",
+            type=ServiceType.DATA_SERVICE,
+            host="localhost",
+            port=8081,
+            version="1.0.0",
+            health_check_url="/health",
+            tags={"crypto", "finance"},
+        )
+    )
 
     # Call a service
     try:
-        result = await mesh.call_service(
-            "grid-service",
-            "/api/v1/status",
-            method="GET"
-        )
+        result = await mesh.call_service("grid-service", "/api/v1/status", method="GET")
         print(f"Service call result: {result}")
     except Exception as e:
         print(f"Service call failed: {e}")
@@ -585,6 +566,7 @@ async def example_mesh_setup():
 
 
 if __name__ == "__main__":
+
     async def main():
         mesh = await example_mesh_setup()
 

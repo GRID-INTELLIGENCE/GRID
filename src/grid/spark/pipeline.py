@@ -12,7 +12,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-import requests
+import requests  # type: ignore[import-untyped]
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 

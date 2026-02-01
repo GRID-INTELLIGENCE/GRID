@@ -120,7 +120,9 @@ class CognitiveVectorizer:
         integral_features = [f"{f}_integral" for f in base_features] if self.config.include_integral else []
 
         # Fill remaining slots with contextual features
-        contextual_count = self.config.vector_size - len(base_features) - len(derivative_features) - len(integral_features)
+        contextual_count = (
+            self.config.vector_size - len(base_features) - len(derivative_features) - len(integral_features)
+        )
         contextual_features = [f"context_{i}" for i in range(contextual_count)] if contextual_count > 0 else []
 
         self.feature_names = base_features + derivative_features + integral_features + contextual_features
@@ -166,7 +168,7 @@ class CognitiveVectorizer:
         # Create result
         VectorizationResult(
             vectors=vectors,
-            feature_names=self.feature_names[:vectors.shape[1]],
+            feature_names=self.feature_names[: vectors.shape[1]],
             metadata={
                 "num_units": len(units),
                 "config": self.config.metadata,
@@ -196,7 +198,7 @@ class CognitiveVectorizer:
 
         windows = []
         for i in range(0, len(units) - self.config.window_size + 1, stride):
-            window = units[i:i + self.config.window_size]
+            window = units[i : i + self.config.window_size]
             cv = self.vectorize_behavior(window)
             if cv.to_matrix().shape[0] > 0:
                 windows.append(cv.centroid())
@@ -317,10 +319,18 @@ class CognitiveVectorizer:
             loco2 = units[i].locomotion
 
             # Convert to vectors
-            v1 = np.array([math.cos(loco1.heading * 2 * math.pi) * loco1.speed,
-                          math.sin(loco1.heading * 2 * math.pi) * loco1.speed])
-            v2 = np.array([math.cos(loco2.heading * 2 * math.pi) * loco2.speed,
-                          math.sin(loco2.heading * 2 * math.pi) * loco2.speed])
+            v1 = np.array(
+                [
+                    math.cos(loco1.heading * 2 * math.pi) * loco1.speed,
+                    math.sin(loco1.heading * 2 * math.pi) * loco1.speed,
+                ]
+            )
+            v2 = np.array(
+                [
+                    math.cos(loco2.heading * 2 * math.pi) * loco2.speed,
+                    math.sin(loco2.heading * 2 * math.pi) * loco2.speed,
+                ]
+            )
 
             # Calculate angle between vectors
             if np.linalg.norm(v1) > 0 and np.linalg.norm(v2) > 0:

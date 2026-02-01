@@ -12,7 +12,7 @@ from .signal_path import SignalProcessor
 from .worker_pool import DistributedWorkerPool
 
 try:
-    from EQ.integration import get_eq_integration
+    from EQ.integration import get_eq_integration  # type: ignore[import-not-found]
 except ImportError:
     get_eq_integration = None
 

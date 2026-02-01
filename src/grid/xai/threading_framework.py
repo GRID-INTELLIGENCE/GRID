@@ -156,9 +156,9 @@ class XAIThreadPool:
 
         try:
             await self.task_queue.put(task)
-        except asyncio.QueueFull:
+        except asyncio.QueueFull as e:
             logger.warning("Task queue is full, dropping task")
-            raise RuntimeError("Task queue is full")
+            raise RuntimeError("Task queue is full") from e
 
         logger.info(f"Submitted task {task_id} of type {task_type}")
         return task_id
@@ -390,6 +390,7 @@ def get_stream_adapter():
     global _stream_adapter
     if _stream_adapter is None:
         from .stream_adapter import XAIStreamAdapter
+
         _stream_adapter = XAIStreamAdapter()
     return _stream_adapter
 
@@ -413,6 +414,7 @@ def get_resource_manager():
 # Backward compatibility - create at module level if possible
 try:
     from .stream_adapter import XAIStreamAdapter
+
     stream_adapter = XAIStreamAdapter()
     thread_pool = XAIThreadPool()
     resource_manager = XAIResourceManager()

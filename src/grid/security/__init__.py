@@ -10,7 +10,6 @@ from .templates import (
     DEVELOPMENT_CONFIG,
     PRODUCTION_CONFIG,
     STAGING_CONFIG,
-    generate_docker_compose,
     generate_env_file,
     generate_kubernetes_manifests,
 )
@@ -88,10 +87,7 @@ def generate_deployment_configs() -> None:
         generate_env_file(STAGING_CONFIG, ".env.staging")
         generate_env_file(PRODUCTION_CONFIG, ".env.production")
 
-        # Generate Docker configuration
-        from .templates import DOCKER_PRODUCTION_CONFIG
 
-        generate_docker_compose(DOCKER_PRODUCTION_CONFIG, "docker-compose.prod.yml")
 
         # Generate Kubernetes manifests
         from .templates import KUBERNETES_CONFIG
@@ -152,7 +148,6 @@ __all__ = [
     "DEVELOPMENT_CONFIG",
     "PRODUCTION_CONFIG",
     "STAGING_CONFIG",
-    "generate_docker_compose",
     "generate_env_file",
     "generate_kubernetes_manifests",
     # General

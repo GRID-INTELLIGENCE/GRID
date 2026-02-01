@@ -3,6 +3,7 @@
 import time
 from collections import deque
 from dataclasses import dataclass, field
+from typing import Any
 
 
 @dataclass
@@ -69,7 +70,7 @@ class IndexProgress:
             return 0.0
         return min(100.0, (self.completed / self.total) * 100.0)
 
-    def summary(self) -> dict:
+    def summary(self) -> dict[str, Any]:
         """Return a structured summary."""
         eta = self.eta_seconds()
         return {

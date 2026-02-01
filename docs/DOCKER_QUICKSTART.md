@@ -1,23 +1,17 @@
-# Docker Integration for GRID
 
-This guide helps you set up and run GRID using Docker for both local development and production deployment.
 
 ## Quick Start
 
 ### Prerequisites
-- Docker Engine 20.10+ or Docker Desktop 4.0+
-- Docker Compose 2.0+ (included with Docker Desktop)
 - 4GB+ RAM, 2GB+ disk space for images and volumes
 
 ### Local Development
 
-> **Note**: The base `docker-compose.yml` provides **infrastructure services only** (PostgreSQL, ChromaDB, Ollama, Redis). The Mothership API service is defined in `docker-compose.prod.yml` and requires explicit profile activation or can be run directly on the host.
 
 **Option A: Run API on host (recommended for development)**
 
 1. **Start infrastructure services**:
    ```bash
-   docker-compose up -d
    ```
 
    This starts:
@@ -34,11 +28,9 @@ This guide helps you set up and run GRID using Docker for both local development
 
    API will be available at: http://localhost:8080
 
-**Option B: Run API in Docker (production-like)**
 
 1. **Start all services including API**:
    ```bash
-   docker-compose -f docker-compose.yml -f docker-compose.prod.yml --profile api up -d
    ```
 
    This adds:
@@ -46,14 +38,12 @@ This guide helps you set up and run GRID using Docker for both local development
 
 2. **Check service status**:
    ```bash
-   docker-compose ps
    ```
 
    All services should show `healthy` in the STATUS column.
 
 3. **View API logs**:
    ```bash
-   docker-compose - docker-compose.prod.yml logs -f mothership-api
    ```
 
 4. **Access the API**:
@@ -63,12 +53,10 @@ This guide helps you set up and run GRID using Docker for both local development
 
 5. **Stop services**:
    ```bash
-   docker-compose down
    ```
 
    To also remove data volumes:
    ```bash
-   docker-compose down -v
    ```
 
 ---
@@ -77,7 +65,6 @@ This guide helps you set up and run GRID using Docker for both local development
 
 ### Environment Variables
 
-Each service uses environment variables for configuration. Modify `docker-compose.yml` to override defaults:
 
 #### Mothership API
 - `MOTHERSHIP_HOST`: API bind address (default: `0.0.0.0`)
@@ -106,7 +93,6 @@ Each service uses environment variables for configuration. Modify `docker-compos
 
 ### Service Dependencies
 
-The Mothership API depends on PostgreSQL, ChromaDB, and Ollama being healthy before starting. Use `docker-compose logs` to debug startup issues.
 
 ---
 
@@ -118,10 +104,8 @@ Test the API inside the container:
 
 ```bash
 # Run tests
-docker-compose exec mothership-api pytest tests/ -v --tb=short
 
 # Run with coverage
-docker-compose exec mothership-api pytest tests/ --cov=grid --cov-report=html
 ```
 
 ### Database Migrations
@@ -129,7 +113,6 @@ docker-compose exec mothership-api pytest tests/ --cov=grid --cov-report=html
 Apply Alembic migrations (if using):
 
 ```bash
-docker-compose exec mothership-api alembic upgrade head
 ```
 
 ### RAG Operations
@@ -137,13 +120,11 @@ docker-compose exec mothership-api alembic upgrade head
 Query the local RAG system:
 
 ```bash
-docker-compose exec mothership-api python -m tools.rag.cli query "How does pattern recognition work?"
 ```
 
 Index documentation:
 
 ```bash
-docker-compose exec mothership-api python -m tools.rag.cli index docs/ --rebuild --curate
 ```
 
 ### Shell Access
@@ -152,10 +133,8 @@ Debug a service by opening a shell:
 
 ```bash
 # Access API container
-docker-compose exec mothership-api /bin/bash
 
 # Access PostgreSQL
-docker-compose exec postgres psql -U grid -d grid_db
 ```
 
 ---
@@ -165,27 +144,23 @@ docker-compose exec postgres psql -U grid -d grid_db
 ### Build for Local Testing
 
 ```bash
-docker build -t grid-mothership:latest .
 ```
 
 ### Build with BuildKit Cache
 
 ```bash
-DOCKER_BUILDKIT=1 docker build -t grid-mothership:latest .
 ```
 
 ### Build Specific Stages
 
 ```bash
 # Build only the builder stage for inspection
-docker build --target builder -t grid-builder:latest .
 ```
 
 ---
 
 ## Production Deployment
 
-### Using Docker Compose (Small Deployments)
 
 1. **Create a `.env.production` file**:
    ```env
@@ -196,15 +171,12 @@ docker build --target builder -t grid-builder:latest .
 
 2. **Run with production config**:
    ```bash
-   docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
    ```
 
 ### Using Kubernetes (Enterprise)
 
 1. **Push image to registry**:
    ```bash
-   docker tag grid-mothership:latest ghcr.io/your-org/grid:latest
-   docker push ghcr.io/your-org/grid:latest
    ```
 
 2. **Use Kubernetes manifests** (create in `k8s/`):
@@ -244,23 +216,16 @@ docker build --target builder -t grid-builder:latest .
 
 ```bash
 # View detailed logs
-docker-compose logs mothership-api
-docker-compose logs postgres
-docker-compose logs chroma
-docker-compose logs ollama
 
 # Check container health
-docker-compose ps
 ```
 
 ### Database Connection Issues
 
 ```bash
 # Verify PostgreSQL is running and accepting connections
-docker-compose exec postgres psql -U grid -d grid_db -c "SELECT 1"
 
 # Check DATABASE_URL is correct in mothership-api service
-docker-compose exec mothership-api env | grep DATABASE_URL
 ```
 
 ### ChromaDB Not Responding
@@ -270,23 +235,18 @@ docker-compose exec mothership-api env | grep DATABASE_URL
 curl http://localhost:8000/api/v1/heartbeat
 
 # View ChromaDB logs
-docker-compose logs chroma
 ```
 
 ### Ollama Models Not Available
 
 ```bash
 # Access Ollama and pull required models
-docker-compose exec ollama ollama pull nomic-embed-text-v2-moe:latest
-docker-compose exec ollama ollama pull ministral:latest
 
 # List available models
-docker-compose exec ollama ollama list
 ```
 
 ### Port Conflicts
 
-If ports are already in use, modify `docker-compose.yml`:
 
 ```yaml
 services:
@@ -300,11 +260,8 @@ Then access API at `http://localhost:8081`.
 ### Out of Disk Space
 
 ```bash
-# Clean up unused Docker resources
-docker system prune -a
 
 # Remove specific volumes (data will be lost)
-docker-compose down -v
 ```
 
 ---
@@ -313,7 +270,6 @@ docker-compose down -v
 
 ### Resource Limits
 
-Set resource constraints in `docker-compose.yml`:
 
 ```yaml
 mothership-api:
@@ -346,22 +302,17 @@ Requires NVIDIA Container Toolkit installed.
 
 ### Persistent Storage
 
-By default, volumes are created in Docker's data directory. For better control:
 
 ```bash
 # Use named volumes (recommended)
-docker volume ls
-docker volume inspect grid-postgres_data
 
 # Or bind mount to host directory
-docker-compose -f docker-compose.volumes.yml up
 ```
 
 ---
 
 ## Integration with GitHub Actions
 
-The project includes a Docker build workflow (`.github/workflows/docker-build.yml`) that:
 - Builds images on push to `main` and PR branches
 - Scans for vulnerabilities with Trivy
 - Pushes to GitHub Container Registry (for main/tags)
@@ -370,15 +321,12 @@ The project includes a Docker build workflow (`.github/workflows/docker-build.ym
 Push images to your registry:
 
 ```bash
-docker tag grid-mothership:latest ghcr.io/your-org/grid:latest
-docker push ghcr.io/your-org/grid:latest
 ```
 
 ---
 
 ## Next Steps
 
-- **Add docker-compose.prod.yml** for production overrides (scaled services, external DB, etc.)
 - **Configure CI/CD** to automatically deploy on merge to main
 - **Monitor containers** with tools like Prometheus + Grafana
 - **Set up container logging** with ELK stack or cloud providers
@@ -388,8 +336,3 @@ docker push ghcr.io/your-org/grid:latest
 
 ## References
 
-- [Docker Documentation](https://docs.docker.com/)
-- [Docker Compose Reference](https://docs.docker.com/compose/compose-file/)
-- [PostgreSQL Docker Image](https://hub.docker.com/_/postgres)
-- [ChromaDB Docker Deployment](https://docs.trychroma.com/deployment)
-- [Ollama Docker Setup](https://ollama.ai/blog/ollama-is-running-in-docker)

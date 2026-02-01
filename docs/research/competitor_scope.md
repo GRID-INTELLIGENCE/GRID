@@ -4,7 +4,6 @@ This document defines the classes of competitors and representative products tha
 
 ## 1. Python Web / Application Frameworks
 
-**Goal:** Compare Grid’s backend framework aspects (FastAPI-based stack, DI, auth, testing, Docker, templates) with existing Python frameworks.
 
 **Representative products:**
 - Django

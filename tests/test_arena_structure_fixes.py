@@ -13,12 +13,16 @@ import sys
 import time
 from pathlib import Path
 
-# Add Arena path to sys.path
-arena_path = Path(__file__).parent.parent / "archive" / "misc" / "Arena" / "the_chase" / "python" / "src"
+import pytest
+
+# Early check: Skip entire module if the_chase path doesn't exist
+arena_path = Path(__file__).parent.parent / "Arena" / "the_chase" / "python" / "src"
+if not (arena_path / "the_chase").exists():
+    pytest.skip("the_chase path does not exist", allow_module_level=True)
+
 if str(arena_path) not in sys.path:
     sys.path.insert(0, str(arena_path))
 
-import pytest
 try:
     from the_chase.core.cache import CacheLayer, CacheMeta, MemoryTier
     from the_chase.overwatch.rewards import (
@@ -28,8 +32,8 @@ try:
         RewardEscalator,
         RewardLevel,
     )
-except ImportError:
-    pytest.skip("Optional dependency 'the_chase' not available", allow_module_level=True)
+except (ImportError, ModuleNotFoundError, TypeError, OSError) as e:
+    pytest.skip(f"the_chase module not available: {e}", allow_module_level=True)
 
 
 class TestHonorDecay:

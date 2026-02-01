@@ -12,7 +12,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -77,9 +77,9 @@ class CognitivePattern:
         self_feature_set = {f.feature_id: f.value for f in self.features}
         other_feature_set = {f.feature_id: f.value for f in other_features}
 
-        intersection = 0
-        union = 0
-        total_weight = 0
+        intersection = 0.0
+        union = 0.0
+        total_weight = 0.0
 
         all_feature_ids = set(self_feature_set.keys()) | set(other_feature_set.keys())
 
@@ -146,7 +146,7 @@ class SequenceMatcher(PatternMatcher):
         if len(expected_sequence) != len(input_data):
             return 0.0, {"error": "Sequence length mismatch"}
 
-        matches = 0
+        matches = 0.0
         total = len(expected_sequence)
 
         for _i, (expected, actual) in enumerate(zip(expected_sequence, input_data, strict=False)):
@@ -329,7 +329,7 @@ class PatternManager:
 
     def get_pattern_statistics(self) -> dict[str, Any]:
         """Get statistics about registered patterns."""
-        pattern_types = {}
+        pattern_types: dict[str, int] = {}
         for pattern in self.patterns.values():
             pattern_types[pattern.pattern_type.value] = pattern_types.get(pattern.pattern_type.value, 0) + 1
 

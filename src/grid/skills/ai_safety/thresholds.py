@@ -11,7 +11,7 @@ from typing import Any
 
 from grid.skills.base import SimpleSkill
 
-from .base import SafetyViolation, ThreatLevel
+from .base import SafetyCategory, SafetyViolation, ThreatLevel
 from .config import get_config
 
 logger = logging.getLogger(__name__)
@@ -58,9 +58,9 @@ def calculate_threshold(
         Threshold value.
     """
     sensitivity_multipliers = {
-        "low": 2.0,      # 2 standard deviations
-        "medium": 1.5,   # 1.5 standard deviations
-        "high": 1.0,     # 1 standard deviation
+        "low": 2.0,  # 2 standard deviations
+        "medium": 1.5,  # 1.5 standard deviations
+        "high": 1.0,  # 1 standard deviation
     }
 
     multiplier = sensitivity_multipliers.get(sensitivity, 1.5)
@@ -172,9 +172,7 @@ def thresholds_handler(args: dict[str, Any]) -> dict[str, Any]:
             direction = "above" if current_value > metric_baseline else "below"
 
             if check_threshold_violation(current_value, threshold, direction):
-                severity = get_severity_from_deviation(
-                    current_value, metric_baseline, threshold
-                )
+                severity = get_severity_from_deviation(current_value, metric_baseline, threshold)
 
                 if severity != ThreatLevel.NONE:
                     violation = SafetyViolation(

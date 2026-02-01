@@ -47,16 +47,26 @@ def check_anthropic_safety(content: str, **kwargs: Any) -> list[SafetyViolation]
     # Local pattern-based checks following Constitutional AI principles
     harmful_patterns = {
         "harmful_instructions": [
-            "how to make", "how to build", "instructions for",
-            "step by step", "tutorial on",
+            "how to make",
+            "how to build",
+            "instructions for",
+            "step by step",
+            "tutorial on",
         ],
         "discrimination": [
-            "inferior race", "superior race", "racial purity",
-            "ethnic cleansing", "discriminate against",
+            "inferior race",
+            "superior race",
+            "racial purity",
+            "ethnic cleansing",
+            "discriminate against",
         ],
         "manipulation": [
-            "manipulate", "deceive", "trick into", "scam",
-            "fraud", "exploit",
+            "manipulate",
+            "deceive",
+            "trick into",
+            "scam",
+            "fraud",
+            "exploit",
         ],
     }
 

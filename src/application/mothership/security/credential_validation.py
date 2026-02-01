@@ -39,7 +39,12 @@ class CredentialValidationService:
     - Failed login tracking
     """
 
-    def __init__(self, user_store: dict[str, User] | None = None, max_failed_attempts: int = 5, lockout_duration_minutes: int = 30):
+    def __init__(
+        self,
+        user_store: dict[str, User] | None = None,
+        max_failed_attempts: int = 5,
+        lockout_duration_minutes: int = 30,
+    ):
         """Initialize the credential validation service.
 
         Args:
@@ -73,9 +78,7 @@ class CredentialValidationService:
         if not user:
             self._record_failed_attempt(username)
             return AuthResult(
-                success=False,
-                error_message="Invalid username or password",
-                error_code="INVALID_CREDENTIALS"
+                success=False, error_message="Invalid username or password", error_code="INVALID_CREDENTIALS"
             )
 
         # Check account status
@@ -87,9 +90,7 @@ class CredentialValidationService:
         if not await self._verify_password(password, user):
             self._record_failed_attempt(username)
             return AuthResult(
-                success=False,
-                error_message="Invalid username or password",
-                error_code="INVALID_CREDENTIALS"
+                success=False, error_message="Invalid username or password", error_code="INVALID_CREDENTIALS"
             )
 
         # Clear failed attempts on successful login
@@ -149,28 +150,22 @@ class CredentialValidationService:
             return AuthResult(
                 success=False,
                 error_message="Account is suspended. Please contact support.",
-                error_code="ACCOUNT_SUSPENDED"
+                error_code="ACCOUNT_SUSPENDED",
             )
 
         if user.status == UserStatus.BANNED:
-            return AuthResult(
-                success=False,
-                error_message="Account has been banned.",
-                error_code="ACCOUNT_BANNED"
-            )
+            return AuthResult(success=False, error_message="Account has been banned.", error_code="ACCOUNT_BANNED")
 
         if user.status == UserStatus.INACTIVE:
             return AuthResult(
                 success=False,
                 error_message="Account is inactive. Please activate your account.",
-                error_code="ACCOUNT_INACTIVE"
+                error_code="ACCOUNT_INACTIVE",
             )
 
         if user.status == UserStatus.PENDING:
             return AuthResult(
-                success=False,
-                error_message="Account registration is pending approval.",
-                error_code="ACCOUNT_PENDING"
+                success=False, error_message="Account registration is pending approval.", error_code="ACCOUNT_PENDING"
             )
 
         return None
@@ -192,9 +187,9 @@ class CredentialValidationService:
 
             # Verify password
             if isinstance(stored_hash, str):
-                stored_hash = stored_hash.encode('utf-8')
+                stored_hash = stored_hash.encode("utf-8")
 
-            return bcrypt.checkpw(password.encode('utf-8'), stored_hash)
+            return bcrypt.checkpw(password.encode("utf-8"), stored_hash)
 
         except ImportError:
             logger.error("bcrypt not installed, cannot verify password")
@@ -219,7 +214,7 @@ class CredentialValidationService:
                 return AuthResult(
                     success=False,
                     error_message=f"Account is locked. Try again in {remaining.seconds // 60} minutes.",
-                    error_code="ACCOUNT_LOCKED"
+                    error_code="ACCOUNT_LOCKED",
                 )
             else:
                 # Lockout expired, remove it
@@ -240,9 +235,7 @@ class CredentialValidationService:
 
         # Clean old attempts (older than lockout duration)
         cutoff = datetime.now(UTC) - self._lockout_duration
-        self._failed_attempts[username_lower] = [
-            t for t in self._failed_attempts[username_lower] if t > cutoff
-        ]
+        self._failed_attempts[username_lower] = [t for t in self._failed_attempts[username_lower] if t > cutoff]
 
         # Check if should lockout
         if len(self._failed_attempts[username_lower]) >= self._max_failed_attempts:
@@ -256,12 +249,7 @@ class CredentialValidationService:
         self._lockouts.pop(username_lower, None)
 
     async def create_user(
-        self,
-        username: str,
-        password: str,
-        email: str | None = None,
-        org_id: str | None = None,
-        role: str = "viewer"
+        self, username: str, password: str, email: str | None = None, org_id: str | None = None, role: str = "viewer"
     ) -> User:
         """Create a new user with hashed password.
 
@@ -278,7 +266,7 @@ class CredentialValidationService:
         import bcrypt
 
         # Hash password
-        password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt(rounds=12))
+        password_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt(rounds=12))
 
         # Create user
         user = User(
@@ -289,7 +277,7 @@ class CredentialValidationService:
         )
 
         # Store password hash in metadata
-        user.metadata["password_hash"] = password_hash.decode('utf-8')
+        user.metadata["password_hash"] = password_hash.decode("utf-8")
 
         # Add to store
         self._user_store[user.user_id] = user

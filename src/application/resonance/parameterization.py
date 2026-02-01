@@ -1,26 +1,26 @@
 from dataclasses import dataclass, field
-from typing import List, Dict, Any, Union
+
 
 @dataclass
 class ParameterSpec:
     name: str
     type: str
-    range: List[Union[int, float]]
-    default: Union[int, float]
+    range: list[int | float]
+    default: int | float
     description: str
 
 @dataclass
 class ParameterValue:
-    current: Union[int, float]
-    previous: Union[int, float]
-    target: Union[int, float]
+    current: int | float
+    previous: int | float
+    target: int | float
 
 @dataclass
 class ParameterConstraint:
-    min_val: Union[int, float]
-    max_val: Union[int, float]
-    step: Union[int, float]
-    dependencies: List[str] = field(default_factory=list)
+    min_val: int | float
+    max_val: int | float
+    step: int | float
+    dependencies: list[str] = field(default_factory=list)
 
 @dataclass
 class ParameterObjective:
@@ -34,24 +34,24 @@ class ObjectiveSpec:
     weight: float
 
 class Parameterization:
-    def __init__(self):
-        self.parameters: Dict[str, ParameterSpec] = {}
-        self.values: Dict[str, ParameterValue] = {}
-        self.constraints: Dict[str, ParameterConstraint] = {}
-        self.objectives: Dict[str, ParameterObjective] = {}
+    def __init__(self) -> None:
+        self.parameters: dict[str, ParameterSpec] = {}
+        self.values: dict[str, ParameterValue] = {}
+        self.constraints: dict[str, ParameterConstraint] = {}
+        self.objectives: dict[str, ParameterObjective] = {}
 
-    def define_parameters(self, specs: List[ParameterSpec]):
+    def define_parameters(self, specs: list[ParameterSpec]) -> None:
         for spec in specs:
             self.parameters[spec.name] = spec
 
-    def validate_parameters(self, values: Dict[str, float]) -> bool:
+    def validate_parameters(self, values: dict[str, float]) -> bool:
         # Placeholder for validation logic
         return True
 
-    def optimize_parameters(self, objectives: List[ObjectiveSpec]) -> Dict[str, float]:
+    def optimize_parameters(self, objectives: list[ObjectiveSpec]) -> dict[str, float]:
         # Placeholder for optimization logic
         return {}
 
-    def constrain_parameters(self, values: Dict[str, float]) -> Dict[str, float]:
+    def constrain_parameters(self, values: dict[str, float]) -> dict[str, float]:
         # Placeholder for constraint logic
         return values

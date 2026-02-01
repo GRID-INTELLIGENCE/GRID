@@ -23,7 +23,7 @@ import time
 import uuid
 from contextvars import ContextVar
 from datetime import UTC, datetime, timezone
-from typing import Any, Dict, Optional
+from typing import Any
 
 from fastapi import FastAPI, Request, Response, status
 from fastapi.responses import JSONResponse
@@ -429,6 +429,7 @@ def setup_middleware(app: FastAPI, settings: Any) -> None:
         audit_service = None
         try:
             from ..services.audit_service import initialize_audit_service
+
             audit_service = initialize_audit_service(
                 db_session_factory=None,  # DB session factory injected separately if needed
                 enable_db_persistence=False,  # Enable when DB is configured
@@ -439,9 +440,7 @@ def setup_middleware(app: FastAPI, settings: Any) -> None:
             logger.warning(f"Failed to initialize audit service: {e}, using fallback logging")
 
         # Determine audit logging setting
-        audit_logging_enabled = bool(
-            getattr(settings, "telemetry", None) and settings.telemetry.enabled
-        )
+        audit_logging_enabled = bool(getattr(settings, "telemetry", None) and settings.telemetry.enabled)
 
         app.add_middleware(
             SecurityEnforcerMiddleware,

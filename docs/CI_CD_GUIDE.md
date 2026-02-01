@@ -124,14 +124,12 @@ GRID uses GitHub Actions for automated CI/CD, aligned with industry best practic
 | `release` | Create GitHub Release |
 | `summary` | Release summary |
 
-### Docker Build
 
 **File:** `.github/workflows/build.yaml`
 
 **Triggers:**
 - Push to `master`
 
-**Purpose:** Build and push Docker image to Docker Hub.
 
 ---
 
@@ -157,7 +155,6 @@ curl -s https://raw.githubusercontent.com/nektos/act/master/install.sh | sudo ba
 
 ### Prerequisites
 
-- Docker installed and running
 - Sufficient disk space (~2-5GB for container images)
 
 ### Usage
@@ -322,11 +319,8 @@ pip-audit
 ### Act Issues
 
 ```bash
-# Clean Docker resources
-docker system prune -a
 
 # Pull latest images
-docker pull catthehacker/ubuntu:act-latest
 
 # Debug mode
 act -v --verbose
@@ -358,7 +352,6 @@ GRID uses Dependabot for automated dependency updates:
 
 - **Python dependencies:** Weekly on Monday
 - **GitHub Actions:** Weekly on Monday
-- **Docker:** Weekly on Tuesday
 
 Updates are grouped by category:
 - Development dependencies (pytest, mypy, ruff, black, etc.)

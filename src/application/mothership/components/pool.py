@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 
 class ComponentState(Enum):
     """Component lifecycle states."""
+
     INITIALIZING = "initializing"
     IDLE = "idle"
     ACTIVE = "active"
@@ -33,6 +34,7 @@ class ComponentState(Enum):
 
 class ComponentType(Enum):
     """Types of components in the pool."""
+
     PROCESSOR = "processor"
     VALIDATOR = "validator"
     TRANSFORMER = "transformer"
@@ -44,6 +46,7 @@ class ComponentType(Enum):
 @dataclass
 class ComponentMetrics:
     """Performance metrics for components."""
+
     component_id: str
     component_type: ComponentType
     state: ComponentState
@@ -73,7 +76,7 @@ class ComponentMetrics:
             ComponentState.RECOVERING: 0.3,
             ComponentState.INITIALIZING: 0.4,
             ComponentState.SHUTTING_DOWN: 0.1,
-            ComponentState.TERMINATED: 0.0
+            ComponentState.TERMINATED: 0.0,
         }
 
         state_score = state_weight.get(self.state, 0.0)
@@ -94,9 +97,8 @@ class ComponentMetrics:
 
         # Update average processing time
         self.avg_processing_time = (
-            (self.avg_processing_time * (self.total_operations - 1) + processing_time)
-            / self.total_operations
-        )
+            self.avg_processing_time * (self.total_operations - 1) + processing_time
+        ) / self.total_operations
 
         # Update error rate
         self.error_rate = self.failed_operations / self.total_operations
@@ -110,9 +112,7 @@ class Component:
         self.component_type = component_type
         self.state = ComponentState.INITIALIZING
         self.metrics = ComponentMetrics(
-            component_id=component_id,
-            component_type=component_type,
-            state=ComponentState.INITIALIZING
+            component_id=component_id, component_type=component_type, state=ComponentState.INITIALIZING
         )
         self._lock = asyncio.Lock()
 
@@ -204,7 +204,7 @@ class ProcessorComponent(Component):
             "original": data,
             "processed": True,
             "processor": self.component_id,
-            "timestamp": datetime.now(UTC).isoformat()
+            "timestamp": datetime.now(UTC).isoformat(),
         }
 
 
@@ -221,17 +221,13 @@ class ValidatorComponent(Component):
         # Simple validation logic
         is_valid = isinstance(data, dict) and "data" in data
 
-        return {
-            "valid": is_valid,
-            "validator": self.component_id,
-            "validated_at": datetime.now(UTC).isoformat()
-        }
+        return {"valid": is_valid, "validator": self.component_id, "validated_at": datetime.now(UTC).isoformat()}
 
 
 class ComponentPool:
     """
     Dynamic component pool with watch-like precision coordination.
-    
+
     Features:
     - Dynamic scaling based on demand
     - Component health monitoring
@@ -272,14 +268,12 @@ class ComponentPool:
 
             if component_type:
                 candidates = [
-                    comp for comp_id, comp in self.components.items()
+                    comp
+                    for comp_id, comp in self.components.items()
                     if comp.component_type == component_type and comp.state == ComponentState.IDLE
                 ]
             else:
-                candidates = [
-                    comp for comp_id, comp in self.components.items()
-                    if comp.state == ComponentState.IDLE
-                ]
+                candidates = [comp for comp_id, comp in self.components.items() if comp.state == ComponentState.IDLE]
 
             if not candidates:
                 # Try to scale up
@@ -288,13 +282,13 @@ class ComponentPool:
                 # Retry after scaling
                 if component_type:
                     candidates = [
-                        comp for comp_id, comp in self.components.items()
+                        comp
+                        for comp_id, comp in self.components.items()
                         if comp.component_type == component_type and comp.state == ComponentState.IDLE
                     ]
                 else:
                     candidates = [
-                        comp for comp_id, comp in self.components.items()
-                        if comp.state == ComponentState.IDLE
+                        comp for comp_id, comp in self.components.items() if comp.state == ComponentState.IDLE
                     ]
 
             if not candidates:
@@ -377,8 +371,7 @@ class ComponentPool:
                         await self._remove_component(component_id)
 
                 # Check for idle components that can be terminated
-                elif (component.state == ComponentState.IDLE and
-                      len(self.components) > self.min_components):
+                elif component.state == ComponentState.IDLE and len(self.components) > self.min_components:
                     idle_time = (datetime.now(UTC) - component.metrics.last_activity).total_seconds()
                     if idle_time > 60:  # Idle for more than 1 minute
                         await self._remove_component(component_id)
@@ -394,12 +387,8 @@ class ComponentPool:
             avg_efficiency = total_efficiency / len(self.components)
 
             # Scale down if efficiency is high and we have excess components
-            if (avg_efficiency > 0.8 and
-                len(self.components) > self.min_components):
-                idle_components = [
-                    comp for comp in self.components.values()
-                    if comp.state == ComponentState.IDLE
-                ]
+            if avg_efficiency > 0.8 and len(self.components) > self.min_components:
+                idle_components = [comp for comp in self.components.values() if comp.state == ComponentState.IDLE]
 
                 if idle_components:
                     await self._remove_component(idle_components[0].component_id)
@@ -444,10 +433,9 @@ class ComponentPool:
         stats = {
             "total_components": len(self.components),
             "component_types": {
-                comp_type.value: len(component_ids)
-                for comp_type, component_ids in self.component_types.items()
+                comp_type.value: len(component_ids) for comp_type, component_ids in self.component_types.items()
             },
-            "components": {}
+            "components": {},
         }
 
         for component_id, component in self.components.items():
@@ -457,7 +445,7 @@ class ComponentPool:
                 "efficiency_score": component.metrics.efficiency_score,
                 "success_rate": component.metrics.success_rate,
                 "total_operations": component.metrics.total_operations,
-                "avg_processing_time": component.metrics.avg_processing_time
+                "avg_processing_time": component.metrics.avg_processing_time,
             }
 
         return stats

@@ -7,13 +7,14 @@ import os
 from pathlib import Path
 from typing import Any
 
-from databricks.sdk import WorkspaceClient
+from databricks.sdk import WorkspaceClient  # type: ignore[import-untyped]
 
 logger = logging.getLogger(__name__)
 
 # Load environment variables from .env file
 try:
     from dotenv import load_dotenv
+
     env_path = Path(__file__).parent.parent.parent.parent / ".env"
     load_dotenv(env_path)
     logger.info(f"Loaded environment variables from {env_path}")
@@ -47,18 +48,12 @@ class DatabricksClient:
         # Priority: explicit args > environment variables > CLI profile
         self.host = host or os.getenv("DATABRICKS_HOST", "").strip()
         # Token priority: explicit arg > DATABRICKS_TOKEN env var > 'databricks' env var
-        self.token = (
-            token
-            or os.getenv("DATABRICKS_TOKEN", "").strip()
-            or os.getenv("databricks", "").strip()
-        )
+        self.token = token or os.getenv("DATABRICKS_TOKEN", "").strip() or os.getenv("databricks", "").strip()
         self.profile = profile
 
         # Validate authentication
         if not self.host and not self.profile:
-            raise ValueError(
-                "Either 'host' parameter or DATABRICKS_HOST environment variable is required"
-            )
+            raise ValueError("Either 'host' parameter or DATABRICKS_HOST environment variable is required")
 
         if not self.token and not self.profile:
             raise ValueError(
@@ -81,7 +76,7 @@ class DatabricksClient:
         """Verify the connection to Databricks workspace."""
         try:
             # Use workspace.get_status() to verify connection
-            workspace_info = self.client.workspace.get_status("/")
+            self.client.workspace.get_status("/")
             logger.info("Successfully connected to Databricks workspace")
         except Exception as e:
             logger.error(f"Failed to connect to Databricks workspace: {e}")

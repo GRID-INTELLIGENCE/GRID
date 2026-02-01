@@ -19,14 +19,14 @@ from starlette.types import ASGIApp
 
 # Import cognitive engine (optional - graceful degradation if not available)
 try:
-    from grid.cognitive.engine import CognitiveEngine
+    from grid.cognitive.engine import CognitiveEngine  # type: ignore[import-not-found]
 except ImportError:
     CognitiveEngine = None  # type: ignore[misc, assignment]
 
 # Import quality gates configuration
 try:
-    from config.cognitive_settings import get_cognitive_load_thresholds
-    from config.quality_gates import get_rate_limit
+    from config.cognitive_settings import get_cognitive_load_thresholds  # type: ignore[import-not-found]
+    from config.quality_gates import get_rate_limit  # type: ignore[import-not-found]
 except ImportError:
     # Fallback if modules not available
     def get_rate_limit(limit_type: str = "default") -> int:
@@ -206,14 +206,14 @@ class CognitiveRedisRateLimitMiddleware(BaseHTTPMiddleware):
                     "error": {
                         "code": "COGNITIVE_RATE_LIMIT_EXCEEDED",
                         "message": "Rate limit exceeded based on current cognitive load",
-                        "cognitive_adjustment": effective_rpm / self.base_requests_per_minute
+                        "cognitive_adjustment": effective_rpm / self.base_requests_per_minute,
                     },
                 },
                 headers={
                     "Retry-After": "60",
                     "X-RateLimit-Limit": str(effective_rpm),
                     "X-RateLimit-Remaining": "0",
-                    "X-Cognitive-Load-Adjustment": f"{effective_rpm / self.base_requests_per_minute:.2f}"
+                    "X-Cognitive-Load-Adjustment": f"{effective_rpm / self.base_requests_per_minute:.2f}",
                 },
             )
 

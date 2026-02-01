@@ -127,7 +127,7 @@ class OllamaProvider:
 
     def is_available(self) -> bool:
         try:
-            import requests
+            import requests  # type: ignore[import-untyped]
 
             health_url = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434") + "/api/tags"
             response = requests.get(health_url, timeout=1)
@@ -139,7 +139,7 @@ class OllamaProvider:
         """Executes generation via Ollama REST API."""
         import time
 
-        import requests
+        import requests  # type: ignore[import-untyped]
 
         start_time = time.perf_counter()
 

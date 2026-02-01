@@ -11,7 +11,6 @@ Stateless transformer service consumes raw events, enriches with OpenAI embeddin
 - `ml/model/register_model.py` — Register model and create deployment in CP4D.
 - `infra/terraform/main.tf` — Azure Event Hub + Storage provisioning.
 - `infra/monitoring/prometheus.yml` — Prometheus config for metrics.
-- `.github/workflows/ci.yml` — CI: lint, test, build, push Docker image.
 
 ## Next Steps (what to run, in order)
 1. **Provision infrastructure**
@@ -31,8 +30,6 @@ Stateless transformer service consumes raw events, enriches with OpenAI embeddin
 4. **Build and run transformer**
    ```bash
    cd transformer
-   docker build -t transformer:latest .
-   docker run --rm -e OPENAI_KEY=$OPENAI_KEY -e KAFKA_BOOTSTRAP=$KAFKA_BOOTSTRAP transformer:latest
    ```
 5. **Register model in CP4D**
    - Place your model artifact at `ml/model/model.pkl`.

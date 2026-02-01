@@ -225,19 +225,23 @@ class AdvancedFlowManager:
             weighted_scores[tid] = weighted_score
 
         # Reorder by weighted score
-        remaining_tasks = [
-            tid for tid in topological_order if tid not in weighted_scores
-        ]
+        remaining_tasks = [tid for tid in topological_order if tid not in weighted_scores]
         remaining_tasks_sorted = sorted(remaining_tasks, key=lambda tid: weighted_scores[tid], reverse=True)
 
         optimized_order = topological_order + remaining_tasks_sorted
 
         # Calculate optimization score
         # Higher score is better - measures how many high priority tasks are ready
-        ready_critical = sum(1 for tid, task in self._tasks.items()
-                               if task.status == FlowState.COMPLETED and task.priority == TaskPriority.CRITICAL)
-        ready_high = sum(1 for tid, task in self._tasks.items()
-                            if task.status == FlowState.COMPLETED and task.priority == TaskPriority.HIGH)
+        ready_critical = sum(
+            1
+            for tid, task in self._tasks.items()
+            if task.status == FlowState.COMPLETED and task.priority == TaskPriority.CRITICAL
+        )
+        ready_high = sum(
+            1
+            for tid, task in self._tasks.items()
+            if task.status == FlowState.COMPLETED and task.priority == TaskPriority.HIGH
+        )
 
         optimization_score = (ready_critical + ready_high) / len(self._tasks)
 

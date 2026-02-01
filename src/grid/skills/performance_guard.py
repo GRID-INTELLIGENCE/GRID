@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 # Try to import Prometheus client
 try:
-    from prometheus_client import Counter, Gauge
+    from prometheus_client import Counter, Gauge  # type: ignore[import-not-found]
 
     HAS_PROMETHEUS = True
 except ImportError:

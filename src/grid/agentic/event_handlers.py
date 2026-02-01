@@ -441,6 +441,7 @@ class FlowStateDetectedHandler(BaseEventHandler):
 
             # Track flow duration
             import time
+
             current_time = time.time()
             if user_id not in self._flow_start_times:
                 self._flow_start_times[user_id] = current_time
@@ -464,6 +465,7 @@ class FlowStateDetectedHandler(BaseEventHandler):
             # Flow ended
             if user_id in self._flow_start_times:
                 import time
+
                 flow_duration = time.time() - self._flow_start_times[user_id]
                 logger.info(f"Flow state ended for {user_id}: duration={flow_duration:.1f}s")
                 del self._flow_start_times[user_id]
@@ -501,9 +503,7 @@ class PatternDetectedHandler(BaseEventHandler):
             # Update pattern counts
             if user_id not in self._pattern_counts:
                 self._pattern_counts[user_id] = {}
-            self._pattern_counts[user_id][pattern_name] = (
-                self._pattern_counts[user_id].get(pattern_name, 0) + 1
-            )
+            self._pattern_counts[user_id][pattern_name] = self._pattern_counts[user_id].get(pattern_name, 0) + 1
 
             logger.info(
                 f"Pattern detected for {user_id}: {pattern_name} "

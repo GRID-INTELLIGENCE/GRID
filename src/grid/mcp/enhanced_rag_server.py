@@ -14,7 +14,7 @@ import asyncio
 import json
 import logging
 import sys
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -43,10 +43,7 @@ except ImportError:
     sys.exit(1)
 
 try:
-    from tools.rag.config import RAGConfig
-    from tools.rag.conversation import ConversationMemory
-    from tools.rag.conversational_rag import ConversationalRAGEngine, create_conversational_rag_engine
-    from tools.rag.rag_engine import RAGEngine
+    from tools.rag.conversational_rag import create_conversational_rag_engine
     from tools.rag.utils import check_ollama_connection
 except ImportError:
     print("GRID RAG tools not found. Please ensure GRID is properly installed.")
@@ -64,7 +61,7 @@ class RAGSession:
     session_id: str
     created_at: datetime = datetime.now()
     last_accessed: datetime = datetime.now()
-    metadata: dict[str, Any] = None
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class EnhancedRAGMCPServer:
@@ -98,18 +95,14 @@ class EnhancedRAGMCPServer:
                             "session_id": {
                                 "type": "string",
                                 "description": "Session ID for conversation continuity",
-                                "default": None
+                                "default": None,
                             },
                             "enable_multi_hop": {
                                 "type": "boolean",
                                 "description": "Enable multi-hop reasoning",
-                                "default": False
+                                "default": False,
                             },
-                            "temperature": {
-                                "type": "number",
-                                "description": "LLM temperature",
-                                "default": 0.7
-                            }
+                            "temperature": {"type": "number", "description": "LLM temperature", "default": 0.7},
                         },
                         "required": ["query"],
                     },
@@ -121,11 +114,7 @@ class EnhancedRAGMCPServer:
                         "type": "object",
                         "properties": {
                             "session_id": {"type": "string", "description": "Session identifier"},
-                            "metadata": {
-                                "type": "object",
-                                "description": "Session metadata",
-                                "default": {}
-                            }
+                            "metadata": {"type": "object", "description": "Session metadata", "default": {}},
                         },
                         "required": ["session_id"],
                     },
@@ -135,9 +124,7 @@ class EnhancedRAGMCPServer:
                     description="Get information about a session",
                     inputSchema={
                         "type": "object",
-                        "properties": {
-                            "session_id": {"type": "string", "description": "Session identifier"}
-                        },
+                        "properties": {"session_id": {"type": "string", "description": "Session identifier"}},
                         "required": ["session_id"],
                     },
                 ),
@@ -146,9 +133,7 @@ class EnhancedRAGMCPServer:
                     description="Delete a conversation session",
                     inputSchema={
                         "type": "object",
-                        "properties": {
-                            "session_id": {"type": "string", "description": "Session identifier"}
-                        },
+                        "properties": {"session_id": {"type": "string", "description": "Session identifier"}},
                         "required": ["session_id"],
                     },
                 ),
@@ -164,11 +149,7 @@ class EnhancedRAGMCPServer:
                         "type": "object",
                         "properties": {
                             "path": {"type": "string", "description": "Path to documents"},
-                            "rebuild": {
-                                "type": "boolean",
-                                "description": "Rebuild index",
-                                "default": False
-                            }
+                            "rebuild": {"type": "boolean", "description": "Rebuild index", "default": False},
                         },
                         "required": ["path"],
                     },
@@ -198,9 +179,7 @@ class EnhancedRAGMCPServer:
                     )
             except Exception as e:
                 logger.error(f"Error in tool {name}: {e}")
-                return CallToolResult(
-                    content=[TextContent(text=f"Error: {str(e)}", type="text")], isError=True
-                )
+                return CallToolResult(content=[TextContent(text=f"Error: {str(e)}", type="text")], isError=True)
 
     async def _handle_query(self, arguments: dict[str, Any]) -> CallToolResult:
         """Handle RAG query with conversation support."""
@@ -210,17 +189,12 @@ class EnhancedRAGMCPServer:
         temperature = arguments.get("temperature", 0.7)
 
         if not query:
-            return CallToolResult(
-                content=[TextContent(text="Error: query is required", type="text")], isError=True
-            )
+            return CallToolResult(content=[TextContent(text="Error: query is required", type="text")], isError=True)
 
         try:
             # Execute query with conversation support
             result = await self.rag_engine.query(
-                query_text=query,
-                session_id=session_id,
-                enable_multi_hop=enable_multi_hop,
-                temperature=temperature
+                query_text=query, session_id=session_id, enable_multi_hop=enable_multi_hop, temperature=temperature
             )
 
             # Format response
@@ -230,18 +204,14 @@ class EnhancedRAGMCPServer:
                 "conversation_metadata": result.get("conversation_metadata", {}),
                 "multi_hop_used": result.get("multi_hop_used", False),
                 "fallback_used": result.get("fallback_used", False),
-                "latency_ms": result.get("latency_ms", 0)
+                "latency_ms": result.get("latency_ms", 0),
             }
 
-            return CallToolResult(
-                content=[TextContent(text=json.dumps(response_data, indent=2), type="text")]
-            )
+            return CallToolResult(content=[TextContent(text=json.dumps(response_data, indent=2), type="text")])
 
         except Exception as e:
             logger.error(f"Query failed: {e}")
-            return CallToolResult(
-                content=[TextContent(text=f"Query failed: {str(e)}", type="text")], isError=True
-            )
+            return CallToolResult(content=[TextContent(text=f"Query failed: {str(e)}", type="text")], isError=True)
 
     async def _handle_create_session(self, arguments: dict[str, Any]) -> CallToolResult:
         """Create a new conversation session."""
@@ -258,10 +228,7 @@ class EnhancedRAGMCPServer:
             self.rag_engine.create_session(session_id, metadata)
 
             # Store session info
-            self.sessions[session_id] = RAGSession(
-                session_id=session_id,
-                metadata=metadata
-            )
+            self.sessions[session_id] = RAGSession(session_id=session_id, metadata=metadata)
 
             return CallToolResult(
                 content=[TextContent(text=f"Session '{session_id}' created successfully", type="text")]
@@ -291,9 +258,7 @@ class EnhancedRAGMCPServer:
                     content=[TextContent(text=f"Session '{session_id}' not found", type="text")], isError=True
                 )
 
-            return CallToolResult(
-                content=[TextContent(text=json.dumps(session_info, indent=2), type="text")]
-            )
+            return CallToolResult(content=[TextContent(text=json.dumps(session_info, indent=2), type="text")])
 
         except Exception as e:
             logger.error(f"Failed to get session: {e}")
@@ -342,12 +307,10 @@ class EnhancedRAGMCPServer:
             # Add server-specific stats
             stats["server_stats"] = {
                 "active_sessions": len(self.sessions),
-                "total_sessions_created": len(self.sessions)  # This would be tracked properly in production
+                "total_sessions_created": len(self.sessions),  # This would be tracked properly in production
             }
 
-            return CallToolResult(
-                content=[TextContent(text=json.dumps(stats, indent=2), type="text")]
-            )
+            return CallToolResult(content=[TextContent(text=json.dumps(stats, indent=2), type="text")])
 
         except Exception as e:
             logger.error(f"Failed to get stats: {e}")
@@ -361,9 +324,7 @@ class EnhancedRAGMCPServer:
         rebuild = arguments.get("rebuild", False)
 
         if not path:
-            return CallToolResult(
-                content=[TextContent(text="Error: path is required", type="text")], isError=True
-            )
+            return CallToolResult(content=[TextContent(text="Error: path is required", type="text")], isError=True)
 
         try:
             # Index documents using RAG engine
@@ -372,7 +333,12 @@ class EnhancedRAGMCPServer:
             stats = self.rag_engine.get_stats()
 
             return CallToolResult(
-                content=[TextContent(text=f"Indexed documents from '{path}'. Total documents: {stats.get('document_count', 0)}", type="text")]
+                content=[
+                    TextContent(
+                        text=f"Indexed documents from '{path}'. Total documents: {stats.get('document_count', 0)}",
+                        type="text",
+                    )
+                ]
             )
 
         except Exception as e:
@@ -407,10 +373,10 @@ async def main():
                         "get_session": {"description": "Get session information"},
                         "delete_session": {"description": "Delete conversation session"},
                         "get_stats": {"description": "Get system statistics"},
-                        "index_documents": {"description": "Index documents for RAG"}
+                        "index_documents": {"description": "Index documents for RAG"},
                     },
-                    "resources": {}
-                }
+                    "resources": {},
+                },
             ),
         )
 

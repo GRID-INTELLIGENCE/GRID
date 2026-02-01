@@ -122,9 +122,7 @@ updates:
           - "patch"
 
   # ---------------------------------------------------------------------------
-  # Docker (if Dockerfile exists)
   # ---------------------------------------------------------------------------
-  - package-ecosystem: "docker"
     directory: "/"
     schedule:
       interval: "weekly"
@@ -134,8 +132,6 @@ updates:
     open-pull-requests-limit: 3
     labels:
       - "dependencies"
-      - "docker"
       - "automated"
     commit-message:
-      prefix: "deps(docker)"
       include: "scope"

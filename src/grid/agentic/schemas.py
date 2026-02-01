@@ -43,11 +43,11 @@ class CaseResponse(BaseModel):
     confidence: float | None = Field(None, description="Classification confidence")
     reference_file_path: str | None = Field(None, description="Path to reference file")
     events: list[str] = Field(default_factory=list, description="Events emitted so far")
-    created_at: str = Field(..., description="Case creation timestamp")
+    created_at: str = Field(default="", description="Case creation timestamp")
     updated_at: str | None = Field(None, description="Last update timestamp")
-    completed_at: str | None = Field(None, description="Completion timestamp")
-    outcome: str | None = Field(None, description="Case outcome")
-    solution: str | None = Field(None, description="Solution applied")
+    completed_at: str | None = Field(default="", description="Completion timestamp")
+    outcome: str | None = Field(default="", description="Case outcome")
+    solution: str | None = Field(default="", description="Solution applied")
 
     model_config = ConfigDict(
         json_schema_extra={

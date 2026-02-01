@@ -28,7 +28,6 @@ This document outlines the priority tasks for the next phase of GRID development
 
 ### 2. Environment Parity
 - [ ] Finalize **WSL/Unix Compatibility Layer** for `grid-grep` performance.
-- [ ] Optimize Docker build times using multi-stage builds and layer caching (see `Dockerfile.min`).
 
 ---
 

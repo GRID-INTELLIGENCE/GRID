@@ -97,9 +97,7 @@ class BaseVectorStore(ABC):
 
         self.add(ids=ids, documents=texts, embeddings=dense_embeddings, metadatas=metadatas)
 
-    def similarity_search(
-        self, query: str, k: int = 5, where: dict[str, Any] | None = None
-    ) -> list[Any]:
+    def similarity_search(self, query: str, k: int = 5, where: dict[str, Any] | None = None) -> list[Any]:
         """Search for similar documents using query string."""
         from ..embeddings.simple import SimpleEmbedding
 
@@ -108,13 +106,13 @@ class BaseVectorStore(ABC):
         if hasattr(query_embedding, "tolist"):
             query_embedding = query_embedding.tolist()
         elif isinstance(query_embedding, dict):
-             # basic sparse to dense
-             max_idx = max([int(k) for k in query_embedding.keys() if k.isdigit()] + [99])
-             dense = [0.0] * (max_idx + 1)
-             for key, v in query_embedding.items():
-                 if key.isdigit():
-                     dense[int(key)] = v
-             query_embedding = dense
+            # basic sparse to dense
+            max_idx = max([int(k) for k in query_embedding.keys() if k.isdigit()] + [99])
+            dense = [0.0] * (max_idx + 1)
+            for key, v in query_embedding.items():
+                if key.isdigit():
+                    dense[int(key)] = v
+            query_embedding = dense
 
         results = self.query(query_embedding=query_embedding, n_results=k, where=where)
 

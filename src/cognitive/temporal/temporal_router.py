@@ -11,16 +11,9 @@ class TemporalRouter:
     """
 
     def __init__(self):
-        self.temporal_patterns = {
-            "urgent": self._is_urgent,
-            "cyclic": self._is_cyclic,
-            "long_term": self._is_long_term
-        }
+        self.temporal_patterns = {"urgent": self._is_urgent, "cyclic": self._is_cyclic, "long_term": self._is_long_term}
 
-    def route(self,
-             cognitive_state: CognitiveState,
-             profile: UserCognitiveProfile,
-             temporal_context: dict) -> dict:
+    def route(self, cognitive_state: CognitiveState, profile: UserCognitiveProfile, temporal_context: dict) -> dict:
         """
         Route request based on temporal context and cognitive state.
 
@@ -50,7 +43,7 @@ class TemporalRouter:
             "coffee_mode": coffee_mode,
             "chunk_size": coffee_mode["chunk_size"],
             "processing_mode": coffee_mode["processing_mode"],
-            "temporal_adaptations": []
+            "temporal_adaptations": [],
         }
 
         # Apply pattern-specific routing
@@ -76,8 +69,7 @@ class TemporalRouter:
         else:
             return {"name": "Cold Brew", "chunk_size": 128, "processing_mode": "comprehensive"}
 
-    def _is_urgent(self, state: CognitiveState, profile: UserCognitiveProfile,
-                  context: dict, decision: dict):
+    def _is_urgent(self, state: CognitiveState, profile: UserCognitiveProfile, context: dict, decision: dict):
         """Urgent temporal pattern routing."""
         deadline = context.get("deadline")
         if deadline and deadline - datetime.now() < timedelta(hours=24):
@@ -90,8 +82,7 @@ class TemporalRouter:
                 decision["processing_mode"] = "System_1"
                 decision["chunk_size"] = max(32, decision["chunk_size"] // 2)
 
-    def _is_cyclic(self, state: CognitiveState, profile: UserCognitiveProfile,
-                  context: dict, decision: dict):
+    def _is_cyclic(self, state: CognitiveState, profile: UserCognitiveProfile, context: dict, decision: dict):
         """Cyclic temporal pattern routing."""
         decision["route_type"] = "recurring"
         decision["temporal_adaptations"].extend(["pattern_recognition", "predictive_caching"])
@@ -101,8 +92,7 @@ class TemporalRouter:
             decision["processing_mode"] = "System_2"
             decision["chunk_size"] = min(128, decision["chunk_size"] * 2)
 
-    def _is_long_term(self, state: CognitiveState, profile: UserCognitiveProfile,
-                     context: dict, decision: dict):
+    def _is_long_term(self, state: CognitiveState, profile: UserCognitiveProfile, context: dict, decision: dict):
         """Long-term temporal pattern routing."""
         decision["route_type"] = "strategic"
         decision["temporal_adaptations"].extend(["horizon_scanning", "trend_analysis"])
@@ -111,7 +101,6 @@ class TemporalRouter:
         decision["processing_mode"] = "System_2"
         decision["chunk_size"] = 128
 
-    def _default_pattern(self, state: CognitiveState, profile: UserCognitiveProfile,
-                        context: dict, decision: dict):
+    def _default_pattern(self, state: CognitiveState, profile: UserCognitiveProfile, context: dict, decision: dict):
         """Default temporal pattern routing."""
         decision["temporal_adaptations"].append("time_neutral")

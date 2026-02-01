@@ -14,30 +14,32 @@
     "test": "vitest"
   },
   "dependencies": {
+    "axios": "^1.6.2",
+    "date-fns": "^2.30.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "axios": "^1.6.2",
-    "recharts": "^2.10.3",
-    "date-fns": "^2.30.0"
+    "recharts": "^2.10.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.1",
+    "@testing-library/jest-dom": "^6.1.5",
+    "@testing-library/react": "^14.1.2",
+    "@testing-library/user-event": "^14.5.1",
+    "@types/node": "^25.1.0",
     "@types/react": "^18.2.43",
     "@types/react-dom": "^18.2.17",
-    "@vitejs/plugin-react": "^4.2.1",
-    "@testing-library/react": "^14.1.2",
-    "@testing-library/jest-dom": "^6.1.5",
-    "@testing-library/user-event": "^14.5.1",
     "@typescript-eslint/eslint-plugin": "^6.14.0",
     "@typescript-eslint/parser": "^6.14.0",
+    "@vitejs/plugin-react": "^4.2.1",
+    "autoprefixer": "^10.4.16",
     "eslint": "^8.55.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
+    "jsdom": "^23.0.1",
+    "postcss": "^8.4.32",
+    "tailwindcss": "^3.4.0",
     "typescript": "^5.3.3",
     "vite": "^5.0.8",
-    "vitest": "^1.1.0",
-    "jsdom": "^23.0.1",
-    "tailwindcss": "^3.4.0",
-    "autoprefixer": "^10.4.16",
-    "postcss": "^8.4.32"
+    "vitest": "^1.1.0"
   }
 }

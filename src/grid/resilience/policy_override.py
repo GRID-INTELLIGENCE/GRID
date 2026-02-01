@@ -9,7 +9,7 @@ import os
 from pathlib import Path
 from typing import Any
 
-import yaml
+import yaml  # type: ignore[import-untyped]
 
 from grid.resilience.policies import OperationPolicy, register_policy
 
@@ -81,9 +81,7 @@ def load_policy_overrides(config_path: str | Path = "config/retry_policies.yaml"
                     "backoff_factor": overrides_dict.get("backoff_factor", base_policy.backoff_factor),
                     "initial_delay": overrides_dict.get("initial_delay", base_policy.initial_delay),
                     "max_delay": overrides_dict.get("max_delay", base_policy.max_delay),
-                    "timeout_seconds": overrides_dict.get(
-                        "timeout_seconds", base_policy.timeout_seconds
-                    ),
+                    "timeout_seconds": overrides_dict.get("timeout_seconds", base_policy.timeout_seconds),
                     "retryable_exceptions": base_policy.retryable_exceptions,
                     "non_retryable_exceptions": base_policy.non_retryable_exceptions,
                 }
@@ -177,9 +175,7 @@ def apply_env_policy_overrides() -> int:
                     "backoff_factor": overrides_dict.get("backoff_factor", base_policy.backoff_factor),
                     "initial_delay": overrides_dict.get("initial_delay", base_policy.initial_delay),
                     "max_delay": overrides_dict.get("max_delay", base_policy.max_delay),
-                    "timeout_seconds": overrides_dict.get(
-                        "timeout_seconds", base_policy.timeout_seconds
-                    ),
+                    "timeout_seconds": overrides_dict.get("timeout_seconds", base_policy.timeout_seconds),
                     "retryable_exceptions": base_policy.retryable_exceptions,
                     "non_retryable_exceptions": base_policy.non_retryable_exceptions,
                 }

@@ -90,7 +90,7 @@ def _detect_entities(args: Mapping[str, Any]) -> dict[str, Any]:
     try:
         # Try to use GRID's NER service
         try:
-            from application.mothership.ner_service import NERService
+            from application.mothership.ner_service import NERService  # type: ignore[import-not-found]
 
             ner = NERService()
             entities = ner.extract(text, entity_types=entity_types)

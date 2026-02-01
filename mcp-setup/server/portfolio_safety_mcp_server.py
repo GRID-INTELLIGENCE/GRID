@@ -9,31 +9,26 @@ Returns only sanitized portfolio insights with full audit trails.
 import asyncio
 import json
 import logging
-from typing import Any
-from datetime import datetime
-
-from mcp.server import Server
-from mcp.types import CallToolResult, ListToolsResult, TextContent, Tool
 
 # Coinbase imports
 import sys
+from datetime import datetime
 from pathlib import Path
+from typing import Any
+
+from mcp.server import Server
+from mcp.types import CallToolResult, ListToolsResult, TextContent, Tool
 
 # Add Coinbase to path
 coinbase_path = Path(__file__).parent.parent.parent.parent / "Coinbase"
 if str(coinbase_path) not in sys.path:
     sys.path.insert(0, str(coinbase_path))
 
-from coinbase.security.portfolio_security import get_portfolio_security
-from coinbase.security.portfolio_data_policy import (
-    get_portfolio_data_policy,
-    AccessPurpose,
-    OutputRule
-)
-from coinbase.security.ai_safety import get_ai_safety
--from coinbase.security.audit_logger import get_audit_logger
-+from coinbase.security.audit_logger import get_audit_logger, AuditEventType
 from coinbase.database.ai_safe_analyzer import get_ai_safe_analyzer
+from coinbase.security.ai_safety import get_ai_safety
+from coinbase.security.audit_logger import AuditEventType, get_audit_logger
+from coinbase.security.portfolio_data_policy import get_portfolio_data_policy
+from coinbase.security.portfolio_security import get_portfolio_security
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

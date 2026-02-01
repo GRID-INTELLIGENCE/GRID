@@ -19,7 +19,7 @@ except Exception:  # pragma: no cover
 
 # Try to import get_db, mock if missing
 try:
-    from src.grid.persistence.database import get_db
+    from src.grid.persistence.database import get_db  # type: ignore[import-not-found]
 except ImportError:
 
     def get_db() -> Any:

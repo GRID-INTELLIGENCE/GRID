@@ -70,7 +70,6 @@ hogwarts-visualizer/
 
 #### 🟡 Priority 2: Production Integration (Week 2)
 - [ ] **Real AI Provider Integration** - Replace mock services
-- [ ] **Production Deployment** - Docker + CI/CD
 - [ ] **Router Reorganization** - Module-based structure
 - [ ] **Configuration Management** - Central config module
 
@@ -228,7 +227,6 @@ tests/
 
 **Deliverables:**
 - ✅ Real AI provider integration
-- ✅ Docker deployment configuration
 - ✅ CI/CD pipeline
 - ✅ Router reorganization
 

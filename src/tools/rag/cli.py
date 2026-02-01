@@ -309,7 +309,7 @@ def preflight_check(repo_path: str, config: RAGConfig, skip_preflight: bool = Fa
     print("Pre-flight checks complete\n")
 
 
-async def index_command(args):
+async def index_command(args) -> int:
     """Handle index command."""
     mode = "rebuild" if args.rebuild else "incremental"
     quiet = args.json
@@ -402,7 +402,7 @@ async def index_command(args):
     return 0
 
 
-async def ondemand_command(args):
+async def ondemand_command(args) -> int:
     """Handle on-demand query command."""
     print(f"On-demand query: {args.query}")
 
@@ -470,7 +470,7 @@ async def ondemand_command(args):
     return 0
 
 
-async def query_command(args):
+async def query_command(args) -> int:
     """Handle query command."""
     print(f"Querying: {args.query}")
 
@@ -507,7 +507,7 @@ async def query_command(args):
     return 0
 
 
-async def intelligent_query_command(args):
+async def intelligent_query_command(args) -> int:
     """Handle intelligent query command (Phase 3: Reasoning Layer)."""
     if not args.json:
         print(f"\n🧠 Intelligent RAG Query: {args.query}")
@@ -606,7 +606,7 @@ async def intelligent_query_command(args):
         return 1
 
 
-async def evaluate_command(args):
+async def evaluate_command(args) -> int:
     """Handle evaluate command."""
     print("Evaluating RAG system performance...")
 
@@ -645,7 +645,7 @@ async def evaluate_command(args):
     return 0
 
 
-async def stats_command(args):
+async def stats_command(args) -> int:
     """Handle stats command."""
     try:
         config = RAGConfig.from_env()
@@ -667,7 +667,7 @@ async def stats_command(args):
     return 0
 
 
-async def main():
+async def main() -> int:
     """Main CLI entry point."""
     parser = setup_parser()
     args = parser.parse_args()

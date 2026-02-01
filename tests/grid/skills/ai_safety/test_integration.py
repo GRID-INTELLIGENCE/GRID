@@ -1,6 +1,5 @@
 """Integration tests for AI Safety Skills."""
 
-import pytest
 
 from grid.skills.ai_safety.base import ThreatLevel
 from grid.skills.ai_safety.actions import actions_handler

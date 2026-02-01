@@ -79,11 +79,7 @@ class DistributedSparkIndexer:
             RuntimeError: If Databricks is not properly configured
         """
         host = os.getenv("DATABRICKS_HOST") or os.getenv("DATABRICKS_SERVER_HOSTNAME")
-        token = (
-            os.getenv("DATABRICKS_TOKEN")
-            or os.getenv("DATABRICKS_ACCESS_TOKEN")
-            or os.getenv("local_databricks")
-        )
+        token = os.getenv("DATABRICKS_TOKEN") or os.getenv("DATABRICKS_ACCESS_TOKEN") or os.getenv("local_databricks")
         http_path = os.getenv("DATABRICKS_HTTP_PATH")
 
         if not all([host, token, http_path]):
@@ -129,10 +125,7 @@ class DistributedSparkIndexer:
             "job_id": None,
         }
 
-        logger.info(
-            f"Distributed indexing submitted. "
-            f"Monitors status at: {metrics['status']}"
-        )
+        logger.info(f"Distributed indexing submitted. " f"Monitors status at: {metrics['status']}")
 
         return metrics
 

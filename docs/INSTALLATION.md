@@ -25,7 +25,6 @@ Complete installation instructions for Grid project across different platforms a
 
 ### Optional Requirements
 
-- **Docker**: 20.10+ (for containerized deployment)
 - **Git**: 2.30+ (for development)
 - **Make**: For using Makefile commands
 
@@ -234,9 +233,6 @@ sudo apt install -y \
     make \
     build-essential
 
-# Install Docker (optional)
-curl -fsSL https://get.docker.com -o get-docker.sh
-sudo sh get-docker.sh
 ```
 
 #### CentOS/RHEL
@@ -250,50 +246,30 @@ sudo dnf install -y python3.11 python3.11-pip git make gcc
 
 ---
 
-## 🐳 Docker Installation
 
-### Install Docker
 
 #### Windows
-1. Download [Docker Desktop](https://www.docker.com/products/docker-desktop)
 2. Run installer
 3. Restart computer
-4. Verify: `docker --version`
 
 #### macOS
 ```bash
 # Using Homebrew
-brew install --cask docker
 
-# Or download from Docker website
 ```
 
 #### Linux
 ```bash
-# Install Docker Engine
-curl -fsSL https://get.docker.com -o get-docker.sh
-sudo sh get-docker.sh
 
-# Add user to docker group
-sudo usermod -aG docker $USER
-newgrp docker
 
-# Install Docker Compose
-sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-sudo chmod +x /usr/local/bin/docker-compose
 ```
 
-### Run with Docker
 
 ```bash
 # Build image
-docker build -t grid:latest .
 
 # Run container
-docker run -p 8000:8000 --env-file .env grid:latest
 
-# Or use docker-compose
-docker-compose up -d
 ```
 
 ---
@@ -336,7 +312,6 @@ pip install mkdocs mkdocs-material  # Documentation site
    - Pylance
    - Black Formatter
    - isort
-   - Docker
 
 #### PyCharm
 1. Open project folder
@@ -396,18 +371,12 @@ lsof -ti:8000 | xargs kill -9
 uvicorn src.api.main:app --port 8001
 ```
 
-#### Permission Errors (Docker)
 
-**Problem**: `Permission denied` when running Docker
 
 **Solution**:
 ```bash
-# Linux: Add user to docker group
-sudo usermod -aG docker $USER
-newgrp docker
 
 # Or run with sudo (not recommended)
-sudo docker-compose up
 ```
 
 ### Getting Help

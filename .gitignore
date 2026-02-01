@@ -140,8 +140,8 @@ Cargo.lock
 *.iso
 *.dmg
 
-# Arena/the_chase game files
-Arena/
+# Arena/the_chase game files - NOW TRACKED
+# Arena/
 Hogwarts/
 
 # Build and dependency directories

@@ -12,7 +12,7 @@ import pytest
 try:
     # Check if Arena path exists before attempting import
     the_chase_path = Path(__file__).parent.parent / "Arena" / "the_chase" / "python" / "src"
-    if not the_chase_path.exists():
+    if not (the_chase_path / "the_chase").exists():
         raise ImportError("the_chase path does not exist")
 
     # Add the_chase to path

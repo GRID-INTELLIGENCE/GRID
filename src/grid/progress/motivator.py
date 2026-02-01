@@ -11,6 +11,7 @@ import sys
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 
 @dataclass
@@ -29,7 +30,7 @@ class GearMetrics:
     ruff_issues: int
     type_coverage: float  # 0-100%
 
-    def to_dict(self):
+    def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 
 
@@ -37,7 +38,7 @@ class MotivationEngine:
     """Tracks progress and provides motivational milestones."""
 
     # Gear definitions (RPM thresholds)
-    GEARS = {
+    GEARS: dict[str, dict[str, Any]] = {
         "2nd": {"rpm_min": 0, "rpm_max": 2500, "status": "Stalled - Starting repairs"},
         "3rd": {"rpm_min": 2500, "rpm_max": 5000, "status": "Climbing - Building momentum"},
         "4th": {"rpm_min": 5000, "rpm_max": 8000, "status": "Flying - Production ready"},
@@ -87,9 +88,7 @@ class MotivationEngine:
         type_coverage = max(0, 100 - (mypy_errors * 2))
 
         # Calculate RPM
-        rpm = self._calculate_rpm(
-            test_pass_rate, import_errors, syntax_errors, mypy_errors, ruff_issues
-        )
+        rpm = self._calculate_rpm(test_pass_rate, import_errors, syntax_errors, mypy_errors, ruff_issues)
 
         return GearMetrics(
             timestamp=datetime.now().isoformat(),
@@ -143,6 +142,7 @@ class MotivationEngine:
 
             output = result.stdout + result.stderr
             import re
+
             matches = re.findall(pattern, output)
             return len(matches)
 
@@ -163,6 +163,7 @@ class MotivationEngine:
             output = result.stdout
             # MyPy reports "X error in Y files" at the end
             import re
+
             matches = re.findall(r"(\d+) error", output)
             return int(matches[0]) if matches else 0
 
@@ -247,9 +248,7 @@ class MotivationEngine:
         next_specs = self.GEARS[next_gear_target]
 
         progress_to_next = (
-            (metrics.rpm - current_specs["rpm_min"])
-            / (next_specs["rpm_max"] - current_specs["rpm_min"])
-            * 100
+            (metrics.rpm - current_specs["rpm_min"]) / (next_specs["rpm_max"] - current_specs["rpm_min"]) * 100
         )
         progress_to_next = max(0, min(100, progress_to_next))
 
@@ -273,7 +272,9 @@ class MotivationEngine:
 
         # Metrics snapshot
         report.append("\n📈 METRICS SNAPSHOT:")
-        report.append(f"   ✅ Tests Passing:    {metrics.test_passing:3d}/{metrics.test_count:3d} ({metrics.test_pass_rate:5.1f}%)")
+        report.append(
+            f"   ✅ Tests Passing:    {metrics.test_passing:3d}/{metrics.test_count:3d} ({metrics.test_pass_rate:5.1f}%)"
+        )
         report.append(f"   ❌ Tests Failing:    {metrics.test_failing:3d}")
         report.append(f"   🚨 Import Errors:    {metrics.import_errors:3d}")
         report.append(f"   💥 Syntax Errors:    {metrics.syntax_errors:3d}")

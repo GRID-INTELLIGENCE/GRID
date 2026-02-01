@@ -26,9 +26,9 @@ except Exception as e:
     ModelRoutingDecision = None  # type: ignore
     route_models = None  # type: ignore
 
-# Legacy exports for backward compatibility
-from .engine import create_on_demand_engine as OnDemandRAGEngine  # type: ignore
-from .engine import create_persistent_engine as RAGEngine  # type: ignore
+# Legacy exports for backward compatibility (aliases, not redefinitions)
+OnDemandRAGEngine = create_on_demand_engine  # noqa: F811
+PersistentRAGEngine = create_persistent_engine  # Legacy alias
 
 # Optional ChromaDB dependency
 try:

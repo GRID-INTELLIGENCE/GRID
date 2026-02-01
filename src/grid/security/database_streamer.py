@@ -11,6 +11,7 @@ from grid.skills.intelligence_inventory import IntelligenceInventory
 
 logger = logging.getLogger(__name__)
 
+
 class DatabaseStreamer:
     """Handles streaming of events to persistent storage."""
 
@@ -52,7 +53,7 @@ class DatabaseStreamer:
             self.local_inventory._get_connection().execute(
                 "INSERT INTO intelligence_records (skill_id, decision_type, confidence, rationale, timestamp) "
                 "VALUES (?, ?, ?, ?, ?)",
-                ["codebase_tracker", event.event_type, 1.0, json.dumps(event.to_dict()), event.timestamp]
+                ["codebase_tracker", event.event_type, 1.0, json.dumps(event.to_dict()), event.timestamp],
             )
             self.local_inventory._get_connection().commit()
         except Exception as e:
@@ -76,21 +77,25 @@ class DatabaseStreamer:
             # Insert events
             for event in events:
                 conn.execute(
-                    text("INSERT INTO codebase_activity (timestamp, event_type, path, details, severity) "
-                         "VALUES (:ts, :type, :path, :details, :sev)"),
+                    text(
+                        "INSERT INTO codebase_activity (timestamp, event_type, path, details, severity) "
+                        "VALUES (:ts, :type, :path, :details, :sev)"
+                    ),
                     {
                         "ts": event.timestamp,
                         "type": event.event_type,
                         "path": event.path,
                         "details": json.dumps(event.details),
-                        "sev": event.severity
-                    }
+                        "sev": event.severity,
+                    },
                 )
         logger.info(f"DatabaseStreamer: Streamed {len(events)} events to Databricks")
+
 
 if __name__ == "__main__":
     # Basic test
     from grid.security.codebase_tracker import ActivityEvent
+
     streamer = DatabaseStreamer(use_databricks=False)
     test_event = ActivityEvent("test_stream", "e:/grid", {"test": True})
     streamer.stream_events([test_event])
