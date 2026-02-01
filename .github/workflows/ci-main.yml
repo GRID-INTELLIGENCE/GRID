@@ -5,15 +5,13 @@
 # Provides comprehensive quality checks, security, tests, and build verification
 # =============================================================================
 
-name: GRID CI/CD Pipeline (Disabled - Complex)
+name: GRID CI/CD Pipeline
 
 on:
-  workflow_dispatch:  # Manual trigger only
-  # push:
-  #   branches:
-  #     - main
-  #     - master
-  #     - develop
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
       - "feature/**"
       - "release/**"
       - "hotfix/**"

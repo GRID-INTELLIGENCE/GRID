@@ -1,19 +1,10 @@
-name: Agent & Schema Validation (Disabled - Complex)
+name: Agent & Schema Validation
 
 on:
-  workflow_dispatch:  # Manual trigger only
-  # pull_request:
-  #   paths:
-  #     - '**/manifest.json'
-  #     - 'system_template.json'
-  #     - 'modules/**'
-  #     - 'contracts/**'
-  #     - '.github/workflows/agent_validation.yml'
-  #     - 'tools/inventory.py'
-  #     - 'tools/agent_validate.py'
-  #     - 'tools/validate_schemas.py'
-  # push:
-  #   branches:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
       - main
       - develop
 

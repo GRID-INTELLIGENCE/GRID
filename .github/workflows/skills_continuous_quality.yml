@@ -1,23 +1,15 @@
-name: Skills Continuous Quality (Disabled - Complex)
+name: Skills Continuous Quality
 on:
-  workflow_dispatch:  # Manual trigger only
-    inputs:
-      test_mode:
-        description: 'Test mode (dry-run)'
-        required: false
-        default: 'false'
-  # schedule:
-  #   - cron: '0 */4 * * *'  # Every 4 hours
-  # push:
-  #   branches: [main, architecture/stabilization]
-  #   paths:
-  #     - 'src/grid/skills/**'
-  #     - 'tests/skills/**'
-  # pull_request:
-  #   branches: [main, architecture/stabilization]
-  #   paths:
-  #     - 'src/grid/skills/**'
-  #     - 'tests/skills/**'
+  push:
+    branches: [main, architecture/stabilization]
+    paths:
+      - 'src/grid/skills/**'
+      - 'tests/skills/**'
+  pull_request:
+    branches: [main, architecture/stabilization]
+    paths:
+      - 'src/grid/skills/**'
+      - 'tests/skills/**'
 
 env:
   PYTHON_VERSION: '3.13'
