@@ -8,10 +8,12 @@
 name: GRID CI/CD Pipeline
 
 on:
-  push:
-    branches: [main, master, develop]
-  pull_request:
-    branches: [main, master, develop]
+  workflow_dispatch:  # Manual trigger only - GitHub Actions free tier blocked
+  # Uncomment below and comment workflow_dispatch when billing is resolved
+  # push:
+  #   branches: [main, master, develop]
+  # pull_request:
+  #   branches: [main, master, develop]
       - "feature/**"
       - "release/**"
       - "hotfix/**"

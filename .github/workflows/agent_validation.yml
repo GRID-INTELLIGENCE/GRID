@@ -1,10 +1,12 @@
 name: Agent & Schema Validation
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+  workflow_dispatch:  # Manual trigger only - GitHub Actions free tier blocked
+  # Uncomment below and comment workflow_dispatch when billing is resolved
+  # push:
+  #   branches: [main]
+  # pull_request:
+  #   branches: [main]
       - main
       - develop
 

@@ -1,15 +1,17 @@
 name: Skills Continuous Quality
 on:
-  push:
-    branches: [main, architecture/stabilization]
-    paths:
-      - 'src/grid/skills/**'
-      - 'tests/skills/**'
-  pull_request:
-    branches: [main, architecture/stabilization]
-    paths:
-      - 'src/grid/skills/**'
-      - 'tests/skills/**'
+  workflow_dispatch:  # Manual trigger only - GitHub Actions free tier blocked
+  # Uncomment below and comment workflow_dispatch when billing is resolved
+  # push:
+  #   branches: [main, architecture/stabilization]
+  #   paths:
+  #     - 'src/grid/skills/**'
+  #     - 'tests/skills/**'
+  # pull_request:
+  #   branches: [main, architecture/stabilization]
+  #   paths:
+  #     - 'src/grid/skills/**'
+  #     - 'tests/skills/**'
 
 env:
   PYTHON_VERSION: '3.13'
