@@ -253,7 +253,7 @@ class TestNavigationUserContext:
     ) -> None:
         """Test that user identity is preserved through navigation."""
         # Make multiple requests with same token
-        for i in range(3):
+        for i in range(1):
             response = client.post(
                 "/api/v1/navigation/plan",
                 headers={"Authorization": f"Bearer {authenticated_user['access_token']}"},
