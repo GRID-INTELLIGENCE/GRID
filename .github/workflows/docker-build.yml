@@ -28,7 +28,6 @@ jobs:
     permissions:
       contents: read
       packages: write
-    if: fileExists('Dockerfile') || fileExists('Dockerfile.root') || fileExists('Containerfile')
 
     steps:
       - name: Checkout repository
@@ -39,9 +38,10 @@ jobs:
         run: |
           if [ -f "Dockerfile" ] || [ -f "Dockerfile.root" ] || [ -f "Containerfile" ]; then
             echo "Dockerfile found"
+            echo "skip=false" >> $GITHUB_OUTPUT
           else
             echo "No Dockerfile found, skipping build"
-            echo "::set-output name=skip::true"
+            echo "skip=true" >> $GITHUB_OUTPUT
           fi
 
       - name: Normalize image name and tag
