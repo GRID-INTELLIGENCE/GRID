@@ -19,8 +19,6 @@ This script:
 """
 
 import argparse
-import json
-import os
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -232,7 +230,7 @@ class GRIDSetup:
 
             # Parse .env file
             secrets_migrated = 0
-            with open(env_file, "r") as f:
+            with open(env_file) as f:
                 for line in f:
                     line = line.strip()
                     if not line or line.startswith("#") or "=" not in line:

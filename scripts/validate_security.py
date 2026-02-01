@@ -18,7 +18,7 @@ import os
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 # Colors
 GREEN = "\033[92m"
@@ -64,7 +64,7 @@ class SecurityValidator:
         self.args = args
         self.project_root = Path(__file__).resolve().parent.parent
         self.grid_home = Path.home() / ".grid"
-        self.results: List[Dict[str, Any]] = []
+        self.results: list[dict[str, Any]] = []
 
     def run(self) -> int:
         """Run validation."""
@@ -137,7 +137,7 @@ class SecurityValidator:
 
         return 0 if failed == 0 else 1
 
-    def _validate_environment(self) -> List[Dict]:
+    def _validate_environment(self) -> list[dict]:
         """Validate environment configuration."""
         checks = []
 
@@ -208,7 +208,7 @@ class SecurityValidator:
 
         return checks
 
-    def _validate_secrets(self) -> List[Dict]:
+    def _validate_secrets(self) -> list[dict]:
         """Validate secrets management."""
         checks = []
 
@@ -336,7 +336,7 @@ class SecurityValidator:
 
         return checks
 
-    def _validate_dependencies(self) -> List[Dict]:
+    def _validate_dependencies(self) -> list[dict]:
         """Validate security dependencies."""
         checks = []
 
@@ -396,7 +396,7 @@ class SecurityValidator:
 
         return checks
 
-    def _validate_security_patterns(self) -> List[Dict]:
+    def _validate_security_patterns(self) -> list[dict]:
         """Validate security patterns in code."""
         checks = []
 
@@ -502,7 +502,7 @@ class SecurityValidator:
         except Exception:
             return False
 
-    def _generate_report(self, checks: List[Dict]) -> None:
+    def _generate_report(self, checks: list[dict]) -> None:
         """Generate a validation report."""
         report_path = self.project_root / "security_validation_report.json"
 
