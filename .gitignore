@@ -277,6 +277,7 @@ reproduce_*.txt
 *.log.*
 *.log-*
 rag_logs/
+.rag_logs/
 
 # Audit logs (sensitive)
 **/audit_logs/
