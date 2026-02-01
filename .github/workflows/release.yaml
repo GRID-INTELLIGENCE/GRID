@@ -81,7 +81,7 @@ jobs:
             VERSION=${GITHUB_REF#refs/tags/v}
             TAG=${GITHUB_REF#refs/tags/}
           else
-            CURRENT=$(uv run python -c "import toml; print(toml.load('pyproject.toml')['project']['version'])")
+            CURRENT=$(python -c "import toml; print(toml.load('pyproject.toml')['project']['version'])")
             IFS='.' read -r -a parts <<< "$CURRENT"
             MAJOR=${parts[0]}
             MINOR=${parts[1]}
@@ -197,7 +197,7 @@ jobs:
       - name: "Update Version"
         if: github.event_name == 'workflow_dispatch'
         run: |
-          uv run python -c "
+          python -c "
           import toml
           with open('pyproject.toml', 'r') as f:
               config = toml.load(f)
