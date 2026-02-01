@@ -28,11 +28,6 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Application Frameworks",
 ]
 
-[project.urls]
-Homepage = "https://github.com/caraxesthebloodwyrm02/GRID"
-Repository = "https://github.com/caraxesthebloodwyrm02/GRID"
-Issues = "https://github.com/caraxesthebloodwyrm02/GRID/issues"
-
 dependencies = [
     # Core Framework
     "fastapi>=0.104.0",
@@ -109,6 +104,11 @@ dependencies = [
     "tqdm>=4.65.0",
     "typing-extensions>=4.5.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/caraxesthebloodwyrm02/GRID"
+Repository = "https://github.com/caraxesthebloodwyrm02/GRID"
+Issues = "https://github.com/caraxesthebloodwyrm02/GRID/issues"
 
 [project.scripts]
 # Core CLI commands
