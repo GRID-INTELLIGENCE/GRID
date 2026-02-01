@@ -17,6 +17,22 @@ keywords = [
     "event-driven",
 ]
 
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: Other/Proprietary License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+]
+
+[project.urls]
+Homepage = "https://github.com/caraxesthebloodwyrm02/GRID"
+Repository = "https://github.com/caraxesthebloodwyrm02/GRID"
+Issues = "https://github.com/caraxesthebloodwyrm02/GRID/issues"
+
 dependencies = [
     # Core Framework
     "fastapi>=0.104.0",
