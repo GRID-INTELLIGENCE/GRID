@@ -1,5 +1,5 @@
 [project]
-name = "grid"
+name = "grid-intelligence"
 version = "2.2.1"
 description = "GRID - Geometric Resonance Intelligence Driver: A comprehensive framework for exploring complex systems through geometric resonance patterns, cognitive decision support, local-first AI, and event-driven agentic systems"
 authors = [{ name = "Irfan Kabir", email = "irfankabir02@gmail.com" }]

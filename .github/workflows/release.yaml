@@ -230,7 +230,7 @@ jobs:
     if: github.event.inputs.dry_run != 'true'
     environment:
       name: pypi
-      url: https://pypi.org/project/grid/
+      url: https://pypi.org/project/grid-intelligence/
 
     permissions:
       id-token: write
