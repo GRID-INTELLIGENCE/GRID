@@ -745,8 +745,8 @@ wheels = [
 ]
 
 [[package]]
-name = "grid"
-version = "2.2.0"
+name = "grid-intelligence"
+version = "2.2.1"
 source = { editable = "." }
 dependencies = [
     { name = "aiosqlite" },
