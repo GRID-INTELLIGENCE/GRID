@@ -214,6 +214,7 @@ class TestVectorStorePerformance:
 
         return documents
 
+    @pytest.mark.slow
     def test_large_batch_insertion(self, large_document_set):
         """Test performance of large batch insertions"""
         store = InMemoryDenseStore(embedding_dim=1536)
@@ -229,6 +230,7 @@ class TestVectorStorePerformance:
 
         assert len(store) == len(large_document_set), "All documents should be inserted"
 
+    @pytest.mark.slow
     def test_search_performance_at_scale(self, large_document_set):
         """Test search performance with large dataset"""
         store = InMemoryDenseStore(embedding_dim=1536)
@@ -260,6 +262,7 @@ class TestVectorStorePerformance:
         assert max_search_time < 0.5, f"Max search time {max_search_time:.3f}s too slow, expected <0.5s"
         assert all(count == 10 for count in results_counts), "All searches should return k=10 results"
 
+    @pytest.mark.slow
     def test_memory_usage(self, large_document_set):
         """Test memory usage doesn't grow excessively"""
         import os
