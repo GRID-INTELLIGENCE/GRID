@@ -135,7 +135,6 @@ def generate_env_file(config: dict[str, Any], output_path: str) -> None:
     print(f"Generated environment file: {env_file}")
 
 
-
 def generate_docker_compose(config: dict[str, Any], output_path: str) -> None:
     """Generate docker-compose.yml file from configuration."""
     compose_content = f"""services:
@@ -304,7 +303,6 @@ def main() -> None:
     generate_env_file(DEVELOPMENT_CONFIG, ".env.development")
     generate_env_file(STAGING_CONFIG, ".env.staging")
     generate_env_file(PRODUCTION_CONFIG, ".env.production")
-
 
     # Generate Kubernetes manifests
     generate_kubernetes_manifests(KUBERNETES_CONFIG, "k8s/")

@@ -16,6 +16,7 @@ from cognitive.temporal.temporal_reasoning import (
 @dataclass
 class SoftwareDevelopmentMetrics:
     """Metrics collected during software development test execution."""
+
     execution_time: float
     architecture_confidence: float
     feature_integration_score: float
@@ -28,6 +29,7 @@ class SoftwareDevelopmentMetrics:
 @dataclass
 class PrecalculatedSoftwareResult:
     """Pre-calculated expected results for software development scenarios."""
+
     scenario: str
     expected_architecture_confidence: float
     expected_feature_integration_score: float
@@ -52,7 +54,7 @@ class SoftwareDevelopmentTemporalReasoningTestSuite:
                 expected_feature_integration_score=0.75,
                 expected_code_quality_prediction=0.78,
                 expected_scalability_confidence=0.70,
-                analogy_description="Like building a house with a flexible blueprint"
+                analogy_description="Like building a house with a flexible blueprint",
             ),
             PrecalculatedSoftwareResult(
                 scenario="Legacy system refactoring",
@@ -60,7 +62,7 @@ class SoftwareDevelopmentTemporalReasoningTestSuite:
                 expected_feature_integration_score=0.55,
                 expected_code_quality_prediction=0.60,
                 expected_scalability_confidence=0.45,
-                analogy_description="Like renovating an old building with structural issues"
+                analogy_description="Like renovating an old building with structural issues",
             ),
             PrecalculatedSoftwareResult(
                 scenario="Microservices migration",
@@ -68,7 +70,7 @@ class SoftwareDevelopmentTemporalReasoningTestSuite:
                 expected_feature_integration_score=0.68,
                 expected_code_quality_prediction=0.72,
                 expected_scalability_confidence=0.85,
-                analogy_description="Like reorganizing a large corporation into specialized departments"
+                analogy_description="Like reorganizing a large corporation into specialized departments",
             ),
             PrecalculatedSoftwareResult(
                 scenario="Real-time system development",
@@ -76,8 +78,8 @@ class SoftwareDevelopmentTemporalReasoningTestSuite:
                 expected_feature_integration_score=0.85,
                 expected_code_quality_prediction=0.88,
                 expected_scalability_confidence=0.95,
-                analogy_description="Like designing a high-performance race car"
-            )
+                analogy_description="Like designing a high-performance race car",
+            ),
         ]
 
     @pytest.fixture
@@ -95,8 +97,8 @@ class SoftwareDevelopmentTemporalReasoningTestSuite:
                     "programming_language": "python",
                     "system_architecture": "microservices",
                     "product_feature": "security",
-                    "development_stage": "implementation"
-                }
+                    "development_stage": "implementation",
+                },
             ),
             TemporalFact(
                 subject="authentication_module",
@@ -107,8 +109,8 @@ class SoftwareDevelopmentTemporalReasoningTestSuite:
                     "programming_language": "python",
                     "system_architecture": "microservices",
                     "product_feature": "user_experience",
-                    "development_stage": "integration"
-                }
+                    "development_stage": "integration",
+                },
             ),
             TemporalFact(
                 subject="authentication_module",
@@ -119,8 +121,8 @@ class SoftwareDevelopmentTemporalReasoningTestSuite:
                     "programming_language": "python",
                     "system_architecture": "microservices",
                     "product_feature": "reliability",
-                    "development_stage": "testing"
-                }
+                    "development_stage": "testing",
+                },
             ),
             TemporalFact(
                 subject="payment_service",
@@ -131,8 +133,8 @@ class SoftwareDevelopmentTemporalReasoningTestSuite:
                     "programming_language": "java",
                     "system_architecture": "microservices",
                     "product_feature": "ecommerce",
-                    "development_stage": "design"
-                }
+                    "development_stage": "design",
+                },
             ),
             TemporalFact(
                 subject="payment_service",
@@ -143,8 +145,8 @@ class SoftwareDevelopmentTemporalReasoningTestSuite:
                     "programming_language": "java",
                     "system_architecture": "microservices",
                     "product_feature": "ecommerce",
-                    "development_stage": "implementation"
-                }
+                    "development_stage": "implementation",
+                },
             ),
             TemporalFact(
                 subject="database_layer",
@@ -155,8 +157,8 @@ class SoftwareDevelopmentTemporalReasoningTestSuite:
                     "programming_language": "sql",
                     "system_architecture": "data_layer",
                     "product_feature": "data_persistence",
-                    "development_stage": "migration"
-                }
+                    "development_stage": "migration",
+                },
             ),
             TemporalFact(
                 subject="api_gateway",
@@ -167,8 +169,8 @@ class SoftwareDevelopmentTemporalReasoningTestSuite:
                     "programming_language": "go",
                     "system_architecture": "api_management",
                     "product_feature": "scalability",
-                    "development_stage": "configuration"
-                }
+                    "development_stage": "configuration",
+                },
             ),
             TemporalFact(
                 subject="monitoring_system",
@@ -179,9 +181,9 @@ class SoftwareDevelopmentTemporalReasoningTestSuite:
                     "programming_language": "yaml",
                     "system_architecture": "observability",
                     "product_feature": "reliability",
-                    "development_stage": "implementation"
-                }
-            )
+                    "development_stage": "implementation",
+                },
+            ),
         ]
 
     @pytest.fixture
@@ -191,10 +193,12 @@ class SoftwareDevelopmentTemporalReasoningTestSuite:
             history_window=timedelta(days=60),  # Software development cycles
             temporal_decay_factor=0.85,  # Slower decay for technical decisions
             cross_reference_threshold=0.65,  # Higher threshold for technical accuracy
-            max_path_length=8  # Allow longer dependency chains
+            max_path_length=8,  # Allow longer dependency chains
         )
 
-    def test_software_architecture_evolution(self, software_temporal_reasoning_instance, sample_software_development_facts):
+    def test_software_architecture_evolution(
+        self, software_temporal_reasoning_instance, sample_software_development_facts
+    ):
         """Test how temporal reasoning tracks software architecture evolution."""
         start_time = time.perf_counter()
 
@@ -219,11 +223,13 @@ class SoftwareDevelopmentTemporalReasoningTestSuite:
             code_quality_prediction=0.0,
             development_velocity_estimate=0.0,
             technical_debt_projection=0,
-            scalability_confidence=0.0
+            scalability_confidence=0.0,
         )
         self.metrics_history.append(metrics)
 
-    def test_feature_integration_analysis(self, software_temporal_reasoning_instance, sample_software_development_facts):
+    def test_feature_integration_analysis(
+        self, software_temporal_reasoning_instance, sample_software_development_facts
+    ):
         """Test feature integration analysis using temporal reasoning."""
         for fact in sample_software_development_facts:
             software_temporal_reasoning_instance.add_temporal_fact(fact)
@@ -232,8 +238,7 @@ class SoftwareDevelopmentTemporalReasoningTestSuite:
 
         # Analyze feature integration across different product areas
         references = software_temporal_reasoning_instance.perform_cross_referencing(
-            CrossReferenceDomain.TOPIC,  # Programming languages
-            CrossReferenceDomain.SUBJECT  # System components
+            CrossReferenceDomain.TOPIC, CrossReferenceDomain.SUBJECT  # Programming languages  # System components
         )
 
         execution_time = time.perf_counter() - start_time
@@ -248,7 +253,7 @@ class SoftwareDevelopmentTemporalReasoningTestSuite:
             code_quality_prediction=0.0,
             development_velocity_estimate=0.0,
             technical_debt_projection=0,
-            scalability_confidence=0.0
+            scalability_confidence=0.0,
         )
         self.metrics_history.append(metrics)
 
@@ -275,11 +280,13 @@ class SoftwareDevelopmentTemporalReasoningTestSuite:
             code_quality_prediction=quality_prediction,
             development_velocity_estimate=0.0,
             technical_debt_projection=0,
-            scalability_confidence=0.0
+            scalability_confidence=0.0,
         )
         self.metrics_history.append(metrics)
 
-    def test_scalability_confidence_assessment(self, software_temporal_reasoning_instance, sample_software_development_facts):
+    def test_scalability_confidence_assessment(
+        self, software_temporal_reasoning_instance, sample_software_development_facts
+    ):
         """Test scalability confidence assessment."""
         for fact in sample_software_development_facts:
             software_temporal_reasoning_instance.add_temporal_fact(fact)
@@ -288,10 +295,12 @@ class SoftwareDevelopmentTemporalReasoningTestSuite:
 
         # Assess scalability based on architecture choices and features
         scalability_indicators = [
-            any("microservices" in f.metadata.get("system_architecture", "") for f in sample_software_development_facts),
+            any(
+                "microservices" in f.metadata.get("system_architecture", "") for f in sample_software_development_facts
+            ),
             any("rate_limiting" in f.object for f in sample_software_development_facts),
             any("postgresql" in f.object for f in sample_software_development_facts),
-            any("prometheus" in f.object for f in sample_software_development_facts)
+            any("prometheus" in f.object for f in sample_software_development_facts),
         ]
 
         scalability_score = sum(scalability_indicators) / len(scalability_indicators)
@@ -305,11 +314,13 @@ class SoftwareDevelopmentTemporalReasoningTestSuite:
             code_quality_prediction=0.0,
             development_velocity_estimate=0.0,
             technical_debt_projection=0,
-            scalability_confidence=scalability_score
+            scalability_confidence=scalability_score,
         )
         self.metrics_history.append(metrics)
 
-    def test_development_velocity_estimation(self, software_temporal_reasoning_instance, sample_software_development_facts):
+    def test_development_velocity_estimation(
+        self, software_temporal_reasoning_instance, sample_software_development_facts
+    ):
         """Test development velocity estimation."""
         for fact in sample_software_development_facts:
             software_temporal_reasoning_instance.add_temporal_fact(fact)
@@ -334,7 +345,7 @@ class SoftwareDevelopmentTemporalReasoningTestSuite:
             code_quality_prediction=0.0,
             development_velocity_estimate=velocity_score,
             technical_debt_projection=0,
-            scalability_confidence=0.0
+            scalability_confidence=0.0,
         )
         self.metrics_history.append(metrics)
 
@@ -349,7 +360,9 @@ class SoftwareDevelopmentTemporalReasoningTestSuite:
         debt_indicators = [
             len([f for f in sample_software_development_facts if "migration" in f.predicate]),  # Migration debt
             len([f for f in sample_software_development_facts if "depends" in f.predicate]),  # Coupling debt
-            len(set([f.metadata.get("programming_language") for f in sample_software_development_facts])),  # Language diversity debt
+            len(
+                set([f.metadata.get("programming_language") for f in sample_software_development_facts])
+            ),  # Language diversity debt
         ]
 
         technical_debt = sum(debt_indicators) * 10  # Rough estimation
@@ -363,11 +376,13 @@ class SoftwareDevelopmentTemporalReasoningTestSuite:
             code_quality_prediction=0.0,
             development_velocity_estimate=0.0,
             technical_debt_projection=technical_debt,
-            scalability_confidence=0.0
+            scalability_confidence=0.0,
         )
         self.metrics_history.append(metrics)
 
-    def test_comprehensive_software_analysis(self, software_temporal_reasoning_instance, sample_software_development_facts):
+    def test_comprehensive_software_analysis(
+        self, software_temporal_reasoning_instance, sample_software_development_facts
+    ):
         """Run comprehensive software development analysis."""
         for fact in sample_software_development_facts:
             software_temporal_reasoning_instance.add_temporal_fact(fact)
@@ -387,9 +402,13 @@ class SoftwareDevelopmentTemporalReasoningTestSuite:
         architecture_confidence = software_temporal_reasoning_instance.temporal_consistency_score
         feature_integration_score = min(1.0, len(references) / 20)
         code_quality_prediction = confidence * 0.8  # Correlated with overall confidence
-        scalability_confidence = 0.75 if any("microservices" in str(f.metadata) for f in sample_software_development_facts) else 0.5
+        scalability_confidence = (
+            0.75 if any("microservices" in str(f.metadata) for f in sample_software_development_facts) else 0.5
+        )
         development_velocity_estimate = len(paths) / max(0.1, execution_time)
-        technical_debt_projection = len([f for f in sample_software_development_facts if "migration" in f.predicate]) * 15
+        technical_debt_projection = (
+            len([f for f in sample_software_development_facts if "migration" in f.predicate]) * 15
+        )
 
         metrics = SoftwareDevelopmentMetrics(
             execution_time=execution_time,
@@ -398,7 +417,7 @@ class SoftwareDevelopmentTemporalReasoningTestSuite:
             code_quality_prediction=code_quality_prediction,
             development_velocity_estimate=development_velocity_estimate,
             technical_debt_projection=technical_debt_projection,
-            scalability_confidence=scalability_confidence
+            scalability_confidence=scalability_confidence,
         )
         self.metrics_history.append(metrics)
 
@@ -439,32 +458,35 @@ class SoftwareDevelopmentTemporalReasoningTestSuite:
                 "architecture_confidence": {
                     "actual": latest_metrics.architecture_confidence,
                     "expected": best_match.expected_architecture_confidence,
-                    "difference": latest_metrics.architecture_confidence - best_match.expected_architecture_confidence
+                    "difference": latest_metrics.architecture_confidence - best_match.expected_architecture_confidence,
                 },
                 "feature_integration_score": {
                     "actual": latest_metrics.feature_integration_score,
                     "expected": best_match.expected_feature_integration_score,
-                    "difference": latest_metrics.feature_integration_score - best_match.expected_feature_integration_score
+                    "difference": latest_metrics.feature_integration_score
+                    - best_match.expected_feature_integration_score,
                 },
                 "code_quality_prediction": {
                     "actual": latest_metrics.code_quality_prediction,
                     "expected": best_match.expected_code_quality_prediction,
-                    "difference": latest_metrics.code_quality_prediction - best_match.expected_code_quality_prediction
+                    "difference": latest_metrics.code_quality_prediction - best_match.expected_code_quality_prediction,
                 },
                 "scalability_confidence": {
                     "actual": latest_metrics.scalability_confidence,
                     "expected": best_match.expected_scalability_confidence,
-                    "difference": latest_metrics.scalability_confidence - best_match.expected_scalability_confidence
-                }
+                    "difference": latest_metrics.scalability_confidence - best_match.expected_scalability_confidence,
+                },
             },
             "development_insights": {
                 "technical_debt_projection": latest_metrics.technical_debt_projection,
                 "development_velocity_estimate": latest_metrics.development_velocity_estimate,
-                "execution_efficiency": latest_metrics.execution_time
-            }
+                "execution_efficiency": latest_metrics.execution_time,
+            },
         }
 
-    def _calculate_software_result_similarity(self, metrics: SoftwareDevelopmentMetrics, expected: PrecalculatedSoftwareResult) -> float:
+    def _calculate_software_result_similarity(
+        self, metrics: SoftwareDevelopmentMetrics, expected: PrecalculatedSoftwareResult
+    ) -> float:
         """Calculate similarity between software metrics and expected results."""
         arch_diff = abs(metrics.architecture_confidence - expected.expected_architecture_confidence)
         integration_diff = abs(metrics.feature_integration_score - expected.expected_feature_integration_score)
@@ -485,11 +507,21 @@ class SoftwareDevelopmentTemporalReasoningTestSuite:
         analogy_comparison = self.create_software_analogy_comparison()
 
         # Calculate aggregate metrics
-        avg_architecture_confidence = float(np.mean([m.architecture_confidence for m in self.metrics_history if m.architecture_confidence > 0]))
-        avg_feature_integration_score = float(np.mean([m.feature_integration_score for m in self.metrics_history if m.feature_integration_score > 0]))
-        avg_code_quality_prediction = float(np.mean([m.code_quality_prediction for m in self.metrics_history if m.code_quality_prediction > 0]))
-        avg_scalability_confidence = float(np.mean([m.scalability_confidence for m in self.metrics_history if m.scalability_confidence > 0]))
-        avg_technical_debt = float(np.mean([m.technical_debt_projection for m in self.metrics_history if m.technical_debt_projection > 0]))
+        avg_architecture_confidence = float(
+            np.mean([m.architecture_confidence for m in self.metrics_history if m.architecture_confidence > 0])
+        )
+        avg_feature_integration_score = float(
+            np.mean([m.feature_integration_score for m in self.metrics_history if m.feature_integration_score > 0])
+        )
+        avg_code_quality_prediction = float(
+            np.mean([m.code_quality_prediction for m in self.metrics_history if m.code_quality_prediction > 0])
+        )
+        avg_scalability_confidence = float(
+            np.mean([m.scalability_confidence for m in self.metrics_history if m.scalability_confidence > 0])
+        )
+        avg_technical_debt = float(
+            np.mean([m.technical_debt_projection for m in self.metrics_history if m.technical_debt_projection > 0])
+        )
 
         # Analyze temporal reasoning impact on software development
         quality_improvement = self._analyze_code_quality_improvement()
@@ -502,26 +534,34 @@ class SoftwareDevelopmentTemporalReasoningTestSuite:
                 "average_feature_integration_score": avg_feature_integration_score,
                 "average_code_quality_prediction": avg_code_quality_prediction,
                 "average_scalability_confidence": avg_scalability_confidence,
-                "average_technical_debt_projection": avg_technical_debt
+                "average_technical_debt_projection": avg_technical_debt,
             },
             "temporal_reasoning_software_impact": {
                 "code_quality_improvement": quality_improvement,
                 "feature_integration_effectiveness": integration_benefit,
                 "architecture_consistency_maintenance": avg_architecture_confidence,
-                "scalability_prediction_accuracy": avg_scalability_confidence
+                "scalability_prediction_accuracy": avg_scalability_confidence,
             },
             "analogy_comparison": analogy_comparison,
             "software_engineering_insights": {
                 "temporal_architecture_awareness": avg_architecture_confidence,
                 "cross_component_integration": avg_feature_integration_score,
-                "quality_prediction_reliability": np.std([m.code_quality_prediction for m in self.metrics_history if m.code_quality_prediction > 0]) if self.metrics_history else 0.0,
-                "scalability_assessment_stability": np.std([m.scalability_confidence for m in self.metrics_history if m.scalability_confidence > 0]) if self.metrics_history else 0.0
+                "quality_prediction_reliability": (
+                    np.std([m.code_quality_prediction for m in self.metrics_history if m.code_quality_prediction > 0])
+                    if self.metrics_history
+                    else 0.0
+                ),
+                "scalability_assessment_stability": (
+                    np.std([m.scalability_confidence for m in self.metrics_history if m.scalability_confidence > 0])
+                    if self.metrics_history
+                    else 0.0
+                ),
             },
             "development_efficiency_characteristics": {
                 "analysis_scalability": self._calculate_software_scalability(),
                 "processing_efficiency": float(np.mean([m.execution_time for m in self.metrics_history])),
-                "prediction_consistency": self._calculate_prediction_consistency()
-            }
+                "prediction_consistency": self._calculate_prediction_consistency(),
+            },
         }
 
     def _analyze_code_quality_improvement(self) -> float:
@@ -551,7 +591,7 @@ class SoftwareDevelopmentTemporalReasoningTestSuite:
         return {
             "average_integration_correlation": float(np.mean(correlations)) if correlations else 0.0,
             "integration_stability": float(np.std(correlations)) if correlations else 0.0,
-            "benefit_confidence": len(correlations) / len(self.metrics_history) if self.metrics_history else 0.0
+            "benefit_confidence": len(correlations) / len(self.metrics_history) if self.metrics_history else 0.0,
         }
 
     def _calculate_software_scalability(self) -> float:
@@ -574,7 +614,9 @@ class SoftwareDevelopmentTemporalReasoningTestSuite:
     def _calculate_prediction_consistency(self) -> float:
         """Calculate consistency of predictions across different analyses."""
         quality_predictions = [m.code_quality_prediction for m in self.metrics_history if m.code_quality_prediction > 0]
-        scalability_predictions = [m.scalability_confidence for m in self.metrics_history if m.scalability_confidence > 0]
+        scalability_predictions = [
+            m.scalability_confidence for m in self.metrics_history if m.scalability_confidence > 0
+        ]
 
         if not quality_predictions or not scalability_predictions:
             return 0.0
@@ -627,7 +669,11 @@ if __name__ == "__main__":
     print(f"Description: {results['analogy_comparison']['analogy_description']}")
     print(".3f")
     print("\nKey Insights:")
-    print(f"- Architecture Consistency: {results['software_engineering_insights']['temporal_architecture_awareness']:.3f}")
+    print(
+        f"- Architecture Consistency: {results['software_engineering_insights']['temporal_architecture_awareness']:.3f}"
+    )
     print(f"- Integration Effectiveness: {results['software_engineering_insights']['cross_component_integration']:.3f}")
     print(f"- Analysis Scalability: {results['development_efficiency_characteristics']['analysis_scalability']:.3f}")
-    print(f"- Prediction Consistency: {results['development_efficiency_characteristics']['prediction_consistency']:.3f}")
+    print(
+        f"- Prediction Consistency: {results['development_efficiency_characteristics']['prediction_consistency']:.3f}"
+    )

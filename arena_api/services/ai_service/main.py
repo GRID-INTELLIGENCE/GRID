@@ -31,21 +31,26 @@ from ...service_mesh.discovery import ServiceDiscovery
 
 logger = logging.getLogger(__name__)
 
+
 class TextGenerationRequest(BaseModel):
     """Request model for text generation."""
+
     prompt: str = Field(..., min_length=1, max_length=1000, description="Text prompt for generation")
     max_tokens: int = Field(100, ge=10, le=500, description="Maximum tokens to generate")
     temperature: float = Field(0.7, ge=0.1, le=2.0, description="Sampling temperature")
     model: str = Field("arena-gpt", description="Model to use for generation")
 
+
 class TextGenerationResponse(BaseModel):
     """Response model for text generation."""
+
     generated_text: str
     model_used: str
     tokens_used: int
     safety_score: float
     processing_time: float
     timestamp: datetime
+
 
 class ArenaAIService:
     """
@@ -56,7 +61,7 @@ class ArenaAIService:
         self.app = FastAPI(
             title="Arena AI Service",
             description="AI-powered text generation with safety and compliance",
-            version="1.0.0"
+            version="1.0.0",
         )
 
         # Initialize components
@@ -75,7 +80,7 @@ class ArenaAIService:
             "The Arena architecture provides dynamic API routing with built-in safety mechanisms.",
             "Service discovery enables automatic registration and health monitoring of microservices.",
             "AI safety checks prevent harmful content generation and ensure compliance.",
-            "The monitoring system provides real-time metrics and alerting capabilities."
+            "The monitoring system provides real-time metrics and alerting capabilities.",
         ]
 
         # Setup middleware and routes
@@ -102,14 +107,12 @@ class ArenaAIService:
                 "status": "healthy",
                 "service": self.service_name,
                 "timestamp": datetime.utcnow().isoformat(),
-                "version": "1.0.0"
+                "version": "1.0.0",
             }
 
         @self.app.post("/generate", response_model=TextGenerationResponse)
         async def generate_text(
-            request: TextGenerationRequest,
-            req: Request,
-            authenticated: bool = Depends(self._authenticate_request)
+            request: TextGenerationRequest, req: Request, authenticated: bool = Depends(self._authenticate_request)
         ):
             """Generate text using AI model with safety checks."""
             start_time = asyncio.get_event_loop().time()
@@ -118,18 +121,12 @@ class ArenaAIService:
                 # 1. AI Safety check
                 safety_result = await self.ai_safety.check_request(req)
                 if not safety_result["safe"]:
-                    raise HTTPException(
-                        status_code=403,
-                        detail="Request flagged by AI safety system"
-                    )
+                    raise HTTPException(status_code=403, detail="Request flagged by AI safety system")
 
                 # 2. Content safety analysis
                 content_check = await self.ai_safety._analyze_content_safety(req)
                 if not content_check.passed and content_check.severity.name == "CRITICAL":
-                    raise HTTPException(
-                        status_code=403,
-                        detail="Content safety violation"
-                    )
+                    raise HTTPException(status_code=403, detail="Content safety violation")
 
                 # 3. Generate text (mock implementation)
                 generated_text = await self._generate_text_mock(request)
@@ -144,9 +141,7 @@ class ArenaAIService:
                 processing_time = asyncio.get_event_loop().time() - start_time
 
                 # 6. Record metrics
-                await self.monitoring.record_request(
-                    req, {"status_code": 200}, processing_time, authenticated
-                )
+                await self.monitoring.record_request(req, {"status_code": 200}, processing_time, authenticated)
 
                 # 7. Create response
                 response = TextGenerationResponse(
@@ -155,7 +150,7 @@ class ArenaAIService:
                     tokens_used=len(generated_text.split()),
                     safety_score=output_safety.get("score", 0.8),
                     processing_time=round(processing_time, 3),
-                    timestamp=datetime.utcnow()
+                    timestamp=datetime.utcnow(),
                 )
 
                 return response
@@ -176,7 +171,7 @@ class ArenaAIService:
                         "name": "arena-gpt",
                         "description": "Arena-optimized GPT model with safety features",
                         "max_tokens": 500,
-                        "safety_enabled": True
+                        "safety_enabled": True,
                     }
                 ]
             }
@@ -216,12 +211,12 @@ class ArenaAIService:
         if request.temperature > 1.0:
             base_response += " This response includes additional creative elements."
         elif request.temperature < 0.5:
-            base_response = base_response.split('.')[0] + "."
+            base_response = base_response.split(".")[0] + "."
 
         # Limit by max tokens
         words = base_response.split()
         if len(words) > request.max_tokens:
-            base_response = " ".join(words[:request.max_tokens])
+            base_response = " ".join(words[: request.max_tokens])
 
         return base_response
 
@@ -230,11 +225,7 @@ class ArenaAIService:
         Check the safety of generated output.
         """
         # Simple safety checks - replace with more sophisticated analysis
-        unsafe_patterns = [
-            r"(?i)(kill|harm|violence)",
-            r"(?i)(illegal|criminal)",
-            r"(?i)(hate|discrimination)"
-        ]
+        unsafe_patterns = [r"(?i)(kill|harm|violence)", r"(?i)(illegal|criminal)", r"(?i)(hate|discrimination)"]
 
         issues = []
         for pattern in unsafe_patterns:
@@ -244,11 +235,7 @@ class ArenaAIService:
         safety_score = 1.0 - (len(issues) * 0.2)  # Deduct 0.2 per issue
         safety_score = max(0.0, min(1.0, safety_score))
 
-        return {
-            "safe": len(issues) == 0,
-            "score": safety_score,
-            "issues": issues
-        }
+        return {"safe": len(issues) == 0, "score": safety_score, "issues": issues}
 
     async def register_with_discovery(self):
         """Register this service with the service discovery system."""
@@ -261,12 +248,9 @@ class ArenaAIService:
                     "version": "1.0.0",
                     "capabilities": ["text_generation", "safety_checks"],
                     "models": ["arena-gpt"],
-                    "rate_limits": {
-                        "requests_per_minute": 60,
-                        "tokens_per_minute": 10000
-                    }
+                    "rate_limits": {"requests_per_minute": 60, "tokens_per_minute": 10000},
                 },
-                "tags": ["ai", "generation", "safety"]
+                "tags": ["ai", "generation", "safety"],
             }
 
             # Register with service discovery (this would typically call the discovery API)
@@ -312,6 +296,7 @@ class ArenaAIService:
         await self.monitoring.stop()
         logger.info("AI service shutdown complete")
 
+
 # Global service instance
 service = ArenaAIService()
 
@@ -319,6 +304,7 @@ service = ArenaAIService()
 app = service.app
 
 if __name__ == "__main__":
+
     async def startup():
         await service.start_background_tasks()
 
@@ -329,9 +315,4 @@ if __name__ == "__main__":
     app.add_event_handler("startup", startup)
     app.add_event_handler("shutdown", shutdown)
 
-    uvicorn.run(
-        "main:app",
-        host="0.0.0.0",
-        port=int(os.getenv("AI_SERVICE_PORT", "8001")),
-        reload=True
-    )
+    uvicorn.run("main:app", host="0.0.0.0", port=int(os.getenv("AI_SERVICE_PORT", "8001")), reload=True)

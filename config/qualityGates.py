@@ -51,9 +51,12 @@ def get_optimization_threshold(metric: str, tier: str | None = None) -> float:
     if metric in metrics:
         if tier and "tieredScoring" in metrics[metric]:
             return cast(float, metrics[metric]["tieredScoring"].get(tier, metrics[metric].get("threshold", 0.0)))
-        return cast(float, metrics[metric].get(
-            "threshold", metrics[metric].get("optimalThreshold", metrics[metric].get("floor", 0.0))
-        ))
+        return cast(
+            float,
+            metrics[metric].get(
+                "threshold", metrics[metric].get("optimalThreshold", metrics[metric].get("floor", 0.0))
+            ),
+        )
     raise ValueError(f"Unknown optimization metric: {metric}")
 
 

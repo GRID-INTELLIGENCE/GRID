@@ -13,7 +13,7 @@ import sys
 import time
 
 # Add src to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "src"))
 
 from tools.rag.conversational_rag import create_conversational_rag_engine
 
@@ -51,11 +51,11 @@ class LoadTest:
 
             try:
                 start = time.perf_counter()
-                result = await self.engine.query(
+                await self.engine.query(
                     query_text=query,
                     session_id=session_id,
                     enable_multi_hop=random.choice([True, False]),
-                    temperature=0.7
+                    temperature=0.7,
                 )
                 latency_ms = (time.perf_counter() - start) * 1000
                 latencies.append(latency_ms)
@@ -76,14 +76,15 @@ class LoadTest:
             "errors": errors,
             "latencies": latencies,
             "mean_latency_ms": statistics.mean(latencies) if latencies else 0,
-            "p95_latency_ms": statistics.quantiles(latencies, n=100)[94] if len(latencies) >= 100 else max(latencies) if latencies else 0,
+            "p95_latency_ms": (
+                statistics.quantiles(latencies, n=100)[94]
+                if len(latencies) >= 100
+                else max(latencies) if latencies else 0
+            ),
         }
 
     async def run_load_test(
-        self,
-        num_users: int = 100,
-        queries_per_user: int = 10,
-        concurrent_users: int = 10
+        self, num_users: int = 100, queries_per_user: int = 10, concurrent_users: int = 10
     ) -> dict[str, any]:
         """Run load test with multiple concurrent users."""
         print(f"\n{'='*60}")
@@ -102,10 +103,7 @@ class LoadTest:
             print(f"\nRunning batch {batch_start}-{batch_end}...")
 
             # Run users in parallel
-            tasks = [
-                self.simulate_user_session(user_id, queries_per_user)
-                for user_id in batch_users
-            ]
+            tasks = [self.simulate_user_session(user_id, queries_per_user) for user_id in batch_users]
             batch_results = await asyncio.gather(*tasks)
             results.extend(batch_results)
 
@@ -185,11 +183,7 @@ class LoadTest:
                 continue
 
             print(f"\nTesting with {num_users} concurrent users...")
-            result = await self.run_load_test(
-                num_users=num_users,
-                queries_per_user=5,
-                concurrent_users=num_users
-            )
+            result = await self.run_load_test(num_users=num_users, queries_per_user=5, concurrent_users=num_users)
             results.append(result)
 
             # Check if system is failing
@@ -215,11 +209,7 @@ async def main():
     load_test = LoadTest()
 
     # Standard load test
-    await load_test.run_load_test(
-        num_users=100,
-        queries_per_user=10,
-        concurrent_users=10
-    )
+    await load_test.run_load_test(num_users=100, queries_per_user=10, concurrent_users=10)
 
     # Stress test
     await load_test.test_stress_load(max_users=200)

@@ -161,7 +161,7 @@ class TestRateLimiter:
         result = limiter.check_rate_limit("test_user")
         assert result is not None
         assert isinstance(result, dict)
-        assert 'allowed' in result
+        assert "allowed" in result
 
     def test_get_key_with_scope(self, limiter: RateLimiter):
         """Verify key generation with scope."""

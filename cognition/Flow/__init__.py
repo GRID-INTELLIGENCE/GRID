@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 class FlowState(Enum):
     """States in cognitive flow processing."""
+
     IDLE = "idle"
     ACTIVE = "active"
     BLOCKED = "blocked"
@@ -28,6 +29,7 @@ class FlowState(Enum):
 @dataclass
 class FlowEvent:
     """Represents an event in the cognitive flow."""
+
     event_id: str
     event_type: str
     timestamp: float
@@ -39,6 +41,7 @@ class FlowEvent:
 @dataclass
 class CognitiveFlow:
     """A cognitive flow with events and state management."""
+
     flow_id: str
     name: str
     events: list[FlowEvent] = field(default_factory=list)

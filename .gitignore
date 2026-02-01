@@ -1,24 +1,182 @@
-# Dev Drive setup artifacts
-Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle
-complete-dev-drive-setup.md
-dev-drive-manual-setup.md
-setup-dev-drive.ps1
-current_mypy_errors.txt
-*.vhdx
+# ============================================================================
+# GRID Project .gitignore
+# ============================================================================
+# Organized by category - prevents accidental commit of secrets and sensitive data
+# ============================================================================
 
-# Environment configuration files (keep examples, ignore local overrides)
-.env.venv
-.env.local
+# ==========================
+# ENVIRONMENT & SECRETS
+# ==========================
+
+# Environment files (may contain API keys, passwords)
+.env
+.env.*
+!.env.example
+!.env.template
+*.env
 .envrc
 
-# Virtual environments - unified root strategy
+# Explicit secret/credential files
+**/secrets/
+**/credentials/
+*.secret
+*.secrets
+*.credential
+*.credentials
+*_secret.*
+*_secrets.*
+*_credential.*
+*_credentials.*
+
+# User environment exports (CRITICAL)
+**/user_env*.txt
+**/user_env*.json
+**/env_export*
+**/exported_env*
+
+# API Keys and tokens
+*.apikey
+*.api_key
+**/api_key*
+**/apikey*
+**/*_api_key*
+**/*_apikey*
+**/api_keys.json
+**/api_keys.yaml
+**/api_keys.yml
+**/token*.json
+**/tokens.json
+**/tokens.yaml
+**/access_token*
+**/refresh_token*
+**/auth_token*
+**/auth_tokens*
+
+# Google OAuth client secrets (CRITICAL SECURITY)
+client_secret*.json
+*client_secret*.json
+
+# ==========================
+# CRYPTOGRAPHIC MATERIAL
+# ==========================
+
+# Private keys
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.pk8
+*.ppk
+id_rsa*
+id_ed25519*
+id_ecdsa*
+id_dsa*
+
+# Certificates (private)
+*.crt
+*.cer
+*.der
+*.cert
+!**/certs/public/
+!**/certificates/public/
+
+# Encryption keys
+**/encryption_key*
+**/master_key*
+**/vault_key*
+**/private_key*
+**/keyfile*
+*.aes
+*.gpg
+*.pgp
+
+# JWT secrets
+jwt_secret*
+**/jwt/*.key
+**/jwt_secret*
+
+# SSH and GPG Keys
+**/.ssh/
+**/gpg-keys/
+**/ssh-keys/
+
+# ==========================
+# CLOUD PROVIDER CONFIGS
+# ==========================
+
+# GCP
+**/credentials.json
+**/gcp_credentials*.json
+**/service_account*.json
+**/serviceaccount*.json
+**/google_credentials.json
+application_default_credentials.json
+**/.gcloud/
+
+# AWS
+.aws/
+**/.aws/
+aws_credentials
+aws_config
+**/aws_credentials*
+**/aws_access_keys*
+
+# Azure
+.azure/
+**/.azure/
+azure_credentials*
+
+# Databricks
+.databrickscfg
+**/databricks_token*
+**/databricks_credentials*
+
+# ==========================
+# DATABASE & DATA FILES
+# ==========================
+
+# SQLite databases
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+!**/migrations/*.sql
+
+# Database dumps and backups
+*.sql
+*.dump
+*.backup
+**/*.db.bak
+**/*.sql.bak
+**/db_dumps/
+**/database_backups/
+
+# Redis dumps
+dump.rdb
+*.rdb
+
+# Database connection strings
+**/database_url*
+**/db_connection*
+**/connection_string*
+
+# ==========================
+# VIRTUAL ENVIRONMENTS
+# ==========================
+
 # Only allow root .venv, exclude all others
 venv/
 */venv/
 */.venv/
 !/.venv/
 
-# Python cache and build artifacts
+# ==========================
+# PYTHON BUILD ARTIFACTS
+# ==========================
+
 __pycache__/
 *.py[cod]
 *$py.class
@@ -41,7 +199,10 @@ wheels/
 *.egg
 MANIFEST
 
-# Testing and coverage
+# ==========================
+# TESTING & COVERAGE
+# ==========================
+
 .pytest_cache/
 .coverage
 htmlcov/
@@ -51,29 +212,259 @@ coverage.xml
 *.cover
 .hypothesis/
 
-# IDE and editor files
+# Test credentials
+**/test_credentials*
+**/mock_secrets*
+**/fixtures/secrets/
+
+# Test outputs
+*_output*.txt
+*_errors*.json
+*_errors*.txt
+test_*.txt
+test_*.json
+property_test_error.txt
+reproduce_*.py
+reproduce_*.txt
+
+# Debug files
+**/debug_output/
+*.debug
+
+# ==========================
+# IDE & EDITOR FILES
+# ==========================
+
+# VS Code
 .vscode/
+.vscode/settings.json
+.vscode/launch.json
+.vscode/*.code-workspace
+!.vscode/extensions.json
+!.vscode/tasks.json
+
+# JetBrains
 .idea/
-*.swp
-*.swo
-*~
+*.iml
+*.iws
+*.ipr
+
+# Other editors
 .cursor/
 .cursorignore
 .claude/
+.windsurf/
+.zed/
+*.swp
+*.swo
+*~
+*.sublime-workspace
 
-# Environment files
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+# Private/ignore files
+.private/
+**/.private/
+.agentignore
+.cascadeignore
 
-# Development directories (keep structure, ignore temp content)
+# ==========================
+# LOGS
+# ==========================
+
+*.log
+**/logs/
+!**/logs/.gitkeep
+**/log/
+*.log.*
+*.log-*
+rag_logs/
+
+# Audit logs (sensitive)
+**/audit_logs/
+**/security_logs/
+**/access_logs/
+
+# ==========================
+# TEMPORARY FILES
+# ==========================
+
+tmp/
+temp/
+.tmp/
+*.tmp
+*.temp
+*.bak
+*.backup
+*.old
+**/*.orig
+**/backups/
+
+# ==========================
+# CACHE DIRECTORIES
+# ==========================
+
+.cache/
+.mypy_cache/
+.ruff_cache/
+.rag_db/
+.rag_db_*/
+rag_db/
+
+# ==========================
+# OS GENERATED FILES
+# ==========================
+
+# macOS
+.DS_Store
+.DS_Store?
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+.directory
+
+# ==========================
+# LARGE GENERATED FILES
+# ==========================
+
+*.vhdx
+*.vhd
+*.iso
+*.dmg
+
+# ==========================
+# NODE.JS
+# ==========================
+
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# npm/yarn configs
+.npmrc
+.yarnrc
+.yarn/
+!.yarn/patches/
+!.yarn/plugins/
+!.yarn/releases/
+!.yarn/sdks/
+!.yarn/versions/
+
+# ==========================
+# RUST
+# ==========================
+
+target/
+Cargo.lock
+**/*.rs.bk
+rust/
+
+# ==========================
+# DOCKER
+# ==========================
+
+.docker/
+.dockerignore
+docker-compose.override.yml
+docker-compose.local.yml
+
+# ==========================
+# TERRAFORM
+# ==========================
+
+*.tfstate
+*.tfstate.*
+.terraform/
+*.tfvars
+!*.tfvars.example
+
+# ==========================
+# ANSIBLE
+# ==========================
+
+**/vault_password*
+**/ansible_vault*
+
+# ==========================
+# VAULT & SECRET MANAGERS
+# ==========================
+
+**/.vault-token
+**/vault_token*
+**/hashicorp_*
+**/secret_manager*
+
+# OAuth
+**/oauth_*.json
+**/.oauth/
+
+# Secrets in config files
+**/*secret*.json
+**/*secret*.yaml
+**/*secret*.yml
+**/*secrets*.json
+**/*secrets*.yaml
+**/*secrets*.yml
+**/secret_config*
+
+# Password files
+**/*password*.txt
+**/*passwd*
+**/htpasswd
+**/.htaccess
+**/auth.json
+**/.netrc
+**/.pypirc
+
+# Private configuration
+**/private_config*
+**/private_settings*
+**/prod_config*
+**/production_config*
+
+# CI/CD Secrets
+**/.github/secrets/
+**/.gitlab-ci-secrets/
+**/ci_secrets*
+**/deploy_key*
+
+# ==========================
+# JUPYTER NOTEBOOKS
+# ==========================
+
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/*
+
+# ==========================
+# DEV DRIVE SETUP ARTIFACTS
+# ==========================
+
+Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle
+complete-dev-drive-setup.md
+dev-drive-manual-setup.md
+setup-dev-drive.ps1
+current_mypy_errors.txt
+
+# ==========================
+# PROJECT-SPECIFIC PATHS
+# ==========================
+
+# Development directories
 dev/temp/
 dev/logs/
 dev/cache/
 
-# Reports (keep structure, ignore temporary content)
+# Reports
+reports/
 reports/integration/*.txt
 reports/temp/
 reports/cache/
@@ -85,140 +476,8 @@ docs-ext/temp/
 build/cache/
 build/temp/
 
-# Logs and runtime
-logs/
-*.log
-rag_logs/
-rag_db/
-
-# Temporary files
-tmp/
-temp/
-.tmp/
-*.tmp
-
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# Database
-*.db
-*.db-shm
-*.db-wal
-*.sqlite
-*.sqlite3
-
-# Cache and data directories
-.cache/
-.mypy_cache/
-.ruff_cache/
-.rag_db/
+# Data directory
 data/
-
-# Node.js (if present)
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Rust (if present)
-target/
-Cargo.lock
-**/*.rs.bk
-
-# Docker
-.dockerignore
-
-# Large generated files
-*.vhdx
-*.vhd
-*.iso
-*.dmg
-
-# Arena/the_chase game files - NOW TRACKED
-# Arena/
-Hogwarts/
-
-# Build and dependency directories
-k8s/
-circuits/
-codemaps/
-
-# Tools and utilities
-tools/ambient_sound/
-tools/pulse_monitor/
-tools/zoology_mapper/
-
-
-# Configuration files
-grid.code-workspace
-light_of_the_seven/grid.code-workspace
-
-# Media assets
-media/
-assets/*.png
-assets/*.jpg
-assets/*.jpeg
-assets/*.gif
-
-# Lock files (except uv.lock at root)
-**/uv.lock
-!uv.lock
-
-# IDE and editor ignores
-.private/
-.agentignore
-.cascadeignore
-.zed/
-
-# Generated docs and reports (keep core files)
-*.md
-!README.md
-!PROJECT_CHECKPOINT.md
-!.windsurf/rules/README.md
-docs/*.md
-!docs/SECURITY.md
-!docs/SECURITY_ARCHITECTURE.md
-!docs/SECURITY_LABELS.md
-!docs/SECURITY_HARDENING.md
-!docs/SECURITY_HARDENING_REPORT.md
-!docs/SECURITY_MAINTAINABILITY.md
-!docs/SECURITY_REMEDIATION.md
-!docs/INTELLIGENT_SKILLS_SYSTEM.md
-!docs/SKILLS_RAG_QUICKSTART.md
-!docs/SIMPLIFIED_SETUP.md
-!docs/DEVELOPMENT_GUIDE.md
-reports/
-
-# Test outputs and errors
-*_output*.txt
-*_errors*.json
-*_errors*.txt
-test_*.txt
-test_*.json
-property_test_error.txt
-reproduce_*.py
-reproduce_*.txt
-
-# Temporary analysis files
-check_import*.py
-check_output.txt
-recent_docs.txt
-error_code.json
-schema_errors.txt
-safety_errors.txt
-secrets_errors*.txt
-version_errors*.txt
-ruff_errors.txt
-mypy_errors*.txt
-mypy_final_report.txt
-
-# Generated data
 data/all_*.json
 data/all_*.csv
 data/*_metrics.json
@@ -230,7 +489,7 @@ data/skill_versions/
 data/skills_ab_tests/
 data/skills_diagnostics/
 
-# Artifacts and generated assets
+# Artifacts
 artifacts/*.json
 artifacts/*.png
 artifacts/repo_analysis/
@@ -251,28 +510,121 @@ grid/security/
 grid/version_3_5.py
 grid/version_4_5.py
 
-# Rust projects
-rust/
+# Game files
+Hogwarts/
 
-# Scripts and utilities
+# Build and dependency directories
+k8s/
+circuits/
+codemaps/
+
+# Tools and utilities
+tools/ambient_sound/
+tools/pulse_monitor/
+tools/zoology_mapper/
+
+# Configuration files
+grid.code-workspace
+light_of_the_seven/grid.code-workspace
+
+# Config directory sensitive files
+config/secrets/
+config/env/
+config/ignored/
+config/user_*
+
+# User-specific configurations
+**/user_config/
+**/.user/
+
+# Local development overrides
+*.local.yaml
+*.local.yml
+*.local.json
+*.local.toml
+
+# ==========================
+# MEDIA ASSETS
+# ==========================
+
+media/
+assets/*.png
+assets/*.jpg
+assets/*.jpeg
+assets/*.gif
+
+# ==========================
+# LOCK FILES
+# ==========================
+
+**/uv.lock
+!uv.lock
+
+# pip
+pip.conf
+.pip/
+
+# ==========================
+# MARKDOWN FILES
+# ==========================
+
+*.md
+!README.md
+!PROJECT_CHECKPOINT.md
+!.windsurf/rules/README.md
+
+# Allowed docs
+docs/*.md
+!docs/SECURITY.md
+!docs/SECURITY_ARCHITECTURE.md
+!docs/SECURITY_LABELS.md
+!docs/SECURITY_HARDENING.md
+!docs/SECURITY_HARDENING_REPORT.md
+!docs/SECURITY_MAINTAINABILITY.md
+!docs/SECURITY_REMEDIATION.md
+!docs/INTELLIGENT_SKILLS_SYSTEM.md
+!docs/SKILLS_RAG_QUICKSTART.md
+!docs/SIMPLIFIED_SETUP.md
+!docs/DEVELOPMENT_GUIDE.md
+
+# Internal docs with credentials
+**/CREDENTIALS.md
+**/SECRETS.md
+**/internal_config.md
+**/*_PRIVATE.md
+
+# ==========================
+# SCRIPTS
+# ==========================
+
+scripts/*.py
+*.ps1
+!scripts/__init__.py
 !scripts/setup.py
 !scripts/validate_security.py
 !scripts/migrate_secrets_to_gcp.py
 !scripts/deploy_security_config.py
 !scripts/agent_setup.ps1
-scripts/*.py
-!scripts/__init__.py
-*.ps1
-!scripts/agent_setup.ps1
 
-# Environment files
-.env.development
-.env.production
-.env.staging
+# ==========================
+# TEMPORARY ANALYSIS FILES
+# ==========================
 
-# ===========================================
-# WEALTH MANAGEMENT VAULT SECURITY
-# ===========================================
+check_import*.py
+check_output.txt
+recent_docs.txt
+error_code.json
+schema_errors.txt
+safety_errors.txt
+secrets_errors*.txt
+version_errors*.txt
+ruff_errors.txt
+mypy_errors*.txt
+mypy_final_report.txt
+
+# ==========================
+# WEALTH MANAGEMENT VAULT
+# ==========================
 
 # Experiment data patterns
 **/active_experiment_data/
@@ -292,447 +644,10 @@ scripts/*.py
 **/appraisals/
 **/insurance_docs/
 
-# Google OAuth client secrets (CRITICAL SECURITY)
-client_secret*.json
-*client_secret*.json
-
-
-# ===========================================
-# SECRETS & CREDENTIALS PATTERN FILTER
-# ===========================================
-
-# API Keys and Tokens
-**/api_key*
-**/apikey*
-**/*_api_key*
-**/*_apikey*
-**/token*.json
-**/access_token*
-**/refresh_token*
-**/auth_token*
-**/*.pem
-**/*.key
-**/*.cert
-**/*.crt
-**/*.p12
-**/*.pfx
-
-# Cloud Provider Credentials
-**/credentials.json
-**/service_account*.json
-**/serviceaccount*.json
-**/gcp_credentials*.json
-**/aws_credentials*
-**/azure_credentials*
-**/.aws/
-**/.gcloud/
-**/.azure/
-
-# SSH and GPG Keys
-**/.ssh/
-**/id_rsa*
-**/id_ed25519*
-**/id_dsa*
-**/*.gpg
-**/gpg-keys/
-**/ssh-keys/
-
-# Secrets in Config
-**/*secret*.json
-**/*secret*.yaml
-**/*secret*.yml
-**/*secrets*.json
-**/*secrets*.yaml
-**/*secrets*.yml
-**/secrets/
-**/.secrets/
-**/secret_config*
-
-# Password and Auth Files
-**/*password*.txt
-**/*passwd*
-**/htpasswd
-**/.htaccess
-**/auth.json
-**/.netrc
-**/.npmrc
-**/.pypirc
-
-# Database Connection Strings
-**/database_url*
-**/db_connection*
-**/connection_string*
-**/*.db.bak
-**/*.sql.bak
-
-# Private Configuration
-**/private_config*
-**/private_settings*
-**/.private/
-**/prod_config*
-**/production_config*
-
-# OAuth and JWT
-**/oauth_*.json
-**/jwt_secret*
-**/.oauth/
-
-# Encryption Keys
-**/encryption_key*
-**/master_key*
-**/private_key*
-**/keyfile*
-**/keystore*
-
-# Vault and Secret Manager
-**/.vault-token
-**/vault_token*
-**/hashicorp_*
-**/secret_manager*
-
-# CI/CD Secrets
-**/.github/secrets/
-**/.gitlab-ci-secrets/
-**/ci_secrets*
-**/deploy_key*
-# ============================================================================
-# GRID Security-Sensitive Files - .gitignore Additions
-# ============================================================================
-# Add the contents of this file to your main .gitignore
-# These patterns prevent accidental commit of secrets and sensitive data
-# ============================================================================
-
-# ==========================
-# ENVIRONMENT & SECRETS
-# ==========================
-
-# Environment files (may contain API keys, passwords)
-.env
-.env.*
-!.env.example
-!.env.template
-*.env
-.envrc
-.env.local
-.env.development
-.env.staging
-.env.production
-.env.test
-
-# Explicit secret/credential files
-**/secrets/
-**/credentials/
-*.secret
-*.secrets
-*.credential
-*.credentials
-*_secret.*
-*_secrets.*
-*_credential.*
-*_credentials.*
-
-# User environment exports (CRITICAL - found in audit)
-**/user_env*.txt
-**/user_env*.json
-**/env_export*
-**/exported_env*
-
-# API Keys and tokens
-*.apikey
-*.api_key
-**/api_keys.json
-**/api_keys.yaml
-**/api_keys.yml
-**/tokens.json
-**/tokens.yaml
-**/auth_tokens*
-
-# ==========================
-# CRYPTOGRAPHIC MATERIAL
-# ==========================
-
-# Private keys
-*.pem
-*.key
-*.p12
-*.pfx
-*.jks
-*.keystore
-*.pk8
-id_rsa*
-id_ed25519*
-id_ecdsa*
-id_dsa*
-*.ppk
-
-# Certificates (private)
-*.crt
-*.cer
-*.der
-!**/certs/public/
-!**/certificates/public/
-
-# Encryption keys
-**/encryption_key*
-**/master_key*
-**/vault_key*
-*.aes
-*.gpg
-*.pgp
-
-# JWT secrets
-jwt_secret*
-**/jwt/*.key
-
-# ==========================
-# DATABASE & DATA FILES
-# ==========================
-
-# SQLite databases (may contain sensitive data)
-*.db
-*.sqlite
-*.sqlite3
-!**/migrations/*.sql
-
-# Database dumps
-*.sql
-*.dump
-*.backup
-**/db_dumps/
-**/database_backups/
-
-# Redis dumps
-dump.rdb
-*.rdb
-
-# ==========================
-# CLOUD PROVIDER CONFIGS
-# ==========================
-
-# GCP
-**/gcp_credentials.json
-**/service_account*.json
-**/google_credentials.json
-application_default_credentials.json
-
-# AWS
-.aws/
-aws_credentials
-aws_config
-**/aws_access_keys*
-
-# Azure
-.azure/
-azure_credentials*
-
-# Databricks
-.databrickscfg
-**/databricks_token*
-**/databricks_credentials*
-
-# ==========================
-# LOGS (May contain secrets)
-# ==========================
-
-# Log files
-*.log
-**/logs/
-!**/logs/.gitkeep
-**/log/
-*.log.*
-*.log-*
-
-# Audit logs (sensitive)
-**/audit_logs/
-**/security_logs/
-**/access_logs/
-
-# ==========================
-# IDE & EDITOR CACHES
-# ==========================
-
-# VS Code (may cache secrets in workspace settings)
-.vscode/settings.json
-.vscode/launch.json
-.vscode/*.code-workspace
-!.vscode/extensions.json
-!.vscode/tasks.json
-
-# JetBrains (may cache credentials)
-.idea/
-*.iml
-*.iws
-*.ipr
-.idea/**/workspace.xml
-.idea/**/tasks.xml
-.idea/**/usage.statistics.xml
-.idea/**/shelf/
-.idea/**/dataSources/
-.idea/**/dataSources.ids
-.idea/**/dataSources.local.xml
-.idea/**/sqlDataSources.xml
-.idea/**/dynamic.xml
-
-# Windsurf
-.windsurf/
-
-# Cursor
-.cursor/
-
-# Sublime Text
-*.sublime-workspace
-
-# ==========================
-# BUILD & TEMP FILES
-# ==========================
-
-# Temp files that may contain secrets
-*.tmp
-*.temp
-*.swp
-*.swo
-*~
-.cache/
-__pycache__/
-*.pyc
-
-# Build artifacts
-dist/
-build/
-*.egg-info/
-
-# Coverage reports (may show code paths)
-.coverage
-htmlcov/
-coverage.xml
-
-# ==========================
-# TESTING & DEBUGGING
-# ==========================
-
-# Test credentials (even fake ones set bad patterns)
-**/test_credentials*
-**/mock_secrets*
-**/fixtures/secrets/
-
-# Debug files
-**/debug_output/
-*.debug
-
-# ==========================
-# PLATFORM SPECIFIC
-# ==========================
-
-# macOS
-.DS_Store
-.AppleDouble
-.LSOverride
-._*
-
-# Windows
-Thumbs.db
-ehthumbs.db
-Desktop.ini
-$RECYCLE.BIN/
-
-# Linux
-*~
-.directory
-
-# ==========================
-# NOTEBOOK OUTPUTS
-# ==========================
-
-# Jupyter (may contain executed output with secrets)
-.ipynb_checkpoints/
-*/.ipynb_checkpoints/*
-
-# Clear notebook outputs before committing
-# Consider using nbstripout pre-commit hook
-
-# ==========================
-# DOCUMENTATION WITH SECRETS
-# ==========================
-
-# Internal docs that may contain credentials
-**/CREDENTIALS.md
-**/SECRETS.md
-**/internal_config.md
-**/*_PRIVATE.md
-
-# ==========================
-# BACKUP FILES
-# ==========================
-
-*.bak
-*.backup
-*.old
-**/backups/
-**/*.orig
-
-# ==========================
-# VENDOR/THIRD-PARTY CONFIGS
-# ==========================
-
-# npm/yarn
-.npmrc
-.yarnrc
-.yarn/
-!.yarn/patches/
-!.yarn/plugins/
-!.yarn/releases/
-!.yarn/sdks/
-!.yarn/versions/
-
-# pip
-pip.conf
-.pip/
-
-# Docker (may contain build args with secrets)
-.docker/
-docker-compose.override.yml
-docker-compose.local.yml
-
-# Terraform (contains state with sensitive data)
-*.tfstate
-*.tfstate.*
-.terraform/
-*.tfvars
-!*.tfvars.example
-
-# Ansible
-**/vault_password*
-**/ansible_vault*
-
-# ==========================
-# CUSTOM GRID PATHS
-# ==========================
-
-# Config directory sensitive files
-config/secrets/
-config/env/
-config/ignored/
-config/user_*
-
-# Knowledge base sensitive data
-.rag_db/
-.rag_db_*/
-
-# Local development overrides
-*.local.yaml
-*.local.yml
-*.local.json
-*.local.toml
-
-# User-specific configurations
-**/user_config/
-**/.user/
-
 # ==========================
 # SECURITY SCAN OUTPUTS
 # ==========================
 
-# These may contain vulnerability details
 **/security-reports/
 **/vulnerability-scan/
 **/pentest-results/

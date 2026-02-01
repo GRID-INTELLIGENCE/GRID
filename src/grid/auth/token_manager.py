@@ -13,11 +13,13 @@ logger = logging.getLogger(__name__)
 # Load settings once or inject dependency
 settings = MothershipSettings.from_env()
 
+
 class TokenManager:
     """
     Manages JWT tokens (Issue, Verify, Revoke).
     Uses Cache backend for Denylist (Revocation).
     """
+
     def __init__(self):
         self.secret_key = settings.security.secret_key or "insecure-dev-secret"
         self.algorithm = settings.security.algorithm

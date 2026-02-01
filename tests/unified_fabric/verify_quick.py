@@ -1,4 +1,5 @@
 """Quick verification test for unified_fabric"""
+
 import asyncio
 
 from src.unified_fabric import DynamicEventBus, Event
@@ -33,11 +34,7 @@ async def test_event_bus():
     bus.subscribe("test.event", handler)
     await bus.start()
 
-    event = Event(
-        event_type="test.event",
-        payload={"key": "value"},
-        source_domain="test"
-    )
+    event = Event(event_type="test.event", payload={"key": "value"}, source_domain="test")
 
     await bus.publish(event, wait_for_handlers=True)
     await bus.stop()

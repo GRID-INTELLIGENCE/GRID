@@ -1,13 +1,15 @@
 """
 MCP Server integration for The Chase
 """
+
 from typing import Any
 
 
 class OverwatchMCP:
     """MCP Server integration for OVERWATCH"""
+
     def __init__(self, mcp_config: dict):
-        self.mcp_servers = mcp_config.get('servers', {})
+        self.mcp_servers = mcp_config.get("servers", {})
 
     def call_mcp_tool(self, server: str, tool: str, args: dict) -> Any:
         """Call MCP tool on server"""

@@ -29,9 +29,7 @@ def parse_ndjson_events(response) -> list[dict[str, Any]]:
     return events
 
 
-async def mock_rag_stream(
-    query: str, top_k: int = 5, session_id: str | None = None
-) -> AsyncGenerator[dict[str, Any]]:
+async def mock_rag_stream(query: str, top_k: int = 5, session_id: str | None = None) -> AsyncGenerator[dict[str, Any]]:
     """Mock async RAG streaming generator."""
     yield {"type": "analysis_started", "data": {"query": query}}
     yield {"type": "retrieval_started", "data": {"indices": []}}
@@ -47,9 +45,7 @@ async def mock_rag_stream(
 def rag_client():
     """Create test client for RAG streaming API with mocked engine."""
     # Patch the RAG engine creation before importing the router
-    with patch(
-        "application.mothership.routers.rag_streaming.create_conversational_rag_engine"
-    ) as mock_create:
+    with patch("application.mothership.routers.rag_streaming.create_conversational_rag_engine") as mock_create:
         # Create mock engine with proper async methods
         mock_engine = MagicMock()
         mock_engine.query = AsyncMock(

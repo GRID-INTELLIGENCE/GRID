@@ -41,6 +41,7 @@ class TestScoredChunkContract:
         """ScoredChunk should be immutable."""
         chunk = ScoredChunk(chunk_id="c1", text="hello", score=0.9)
         from dataclasses import FrozenInstanceError
+
         with pytest.raises(FrozenInstanceError):
             chunk.text = "modified"  # type: ignore
 

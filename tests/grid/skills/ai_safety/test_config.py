@@ -1,7 +1,5 @@
 """Tests for AI Safety Configuration."""
 
-
-
 from grid.skills.ai_safety.config import AISafetyConfig, ProviderConfig, get_config, reset_config
 
 

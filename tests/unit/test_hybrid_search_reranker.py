@@ -36,7 +36,7 @@ class TestHybridRetriever:
             "Traditional baking methods use yeast and flour",
             "Training deep learning models requires large datasets",
             "Baking bread requires proper fermentation techniques",
-            "Neural network architectures evolve rapidly"
+            "Neural network architectures evolve rapidly",
         ]
 
         embeddings = SimpleEmbeddings(embedding_dim=384).embed_batch(documents)
@@ -44,7 +44,7 @@ class TestHybridRetriever:
             ids=[f"doc_{i}" for i in range(len(documents))],
             documents=documents,
             embeddings=embeddings,
-            metadatas=[{"topic": "AI" if i < 3 or i >= 4 else "cooking"} for i in range(len(documents))]
+            metadatas=[{"topic": "AI" if i < 3 or i >= 4 else "cooking"} for i in range(len(documents))],
         )
 
         return store
@@ -57,11 +57,7 @@ class TestHybridRetriever:
     @pytest.fixture
     def hybrid_retriever(self, vector_store, embedding_provider):
         """Create hybrid retriever instance."""
-        return HybridRetriever(
-            vector_store=vector_store,
-            embedding_provider=embedding_provider,
-            k=60  # RRF parameter
-        )
+        return HybridRetriever(vector_store=vector_store, embedding_provider=embedding_provider, k=60)  # RRF parameter
 
     def test_tokenization_function(self):
         """Test the tokenization function used for BM25."""
@@ -209,12 +205,7 @@ class TestHybridRetriever:
         # Add new document
         new_doc = "New document about data science"
         new_embedding = hybrid_retriever.embedding_provider.embed(new_doc)
-        vector_store.add(
-            ids=["new_doc"],
-            documents=[new_doc],
-            embeddings=[new_embedding],
-            metadatas=[{"topic": "AI"}]
-        )
+        vector_store.add(ids=["new_doc"], documents=[new_doc], embeddings=[new_embedding], metadatas=[{"topic": "AI"}])
 
         # Index should be invalidated and rebuilt
         hybrid_retriever.search("data", top_k=1)
@@ -225,8 +216,7 @@ class TestHybridRetriever:
         """Test performance with larger document sets."""
         # Add more documents
         additional_docs = [
-            f"Document {i} about {'AI' if i % 2 == 0 else 'cooking'} with specific content"
-            for i in range(100)
+            f"Document {i} about {'AI' if i % 2 == 0 else 'cooking'} with specific content" for i in range(100)
         ]
 
         embeddings = embedding_provider.embed_batch(additional_docs)
@@ -234,13 +224,14 @@ class TestHybridRetriever:
             ids=[f"large_doc_{i}" for i in range(len(additional_docs))],
             documents=additional_docs,
             embeddings=embeddings,
-            metadatas=[{"topic": "AI" if i % 2 == 0 else "cooking"} for i in range(len(additional_docs))]
+            metadatas=[{"topic": "AI" if i % 2 == 0 else "cooking"} for i in range(len(additional_docs))],
         )
 
         # Create new retriever for larger corpus
         large_retriever = HybridRetriever(vector_store, embedding_provider)
 
         import time
+
         start_time = time.time()
         results = large_retriever.search("machine learning algorithms", top_k=10)
         duration = time.time() - start_time
@@ -256,7 +247,7 @@ class TestCrossEncoderReranker:
     @pytest.fixture
     def mock_cross_encoder(self):
         """Create mock cross-encoder model."""
-        with patch('tools.rag.cross_encoder_reranker.CrossEncoder') as mock:
+        with patch("tools.rag.cross_encoder_reranker.CrossEncoder") as mock:
             mock_model = Mock()
             mock_model.predict.return_value = np.array([0.9, 0.7, 0.3, 0.8, 0.2])
             mock.return_value = mock_model
@@ -265,17 +256,11 @@ class TestCrossEncoderReranker:
     @pytest.fixture
     def reranker(self, mock_cross_encoder):
         """Create cross-encoder reranker with mock model."""
-        return CrossEncoderReranker(
-            model_name="cross-encoder/ms-marco-MiniLM-L6-v2",
-            max_candidates=20
-        )
+        return CrossEncoderReranker(model_name="cross-encoder/ms-marco-MiniLM-L6-v2", max_candidates=20)
 
     def test_reranker_initialization(self, mock_cross_encoder):
         """Test reranker initialization with model."""
-        reranker = CrossEncoderReranker(
-            model_name="test-model",
-            max_candidates=10
-        )
+        reranker = CrossEncoderReranker(model_name="test-model", max_candidates=10)
 
         assert reranker.model_name == "test-model"
         assert reranker.max_candidates == 10
@@ -289,7 +274,7 @@ class TestCrossEncoderReranker:
             "Cooking recipe book",
             "Deep learning neural networks",
             "Traditional baking methods",
-            "AI and machine learning"
+            "AI and machine learning",
         ]
 
         results = reranker.rerank(query, documents, top_k=3)
@@ -361,19 +346,20 @@ class TestCrossEncoderReranker:
 
     def test_factory_function_no_reranker(self):
         """Test factory function when reranking disabled."""
-        with patch('tools.rag.cross_encoder_reranker.RAGConfig') as mock_config:
+        with patch("tools.rag.cross_encoder_reranker.RAGConfig") as mock_config:
             config_instance = Mock()
             config_instance.use_reranker = False
             mock_config.from_env.return_value = config_instance
 
             from tools.rag.cross_encoder_reranker import create_reranker
+
             result = create_reranker()
 
             assert result is None
 
     def test_factory_function_with_reranker(self):
         """Test factory function when reranking enabled."""
-        with patch('tools.rag.cross_encoder_reranker.RAGConfig') as mock_config:
+        with patch("tools.rag.cross_encoder_reranker.RAGConfig") as mock_config:
             config_instance = Mock()
             config_instance.use_reranker = True
             config_instance.llm_model_local = "test-model"
@@ -381,14 +367,12 @@ class TestCrossEncoderReranker:
             config_instance.reranker_top_k = 15
             mock_config.from_env.return_value = config_instance
 
-            with patch('tools.rag.cross_encoder_reranker.OllamaReranker') as mock_ollama:
+            with patch("tools.rag.cross_encoder_reranker.OllamaReranker") as mock_ollama:
                 create_reranker_result = create_reranker()
 
                 assert create_reranker_result is not None
                 mock_ollama.assert_called_once_with(
-                    model="test-model",
-                    base_url="http://localhost:11434",
-                    max_candidates=15
+                    model="test-model", base_url="http://localhost:11434", max_candidates=15
                 )
 
 
@@ -398,7 +382,7 @@ class TestOllamaReranker:
     @pytest.fixture
     def mock_ollama_client(self):
         """Create mock Ollama client."""
-        with patch('tools.rag.cross_encoder_reranker.httpx.AsyncClient') as mock_client:
+        with patch("tools.rag.cross_encoder_reranker.httpx.AsyncClient") as mock_client:
             client_instance = Mock()
             mock_client.return_value = client_instance
             yield client_instance
@@ -406,10 +390,7 @@ class TestOllamaReranker:
     @pytest.fixture
     def ollama_reranker(self, mock_ollama_client):
         """Create Ollama reranker with mocked client."""
-        return OllamaReranker(
-            model="mistral-nemo:latest",
-            base_url="http://localhost:11434"
-        )
+        return OllamaReranker(model="mistral-nemo:latest", base_url="http://localhost:11434")
 
     def test_ollama_initialization(self, ollama_reranker):
         """Test Ollama reranker initialization."""
@@ -420,18 +401,12 @@ class TestOllamaReranker:
     def test_ollama_score_document(self, ollama_reranker, mock_ollama_client):
         """Test individual document scoring."""
         mock_ollama_client.post.return_value = Mock()
-        mock_ollama_client.post.return_value.model_dump_json.return_value = {
-            "response": "7.5"
-        }
+        mock_ollama_client.post.return_value.model_dump_json.return_value = {"response": "7.5"}
 
         import asyncio
 
         async def test_score():
-            score = await ollama_reranker._async_score_document(
-                mock_ollama_client,
-                "test query",
-                "test document"
-            )
+            score = await ollama_reranker._async_score_document(mock_ollama_client, "test query", "test document")
 
             assert score == 7.5
             mock_ollama_client.post.assert_called_once()
@@ -442,9 +417,7 @@ class TestOllamaReranker:
         """Test async reranking with multiple documents."""
         # Mock successful responses
         mock_ollama_client.post.return_value = Mock()
-        mock_ollama_client.post.return_value.model_dump_json.return_value = {
-            "response": "8.0"
-        }
+        mock_ollama_client.post.return_value.model_dump_json.return_value = {"response": "8.0"}
 
         import asyncio
 
@@ -468,11 +441,7 @@ class TestOllamaReranker:
         import asyncio
 
         async def test_error():
-            score = await ollama_reranker._async_score_document(
-                mock_ollama_client,
-                "test query",
-                "test document"
-            )
+            score = await ollama_reranker._async_score_document(mock_ollama_client, "test query", "test document")
 
             # Should return 0.0 on error
             assert score == 0.0
@@ -481,7 +450,7 @@ class TestOllamaReranker:
 
     def test_ollama_sync_wrapper(self, ollama_reranker):
         """Test synchronous wrapper for async reranking."""
-        with patch.object(ollama_reranker, 'async_rerank') as mock_async:
+        with patch.object(ollama_reranker, "async_rerank") as mock_async:
             mock_async.return_value = [(0, 0.9), (1, 0.7)]
 
             results = ollama_reranker.rerank("test query", ["doc1", "doc2"], top_k=2)
@@ -556,7 +525,7 @@ class TestHybridSearchIntegration:
             "Traditional baking bread recipes",
             "Training neural networks with backpropagation",
             "Cake decorating techniques",
-            "Convolutional networks for image recognition"
+            "Convolutional networks for image recognition",
         ]
 
         embeddings = SimpleEmbeddings(embedding_dim=384).embed_batch(documents)
@@ -564,7 +533,7 @@ class TestHybridSearchIntegration:
             ids=[f"doc_{i}" for i in range(len(documents))],
             documents=documents,
             embeddings=embeddings,
-            metadatas=[{"topic": "AI" if i < 3 or i >= 4 else "cooking"} for i in range(len(documents))]
+            metadatas=[{"topic": "AI" if i < 3 or i >= 4 else "cooking"} for i in range(len(documents))],
         )
 
         # Create hybrid retriever
@@ -662,10 +631,7 @@ class TestHybridSearchIntegration:
         hybrid, reranker = integrated_system
 
         # Add more documents
-        additional_docs = [
-            f"Additional document {i} about {'AI' if i % 2 == 0 else 'cooking'}"
-            for i in range(50)
-        ]
+        additional_docs = [f"Additional document {i} about {'AI' if i % 2 == 0 else 'cooking'}" for i in range(50)]
 
         store = hybrid.vector_store
         embeddings = hybrid.embedding_provider.embed_batch(additional_docs)
@@ -673,13 +639,14 @@ class TestHybridSearchIntegration:
             ids=[f"extra_doc_{i}" for i in range(len(additional_docs))],
             documents=additional_docs,
             embeddings=embeddings,
-            metadatas=[{"topic": "AI" if i % 2 == 0 else "cooking"} for i in range(len(additional_docs))]
+            metadatas=[{"topic": "AI" if i % 2 == 0 else "cooking"} for i in range(len(additional_docs))],
         )
 
         # Invalidate cache to rebuild index
         hybrid.invalidate_cache()
 
         import time
+
         start_time = time.time()
 
         results = hybrid.search("machine learning", top_k=10)

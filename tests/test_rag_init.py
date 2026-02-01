@@ -9,6 +9,7 @@ os.environ["USE_DATABRICKS"] = "false"
 
 try:
     from tools.rag.config import RAGConfig
+
     print("1. RAGConfig OK")
 
     config = RAGConfig.from_env()
@@ -16,6 +17,7 @@ try:
     print("2. Config loaded OK")
 
     from tools.rag.rag_engine import RAGEngine
+
     print("3. RAGEngine import OK")
 
     engine = RAGEngine(config=config)
@@ -27,4 +29,5 @@ try:
 except Exception as e:
     print(f"FAIL at step: {type(e).__name__}: {e}")
     import traceback
+
     traceback.print_exc()

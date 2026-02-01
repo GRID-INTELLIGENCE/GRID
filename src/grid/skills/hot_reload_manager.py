@@ -19,7 +19,11 @@ from pathlib import Path
 
 # Note: watchdog is an optional dependency for hot-reloading
 try:
-    from watchdog.events import FileCreatedEvent, FileModifiedEvent, FileSystemEventHandler  # type: ignore[import-not-found]
+    from watchdog.events import (  # type: ignore[import-not-found]
+        FileCreatedEvent,
+        FileModifiedEvent,
+        FileSystemEventHandler,
+    )
     from watchdog.observers import Observer  # type: ignore[import-not-found]
 
     WATCHDOG_AVAILABLE = True

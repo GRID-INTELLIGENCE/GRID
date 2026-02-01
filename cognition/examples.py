@@ -13,18 +13,14 @@ from cognition.Flow import FlowEvent, FlowManager
 flow_manager = FlowManager()
 
 # Create a cognitive flow
-flow = flow_manager.create_flow(
-    flow_id="example_flow",
-    name="Example Cognitive Flow",
-    domain="software_development"
-)
+flow = flow_manager.create_flow(flow_id="example_flow", name="Example Cognitive Flow", domain="software_development")
 
 # Add events to the flow
 event1 = FlowEvent(
     event_id="perception_1",
     event_type="perception",
     timestamp=time.time(),
-    data={"stimulus": "code_review", "complexity": "high"}
+    data={"stimulus": "code_review", "complexity": "high"},
 )
 
 flow_manager.process_event("example_flow", event1)
@@ -42,15 +38,12 @@ pattern = pattern_manager.create_pattern_from_template(
     pattern_type=PatternType.SEMANTIC,
     template={
         "keywords": ["error", "exception", "bug", "issue"],
-        "phrases": ["stack trace", "null pointer", "index out of bounds"]
-    }
+        "phrases": ["stack trace", "null pointer", "index out of bounds"],
+    },
 )
 
 # Match pattern against input
-confidence, details = pattern_manager.match_pattern(
-    "bug_pattern",
-    "Found a null pointer exception in the code"
-)
+confidence, details = pattern_manager.match_pattern("bug_pattern", "Found a null pointer exception in the code")
 
 # Example 3: Temporal Context
 from cognition.Time import TimeManager
@@ -59,18 +52,11 @@ from cognition.Time import TimeManager
 time_manager = TimeManager()
 
 # Create a temporal context
-context = time_manager.create_context(
-    context_id="dev_session",
-    timezone_offset=-5.0,  # EST
-    session_type="coding"
-)
+context = time_manager.create_context(context_id="dev_session", timezone_offset=-5.0, session_type="coding")  # EST
 
 # Add a time window for focused work
 window = time_manager.window_manager.create_window(
-    window_id="focus_time",
-    start_time=time.time(),
-    duration=3600,  # 1 hour
-    activity_type="deep_work"
+    window_id="focus_time", start_time=time.time(), duration=3600, activity_type="deep_work"  # 1 hour
 )
 
 context.add_window(window)

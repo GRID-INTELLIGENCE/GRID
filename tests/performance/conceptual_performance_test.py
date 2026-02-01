@@ -22,7 +22,7 @@ class MockRAGEngine:
             "multi_hop_queries": 0,
             "fallback_queries": 0,
             "auto_indexing_attempts": 0,
-            "auto_indexing_successes": 0
+            "auto_indexing_successes": 0,
         }
 
     async def query(self, query_text: str, session_id: str = None) -> dict[str, Any]:
@@ -73,9 +73,9 @@ class MockRAGEngine:
                 "session_id": session_id,
                 "session_active": session_id is not None,
                 "context_used": context_used,
-                "turn_count": turn_count
+                "turn_count": turn_count,
             },
-            "latency_ms": latency
+            "latency_ms": latency,
         }
 
     def _should_use_fallback(self, query: str) -> bool:
@@ -100,20 +100,17 @@ class MockRAGEngine:
     def _generate_mock_sources(self, query: str, fallback_used: bool) -> list[dict[str, Any]]:
         """Generate mock sources."""
         if fallback_used:
-            return [{
-                "text": "General knowledge fallback",
-                "metadata": {"source": "fallback", "confidence": 0.5}
-            }]
+            return [{"text": "General knowledge fallback", "metadata": {"source": "fallback", "confidence": 0.5}}]
         else:
             return [
                 {
                     "text": f"Documentation about {query}",
-                    "metadata": {"path": f"docs/{query.replace(' ', '_')}.md", "confidence": 0.9}
+                    "metadata": {"path": f"docs/{query.replace(' ', '_')}.md", "confidence": 0.9},
                 },
                 {
                     "text": f"Additional information about {query}",
-                    "metadata": {"path": f"docs/details/{query.replace(' ', '_')}.md", "confidence": 0.8}
-                }
+                    "metadata": {"path": f"docs/details/{query.replace(' ', '_')}.md", "confidence": 0.8},
+                },
             ]
 
     def get_metrics(self) -> dict[str, Any]:
@@ -121,9 +118,11 @@ class MockRAGEngine:
         return {
             **self.metrics,
             "session_count": len(self.conversation_memory),
-            "avg_turns_per_session": sum(
-                len(turns) for turns in self.conversation_memory.values()
-            ) / len(self.conversation_memory) if self.conversation_memory else 0
+            "avg_turns_per_session": (
+                sum(len(turns) for turns in self.conversation_memory.values()) / len(self.conversation_memory)
+                if self.conversation_memory
+                else 0
+            ),
         }
 
 
@@ -137,15 +136,11 @@ async def test_fallback_performance():
     fallback_queries = [
         "What is the meaning of life?",
         "Explain quantum computing",
-        "Who won the world series in 2020?"
+        "Who won the world series in 2020?",
     ]
 
     # Test queries that should use indexed content
-    indexed_queries = [
-        "What is GRID?",
-        "How does RAG work?",
-        "What are the 9 cognition patterns?"
-    ]
+    indexed_queries = ["What is GRID?", "How does RAG work?", "What are the 9 cognition patterns?"]
 
     print("\nFallback Queries:")
     for query in fallback_queries:
@@ -155,7 +150,9 @@ async def test_fallback_performance():
     print("\nIndexed Content Queries:")
     for query in indexed_queries:
         result = await engine.query(query)
-        print(f"  '{query}' -> Fallback: {result['fallback_used']}, Latency: {result['latency_ms']:.1f}ms, Sources: {len(result['sources'])}")
+        print(
+            f"  '{query}' -> Fallback: {result['fallback_used']}, Latency: {result['latency_ms']:.1f}ms, Sources: {len(result['sources'])}"
+        )
 
 
 async def test_conversation_performance():
@@ -169,7 +166,7 @@ async def test_conversation_performance():
         "What is GRID?",
         "How does it work?",
         "What are the main components?",
-        "How does conversation memory work?"
+        "How does conversation memory work?",
     ]
 
     print(f"\nConversation Session: {session_id}")
@@ -191,15 +188,11 @@ async def test_multi_hop_performance():
     multi_hop_queries = [
         "How does the GRID architecture work?",
         "Explain the RAG workflow",
-        "What are the components of the agentic system?"
+        "What are the components of the agentic system?",
     ]
 
     # Test simple queries
-    simple_queries = [
-        "What is GRID?",
-        "Who created RAG?",
-        "What is a vector store?"
-    ]
+    simple_queries = ["What is GRID?", "Who created RAG?", "What is a vector store?"]
 
     print("\nMulti-hop Queries:")
     for query in multi_hop_queries:
@@ -224,7 +217,7 @@ async def test_metrics():
         "How does it work?",
         "What is the meaning of life?",
         "Explain the architecture",
-        "Who won the world series?"
+        "Who won the world series?",
     ]
 
     session_ids = ["session-1", "session-2"]
@@ -271,6 +264,7 @@ async def main():
     except Exception as e:
         print(f"\nError during testing: {e}")
         import traceback
+
         traceback.print_exc()
 
 

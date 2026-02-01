@@ -11,12 +11,14 @@ logger = logging.getLogger(__name__)
 
 settings = MothershipSettings.from_env()
 
+
 class StripeService:
     """
     Adapter for Stripe API operations.
     Wraps synchronous Stripe calls in asyncio executors.
     Provides mock fallback if Stripe is disabled.
     """
+
     def __init__(self):
         self.api_key = settings.payment.stripe_secret_key
         self.enabled = settings.payment.stripe_enabled
@@ -38,8 +40,7 @@ class StripeService:
             loop = asyncio.get_running_loop()
             # Use metadata to link back to our user_id
             customer = await loop.run_in_executor(
-                None,
-                lambda: stripe.Customer.create(email=email, name=name, metadata={"user_id": user_id})
+                None, lambda: stripe.Customer.create(email=email, name=name, metadata={"user_id": user_id})
             )
             return customer.id
         except Exception as e:
@@ -49,7 +50,7 @@ class StripeService:
     async def create_subscription(self, customer_id: str, price_id: str) -> dict[str, Any] | None:
         """Create a Subscription for a Customer."""
         if not self.enabled:
-            return {"id": "sub_mock", "status": "active", "current_period_end": int(time.time() + 86400*30)}
+            return {"id": "sub_mock", "status": "active", "current_period_end": int(time.time() + 86400 * 30)}
 
         try:
             loop = asyncio.get_running_loop()
@@ -58,10 +59,10 @@ class StripeService:
                 lambda: stripe.Subscription.create(
                     customer=customer_id,
                     items=[{"price": price_id}],
-                )
+                ),
             )
             # Return dict representation
-            return subscription # type: ignore
+            return subscription  # type: ignore
         except Exception as e:
             logger.error(f"Stripe create_subscription failed: {e}")
             return None
@@ -76,11 +77,8 @@ class StripeService:
             await loop.run_in_executor(
                 None,
                 lambda: stripe.SubscriptionItem.create_usage_record(
-                    subscription_item_id,
-                    quantity=quantity,
-                    timestamp=int(time.time()),
-                    action="increment"
-                )
+                    subscription_item_id, quantity=quantity, timestamp=int(time.time()), action="increment"
+                ),
             )
             return True
         except Exception as e:

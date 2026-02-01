@@ -33,7 +33,9 @@ class MockVectorStore(BaseVectorStore):
                 "metadata": metadatas[i] if metadatas else {},
             }
 
-    def query(self, query_embedding: list[float], n_results: int = 5, where: dict | None = None, include: list | None = None) -> dict:
+    def query(
+        self, query_embedding: list[float], n_results: int = 5, where: dict | None = None, include: list | None = None
+    ) -> dict:
         """Query mock store."""
         return {"ids": [], "documents": [], "metadatas": [], "distances": []}
 

@@ -7,6 +7,7 @@ sys.path.insert(0, SRC_PATH)
 
 from application.resonance.query_engine import ResonanceQueryEngine  # noqa: E402
 
+
 def run_investigative_suite():
     print("--- [Databricks Investigative SQL Suite] ---")
     print("Scenario: Mirroring Cloud SQL Analytics in Local Relational Store")
@@ -66,6 +67,7 @@ def run_investigative_suite():
         GROUP BY t.activity_id
     """
     print(engine.execute_query(q3).to_string(index=False))
+
 
 if __name__ == "__main__":
     run_investigative_suite()

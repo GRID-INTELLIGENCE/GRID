@@ -27,12 +27,7 @@ class TestFlowPatternCoffee:
         assert mode.momentum == "low"
 
     def test_recognize_with_coffee_mode(self, flow_pattern):
-        data = {
-            "cognitive_load": 2.0,
-            "engagement": 0.9,
-            "focus": 0.9,
-            "time_distortion": 0.5
-        }
+        data = {"cognitive_load": 2.0, "engagement": 0.9, "focus": 0.9, "time_distortion": 0.5}
         detection = flow_pattern.recognize_with_coffee_mode(data)
         assert detection.detected is True
         assert detection.features["coffee_mode"] == "Espresso"
@@ -40,21 +35,13 @@ class TestFlowPatternCoffee:
         assert "Espresso" in detection.explanation
 
     def test_calculate_momentum(self, flow_pattern):
-        data = {
-            "cognitive_load": 2.0,
-            "engagement": 0.8,
-            "focus": 0.8
-        }
+        data = {"cognitive_load": 2.0, "engagement": 0.8, "focus": 0.8}
         momentum = flow_pattern.calculate_momentum(data)
         assert momentum["momentum_type"] == "high"
         assert momentum["momentum_score"] > 0.8
         assert momentum["recommended_pace"] == "fast"
 
-        data_low = {
-            "cognitive_load": 8.0,
-            "engagement": 0.5,
-            "focus": 0.5
-        }
+        data_low = {"cognitive_load": 8.0, "engagement": 0.5, "focus": 0.5}
         momentum_low = flow_pattern.calculate_momentum(data_low)
         assert momentum_low["momentum_type"] == "low"
         assert momentum_low["momentum_score"] < 0.5

@@ -5,7 +5,6 @@ Tests border crossings, gradient consistency, and stability of the
 Grid safety system. Validates that all safety modules integrate correctly.
 """
 
-
 import pytest
 
 

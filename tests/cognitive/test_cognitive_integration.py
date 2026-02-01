@@ -19,9 +19,7 @@ class TestCognitiveIntegration:
         """Test complete flow from interaction to cognitive state."""
         # Create interaction event
         event = InteractionEvent(
-            user_id="test_user",
-            action="case_start",
-            metadata={"complexity": 0.7, "information_density": 0.6}
+            user_id="test_user", action="case_start", metadata={"complexity": 0.7, "information_density": 0.6}
         )
 
         # Track interaction
@@ -37,30 +35,21 @@ class TestCognitiveIntegration:
     async def test_interaction_to_operation_mapping(self, cognitive_engine):
         """Test interaction to operation conversion."""
         # Test case_start mapping
-        case_start_event = InteractionEvent(
-            user_id="test_user",
-            action="case_start"
-        )
+        case_start_event = InteractionEvent(user_id="test_user", action="case_start")
         operation = cognitive_engine._interaction_to_operation(case_start_event)
 
         assert operation["complexity"] == 0.7  # Should be increased for case_start
-        assert operation["novelty"] == 0.6    # Should be increased for case_start
+        assert operation["novelty"] == 0.6  # Should be increased for case_start
 
         # Test retry mapping
-        retry_event = InteractionEvent(
-            user_id="test_user",
-            action="retry"
-        )
+        retry_event = InteractionEvent(user_id="test_user", action="retry")
         retry_operation = cognitive_engine._interaction_to_operation(retry_event)
 
         assert retry_operation["complexity"] == 0.8  # Should be high for retry
-        assert retry_operation["novelty"] == 0.2      # Should be low for retry
+        assert retry_operation["novelty"] == 0.2  # Should be low for retry
 
         # Test error mapping
-        error_event = InteractionEvent(
-            user_id="test_user",
-            action="error"
-        )
+        error_event = InteractionEvent(user_id="test_user", action="error")
         error_operation = cognitive_engine._interaction_to_operation(error_event)
 
         assert error_operation["complexity"] == 0.9  # Should be very high for error
@@ -72,19 +61,11 @@ class TestCognitiveIntegration:
         user_id = "test_learning_user"
 
         # First interaction - should create profile
-        event1 = InteractionEvent(
-            user_id=user_id,
-            action="case_start",
-            metadata={"complexity": 0.5}
-        )
+        event1 = InteractionEvent(user_id=user_id, action="case_start", metadata={"complexity": 0.5})
         state1 = await cognitive_engine.track_interaction(event1)
 
         # Second interaction - should update profile
-        event2 = InteractionEvent(
-            user_id=user_id,
-            action="query",
-            metadata={"complexity": 0.3}
-        )
+        event2 = InteractionEvent(user_id=user_id, action="query", metadata={"complexity": 0.3})
         state2 = await cognitive_engine.track_interaction(event2)
 
         # Verify both states were created
@@ -99,17 +80,13 @@ class TestCognitiveIntegration:
         """Test processing mode detection based on load."""
         # Low load should trigger System 1
         low_load_event = InteractionEvent(
-            user_id="test_user",
-            action="query",
-            metadata={"complexity": 0.2, "information_density": 0.3}
+            user_id="test_user", action="query", metadata={"complexity": 0.2, "information_density": 0.3}
         )
         low_load_state = await cognitive_engine.track_interaction(low_load_event)
 
         # High load should trigger System 2
         high_load_event = InteractionEvent(
-            user_id="test_user",
-            action="case_start",
-            metadata={"complexity": 0.9, "information_density": 0.8}
+            user_id="test_user", action="case_start", metadata={"complexity": 0.9, "information_density": 0.8}
         )
         high_load_state = await cognitive_engine.track_interaction(high_load_event)
 

@@ -33,6 +33,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ChunkingProfile:
     """Chunking profile configuration."""
+
     chunk_size: int
     overlap: int
     description: str = ""
@@ -41,6 +42,7 @@ class ChunkingProfile:
 @dataclass
 class SourceConfig:
     """Source configuration from manifest."""
+
     path: str
     profile: str
     metadata: dict[str, Any]
@@ -49,6 +51,7 @@ class SourceConfig:
 @dataclass
 class IngestionManifest:
     """Ingestion manifest configuration."""
+
     profiles: dict[str, ChunkingProfile] = field(default_factory=dict)
     sources: list[SourceConfig] = field(default_factory=list)
     security: dict[str, Any] = field(default_factory=dict)
@@ -59,6 +62,7 @@ class IngestionManifest:
 @dataclass
 class DocumentData:
     """Document data structure."""
+
     id: str
     title: str
     content: str
@@ -71,6 +75,7 @@ class DocumentData:
 @dataclass
 class IngestionResult:
     """Result of ingestion operation."""
+
     document_id: str
     chunks_created: int
     success: bool
@@ -103,8 +108,16 @@ class FileConnector(DataConnector):
         self.directory = Path(directory)
         self.file_patterns = file_patterns or ["*.txt", "*.md", "*.pdf", "*.docx"]
         self.supported_extensions = {
-            '.txt', '.md', '.pdf', '.docx',  # existing
-            '.py', '.rst', '.json', '.yaml', '.yml', '.ipynb'  # new
+            ".txt",
+            ".md",
+            ".pdf",
+            ".docx",  # existing
+            ".py",
+            ".rst",
+            ".json",
+            ".yaml",
+            ".yml",
+            ".ipynb",  # new
         }
         self.manifest_path = manifest_path
         self.manifest = self._load_manifest() if manifest_path else None
@@ -121,30 +134,32 @@ class FileConnector(DataConnector):
 
             # Parse profiles
             profiles = {}
-            if 'profiles' in data:
-                for name, profile_data in data['profiles'].items():
+            if "profiles" in data:
+                for name, profile_data in data["profiles"].items():
                     profiles[name] = ChunkingProfile(
-                        chunk_size=profile_data.get('chunk_size', 800),
-                        overlap=profile_data.get('overlap', 120),
-                        description=profile_data.get('description', '')
+                        chunk_size=profile_data.get("chunk_size", 800),
+                        overlap=profile_data.get("overlap", 120),
+                        description=profile_data.get("description", ""),
                     )
 
             # Parse sources
             sources = []
-            if 'sources' in data:
-                for source_data in data['sources']:
-                    sources.append(SourceConfig(
-                        path=source_data['path'],
-                        profile=source_data['profile'],
-                        metadata=source_data.get('metadata', {})
-                    ))
+            if "sources" in data:
+                for source_data in data["sources"]:
+                    sources.append(
+                        SourceConfig(
+                            path=source_data["path"],
+                            profile=source_data["profile"],
+                            metadata=source_data.get("metadata", {}),
+                        )
+                    )
 
             return IngestionManifest(
                 profiles=profiles,
                 sources=sources,
-                security=data.get('security', {}),
-                sync=data.get('sync', {}),
-                feedback=data.get('feedback', {})
+                security=data.get("security", {}),
+                sync=data.get("sync", {}),
+                feedback=data.get("feedback", {}),
             )
         except Exception as e:
             logger.error(f"Error loading manifest: {e}")
@@ -171,21 +186,21 @@ class FileConnector(DataConnector):
         content = ""
         file_type = file_path.suffix.lower()
 
-        if file_type == '.txt' or file_type == '.md':
-            content = file_path.read_text(encoding='utf-8')
-        elif file_type == '.pdf':
+        if file_type == ".txt" or file_type == ".md":
+            content = file_path.read_text(encoding="utf-8")
+        elif file_type == ".pdf":
             content = self._extract_pdf_text(file_path)
-        elif file_type == '.docx':
+        elif file_type == ".docx":
             content = self._extract_docx_text(file_path)
-        elif file_type == '.py':
+        elif file_type == ".py":
             content = self._extract_code_text(file_path)
-        elif file_type == '.rst':
-            content = file_path.read_text(encoding='utf-8')
-        elif file_type == '.json':
+        elif file_type == ".rst":
+            content = file_path.read_text(encoding="utf-8")
+        elif file_type == ".json":
             content = self._extract_json_text(file_path)
-        elif file_type == '.yaml' or file_type == '.yml':
+        elif file_type == ".yaml" or file_type == ".yml":
             content = self._extract_yaml_text(file_path)
-        elif file_type == '.ipynb':
+        elif file_type == ".ipynb":
             content = self._extract_notebook_text(file_path)
         else:
             return None
@@ -224,7 +239,7 @@ class FileConnector(DataConnector):
             source_type="file",
             source_path=str(file_path),
             file_type=file_type[1:],  # Remove the dot
-            metadata=metadata
+            metadata=metadata,
         )
 
     def _get_git_metadata(self, file_path: Path) -> dict[str, Any] | None:
@@ -232,33 +247,30 @@ class FileConnector(DataConnector):
         try:
             # Get git commit SHA
             result = subprocess.run(
-                ['git', 'log', '-n', '1', '--pretty=format:%H', '--', str(file_path)],
+                ["git", "log", "-n", "1", "--pretty=format:%H", "--", str(file_path)],
                 capture_output=True,
                 text=True,
-                timeout=10
+                timeout=10,
             )
             if result.returncode == 0 and result.stdout.strip():
                 commit_sha = result.stdout.strip()
-                return {
-                    "git_commit": commit_sha,
-                    "doc_version": f"main@{commit_sha}"
-                }
+                return {"git_commit": commit_sha, "doc_version": f"main@{commit_sha}"}
         except Exception as e:
             logger.debug(f"Could not get git metadata for {file_path}: {e}")
         return None
 
     def _extract_code_text(self, file_path: Path) -> str:
         """Extract text from code files."""
-        return file_path.read_text(encoding='utf-8')
+        return file_path.read_text(encoding="utf-8")
 
     def _extract_json_text(self, file_path: Path) -> str:
         """Extract text from JSON files."""
-        data = json.loads(file_path.read_text(encoding='utf-8'))
+        data = json.loads(file_path.read_text(encoding="utf-8"))
         return json.dumps(data, indent=2)
 
     def _extract_yaml_text(self, file_path: Path) -> str:
         """Extract text from YAML files."""
-        data = yaml.safe_load(file_path.read_text(encoding='utf-8'))
+        data = yaml.safe_load(file_path.read_text(encoding="utf-8"))
         return yaml.dump(data, default_flow_style=False)
 
     def _extract_notebook_text(self, file_path: Path) -> str:
@@ -266,15 +278,15 @@ class FileConnector(DataConnector):
         nb = nbformat.read(str(file_path), as_version=4)
         content_parts = []
         for cell in nb.cells:
-            if cell.cell_type == 'markdown':
+            if cell.cell_type == "markdown":
                 content_parts.append(cell.source)
-            elif cell.cell_type == 'code':
+            elif cell.cell_type == "code":
                 content_parts.append(f"```python\n{cell.source}\n```")
-        return '\n\n'.join(content_parts)
+        return "\n\n".join(content_parts)
 
     def _extract_pdf_text(self, file_path: Path) -> str:
         """Extract text from PDF file."""
-        with open(file_path, 'rb') as file:
+        with open(file_path, "rb") as file:
             pdf_reader = PyPDF2.PdfReader(file)
             text = ""
             for page in pdf_reader.pages:
@@ -290,11 +302,7 @@ class FileConnector(DataConnector):
         return text
 
     def get_metadata(self) -> dict[str, Any]:
-        return {
-            "type": "file",
-            "directory": str(self.directory),
-            "patterns": self.file_patterns
-        }
+        return {"type": "file", "directory": str(self.directory), "patterns": self.file_patterns}
 
 
 class WebConnector(DataConnector):
@@ -312,7 +320,7 @@ class WebConnector(DataConnector):
                 response = requests.head(self.urls[0], headers=self.headers, timeout=10)
                 return response.status_code < 400
             return True
-        except:
+        except Exception:
             return False
 
     def fetch_data(self) -> Iterator[DocumentData]:
@@ -331,7 +339,7 @@ class WebConnector(DataConnector):
         response.raise_for_status()
 
         # Parse HTML content
-        soup = BeautifulSoup(response.content, 'html.parser')
+        soup = BeautifulSoup(response.content, "html.parser")
 
         # Extract title
         title = soup.title.string if soup.title else urlparse(url).path
@@ -339,7 +347,7 @@ class WebConnector(DataConnector):
         # Extract text content
         for script in soup(["script", "style"]):
             script.extract()
-        content = soup.get_text(separator='\n', strip=True)
+        content = soup.get_text(separator="\n", strip=True)
 
         # Generate document ID from URL hash
         url_hash = hashlib.md5(url.encode()).hexdigest()
@@ -355,24 +363,19 @@ class WebConnector(DataConnector):
             metadata={
                 "status_code": response.status_code,
                 "content_type": response.headers.get("content-type"),
-                "url_hash": url_hash
-            }
+                "url_hash": url_hash,
+            },
         )
 
     def get_metadata(self) -> dict[str, Any]:
-        return {
-            "type": "web",
-            "urls": self.urls,
-            "headers": self.headers
-        }
+        return {"type": "web", "urls": self.urls, "headers": self.headers}
 
 
 class APIConnector(DataConnector):
     """Connector for REST APIs."""
 
-    def __init__(self, base_url: str, endpoints: list[str],
-                 headers: dict[str, str] = None, auth_token: str = None):
-        self.base_url = base_url.rstrip('/')
+    def __init__(self, base_url: str, endpoints: list[str], headers: dict[str, str] = None, auth_token: str = None):
+        self.base_url = base_url.rstrip("/")
         self.endpoints = endpoints
         self.headers = headers or {"Content-Type": "application/json"}
         if auth_token:
@@ -381,10 +384,9 @@ class APIConnector(DataConnector):
     def connect(self) -> bool:
         """Test API connection."""
         try:
-            response = requests.get(f"{self.base_url}/health",
-                                  headers=self.headers, timeout=10)
+            response = requests.get(f"{self.base_url}/health", headers=self.headers, timeout=10)
             return response.status_code < 400
-        except:
+        except Exception:
             return False
 
     def fetch_data(self) -> Iterator[DocumentData]:
@@ -428,16 +430,12 @@ class APIConnector(DataConnector):
             metadata={
                 "endpoint": endpoint,
                 "status_code": response.status_code,
-                "response_size": len(response.content)
-            }
+                "response_size": len(response.content),
+            },
         )
 
     def get_metadata(self) -> dict[str, Any]:
-        return {
-            "type": "api",
-            "base_url": self.base_url,
-            "endpoints": self.endpoints
-        }
+        return {"type": "api", "base_url": self.base_url, "endpoints": self.endpoints}
 
 
 class TextProcessor:
@@ -462,7 +460,7 @@ class TextProcessor:
             if end < len(text):
                 # Look for sentence endings within the last 200 chars
                 search_end = min(end + 200, len(text))
-                break_chars = ['. ', '! ', '? ', '\n\n']
+                break_chars = [". ", "! ", "? ", "\n\n"]
 
                 best_break = end
                 for break_char in break_chars:
@@ -485,7 +483,7 @@ class TextProcessor:
 
         return chunks
 
-    def get_chunking_profile(self, profile_name: str, manifest: IngestionManifest | None = None) -> 'ChunkingProfile':
+    def get_chunking_profile(self, profile_name: str, manifest: IngestionManifest | None = None) -> "ChunkingProfile":
         """Get chunking profile by name."""
         if manifest and profile_name in manifest.profiles:
             return manifest.profiles[profile_name]
@@ -503,11 +501,7 @@ class DataIngestionPipeline:
         self.manifest_path = manifest_path
         self.manifest = self._load_manifest() if manifest_path else None
         self.processor = TextProcessor()
-        self.ingestion_stats = {
-            "documents_processed": 0,
-            "chunks_created": 0,
-            "errors": 0
-        }
+        self.ingestion_stats = {"documents_processed": 0, "chunks_created": 0, "errors": 0}
         self.last_ingested_sha = self._load_last_ingested_sha()
 
     def _load_manifest(self) -> IngestionManifest | None:
@@ -522,30 +516,32 @@ class DataIngestionPipeline:
 
             # Parse profiles
             profiles = {}
-            if 'profiles' in data:
-                for name, profile_data in data['profiles'].items():
+            if "profiles" in data:
+                for name, profile_data in data["profiles"].items():
                     profiles[name] = ChunkingProfile(
-                        chunk_size=profile_data.get('chunk_size', 800),
-                        overlap=profile_data.get('overlap', 120),
-                        description=profile_data.get('description', '')
+                        chunk_size=profile_data.get("chunk_size", 800),
+                        overlap=profile_data.get("overlap", 120),
+                        description=profile_data.get("description", ""),
                     )
 
             # Parse sources
             sources = []
-            if 'sources' in data:
-                for source_data in data['sources']:
-                    sources.append(SourceConfig(
-                        path=source_data['path'],
-                        profile=source_data['profile'],
-                        metadata=source_data.get('metadata', {})
-                    ))
+            if "sources" in data:
+                for source_data in data["sources"]:
+                    sources.append(
+                        SourceConfig(
+                            path=source_data["path"],
+                            profile=source_data["profile"],
+                            metadata=source_data.get("metadata", {}),
+                        )
+                    )
 
             return IngestionManifest(
                 profiles=profiles,
                 sources=sources,
-                security=data.get('security', {}),
-                sync=data.get('sync', {}),
-                feedback=data.get('feedback', {})
+                security=data.get("security", {}),
+                sync=data.get("sync", {}),
+                feedback=data.get("feedback", {}),
             )
         except Exception as e:
             logger.error(f"Error loading manifest: {e}")
@@ -555,13 +551,11 @@ class DataIngestionPipeline:
         """Load last ingested commit SHA from database."""
         try:
             with self.db.session() as cursor:
-                cursor.execute(
-                    "SELECT extra_metadata FROM kb_documents WHERE id = 'last_ingested_sha'"
-                )
+                cursor.execute("SELECT extra_metadata FROM kb_documents WHERE id = 'last_ingested_sha'")
                 row = cursor.fetchone()
                 if row:
                     metadata = json.loads(row[0])
-                    return metadata.get('sha')
+                    return metadata.get("sha")
         except Exception as e:
             logger.debug(f"Could not load last ingested SHA: {e}")
         return None
@@ -583,7 +577,7 @@ class DataIngestionPipeline:
                         (id, title, content, source_type, source_path, file_type, extra_metadata, created_at, updated_at)
                     VALUES ('last_ingested_sha', 'Last Ingested SHA', '', 'system', '', '', ?, current_timestamp(), current_timestamp())
                     """,
-                    (json.dumps({'sha': sha}), json.dumps({'sha': sha}))
+                    (json.dumps({"sha": sha}), json.dumps({"sha": sha})),
                 )
         except Exception as e:
             logger.error(f"Could not save last ingested SHA: {e}")
@@ -606,13 +600,10 @@ class DataIngestionPipeline:
 
             # Use git diff to get changed files
             result = subprocess.run(
-                ['git', 'diff', '--name-only', f'{since_sha}..HEAD'],
-                capture_output=True,
-                text=True,
-                timeout=30
+                ["git", "diff", "--name-only", f"{since_sha}..HEAD"], capture_output=True, text=True, timeout=30
             )
             if result.returncode == 0:
-                changed_files = [Path(f.strip()) for f in result.stdout.split('\n') if f.strip()]
+                changed_files = [Path(f.strip()) for f in result.stdout.split("\n") if f.strip()]
                 return changed_files
         except Exception as e:
             logger.error(f"Error getting changed files: {e}")
@@ -622,15 +613,12 @@ class DataIngestionPipeline:
         """Check if file contains secrets using detect-secrets."""
         try:
             result = subprocess.run(
-                ['detect-secrets', 'scan', str(file_path)],
-                capture_output=True,
-                text=True,
-                timeout=30
+                ["detect-secrets", "scan", str(file_path)], capture_output=True, text=True, timeout=30
             )
             if result.returncode == 0:
                 output = result.stdout
                 # Check if any secrets were found
-                return 'No secrets detected' not in output
+                return "No secrets detected" not in output
         except FileNotFoundError:
             logger.warning("detect-secrets not installed, skipping secret scan")
         except Exception as e:
@@ -642,8 +630,7 @@ class DataIngestionPipeline:
         if not self.manifest:
             return False
 
-        skip_patterns = self.manifest.security.get('skip_patterns', [])
-        file_str = str(file_path)
+        skip_patterns = self.manifest.security.get("skip_patterns", [])
 
         for pattern in skip_patterns:
             if file_path.match(pattern):
@@ -694,7 +681,7 @@ class DataIngestionPipeline:
                 source_type=doc_data.source_type,
                 source_path=doc_data.source_path,
                 file_type=doc_data.file_type,
-                metadata=doc_data.metadata
+                metadata=doc_data.metadata,
             )
 
             # Chunk the content
@@ -714,29 +701,20 @@ class DataIngestionPipeline:
                     chunk_index=i,
                     embedding=embedding,
                     token_count=len(chunk.split()),
-                    metadata={"chunk_index": i}
+                    metadata={"chunk_index": i},
                 )
 
                 chunks_created += 1
 
-            return IngestionResult(
-                document_id=doc_data.id,
-                chunks_created=chunks_created,
-                success=True
-            )
+            return IngestionResult(document_id=doc_data.id, chunks_created=chunks_created, success=True)
 
         except Exception as e:
-            return IngestionResult(
-                document_id=doc_data.id,
-                chunks_created=0,
-                success=False,
-                error_message=str(e)
-            )
+            return IngestionResult(document_id=doc_data.id, chunks_created=0, success=False, error_message=str(e))
 
     def get_stats(self) -> dict[str, Any]:
         """Get ingestion statistics."""
         return {
             **self.ingestion_stats,
             "connectors_count": len(self.connectors),
-            "connectors_info": [c.get_metadata() for c in self.connectors]
+            "connectors_info": [c.get_metadata() for c in self.connectors],
         }

@@ -1,6 +1,7 @@
 """
 Billing Service - Cost Calculation and Plan Management.
 """
+
 import logging
 
 from src.application.mothership.config import MothershipSettings
@@ -15,15 +16,14 @@ class BillingService:
     """
     Domain service for Billing logic: Cost Calculation, Plan Limits, Tier Management.
     """
+
     def __init__(self, db_manager: DatabaseManager):
         self.db = db_manager
         self.aggregator = UsageAggregator(db_manager)
 
     async def get_user_tier(self, user_id: str) -> CostTier:
         """Get user's current subscription tier."""
-        row = await self.db.fetch_one(
-            "SELECT tier FROM subscriptions WHERE user_id = ?", (user_id,)
-        )
+        row = await self.db.fetch_one("SELECT tier FROM subscriptions WHERE user_id = ?", (user_id,))
         if row:
             try:
                 return CostTier(row["tier"])
@@ -34,18 +34,17 @@ class BillingService:
     async def set_user_tier(self, user_id: str, tier: CostTier, stripe_sub_id: str = None) -> None:
         """Set or update user's subscription tier."""
         import uuid
-        existing = await self.db.fetch_one(
-            "SELECT id FROM subscriptions WHERE user_id = ?", (user_id,)
-        )
+
+        existing = await self.db.fetch_one("SELECT id FROM subscriptions WHERE user_id = ?", (user_id,))
         if existing:
             await self.db.execute(
                 "UPDATE subscriptions SET tier = ?, stripe_subscription_id = ? WHERE user_id = ?",
-                (tier.value, stripe_sub_id, user_id)
+                (tier.value, stripe_sub_id, user_id),
             )
         else:
             await self.db.execute(
                 "INSERT INTO subscriptions (id, user_id, tier, stripe_subscription_id) VALUES (?, ?, ?, ?)",
-                (str(uuid.uuid4()), user_id, tier.value, stripe_sub_id)
+                (str(uuid.uuid4()), user_id, tier.value, stripe_sub_id),
             )
         await self.db.commit()
 
@@ -85,11 +84,7 @@ class BillingService:
             if used > limit:
                 overage = used - limit
                 # Get overage rate from settings
-                overage_rate = getattr(
-                    settings.billing,
-                    f"{event_type}_overage_cents",
-                    1  # Default 1 cent per unit
-                )
+                overage_rate = getattr(settings.billing, f"{event_type}_overage_cents", 1)  # Default 1 cent per unit
                 total_cents += overage * overage_rate
 
         return total_cents

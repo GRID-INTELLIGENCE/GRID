@@ -1,9 +1,11 @@
 """
 ADSR-Arena Integration Bridge
 """
+
 from ..core.adsr_envelope import ADSREnvelope, EnvelopePhase
 from ..core.cache import CacheLayer
 from ..overwatch.rewards import CharacterRewardState
+
 
 class ADSRArenaBridge:
     """Bridge between GRID ADSR and Arena systems"""
@@ -19,7 +21,7 @@ class ADSRArenaBridge:
             # Maintain cache entries during sustain
             # This is a placeholder for the actual logic
             for key in self.cache.l1.keys():
-                self.cache.l1[key]['priority'] = 'maintained'
+                self.cache.l1[key]["priority"] = "maintained"
 
     def sync_decay_phase(self):
         """Sync decay phase between ADSR and Arena rewards"""

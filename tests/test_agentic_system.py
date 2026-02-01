@@ -148,6 +148,7 @@ def test_case_completed_event():
     assert event_dict["outcome"] == "success"
     assert event_dict["solution"] == "Solution applied"
 
+
 # ============================================================================
 # SPRINT 1: Additional Async Tests for Event-Driven Architecture
 # ============================================================================
@@ -158,18 +159,17 @@ async def test_agentic_system_execute_case_with_agent_role(agentic_system):
     """Test case execution with specific agent role."""
     reference_file = agentic_system.knowledge_base_path / "role_test.json"
     reference_file.write_text(
-        json.dumps({
-            "case_id": "ROLE-001",
-            "recommended_roles": ["Analyst", "Executor"],
-            "recommended_tasks": ["/analyze", "/execute"]
-        })
+        json.dumps(
+            {
+                "case_id": "ROLE-001",
+                "recommended_roles": ["Analyst", "Executor"],
+                "recommended_tasks": ["/analyze", "/execute"],
+            }
+        )
     )
 
     result = await agentic_system.execute_case(
-        case_id="ROLE-001",
-        reference_file_path="role_test.json",
-        agent_role="Analyst",
-        task="/analyze"
+        case_id="ROLE-001", reference_file_path="role_test.json", agent_role="Analyst", task="/analyze"
     )
 
     assert result["status"] == "completed"
@@ -181,17 +181,11 @@ async def test_agentic_system_execute_case_with_user_id(agentic_system):
     """Test case execution with user tracking."""
     reference_file = agentic_system.knowledge_base_path / "user_test.json"
     reference_file.write_text(
-        json.dumps({
-            "case_id": "USER-001",
-            "recommended_roles": ["Executor"],
-            "recommended_tasks": ["/execute"]
-        })
+        json.dumps({"case_id": "USER-001", "recommended_roles": ["Executor"], "recommended_tasks": ["/execute"]})
     )
 
     result = await agentic_system.execute_case(
-        case_id="USER-001",
-        reference_file_path="user_test.json",
-        user_id="test_user_123"
+        case_id="USER-001", reference_file_path="user_test.json", user_id="test_user_123"
     )
 
     assert result["status"] == "completed"
@@ -291,17 +285,10 @@ async def test_agentic_system_case_completion_event(agentic_system):
 
     reference_file = agentic_system.knowledge_base_path / "completion_test.json"
     reference_file.write_text(
-        json.dumps({
-            "case_id": "COMPLETE-001",
-            "recommended_roles": ["Executor"],
-            "recommended_tasks": ["/execute"]
-        })
+        json.dumps({"case_id": "COMPLETE-001", "recommended_roles": ["Executor"], "recommended_tasks": ["/execute"]})
     )
 
-    result = await agentic_system.execute_case(
-        case_id="COMPLETE-001",
-        reference_file_path="completion_test.json"
-    )
+    result = await agentic_system.execute_case(case_id="COMPLETE-001", reference_file_path="completion_test.json")
 
     assert result["status"] == "completed"
 
@@ -313,27 +300,23 @@ async def test_agent_executor_multiple_tasks(knowledge_base_path):
 
     reference_file = knowledge_base_path / "multi_task.json"
     reference_file.write_text(
-        json.dumps({
-            "case_id": "MULTI-001",
-            "recommended_roles": ["Analyzer", "Executor"],
-            "recommended_tasks": ["/inventory", "/execute"]
-        })
+        json.dumps(
+            {
+                "case_id": "MULTI-001",
+                "recommended_roles": ["Analyzer", "Executor"],
+                "recommended_tasks": ["/inventory", "/execute"],
+            }
+        )
     )
 
     # Execute first task
     result1 = await executor.execute_task(
-        case_id="MULTI-001",
-        reference_file_path="multi_task.json",
-        agent_role="Analyzer",
-        task="/inventory"
+        case_id="MULTI-001", reference_file_path="multi_task.json", agent_role="Analyzer", task="/inventory"
     )
 
     # Execute second task
     result2 = await executor.execute_task(
-        case_id="MULTI-001",
-        reference_file_path="multi_task.json",
-        agent_role="Executor",
-        task="/execute"
+        case_id="MULTI-001", reference_file_path="multi_task.json", agent_role="Executor", task="/execute"
     )
 
     assert result1["status"] == "completed"

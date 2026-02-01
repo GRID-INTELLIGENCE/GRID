@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 
 class TimeUnit(Enum):
     """Time units for temporal operations."""
+
     MILLISECONDS = "ms"
     SECONDS = "s"
     MINUTES = "min"
@@ -29,6 +30,7 @@ class TimeUnit(Enum):
 
 class TemporalState(Enum):
     """States in temporal processing."""
+
     PAST = "past"
     PRESENT = "present"
     FUTURE = "future"
@@ -38,6 +40,7 @@ class TemporalState(Enum):
 @dataclass
 class TimeWindow:
     """Represents a time window with start and end times."""
+
     window_id: str
     start_time: float
     end_time: float | None = None
@@ -52,7 +55,7 @@ class TimeWindow:
 
     def contains(self, timestamp: float) -> bool:
         """Check if a timestamp falls within this window."""
-        end_time = self.end_time or float('inf')
+        end_time = self.end_time or float("inf")
         return self.start_time <= timestamp <= end_time
 
     def is_active(self) -> bool:
@@ -60,16 +63,17 @@ class TimeWindow:
         now = time.time()
         return self.contains(now)
 
-    def overlaps(self, other: 'TimeWindow') -> bool:
+    def overlaps(self, other: "TimeWindow") -> bool:
         """Check if this window overlaps with another."""
-        self_end = self.end_time or float('inf')
-        other_end = other.end_time or float('inf')
+        self_end = self.end_time or float("inf")
+        other_end = other.end_time or float("inf")
         return (self.start_time <= other_end) and (other.start_time <= self_end)
 
 
 @dataclass
 class TemporalContext:
     """Temporal context for cognitive operations."""
+
     context_id: str
     current_time: float = field(default_factory=time.time)
     timezone_offset: float = 0.0  # Hours from UTC
@@ -128,12 +132,7 @@ class TimeWindowManager:
         if window_id in self.windows:
             raise ValueError(f"Window {window_id} already exists")
 
-        window = TimeWindow(
-            window_id=window_id,
-            start_time=start_time,
-            duration=duration,
-            metadata=metadata
-        )
+        window = TimeWindow(window_id=window_id, start_time=start_time, duration=duration, metadata=metadata)
 
         self.windows[window_id] = window
         self.logger.info(f"Created window {window_id}: duration {duration}s")
@@ -223,11 +222,7 @@ class TimeManager:
         if context_id in self.contexts:
             raise ValueError(f"Context {context_id} already exists")
 
-        context = TemporalContext(
-            context_id=context_id,
-            timezone_offset=timezone_offset,
-            metadata=metadata
-        )
+        context = TemporalContext(context_id=context_id, timezone_offset=timezone_offset, metadata=metadata)
 
         self.contexts[context_id] = context
         self.logger.info(f"Created context {context_id}")
@@ -268,9 +263,9 @@ class TimeManager:
         # Default processing
         return {"processed": True, "event_type": event_type}
 
-    def create_recurring_window(self, context_id: str, window_id: str,
-                               start_time: float, interval: float,
-                               duration: float, **metadata) -> TimeWindow:
+    def create_recurring_window(
+        self, context_id: str, window_id: str, start_time: float, interval: float, duration: float, **metadata
+    ) -> TimeWindow:
         """Create a recurring time window."""
         context = self.get_context(context_id)
         if not context:
@@ -278,10 +273,7 @@ class TimeManager:
 
         # Create initial window
         window = self.window_manager.create_window(
-            window_id=window_id,
-            start_time=start_time,
-            duration=duration,
-            **metadata
+            window_id=window_id, start_time=start_time, duration=duration, **metadata
         )
 
         # Add to context
@@ -345,7 +337,7 @@ class DeadlineProcessor(TemporalProcessor):
             "deadline_time": deadline_time,
             "time_remaining": time_remaining,
             "is_overdue": is_overdue,
-            "urgency": "high" if time_remaining < 3600 else "medium" if time_remaining < 86400 else "low"
+            "urgency": "high" if time_remaining < 3600 else "medium" if time_remaining < 86400 else "low",
         }
 
 
@@ -367,7 +359,7 @@ class IntervalProcessor(TemporalProcessor):
             "interval": interval,
             "last_occurrence": last_occurrence,
             "next_occurrence": next_occurrence,
-            "is_due": is_due
+            "is_due": is_due,
         }
 
 

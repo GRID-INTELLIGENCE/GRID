@@ -38,11 +38,11 @@ class SchemaValidator:
 
         for schema_file in schema_files:
             try:
-                with open(schema_file, encoding='utf-8') as f:
+                with open(schema_file, encoding="utf-8") as f:
                     schema = json.load(f)
 
                 # Use filename without extension as schema name
-                schema_name = schema_file.stem.replace('.schema', '')
+                schema_name = schema_file.stem.replace(".schema", "")
                 self.schemas[schema_name] = schema
 
                 if self.verbose:
@@ -56,9 +56,18 @@ class SchemaValidator:
         json_files = []
 
         exclude_dirs = {
-            '.git', '__pycache__', '.mypy_cache', 'node_modules',
-            '.venv', '.pytest_cache', '.next', 'dist', 'build',
-            '.serverless', 'coverage', 'htmlcov'
+            ".git",
+            "__pycache__",
+            ".mypy_cache",
+            "node_modules",
+            ".venv",
+            ".pytest_cache",
+            ".next",
+            "dist",
+            "build",
+            ".serverless",
+            "coverage",
+            "htmlcov",
         }
 
         for root, dirs, files in os.walk(root_dir):
@@ -66,7 +75,7 @@ class SchemaValidator:
             dirs[:] = [d for d in dirs if d not in exclude_dirs]
 
             for file in files:
-                if file.endswith('.json'):
+                if file.endswith(".json"):
                     json_files.append(Path(root) / file)
 
         return json_files
@@ -77,30 +86,24 @@ class SchemaValidator:
         filepath_str = str(file_path).lower()
 
         # Schema matching rules
-        if 'package' in filename and filename.endswith('package.json'):
-            return 'package'
-        elif 'telemetry' in filename or 'data/telemetry' in filepath_str:
-            return 'telemetry'
-        elif any(keyword in filename for keyword in ['config', 'settings', 'grid-config']):
-            return 'grid-config'
+        if "package" in filename and filename.endswith("package.json"):
+            return "package"
+        elif "telemetry" in filename or "data/telemetry" in filepath_str:
+            return "telemetry"
+        elif any(keyword in filename for keyword in ["config", "settings", "grid-config"]):
+            return "grid-config"
         else:
             return None  # No specific schema match
 
     def validate_file(self, file_path: Path) -> dict[str, Any]:
         """Validate a single JSON file."""
-        result = {
-            'file': str(file_path),
-            'valid_json': False,
-            'schema_valid': None,
-            'schema_name': None,
-            'errors': []
-        }
+        result = {"file": str(file_path), "valid_json": False, "schema_valid": None, "schema_name": None, "errors": []}
 
         try:
             # First, check if it's valid JSON
-            with open(file_path, encoding='utf-8') as f:
+            with open(file_path, encoding="utf-8") as f:
                 data = json.load(f)
-            result['valid_json'] = True
+            result["valid_json"] = True
 
             # Try to validate against schema
             schema_name = self.match_schema(file_path)
@@ -108,29 +111,25 @@ class SchemaValidator:
                 schema = self.schemas[schema_name]
                 try:
                     jsonschema.validate(data, schema)
-                    result['schema_valid'] = True
-                    result['schema_name'] = schema_name
+                    result["schema_valid"] = True
+                    result["schema_name"] = schema_name
                 except (ValidationError, SchemaError) as e:
-                    result['schema_valid'] = False
-                    result['schema_name'] = schema_name
-                    result['errors'].append({
-                        'type': 'schema_validation',
-                        'message': str(e),
-                        'path': list(e.absolute_path) if hasattr(e, 'absolute_path') else []
-                    })
+                    result["schema_valid"] = False
+                    result["schema_name"] = schema_name
+                    result["errors"].append(
+                        {
+                            "type": "schema_validation",
+                            "message": str(e),
+                            "path": list(e.absolute_path) if hasattr(e, "absolute_path") else [],
+                        }
+                    )
             else:
-                result['schema_valid'] = None  # No schema to validate against
+                result["schema_valid"] = None  # No schema to validate against
 
         except json.JSONDecodeError as e:
-            result['errors'].append({
-                'type': 'json_parse',
-                'message': f"Invalid JSON: {e}"
-            })
+            result["errors"].append({"type": "json_parse", "message": f"Invalid JSON: {e}"})
         except Exception as e:
-            result['errors'].append({
-                'type': 'unknown',
-                'message': f"Unexpected error: {e}"
-            })
+            result["errors"].append({"type": "unknown", "message": f"Unexpected error: {e}"})
 
         return result
 
@@ -149,11 +148,11 @@ class SchemaValidator:
             results.append(result)
 
             # Print immediate feedback
-            if result['valid_json']:
+            if result["valid_json"]:
                 status = "✓"
-                if result['schema_valid'] is True:
+                if result["schema_valid"] is True:
                     status += " (schema valid)"
-                elif result['schema_valid'] is False:
+                elif result["schema_valid"] is False:
                     status += " (schema invalid)"
                 else:
                     status += " (no schema)"
@@ -171,38 +170,40 @@ class SchemaValidator:
     def generate_summary(self, results: list[dict]) -> dict[str, Any]:
         """Generate a summary of validation results."""
         total_files = len(results)
-        valid_json = sum(1 for r in results if r['valid_json'])
-        schema_valid = sum(1 for r in results if r['schema_valid'] is True)
-        schema_invalid = sum(1 for r in results if r['schema_valid'] is False)
-        no_schema = sum(1 for r in results if r['schema_valid'] is None)
+        valid_json = sum(1 for r in results if r["valid_json"])
+        schema_valid = sum(1 for r in results if r["schema_valid"] is True)
+        schema_invalid = sum(1 for r in results if r["schema_valid"] is False)
+        no_schema = sum(1 for r in results if r["schema_valid"] is None)
 
         coverage_percent = (valid_json / total_files * 100) if total_files > 0 else 0
-        schema_coverage_percent = (schema_valid / (schema_valid + schema_invalid) * 100) if (schema_valid + schema_invalid) > 0 else 0
+        schema_coverage_percent = (
+            (schema_valid / (schema_valid + schema_invalid) * 100) if (schema_valid + schema_invalid) > 0 else 0
+        )
 
         return {
-            'total_files': total_files,
-            'valid_json': valid_json,
-            'invalid_json': total_files - valid_json,
-            'schema_valid': schema_valid,
-            'schema_invalid': schema_invalid,
-            'no_schema_available': no_schema,
-            'json_coverage_percent': round(coverage_percent, 1),
-            'schema_coverage_percent': round(schema_coverage_percent, 1),
-            'passed': valid_json == total_files and schema_invalid == 0
+            "total_files": total_files,
+            "valid_json": valid_json,
+            "invalid_json": total_files - valid_json,
+            "schema_valid": schema_valid,
+            "schema_invalid": schema_invalid,
+            "no_schema_available": no_schema,
+            "json_coverage_percent": round(coverage_percent, 1),
+            "schema_coverage_percent": round(schema_coverage_percent, 1),
+            "passed": valid_json == total_files and schema_invalid == 0,
         }
 
     def save_report(self, summary: dict[str, Any], results: list[dict]) -> None:
         """Save validation report to file."""
-        os.makedirs('reports', exist_ok=True)
+        os.makedirs("reports", exist_ok=True)
 
         report = {
-            'summary': summary,
-            'results': results,
-            'schemas_used': list(self.schemas.keys()),
-            'timestamp': str(Path.cwd())
+            "summary": summary,
+            "results": results,
+            "schemas_used": list(self.schemas.keys()),
+            "timestamp": str(Path.cwd()),
         }
 
-        with open('reports/schema_validation_detailed.json', 'w') as f:
+        with open("reports/schema_validation_detailed.json", "w") as f:
             json.dump(report, f, indent=2)
 
         print("\n📄 Detailed report saved to: reports/schema_validation_detailed.json")
@@ -216,28 +217,25 @@ class SchemaValidator:
         print(f"Schema validation passed: {summary['schema_valid']}")
         print(f"Schema validation failed: {summary['schema_invalid']}")
         print(f"No schema available: {summary['no_schema_available']}")
-        if summary['schema_valid'] + summary['schema_invalid'] > 0:
+        if summary["schema_valid"] + summary["schema_invalid"] > 0:
             print(f"Schema coverage: {summary['schema_coverage_percent']}%")
 
-        if summary['passed']:
+        if summary["passed"]:
             print("\n✅ All validations passed!")
         else:
             print("\n❌ Some validations failed!")
-            if summary['invalid_json'] > 0:
+            if summary["invalid_json"] > 0:
                 print(f"   {summary['invalid_json']} files have invalid JSON")
-            if summary['schema_invalid'] > 0:
+            if summary["schema_invalid"] > 0:
                 print(f"   {summary['schema_invalid']} files failed schema validation")
+
 
 def main():
     parser = argparse.ArgumentParser(description="Validate JSON files against schemas")
-    parser.add_argument("--schemas-dir", default="schemas",
-                       help="Directory containing schema files")
-    parser.add_argument("--root-dir", default=".",
-                       help="Root directory to scan for JSON files")
-    parser.add_argument("--verbose", "-v", action="store_true",
-                       help="Enable verbose output")
-    parser.add_argument("--fail-on-error", action="store_true",
-                       help="Exit with non-zero code on validation failures")
+    parser.add_argument("--schemas-dir", default="schemas", help="Directory containing schema files")
+    parser.add_argument("--root-dir", default=".", help="Root directory to scan for JSON files")
+    parser.add_argument("--verbose", "-v", action="store_true", help="Enable verbose output")
+    parser.add_argument("--fail-on-error", action="store_true", help="Exit with non-zero code on validation failures")
 
     args = parser.parse_args()
 
@@ -246,8 +244,9 @@ def main():
     validator.print_summary(summary)
 
     # Exit with appropriate code
-    if args.fail_on_error and not summary['passed']:
+    if args.fail_on_error and not summary["passed"]:
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

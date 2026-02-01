@@ -143,11 +143,13 @@ class ProductionDatabaseMCPServer:
         # Security: Validate SQL query pattern
         if not self._is_query_safe(sql):
             return CallToolResult(
-                content=[TextContent(
-                    text="Query rejected: SQL pattern not allowed. Only SELECT queries with proper validation are permitted.",
-                    type="text"
-                )],
-                isError=True
+                content=[
+                    TextContent(
+                        text="Query rejected: SQL pattern not allowed. Only SELECT queries with proper validation are permitted.",
+                        type="text",
+                    )
+                ],
+                isError=True,
             )
 
         try:
@@ -161,11 +163,12 @@ class ProductionDatabaseMCPServer:
                 # For SELECT queries without parameters, ensure it's a safe read-only query
                 if not sql.strip().upper().startswith("SELECT"):
                     return CallToolResult(
-                        content=[TextContent(
-                            text="Query rejected: Only SELECT queries are allowed without parameters.",
-                            type="text"
-                        )],
-                        isError=True
+                        content=[
+                            TextContent(
+                                text="Query rejected: Only SELECT queries are allowed without parameters.", type="text"
+                            )
+                        ],
+                        isError=True,
                     )
                 cursor.execute(sql)
 
@@ -204,9 +207,23 @@ class ProductionDatabaseMCPServer:
 
         # Check for dangerous keywords
         dangerous_keywords = [
-            "DROP", "DELETE", "UPDATE", "INSERT", "ALTER", "CREATE",
-            "TRUNCATE", "EXEC", "EXECUTE", "SCRIPT", "--", ";",
-            "UNION", "JOIN", "WHERE", "OR", "AND"
+            "DROP",
+            "DELETE",
+            "UPDATE",
+            "INSERT",
+            "ALTER",
+            "CREATE",
+            "TRUNCATE",
+            "EXEC",
+            "EXECUTE",
+            "SCRIPT",
+            "--",
+            ";",
+            "UNION",
+            "JOIN",
+            "WHERE",
+            "OR",
+            "AND",
         ]
 
         for keyword in dangerous_keywords:

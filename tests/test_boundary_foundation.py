@@ -5,7 +5,6 @@ Tests for BoundaryContract and Ring Decorators to validate
 the foundational safety boundary system.
 """
 
-
 import pytest
 
 from grid.safety.boundary_contract import (

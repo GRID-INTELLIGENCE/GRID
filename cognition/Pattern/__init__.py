@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 
 class PatternType(Enum):
     """Types of cognitive patterns."""
+
     SEQUENCE = "sequence"
     TEMPORAL = "temporal"
     SEMANTIC = "semantic"
@@ -28,6 +29,7 @@ class PatternType(Enum):
 
 class MatchStrength(Enum):
     """Strength of pattern match."""
+
     WEAK = 0.3
     MODERATE = 0.6
     STRONG = 0.8
@@ -37,6 +39,7 @@ class MatchStrength(Enum):
 @dataclass
 class PatternFeature:
     """A feature within a cognitive pattern."""
+
     feature_id: str
     feature_type: str
     value: Any
@@ -47,6 +50,7 @@ class PatternFeature:
 @dataclass
 class CognitivePattern:
     """Represents a cognitive pattern with features and metadata."""
+
     pattern_id: str
     name: str
     pattern_type: PatternType
@@ -90,7 +94,9 @@ class CognitivePattern:
             if self_value is not None and other_value is not None:
                 # Calculate feature similarity
                 if isinstance(self_value, (int, float)) and isinstance(other_value, (int, float)):
-                    similarity = 1.0 - min(1.0, abs(self_value - other_value) / max(abs(self_value), abs(other_value), 1.0))
+                    similarity = 1.0 - min(
+                        1.0, abs(self_value - other_value) / max(abs(self_value), abs(other_value), 1.0)
+                    )
                 elif isinstance(self_value, str) and isinstance(other_value, str):
                     similarity = 1.0 if self_value == other_value else 0.0
                 else:
@@ -159,11 +165,7 @@ class SequenceMatcher(PatternMatcher):
 
         confidence = matches / total if total > 0 else 0.0
 
-        return confidence, {
-            "matches": matches,
-            "total": total,
-            "sequence_alignment": expected_sequence == input_data
-        }
+        return confidence, {"matches": matches, "total": total, "sequence_alignment": expected_sequence == input_data}
 
 
 class SemanticMatcher(PatternMatcher):
@@ -171,9 +173,36 @@ class SemanticMatcher(PatternMatcher):
 
     def __init__(self):
         self.stopwords = {
-            "the", "a", "an", "and", "or", "but", "in", "on", "at", "to", "for",
-            "of", "with", "by", "is", "are", "was", "were", "be", "been", "have",
-            "has", "had", "do", "does", "did", "will", "would", "could", "should"
+            "the",
+            "a",
+            "an",
+            "and",
+            "or",
+            "but",
+            "in",
+            "on",
+            "at",
+            "to",
+            "for",
+            "of",
+            "with",
+            "by",
+            "is",
+            "are",
+            "was",
+            "were",
+            "be",
+            "been",
+            "have",
+            "has",
+            "had",
+            "do",
+            "does",
+            "did",
+            "will",
+            "would",
+            "could",
+            "should",
         }
 
     def can_match(self, pattern_type: PatternType) -> bool:
@@ -220,7 +249,7 @@ class SemanticMatcher(PatternMatcher):
             "pattern_keywords": list(pattern_keywords),
             "input_words": list(input_words),
             "jaccard_similarity": jaccard,
-            "phrase_boost": phrase_boost
+            "phrase_boost": phrase_boost,
         }
 
     def _tokenize(self, text: str) -> list[str]:
@@ -274,7 +303,9 @@ class PatternManager:
 
         return 0.0, {"error": f"No matcher available for pattern type {pattern.pattern_type}"}
 
-    def find_matches(self, input_data: Any, pattern_type: PatternType | None = None) -> list[tuple[str, float, dict[str, Any]]]:
+    def find_matches(
+        self, input_data: Any, pattern_type: PatternType | None = None
+    ) -> list[tuple[str, float, dict[str, Any]]]:
         """Find all patterns that match the input data."""
         matches = []
 
@@ -290,33 +321,24 @@ class PatternManager:
         matches.sort(key=lambda x: x[1], reverse=True)
         return matches
 
-    def create_pattern_from_template(self, pattern_id: str, name: str, pattern_type: PatternType, template: dict[str, Any]) -> CognitivePattern:
+    def create_pattern_from_template(
+        self, pattern_id: str, name: str, pattern_type: PatternType, template: dict[str, Any]
+    ) -> CognitivePattern:
         """Create a pattern from a template."""
-        pattern = CognitivePattern(
-            pattern_id=pattern_id,
-            name=name,
-            pattern_type=pattern_type,
-            template=template
-        )
+        pattern = CognitivePattern(pattern_id=pattern_id, name=name, pattern_type=pattern_type, template=template)
 
         # Auto-generate features from template
         if pattern_type == PatternType.SEMANTIC and "keywords" in template:
             for keyword in template["keywords"]:
                 feature = PatternFeature(
-                    feature_id=f"keyword_{keyword}",
-                    feature_type="keyword",
-                    value=keyword,
-                    weight=1.0
+                    feature_id=f"keyword_{keyword}", feature_type="keyword", value=keyword, weight=1.0
                 )
                 pattern.add_feature(feature)
 
         elif pattern_type == PatternType.SEQUENCE and "sequence" in template:
             for i, item in enumerate(template["sequence"]):
                 feature = PatternFeature(
-                    feature_id=f"seq_item_{i}",
-                    feature_type="sequence_item",
-                    value=item,
-                    weight=1.0
+                    feature_id=f"seq_item_{i}", feature_type="sequence_item", value=item, weight=1.0
                 )
                 pattern.add_feature(feature)
 
@@ -336,7 +358,7 @@ class PatternManager:
         return {
             "total_patterns": len(self.patterns),
             "pattern_types": pattern_types,
-            "available_matchers": len(self.matchers)
+            "available_matchers": len(self.matchers),
         }
 
 

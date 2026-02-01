@@ -18,6 +18,7 @@ from cognitive.temporal.temporal_reasoning import (
 @dataclass
 class TestMetrics:
     """Metrics collected during test execution."""
+
     execution_time: float
     decision_accuracy: float
     temporal_consistency: float
@@ -30,6 +31,7 @@ class TestMetrics:
 @dataclass
 class PrecalculatedResult:
     """Pre-calculated expected results for comparison."""
+
     scenario: str
     expected_decision_confidence: float
     expected_temporal_consistency: float
@@ -54,7 +56,7 @@ class TemporalReasoningTestSuite:
                 expected_temporal_consistency=1.0,
                 expected_cross_reference_coverage=0.6,
                 expected_paths_count=3,
-                analogy_description="Like following a clear recipe step-by-step"
+                analogy_description="Like following a clear recipe step-by-step",
             ),
             PrecalculatedResult(
                 scenario="Complex cross-domain reasoning",
@@ -62,7 +64,7 @@ class TemporalReasoningTestSuite:
                 expected_temporal_consistency=0.9,
                 expected_cross_reference_coverage=0.8,
                 expected_paths_count=7,
-                analogy_description="Like solving a mystery novel with clues from different chapters"
+                analogy_description="Like solving a mystery novel with clues from different chapters",
             ),
             PrecalculatedResult(
                 scenario="Temporal inconsistency detection",
@@ -70,7 +72,7 @@ class TemporalReasoningTestSuite:
                 expected_temporal_consistency=0.6,
                 expected_cross_reference_coverage=0.4,
                 expected_paths_count=2,
-                analogy_description="Like trying to assemble a puzzle with missing pieces"
+                analogy_description="Like trying to assemble a puzzle with missing pieces",
             ),
             PrecalculatedResult(
                 scenario="High temporal density",
@@ -78,8 +80,8 @@ class TemporalReasoningTestSuite:
                 expected_temporal_consistency=0.98,
                 expected_cross_reference_coverage=0.9,
                 expected_paths_count=12,
-                analogy_description="Like reading a detailed historical chronicle"
-            )
+                analogy_description="Like reading a detailed historical chronicle",
+            ),
         ]
 
     @pytest.fixture
@@ -93,29 +95,29 @@ class TemporalReasoningTestSuite:
                 predicate="viewed",
                 object="Product_X",
                 timestamp=base_time - timedelta(hours=2),
-                metadata={"topic": "shopping", "domain": "ecommerce"}
+                metadata={"topic": "shopping", "domain": "ecommerce"},
             ),
             TemporalFact(
                 subject="User_A",
                 predicate="purchased",
                 object="Product_Y",
                 timestamp=base_time - timedelta(hours=1),
-                metadata={"topic": "shopping", "domain": "ecommerce"}
+                metadata={"topic": "shopping", "domain": "ecommerce"},
             ),
             TemporalFact(
                 subject="User_A",
                 predicate="reviewed",
                 object="Product_Y",
                 timestamp=base_time - timedelta(minutes=30),
-                metadata={"topic": "feedback", "domain": "ecommerce"}
+                metadata={"topic": "feedback", "domain": "ecommerce"},
             ),
             TemporalFact(
                 subject="Product_Y",
                 predicate="related_to",
                 object="Product_Z",
                 timestamp=base_time - timedelta(hours=24),
-                metadata={"topic": "recommendation", "domain": "ecommerce"}
-            )
+                metadata={"topic": "recommendation", "domain": "ecommerce"},
+            ),
         ]
 
     @pytest.fixture
@@ -125,7 +127,7 @@ class TemporalReasoningTestSuite:
             history_window=timedelta(days=7),
             temporal_decay_factor=0.8,
             cross_reference_threshold=0.6,
-            max_path_length=5
+            max_path_length=5,
         )
 
     def test_temporal_fact_addition(self, temporal_reasoning_instance, sample_temporal_facts):
@@ -148,7 +150,7 @@ class TemporalReasoningTestSuite:
             cross_reference_coverage=temporal_reasoning_instance.cross_reference_coverage,
             path_construction_efficiency=0.0,
             memory_usage_estimate=len(sample_temporal_facts) * 100,  # Rough estimate
-            reasoning_depth=1
+            reasoning_depth=1,
         )
         self.metrics_history.append(metrics)
 
@@ -175,7 +177,7 @@ class TemporalReasoningTestSuite:
             cross_reference_coverage=temporal_reasoning_instance.cross_reference_coverage,
             path_construction_efficiency=len(paths) / execution_time if execution_time > 0 else 0,
             memory_usage_estimate=len(paths) * 50,
-            reasoning_depth=max(len(p.facts) for p in paths) if paths else 0
+            reasoning_depth=max(len(p.facts) for p in paths) if paths else 0,
         )
         self.metrics_history.append(metrics)
 
@@ -187,8 +189,7 @@ class TemporalReasoningTestSuite:
 
         start_time = time.perf_counter()
         references = temporal_reasoning_instance.perform_cross_referencing(
-            CrossReferenceDomain.TOPIC,
-            CrossReferenceDomain.SUBJECT
+            CrossReferenceDomain.TOPIC, CrossReferenceDomain.SUBJECT
         )
         execution_time = time.perf_counter() - start_time
 
@@ -205,7 +206,7 @@ class TemporalReasoningTestSuite:
             cross_reference_coverage=temporal_reasoning_instance.cross_reference_coverage,
             path_construction_efficiency=0.0,
             memory_usage_estimate=len(references) * 30,
-            reasoning_depth=1
+            reasoning_depth=1,
         )
         self.metrics_history.append(metrics)
 
@@ -215,10 +216,7 @@ class TemporalReasoningTestSuite:
         for fact in sample_temporal_facts:
             temporal_reasoning_instance.add_temporal_fact(fact)
 
-        temporal_reasoning_instance.perform_cross_referencing(
-            CrossReferenceDomain.TOPIC,
-            CrossReferenceDomain.SUBJECT
-        )
+        temporal_reasoning_instance.perform_cross_referencing(CrossReferenceDomain.TOPIC, CrossReferenceDomain.SUBJECT)
 
         start_time = time.perf_counter()
         confidence = temporal_reasoning_instance.get_decision_confidence("User_A")
@@ -235,7 +233,7 @@ class TemporalReasoningTestSuite:
             cross_reference_coverage=temporal_reasoning_instance.cross_reference_coverage,
             path_construction_efficiency=0.0,
             memory_usage_estimate=100,
-            reasoning_depth=1
+            reasoning_depth=1,
         )
         self.metrics_history.append(metrics)
 
@@ -253,8 +251,7 @@ class TemporalReasoningTestSuite:
             # Perform full reasoning pipeline
             paths = temporal_reasoning_instance.construct_temporal_paths(facts[0].subject)
             temporal_reasoning_instance.perform_cross_referencing(
-                CrossReferenceDomain.TOPIC,
-                CrossReferenceDomain.SUBJECT
+                CrossReferenceDomain.TOPIC, CrossReferenceDomain.SUBJECT
             )
             confidence = temporal_reasoning_instance.get_decision_confidence(facts[0].subject)
 
@@ -268,7 +265,7 @@ class TemporalReasoningTestSuite:
                 cross_reference_coverage=temporal_reasoning_instance.cross_reference_coverage,
                 path_construction_efficiency=len(paths) / execution_time if execution_time > 0 else 0,
                 memory_usage_estimate=size * 200,  # Rough estimate
-                reasoning_depth=max(len(p.facts) for p in paths) if paths else 0
+                reasoning_depth=max(len(p.facts) for p in paths) if paths else 0,
             )
             self.metrics_history.append(metrics)
 
@@ -283,16 +280,15 @@ class TemporalReasoningTestSuite:
         domains = ["ecommerce", "social", "content", "search"]
 
         for i in range(count):
-            facts.append(TemporalFact(
-                subject=f"User_{i % 10}",
-                predicate=["viewed", "purchased", "searched", "shared"][i % 4],
-                object=f"Entity_{i % 20}",
-                timestamp=base_time - timedelta(minutes=i * 5),
-                metadata={
-                    "topic": topics[i % len(topics)],
-                    "domain": domains[i % len(domains)]
-                }
-            ))
+            facts.append(
+                TemporalFact(
+                    subject=f"User_{i % 10}",
+                    predicate=["viewed", "purchased", "searched", "shared"][i % 4],
+                    object=f"Entity_{i % 20}",
+                    timestamp=base_time - timedelta(minutes=i * 5),
+                    metadata={"topic": topics[i % len(topics)], "domain": domains[i % len(domains)]},
+                )
+            )
 
         return facts
 
@@ -346,24 +342,25 @@ class TemporalReasoningTestSuite:
                 "decision_confidence": {
                     "actual": latest_metrics.decision_accuracy,
                     "expected": best_match.expected_decision_confidence,
-                    "difference": latest_metrics.decision_accuracy - best_match.expected_decision_confidence
+                    "difference": latest_metrics.decision_accuracy - best_match.expected_decision_confidence,
                 },
                 "temporal_consistency": {
                     "actual": latest_metrics.temporal_consistency,
                     "expected": best_match.expected_temporal_consistency,
-                    "difference": latest_metrics.temporal_consistency - best_match.expected_temporal_consistency
+                    "difference": latest_metrics.temporal_consistency - best_match.expected_temporal_consistency,
                 },
                 "cross_reference_coverage": {
                     "actual": latest_metrics.cross_reference_coverage,
                     "expected": best_match.expected_cross_reference_coverage,
-                    "difference": latest_metrics.cross_reference_coverage - best_match.expected_cross_reference_coverage
-                }
+                    "difference": latest_metrics.cross_reference_coverage
+                    - best_match.expected_cross_reference_coverage,
+                },
             },
             "performance_analysis": {
                 "execution_efficiency": latest_metrics.execution_time,
                 "reasoning_depth": latest_metrics.reasoning_depth,
-                "memory_efficiency": latest_metrics.memory_usage_estimate
-            }
+                "memory_efficiency": latest_metrics.memory_usage_estimate,
+            },
         }
 
     def _calculate_result_similarity(self, metrics: TestMetrics, expected: PrecalculatedResult) -> float:
@@ -401,25 +398,27 @@ class TemporalReasoningTestSuite:
                 "average_execution_time": avg_execution_time,
                 "average_decision_accuracy": avg_decision_accuracy,
                 "average_temporal_consistency": avg_temporal_consistency,
-                "average_cross_reference_coverage": avg_cross_reference_coverage
+                "average_cross_reference_coverage": avg_cross_reference_coverage,
             },
             "temporal_reasoning_impact": {
                 "decision_accuracy_improvement": accuracy_improvement,
                 "cross_reference_effectiveness": cross_reference_benefit,
                 "consistency_maintenance": avg_temporal_consistency,
-                "reasoning_depth_achievement": np.mean([m.reasoning_depth for m in self.metrics_history])
+                "reasoning_depth_achievement": np.mean([m.reasoning_depth for m in self.metrics_history]),
             },
             "analogy_comparison": analogy_comparison,
             "cognitive_state_analysis": {
                 "temporal_awareness_level": avg_temporal_consistency,
                 "cross_domain_integration": avg_cross_reference_coverage,
-                "decision_confidence_stability": np.std([m.decision_accuracy for m in self.metrics_history])
+                "decision_confidence_stability": np.std([m.decision_accuracy for m in self.metrics_history]),
             },
             "performance_characteristics": {
                 "scalability_factor": self._calculate_scalability(),
                 "memory_efficiency": np.mean([m.memory_usage_estimate for m in self.metrics_history]),
-                "processing_efficiency": np.mean([m.path_construction_efficiency for m in self.metrics_history if m.path_construction_efficiency > 0])
-            }
+                "processing_efficiency": np.mean(
+                    [m.path_construction_efficiency for m in self.metrics_history if m.path_construction_efficiency > 0]
+                ),
+            },
         }
 
     def _analyze_accuracy_improvement(self) -> float:
@@ -442,15 +441,13 @@ class TemporalReasoningTestSuite:
 
         for metrics in self.metrics_history:
             if metrics.cross_reference_coverage > 0:
-                correlation = np.corrcoef(
-                    [metrics.cross_reference_coverage, metrics.decision_accuracy]
-                )[0, 1]
+                correlation = np.corrcoef([metrics.cross_reference_coverage, metrics.decision_accuracy])[0, 1]
                 correlations.append(correlation)
 
         return {
             "average_correlation": float(np.mean(correlations)) if correlations else 0.0,
             "correlation_stability": np.std(correlations) if correlations else 0.0,
-            "benefit_confidence": len(correlations) / len(self.metrics_history) if self.metrics_history else 0.0
+            "benefit_confidence": len(correlations) / len(self.metrics_history) if self.metrics_history else 0.0,
         }
 
     def _calculate_scalability(self) -> float:
@@ -491,20 +488,16 @@ def run_temporal_reasoning_test_suite() -> dict[str, Any]:
     paths = tr.construct_temporal_paths("User_0")
 
     # Test cross-referencing
-    references = tr.perform_cross_referencing(
-        CrossReferenceDomain.TOPIC,
-        CrossReferenceDomain.SUBJECT
-    )
+    references = tr.perform_cross_referencing(CrossReferenceDomain.TOPIC, CrossReferenceDomain.SUBJECT)
 
     # Test decision confidence
     tr.get_decision_confidence("User_0")
 
     # Record processing
-    tr.record_processing_event("full_test", {
-        "facts_processed": len(facts),
-        "paths_constructed": len(paths),
-        "references_generated": len(references)
-    })
+    tr.record_processing_event(
+        "full_test",
+        {"facts_processed": len(facts), "paths_constructed": len(paths), "references_generated": len(references)},
+    )
 
     # Run performance benchmark
     suite.test_performance_benchmark(tr)

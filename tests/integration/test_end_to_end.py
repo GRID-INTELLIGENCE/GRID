@@ -14,6 +14,7 @@ from src.grid.infrastructure.database import DatabaseManager
 def db_path(tmp_path):
     return str(tmp_path / "e2e_grid.db")
 
+
 @pytest.fixture
 async def services(db_path):
     # Setup Infrastructure
@@ -25,20 +26,16 @@ async def services(db_path):
     auth = AuthService(db, tm)
 
     # Setup Usage & Billing
-    tracker = UsageTracker(db, batch_size=1, flush_interval=0.1) # Flush fast
+    tracker = UsageTracker(db, batch_size=1, flush_interval=0.1)  # Flush fast
     await tracker.start()
 
     billing = BillingService(db)
 
-    yield {
-        "db": db,
-        "auth": auth,
-        "tracker": tracker,
-        "billing": billing
-    }
+    yield {"db": db, "auth": auth, "tracker": tracker, "billing": billing}
 
     await tracker.stop()
     await db.close()
+
 
 @pytest.mark.asyncio
 async def test_end_to_end_flow(services):
@@ -70,13 +67,14 @@ async def test_end_to_end_flow(services):
     assert bill == 4900  # $49.00
 
     # 5. Create Overage
-    await tracker.track_event(user_id, "relationship_analysis", 600) # Total 1100
+    await tracker.track_event(user_id, "relationship_analysis", 600)  # Total 1100
     await asyncio.sleep(0.5)
 
     # Limit is 1000. Overage 100. Cost 5 cents each = 500 cents.
     # Total = 4900 + 500 = 5400
     bill_overage = await billing.calculate_current_bill(user_id)
     assert bill_overage == 5400
+
 
 @pytest.mark.asyncio
 async def test_auth_refresh_flow(services):

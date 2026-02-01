@@ -9,7 +9,7 @@ import sys
 import time
 
 # Add src to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "src"))
 
 from tools.rag.conversational_rag import create_conversational_rag_engine
 
@@ -42,11 +42,7 @@ async def test_conversation_flow():
     engine = create_conversational_rag_engine()
     session_id = engine.create_session("test-conversation")
 
-    queries = [
-        "What is GRID?",
-        "How does it work?",
-        "What are the 9 cognition patterns?"
-    ]
+    queries = ["What is GRID?", "How does it work?", "What are the 9 cognition patterns?"]
 
     for i, query in enumerate(queries):
         start_time = time.perf_counter()
@@ -99,6 +95,7 @@ async def main():
     except Exception as e:
         print(f"\nError during testing: {e}")
         import traceback
+
         traceback.print_exc()
 
 

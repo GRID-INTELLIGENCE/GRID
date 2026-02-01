@@ -1,6 +1,5 @@
 """Tests for AI Safety Provider Skills."""
 
-
 from grid.skills.ai_safety.providers import (
     PROVIDER_SKILLS,
     get_provider_skill,
@@ -59,7 +58,7 @@ class TestOpenAIProvider:
 
     def test_skill_has_handler(self):
         """Test that skill has a handler function."""
-        assert hasattr(provider_openai, 'handler')
+        assert hasattr(provider_openai, "handler")
         assert callable(provider_openai.handler)
 
     def test_handler_with_safe_content(self):
@@ -166,13 +165,13 @@ class TestProviderSkillVersions:
     def test_all_providers_have_versions(self):
         """Test that all provider skills have version attributes."""
         for name, skill in PROVIDER_SKILLS.items():
-            assert hasattr(skill, 'version')
+            assert hasattr(skill, "version")
             assert skill.version is not None
-            assert len(skill.version.split('.')) >= 2  # Semantic version format
+            assert len(skill.version.split(".")) >= 2  # Semantic version format
 
     def test_all_providers_have_descriptions(self):
         """Test that all provider skills have descriptions."""
         for name, skill in PROVIDER_SKILLS.items():
-            assert hasattr(skill, 'description')
+            assert hasattr(skill, "description")
             assert skill.description is not None
             assert len(skill.description) > 0

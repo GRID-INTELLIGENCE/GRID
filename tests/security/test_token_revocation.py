@@ -1,5 +1,6 @@
+from datetime import UTC, datetime, timedelta
+
 import pytest
-from datetime import datetime, timedelta, UTC
 
 from application.mothership.security.token_revocation import (
     TokenRevocationList,
@@ -27,22 +28,22 @@ class TestTokenRevocationList:
         """Test revoking a token."""
         jti = "test-jti-123"
         expires_at = datetime.now(UTC) + timedelta(hours=1)
-        
+
         result = await revocation_list.revoke_token(jti, expires_at, reason="logout")
-        
+
         assert result is True
 
     @pytest.mark.asyncio
     async def test_is_revoked(self, revocation_list):
         """Test checking if token is revoked."""
         jti = "test-jti-456"
-        
+
         # Not revoked initially
         assert await revocation_list.is_revoked(jti) is False
-        
+
         # Revoke it
         await revocation_list.revoke_token(jti, reason="test")
-        
+
         # Now should be revoked
         assert await revocation_list.is_revoked(jti) is True
 
@@ -51,9 +52,9 @@ class TestTokenRevocationList:
         """Test that already expired tokens are not stored."""
         jti = "expired-jti"
         expires_at = datetime.now(UTC) - timedelta(hours=1)  # Already expired
-        
+
         result = await revocation_list.revoke_token(jti, expires_at)
-        
+
         # Should return True but not actually store
         assert result is True
 
@@ -68,9 +69,9 @@ class TestTokenValidator:
             "jti": "valid-jti",
             "exp": (datetime.now(UTC) + timedelta(hours=1)).timestamp(),
         }
-        
+
         is_valid, error = await token_validator.validate_token(payload)
-        
+
         assert is_valid is True
         assert error is None
 
@@ -79,14 +80,14 @@ class TestTokenValidator:
         """Test validation of revoked token."""
         jti = "revoked-jti"
         await revocation_list.revoke_token(jti, reason="test")
-        
+
         payload = {
             "jti": jti,
             "exp": (datetime.now(UTC) + timedelta(hours=1)).timestamp(),
         }
-        
+
         is_valid, error = await token_validator.validate_token(payload)
-        
+
         assert is_valid is False
         assert error == "Token has been revoked"
 
@@ -94,8 +95,8 @@ class TestTokenValidator:
     async def test_validate_missing_jti(self, token_validator):
         """Test validation rejects tokens without JTI."""
         payload = {"exp": (datetime.now(UTC) + timedelta(hours=1)).timestamp()}
-        
+
         is_valid, error = await token_validator.validate_token(payload)
-        
+
         assert is_valid is False
         assert error == "Token missing JTI claim"

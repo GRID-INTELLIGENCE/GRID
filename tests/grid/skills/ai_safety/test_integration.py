@@ -1,8 +1,7 @@
 """Integration tests for AI Safety Skills."""
 
-
-from grid.skills.ai_safety.base import ThreatLevel
 from grid.skills.ai_safety.actions import actions_handler
+from grid.skills.ai_safety.base import ThreatLevel
 from grid.skills.ai_safety.monitor import monitor_handler
 from grid.skills.ai_safety.rules import rules_handler
 from grid.skills.ai_safety.thresholds import thresholds_handler
@@ -19,45 +18,55 @@ class TestSafetyPipeline:
 
         # Step 2: If violations, take action
         if rules_result["violation_count"] > 0:
-            action_result = actions_handler({
-                "violation": rules_result["violations"][0],
-                "content": "This contains hate speech",
-            })
+            action_result = actions_handler(
+                {
+                    "violation": rules_result["violations"][0],
+                    "content": "This contains hate speech",
+                }
+            )
             assert action_result["success"] is True
 
     def test_monitoring_with_violation_response(self):
         """Test monitoring and responding to violations."""
         # Create monitoring session
-        create_result = monitor_handler({
-            "operation": "create",
-            "stream_id": "test_stream",
-        })
+        create_result = monitor_handler(
+            {
+                "operation": "create",
+                "stream_id": "test_stream",
+            }
+        )
         assert create_result["success"] is True
         session_id = create_result["session_id"]
 
         # Check harmful content
-        check_result = monitor_handler({
-            "operation": "check",
-            "session_id": session_id,
-            "content": "Violence and weapons",
-        })
+        check_result = monitor_handler(
+            {
+                "operation": "check",
+                "session_id": session_id,
+                "content": "Violence and weapons",
+            }
+        )
         assert check_result["success"] is True
 
         # Get stats
-        stats_result = monitor_handler({
-            "operation": "stats",
-            "session_id": session_id,
-        })
+        stats_result = monitor_handler(
+            {
+                "operation": "stats",
+                "session_id": session_id,
+            }
+        )
         assert stats_result["success"] is True
 
     def test_threshold_based_monitoring(self):
         """Test threshold-based safety monitoring."""
         # Set up metrics with baseline
-        thresholds_result = thresholds_handler({
-            "metrics": {"error_rate": 50.0},
-            "baseline": {"error_rate": 5.0},
-            "sensitivity": "high",
-        })
+        thresholds_result = thresholds_handler(
+            {
+                "metrics": {"error_rate": 50.0},
+                "baseline": {"error_rate": 5.0},
+                "sensitivity": "high",
+            }
+        )
         assert thresholds_result["success"] is True
 
         # If threshold violation detected, log it
@@ -115,10 +124,7 @@ class TestSafetyReportGeneration:
         report = SafetyReport(
             overall_score=0.7 if violations else 1.0,
             threat_level=threat_level,
-            violations=[
-                type('obj', (object,), v)() if isinstance(v, dict) else v
-                for v in violations
-            ],
+            violations=[type("obj", (object,), v)() if isinstance(v, dict) else v for v in violations],
         )
 
         assert report.threat_level == threat_level

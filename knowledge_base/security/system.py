@@ -26,6 +26,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class User:
     """User account information."""
+
     user_id: str
     username: str
     email: str
@@ -39,6 +40,7 @@ class User:
 @dataclass
 class APIKey:
     """API key for programmatic access."""
+
     key_id: str
     name: str
     user_id: str
@@ -53,6 +55,7 @@ class APIKey:
 @dataclass
 class RateLimitRule:
     """Rate limiting rule."""
+
     name: str
     max_requests: int
     window_seconds: int
@@ -75,7 +78,7 @@ class JWTManager:
             "role": user.role,
             "permissions": user.permissions,
             "iat": datetime.now().timestamp(),
-            "exp": (datetime.now() + timedelta(seconds=self.config.security.jwt_expiration)).timestamp()
+            "exp": (datetime.now() + timedelta(seconds=self.config.security.jwt_expiration)).timestamp(),
         }
 
         return jwt.encode(payload, self.config.security.jwt_secret, algorithm=self.config.security.jwt_algorithm)
@@ -83,8 +86,9 @@ class JWTManager:
     def verify_token(self, token: str) -> dict[str, Any] | None:
         """Verify and decode JWT token."""
         try:
-            payload = jwt.decode(token, self.config.security.jwt_secret,
-                               algorithms=[self.config.security.jwt_algorithm])
+            payload = jwt.decode(
+                token, self.config.security.jwt_secret, algorithms=[self.config.security.jwt_algorithm]
+            )
 
             # Check if token is expired
             if payload.get("exp", 0) < datetime.now().timestamp():
@@ -105,7 +109,7 @@ class JWTManager:
             username=payload["username"],
             email="",  # Email not stored in token
             role=payload.get("role", "user"),
-            permissions=payload.get("permissions", [])
+            permissions=payload.get("permissions", []),
         )
 
 
@@ -116,8 +120,7 @@ class APIKeyManager:
         self.keys: dict[str, APIKey] = {}
         # In production, this would be stored in a database
 
-    def create_key(self, name: str, user_id: str, permissions: list[str],
-                  expires_days: int | None = None) -> str:
+    def create_key(self, name: str, user_id: str, permissions: list[str], expires_days: int | None = None) -> str:
         """Create a new API key."""
         # Generate secure random key
         raw_key = secrets.token_urlsafe(32)
@@ -130,12 +133,7 @@ class APIKeyManager:
             expires_at = datetime.now() + timedelta(days=expires_days)
 
         api_key = APIKey(
-            key_id=key_id,
-            name=name,
-            user_id=user_id,
-            key_hash=key_hash,
-            permissions=permissions,
-            expires_at=expires_at
+            key_id=key_id, name=name, user_id=user_id, key_hash=key_hash, permissions=permissions, expires_at=expires_at
         )
 
         self.keys[key_id] = api_key
@@ -175,15 +173,17 @@ class APIKeyManager:
         user_keys = []
         for api_key in self.keys.values():
             if api_key.user_id == user_id:
-                user_keys.append({
-                    "key_id": api_key.key_id,
-                    "name": api_key.name,
-                    "permissions": api_key.permissions,
-                    "is_active": api_key.is_active,
-                    "created_at": api_key.created_at.isoformat(),
-                    "expires_at": api_key.expires_at.isoformat() if api_key.expires_at else None,
-                    "last_used": api_key.last_used.isoformat() if api_key.last_used else None
-                })
+                user_keys.append(
+                    {
+                        "key_id": api_key.key_id,
+                        "name": api_key.name,
+                        "permissions": api_key.permissions,
+                        "is_active": api_key.is_active,
+                        "created_at": api_key.created_at.isoformat(),
+                        "expires_at": api_key.expires_at.isoformat() if api_key.expires_at else None,
+                        "last_used": api_key.last_used.isoformat() if api_key.last_used else None,
+                    }
+                )
 
         return user_keys
 
@@ -212,10 +212,7 @@ class RateLimiter:
 
         # Clean old requests outside the window
         window_start = now - rule.window_seconds
-        self.requests[identifier] = [
-            req_time for req_time in self.requests[identifier]
-            if req_time > window_start
-        ]
+        self.requests[identifier] = [req_time for req_time in self.requests[identifier] if req_time > window_start]
 
         # Check if under limit
         if len(self.requests[identifier]) < rule.max_requests:
@@ -232,10 +229,7 @@ class RateLimiter:
         now = time.time()
         window_start = now - rule.window_seconds
 
-        valid_requests = [
-            req_time for req_time in self.requests.get(identifier, [])
-            if req_time > window_start
-        ]
+        valid_requests = [req_time for req_time in self.requests.get(identifier, []) if req_time > window_start]
 
         return max(0, rule.max_requests - len(valid_requests))
 
@@ -253,20 +247,10 @@ class AccessControl:
     def __init__(self):
         # Define roles and their permissions
         self.role_permissions = {
-            "admin": [
-                "read:*", "write:*", "delete:*", "admin:*",
-                "search:*", "generate:*", "ingest:*"
-            ],
-            "editor": [
-                "read:*", "write:documents", "write:chunks",
-                "search:*", "generate:*", "ingest:*"
-            ],
-            "user": [
-                "read:documents", "read:chunks", "search:*", "generate:basic"
-            ],
-            "viewer": [
-                "read:documents", "read:chunks", "search:public"
-            ]
+            "admin": ["read:*", "write:*", "delete:*", "admin:*", "search:*", "generate:*", "ingest:*"],
+            "editor": ["read:*", "write:documents", "write:chunks", "search:*", "generate:*", "ingest:*"],
+            "user": ["read:documents", "read:chunks", "search:*", "generate:basic"],
+            "viewer": ["read:documents", "read:chunks", "search:public"],
         }
 
     def has_permission(self, user_permissions: list[str], required_permission: str) -> bool:
@@ -309,16 +293,13 @@ class DataProtection:
     def mask_sensitive_data(text: str) -> str:
         """Mask sensitive information in text."""
         # Email masking
-        text = re.sub(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b',
-                     '[EMAIL_MASKED]', text)
+        text = re.sub(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b", "[EMAIL_MASKED]", text)
 
         # Phone number masking
-        text = re.sub(r'\b\d{3}[-.]?\d{3}[-.]?\d{4}\b',
-                     '[PHONE_MASKED]', text)
+        text = re.sub(r"\b\d{3}[-.]?\d{3}[-.]?\d{4}\b", "[PHONE_MASKED]", text)
 
         # SSN masking
-        text = re.sub(r'\b\d{3}[-]?\d{2}[-]?\d{4}\b',
-                     '[SSN_MASKED]', text)
+        text = re.sub(r"\b\d{3}[-]?\d{2}[-]?\d{4}\b", "[SSN_MASKED]", text)
 
         return text
 
@@ -329,20 +310,16 @@ class DataProtection:
 
         # Check for potentially harmful content
         harmful_patterns = [
-            r'\b(hack|exploit|attack|malware)\b',
-            r'\b(password|credential|secret)\b.*\b(leak|steal|hack)\b',
-            r'\b(illegal|criminal|terrorist)\b'
+            r"\b(hack|exploit|attack|malware)\b",
+            r"\b(password|credential|secret)\b.*\b(leak|steal|hack)\b",
+            r"\b(illegal|criminal|terrorist)\b",
         ]
 
         for pattern in harmful_patterns:
             if re.search(pattern, text.lower()):
                 issues.append(f"Potentially harmful content detected: {pattern}")
 
-        return {
-            "safe": len(issues) == 0,
-            "issues": issues,
-            "content_length": len(text)
-        }
+        return {"safe": len(issues) == 0, "issues": issues, "content_length": len(text)}
 
 
 class SecurityMiddleware:
@@ -359,11 +336,10 @@ class SecurityMiddleware:
         self.default_rule = RateLimitRule(
             name="default",
             max_requests=config.security.rate_limit_requests,
-            window_seconds=config.security.rate_limit_window
+            window_seconds=config.security.rate_limit_window,
         )
 
-    def authenticate_request(self, token: str | None = None,
-                           api_key: str | None = None) -> User | None:
+    def authenticate_request(self, token: str | None = None, api_key: str | None = None) -> User | None:
         """Authenticate a request."""
         if not self.config.security.enable_auth:
             # Return anonymous user
@@ -372,7 +348,7 @@ class SecurityMiddleware:
                 username="anonymous",
                 email="",
                 role="viewer",
-                permissions=self.access_control.get_role_permissions("viewer")
+                permissions=self.access_control.get_role_permissions("viewer"),
             )
 
         # Try JWT token first
@@ -391,7 +367,7 @@ class SecurityMiddleware:
                     user_id=api_key_obj.user_id,
                     username=f"api_{api_key_obj.key_id}",
                     email="",
-                    permissions=api_key_obj.permissions
+                    permissions=api_key_obj.permissions,
                 )
                 return user
 
@@ -430,12 +406,13 @@ class SecurityMiddleware:
             "rate_limiting_enabled": True,
             "active_api_keys": len([k for k in self.api_key_manager.keys.values() if k.is_active]),
             "blocked_users": len(self.rate_limiter.blocked),
-            "jwt_expiration_hours": self.config.security.jwt_expiration / 3600
+            "jwt_expiration_hours": self.config.security.jwt_expiration / 3600,
         }
 
 
 def require_auth(permission: str = ""):
     """Decorator for requiring authentication and permissions."""
+
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -443,12 +420,15 @@ def require_auth(permission: str = ""):
             # For now, just log the requirement
             logger.debug(f"Function {func.__name__} requires permission: {permission}")
             return func(*args, **kwargs)
+
         return wrapper
+
     return decorator
 
 
 def rate_limit(max_requests: int = 100, window_seconds: int = 60):
     """Decorator for rate limiting."""
+
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -456,5 +436,7 @@ def rate_limit(max_requests: int = 100, window_seconds: int = 60):
             # For now, just log the limit
             logger.debug(f"Function {func.__name__} rate limited: {max_requests}/{window_seconds}s")
             return func(*args, **kwargs)
+
         return wrapper
+
     return decorator

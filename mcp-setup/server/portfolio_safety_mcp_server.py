@@ -58,9 +58,7 @@ class PortfolioSafetyLensServer:
                     description="Get sanitized portfolio metrics only (no raw positions)",
                     inputSchema={
                         "type": "object",
-                        "properties": {
-                            "user_id": {"type": "string", "description": "User ID"}
-                        },
+                        "properties": {"user_id": {"type": "string", "description": "User ID"}},
                         "required": ["user_id"],
                     },
                 ),
@@ -69,9 +67,7 @@ class PortfolioSafetyLensServer:
                     description="Get portfolio risk score and signals (no raw data)",
                     inputSchema={
                         "type": "object",
-                        "properties": {
-                            "user_id": {"type": "string", "description": "User ID"}
-                        },
+                        "properties": {"user_id": {"type": "string", "description": "User ID"}},
                         "required": ["user_id"],
                     },
                 ),
@@ -80,9 +76,7 @@ class PortfolioSafetyLensServer:
                     description="Get recent security events (hashed IDs only)",
                     inputSchema={
                         "type": "object",
-                        "properties": {
-                            "limit": {"type": "integer", "description": "Number of events", "default": 10}
-                        },
+                        "properties": {"limit": {"type": "integer", "description": "Number of events", "default": 10}},
                         "required": [],
                     },
                 ),
@@ -91,9 +85,7 @@ class PortfolioSafetyLensServer:
                     description="Check portfolio data policy compliance",
                     inputSchema={
                         "type": "object",
-                        "properties": {
-                            "user_id": {"type": "string", "description": "User ID"}
-                        },
+                        "properties": {"user_id": {"type": "string", "description": "User ID"}},
                         "required": ["user_id"],
                     },
                 ),
@@ -114,25 +106,18 @@ class PortfolioSafetyLensServer:
                     return await self._governance_lint(arguments)
                 else:
                     return CallToolResult(
-                        content=[TextContent(text=f"Unknown tool: {name}", type="text")],
-                        isError=True
+                        content=[TextContent(text=f"Unknown tool: {name}", type="text")], isError=True
                     )
             except Exception as e:
                 logger.error(f"Error in tool {name}: {e}")
-                return CallToolResult(
-                    content=[TextContent(text=f"Error: {str(e)}", type="text")],
-                    isError=True
-                )
+                return CallToolResult(content=[TextContent(text=f"Error: {str(e)}", type="text")], isError=True)
 
     async def _portfolio_summary_safe(self, arguments: dict[str, Any]) -> CallToolResult:
         """Get sanitized portfolio summary metrics only."""
         user_id = arguments.get("user_id")
 
         if not user_id:
-            return CallToolResult(
-                content=[TextContent(text="Error: user_id is required", type="text")],
-                isError=True
-            )
+            return CallToolResult(content=[TextContent(text="Error: user_id is required", type="text")], isError=True)
 
         try:
             # Get safe metrics only
@@ -145,7 +130,7 @@ class PortfolioSafetyLensServer:
                 "total_gain_loss": round(metrics.get("total_gain_loss", 0), 2),
                 "gain_loss_percentage": round(metrics.get("gain_loss_percentage", 0), 2),
                 "positions_count": len(metrics.get("positions", [])),
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             }
 
             # Log access
@@ -153,29 +138,21 @@ class PortfolioSafetyLensServer:
                 event_type=AuditEventType.READ,
                 user_id=user_id,
                 action="portfolio_summary_safe",
-                details={"tool": "portfolio_summary_safe"}
+                details={"tool": "portfolio_summary_safe"},
             )
 
-            return CallToolResult(
-                content=[TextContent(text=json.dumps(sanitized, indent=2), type="text")]
-            )
+            return CallToolResult(content=[TextContent(text=json.dumps(sanitized, indent=2), type="text")])
 
         except Exception as e:
             logger.error(f"Error getting portfolio summary: {e}")
-            return CallToolResult(
-                content=[TextContent(text=f"Error: {str(e)}", type="text")],
-                isError=True
-            )
+            return CallToolResult(content=[TextContent(text=f"Error: {str(e)}", type="text")], isError=True)
 
     async def _portfolio_risk_signal(self, arguments: dict[str, Any]) -> CallToolResult:
         """Get portfolio risk score and signals (no raw data)."""
         user_id = arguments.get("user_id")
 
         if not user_id:
-            return CallToolResult(
-                content=[TextContent(text="Error: user_id is required", type="text")],
-                isError=True
-            )
+            return CallToolResult(content=[TextContent(text="Error: user_id is required", type="text")], isError=True)
 
         try:
             # Get concentration risk
@@ -189,14 +166,11 @@ class PortfolioSafetyLensServer:
                 "risk_level": risk.get("risk_level", "UNKNOWN"),
                 "concentration_risk": {
                     "top_position_percentage": risk.get("top_position_percentage", 0),
-                    "top_3_percentage": risk.get("top_3_percentage", 0)
+                    "top_3_percentage": risk.get("top_3_percentage", 0),
                 },
-                "diversification": {
-                    "total_positions": len(allocation),
-                    "sectors": list(allocation.keys())
-                },
+                "diversification": {"total_positions": len(allocation), "sectors": list(allocation.keys())},
                 "recommendation": risk.get("recommendation", "No data available"),
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             }
 
             # Log access
@@ -204,19 +178,14 @@ class PortfolioSafetyLensServer:
                 event_type=AuditEventType.READ,
                 user_id=user_id,
                 action="portfolio_risk_signal",
-                details={"tool": "portfolio_risk_signal"}
+                details={"tool": "portfolio_risk_signal"},
             )
 
-            return CallToolResult(
-                content=[TextContent(text=json.dumps(risk_signal, indent=2), type="text")]
-            )
+            return CallToolResult(content=[TextContent(text=json.dumps(risk_signal, indent=2), type="text")])
 
         except Exception as e:
             logger.error(f"Error getting risk signal: {e}")
-            return CallToolResult(
-                content=[TextContent(text=f"Error: {str(e)}", type="text")],
-                isError=True
-            )
+            return CallToolResult(content=[TextContent(text=f"Error: {str(e)}", type="text")], isError=True)
 
     async def _audit_log_tail(self, arguments: dict[str, Any]) -> CallToolResult:
         """Get recent security events (hashed IDs only)."""
@@ -229,38 +198,32 @@ class PortfolioSafetyLensServer:
             # Sanitize (hashed IDs only, no sensitive data)
             sanitized_logs = []
             for log in logs:
-                sanitized_logs.append({
-                    "timestamp": log.timestamp.isoformat(),
-                    "event_type": log.event_type.value if hasattr(log.event_type, 'value') else str(log.event_type),
-                    "user_id_hash": log.user_id_hash[:16] + "...",  # Truncated hash
-                    "action": log.action,
-                    "details_count": len(log.details) if log.details else 0
-                })
+                sanitized_logs.append(
+                    {
+                        "timestamp": log.timestamp.isoformat(),
+                        "event_type": log.event_type.value if hasattr(log.event_type, "value") else str(log.event_type),
+                        "user_id_hash": log.user_id_hash[:16] + "...",  # Truncated hash
+                        "action": log.action,
+                        "details_count": len(log.details) if log.details else 0,
+                    }
+                )
 
-            return CallToolResult(
-                content=[TextContent(text=json.dumps(sanitized_logs, indent=2), type="text")]
-            )
+            return CallToolResult(content=[TextContent(text=json.dumps(sanitized_logs, indent=2), type="text")])
 
         except Exception as e:
             logger.error(f"Error getting audit logs: {e}")
-            return CallToolResult(
-                content=[TextContent(text=f"Error: {str(e)}", type="text")],
-                isError=True
-            )
+            return CallToolResult(content=[TextContent(text=f"Error: {str(e)}", type="text")], isError=True)
 
     async def _governance_lint(self, arguments: dict[str, Any]) -> CallToolResult:
         """Check portfolio data policy compliance."""
         user_id = arguments.get("user_id")
 
         if not user_id:
-            return CallToolResult(
-                content=[TextContent(text="Error: user_id is required", type="text")],
-                isError=True
-            )
+            return CallToolResult(content=[TextContent(text="Error: user_id is required", type="text")], isError=True)
 
         try:
             # Get portfolio analysis
-            analysis = self.analyzer.analyze_portfolio(user_id, purpose="compliance_check")
+            _ = self.analyzer.analyze_portfolio(user_id, purpose="compliance_check")
 
             # Check compliance
             compliance_checks = {
@@ -270,7 +233,7 @@ class PortfolioSafetyLensServer:
                 "ai_safety_enforced": True,  # AI safety checks are applied
                 "output_sanitization": True,  # Outputs are sanitized
                 "policy_compliant": True,
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             }
 
             # Log compliance check
@@ -278,19 +241,14 @@ class PortfolioSafetyLensServer:
                 event_type=AuditEventType.READ,
                 user_id=user_id,
                 action="governance_lint",
-                details={"tool": "governance_lint", "compliant": True}
+                details={"tool": "governance_lint", "compliant": True},
             )
 
-            return CallToolResult(
-                content=[TextContent(text=json.dumps(compliance_checks, indent=2), type="text")]
-            )
+            return CallToolResult(content=[TextContent(text=json.dumps(compliance_checks, indent=2), type="text")])
 
         except Exception as e:
             logger.error(f"Error checking governance: {e}")
-            return CallToolResult(
-                content=[TextContent(text=f"Error: {str(e)}", type="text")],
-                isError=True
-            )
+            return CallToolResult(content=[TextContent(text=f"Error: {str(e)}", type="text")], isError=True)
 
 
 async def main():
@@ -299,6 +257,7 @@ async def main():
 
     # Use stdio transport
     from mcp.server.stdio import stdio_server
+
     await stdio_server(server.server)
 
 

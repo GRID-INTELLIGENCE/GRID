@@ -20,7 +20,7 @@ import pytest
 pytest.skip("HuggingFace Hub importlib_metadata version issue", allow_module_level=True)
 
 # Add src to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "src"))
 
 from grid.mcp.enhanced_rag_server import EnhancedRAGMCPServer
 from tools.rag.conversational_rag import create_conversational_rag_engine
@@ -66,8 +66,8 @@ async def test_enhanced_rag_capabilities():
     print(f"      Turn count: {result2['conversation_metadata']['turn_count']}")
 
     # Verify conversation progression
-    turn_count1 = result1['conversation_metadata']['turn_count']
-    turn_count2 = result2['conversation_metadata']['turn_count']
+    turn_count1 = result1["conversation_metadata"]["turn_count"]
+    turn_count2 = result2["conversation_metadata"]["turn_count"]
     assert turn_count2 > turn_count1, "Turn count should increase in conversation"
     print(f"   ✅ Conversation progression: {turn_count1} → {turn_count2}")
 
@@ -75,11 +75,7 @@ async def test_enhanced_rag_capabilities():
     print("\n4. Testing Multi-hop Reasoning...")
 
     # Enable multi-hop for this query
-    result3 = await engine.query(
-        "Explain the GRID architecture",
-        session_id=session_id,
-        enable_multi_hop=True
-    )
+    result3 = await engine.query("Explain the GRID architecture", session_id=session_id, enable_multi_hop=True)
 
     print(f"   ✅ Multi-hop query: {result3['answer'][:50]}...")
     print(f"      Multi-hop used: {result3.get('multi_hop_used', False)}")
@@ -141,7 +137,7 @@ async def main():
 
     try:
         # Test server instantiation
-        server = await test_enhanced_rag_server_instantiation()
+        await test_enhanced_rag_server_instantiation()
 
         # Test enhanced RAG capabilities
         await test_enhanced_rag_capabilities()
@@ -160,6 +156,7 @@ async def main():
     except Exception as e:
         print(f"\n❌ Test failed: {e}")
         import traceback
+
         traceback.print_exc()
 
 

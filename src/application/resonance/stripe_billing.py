@@ -12,11 +12,11 @@ from __future__ import annotations
 
 import logging
 import os
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import Enum
-from typing import Any, Optional
-from collections.abc import Callable
+from typing import Any
 from uuid import uuid4
 
 logger = logging.getLogger(__name__)
@@ -153,8 +153,8 @@ class StripeBilling:
         customer_id: str,
         event_name: str,
         value: int,
-        identifier: Optional[str] = None,
-        timestamp: Optional[datetime] = None,
+        identifier: str | None = None,
+        timestamp: datetime | None = None,
     ) -> MeterEvent:
         """
         Create a billing meter event.

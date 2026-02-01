@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class GenerationRequest:
     """Request for text generation."""
+
     query: str
     context: list[RankedResult]
     system_prompt: str | None = None
@@ -35,6 +36,7 @@ class GenerationRequest:
 @dataclass
 class GenerationResult:
     """Result of text generation."""
+
     answer: str
     sources: list[dict[str, Any]]
     confidence_score: float
@@ -47,8 +49,7 @@ class PromptBuilder:
     """Builds prompts for LLM generation."""
 
     @staticmethod
-    def build_qa_prompt(query: str, context: list[RankedResult],
-                       system_prompt: str | None = None) -> str:
+    def build_qa_prompt(query: str, context: list[RankedResult], system_prompt: str | None = None) -> str:
         """Build question-answering prompt."""
 
         # Default system prompt
@@ -81,8 +82,7 @@ Answer:"""
 Summary:"""
 
     @staticmethod
-    def build_chat_prompt(messages: list[dict[str, str]],
-                         context: list[RankedResult]) -> str:
+    def build_chat_prompt(messages: list[dict[str, str]], context: list[RankedResult]) -> str:
         """Build conversational prompt with context."""
         context_text = PromptBuilder._format_context(context)
 
@@ -135,12 +135,7 @@ class LLMGenerator:
         self.client = OpenAI(api_key=config.llm.api_key)
 
         # Generation statistics
-        self.generation_stats = {
-            "total_generations": 0,
-            "total_tokens_used": 0,
-            "avg_response_time": 0.0,
-            "errors": 0
-        }
+        self.generation_stats = {"total_generations": 0, "total_tokens_used": 0, "avg_response_time": 0.0, "errors": 0}
 
     def generate_answer(self, request: GenerationRequest) -> GenerationResult:
         """Generate answer for a question using retrieved context."""
@@ -148,11 +143,7 @@ class LLMGenerator:
 
         try:
             # Build prompt
-            prompt = PromptBuilder.build_qa_prompt(
-                request.query,
-                request.context,
-                request.system_prompt
-            )
+            prompt = PromptBuilder.build_qa_prompt(request.query, request.context, request.system_prompt)
 
             # Set parameters
             temperature = request.temperature or self.config.llm.temperature
@@ -163,7 +154,7 @@ class LLMGenerator:
                 model=self.config.llm.model,
                 messages=[{"role": "user", "content": prompt}],
                 temperature=temperature,
-                max_tokens=max_tokens
+                max_tokens=max_tokens,
             )
 
             # Extract response
@@ -173,7 +164,7 @@ class LLMGenerator:
             token_usage = {
                 "prompt_tokens": response.usage.prompt_tokens,
                 "completion_tokens": response.usage.completion_tokens,
-                "total_tokens": response.usage.total_tokens
+                "total_tokens": response.usage.total_tokens,
             }
 
             # Calculate confidence (simplified - based on response length and context)
@@ -195,7 +186,7 @@ class LLMGenerator:
                 confidence_score=confidence,
                 token_usage=token_usage,
                 processing_time=processing_time,
-                model=self.config.llm.model
+                model=self.config.llm.model,
             )
 
         except Exception as e:
@@ -209,7 +200,7 @@ class LLMGenerator:
                 confidence_score=0.0,
                 token_usage={"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0},
                 processing_time=time.time() - start_time,
-                model=self.config.llm.model
+                model=self.config.llm.model,
             )
 
     async def generate_answer_stream(self, request: GenerationRequest) -> AsyncGenerator[str]:
@@ -222,11 +213,7 @@ class LLMGenerator:
 
         try:
             # Build prompt
-            prompt = PromptBuilder.build_qa_prompt(
-                request.query,
-                request.context,
-                request.system_prompt
-            )
+            prompt = PromptBuilder.build_qa_prompt(request.query, request.context, request.system_prompt)
 
             # Call OpenAI API with streaming
             response = openai.ChatCompletion.create(
@@ -234,7 +221,7 @@ class LLMGenerator:
                 messages=[{"role": "user", "content": prompt}],
                 temperature=request.temperature or self.config.llm.temperature,
                 max_tokens=request.max_tokens or self.config.llm.max_tokens,
-                stream=True
+                stream=True,
             )
 
             full_response = ""
@@ -260,7 +247,7 @@ class LLMGenerator:
                 model=self.config.llm.model,
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.3,
-                max_tokens=max_length // 4  # Rough estimate
+                max_tokens=max_length // 4,  # Rough estimate
             )
 
             summary = response.choices[0].message.content.strip()
@@ -285,15 +272,19 @@ class LLMGenerator:
 
         # Answer quality indicators
         answer_length = len(answer.split())
-        has_specific_info = any(term in answer.lower() for term in
-                               ["according to", "the document", "source", "context"])
+        has_specific_info = any(
+            term in answer.lower() for term in ["according to", "the document", "source", "context"]
+        )
 
         # Calculate confidence
-        confidence = min(1.0, (
-            avg_context_score * 0.4 +  # Context relevance
-            min(answer_length / 100, 1.0) * 0.3 +  # Answer length
-            (0.3 if has_specific_info else 0.0)  # Specific references
-        ))
+        confidence = min(
+            1.0,
+            (
+                avg_context_score * 0.4  # Context relevance
+                + min(answer_length / 100, 1.0) * 0.3  # Answer length
+                + (0.3 if has_specific_info else 0.0)  # Specific references
+            ),
+        )
 
         return round(confidence, 2)
 
@@ -308,7 +299,7 @@ class LLMGenerator:
                 "document_id": result.document_id,
                 "chunk_id": result.chunk_id,
                 "source_type": result.source_type,
-                "rank": result.rank
+                "rank": result.rank,
             }
             sources.append(source)
 
@@ -322,9 +313,7 @@ class LLMGenerator:
         # Update average response time
         prev_avg = self.generation_stats["avg_response_time"]
         count = self.generation_stats["total_generations"]
-        self.generation_stats["avg_response_time"] = (
-            (prev_avg * (count - 1)) + processing_time
-        ) / count
+        self.generation_stats["avg_response_time"] = ((prev_avg * (count - 1)) + processing_time) / count
 
     def get_generation_stats(self) -> dict[str, Any]:
         """Get generation statistics."""
@@ -334,16 +323,11 @@ class LLMGenerator:
                 "model": self.config.llm.model,
                 "temperature": self.config.llm.temperature,
                 "max_tokens": self.config.llm.max_tokens,
-                "streaming": self.config.llm.streaming
-            }
+                "streaming": self.config.llm.streaming,
+            },
         }
 
     def clear_stats(self) -> None:
         """Clear generation statistics."""
-        self.generation_stats = {
-            "total_generations": 0,
-            "total_tokens_used": 0,
-            "avg_response_time": 0.0,
-            "errors": 0
-        }
+        self.generation_stats = {"total_generations": 0, "total_tokens_used": 0, "avg_response_time": 0.0, "errors": 0}
         logger.info("Generation statistics cleared")

@@ -57,11 +57,13 @@ class PersistenceVerifier:
 
             total = conn.execute("SELECT COUNT(*) FROM execution_records").fetchone()[0]
 
-            null_count = conn.execute("""
+            null_count = conn.execute(
+                """
                 SELECT COUNT(*) FROM execution_records
                 WHERE skill_id IS NULL OR timestamp IS NULL
                 OR status IS NULL OR execution_time_ms IS NULL
-            """).fetchone()[0]
+            """
+            ).fetchone()[0]
 
             if null_count > 0:
                 return PersistenceCheck(
@@ -91,11 +93,13 @@ class PersistenceVerifier:
 
             total = conn.execute("SELECT COUNT(*) FROM intelligence_records").fetchone()[0]
 
-            null_count = conn.execute("""
+            null_count = conn.execute(
+                """
                 SELECT COUNT(*) FROM intelligence_records
                 WHERE skill_id IS NULL OR decision_type IS NULL
                 OR confidence IS NULL OR timestamp IS NULL
-            """).fetchone()[0]
+            """
+            ).fetchone()[0]
 
             if null_count > 0:
                 return PersistenceCheck(
@@ -126,10 +130,12 @@ class PersistenceVerifier:
             total = conn.execute("SELECT COUNT(*) FROM performance_baselines").fetchone()[0]
 
             # Check for invalid (negative/zero) latencies - allow NULL for optional fields
-            invalid = conn.execute("""
+            invalid = conn.execute(
+                """
                 SELECT COUNT(*) FROM performance_baselines
                 WHERE (p50_ms IS NOT NULL AND p50_ms <= 0)
-            """).fetchone()[0]
+            """
+            ).fetchone()[0]
 
             if invalid > 0:
                 return PersistenceCheck(
@@ -186,16 +192,20 @@ class PersistenceVerifier:
             conn = inv._get_connection()
 
             # Orphaned execution records
-            orphaned_exec = conn.execute("""
+            orphaned_exec = conn.execute(
+                """
                 SELECT COUNT(*) FROM execution_records e
                 WHERE NOT EXISTS (SELECT 1 FROM skill_metadata s WHERE s.skill_id = e.skill_id)
-            """).fetchone()[0]
+            """
+            ).fetchone()[0]
 
             # Orphaned intelligence records
-            orphaned_intel = conn.execute("""
+            orphaned_intel = conn.execute(
+                """
                 SELECT COUNT(*) FROM intelligence_records i
                 WHERE NOT EXISTS (SELECT 1 FROM skill_metadata s WHERE s.skill_id = i.skill_id)
-            """).fetchone()[0]
+            """
+            ).fetchone()[0]
 
             total_orphaned = orphaned_exec + orphaned_intel
 

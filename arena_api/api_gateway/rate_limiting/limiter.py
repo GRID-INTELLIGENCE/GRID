@@ -22,6 +22,7 @@ from fastapi import Request
 
 logger = logging.getLogger(__name__)
 
+
 class RateLimiter:
     """
     Intelligent rate limiter with adaptive capabilities.
@@ -76,13 +77,13 @@ class RateLimiter:
                     "retry_after": most_restrictive.get("retry_after", 60),
                     "limit_type": most_restrictive.get("limit_type"),
                     "current_usage": most_restrictive.get("current_usage", 0),
-                    "limit": most_restrictive.get("limit", 0)
+                    "limit": most_restrictive.get("limit", 0),
                 }
 
             return {
                 "allowed": True,
                 "remaining": min(limit.get("remaining", 1000) for limit in limits),
-                "reset_time": min(limit.get("reset_time", time.time() + 3600) for limit in limits)
+                "reset_time": min(limit.get("reset_time", time.time() + 3600) for limit in limits),
             }
 
         except Exception as e:
@@ -114,7 +115,7 @@ class RateLimiter:
     def _get_service_name(self, request: Request) -> str | None:
         """Extract service name from request path."""
         path = request.url.path
-        parts = path.strip('/').split('/')
+        parts = path.strip("/").split("/")
         if len(parts) > 0 and parts[0] != "":
             return parts[0]
         return None
@@ -140,7 +141,7 @@ class RateLimiter:
                 "limit_type": "ip",
                 "current_usage": current_usage,
                 "limit": limit,
-                "retry_after": 60
+                "retry_after": 60,
             }
 
         # Add current request
@@ -148,11 +149,7 @@ class RateLimiter:
 
         remaining_time = 60 - (current_time - window[0]) if window else 60
 
-        return {
-            "allowed": True,
-            "remaining": limit - current_usage - 1,
-            "reset_time": current_time + remaining_time
-        }
+        return {"allowed": True, "remaining": limit - current_usage - 1, "reset_time": current_time + remaining_time}
 
     async def _check_user_limit(self, user_id: str) -> dict[str, Any]:
         """Check rate limit for user."""
@@ -176,14 +173,10 @@ class RateLimiter:
                 "limit_type": "user",
                 "current_usage": bucket.capacity - tokens_remaining,
                 "limit": bucket.capacity,
-                "retry_after": 1  # Wait 1 second for token refill
+                "retry_after": 1,  # Wait 1 second for token refill
             }
 
-        return {
-            "allowed": True,
-            "remaining": tokens_remaining,
-            "reset_time": time.time() + 1
-        }
+        return {"allowed": True, "remaining": tokens_remaining, "reset_time": time.time() + 1}
 
     async def _check_service_limit(self, service_name: str) -> dict[str, Any]:
         """Check rate limit for service."""
@@ -201,7 +194,7 @@ class RateLimiter:
                 "limit_type": "service",
                 "current_usage": current_usage,
                 "limit": limit,
-                "retry_after": 60
+                "retry_after": 60,
             }
 
         # Increment usage
@@ -210,7 +203,7 @@ class RateLimiter:
         return {
             "allowed": True,
             "remaining": limit - current_usage - 1,
-            "reset_time": (int(time.time() // 60) + 1) * 60
+            "reset_time": (int(time.time() // 60) + 1) * 60,
         }
 
     async def _record_violation(self, request: Request, limit_info: dict[str, Any]):
@@ -220,7 +213,7 @@ class RateLimiter:
                 request=request,
                 limit_type=limit_info.get("limit_type"),
                 current_usage=limit_info.get("current_usage", 0),
-                limit=limit_info.get("limit", 0)
+                limit=limit_info.get("limit", 0),
             )
 
     def set_user_limit(self, user_id: str, requests_per_second: int, burst_limit: int = None):
@@ -228,10 +221,7 @@ class RateLimiter:
         if burst_limit is None:
             burst_limit = requests_per_second * 2
 
-        self.user_limits[user_id] = {
-            "rate": requests_per_second,
-            "burst": burst_limit
-        }
+        self.user_limits[user_id] = {"rate": requests_per_second, "burst": burst_limit}
 
         # Update existing bucket if it exists
         bucket_key = f"user:{user_id}"
@@ -250,11 +240,7 @@ class RateLimiter:
             window_key = f"ip:{identifier}"
             window = self.sliding_windows[window_key]
             current_usage = len(window)
-            return {
-                "current_usage": current_usage,
-                "limit": 100,
-                "remaining": max(0, 100 - current_usage)
-            }
+            return {"current_usage": current_usage, "limit": 100, "remaining": max(0, 100 - current_usage)}
         elif limit_type == "user":
             bucket_key = f"user:{identifier}"
             bucket = self.token_buckets.get(bucket_key)
@@ -262,18 +248,15 @@ class RateLimiter:
                 return {
                     "current_usage": bucket.capacity - bucket.tokens,
                     "limit": bucket.capacity,
-                    "remaining": bucket.tokens
+                    "remaining": bucket.tokens,
                 }
         elif limit_type == "service":
             window_key = f"service:{identifier}:{int(time.time() // 60)}"
             current_usage = self.fixed_limits.get(window_key, 0)
-            return {
-                "current_usage": current_usage,
-                "limit": 1000,
-                "remaining": max(0, 1000 - current_usage)
-            }
+            return {"current_usage": current_usage, "limit": 1000, "remaining": max(0, 1000 - current_usage)}
 
         return {"error": "Unknown limit type"}
+
 
 class TokenBucket:
     """
@@ -310,6 +293,7 @@ class TokenBucket:
         self.tokens = min(self.capacity, self.tokens + tokens_to_add)
         self.last_refill = now
 
+
 class AdaptiveRateLimiter:
     """
     AI-driven adaptive rate limiter that adjusts limits based on system load.
@@ -333,18 +317,13 @@ class AdaptiveRateLimiter:
         adjusted_remaining = int(base_result["remaining"] * (1 - load_factor))
 
         if adjusted_remaining <= 0:
-            return {
-                "allowed": False,
-                "retry_after": 30,
-                "limit_type": "adaptive",
-                "reason": "High system load"
-            }
+            return {"allowed": False, "retry_after": 30, "limit_type": "adaptive", "reason": "High system load"}
 
         return {
             "allowed": True,
             "remaining": adjusted_remaining,
             "reset_time": base_result["reset_time"],
-            "load_factor": load_factor
+            "load_factor": load_factor,
         }
 
     def _calculate_load_factor(self) -> float:

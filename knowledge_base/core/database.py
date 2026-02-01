@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class DocumentData:
     """Document data structure."""
+
     id: str
     title: str
     content: str
@@ -34,6 +35,7 @@ class DocumentData:
 @dataclass
 class SearchResult:
     """Search result data structure."""
+
     document_id: str
     chunk_id: str
     content: str
@@ -228,7 +230,6 @@ class KnowledgeBaseDB:
                 ),
             )
 
-
     def log_search_query(
         self,
         query: str,
@@ -307,9 +308,7 @@ class KnowledgeBaseDB:
                 (str(uuid.uuid4()), chunk_id, user_id, rating, comments),
             )
 
-    def get_chunk_feedback(
-        self, chunk_id: str, limit: int = 10
-    ) -> list[dict[str, Any]]:
+    def get_chunk_feedback(self, chunk_id: str, limit: int = 10) -> list[dict[str, Any]]:
         """Get feedback for a specific chunk."""
         with self.session() as cursor:
             cursor.execute(

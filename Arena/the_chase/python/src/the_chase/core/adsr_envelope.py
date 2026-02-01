@@ -12,10 +12,9 @@ ADSR Parameters (matching GRID's defaults):
 - release_time: 0.3 (fade out time)
 """
 
-from typing import Optional
-from enum import Enum
-from dataclasses import dataclass
 import time
+from dataclasses import dataclass
+from enum import Enum
 
 
 class EnvelopePhase(Enum):
@@ -65,8 +64,8 @@ class ArenaADSREnvelope:
         self.sustain_time = sustain_time
         self.release_time = release_time
 
-        self._start_time: Optional[float] = None
-        self._release_start: Optional[float] = None
+        self._start_time: float | None = None
+        self._release_start: float | None = None
         self._metrics = EnvelopeMetrics()
 
     @property

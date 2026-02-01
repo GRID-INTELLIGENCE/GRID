@@ -99,15 +99,13 @@ class TestEnhancedCognitiveEngine:
             "split_attention": 0.4,
             "element_interactivity": 0.7,
             "cognitive_load": 8.0,  # For flow pattern
-            "engagement": 0.8,     # For flow pattern
-            "focus": 0.7,          # For flow pattern
-            "time_distortion": 0.6  # For flow pattern
+            "engagement": 0.8,  # For flow pattern
+            "focus": 0.7,  # For flow pattern
+            "time_distortion": 0.6,  # For flow pattern
         }
 
         result = await enhanced_engine.track_interaction_with_xai(
-            user_id="test_user",
-            action="case_start",
-            metadata=complex_operation
+            user_id="test_user", action="case_start", metadata=complex_operation
         )
 
         patterns = result["detected_patterns"]
@@ -405,8 +403,8 @@ class TestPerformanceAndStress:
                     "element_interactivity": 0.8,
                     "cognitive_load": 9.0,
                     "engagement": 0.9,
-                    "focus": 0.8
-                }
+                    "focus": 0.8,
+                },
             },
             {
                 "name": "Flow state",
@@ -420,8 +418,8 @@ class TestPerformanceAndStress:
                     "cognitive_load": 5.0,
                     "engagement": 0.9,
                     "focus": 0.9,
-                    "time_distortion": 0.8
-                }
+                    "time_distortion": 0.8,
+                },
             },
             {
                 "name": "Cognitive overload",

@@ -6,6 +6,7 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
+
 class CacheInterface(ABC):
     """Abstract interface for caching operations."""
 
@@ -25,11 +26,13 @@ class CacheInterface(ABC):
     async def clear(self) -> None:
         pass
 
+
 class MemoryCache(CacheInterface):
     """
     In-memory cache implementation using Python dict.
     Not shared across processes. Suitable for local dev.
     """
+
     def __init__(self):
         self._store: dict[str, dict[str, Any]] = {}
         self._lock = asyncio.Lock()
@@ -48,10 +51,7 @@ class MemoryCache(CacheInterface):
 
     async def set(self, key: str, value: Any, ttl: int = 300) -> None:
         async with self._lock:
-            self._store[key] = {
-                "value": value,
-                "expires_at": time.time() + ttl
-            }
+            self._store[key] = {"value": value, "expires_at": time.time() + ttl}
 
     async def delete(self, key: str) -> None:
         async with self._lock:
@@ -60,6 +60,7 @@ class MemoryCache(CacheInterface):
     async def clear(self) -> None:
         async with self._lock:
             self._store.clear()
+
 
 class CacheFactory:
     @staticmethod

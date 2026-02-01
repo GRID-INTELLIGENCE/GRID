@@ -9,11 +9,13 @@ class ParameterSpec:
     default: int | float
     description: str
 
+
 @dataclass
 class ParameterValue:
     current: int | float
     previous: int | float
     target: int | float
+
 
 @dataclass
 class ParameterConstraint:
@@ -22,16 +24,19 @@ class ParameterConstraint:
     step: int | float
     dependencies: list[str] = field(default_factory=list)
 
+
 @dataclass
 class ParameterObjective:
     metric_name: str
-    optimization_direction: str # 'maximize' or 'minimize'
+    optimization_direction: str  # 'maximize' or 'minimize'
+
 
 @dataclass
 class ObjectiveSpec:
     metric_name: str
     target_value: float
     weight: float
+
 
 class Parameterization:
     def __init__(self) -> None:

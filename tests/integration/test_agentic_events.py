@@ -64,9 +64,7 @@ async def test_case_created_event_subscription(event_bus: EventBus):
         received.append(event)
 
     await event_bus.subscribe("case.created", handler)
-    await event_bus.publish(
-        CaseCreatedEvent(case_id="SUB-001", raw_input="Input").to_dict()
-    )
+    await event_bus.publish(CaseCreatedEvent(case_id="SUB-001", raw_input="Input").to_dict())
 
     assert len(received) == 1
     assert received[0]["case_id"] == "SUB-001"
@@ -133,9 +131,7 @@ async def test_multiple_event_subscriptions(event_bus: EventBus):
     await event_bus.subscribe("case.created", handler2)
     await event_bus.subscribe("case.created", handler3)
 
-    await event_bus.publish(
-        CaseCreatedEvent(case_id="MULTI-001", raw_input="Input").to_dict()
-    )
+    await event_bus.publish(CaseCreatedEvent(case_id="MULTI-001", raw_input="Input").to_dict())
 
     assert len(handlers_called["h1"]) == 1
     assert len(handlers_called["h2"]) == 1
@@ -158,14 +154,8 @@ async def test_receptionist_workflow_events(event_bus: EventBus):
     await event_bus.subscribe_all(tracking_handler)
 
     # Simulate receptionist workflow
-    await event_bus.publish(
-        CaseCreatedEvent(case_id="RECEP-001", raw_input="Legal inquiry").to_dict()
-    )
-    await event_bus.publish(
-        CaseCategorizedEvent(
-            case_id="RECEP-001", category="legal", priority="high"
-        ).to_dict()
-    )
+    await event_bus.publish(CaseCreatedEvent(case_id="RECEP-001", raw_input="Legal inquiry").to_dict())
+    await event_bus.publish(CaseCategorizedEvent(case_id="RECEP-001", category="legal", priority="high").to_dict())
     await event_bus.publish(
         CaseReferenceGeneratedEvent(
             case_id="RECEP-001",
@@ -193,18 +183,10 @@ async def test_lawyer_workflow_events(event_bus: EventBus):
     case_id = "LAWYER-001"
 
     # Simulate lawyer workflow
+    await event_bus.publish(CaseCreatedEvent(case_id=case_id, raw_input="Document review").to_dict())
+    await event_bus.publish(CaseExecutedEvent(case_id=case_id, agent_role="lawyer", task="/analyze").to_dict())
     await event_bus.publish(
-        CaseCreatedEvent(case_id=case_id, raw_input="Document review").to_dict()
-    )
-    await event_bus.publish(
-        CaseExecutedEvent(
-            case_id=case_id, agent_role="lawyer", task="/analyze"
-        ).to_dict()
-    )
-    await event_bus.publish(
-        CaseCompletedEvent(
-            case_id=case_id, outcome="success", solution="Analysis complete"
-        ).to_dict()
+        CaseCompletedEvent(case_id=case_id, outcome="success", solution="Analysis complete").to_dict()
     )
 
     case_events = [e for e in events if e[0] == case_id]
@@ -230,16 +212,10 @@ async def test_parallel_case_workflows(event_bus: EventBus):
     # Simulate parallel case processing
     cases = ["PARALLEL-001", "PARALLEL-002", "PARALLEL-003"]
     for case_id in cases:
-        await event_bus.publish(
-            CaseCreatedEvent(case_id=case_id, raw_input="Input").to_dict()
-        )
+        await event_bus.publish(CaseCreatedEvent(case_id=case_id, raw_input="Input").to_dict())
 
     for case_id in cases:
-        await event_bus.publish(
-            CaseExecutedEvent(
-                case_id=case_id, agent_role="lawyer", task="/process"
-            ).to_dict()
-        )
+        await event_bus.publish(CaseExecutedEvent(case_id=case_id, agent_role="lawyer", task="/process").to_dict())
 
     assert len(events_by_case) == 3
     for case_id in cases:
@@ -259,20 +235,10 @@ async def test_event_order_preservation(event_bus: EventBus):
     await event_bus.subscribe_all(tracking_handler)
 
     # Publish events in specific order
-    await event_bus.publish(
-        CaseCreatedEvent(case_id="ORDER-001", raw_input="First").to_dict()
-    )
-    await event_bus.publish(
-        CaseCategorizedEvent(case_id="ORDER-001", category="A", priority="1").to_dict()
-    )
-    await event_bus.publish(
-        CaseExecutedEvent(case_id="ORDER-001", agent_role="lawyer", task="/a").to_dict()
-    )
-    await event_bus.publish(
-        CaseCompletedEvent(
-            case_id="ORDER-001", outcome="success", solution="Done"
-        ).to_dict()
-    )
+    await event_bus.publish(CaseCreatedEvent(case_id="ORDER-001", raw_input="First").to_dict())
+    await event_bus.publish(CaseCategorizedEvent(case_id="ORDER-001", category="A", priority="1").to_dict())
+    await event_bus.publish(CaseExecutedEvent(case_id="ORDER-001", agent_role="lawyer", task="/a").to_dict())
+    await event_bus.publish(CaseCompletedEvent(case_id="ORDER-001", outcome="success", solution="Done").to_dict())
 
     assert event_order == [
         "case.created",
@@ -299,9 +265,7 @@ async def test_concurrent_case_creation_events(event_bus: EventBus):
 
     # Publish multiple case creations concurrently
     tasks = [
-        event_bus.publish(
-            CaseCreatedEvent(case_id=f"CONCURRENT-{i:03d}", raw_input=f"Input {i}").to_dict()
-        )
+        event_bus.publish(CaseCreatedEvent(case_id=f"CONCURRENT-{i:03d}", raw_input=f"Input {i}").to_dict())
         for i in range(10)
     ]
 
@@ -323,9 +287,7 @@ async def test_event_handler_async_operations(event_bus: EventBus):
 
     # Publish events
     for i in range(5):
-        await event_bus.publish(
-            CaseCreatedEvent(case_id=f"ASYNC-{i:03d}", raw_input="Input").to_dict()
-        )
+        await event_bus.publish(CaseCreatedEvent(case_id=f"ASYNC-{i:03d}", raw_input="Input").to_dict())
 
     assert len(processing_results) == 5
     assert all(r["processed"] for r in processing_results)
@@ -352,12 +314,8 @@ async def test_event_driven_case_state_synchronization(event_bus: EventBus):
 
     case_id = "SYNC-001"
     await event_bus.publish(CaseCreatedEvent(case_id=case_id, raw_input="Input").to_dict())
-    await event_bus.publish(
-        CaseExecutedEvent(case_id=case_id, agent_role="lawyer", task="/task").to_dict()
-    )
-    await event_bus.publish(
-        CaseCompletedEvent(case_id=case_id, outcome="success", solution="Done").to_dict()
-    )
+    await event_bus.publish(CaseExecutedEvent(case_id=case_id, agent_role="lawyer", task="/task").to_dict())
+    await event_bus.publish(CaseCompletedEvent(case_id=case_id, outcome="success", solution="Done").to_dict())
 
     assert case_states[case_id]["created"]
     assert case_states[case_id]["executed"]
@@ -380,13 +338,7 @@ async def test_event_publisher_subscriber_coordination(event_bus: EventBus):
     tasks = []
     for i in range(10):
         publish_times.append(f"COORD-{i:03d}")
-        tasks.append(
-            event_bus.publish(
-                CaseCreatedEvent(
-                    case_id=f"COORD-{i:03d}", raw_input="Input"
-                ).to_dict()
-            )
-        )
+        tasks.append(event_bus.publish(CaseCreatedEvent(case_id=f"COORD-{i:03d}", raw_input="Input").to_dict()))
 
     await asyncio.gather(*tasks)
 
@@ -401,9 +353,7 @@ async def test_event_publisher_subscriber_coordination(event_bus: EventBus):
 
 
 @pytest.mark.asyncio
-async def test_agentic_system_event_emission_integration(
-    agentic_system: AgenticSystem, event_bus: EventBus
-):
+async def test_agentic_system_event_emission_integration(agentic_system: AgenticSystem, event_bus: EventBus):
     """Test 13: AgenticSystem properly integrates with EventBus."""
     assert agentic_system.event_bus is event_bus
 
@@ -415,9 +365,7 @@ async def test_agentic_system_event_emission_integration(
     await event_bus.subscribe_all(handler)
 
     # Publish event through system's bus
-    await agentic_system.event_bus.publish(
-        CaseCreatedEvent(case_id="INTEG-001", raw_input="Input").to_dict()
-    )
+    await agentic_system.event_bus.publish(CaseCreatedEvent(case_id="INTEG-001", raw_input="Input").to_dict())
 
     assert len(events) == 1
     assert events[0]["case_id"] == "INTEG-001"
@@ -428,9 +376,7 @@ async def test_event_replay_for_recovery(event_bus: EventBus):
     """Test 14: Event replay for system recovery scenarios."""
     # Publish initial events
     for i in range(5):
-        await event_bus.publish(
-            CaseCreatedEvent(case_id=f"REPLAY-{i:03d}", raw_input="Input").to_dict()
-        )
+        await event_bus.publish(CaseCreatedEvent(case_id=f"REPLAY-{i:03d}", raw_input="Input").to_dict())
 
     # Get history
     history = await event_bus.get_event_history(event_type="case.created", limit=10)
@@ -475,15 +421,9 @@ async def test_event_driven_monitoring(event_bus: EventBus):
     # Simulate workflow
     for i in range(5):
         case_id = f"METRIC-{i:03d}"
-        await event_bus.publish(
-            CaseCreatedEvent(case_id=case_id, raw_input="Input").to_dict()
-        )
-        await event_bus.publish(
-            CaseExecutedEvent(case_id=case_id, agent_role="lawyer", task="/task").to_dict()
-        )
-        await event_bus.publish(
-            CaseCompletedEvent(case_id=case_id, outcome="success", solution="Done").to_dict()
-        )
+        await event_bus.publish(CaseCreatedEvent(case_id=case_id, raw_input="Input").to_dict())
+        await event_bus.publish(CaseExecutedEvent(case_id=case_id, agent_role="lawyer", task="/task").to_dict())
+        await event_bus.publish(CaseCompletedEvent(case_id=case_id, outcome="success", solution="Done").to_dict())
 
     assert metrics["created_count"] == 5
     assert metrics["executed_count"] == 5

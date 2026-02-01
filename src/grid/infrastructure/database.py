@@ -4,11 +4,13 @@ import aiosqlite
 
 logger = logging.getLogger(__name__)
 
+
 class DatabaseManager:
     """
     Manages SQLite database connection and operations using aiosqlite.
     Follows the Local-First architecture.
     """
+
     def __init__(self, db_path: str = "grid.db"):
         self.db_path = db_path
         self._connection: aiosqlite.Connection | None = None

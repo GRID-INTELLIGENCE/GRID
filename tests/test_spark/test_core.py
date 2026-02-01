@@ -7,7 +7,6 @@ Tests cover:
 - Staircase Intelligence routing
 """
 
-
 import pytest
 
 

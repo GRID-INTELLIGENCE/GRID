@@ -4,6 +4,7 @@ Tests for ADSR sustain phase fix validation.
 Ensures the sustain phase maintains quality at sustain_level (0.6)
 instead of incorrectly applying decay rate during sustain.
 """
+
 import pytest
 
 from Arena.the_chase.python.src.the_chase.core.adsr_envelope import (

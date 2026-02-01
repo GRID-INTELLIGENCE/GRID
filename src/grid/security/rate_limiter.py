@@ -11,10 +11,12 @@ logger = logging.getLogger(__name__)
 
 settings = MothershipSettings.from_env()
 
+
 class RateLimiter:
     """
     Rate limiter using Token Bucket or Fixed Window algorithm via CacheInterface.
     """
+
     def __init__(self):
         self.cache = CacheFactory.create(settings.cache.backend)
         self.enabled = settings.security.rate_limit_enabled
@@ -49,6 +51,7 @@ class RateLimiter:
             return True
 
         return False
+
 
 class RateLimitMiddleware(BaseHTTPMiddleware):
     def __init__(self, app, exclude_paths: list[str] = None):

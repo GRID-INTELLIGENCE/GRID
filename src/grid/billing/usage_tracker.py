@@ -7,11 +7,13 @@ from src.grid.infrastructure.database import DatabaseManager
 
 logger = logging.getLogger(__name__)
 
+
 class UsageTracker:
     """
     Tracks and persists usage events asynchronously using batch insertion.
     Follows Local-First principles (SQLite persistence).
     """
+
     def __init__(self, db_manager: DatabaseManager, batch_size: int = 100, flush_interval: int = 60):
         self.db = db_manager
         self._buffer: list[dict[str, Any]] = []
@@ -44,12 +46,9 @@ class UsageTracker:
     async def track_event(self, user_id: str, event_type: str, quantity: int = 1) -> None:
         """Buffer a usage event."""
         async with self._lock:
-            self._buffer.append({
-                "user_id": user_id,
-                "event_type": event_type,
-                "quantity": quantity,
-                "timestamp": datetime.now(UTC)
-            })
+            self._buffer.append(
+                {"user_id": user_id, "event_type": event_type, "quantity": quantity, "timestamp": datetime.now(UTC)}
+            )
             should_flush = len(self._buffer) >= self._batch_size
 
         if should_flush:

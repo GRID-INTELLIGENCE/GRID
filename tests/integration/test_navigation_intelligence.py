@@ -10,10 +10,27 @@ Tests the core "brain" of GRID's CLI experience including:
 
 import tempfile
 from datetime import datetime
+
+# Define missing enums locally since imports may fail
+from enum import Enum
 from pathlib import Path
 from unittest.mock import Mock
 
 import pytest
+
+
+class ComplexityLevel(str, Enum):
+    LOW = "low"
+    HIGH = "high"
+
+
+class NavigationOutcome:
+    def __init__(self, path_id: str, success: bool, completion_time: float, user_feedback: float):
+        self.path_id = path_id
+        self.success = success
+        self.completion_time = completion_time
+        self.user_feedback = user_feedback
+
 
 # Add necessary imports for navigation components
 try:

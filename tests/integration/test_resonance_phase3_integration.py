@@ -10,6 +10,7 @@ These tests verify that all components work together correctly.
 from datetime import UTC, datetime
 
 import pytest
+
 from application.resonance.analytics_service import (
     AlertSeverity,
     AnalyticsService,
@@ -142,7 +143,7 @@ class TestEndToEndEventFlow:
             cost.record_event_density(density)
 
         # Optimizer should recommend adjustments
-        recommendations = cost.analyze_and_recommend()
+        cost.analyze_and_recommend()
 
         # Get current allocation
         allocation = cost.get_current_allocation()
@@ -159,7 +160,7 @@ class TestTuningWorkflow:
     @pytest.mark.asyncio
     async def test_full_tuning_lifecycle(self, integrated_system):
         """Test: Generate → Approve → Apply → Evaluate."""
-        analytics = integrated_system["analytics"]
+        integrated_system["analytics"]
         tuning = integrated_system["tuning"]
 
         # Create insight

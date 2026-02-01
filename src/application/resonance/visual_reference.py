@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass
@@ -17,7 +16,7 @@ class LFOParams:
 
 
 class VisualReference:
-    def __init__(self, adsr_params: ADSRParams, lfo_params: Optional[LFOParams] = None):
+    def __init__(self, adsr_params: ADSRParams, lfo_params: LFOParams | None = None):
         self.adsr_params = adsr_params
         self.lfo_params = lfo_params
 

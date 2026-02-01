@@ -8,9 +8,7 @@ from cognitive.patterns.recognition import get_pattern_matcher
 async def benchmark_cognitive_engine():
     engine = get_cognitive_engine()
     event = InteractionEvent(
-        user_id="test_user",
-        action="query",
-        metadata={"complexity": 0.5, "information_density": 0.5}
+        user_id="test_user", action="query", metadata={"complexity": 0.5, "information_density": 0.5}
     )
 
     print("Benchmarking CognitiveEngine.track_interaction()...")
@@ -24,6 +22,7 @@ async def benchmark_cognitive_engine():
     print(f"Average time per track_interaction: {avg_time_ms:.4f} ms")
     return avg_time_ms
 
+
 def benchmark_pattern_matcher():
     matcher = get_pattern_matcher()
     data = {
@@ -36,7 +35,7 @@ def benchmark_pattern_matcher():
         "coordinates": [(i, i) for i in range(10)],
         "sequence": ["a", "b", "c", "a", "b", "c"],
         "events": ["click", "scroll", "click"],
-        "dimensions": {"x": 0.1, "y": 0.2, "z": 0.3}
+        "dimensions": {"x": 0.1, "y": 0.2, "z": 0.3},
     }
 
     print("Benchmarking PatternMatcher.recognize_all()...")
@@ -50,6 +49,7 @@ def benchmark_pattern_matcher():
     print(f"Average time per recognize_all (all 9 patterns): {avg_time_ms:.4f} ms")
     return avg_time_ms
 
+
 async def main():
     engine_ms = await benchmark_cognitive_engine()
     matcher_ms = benchmark_pattern_matcher()
@@ -62,6 +62,7 @@ async def main():
         print("✅ PERFORMANCE GOAL MET (< 5ms)")
     else:
         print("❌ PERFORMANCE GOAL NOT MET (> 5ms)")
+
 
 if __name__ == "__main__":
     asyncio.run(main())

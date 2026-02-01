@@ -30,25 +30,31 @@ import aiohttp
 
 logger = logging.getLogger(__name__)
 
+
 class MetricType(Enum):
     """Types of metrics that can be tracked."""
+
     COUNTER = "counter"
     GAUGE = "gauge"
     HISTOGRAM = "histogram"
     TIMER = "timer"
 
+
 @dataclass
 class MetricData:
     """Container for metric data."""
+
     name: str
     value: float
     timestamp: datetime
     tags: dict[str, str] = field(default_factory=dict)
     metric_type: MetricType = MetricType.GAUGE
 
+
 @dataclass
 class RequestMetrics:
     """Metrics for API requests."""
+
     method: str
     path: str
     status_code: int
@@ -57,6 +63,7 @@ class RequestMetrics:
     service_name: str | None = None
     client_ip: str | None = None
     user_agent: str | None = None
+
 
 class MonitoringManager:
     """
@@ -93,7 +100,7 @@ class MonitoringManager:
             "rate_limit_violations": 10,  # per minute
             "service_unhealthy_count": 2,  # services
             "memory_usage": 0.8,  # 80%
-            "cpu_usage": 0.9  # 90%
+            "cpu_usage": 0.9,  # 90%
         }
 
     async def start(self):
@@ -109,7 +116,7 @@ class MonitoringManager:
             asyncio.create_task(self._metrics_collector()),
             asyncio.create_task(self._log_processor()),
             asyncio.create_task(self._alert_monitor()),
-            asyncio.create_task(self._metrics_exporter())
+            asyncio.create_task(self._metrics_exporter()),
         ]
 
     async def stop(self):
@@ -123,8 +130,7 @@ class MonitoringManager:
         await asyncio.gather(*self._tasks, return_exceptions=True)
         logger.info("Monitoring system stopped")
 
-    async def record_request(self, request, response, processing_time: float,
-                           authenticated: bool = False):
+    async def record_request(self, request, response, processing_time: float, authenticated: bool = False):
         """
         Record metrics for an API request.
 
@@ -138,10 +144,10 @@ class MonitoringManager:
             # Extract request information
             method = request.method
             path = request.url.path
-            status_code = response.status_code if hasattr(response, 'status_code') else 200
-            user_id = getattr(request.state, 'user_id', None) if hasattr(request, 'state') else None
-            client_ip = getattr(request.client, 'host', None) if request.client else None
-            user_agent = request.headers.get('User-Agent')
+            status_code = response.status_code if hasattr(response, "status_code") else 200
+            user_id = getattr(request.state, "user_id", None) if hasattr(request, "state") else None
+            client_ip = getattr(request.client, "host", None) if request.client else None
+            user_agent = request.headers.get("User-Agent")
 
             # Create request metrics
             metrics = RequestMetrics(
@@ -151,7 +157,7 @@ class MonitoringManager:
                 response_time=processing_time,
                 user_id=user_id,
                 client_ip=client_ip,
-                user_agent=user_agent
+                user_agent=user_agent,
             )
 
             # Add to metrics buffer
@@ -201,7 +207,7 @@ class MonitoringManager:
                 "path": request.url.path,
                 "error": error,
                 "processing_time": processing_time,
-                "client_ip": getattr(request.client, 'host', None) if request.client else None
+                "client_ip": getattr(request.client, "host", None) if request.client else None,
             }
 
             self.log_buffer.append(error_log)
@@ -212,8 +218,7 @@ class MonitoringManager:
         except Exception as e:
             logger.error(f"Error recording error metrics: {str(e)}")
 
-    async def record_rate_limit_violation(self, request, limit_type: str,
-                                        current_usage: int, limit: int):
+    async def record_rate_limit_violation(self, request, limit_type: str, current_usage: int, limit: int):
         """
         Record rate limit violation.
 
@@ -237,7 +242,7 @@ class MonitoringManager:
                 "path": request.url.path,
                 "current_usage": current_usage,
                 "limit": limit,
-                "client_ip": getattr(request.client, 'host', None) if request.client else None
+                "client_ip": getattr(request.client, "host", None) if request.client else None,
             }
 
             self.log_buffer.append(violation_log)
@@ -248,8 +253,7 @@ class MonitoringManager:
         except Exception as e:
             logger.error(f"Error recording rate limit violation: {str(e)}")
 
-    async def record_security_event(self, event_type: str, details: dict[str, Any],
-                                  severity: str = "INFO"):
+    async def record_security_event(self, event_type: str, details: dict[str, Any], severity: str = "INFO"):
         """
         Record security-related events.
 
@@ -266,19 +270,14 @@ class MonitoringManager:
                 "level": severity,
                 "type": "security_event",
                 "event_type": event_type,
-                "details": details
+                "details": details,
             }
 
             self.log_buffer.append(security_log)
 
             # High severity security events trigger alerts
             if severity in ["ERROR", "CRITICAL"]:
-                await self._create_alert(
-                    "security",
-                    f"Security event: {event_type}",
-                    severity,
-                    details
-                )
+                await self._create_alert("security", f"Security event: {event_type}", severity, details)
 
         except Exception as e:
             logger.error(f"Error recording security event: {str(e)}")
@@ -296,7 +295,7 @@ class MonitoringManager:
                 "response_time": metrics.response_time,
                 "user_id": metrics.user_id,
                 "client_ip": metrics.client_ip,
-                "user_agent": metrics.user_agent
+                "user_agent": metrics.user_agent,
             }
 
             self.log_buffer.append(request_log)
@@ -313,11 +312,7 @@ class MonitoringManager:
                     "performance",
                     f"High response time: {metrics.response_time:.2f}s",
                     "WARNING",
-                    {
-                        "method": metrics.method,
-                        "path": metrics.path,
-                        "response_time": metrics.response_time
-                    }
+                    {"method": metrics.method, "path": metrics.path, "response_time": metrics.response_time},
                 )
 
             # Error status alert
@@ -326,11 +321,7 @@ class MonitoringManager:
                     "error",
                     f"Server error: {metrics.status_code}",
                     "ERROR",
-                    {
-                        "method": metrics.method,
-                        "path": metrics.path,
-                        "status_code": metrics.status_code
-                    }
+                    {"method": metrics.method, "path": metrics.path, "status_code": metrics.status_code},
                 )
 
         except Exception as e:
@@ -349,11 +340,7 @@ class MonitoringManager:
                         "error_rate",
                         f"High error rate: {error_rate:.2%}",
                         "ERROR",
-                        {
-                            "error_rate": error_rate,
-                            "total_requests": total_requests,
-                            "total_errors": total_errors
-                        }
+                        {"error_rate": error_rate, "total_requests": total_requests, "total_errors": total_errors},
                     )
 
         except Exception as e:
@@ -367,17 +354,13 @@ class MonitoringManager:
             # Check if violations exceed threshold in last minute
             if violations > self.alert_thresholds["rate_limit_violations"]:
                 await self._create_alert(
-                    "rate_limit",
-                    f"High rate limit violations: {violations}",
-                    "WARNING",
-                    {"violations": violations}
+                    "rate_limit", f"High rate limit violations: {violations}", "WARNING", {"violations": violations}
                 )
 
         except Exception as e:
             logger.error(f"Error checking rate limit alerts: {str(e)}")
 
-    async def _create_alert(self, alert_type: str, message: str, severity: str,
-                          details: dict[str, Any]):
+    async def _create_alert(self, alert_type: str, message: str, severity: str, details: dict[str, Any]):
         """Create an alert."""
         try:
             alert = {
@@ -387,7 +370,7 @@ class MonitoringManager:
                 "severity": severity,
                 "details": details,
                 "timestamp": datetime.utcnow().isoformat(),
-                "acknowledged": False
+                "acknowledged": False,
             }
 
             self.alerts_buffer.append(alert)
@@ -406,11 +389,7 @@ class MonitoringManager:
         """Send alert to external dashboard."""
         try:
             async with aiohttp.ClientSession() as session:
-                await session.post(
-                    f"{self.dashboard_url}/alerts",
-                    json=alert,
-                    timeout=aiohttp.ClientTimeout(total=5)
-                )
+                await session.post(f"{self.dashboard_url}/alerts", json=alert, timeout=aiohttp.ClientTimeout(total=5))
         except Exception as e:
             logger.error(f"Error sending alert to dashboard: {str(e)}")
 
@@ -468,7 +447,8 @@ class MonitoringManager:
 
                 # Check for unacknowledged critical alerts
                 critical_alerts = [
-                    alert for alert in self.alerts_buffer
+                    alert
+                    for alert in self.alerts_buffer
                     if alert["severity"] in ["ERROR", "CRITICAL"] and not alert["acknowledged"]
                 ]
 
@@ -490,14 +470,12 @@ class MonitoringManager:
                     metrics_data = {
                         "counters": dict(self.counters),
                         "gauges": self.gauges.copy(),
-                        "timestamp": datetime.utcnow().isoformat()
+                        "timestamp": datetime.utcnow().isoformat(),
                     }
 
                     async with aiohttp.ClientSession() as session:
                         await session.post(
-                            self.metrics_endpoint,
-                            json=metrics_data,
-                            timeout=aiohttp.ClientTimeout(total=10)
+                            self.metrics_endpoint, json=metrics_data, timeout=aiohttp.ClientTimeout(total=10)
                         )
 
             except Exception as e:
@@ -513,8 +491,8 @@ class MonitoringManager:
             "buffer_sizes": {
                 "metrics": len(self.metrics_buffer),
                 "logs": len(self.log_buffer),
-                "alerts": len(self.alerts_buffer)
-            }
+                "alerts": len(self.alerts_buffer),
+            },
         }
 
     def get_recent_alerts(self, limit: int = 10) -> list[dict[str, Any]]:

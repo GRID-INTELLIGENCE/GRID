@@ -14,7 +14,7 @@ import logging
 import os
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
-from typing import Any, Optional
+from typing import Any
 from uuid import uuid4
 
 logger = logging.getLogger(__name__)
@@ -34,7 +34,7 @@ class SQLExecutionResult:
     rows_affected: int
     result_data: list[list[Any]] = field(default_factory=list)
     column_names: list[str] = field(default_factory=list)
-    error_message: Optional[str] = None
+    error_message: str | None = None
     dbu_consumed: float = 0.0
 
 
@@ -57,7 +57,7 @@ class QueryMetrics:
     query_text: str
     warehouse_id: str
     start_time: datetime
-    end_time: Optional[datetime]
+    end_time: datetime | None
     duration_ms: float
     rows_produced: int
     bytes_scanned: int
@@ -88,9 +88,9 @@ class DatabricksAnalytics:
 
     def __init__(
         self,
-        host: Optional[str] = None,
-        token: Optional[str] = None,
-        warehouse_id: Optional[str] = None,
+        host: str | None = None,
+        token: str | None = None,
+        warehouse_id: str | None = None,
     ):
         """
         Initialize Databricks Analytics.
@@ -111,7 +111,7 @@ class DatabricksAnalytics:
         # Tracking
         self._query_history: list[QueryMetrics] = []
         self._usage_cache: list[DBUUsageRecord] = []
-        self._cache_updated: Optional[datetime] = None
+        self._cache_updated: datetime | None = None
 
         logger.info(f"DatabricksAnalytics initialized (sync enabled: {ALLOW_DATABRICKS_SYNC})")
 
@@ -154,7 +154,7 @@ class DatabricksAnalytics:
     async def execute_sql(
         self,
         statement: str,
-        warehouse_id: Optional[str] = None,
+        warehouse_id: str | None = None,
         timeout_seconds: int = 300,
     ) -> SQLExecutionResult:
         """

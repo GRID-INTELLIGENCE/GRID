@@ -1,11 +1,13 @@
 """
 Arena Mode for The Chase
 """
+
 from typing import Any
 
 
 class OverwatchArenaMode:
     """Arena Mode integration for OVERWATCH"""
+
     def __init__(self):
         self.battle_groups = []
         self.personal_leaderboard = {}

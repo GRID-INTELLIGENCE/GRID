@@ -12,6 +12,7 @@ from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
 
 import pytest
+
 from application.resonance.databricks_analytics import (
     DatabricksAnalytics,
     QueryMetrics,

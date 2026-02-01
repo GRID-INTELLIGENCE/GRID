@@ -2,6 +2,7 @@
 CostTier and Usage Aggregation Module.
 Handles tier definitions and periodic usage rollup.
 """
+
 import logging
 from datetime import UTC, datetime
 from enum import Enum
@@ -15,6 +16,7 @@ settings = MothershipSettings.from_env()
 
 class CostTier(str, Enum):
     """Subscription tier definitions."""
+
     FREE = "free"
     STARTER = "starter"
     PRO = "pro"
@@ -55,6 +57,7 @@ class UsageAggregator:
     Aggregates raw usage_logs into daily/monthly summaries.
     Should be run periodically (e.g., via scheduled task or after batch flush).
     """
+
     def __init__(self, db_manager: DatabaseManager):
         self.db = db_manager
 

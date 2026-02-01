@@ -8,6 +8,7 @@ sys.path.insert(0, SRC_PATH)
 
 from application.resonance.query_engine import ResonanceQueryEngine  # noqa: E402
 
+
 def run_targeted_investigation():
     print("--- [Resonance Targeted Database Investigation] ---")
     db_name = "strategic_resonance.db"
@@ -25,22 +26,32 @@ def run_targeted_investigation():
 
     # Activity 1: Intense, many events
     for i in range(50):
-        impact = 0.4 + (0.1 * (i % 5)) # Base rising impact
+        impact = 0.4 + (0.1 * (i % 5))  # Base rising impact
         if i % 10 == 0:
             impact = 0.95  # Spikes
-        events.append({
-            "id": f"e_a1_{i}", "activity_id": "act_1",
-            "type": "CHASE_TICK", "impact": impact,
-            "data": {"v": i}, "timestamp": (start_time + timedelta(milliseconds=200*i)).isoformat()
-        })
+        events.append(
+            {
+                "id": f"e_a1_{i}",
+                "activity_id": "act_1",
+                "type": "CHASE_TICK",
+                "impact": impact,
+                "data": {"v": i},
+                "timestamp": (start_time + timedelta(milliseconds=200 * i)).isoformat(),
+            }
+        )
 
     # Activity 2: Slow, few events
     for i in range(10):
-        events.append({
-            "id": f"e_a2_{i}", "activity_id": "act_2",
-            "type": "SNEAK_TICK", "impact": 0.1,
-            "data": {"v": i}, "timestamp": (start_time + timedelta(seconds=2*i)).isoformat()
-        })
+        events.append(
+            {
+                "id": f"e_a2_{i}",
+                "activity_id": "act_2",
+                "type": "SNEAK_TICK",
+                "impact": 0.1,
+                "data": {"v": i},
+                "timestamp": (start_time + timedelta(seconds=2 * i)).isoformat(),
+            }
+        )
 
     engine.ingest_batch(events)
     print(f"Ingested {len(events)} events across 2 activities.")
@@ -95,10 +106,12 @@ def run_targeted_investigation():
     try:
         engine = None  # Close connections
         import gc
+
         gc.collect()
         # os.remove(db_name)  # Keep for record if preferred, but user usually wants clean workspace
     except Exception:
         pass
+
 
 if __name__ == "__main__":
     run_targeted_investigation()

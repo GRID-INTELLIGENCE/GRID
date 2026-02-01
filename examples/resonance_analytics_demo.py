@@ -203,7 +203,7 @@ async def demo_cost_optimizer():
     # Record costs
     print("\n💰 Recording event costs...")
     for i in range(3):
-        metrics = optimizer.record_event_cost(
+        _ = optimizer.record_event_cost(
             event_count=1000,
             high_impact_count=100,
             meaningful_count=250,
@@ -379,16 +379,16 @@ async def main():
     analytics, insights = await demo_analytics_service()
 
     # Demo 2: Tuning
-    tuning = await demo_tuning_optimizer(insights)
+    _ = await demo_tuning_optimizer(insights)
 
     # Demo 3: Cost Optimization
-    cost = await demo_cost_optimizer()
+    _ = await demo_cost_optimizer()
 
     # Demo 4: Stripe Billing
-    billing = await demo_stripe_billing()
+    _ = await demo_stripe_billing()
 
     # Demo 5: Databricks
-    databricks = await demo_databricks_queries()
+    _ = await demo_databricks_queries()
 
     print("\n" + "=" * 60)
     print("DEMO COMPLETE!")

@@ -2,6 +2,7 @@ import asyncio
 from datetime import UTC, datetime, timedelta
 
 import pytest
+
 from application.mothership.security.auth import verify_jwt_token
 from application.mothership.security.jwt import get_jwt_manager
 from application.mothership.security.token_revocation import get_token_validator
@@ -11,9 +12,7 @@ from application.mothership.security.token_revocation import get_token_validator
 async def test_verify_jwt_token_with_revocation():
     """Verify that verify_jwt_token correctly checks the revocation list."""
     # 1. Setup JWT manager
-    jwt_manager = get_jwt_manager(
-        secret_key="test-secret-key-at-least-32-chars-long-for-valid-test", environment="development"
-    )
+    get_jwt_manager(secret_key="test-secret-key-at-least-32-chars-long-for-valid-test", environment="development")
 
     # 2. Create a token
     jti = "integration-test-jti"

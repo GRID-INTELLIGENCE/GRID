@@ -17,7 +17,7 @@ import pytest
 pytest.skip("HuggingFace Hub importlib_metadata version issue", allow_module_level=True)
 
 # Add src to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "src"))
 
 from grid.mcp.enhanced_rag_server import EnhancedRAGMCPServer
 
@@ -52,8 +52,8 @@ async def test_enhanced_rag_server():
     server = EnhancedRAGMCPServer()
 
     # Create mock streams
-    read_stream = MockStream()
-    write_stream = MockStream()
+    MockStream()
+    MockStream()
 
     # Test 1: List tools
     print("\n1. Testing list_tools...")
@@ -95,10 +95,7 @@ async def test_enhanced_rag_server():
     print("\n3. Testing query with session...")
 
     query = "What is GRID?"
-    result = await call_tool("query", {
-        "query": query,
-        "session_id": session_id
-    })
+    result = await call_tool("query", {"query": query, "session_id": session_id})
 
     print(f"   Result type: {'Error' if result.isError else 'Success'}")
     if result.isError:
@@ -178,18 +175,12 @@ async def test_conversation_flow():
     assert not result.isError
 
     # First query
-    result = await call_tool("query", {
-        "query": "What is GRID?",
-        "session_id": session_id
-    })
+    result = await call_tool("query", {"query": "What is GRID?", "session_id": session_id})
     assert not result.isError
     response1 = json.loads(result.content[0].text)
 
     # Second query (should use context)
-    result = await call_tool("query", {
-        "query": "How does it work?",
-        "session_id": session_id
-    })
+    result = await call_tool("query", {"query": "How does it work?", "session_id": session_id})
     assert not result.isError
     response2 = json.loads(result.content[0].text)
 
@@ -220,6 +211,7 @@ async def main():
     except Exception as e:
         print(f"\n❌ Test failed: {e}")
         import traceback
+
         traceback.print_exc()
 
 

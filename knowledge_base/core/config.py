@@ -14,6 +14,7 @@ from typing import Any
 @dataclass
 class DatabaseConfig:
     """Database configuration for vector storage."""
+
     host: str = "dbc-9747ff30-23c5.cloud.databricks.com"
     http_path: str = "/sql/1.0/warehouses/b23086e70499319a"
     token: str | None = None
@@ -25,6 +26,7 @@ class DatabaseConfig:
 @dataclass
 class EmbeddingConfig:
     """Vector embedding configuration."""
+
     model: str = "text-embedding-3-large"
     provider: str = "openai"
     dimensions: int = 3072
@@ -36,6 +38,7 @@ class EmbeddingConfig:
 @dataclass
 class SearchConfig:
     """Search and retrieval configuration."""
+
     top_k: int = 10
     similarity_threshold: float = 0.7
     use_hybrid_search: bool = True
@@ -46,6 +49,7 @@ class SearchConfig:
 @dataclass
 class LLMConfig:
     """LLM configuration for generation."""
+
     model: str = "gpt-4-turbo-preview"
     provider: str = "openai"
     api_key: str | None = None
@@ -57,6 +61,7 @@ class LLMConfig:
 @dataclass
 class SecurityConfig:
     """Security and access control configuration."""
+
     enable_auth: bool = True
     jwt_secret: str | None = None
     jwt_algorithm: str = "HS256"
@@ -68,6 +73,7 @@ class SecurityConfig:
 @dataclass
 class MonitoringConfig:
     """Monitoring and analytics configuration."""
+
     enable_metrics: bool = True
     enable_logging: bool = True
     log_level: str = "INFO"
@@ -99,7 +105,7 @@ class KnowledgeBaseConfig:
     logs_dir: Path = field(default_factory=lambda: Path("logs"))
 
     @classmethod
-    def from_env(cls) -> 'KnowledgeBaseConfig':
+    def from_env(cls) -> "KnowledgeBaseConfig":
         """Create configuration from environment variables."""
         config = cls()
 
@@ -152,41 +158,41 @@ class KnowledgeBaseConfig:
                 "http_path": self.database.http_path,
                 "connection_timeout": self.database.connection_timeout,
                 "pool_size": self.database.pool_size,
-                "max_overflow": self.database.max_overflow
+                "max_overflow": self.database.max_overflow,
             },
             "embeddings": {
                 "model": self.embeddings.model,
                 "provider": self.embeddings.provider,
                 "dimensions": self.embeddings.dimensions,
                 "batch_size": self.embeddings.batch_size,
-                "max_tokens": self.embeddings.max_tokens
+                "max_tokens": self.embeddings.max_tokens,
             },
             "search": {
                 "top_k": self.search.top_k,
                 "similarity_threshold": self.search.similarity_threshold,
                 "use_hybrid_search": self.search.use_hybrid_search,
                 "rerank_results": self.search.rerank_results,
-                "max_context_length": self.search.max_context_length
+                "max_context_length": self.search.max_context_length,
             },
             "llm": {
                 "model": self.llm.model,
                 "provider": self.llm.provider,
                 "temperature": self.llm.temperature,
                 "max_tokens": self.llm.max_tokens,
-                "streaming": self.llm.streaming
+                "streaming": self.llm.streaming,
             },
             "security": {
                 "enable_auth": self.security.enable_auth,
                 "jwt_algorithm": self.security.jwt_algorithm,
                 "jwt_expiration": self.security.jwt_expiration,
                 "rate_limit_requests": self.security.rate_limit_requests,
-                "rate_limit_window": self.security.rate_limit_window
+                "rate_limit_window": self.security.rate_limit_window,
             },
             "monitoring": {
                 "enable_metrics": self.monitoring.enable_metrics,
                 "enable_logging": self.monitoring.enable_logging,
                 "log_level": self.monitoring.log_level,
                 "metrics_port": self.monitoring.metrics_port,
-                "enable_tracing": self.monitoring.enable_tracing
-            }
+                "enable_tracing": self.monitoring.enable_tracing,
+            },
         }

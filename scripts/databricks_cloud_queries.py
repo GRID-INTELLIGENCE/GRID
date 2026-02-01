@@ -12,6 +12,7 @@ from integration.databricks.client import DatabricksClient  # noqa: E402
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 def run_real_databricks_queries():
     print("Connecting to Databricks Cloud...")
     try:
@@ -24,7 +25,7 @@ def run_real_databricks_queries():
         # List Clusters
         clusters = list(client.clusters.list())
         print(f"Found {len(clusters)} Clusters:")
-        for c in clusters[:3]: # Limit to first 3
+        for c in clusters[:3]:  # Limit to first 3
             print(f" - {c.cluster_name} ({c.state.value})")
 
         # List SQL Warehouses
@@ -42,7 +43,7 @@ def run_real_databricks_queries():
 
             queries = [
                 "SELECT current_user() as user, current_catalog() as cat, current_schema() as schema",
-                "SHOW TABLES IN main.default" # Common default path
+                "SHOW TABLES IN main.default",  # Common default path
             ]
 
             for sql in queries:
@@ -50,10 +51,7 @@ def run_real_databricks_queries():
                 try:
                     # In DB SDK v1+, statement_execution is a separate client or accessed via workspace
                     # Using the SDK pattern for statement execution
-                    res = client.statement_execution.execute_statement(
-                        warehouse_id=active_warehouse,
-                        statement=sql
-                    )
+                    res = client.statement_execution.execute_statement(warehouse_id=active_warehouse, statement=sql)
 
                     # Log the structure of the response
                     if res.result and res.result.data_array:
@@ -86,6 +84,7 @@ def run_real_databricks_queries():
 
     except Exception as e:
         print(f"Connection/SDK Error: {e}")
+
 
 if __name__ == "__main__":
     run_real_databricks_queries()

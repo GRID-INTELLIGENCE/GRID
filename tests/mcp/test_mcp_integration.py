@@ -88,6 +88,7 @@ class MCPTestSuite:
         print_test("MCP library")
         try:
             import importlib.util
+
             spec = importlib.util.find_spec("mcp")
             if spec is not None:
                 print_success()

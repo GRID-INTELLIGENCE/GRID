@@ -1,4 +1,3 @@
-
 from grid.skills.transform_schema_map import transform_schema_map
 
 

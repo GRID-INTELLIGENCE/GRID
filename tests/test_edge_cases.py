@@ -4,22 +4,12 @@ Edge case tests for The Chase core functionality.
 Comprehensive edge case coverage for ADSR envelope, rewards system,
 guardians, and integration points.
 """
+
 import pytest
 
 from Arena.the_chase.python.src.the_chase.core.adsr_envelope import (
     ADSREnvelope,
     EnvelopePhase,
-)
-from Arena.the_chase.python.src.the_chase.overwatch.core import (
-    OverwatchConfig,
-    Overwatch,
-    MorphState,
-)
-from Arena.the_chase.python.src.the_chase.overwatch.rewards import (
-    CharacterRewardState,
-    Achievement,
-    AchievementType,
-    RewardLevel,
 )
 from Arena.the_chase.python.src.the_chase.hardgate.aegis import (
     Aegis,
@@ -31,6 +21,17 @@ from Arena.the_chase.python.src.the_chase.hardgate.compressor import (
 )
 from Arena.the_chase.python.src.the_chase.hardgate.lumen import (
     Lumen,
+)
+from Arena.the_chase.python.src.the_chase.overwatch.core import (
+    MorphState,
+    Overwatch,
+    OverwatchConfig,
+)
+from Arena.the_chase.python.src.the_chase.overwatch.rewards import (
+    Achievement,
+    AchievementType,
+    CharacterRewardState,
+    RewardLevel,
 )
 
 
@@ -119,7 +120,12 @@ class TestADSREnvelopeEdgeCases:
         envelope = ADSREnvelope(OverwatchConfig())
         for i in range(1000):
             envelope.update(float(i) * 0.001)
-        assert envelope.phase in [EnvelopePhase.ATTACK, EnvelopePhase.SUSTAIN, EnvelopePhase.DECAY, EnvelopePhase.RELEASE]
+        assert envelope.phase in [
+            EnvelopePhase.ATTACK,
+            EnvelopePhase.SUSTAIN,
+            EnvelopePhase.DECAY,
+            EnvelopePhase.RELEASE,
+        ]
 
     def test_negative_time_updates(self):
         """Test with negative time values."""
@@ -294,6 +300,7 @@ class TestIntegrationEdgeCases:
         class MockCache:
             def keys(self):
                 return []
+
             @property
             def l1(self):
                 return {}
@@ -321,15 +328,15 @@ class TestIntegrationEdgeCases:
         from Arena.the_chase.python.src.the_chase.overwatch.hooks import OverwatchHooks
 
         hooks = OverwatchHooks()
-        hooks.trigger_hook('pre_user_prompt', 'test')  # Should not raise
+        hooks.trigger_hook("pre_user_prompt", "test")  # Should not raise
 
     def test_mcp_no_servers(self):
         """Test MCP with no servers configured."""
         from Arena.the_chase.python.src.the_chase.overwatch.mcp import OverwatchMCP
 
         mcp = OverwatchMCP({})
-        result = mcp.call_mcp_tool('any_server', 'any_tool', {})
-        assert result['status'] == 'error'
+        result = mcp.call_mcp_tool("any_server", "any_tool", {})
+        assert result["status"] == "error"
 
     def test_arena_mode_no_models(self):
         """Test Arena Mode with no models."""
@@ -345,7 +352,7 @@ class TestIntegrationEdgeCases:
 
         plan = OverwatchPlanMode()
         result = plan.create_plan("")
-        assert 'steps' in result
+        assert "steps" in result
 
 
 class TestStateTransitionEdgeCases:
@@ -368,7 +375,12 @@ class TestStateTransitionEdgeCases:
         envelope = ADSREnvelope(OverwatchConfig())
         for i in range(100):
             envelope.update(float(i))
-        assert envelope.phase in [EnvelopePhase.ATTACK, EnvelopePhase.SUSTAIN, EnvelopePhase.DECAY, EnvelopePhase.RELEASE]
+        assert envelope.phase in [
+            EnvelopePhase.ATTACK,
+            EnvelopePhase.SUSTAIN,
+            EnvelopePhase.DECAY,
+            EnvelopePhase.RELEASE,
+        ]
 
     def test_level_transition_boundaries(self):
         """Test exact level transition boundaries."""
@@ -484,6 +496,7 @@ class TestErrorHandlingEdgeCases:
         class BrokenCache:
             def keys(self):
                 raise Exception("Cache corrupted")
+
             @property
             def l1(self):
                 raise Exception("Cache corrupted")

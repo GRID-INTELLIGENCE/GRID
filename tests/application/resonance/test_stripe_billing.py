@@ -9,6 +9,7 @@ Covers:
 """
 
 import pytest
+
 from application.resonance.stripe_billing import (
     InvoicePreview,
     MeterEvent,

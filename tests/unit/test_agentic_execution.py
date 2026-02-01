@@ -50,9 +50,7 @@ async def agentic_system(knowledge_base_path: Path, event_bus: EventBus) -> Agen
 
 
 @pytest.mark.asyncio
-async def test_execute_case_handler_error_recovery(
-    agentic_system: AgenticSystem, tmp_path: Path
-):
+async def test_execute_case_handler_error_recovery(agentic_system: AgenticSystem, tmp_path: Path):
     """Test 1: System recovers when event handler fails."""
     reference_file = tmp_path / "reference.txt"
     reference_file.write_text("Test content")
@@ -88,13 +86,9 @@ async def test_execute_case_handler_error_recovery(
 
 
 @pytest.mark.asyncio
-async def test_execute_case_invalid_reference_file(
-    agentic_system: AgenticSystem, tmp_path: Path
-):
+async def test_execute_case_invalid_reference_file(agentic_system: AgenticSystem, tmp_path: Path):
     """Test 2: System handles missing reference file gracefully."""
-    with patch.object(
-        agentic_system.agent_executor, "execute_task", new_callable=AsyncMock
-    ) as mock_execute:
+    with patch.object(agentic_system.agent_executor, "execute_task", new_callable=AsyncMock) as mock_execute:
         mock_execute.side_effect = FileNotFoundError("Reference file not found")
 
         with pytest.raises(FileNotFoundError):
@@ -105,16 +99,12 @@ async def test_execute_case_invalid_reference_file(
 
 
 @pytest.mark.asyncio
-async def test_execute_case_executor_timeout(
-    agentic_system: AgenticSystem, tmp_path: Path
-):
+async def test_execute_case_executor_timeout(agentic_system: AgenticSystem, tmp_path: Path):
     """Test 3: System handles executor timeout."""
     reference_file = tmp_path / "reference.txt"
     reference_file.write_text("Test content")
 
-    with patch.object(
-        agentic_system.agent_executor, "execute_task", new_callable=AsyncMock
-    ) as mock_execute:
+    with patch.object(agentic_system.agent_executor, "execute_task", new_callable=AsyncMock) as mock_execute:
         # Simulate timeout
         async def timeout_handler(*args, **kwargs):
             await asyncio.sleep(10)  # Will timeout
@@ -135,16 +125,12 @@ async def test_execute_case_executor_timeout(
 
 
 @pytest.mark.asyncio
-async def test_execute_case_invalid_case_id(
-    agentic_system: AgenticSystem, tmp_path: Path
-):
+async def test_execute_case_invalid_case_id(agentic_system: AgenticSystem, tmp_path: Path):
     """Test 4: System validates case_id input."""
     reference_file = tmp_path / "reference.txt"
     reference_file.write_text("Test content")
 
-    with patch.object(
-        agentic_system.agent_executor, "execute_task", new_callable=AsyncMock
-    ) as mock_execute:
+    with patch.object(agentic_system.agent_executor, "execute_task", new_callable=AsyncMock) as mock_execute:
         mock_execute.return_value = {"result": "success"}
 
         # Empty case_id should be handled
@@ -163,16 +149,12 @@ async def test_execute_case_invalid_case_id(
 
 
 @pytest.mark.asyncio
-async def test_execute_case_with_timeout_wrapper(
-    agentic_system: AgenticSystem, tmp_path: Path
-):
+async def test_execute_case_with_timeout_wrapper(agentic_system: AgenticSystem, tmp_path: Path):
     """Test 5: Execute case with timeout wrapper."""
     reference_file = tmp_path / "reference.txt"
     reference_file.write_text("Test content")
 
-    with patch.object(
-        agentic_system.agent_executor, "execute_task", new_callable=AsyncMock
-    ) as mock_execute:
+    with patch.object(agentic_system.agent_executor, "execute_task", new_callable=AsyncMock) as mock_execute:
         mock_execute.return_value = {"result": "success", "duration": 0.5}
 
         # Wrap with timeout
@@ -190,16 +172,12 @@ async def test_execute_case_with_timeout_wrapper(
 
 
 @pytest.mark.asyncio
-async def test_concurrent_executions_with_timeout(
-    agentic_system: AgenticSystem, tmp_path: Path
-):
+async def test_concurrent_executions_with_timeout(agentic_system: AgenticSystem, tmp_path: Path):
     """Test 6: Multiple concurrent cases with per-case timeout."""
     reference_file = tmp_path / "reference.txt"
     reference_file.write_text("Test content")
 
-    with patch.object(
-        agentic_system.agent_executor, "execute_task", new_callable=AsyncMock
-    ) as mock_execute:
+    with patch.object(agentic_system.agent_executor, "execute_task", new_callable=AsyncMock) as mock_execute:
         mock_execute.return_value = {"result": "success"}
 
         # Multiple cases with timeout per case
@@ -220,9 +198,7 @@ async def test_concurrent_executions_with_timeout(
 
 
 @pytest.mark.asyncio
-async def test_timeout_cleanup_resources(
-    agentic_system: AgenticSystem, tmp_path: Path
-):
+async def test_timeout_cleanup_resources(agentic_system: AgenticSystem, tmp_path: Path):
     """Test 7: Resources cleaned up after timeout."""
     reference_file = tmp_path / "reference.txt"
     reference_file.write_text("Test content")
@@ -232,9 +208,7 @@ async def test_timeout_cleanup_resources(
     async def cleanup_handler(*args, **kwargs):
         await asyncio.sleep(10)
 
-    with patch.object(
-        agentic_system.agent_executor, "execute_task", new_callable=AsyncMock
-    ) as mock_execute:
+    with patch.object(agentic_system.agent_executor, "execute_task", new_callable=AsyncMock) as mock_execute:
         mock_execute.side_effect = cleanup_handler
 
         try:
@@ -259,9 +233,7 @@ async def test_timeout_cleanup_resources(
 
 
 @pytest.mark.asyncio
-async def test_execute_case_retry_on_transient_failure(
-    agentic_system: AgenticSystem, tmp_path: Path
-):
+async def test_execute_case_retry_on_transient_failure(agentic_system: AgenticSystem, tmp_path: Path):
     """Test 8: System retries on transient failures."""
     reference_file = tmp_path / "reference.txt"
     reference_file.write_text("Test content")
@@ -274,9 +246,7 @@ async def test_execute_case_retry_on_transient_failure(
             raise RuntimeError("Transient error")
         return {"result": "success"}
 
-    with patch.object(
-        agentic_system.agent_executor, "execute_task", new_callable=AsyncMock
-    ) as mock_execute:
+    with patch.object(agentic_system.agent_executor, "execute_task", new_callable=AsyncMock) as mock_execute:
         mock_execute.side_effect = sometimes_fails
 
         try:

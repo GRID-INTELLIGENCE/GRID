@@ -12,10 +12,12 @@ def mock_settings(monkeypatch):
     monkeypatch.setenv("MOTHERSHIP_JWT_ALGORITHM", "HS256")
     # Reset singleton if needed, or TokenManager pulls from env.
 
+
 @pytest.fixture
 def token_manager(mock_settings):
     # Re-instantiate to pick up env vars
     return TokenManager()
+
 
 @pytest.mark.asyncio
 async def test_create_and_verify_token(token_manager):
@@ -28,6 +30,7 @@ async def test_create_and_verify_token(token_manager):
     assert payload["sub"] == "user123"
     assert payload["role"] == "admin"
 
+
 @pytest.mark.asyncio
 async def test_token_expiration(token_manager):
     data = {"sub": "expired_user"}
@@ -37,6 +40,7 @@ async def test_token_expiration(token_manager):
 
     with pytest.raises(ValueError, match="Could not validate credentials"):
         await token_manager.verify_token(token)
+
 
 @pytest.mark.asyncio
 async def test_revoke_token(token_manager):

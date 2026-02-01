@@ -4,7 +4,6 @@ Simple navigation endpoint test.
 Focused test for the navigation endpoint without complex dependencies.
 """
 
-
 import pytest
 import requests
 

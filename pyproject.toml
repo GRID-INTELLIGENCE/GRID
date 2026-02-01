@@ -229,6 +229,7 @@ exclude = [
     "research_snapshots/",
     "venv/",
     ".venv/",
+    ".venv_locked/",
     "__pycache__/",
     "*.pyc",
     "Arena/",
@@ -239,6 +240,7 @@ exclude = [
     "archive/",
     "EUFLE/",
     "research/",
+    "examples/*.ipynb",
 ]
 
 [tool.ruff.lint]
@@ -276,6 +278,7 @@ known-first-party = ["grid", "application", "cognitive", "tools"]
 [tool.black]
 line-length = 120
 target-version = ["py313"]
+exclude = "(light_of_the_seven/|datakit/|archival/|core/|SEGA/|data/|logs/|analysis_report/|artifacts/|research_snapshots/|venv/|\\.venv/|\\.venv_locked/|__pycache__/|.*\\.pyc|Arena/|frontend/|grid_exercises/|\\.case_references/|\\.case_memory/|archive/|EUFLE/|research/|examples/.*\\.ipynb)"
 
 [tool.mypy]
 python_version = "3.13"

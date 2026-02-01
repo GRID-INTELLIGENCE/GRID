@@ -387,9 +387,7 @@ class TestAPIReliability:
     def test_large_payload_handling(self, client):
         """Scenario: API should handle large payloads gracefully"""
         # Test with very large payload
-        large_data = {
-            "data": "x" * 10000  # 10KB of data
-        }
+        large_data = {"data": "x" * 10000}  # 10KB of data
 
         response = client.post(
             "/api/v1/auth/login", json={"username": "test_user", "password": "test_password", **large_data}

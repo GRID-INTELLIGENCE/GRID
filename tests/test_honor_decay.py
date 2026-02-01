@@ -4,12 +4,13 @@ Tests for honor decay mechanism validation.
 Ensures honor decays over time when not actively maintained,
 and level transitions work correctly.
 """
+
 import pytest
 
 from Arena.the_chase.python.src.the_chase.overwatch.rewards import (
-    CharacterRewardState,
     Achievement,
     AchievementType,
+    CharacterRewardState,
     RewardLevel,
 )
 

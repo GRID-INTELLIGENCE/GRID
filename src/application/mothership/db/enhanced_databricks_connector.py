@@ -97,6 +97,7 @@ class EnhancedDatabricksConnector:
             return self._engine
 
         from importlib.util import find_spec
+
         if find_spec("databricks.sql") is None:
             raise ImportError(
                 "databricks-sql-connector is not installed. " "Install with: pip install databricks-sql-connector"

@@ -25,6 +25,7 @@ from fastapi import Request
 
 logger = logging.getLogger(__name__)
 
+
 class AuthManager:
     """
     Authentication manager handling various auth methods for the Arena system.
@@ -40,16 +41,8 @@ class AuthManager:
         """Load API keys from configuration."""
         # In production, load from secure storage
         return {
-            "admin_key": {
-                "key": "arena-admin-key-2024",
-                "permissions": ["read", "write", "admin"],
-                "rate_limit": 1000
-            },
-            "service_key": {
-                "key": "arena-service-key-2024",
-                "permissions": ["read", "write"],
-                "rate_limit": 500
-            }
+            "admin_key": {"key": "arena-admin-key-2024", "permissions": ["read", "write", "admin"], "rate_limit": 1000},
+            "service_key": {"key": "arena-service-key-2024", "permissions": ["read", "write"], "rate_limit": 500},
         }
 
     async def authenticate(self, request: Request) -> dict[str, Any]:
@@ -75,21 +68,11 @@ class AuthManager:
             if service_result["authenticated"]:
                 return service_result
 
-            return {
-                "authenticated": False,
-                "user": None,
-                "permissions": [],
-                "method": None
-            }
+            return {"authenticated": False, "user": None, "permissions": [], "method": None}
 
         except Exception as e:
             logger.error(f"Authentication error: {str(e)}")
-            return {
-                "authenticated": False,
-                "error": str(e),
-                "user": None,
-                "permissions": []
-            }
+            return {"authenticated": False, "error": str(e), "user": None, "permissions": []}
 
     async def _authenticate_jwt(self, request: Request) -> dict[str, Any]:
         """Authenticate using JWT token."""
@@ -111,7 +94,7 @@ class AuthManager:
                 "permissions": payload.get("permissions", []),
                 "method": "jwt",
                 "user_id": payload.get("user_id"),
-                "roles": payload.get("roles", [])
+                "roles": payload.get("roles", []),
             }
 
         except jwt.ExpiredSignatureError:
@@ -141,7 +124,7 @@ class AuthManager:
                         "permissions": key_data["permissions"],
                         "method": "api_key",
                         "key_name": key_name,
-                        "rate_limit": key_data["rate_limit"]
+                        "rate_limit": key_data["rate_limit"],
                     }
 
             return {"authenticated": False, "error": "Invalid API key"}
@@ -171,7 +154,7 @@ class AuthManager:
                 "user": f"service_{service_info['service_name']}",
                 "permissions": service_info["permissions"],
                 "method": "service_token",
-                "service_name": service_info["service_name"]
+                "service_name": service_info["service_name"],
             }
 
         except Exception as e:
@@ -194,8 +177,9 @@ class AuthManager:
 
         return all(perm in user_permissions for perm in required_permissions)
 
-    def generate_jwt_token(self, user_id: str, permissions: list[str] = None,
-                          roles: list[str] = None, expires_in: int = 3600) -> str:
+    def generate_jwt_token(
+        self, user_id: str, permissions: list[str] = None, roles: list[str] = None, expires_in: int = 3600
+    ) -> str:
         """
         Generate a JWT token for authenticated users.
 
@@ -219,14 +203,13 @@ class AuthManager:
             "permissions": permissions,
             "roles": roles,
             "iat": datetime.utcnow(),
-            "exp": datetime.utcnow() + timedelta(seconds=expires_in)
+            "exp": datetime.utcnow() + timedelta(seconds=expires_in),
         }
 
         token = jwt.encode(payload, self.jwt_secret, algorithm=self.jwt_algorithm)
         return token
 
-    def generate_service_token(self, service_name: str, permissions: list[str] = None,
-                              expires_in: int = 3600) -> str:
+    def generate_service_token(self, service_name: str, permissions: list[str] = None, expires_in: int = 3600) -> str:
         """
         Generate a service-to-service token.
 
@@ -248,7 +231,7 @@ class AuthManager:
             "service_name": service_name,
             "permissions": permissions,
             "expires_at": expires_at,
-            "created_at": datetime.utcnow().timestamp()
+            "created_at": datetime.utcnow().timestamp(),
         }
 
         return token
@@ -274,6 +257,7 @@ class AuthManager:
 
         return service_info
 
+
 class RBACManager:
     """
     Role-Based Access Control manager for fine-grained permissions.
@@ -286,22 +270,10 @@ class RBACManager:
     def _load_roles(self) -> dict[str, dict[str, Any]]:
         """Load role definitions."""
         return {
-            "admin": {
-                "permissions": ["*"],
-                "description": "Full system access"
-            },
-            "service": {
-                "permissions": ["read", "write", "service_call"],
-                "description": "Service-to-service access"
-            },
-            "user": {
-                "permissions": ["read"],
-                "description": "Basic user access"
-            },
-            "analyst": {
-                "permissions": ["read", "analyze"],
-                "description": "Data analysis access"
-            }
+            "admin": {"permissions": ["*"], "description": "Full system access"},
+            "service": {"permissions": ["read", "write", "service_call"], "description": "Service-to-service access"},
+            "user": {"permissions": ["read"], "description": "Basic user access"},
+            "analyst": {"permissions": ["read", "analyze"], "description": "Data analysis access"},
         }
 
     def _load_permissions(self) -> dict[str, str]:
@@ -313,7 +285,7 @@ class RBACManager:
             "admin": "Administrative access",
             "analyze": "Data analysis access",
             "service_call": "Service-to-service calls",
-            "*": "All permissions"
+            "*": "All permissions",
         }
 
     def get_role_permissions(self, role: str) -> list[str]:

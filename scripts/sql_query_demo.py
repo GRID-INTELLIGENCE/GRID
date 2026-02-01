@@ -8,6 +8,7 @@ sys.path.insert(0, SRC_PATH)
 
 from application.resonance.query_engine import ResonanceQueryEngine  # noqa: E402
 
+
 def run_query_demo():
     print("Initializing Resonance SQL Query Engine...")
     engine = ResonanceQueryEngine("demo_resonance.db")
@@ -21,14 +22,16 @@ def run_query_demo():
     # Generate 20 events with varying impact
     for i in range(20):
         impact = 0.2 if i % 3 == 0 else (0.8 if i % 5 == 0 else 0.5)
-        events.append({
-            "id": f"event_{i}",
-            "activity_id": act_id,
-            "type": "SIM_TICK" if impact < 0.5 else "CRITICAL_HIT",
-            "impact": impact,
-            "data": {"value": i * 10},
-            "timestamp": (base_time + timedelta(seconds=i)).isoformat()
-        })
+        events.append(
+            {
+                "id": f"event_{i}",
+                "activity_id": act_id,
+                "type": "SIM_TICK" if impact < 0.5 else "CRITICAL_HIT",
+                "impact": impact,
+                "data": {"value": i * 10},
+                "timestamp": (base_time + timedelta(seconds=i)).isoformat(),
+            }
+        )
 
     engine.ingest_batch(events)
     print(f"Ingested {len(events)} events for activity {act_id}.")
@@ -64,11 +67,12 @@ def run_query_demo():
     sql3 = "SELECT * FROM telemetry_events WHERE impact >= 0.8"
     df3 = engine.execute_query(sql3)
     print(f"Found {len(df3)} high-impact peaks.")
-    print(df3[['id', 'event_type', 'impact']].to_string(index=False))
+    print(df3[["id", "event_type", "impact"]].to_string(index=False))
 
     # Cleanup
     if os.path.exists("demo_resonance.db"):
         os.remove("demo_resonance.db")
+
 
 if __name__ == "__main__":
     run_query_demo()

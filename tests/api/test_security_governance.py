@@ -1266,7 +1266,7 @@ class TestSecurityIntegrationScenarios:
 
         for i in range(100):
 
-            def handler():
+            def handler(i=i):  # noqa: B023 - capture i via default arg
                 return f"result_{i}"
 
             registry.register(f"test.handler_{i}", handler)

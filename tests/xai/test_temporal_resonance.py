@@ -1,4 +1,3 @@
-
 import pytest
 
 from grid.xai.explainer import XAIExplainer
@@ -11,21 +10,14 @@ class TestXAITemporalResonance:
         return XAIExplainer(trace_dir=tmp_path / "xai_traces")
 
     def test_explain_temporal_resonance(self, explainer):
-        explanation = explainer.explain_temporal_resonance(
-            resonance_score=0.9,
-            q_factor=0.2,
-            distance=0.05,
-            decay=0.9
-        )
+        explanation = explainer.explain_temporal_resonance(resonance_score=0.9, q_factor=0.2, distance=0.05, decay=0.9)
         assert "strong resonance peak" in explanation
         assert "narrow (high specificity)" in explanation
         assert "near-perfect alignment" in explanation
 
     def test_generate_coffee_metaphor_narrative_espresso(self, explainer):
         narrative = explainer.generate_coffee_metaphor_narrative(
-            cognitive_load=2.0,
-            processing_mode="system_1",
-            momentum="high"
+            cognitive_load=2.0, processing_mode="system_1", momentum="high"
         )
         assert "Espresso mode" in narrative
         assert "rapid fire processing" in narrative
@@ -33,9 +25,7 @@ class TestXAITemporalResonance:
 
     def test_generate_coffee_metaphor_narrative_cold_brew(self, explainer):
         narrative = explainer.generate_coffee_metaphor_narrative(
-            cognitive_load=8.0,
-            processing_mode="system_2",
-            momentum="low"
+            cognitive_load=8.0, processing_mode="system_2", momentum="low"
         )
         assert "Cold Brew mode" in narrative
         assert "deliberate analysis" in narrative
@@ -48,10 +38,7 @@ class TestXAITemporalResonance:
         cognitive_state = {"estimated_load": 2.0, "processing_mode": "system_1"}
 
         explanation = explainer.synthesize_explanation_with_coffee_metaphor(
-            decision_id=decision_id,
-            context=context,
-            rationale=rationale,
-            cognitive_state=cognitive_state
+            decision_id=decision_id, context=context, rationale=rationale, cognitive_state=cognitive_state
         )
 
         assert "coffee_metaphor_narrative" in explanation
@@ -63,11 +50,7 @@ class TestXAITemporalResonance:
             "detected": True,
             "confidence": 0.9,
             "explanation": "Flowing well.",
-            "features": {
-                "coffee_mode": "Espresso",
-                "processing_mode": "rapid",
-                "momentum": "high"
-            }
+            "features": {"coffee_mode": "Espresso", "processing_mode": "rapid", "momentum": "high"},
         }
         explanation = explainer.explain_pattern_with_coffee_metaphor(pattern_detection)
         assert "Espresso" in explanation["coffee_metaphor"]

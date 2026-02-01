@@ -62,6 +62,7 @@ class TestADSRArenaBridge:
     def bridge(self, grid_adsr: ADSREnvelope, cache: MockCacheLayer, rewards: CharacterRewardState):
         """Create ADSR-Arena bridge."""
         from Arena.the_chase.python.src.the_chase.integration.adsr_arena import ADSRArenaBridge
+
         return ADSRArenaBridge(grid_adsr, cache, rewards)
 
     def test_bridge_initialization(self, bridge):
@@ -73,22 +74,22 @@ class TestADSRArenaBridge:
     def test_sync_sustain_phase_maintains_cache(self, bridge, cache):
         """Verify sustain phase maintains cache entries."""
         bridge.grid_adsr.update(4.0)  # Enter sustain
-        cache.l1['key1'] = {'priority': 'normal'}
-        cache.l1['key2'] = {'priority': 'normal'}
+        cache.l1["key1"] = {"priority": "normal"}
+        cache.l1["key2"] = {"priority": "normal"}
 
         bridge.sync_sustain_phase()
 
-        assert cache.l1['key1']['priority'] == 'maintained'
-        assert cache.l1['key2']['priority'] == 'maintained'
+        assert cache.l1["key1"]["priority"] == "maintained"
+        assert cache.l1["key2"]["priority"] == "maintained"
 
     def test_sync_sustain_phase_no_op_outside_sustain(self, bridge, cache):
         """Verify sync does nothing when not in sustain."""
         bridge.grid_adsr.update(0.1)  # Attack phase
-        cache.l1['key1'] = {'priority': 'normal'}
+        cache.l1["key1"] = {"priority": "normal"}
 
         bridge.sync_sustain_phase()
 
-        assert cache.l1['key1']['priority'] == 'normal'
+        assert cache.l1["key1"]["priority"] == "normal"
 
     def test_sync_decay_phase_applies_honor_decay(self, bridge, rewards):
         """Verify decay phase applies honor decay."""
@@ -143,9 +144,9 @@ class TestADSRArenaBridgeWorkflows:
         grid_adsr.update(4.0)
         assert grid_adsr.phase == EnvelopePhase.SUSTAIN
 
-        cache.l1['entry1'] = {'data': 'test'}
+        cache.l1["entry1"] = {"data": "test"}
         bridge.sync_sustain_phase()
-        assert cache.l1['entry1']['priority'] == 'maintained'
+        assert cache.l1["entry1"]["priority"] == "maintained"
 
         # Enter decay
         grid_adsr.update(20.0)
@@ -167,12 +168,12 @@ class TestADSRArenaBridgeWorkflows:
         bridge = ADSRArenaBridge(grid_adsr, cache, rewards)
 
         grid_adsr.update(4.0)  # Sustain
-        cache.l1['key'] = {'priority': 'normal'}
+        cache.l1["key"] = {"priority": "normal"}
 
         for _ in range(5):
             bridge.sync_sustain_phase()
 
-        assert cache.l1['key']['priority'] == 'maintained'
+        assert cache.l1["key"]["priority"] == "maintained"
 
     def test_cache_with_multiple_entries(self):
         """Test sync with multiple cache entries."""
@@ -187,12 +188,12 @@ class TestADSRArenaBridgeWorkflows:
         grid_adsr.update(4.0)  # Sustain
 
         for i in range(10):
-            cache.l1[f'key_{i}'] = {'priority': 'normal', 'data': i}
+            cache.l1[f"key_{i}"] = {"priority": "normal", "data": i}
 
         bridge.sync_sustain_phase()
 
         for key in cache.l1.keys():
-            assert cache.l1[key]['priority'] == 'maintained'
+            assert cache.l1[key]["priority"] == "maintained"
 
 
 class TestADSRArenaBridgeEdgeCases:
@@ -225,7 +226,7 @@ class TestADSRArenaBridgeEdgeCases:
         rewards = CharacterRewardState()
         rewards.add_achievement(Achievement(AchievementType.VICTORY, 500))
 
-        bridge = ADSRArenaBridge(grid_adsr, cache, rewards)
+        ADSRArenaBridge(grid_adsr, cache, rewards)
 
         # Manually decay honor to test the mechanism
         initial_honor = rewards.honor
@@ -245,11 +246,11 @@ class TestADSRArenaBridgeEdgeCases:
         bridge = ADSRArenaBridge(grid_adsr, cache, rewards)
 
         grid_adsr.update(4.0)  # Sustain
-        cache.l2['l2_key'] = {'data': 'l2'}  # L2 entry
+        cache.l2["l2_key"] = {"data": "l2"}  # L2 entry
 
         bridge.sync_sustain_phase()  # Should only affect L1
 
-        assert 'l2_key' not in cache.l1
+        assert "l2_key" not in cache.l1
 
     def test_bridge_release_phase_no_ops(self):
         """Test bridge handles release phase correctly."""

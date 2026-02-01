@@ -28,6 +28,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class PerformanceResult:
     """Result of a performance test."""
+
     test_name: str
     duration: float
     operations: int
@@ -44,6 +45,7 @@ class PerformanceResult:
 @dataclass
 class BenchmarkConfig:
     """Configuration for benchmark tests."""
+
     duration_seconds: int = 60
     concurrency: int = 10
     warmup_seconds: int = 10
@@ -65,7 +67,7 @@ class SearchBenchmark:
             "How do transformers work?",
             "What is retrieval augmented generation?",
             "Explain the concept of semantic search",
-            "How to optimize vector databases?"
+            "How to optimize vector databases?",
         ]
 
     def run_benchmark(self, config: BenchmarkConfig) -> PerformanceResult:
@@ -83,7 +85,7 @@ class SearchBenchmark:
 
             op_start = time.time()
             try:
-                results = self.retriever.search(query, limit=5)
+                self.retriever.search(query, limit=5)
                 latency = time.time() - op_start
                 return latency, None
             except Exception as e:
@@ -98,7 +100,7 @@ class SearchBenchmark:
 
         # Ramp-up phase
         logger.info("Ramp-up phase...")
-        ramp_end = time.time() + config.ramp_up_seconds
+        # Note: Ramp-up phase is currently a no-op, can be implemented later
 
         # Main test phase
         logger.info("Main test phase...")
@@ -155,8 +157,8 @@ class SearchBenchmark:
             metadata={
                 "concurrency": config.concurrency,
                 "sample_queries": len(self.sample_queries),
-                "avg_results_per_query": 5
-            }
+                "avg_results_per_query": 5,
+            },
         )
 
         logger.info(f"Search benchmark completed: {throughput:.2f} ops/sec, {avg_latency:.3f}s avg latency")
@@ -173,12 +175,14 @@ class GenerationBenchmark:
             "What are the benefits of using vector databases?",
             "How does retrieval augmented generation work?",
             "What is the difference between embeddings and tokens?",
-            "How to optimize search performance in knowledge bases?"
+            "How to optimize search performance in knowledge bases?",
         ]
 
     def run_benchmark(self, config: BenchmarkConfig) -> PerformanceResult:
         """Run generation performance benchmark."""
-        logger.info(f"Starting generation benchmark: {config.concurrency} concurrent users for {config.duration_seconds}s")
+        logger.info(
+            f"Starting generation benchmark: {config.concurrency} concurrent users for {config.duration_seconds}s"
+        )
 
         latencies = []
         errors = 0
@@ -195,11 +199,7 @@ class GenerationBenchmark:
                 # Create a minimal context for testing
                 context = []  # Empty context for benchmark
 
-                generation_request = self.llm_generator.GenerationRequest(
-                    query=query,
-                    context=context,
-                    max_tokens=100
-                )
+                generation_request = self.llm_generator.GenerationRequest(query=query, context=context, max_tokens=100)
 
                 result = self.llm_generator.generate_answer(generation_request)
                 latency = time.time() - op_start
@@ -270,8 +270,8 @@ class GenerationBenchmark:
                 "concurrency": config.concurrency,
                 "total_tokens_used": total_tokens,
                 "tokens_per_second": total_tokens / duration if duration > 0 else 0,
-                "sample_queries": len(self.sample_queries)
-            }
+                "sample_queries": len(self.sample_queries),
+            },
         )
 
         logger.info(f"Generation benchmark completed: {throughput:.2f} ops/sec, {avg_latency:.3f}s avg latency")
@@ -311,7 +311,7 @@ class IngestionBenchmark:
                         source_type="benchmark",
                         source_path="",
                         file_type="txt",
-                        metadata={"benchmark": True}
+                        metadata={"benchmark": True},
                     )
                 )
 
@@ -376,8 +376,8 @@ class IngestionBenchmark:
             metadata={
                 "total_chunks_created": total_chunks,
                 "chunks_per_second": total_chunks / duration if duration > 0 else 0,
-                "avg_chunks_per_document": total_chunks / operations if operations > 0 else 0
-            }
+                "avg_chunks_per_document": total_chunks / operations if operations > 0 else 0,
+            },
         )
 
         logger.info(f"Ingestion benchmark completed: {throughput:.2f} docs/sec, {avg_latency:.3f}s avg latency")
@@ -387,11 +387,15 @@ class IngestionBenchmark:
 class PerformanceTestSuite:
     """Complete performance testing suite."""
 
-    def __init__(self, config: KnowledgeBaseConfig, db: KnowledgeBaseDB,
-                 ingestion_pipeline: DataIngestionPipeline,
-                 embedding_engine: EmbeddingEngine,
-                 retriever: VectorRetriever,
-                 llm_generator: LLMGenerator):
+    def __init__(
+        self,
+        config: KnowledgeBaseConfig,
+        db: KnowledgeBaseDB,
+        ingestion_pipeline: DataIngestionPipeline,
+        embedding_engine: EmbeddingEngine,
+        retriever: VectorRetriever,
+        llm_generator: LLMGenerator,
+    ):
         self.config = config
         self.db = db
 
@@ -439,12 +443,12 @@ class PerformanceTestSuite:
                 "config": {
                     "duration_seconds": benchmark_config.duration_seconds,
                     "concurrency": benchmark_config.concurrency,
-                    "warmup_seconds": benchmark_config.warmup_seconds
-                }
+                    "warmup_seconds": benchmark_config.warmup_seconds,
+                },
             },
             "results": [self._result_to_dict(r) for r in results],
             "summary": self._generate_summary(results),
-            "recommendations": self._generate_recommendations(results)
+            "recommendations": self._generate_recommendations(results),
         }
 
         logger.info(f"Performance test suite completed in {suite_duration:.2f}s")
@@ -477,13 +481,13 @@ class PerformanceTestSuite:
             "cpu_count": psutil.cpu_count(),
             "cpu_logical": psutil.cpu_count(logical=True),
             "memory_total": psutil.virtual_memory().total,
-            "disk_total": psutil.disk_usage('/').total,
+            "disk_total": psutil.disk_usage("/").total,
             "config": {
                 "database_host": self.config.database.host,
                 "embedding_model": self.config.embeddings.model,
                 "llm_model": self.config.llm.model,
-                "search_top_k": self.config.search.top_k
-            }
+                "search_top_k": self.config.search.top_k,
+            },
         }
 
     def _result_to_dict(self, result: PerformanceResult) -> dict[str, Any]:
@@ -500,7 +504,7 @@ class PerformanceTestSuite:
             "p99_latency": result.p99_latency,
             "errors": result.errors,
             "error_rate": result.errors / result.operations if result.operations > 0 else 0,
-            "metadata": result.metadata
+            "metadata": result.metadata,
         }
 
     def _generate_summary(self, results: list[PerformanceResult]) -> dict[str, Any]:
@@ -529,7 +533,7 @@ class PerformanceTestSuite:
             "avg_throughput": avg_throughput,
             "avg_p95_latency": avg_latency_p95,
             "overall_health": health,
-            "test_count": len(results)
+            "test_count": len(results),
         }
 
     def _generate_recommendations(self, results: list[PerformanceResult]) -> list[str]:
@@ -547,13 +551,19 @@ class PerformanceTestSuite:
                 if result.p95_latency > 10.0:
                     recommendations.append("AI generation is slow - consider response caching or model optimization")
                 if result.throughput < 2.0:
-                    recommendations.append("Low generation throughput - consider batch processing or model quantization")
+                    recommendations.append(
+                        "Low generation throughput - consider batch processing or model quantization"
+                    )
 
             elif result.test_name == "ingestion_benchmark":
                 if result.p95_latency > 5.0:
-                    recommendations.append("Document ingestion is slow - consider async processing or chunk optimization")
+                    recommendations.append(
+                        "Document ingestion is slow - consider async processing or chunk optimization"
+                    )
                 if result.throughput < 1.0:
-                    recommendations.append("Low ingestion throughput - consider parallel processing or batch operations")
+                    recommendations.append(
+                        "Low ingestion throughput - consider parallel processing or batch operations"
+                    )
 
         if not recommendations:
             recommendations.append("Performance looks good - no major optimizations needed")
@@ -565,10 +575,10 @@ class PerformanceTestSuite:
         data = {
             "exported_at": datetime.now().isoformat(),
             "system_info": self.get_system_info(),
-            "results": [self._result_to_dict(r) for r in self.results]
+            "results": [self._result_to_dict(r) for r in self.results],
         }
 
-        with open(filepath, 'w') as f:
+        with open(filepath, "w") as f:
             json.dump(data, f, indent=2, default=str)
 
         logger.info(f"Performance results exported to {filepath}")

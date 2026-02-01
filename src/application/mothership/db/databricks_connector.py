@@ -149,6 +149,7 @@ class DatabricksConnector:
             return self._engine
 
         from importlib.util import find_spec
+
         if find_spec("databricks.sql") is None:
             raise ImportError(
                 "databricks-sql-connector is not installed. " "Install with: pip install databricks-sql-connector"
@@ -156,9 +157,7 @@ class DatabricksConnector:
 
         # Build connection string for Databricks
         # Use working hostname instead of original
-        connection_string = (
-            f"databricks://token:{self.access_token}@" f"{self.working_hostname}:443{self.http_path}"
-        )
+        connection_string = f"databricks://token:{self.access_token}@" f"{self.working_hostname}:443{self.http_path}"
 
         # Create engine with appropriate settings
         self._engine = create_engine(

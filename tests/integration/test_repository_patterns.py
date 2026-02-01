@@ -168,7 +168,7 @@ class TestRepositoryTransactions:
         # Simulate error in second repository
         mock_session.add.side_effect = Exception("Database error")
 
-        with pytest.raises(Exception):
+        with pytest.raises(RuntimeError):
             await repositories[0].create({"name": "entity1"})
             await repositories[1].create({"name": "entity2"})
 
@@ -290,9 +290,7 @@ class TestRepositoryPerformance:
     async def test_query_optimization(self, repository, mock_session):
         """Test query optimization hints."""
         # Simulate complex query
-        await repository.query(
-            filters={"type": "test", "status": "active"}, order_by="created_at", limit=50, offset=0
-        )
+        await repository.query(filters={"type": "test", "status": "active"}, order_by="created_at", limit=50, offset=0)
 
         assert mock_session.execute.called_once()
         # Query should be optimized (single call vs multiple)

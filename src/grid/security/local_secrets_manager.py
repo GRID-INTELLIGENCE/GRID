@@ -128,7 +128,8 @@ class LocalSecretsManager:
         conn.execute("PRAGMA journal_mode=WAL")
         conn.execute("PRAGMA synchronous=NORMAL")
 
-        conn.executescript("""
+        conn.executescript(
+            """
             CREATE TABLE IF NOT EXISTS secrets (
                 key TEXT PRIMARY KEY,
                 encrypted_value TEXT NOT NULL,
@@ -145,7 +146,8 @@ class LocalSecretsManager:
             );
 
             CREATE INDEX IF NOT EXISTS idx_secrets_updated ON secrets(updated_at DESC);
-        """)
+        """
+        )
 
         conn.commit()
         conn.close()

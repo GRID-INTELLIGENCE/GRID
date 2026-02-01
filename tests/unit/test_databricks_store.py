@@ -67,7 +67,9 @@ def test_databricks_initialization_success(mock_engine):
 
 def test_databricks_missing_env_vars():
     """Test initialization fails with missing environment variables."""
-    with patch.dict("os.environ", {"DATABRICKS_HOST": "", "DATABRICKS_HTTP_PATH": "", "DATABRICKS_TOKEN": ""}, clear=True):
+    with patch.dict(
+        "os.environ", {"DATABRICKS_HOST": "", "DATABRICKS_HTTP_PATH": "", "DATABRICKS_TOKEN": ""}, clear=True
+    ):
         with pytest.raises(ValueError, match="DATABRICKS_HOST"):
             DatabricksVectorStore()
 

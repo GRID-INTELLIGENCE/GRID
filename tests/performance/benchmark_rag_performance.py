@@ -17,7 +17,7 @@ import time
 import tracemalloc
 
 # Add src to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "src"))
 
 from tools.rag.conversational_rag import create_conversational_rag_engine
 
@@ -55,11 +55,8 @@ class PerformanceBenchmark:
             session_id = f"benchmark-session-{i % 10}"  # Reuse sessions
 
             start = time.perf_counter()
-            result = await self.engine.query(
-                query_text=query,
-                session_id=session_id,
-                enable_multi_hop=False,
-                temperature=0.7
+            _ = await self.engine.query(
+                query_text=query, session_id=session_id, enable_multi_hop=False, temperature=0.7
             )
             latency_ms = (time.perf_counter() - start) * 1000
             latencies.append(latency_ms)
@@ -154,11 +151,7 @@ class PerformanceBenchmark:
 
         async def single_query():
             start = time.perf_counter()
-            result = await self.engine.query(
-                query_text=query,
-                session_id=session_id,
-                enable_multi_hop=False
-            )
+            _ = await self.engine.query(query_text=query, session_id=session_id, enable_multi_hop=False)
             latency_ms = (time.perf_counter() - start) * 1000
             return latency_ms
 
@@ -200,19 +193,15 @@ class PerformanceBenchmark:
         print("  Executing 100 queries...")
         for i in range(100):
             session_id = f"memory-benchmark-{i % 10}"
-            await self.engine.query(
-                query_text="What is GRID?",
-                session_id=session_id,
-                enable_multi_hop=False
-            )
+            await self.engine.query(query_text="What is GRID?", session_id=session_id, enable_multi_hop=False)
 
         snapshot3 = tracemalloc.take_snapshot()
 
         tracemalloc.stop()
 
         # Calculate memory differences
-        stats1 = snapshot2.compare_to(snapshot1, 'lineno')
-        stats2 = snapshot3.compare_to(snapshot2, 'lineno')
+        stats1 = snapshot2.compare_to(snapshot1, "lineno")
+        stats2 = snapshot3.compare_to(snapshot2, "lineno")
 
         total_memory_sessions = sum(stat.size_diff for stat in stats1) / 1024 / 1024  # MB
         total_memory_queries = sum(stat.size_diff for stat in stats2) / 1024 / 1024  # MB

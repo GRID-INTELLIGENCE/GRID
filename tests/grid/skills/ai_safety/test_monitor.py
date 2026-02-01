@@ -1,6 +1,5 @@
 """Tests for AI Safety Monitor Skill."""
 
-
 from grid.skills.ai_safety.monitor import (
     MonitoringSession,
     SafetyMonitor,
@@ -17,7 +16,7 @@ class TestMonitoringSession:
         session = MonitoringSession(
             session_id="test_123",
             stream_id="stream_1",
-            start_time=__import__('datetime').datetime.now(__import__('datetime').timezone.utc),
+            start_time=__import__("datetime").datetime.now(__import__("datetime").timezone.utc),
             check_interval=60,
         )
         assert session.session_id == "test_123"
@@ -27,6 +26,7 @@ class TestMonitoringSession:
     def test_session_to_dict(self):
         """Test session serialization."""
         from datetime import UTC, datetime
+
         session = MonitoringSession(
             session_id="test_123",
             stream_id="stream_1",
@@ -75,7 +75,7 @@ class TestSafetyMonitor:
             "This contains violence and hate speech.",
         )
         assert report is not None
-        assert hasattr(report, 'threat_level')
+        assert hasattr(report, "threat_level")
 
     def test_check_content_updates_stats(self):
         """Test that content checking updates session stats."""
@@ -134,7 +134,7 @@ class TestMonitorHandler:
             "operation": "create",
             "stream_id": "test_stream",
         }
-        create_result = monitor_handler(create_args)
+        monitor_handler(create_args)
 
         # Get all sessions
         args = {"operation": "stats"}

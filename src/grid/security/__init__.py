@@ -87,8 +87,6 @@ def generate_deployment_configs() -> None:
         generate_env_file(STAGING_CONFIG, ".env.staging")
         generate_env_file(PRODUCTION_CONFIG, ".env.production")
 
-
-
         # Generate Kubernetes manifests
         from .templates import KUBERNETES_CONFIG
 

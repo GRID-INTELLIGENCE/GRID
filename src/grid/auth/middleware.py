@@ -8,11 +8,13 @@ from .token_manager import TokenManager
 
 logger = logging.getLogger(__name__)
 
+
 class AuthMiddleware(BaseHTTPMiddleware):
     """
     Middleware to validate Bearer tokens on incoming requests.
     Populates request.state.user with token payload.
     """
+
     def __init__(self, app, token_manager: TokenManager, exclude_paths: list[str] | None = None):
         super().__init__(app)
         self.token_manager = token_manager
@@ -30,10 +32,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
 
         auth_header = request.headers.get("Authorization")
         if not auth_header or not auth_header.startswith("Bearer "):
-            return JSONResponse(
-                status_code=401,
-                content={"detail": "Missing or invalid Authorization header"}
-            )
+            return JSONResponse(status_code=401, content={"detail": "Missing or invalid Authorization header"})
 
         token = auth_header.split(" ")[1]
         try:

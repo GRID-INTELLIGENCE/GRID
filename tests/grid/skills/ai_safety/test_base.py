@@ -1,6 +1,5 @@
 """Tests for AI Safety Base Module."""
 
-
 from grid.skills.ai_safety.base import (
     ActionResult,
     ActionType,
@@ -49,7 +48,9 @@ def test_calculate_safety_score_no_violations():
 
 def test_calculate_safety_score_with_violations():
     violations = [
-        SafetyViolation(category=SafetyCategory.HARMFUL_CONTENT, severity=ThreatLevel.MEDIUM, confidence=0.5, description="Test"),
+        SafetyViolation(
+            category=SafetyCategory.HARMFUL_CONTENT, severity=ThreatLevel.MEDIUM, confidence=0.5, description="Test"
+        ),
     ]
     score = calculate_safety_score(violations)
     assert score < 1.0
@@ -57,7 +58,12 @@ def test_calculate_safety_score_with_violations():
 
 def test_determine_threat_level_critical():
     violations = [
-        SafetyViolation(category=SafetyCategory.HARMFUL_CONTENT, severity=ThreatLevel.CRITICAL, confidence=0.9, description="Critical"),
+        SafetyViolation(
+            category=SafetyCategory.HARMFUL_CONTENT,
+            severity=ThreatLevel.CRITICAL,
+            confidence=0.9,
+            description="Critical",
+        ),
     ]
     level = determine_threat_level(0.5, violations)
     assert level == ThreatLevel.CRITICAL

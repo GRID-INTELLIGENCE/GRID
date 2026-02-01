@@ -36,32 +36,32 @@ class TestXSSDetection:
         result = sanitizer.sanitize_text_full('<script>alert("xss")</script>')
 
         assert result.is_safe is False
-        assert '<script>' not in str(result.sanitized_content)
-        assert any(t['type'] == ThreatType.XSS.value for t in result.threats_detected)
+        assert "<script>" not in str(result.sanitized_content)
+        assert any(t["type"] == ThreatType.XSS.value for t in result.threats_detected)
 
     def test_javascript_protocol(self):
         """Should detect javascript: protocol."""
         sanitizer = InputSanitizer()
-        result = sanitizer.sanitize_text_full('javascript:alert(1)')
+        result = sanitizer.sanitize_text_full("javascript:alert(1)")
 
         assert result.is_safe is False
-        assert 'javascript:' not in str(result.sanitized_content)
+        assert "javascript:" not in str(result.sanitized_content)
 
     def test_on_event_handler(self):
         """Should detect on* event handlers."""
         sanitizer = InputSanitizer()
-        result = sanitizer.sanitize_text_full('<img src=x onerror=alert(1)>')
+        result = sanitizer.sanitize_text_full("<img src=x onerror=alert(1)>")
 
         assert result.is_safe is False
 
     def test_safe_html_entities(self):
         """Should encode HTML entities."""
         sanitizer = InputSanitizer()
-        result = sanitizer.sanitize_text_full('<div>safe content</div>')
+        result = sanitizer.sanitize_text_full("<div>safe content</div>")
 
         sanitized = str(result.sanitized_content)
-        assert '&lt;' in sanitized
-        assert '&gt;' in sanitized
+        assert "&lt;" in sanitized
+        assert "&gt;" in sanitized
 
 
 class TestSQLInjectionDetection:
@@ -73,7 +73,7 @@ class TestSQLInjectionDetection:
         result = sanitizer.sanitize_text_full("' OR '1'='1' UNION SELECT * FROM users")
 
         assert result.is_safe is False
-        assert any(t['type'] == ThreatType.SQL_INJECTION.value for t in result.threats_detected)
+        assert any(t["type"] == ThreatType.SQL_INJECTION.value for t in result.threats_detected)
 
     def test_drop_table_detection(self):
         """Should detect DROP TABLE attacks."""
@@ -227,17 +227,14 @@ class TestJSONSanitization:
         data = {
             "safe": "value",
             "dangerous": "<script>alert(1)</script>",
-            "nested": {
-                "xss": "javascript:alert(1)",
-                "safe": "ok"
-            }
+            "nested": {"xss": "javascript:alert(1)", "safe": "ok"},
         }
 
         result = sanitizer.sanitize_json_full(data)
 
         sanitized = result.sanitized_content
-        assert '<script>' not in str(sanitized.get("dangerous", ""))
-        assert 'javascript:' not in str(sanitized["nested"].get("xss", ""))
+        assert "<script>" not in str(sanitized.get("dangerous", ""))
+        assert "javascript:" not in str(sanitized["nested"].get("xss", ""))
 
     def test_deep_nesting_protection(self):
         """Should protect against deep nesting."""
@@ -253,23 +250,17 @@ class TestJSONSanitization:
 
         result = sanitizer.sanitize_json_full(nested)
 
-        assert any(t['type'] == ThreatType.DEEP_NESTING.value for t in result.threats_detected)
+        assert any(t["type"] == ThreatType.DEEP_NESTING.value for t in result.threats_detected)
 
     def test_list_sanitization(self):
         """Should sanitize items in lists."""
         sanitizer = InputSanitizer()
-        data = {
-            "items": [
-                "safe",
-                "<script>alert(1)</script>",
-                "normal"
-            ]
-        }
+        data = {"items": ["safe", "<script>alert(1)</script>", "normal"]}
 
         result = sanitizer.sanitize_json_full(data)
 
         sanitized = result.sanitized_content
-        assert '<script>' not in str(sanitized["items"][1])
+        assert "<script>" not in str(sanitized["items"][1])
 
 
 class TestThreatSeverity:
@@ -318,13 +309,13 @@ class TestFactoryFunctions:
     def test_sanitize_text_function(self):
         """Should use default sanitizer."""
         result = sanitize_text("<script>alert(1)</script>")
-        assert '<script>' not in result
+        assert "<script>" not in result
 
     def test_sanitize_json_function(self):
         """Should sanitize JSON using default sanitizer."""
         data = {"key": "<script>alert(1)</script>"}
         result = sanitize_json(data)
-        assert '<script>' not in str(result.get("key", ""))
+        assert "<script>" not in str(result.get("key", ""))
 
     def test_is_safe_function(self):
         """Should check if text is safe."""

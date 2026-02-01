@@ -10,6 +10,7 @@ Covers:
 """
 
 import pytest
+
 from application.resonance.cost_optimizer import (
     BillingMeterEvent,
     ComputeMode,

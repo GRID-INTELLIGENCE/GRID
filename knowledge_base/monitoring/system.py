@@ -26,6 +26,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class MetricPoint:
     """Individual metric data point."""
+
     timestamp: datetime
     value: float
     tags: dict[str, str] = field(default_factory=dict)
@@ -34,17 +35,14 @@ class MetricPoint:
 @dataclass
 class MetricSeries:
     """Time series data for a metric."""
+
     name: str
     points: deque = field(default_factory=lambda: deque(maxlen=1000))
     tags: dict[str, str] = field(default_factory=dict)
 
     def add_point(self, value: float, tags: dict[str, str] | None = None) -> None:
         """Add a data point to the series."""
-        point = MetricPoint(
-            timestamp=datetime.now(),
-            value=value,
-            tags=tags or {}
-        )
+        point = MetricPoint(timestamp=datetime.now(), value=value, tags=tags or {})
         self.points.append(point)
 
     def get_recent_points(self, hours: int = 24) -> list[MetricPoint]:
@@ -64,7 +62,7 @@ class MetricSeries:
             "avg": sum(values) / len(values),
             "min": min(values),
             "max": max(values),
-            "latest": values[-1] if values else 0
+            "latest": values[-1] if values else 0,
         }
 
 
@@ -98,7 +96,7 @@ class MetricsCollector:
             "kb.ingestion.errors",
             "kb.system.cpu_percent",
             "kb.system.memory_percent",
-            "kb.system.disk_usage"
+            "kb.system.disk_usage",
         ]
 
         for metric_name in standard_metrics:
@@ -106,6 +104,7 @@ class MetricsCollector:
 
     def _start_background_collection(self) -> None:
         """Start background metric collection."""
+
         def collect_system_metrics():
             while True:
                 try:
@@ -117,7 +116,7 @@ class MetricsCollector:
                     self.record_metric("kb.system.memory_percent", memory.percent)
 
                     # Disk usage (for current drive)
-                    disk = psutil.disk_usage('/')
+                    disk = psutil.disk_usage("/")
                     self.record_metric("kb.system.disk_usage", disk.percent)
 
                 except Exception as e:
@@ -158,11 +157,7 @@ class MetricsCollector:
             return []
 
         points = series.get_recent_points(hours)
-        return [{
-            "timestamp": p.timestamp.isoformat(),
-            "value": p.value,
-            "tags": p.tags
-        } for p in points]
+        return [{"timestamp": p.timestamp.isoformat(), "value": p.value, "tags": p.tags} for p in points]
 
 
 class EventLogger:
@@ -173,15 +168,16 @@ class EventLogger:
         self.events: deque = deque(maxlen=1000)
         self._lock = threading.Lock()
 
-    def log_event(self, event_type: str, message: str,
-                 level: str = "INFO", metadata: dict[str, Any] | None = None) -> None:
+    def log_event(
+        self, event_type: str, message: str, level: str = "INFO", metadata: dict[str, Any] | None = None
+    ) -> None:
         """Log an event."""
         event = {
             "timestamp": datetime.now().isoformat(),
             "type": event_type,
             "message": message,
             "level": level,
-            "metadata": metadata or {}
+            "metadata": metadata or {},
         }
 
         with self._lock:
@@ -217,7 +213,7 @@ class PerformanceMonitor:
         report = {
             "total_searches": search_requests.get_stats()["count"] if search_requests else 0,
             "avg_latency": search_latency.get_stats()["avg"] if search_latency else 0,
-            "error_rate": 0
+            "error_rate": 0,
         }
 
         if search_requests and search_errors:
@@ -238,7 +234,7 @@ class PerformanceMonitor:
             "total_generations": gen_requests.get_stats()["count"] if gen_requests else 0,
             "avg_latency": gen_latency.get_stats()["avg"] if gen_latency else 0,
             "total_tokens": gen_tokens.get_stats()["sum"] if gen_tokens else 0,
-            "error_rate": 0
+            "error_rate": 0,
         }
 
         if gen_requests and gen_errors:
@@ -258,15 +254,16 @@ class PerformanceMonitor:
             "cpu_usage_percent": cpu_metric.get_stats()["latest"] if cpu_metric else 0,
             "memory_usage_percent": memory_metric.get_stats()["latest"] if memory_metric else 0,
             "disk_usage_percent": disk_metric.get_stats()["latest"] if disk_metric else 0,
-            "status": "healthy"  # Could implement more complex health checks
+            "status": "healthy",  # Could implement more complex health checks
         }
 
 
 class AnalyticsDashboard:
     """Analytics dashboard for insights and reporting."""
 
-    def __init__(self, metrics_collector: MetricsCollector,
-                 event_logger: EventLogger, performance_monitor: PerformanceMonitor):
+    def __init__(
+        self, metrics_collector: MetricsCollector, event_logger: EventLogger, performance_monitor: PerformanceMonitor
+    ):
         self.metrics = metrics_collector
         self.events = event_logger
         self.performance = performance_monitor
@@ -279,7 +276,7 @@ class AnalyticsDashboard:
             "generation_performance": self.performance.get_generation_performance_report(),
             "system_health": self.performance.get_system_health_report(),
             "recent_events": self.events.get_recent_events(10),
-            "metrics_summary": self.metrics.get_all_metrics()
+            "metrics_summary": self.metrics.get_all_metrics(),
         }
 
     def get_usage_trends(self, days: int = 7) -> dict[str, Any]:
@@ -288,7 +285,7 @@ class AnalyticsDashboard:
             "search_requests": self.metrics.get_metric_history("kb.search.requests", days * 24),
             "generation_requests": self.metrics.get_metric_history("kb.generation.requests", days * 24),
             "cpu_usage": self.metrics.get_metric_history("kb.system.cpu_percent", days * 24),
-            "memory_usage": self.metrics.get_metric_history("kb.system.memory_percent", days * 24)
+            "memory_usage": self.metrics.get_metric_history("kb.system.memory_percent", days * 24),
         }
 
         return trends
@@ -312,8 +309,8 @@ class AnalyticsDashboard:
                 "platform": platform.system(),
                 "python_version": platform.python_version(),
                 "cpu_count": psutil.cpu_count(),
-                "memory_total": psutil.virtual_memory().total
-            }
+                "memory_total": psutil.virtual_memory().total,
+            },
         }
 
 
@@ -331,8 +328,7 @@ class MonitoringSystem:
 
         logger.info("Monitoring system initialized")
 
-    def track_search_request(self, query: str, results_count: int,
-                           latency: float, user_id: str = "") -> None:
+    def track_search_request(self, query: str, results_count: int, latency: float, user_id: str = "") -> None:
         """Track a search request."""
         self.metrics.record_metric("kb.search.requests", 1, {"user_id": user_id})
         self.metrics.record_metric("kb.search.latency", latency, {"user_id": user_id})
@@ -340,16 +336,10 @@ class MonitoringSystem:
         self.events.log_event(
             "search_request",
             f"Search executed: '{query}' -> {results_count} results ({latency:.2f}s)",
-            metadata={
-                "query": query,
-                "results_count": results_count,
-                "latency": latency,
-                "user_id": user_id
-            }
+            metadata={"query": query, "results_count": results_count, "latency": latency, "user_id": user_id},
         )
 
-    def track_generation_request(self, query: str, tokens_used: int,
-                               latency: float, user_id: str = "") -> None:
+    def track_generation_request(self, query: str, tokens_used: int, latency: float, user_id: str = "") -> None:
         """Track a generation request."""
         self.metrics.record_metric("kb.generation.requests", 1, {"user_id": user_id})
         self.metrics.record_metric("kb.generation.latency", latency, {"user_id": user_id})
@@ -358,16 +348,10 @@ class MonitoringSystem:
         self.events.log_event(
             "generation_request",
             f"AI generation: {tokens_used} tokens ({latency:.2f}s)",
-            metadata={
-                "query": query,
-                "tokens_used": tokens_used,
-                "latency": latency,
-                "user_id": user_id
-            }
+            metadata={"query": query, "tokens_used": tokens_used, "latency": latency, "user_id": user_id},
         )
 
-    def track_ingestion(self, document_count: int, chunk_count: int,
-                       user_id: str = "") -> None:
+    def track_ingestion(self, document_count: int, chunk_count: int, user_id: str = "") -> None:
         """Track document ingestion."""
         self.metrics.record_metric("kb.ingestion.documents", document_count, {"user_id": user_id})
         self.metrics.record_metric("kb.ingestion.chunks", chunk_count, {"user_id": user_id})
@@ -375,11 +359,7 @@ class MonitoringSystem:
         self.events.log_event(
             "document_ingestion",
             f"Documents ingested: {document_count} docs, {chunk_count} chunks",
-            metadata={
-                "document_count": document_count,
-                "chunk_count": chunk_count,
-                "user_id": user_id
-            }
+            metadata={"document_count": document_count, "chunk_count": chunk_count, "user_id": user_id},
         )
 
     def track_error(self, component: str, error_type: str, message: str) -> None:
@@ -391,11 +371,7 @@ class MonitoringSystem:
             "error",
             f"{component.upper()} error: {message}",
             level="ERROR",
-            metadata={
-                "component": component,
-                "error_type": error_type,
-                "message": message
-            }
+            metadata={"component": component, "error_type": error_type, "message": message},
         )
 
     def get_health_status(self) -> dict[str, Any]:
@@ -428,11 +404,7 @@ class MonitoringSystem:
             status = "warning"
             issues.append("High error rate")
 
-        return {
-            "status": status,
-            "issues": issues,
-            "metrics": health_data
-        }
+        return {"status": status, "issues": issues, "metrics": health_data}
 
     def export_metrics(self, filepath: str) -> None:
         """Export all metrics to a JSON file."""
@@ -440,10 +412,10 @@ class MonitoringSystem:
             "exported_at": datetime.now().isoformat(),
             "metrics": self.metrics.get_all_metrics(),
             "events": self.events.get_recent_events(1000),
-            "dashboard": self.analytics.get_dashboard_data()
+            "dashboard": self.analytics.get_dashboard_data(),
         }
 
-        with open(filepath, 'w') as f:
+        with open(filepath, "w") as f:
             json.dump(data, f, indent=2, default=str)
 
         logger.info(f"Metrics exported to {filepath}")

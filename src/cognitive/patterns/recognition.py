@@ -1691,8 +1691,6 @@ class TimePattern(PatternRecognizer):
         doc_year = document_metadata.get("year")
         doc_era = document_metadata.get("era", "unknown")
 
-
-
         # Modern era: documents from last ~15 years
         if temporal_intent.era_type == "modern":
             if doc_year:

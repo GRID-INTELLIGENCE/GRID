@@ -396,7 +396,8 @@ GRID_ENVIRONMENT={self.args.env or "development"}
         """Print setup summary."""
         print_header("Setup Complete!")
 
-        print(f"""
+        print(
+            f"""
 {BOLD}Summary:{RESET}
   • Environment: {self.args.env or "development"}
   • Secrets Location: {self.grid_home / "secrets"}
@@ -423,7 +424,8 @@ GRID_ENVIRONMENT={self.args.env or "development"}
 {BOLD}Documentation:{RESET}
   • See: docs/SECURITY.md
   • See: docs/LOCAL_DEVELOPMENT.md
-""")
+"""
+        )
 
         if self.warnings:
             print(f"\n{YELLOW}Warnings:{RESET}")

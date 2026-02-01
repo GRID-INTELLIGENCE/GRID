@@ -151,9 +151,9 @@ class TestEmbeddingProviders:
         avg_similar = float(np.mean(similar_scores))  # type: ignore[arg-type]
         avg_dissimilar = float(np.mean(dissimilar_scores))  # type: ignore[arg-type]
 
-        assert avg_similar > avg_dissimilar + 0.2, (
-            f"Similar concepts (avg: {avg_similar:.3f}) should be more similar than dissimilar (avg: {avg_dissimilar:.3f})"
-        )
+        assert (
+            avg_similar > avg_dissimilar + 0.2
+        ), f"Similar concepts (avg: {avg_similar:.3f}) should be more similar than dissimilar (avg: {avg_dissimilar:.3f})"
 
     def test_embedding_performance(self, embedding_provider):
         """Scenario: Test embedding generation performance"""
@@ -188,7 +188,9 @@ class TestEmbeddingQuality:
         for i in range(100):
             topic = i % 5
             if topic == 0:
-                texts.append(f"Topic {i}: This is a sample text about different subjects and concepts with unique identifier {i}")
+                texts.append(
+                    f"Topic {i}: This is a sample text about different subjects and concepts with unique identifier {i}"
+                )
             elif topic == 1:
                 texts.append(f"Science {i}: Technology innovation and research methodology with unique identifier {i}")
             elif topic == 2:

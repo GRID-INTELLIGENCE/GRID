@@ -57,7 +57,14 @@ class TestDatabricksClientAuthentication:
             client = DatabricksClient()
             assert client.token == "env-token"
 
-    @patch.dict(os.environ, {"DATABRICKS_HOST": "https://test.cloud.databricks.com", "databricks": "databricks-api-key", "DATABRICKS_TOKEN": ""})
+    @patch.dict(
+        os.environ,
+        {
+            "DATABRICKS_HOST": "https://test.cloud.databricks.com",
+            "databricks": "databricks-api-key",
+            "DATABRICKS_TOKEN": "",
+        },
+    )
     def test_client_uses_databricks_env_var(self):
         """Client should use generic 'databricks' environment variable for API key."""
         with patch("src.integration.databricks.client.WorkspaceClient") as mock_ws:
@@ -68,7 +75,14 @@ class TestDatabricksClientAuthentication:
             client_instance = DatabricksClient()
             assert client_instance.token == "databricks-api-key"
 
-    @patch.dict(os.environ, {"DATABRICKS_HOST": "https://test.cloud.databricks.com", "DATABRICKS_TOKEN": "token-var", "databricks": "databricks-key"})
+    @patch.dict(
+        os.environ,
+        {
+            "DATABRICKS_HOST": "https://test.cloud.databricks.com",
+            "DATABRICKS_TOKEN": "token-var",
+            "databricks": "databricks-key",
+        },
+    )
     def test_databricks_token_priority_over_generic_var(self):
         """DATABRICKS_TOKEN should take priority over generic 'databricks' env var."""
         with patch("src.integration.databricks.client.WorkspaceClient") as mock_ws:
@@ -88,10 +102,7 @@ class TestDatabricksClientAuthentication:
             mock_ws.return_value = mock_client
             mock_client.workspaces.get_status.return_value = Mock(workspace_name="test-workspace")
 
-            client = DatabricksClient(
-                host="https://override.cloud.databricks.com",
-                token="override-token"
-            )
+            client = DatabricksClient(host="https://override.cloud.databricks.com", token="override-token")
             assert client.host == "https://override.cloud.databricks.com"
             assert client.token == "override-token"
 
@@ -117,7 +128,7 @@ class TestDatabricksClientAuthentication:
             # Updated to match current SDK API: workspace.get_status() instead of workspaces.get_status()
             mock_client.workspace.get_status.return_value = Mock(workspace_name="grid-workspace")
 
-            client = DatabricksClient()
+            _ = DatabricksClient()
             mock_client.workspace.get_status.assert_called_once()
 
     @patch.dict(os.environ, {"DATABRICKS_HOST": "https://test.cloud.databricks.com", "DATABRICKS_TOKEN": "token"})
@@ -129,7 +140,7 @@ class TestDatabricksClientAuthentication:
             # Updated to match current SDK API: workspace.get_status() instead of workspaces.get_status()
             mock_client.workspace.get_status.side_effect = Exception("Connection failed")
 
-            with pytest.raises(Exception):
+            with pytest.raises((ConnectionError, RuntimeError)):
                 DatabricksClient()
 
 
@@ -150,14 +161,14 @@ class TestDatabricksClientClusterOperations:
                 cluster_name="Cluster 1",
                 state="RUNNING",
                 num_workers=2,
-                spark_version="10.4.x-scala2.12"
+                spark_version="10.4.x-scala2.12",
             )
             mock_cluster2 = Mock(
                 cluster_id="cluster-2",
                 cluster_name="Cluster 2",
                 state="TERMINATED",
                 num_workers=1,
-                spark_version="10.4.x-scala2.12"
+                spark_version="10.4.x-scala2.12",
             )
             mock_client.clusters.list.return_value = [mock_cluster1, mock_cluster2]
 
@@ -186,7 +197,7 @@ class TestDatabricksClientClusterOperations:
                 num_workers=2,
                 spark_version="10.4.x-scala2.12",
                 node_type_id="i3.xlarge",
-                driver_node_type_id="i3.xlarge"
+                driver_node_type_id="i3.xlarge",
             )
             mock_client.clusters.get.return_value = mock_cluster
 
@@ -236,7 +247,7 @@ class TestDatabricksJobsManager:
                 job_name="test-job",
                 notebook_path="/Repos/user/repo/notebook.ipynb",
                 cluster_id="cluster-1",
-                base_parameters={"param1": "value1"}
+                base_parameters={"param1": "value1"},
             )
 
             assert job_id == "123"
@@ -281,7 +292,7 @@ class TestDatabricksJobsManager:
                 end_time=2000,
                 setup_duration=100,
                 execution_duration=800,
-                cleanup_duration=100
+                cleanup_duration=100,
             )
             mock_client.jobs.get_run.return_value = mock_run
 
@@ -362,10 +373,7 @@ class TestDatabricksNotebooksManager:
             client = DatabricksClient()
             notebooks_manager = DatabricksNotebooksManager(client)
 
-            notebooks_manager.write_notebook(
-                "/Repos/user/repo/notebook.ipynb",
-                "# Updated notebook"
-            )
+            notebooks_manager.write_notebook("/Repos/user/repo/notebook.ipynb", "# Updated notebook")
 
             mock_workspace_client.write.assert_called_once()
             # Verify the call was made with correct parameters

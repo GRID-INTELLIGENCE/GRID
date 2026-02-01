@@ -18,6 +18,7 @@ try:
     )
     from grid.xai.stream_adapter import StreamChunk, StreamProgress, XAIStreamAdapter
     from grid.xai.threading_framework import XAIThreadPool
+
     XAI_AVAILABLE = True
 except ImportError as e:
     print(f"XAI modules not available: {e}")
@@ -41,10 +42,7 @@ class TestXAIStreamAdapter:
             return
 
         chunk = StreamChunk(
-            chunk_id="test_chunk_1",
-            content="Test content",
-            sequence_number=1,
-            metadata={"type": "test"}
+            chunk_id="test_chunk_1", content="Test content", sequence_number=1, metadata={"type": "test"}
         )
 
         assert chunk.chunk_id == "test_chunk_1"
@@ -59,11 +57,7 @@ class TestXAIStreamAdapter:
             pytest.skip("XAI modules not available")
             return
 
-        progress = StreamProgress(
-            total_chunks=10,
-            processed_chunks=3,
-            start_time=datetime.now()
-        )
+        progress = StreamProgress(total_chunks=10, processed_chunks=3, start_time=datetime.now())
 
         assert progress.get_completion_percentage() == 30.0
         assert progress.estimated_completion > 0
@@ -84,16 +78,14 @@ class TestXAIStreamAdapter:
         # Simulate streaming response
         async def mock_response():
             for i in range(3):
-                if hasattr(mock_stream, 'content'):
+                if hasattr(mock_stream, "content"):
                     mock_stream.return_value = f"Content {i}"
                 else:
                     mock_stream.return_value = {"text": f"Text {i}"}
                 yield mock_stream
 
         chunks = await stream_adapter.process_streaming_response(
-            response_stream=mock_response(),
-            stream_id="test_stream",
-            progress_callback=AsyncMock()
+            response_stream=mock_response(), stream_id="test_stream", progress_callback=AsyncMock()
         )
 
         assert len(chunks) == 3
@@ -134,10 +126,7 @@ class TestXAIThreadPool:
             await asyncio.sleep(0.1)
             return "test_result"
 
-        await thread_pool.submit_task(
-            task_coroutine=mock_task,
-            priority=1
-        )
+        await thread_pool.submit_task(task_coroutine=mock_task, priority=1)
 
         # Give some time for processing
         await asyncio.sleep(0.2)
@@ -330,7 +319,7 @@ class TestXAIIntegration:
                 "thread_pool": XAIThreadPool(max_workers=3),
                 "cache": XAICache(max_size=50),
                 "load_balancer": XAILoadBalancer(),
-                "adaptive_processor": XAIAdaptiveProcessor()
+                "adaptive_processor": XAIAdaptiveProcessor(),
             }
         return Mock()
 
@@ -353,9 +342,7 @@ class TestXAIIntegration:
         xai_components["adaptive_processor"].update_load(0.9)
 
         await xai_components["stream_adapter"].process_streaming_response(
-            response_stream=mock_stream(),
-            stream_id="integration_test",
-            progress_callback=None
+            response_stream=mock_stream(), stream_id="integration_test", progress_callback=None
         )
 
         # Verify adaptation occurred

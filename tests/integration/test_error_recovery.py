@@ -116,6 +116,7 @@ class TestFallbackStrategy:
 
     def test_fallback_on_network_error(self):
         """Verify fallback function is called on network error."""
+
         def get_cached_result():
             return {"cached": True, "status": "fallback"}
 
@@ -250,6 +251,7 @@ class TestMetricsCollection:
 
     def test_metrics_recorded_on_retry_failure(self, metrics_collector):
         """Verify metrics are recorded when retry exhausts."""
+
         @retry(max_attempts=2, exceptions=(ValueError,), initial_delay=0.01)
         def operation_fails():
             raise ValueError("Persistent error")

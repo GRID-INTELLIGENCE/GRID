@@ -14,11 +14,11 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from enum import Enum
-from typing import Any, Optional
-from collections.abc import Callable
+from typing import Any
 from uuid import uuid4
 
 logger = logging.getLogger(__name__)
@@ -76,7 +76,7 @@ class BillingMeterEvent:
     timestamp: datetime
     metadata: dict[str, Any] = field(default_factory=dict)
     sent: bool = False
-    sent_at: Optional[datetime] = None
+    sent_at: datetime | None = None
 
 
 @dataclass
@@ -131,9 +131,9 @@ class CostOptimizer:
 
     def __init__(
         self,
-        stripe_api_key: Optional[str] = None,
-        databricks_client: Optional[Any] = None,
-        meter_event_callback: Optional[Callable[[BillingMeterEvent], bool]] = None,
+        stripe_api_key: str | None = None,
+        databricks_client: Any | None = None,
+        meter_event_callback: Callable[[BillingMeterEvent], bool] | None = None,
         cost_tier: CostTier = CostTier.STANDARD,
     ):
         """
@@ -169,8 +169,8 @@ class CostOptimizer:
 
         # Running state
         self._is_running = False
-        self._optimization_task: Optional[asyncio.Task] = None
-        self._meter_flush_task: Optional[asyncio.Task] = None
+        self._optimization_task: asyncio.Task | None = None
+        self._meter_flush_task: asyncio.Task | None = None
 
         logger.info(f"CostOptimizer initialized with tier: {cost_tier.value}")
 
@@ -366,7 +366,7 @@ class CostOptimizer:
 
         return metrics
 
-    def get_current_cost_metrics(self) -> Optional[CostMetrics]:
+    def get_current_cost_metrics(self) -> CostMetrics | None:
         """Get current period metrics."""
         return self._cost_history[-1] if self._cost_history else None
 
@@ -383,7 +383,7 @@ class CostOptimizer:
         customer_id: str,
         event_name: str,
         value: int,
-        metadata: Optional[dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
     ) -> BillingMeterEvent:
         """
         Queue a billing meter event for Stripe.

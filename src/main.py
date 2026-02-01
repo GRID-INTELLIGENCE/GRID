@@ -32,12 +32,7 @@ try:
     mothership_url = os.environ.get("MOTHERSHIP_URL", "http://localhost:8080")
 
     gateway.register_service(
-        ServiceEndpoint(
-            name="grid-service",
-            url=mothership_url,
-            weight=1,
-            health_check_path="/health/live"
-        )
+        ServiceEndpoint(name="grid-service", url=mothership_url, weight=1, health_check_path="/health/live")
     )
 
     # Route all API requests to the Mothership for now
@@ -51,12 +46,7 @@ try:
 
     # Route health checks
     gateway.register_route(
-        RouteConfig(
-            path="/health",
-            service_name="grid-service",
-            methods=["GET"],
-            auth_required=False
-        )
+        RouteConfig(path="/health", service_name="grid-service", methods=["GET"], auth_required=False)
     )
 
 except ImportError as e:
@@ -66,9 +56,7 @@ except ImportError as e:
         from application.mothership.main import app
     except ImportError:
         # If both fail, we have a serious configuration issue
-        raise ImportError(
-            f"Could not initialize GRID entry point. Error loading gateway: {e}"
-        ) from e
+        raise ImportError(f"Could not initialize GRID entry point. Error loading gateway: {e}") from e
 
 if __name__ == "__main__":
     import uvicorn

@@ -64,7 +64,9 @@ class DatabaseStreamer:
         engine = self.databricks.create_engine()
         with engine.begin() as conn:
             # Ensure table exists (Heist Aware Schema)
-            conn.execute(text("""
+            conn.execute(
+                text(
+                    """
                 CREATE TABLE IF NOT EXISTS codebase_activity (
                     timestamp TIMESTAMP,
                     event_type STRING,
@@ -72,7 +74,9 @@ class DatabaseStreamer:
                     details STRING,
                     severity STRING
                 )
-            """))
+            """
+                )
+            )
 
             # Insert events
             for event in events:

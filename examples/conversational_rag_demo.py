@@ -9,7 +9,7 @@ import sys
 from datetime import datetime
 
 # Add src to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 from tools.rag.conversational_rag import create_conversational_rag_engine
 
@@ -46,12 +46,18 @@ async def demo_conversational_rag():
 
     # Mock responses for demonstration
     mock_responses = [
-        ("What is the GRID system?",
-         "GRID is a geometric resonance intelligence driver that explores complex systems through 9 cognition patterns."),
-        ("How does it handle documentation?",
-         "GRID uses local-first RAG with ChromaDB and Ollama for retrieving and generating contextually relevant information."),
-        ("What about conversation memory?",
-         "The conversational RAG engine maintains session-based memory with configurable context windows and multi-hop reasoning.")
+        (
+            "What is the GRID system?",
+            "GRID is a geometric resonance intelligence driver that explores complex systems through 9 cognition patterns.",
+        ),
+        (
+            "How does it handle documentation?",
+            "GRID uses local-first RAG with ChromaDB and Ollama for retrieving and generating contextually relevant information.",
+        ),
+        (
+            "What about conversation memory?",
+            "The conversational RAG engine maintains session-based memory with configurable context windows and multi-hop reasoning.",
+        ),
     ]
 
     for i, (query, answer) in enumerate(mock_responses):
@@ -63,15 +69,15 @@ async def demo_conversational_rag():
             "sources": [
                 {
                     "text": "Documentation about GRID system.",
-                    "metadata": {"path": f"docs/grid_system_doc_{i+1}.md", "chunk_index": 1}
+                    "metadata": {"path": f"docs/grid_system_doc_{i+1}.md", "chunk_index": 1},
                 }
             ],
             "conversation_metadata": {
                 "session_id": session_id,
                 "session_active": True,
                 "context_used": i > 0,
-                "turn_count": i + 1
-            }
+                "turn_count": i + 1,
+            },
         }
 
         print(f"   Answer: {result['answer'][:80]}...")
@@ -116,7 +122,9 @@ async def demo_streaming_api():
     from application.mothership.routers.rag_streaming import chunk_text
 
     # Demo text chunking
-    sample_text = "This demonstrates how the streaming API breaks down responses into manageable chunks for real-time display."
+    sample_text = (
+        "This demonstrates how the streaming API breaks down responses into manageable chunks for real-time display."
+    )
     chunks = chunk_text(sample_text, chunk_size=20)
 
     print("\n1. Text Chunking Example:")

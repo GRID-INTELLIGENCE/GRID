@@ -146,7 +146,7 @@ def is_text_file(path: Path, text_extensions: set[str]) -> bool:
     if path.suffix.lower() in text_extensions:
         return True
 
-    # Check for common text files without extension
+        # Check for common text files without extension
         return True
 
     # Check for shebang

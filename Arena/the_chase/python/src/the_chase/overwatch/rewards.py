@@ -3,7 +3,6 @@ Rewards system for The Chase
 """
 
 from enum import Enum
-from typing import Optional
 
 
 class RewardLevel(Enum):
@@ -39,7 +38,7 @@ class AchievementType(Enum):
 class Achievement:
     """Individual achievements"""
 
-    def __init__(self, achievement_type: AchievementType, points: Optional[int] = None, description: str = ""):
+    def __init__(self, achievement_type: AchievementType, points: int | None = None, description: str = ""):
         self.type = achievement_type
         self.points = points if points is not None else achievement_type.default_points
         self.description = description

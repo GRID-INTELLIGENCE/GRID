@@ -9,6 +9,7 @@ from typing import Any
 
 import pytest
 from fastapi.testclient import TestClient
+from starlette.websockets import WebSocketDisconnect
 
 
 class TestWebSocketConnection:
@@ -30,7 +31,7 @@ class TestWebSocketConnection:
 
     def test_websocket_connect_activity_not_found(self, client: TestClient) -> None:
         """Test WebSocket connection for non-existent activity."""
-        with pytest.raises(Exception):  # WebSocket will close with error
+        with pytest.raises((WebSocketDisconnect, RuntimeError)):
             with client.websocket_connect("/api/v1/resonance/ws/non-existent-id"):
                 pass
 

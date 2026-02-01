@@ -1,0 +1,3 @@
+{"timestamp": "2026-02-01T09:23:13.400820+00:00", "type": "LOW", "data": {"msg": "low"}, "impact": 0.1}
+{"timestamp": "2026-02-01T09:23:13.401113+00:00", "type": "HIGH", "data": {"msg": "high"}, "impact": 0.9}
+{"timestamp": "2026-02-01T09:23:13.401305+00:00", "type": "MEDIUM", "data": {"msg": "mid"}, "impact": 0.5}

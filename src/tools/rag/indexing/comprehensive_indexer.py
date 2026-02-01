@@ -233,7 +233,7 @@ class NLPChunker:
     def detect_content_type(self, file_path: Path) -> ContentType:
         """Detect content type from file extension and content."""
         suffix = file_path.suffix.lower()
-        name = file_path.name.lower()
+        file_path.name.lower()
 
         # Code files
         if suffix == ".py":
@@ -826,7 +826,9 @@ class HuggingFaceEmbedder:
             self.dimension = self.MODEL_DIMS.get(self.model_name, 384)
 
         except ImportError as e:
-            raise ImportError("sentence-transformers is required. Install with: pip install sentence-transformers") from e
+            raise ImportError(
+                "sentence-transformers is required. Install with: pip install sentence-transformers"
+            ) from e
 
     def embed(self, text: str) -> list[float]:
         """Embed a single text."""

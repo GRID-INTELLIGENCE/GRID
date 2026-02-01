@@ -16,7 +16,13 @@ from datetime import datetime
 from enum import Enum
 from typing import Any
 
-from ..event_bus.event_system import Event, EventBus, EventHandler, EventResult, EventStatus  # type: ignore[import-not-found]
+from ..event_bus.event_system import (  # type: ignore[import-not-found]
+    Event,
+    EventBus,
+    EventHandler,
+    EventResult,
+    EventStatus,
+)
 
 
 class AISafetyLevel(Enum):

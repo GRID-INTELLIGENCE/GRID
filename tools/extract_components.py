@@ -61,36 +61,36 @@ class ComponentExtractor:
                 "file": "WizardButton.tsx",
                 "description": "Themed button component with house colors and variants",
                 "category": "ui-components",
-                "dependencies": ["React", "useHouse context"]
+                "dependencies": ["React", "useHouse context"],
             },
             {
                 "name": "HouseThemedCard",
                 "file": "HouseThemedCard.tsx",
                 "description": "Card component with house-themed borders and backgrounds",
                 "category": "ui-components",
-                "dependencies": ["React", "useHouse context"]
+                "dependencies": ["React", "useHouse context"],
             },
             {
                 "name": "SpellboundInput",
                 "file": "SpellboundInput.tsx",
                 "description": "Input component with house theming and validation states",
                 "category": "ui-components",
-                "dependencies": ["React", "useHouse context"]
+                "dependencies": ["React", "useHouse context"],
             },
             {
                 "name": "LoadingSpinner",
                 "file": "LoadingSpinner.tsx",
                 "description": "Animated loading spinner component",
                 "category": "ui-components",
-                "dependencies": ["React"]
+                "dependencies": ["React"],
             },
             {
                 "name": "ErrorBoundary",
                 "file": "ErrorBoundary.tsx",
                 "description": "React error boundary for graceful error handling",
                 "category": "error-handling",
-                "dependencies": ["React"]
-            }
+                "dependencies": ["React"],
+            },
         ]
 
         extracted = []
@@ -114,7 +114,7 @@ class ComponentExtractor:
             "category": "react-components",
             "count": len(extracted),
             "components": extracted,
-            "target_dir": str(target_components_dir)
+            "target_dir": str(target_components_dir),
         }
 
     def extract_algorithms(self) -> dict[str, Any]:
@@ -136,23 +136,22 @@ class ComponentExtractor:
 
                 # Look for Python files that might contain algorithms
                 for py_file in source_dir.glob("*.py"):
-                    if any(keyword in py_file.name.lower() for keyword in
-                           ['algorithm', 'compute', 'math', 'pattern', 'logic']):
+                    if any(
+                        keyword in py_file.name.lower()
+                        for keyword in ["algorithm", "compute", "math", "pattern", "logic"]
+                    ):
                         dst_file = algorithms_dir / source_dir.name / py_file.name
                         self.copy_file(py_file, dst_file)
-                        algorithms.append({
-                            "name": py_file.stem,
-                            "file": str(dst_file),
-                            "source": str(py_file),
-                            "type": "algorithm"
-                        })
+                        algorithms.append(
+                            {"name": py_file.stem, "file": str(dst_file), "source": str(py_file), "type": "algorithm"}
+                        )
 
         return {
             "status": "success" if algorithms else "no-algorithms",
             "category": "algorithms",
             "count": len(algorithms),
             "algorithms": algorithms,
-            "target_dir": str(algorithms_dir)
+            "target_dir": str(algorithms_dir),
         }
 
     def extract_visualizations(self) -> dict[str, Any]:
@@ -169,23 +168,25 @@ class ComponentExtractor:
         for source_dir in potential_sources:
             if source_dir.exists():
                 for file_path in source_dir.rglob("*"):
-                    if file_path.is_file() and file_path.suffix in ['.tsx', '.ts', '.js', '.py', '.html']:
+                    if file_path.is_file() and file_path.suffix in [".tsx", ".ts", ".js", ".py", ".html"]:
                         relative_path = file_path.relative_to(source_dir)
                         dst_file = viz_dir / source_dir.name / relative_path
                         self.copy_file(file_path, dst_file)
-                        visualizations.append({
-                            "name": file_path.stem,
-                            "file": str(dst_file),
-                            "type": file_path.suffix[1:],
-                            "source": str(file_path)
-                        })
+                        visualizations.append(
+                            {
+                                "name": file_path.stem,
+                                "file": str(dst_file),
+                                "type": file_path.suffix[1:],
+                                "source": str(file_path),
+                            }
+                        )
 
         return {
             "status": "success" if visualizations else "no-visualizations",
             "category": "visualizations",
             "count": len(visualizations),
             "visualizations": visualizations,
-            "target_dir": str(viz_dir)
+            "target_dir": str(viz_dir),
         }
 
     def extract_educational_content(self) -> dict[str, Any]:
@@ -202,24 +203,27 @@ class ComponentExtractor:
         for source_dir in potential_sources:
             if source_dir.exists():
                 for file_path in source_dir.rglob("*"):
-                    if file_path.is_file() and any(keyword in file_path.name.lower() for keyword in
-                                                   ['example', 'tutorial', 'demo', 'guide']):
+                    if file_path.is_file() and any(
+                        keyword in file_path.name.lower() for keyword in ["example", "tutorial", "demo", "guide"]
+                    ):
                         relative_path = file_path.relative_to(source_dir)
                         dst_file = examples_dir / source_dir.name / relative_path
                         self.copy_file(file_path, dst_file)
-                        examples.append({
-                            "name": file_path.stem,
-                            "file": str(dst_file),
-                            "type": file_path.suffix[1:],
-                            "source": str(file_path)
-                        })
+                        examples.append(
+                            {
+                                "name": file_path.stem,
+                                "file": str(dst_file),
+                                "type": file_path.suffix[1:],
+                                "source": str(file_path),
+                            }
+                        )
 
         return {
             "status": "success" if examples else "no-examples",
             "category": "educational-content",
             "count": len(examples),
             "examples": examples,
-            "target_dir": str(examples_dir)
+            "target_dir": str(examples_dir),
         }
 
     def extract_configuration_templates(self) -> dict[str, Any]:
@@ -241,19 +245,21 @@ class ComponentExtractor:
                 if file_path.is_file():
                     dst_file = config_dir / file_path.name
                     self.copy_file(file_path, dst_file)
-                    templates.append({
-                        "name": file_path.stem,
-                        "file": str(dst_file),
-                        "type": file_path.suffix[1:],
-                        "source": str(file_path)
-                    })
+                    templates.append(
+                        {
+                            "name": file_path.stem,
+                            "file": str(dst_file),
+                            "type": file_path.suffix[1:],
+                            "source": str(file_path),
+                        }
+                    )
 
         return {
             "status": "success" if templates else "no-templates",
             "category": "config-templates",
             "count": len(templates),
             "templates": templates,
-            "target_dir": str(config_dir)
+            "target_dir": str(config_dir),
         }
 
     def run_extraction(self) -> dict[str, Any]:
@@ -268,7 +274,7 @@ class ComponentExtractor:
             "algorithms": self.extract_algorithms(),
             "visualizations": self.extract_visualizations(),
             "educational_content": self.extract_educational_content(),
-            "configuration_templates": self.extract_configuration_templates()
+            "configuration_templates": self.extract_configuration_templates(),
         }
 
         # Generate summary
@@ -286,38 +292,37 @@ class ComponentExtractor:
         # Save extraction report
         if not self.dry_run:
             report_file = self.target_dir / "extraction_report.json"
-            with open(report_file, 'w') as f:
-                json.dump({
-                    "extraction_results": results,
-                    "total_files": total_extracted,
-                    "extracted_files": self.extracted_files,
-                    "timestamp": str(Path.cwd()),
-                }, f, indent=2)
+            with open(report_file, "w") as f:
+                json.dump(
+                    {
+                        "extraction_results": results,
+                        "total_files": total_extracted,
+                        "extracted_files": self.extracted_files,
+                        "timestamp": str(Path.cwd()),
+                    },
+                    f,
+                    indent=2,
+                )
             print(f"\n📄 Report saved to: {report_file}")
 
         return results
 
+
 def main():
     parser = argparse.ArgumentParser(description="Extract reusable components from GRID research")
-    parser.add_argument("--target-dir", default="lib/extracted",
-                       help="Target directory for extracted components")
-    parser.add_argument("--dry-run", action="store_true",
-                       help="Show what would be extracted without copying files")
-    parser.add_argument("--verbose", "-v", action="store_true",
-                       help="Enable verbose output")
+    parser.add_argument("--target-dir", default="lib/extracted", help="Target directory for extracted components")
+    parser.add_argument("--dry-run", action="store_true", help="Show what would be extracted without copying files")
+    parser.add_argument("--verbose", "-v", action="store_true", help="Enable verbose output")
 
     args = parser.parse_args()
 
-    extractor = ComponentExtractor(
-        target_dir=args.target_dir,
-        dry_run=args.dry_run,
-        verbose=args.verbose
-    )
+    extractor = ComponentExtractor(target_dir=args.target_dir, dry_run=args.dry_run, verbose=args.verbose)
 
     extractor.run_extraction()
 
     if args.dry_run:
         print("\n🔍 This was a dry run. Use without --dry-run to perform actual extraction.")
+
 
 if __name__ == "__main__":
     main()

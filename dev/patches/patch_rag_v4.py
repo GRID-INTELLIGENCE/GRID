@@ -1,5 +1,3 @@
-
-
 def patch_indexer():
     path = "e:/grid/tools/rag/indexer.py"
     with open(path, encoding="utf-8") as f:

@@ -283,9 +283,11 @@ def create_api_app(
                 document_id=ingestion_result.document_id,
                 chunks_created=ingestion_result.chunks_created,
                 success=ingestion_result.success,
-                message="Document ingested successfully"
-                if ingestion_result.success
-                else ingestion_result.error_message or "Ingestion failed",
+                message=(
+                    "Document ingested successfully"
+                    if ingestion_result.success
+                    else ingestion_result.error_message or "Ingestion failed"
+                ),
             )
 
         except Exception as e:

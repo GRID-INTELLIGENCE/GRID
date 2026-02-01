@@ -11,10 +11,12 @@ from src.grid.infrastructure.database import DatabaseManager
 logger = logging.getLogger(__name__)
 settings = MothershipSettings.from_env()
 
+
 class AuthService:
     """
     Handles User Authentication, Registration, and Token Lifecycle.
     """
+
     def __init__(self, db_manager: DatabaseManager, token_manager: TokenManager):
         self.db = db_manager
         self.tm = token_manager
@@ -29,12 +31,12 @@ class AuthService:
 
         # Hash password
         salt = bcrypt.gensalt()
-        pw_hash = bcrypt.hashpw(password.encode('utf-8'), salt).decode('utf-8')
+        pw_hash = bcrypt.hashpw(password.encode("utf-8"), salt).decode("utf-8")
 
         user_id = str(uuid.uuid4())
         await self.db.execute(
             "INSERT INTO users (id, username, password_hash, role) VALUES (?, ?, ?, ?)",
-            (user_id, username, pw_hash, role)
+            (user_id, username, pw_hash, role),
         )
         await self.db.commit()
         return user_id
@@ -45,7 +47,7 @@ class AuthService:
         if not user:
             raise ValueError("Invalid credentials")
 
-        if not bcrypt.checkpw(password.encode('utf-8'), user["password_hash"].encode('utf-8')):
+        if not bcrypt.checkpw(password.encode("utf-8"), user["password_hash"].encode("utf-8")):
             raise ValueError("Invalid credentials")
 
         # Issue tokens
@@ -57,24 +59,16 @@ class AuthService:
         expiry = datetime.now(UTC) + timedelta(days=self._refresh_expiry_days)
 
         await self.db.execute(
-            "INSERT INTO tokens (token_id, user_id, expires_at) VALUES (?, ?, ?)",
-            (refresh_token, user["id"], expiry)
+            "INSERT INTO tokens (token_id, user_id, expires_at) VALUES (?, ?, ?)", (refresh_token, user["id"], expiry)
         )
         await self.db.commit()
 
-        return {
-            "access_token": access_token,
-            "refresh_token": refresh_token,
-            "token_type": "bearer"
-        }
+        return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer"}
 
     async def refresh_access(self, refresh_token: str) -> dict[str, str]:
         """Rotate refresh token and issue new access token."""
         # Validate refresh token
-        row = await self.db.fetch_one(
-            "SELECT * FROM tokens WHERE token_id = ? AND revoked = 0",
-            (refresh_token,)
-        )
+        row = await self.db.fetch_one("SELECT * FROM tokens WHERE token_id = ? AND revoked = 0", (refresh_token,))
         if not row:
             raise ValueError("Invalid refresh token")
 
@@ -89,14 +83,14 @@ class AuthService:
             try:
                 expires_at = datetime.fromisoformat(expires_at)
             except ValueError:
-                pass # Already timestamp? or fail.
+                pass  # Already timestamp? or fail.
 
         # If localized/naive mismatch, assume UTC
         now = datetime.now(UTC)
         if expires_at.replace(tzinfo=UTC) < now:
-             await self.db.execute("UPDATE tokens SET revoked = 1 WHERE token_id = ?", (refresh_token,))
-             await self.db.commit()
-             raise ValueError("Refresh token expired")
+            await self.db.execute("UPDATE tokens SET revoked = 1 WHERE token_id = ?", (refresh_token,))
+            await self.db.commit()
+            raise ValueError("Refresh token expired")
 
         # Revoke old refresh token (Rotation)
         await self.db.execute("UPDATE tokens SET revoked = 1 WHERE token_id = ?", (refresh_token,))
@@ -113,13 +107,8 @@ class AuthService:
         new_expiry = now + timedelta(days=self._refresh_expiry_days)
 
         await self.db.execute(
-            "INSERT INTO tokens (token_id, user_id, expires_at) VALUES (?, ?, ?)",
-            (new_refresh, user["id"], new_expiry)
+            "INSERT INTO tokens (token_id, user_id, expires_at) VALUES (?, ?, ?)", (new_refresh, user["id"], new_expiry)
         )
         await self.db.commit()
 
-        return {
-            "access_token": new_access,
-            "refresh_token": new_refresh,
-            "token_type": "bearer"
-        }
+        return {"access_token": new_access, "refresh_token": new_refresh, "token_type": "bearer"}

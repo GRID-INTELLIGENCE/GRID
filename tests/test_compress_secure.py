@@ -1,6 +1,5 @@
 """Tests for secure compression skill."""
 
-
 from grid.skills.compress_secure import compress_secure
 
 

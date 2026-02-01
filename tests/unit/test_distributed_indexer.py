@@ -43,6 +43,7 @@ def temp_checkpoint_dir():
     yield tmpdir
     # Clean up
     import shutil
+
     try:
         shutil.rmtree(tmpdir, ignore_errors=True)
     except Exception:

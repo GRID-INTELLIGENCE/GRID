@@ -55,18 +55,10 @@ class AgenticMCPServer:
                             "agent_role": {
                                 "type": "string",
                                 "description": "Specific agent role to use",
-                                "default": None
+                                "default": None,
                             },
-                            "task": {
-                                "type": "string",
-                                "description": "Specific task to execute",
-                                "default": None
-                            },
-                            "user_id": {
-                                "type": "string",
-                                "description": "User identifier",
-                                "default": "default"
-                            }
+                            "task": {"type": "string", "description": "Specific task to execute", "default": None},
+                            "user_id": {"type": "string", "description": "User identifier", "default": "default"},
                         },
                         "required": ["case_id", "reference_file_path"],
                     },
@@ -78,11 +70,7 @@ class AgenticMCPServer:
                         "type": "object",
                         "properties": {
                             "query": {"type": "string", "description": "Query for skill retrieval"},
-                            "top_k": {
-                                "type": "integer",
-                                "description": "Number of skills to retrieve",
-                                "default": 5
-                            }
+                            "top_k": {"type": "integer", "description": "Number of skills to retrieve", "default": 5},
                         },
                         "required": ["query"],
                     },
@@ -125,9 +113,7 @@ class AgenticMCPServer:
                     )
             except Exception as e:
                 logger.error(f"Error in tool {name}: {e}")
-                return CallToolResult(
-                    content=[TextContent(text=f"Error: {str(e)}", type="text")], isError=True
-                )
+                return CallToolResult(content=[TextContent(text=f"Error: {str(e)}", type="text")], isError=True)
 
     async def _handle_execute_case(self, arguments: dict[str, Any]) -> CallToolResult:
         """Handle case execution."""
@@ -140,7 +126,7 @@ class AgenticMCPServer:
         if not case_id or not reference_file_path:
             return CallToolResult(
                 content=[TextContent(text="Error: case_id and reference_file_path are required", type="text")],
-                isError=True
+                isError=True,
             )
 
         try:
@@ -157,12 +143,10 @@ class AgenticMCPServer:
                 reference_file_path=reference_file_path,
                 agent_role=agent_role,
                 task=task,
-                user_id=user_id
+                user_id=user_id,
             )
 
-            return CallToolResult(
-                content=[TextContent(text=json.dumps(result, indent=2), type="text")]
-            )
+            return CallToolResult(content=[TextContent(text=json.dumps(result, indent=2), type="text")])
 
         except Exception as e:
             logger.error(f"Failed to execute case: {e}")
@@ -176,9 +160,7 @@ class AgenticMCPServer:
         top_k = arguments.get("top_k", 5)
 
         if not query:
-            return CallToolResult(
-                content=[TextContent(text="Error: query is required", type="text")], isError=True
-            )
+            return CallToolResult(content=[TextContent(text="Error: query is required", type="text")], isError=True)
 
         try:
             # Import skill retriever
@@ -191,15 +173,9 @@ class AgenticMCPServer:
             # Retrieve skills
             skills = skill_retriever.retrieve(query, top_k=top_k)
 
-            result = {
-                "query": query,
-                "skills_retrieved": len(skills),
-                "skills": skills
-            }
+            result = {"query": query, "skills_retrieved": len(skills), "skills": skills}
 
-            return CallToolResult(
-                content=[TextContent(text=json.dumps(result, indent=2), type="text")]
-            )
+            return CallToolResult(content=[TextContent(text=json.dumps(result, indent=2), type="text")])
 
         except Exception as e:
             logger.error(f"Failed to retrieve skills: {e}")
@@ -225,9 +201,7 @@ class AgenticMCPServer:
             memo_generator = MemoGenerator()
             memo = memo_generator.generate(case_id, result)
 
-            return CallToolResult(
-                content=[TextContent(text=json.dumps(memo, indent=2), type="text")]
-            )
+            return CallToolResult(content=[TextContent(text=json.dumps(memo, indent=2), type="text")])
 
         except Exception as e:
             logger.error(f"Failed to generate memo: {e}")
@@ -241,18 +215,11 @@ class AgenticMCPServer:
             stats = {
                 "system": "grid-agentic",
                 "version": "2.0.0",
-                "capabilities": [
-                    "case_execution",
-                    "skill_retrieval",
-                    "memo_generation",
-                    "cognitive_awareness"
-                ],
-                "status": "operational"
+                "capabilities": ["case_execution", "skill_retrieval", "memo_generation", "cognitive_awareness"],
+                "status": "operational",
             }
 
-            return CallToolResult(
-                content=[TextContent(text=json.dumps(stats, indent=2), type="text")]
-            )
+            return CallToolResult(content=[TextContent(text=json.dumps(stats, indent=2), type="text")])
 
         except Exception as e:
             logger.error(f"Failed to get system stats: {e}")
@@ -284,10 +251,10 @@ async def main():
                         "execute_case": {"description": "Execute agentic case"},
                         "retrieve_skill": {"description": "Retrieve skills"},
                         "generate_memo": {"description": "Generate memo"},
-                        "get_system_stats": {"description": "Get system statistics"}
+                        "get_system_stats": {"description": "Get system statistics"},
                     },
-                    "resources": {}
-                }
+                    "resources": {},
+                },
             ),
         )
 

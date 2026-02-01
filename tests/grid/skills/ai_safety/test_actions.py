@@ -1,6 +1,5 @@
 """Tests for AI Safety Actions Skill."""
 
-
 from grid.skills.ai_safety.actions import (
     actions_handler,
     determine_action_type,

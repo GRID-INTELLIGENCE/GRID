@@ -51,6 +51,7 @@ class DatabricksBridge:
             data: Payload data.
             impact: 0.0 to 1.0 weight (higher = more important).
         """
+
         class EnhancedJSONEncoder(json.JSONEncoder):
             def default(self, obj):
                 if hasattr(obj, "__dict__"):
@@ -59,6 +60,7 @@ class DatabricksBridge:
                     return obj.value
                 try:
                     from dataclasses import asdict, is_dataclass
+
                     if is_dataclass(obj):
                         return asdict(obj)
                 except ImportError:

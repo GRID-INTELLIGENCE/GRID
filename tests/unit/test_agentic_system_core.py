@@ -92,9 +92,7 @@ async def test_execute_case_basic(agentic_system: AgenticSystem, tmp_path: Path)
     reference_file = tmp_path / "reference.txt"
     reference_file.write_text("Test content")
 
-    with patch.object(
-        agentic_system.agent_executor, "execute_task", new_callable=AsyncMock
-    ) as mock_execute:
+    with patch.object(agentic_system.agent_executor, "execute_task", new_callable=AsyncMock) as mock_execute:
         mock_execute.return_value = {"result": "success"}
 
         result = await agentic_system.execute_case(
@@ -113,9 +111,7 @@ async def test_execute_case_with_task(agentic_system: AgenticSystem, tmp_path: P
     reference_file = tmp_path / "reference.txt"
     reference_file.write_text("Test content")
 
-    with patch.object(
-        agentic_system.agent_executor, "execute_task", new_callable=AsyncMock
-    ) as mock_execute:
+    with patch.object(agentic_system.agent_executor, "execute_task", new_callable=AsyncMock) as mock_execute:
         mock_execute.return_value = {"task_executed": "/analyze"}
 
         result = await agentic_system.execute_case(
@@ -133,9 +129,7 @@ async def test_execute_case_with_user(agentic_system: AgenticSystem, tmp_path: P
     reference_file = tmp_path / "reference.txt"
     reference_file.write_text("Test content")
 
-    with patch.object(
-        agentic_system.agent_executor, "execute_task", new_callable=AsyncMock
-    ) as mock_execute:
+    with patch.object(agentic_system.agent_executor, "execute_task", new_callable=AsyncMock) as mock_execute:
         mock_execute.return_value = {"user": "alice"}
 
         result = await agentic_system.execute_case(
@@ -161,9 +155,7 @@ async def test_case_created_event(event_bus: EventBus):
         events.append(event)
 
     await event_bus.subscribe("case.created", handler)
-    await event_bus.publish(
-        CaseCreatedEvent(case_id="CREATE-001", raw_input="Test input").to_dict()
-    )
+    await event_bus.publish(CaseCreatedEvent(case_id="CREATE-001", raw_input="Test input").to_dict())
 
     assert len(events) == 1
     assert events[0]["case_id"] == "CREATE-001"
@@ -221,17 +213,9 @@ async def test_event_chain_sequence(event_bus: EventBus):
 
     await event_bus.subscribe_all(handler)
 
-    await event_bus.publish(
-        CaseCreatedEvent(case_id="CHAIN-001", raw_input="Input").to_dict()
-    )
-    await event_bus.publish(
-        CaseExecutedEvent(case_id="CHAIN-001", agent_role="lawyer", task="/task").to_dict()
-    )
-    await event_bus.publish(
-        CaseCompletedEvent(
-            case_id="CHAIN-001", outcome="success", solution="Done"
-        ).to_dict()
-    )
+    await event_bus.publish(CaseCreatedEvent(case_id="CHAIN-001", raw_input="Input").to_dict())
+    await event_bus.publish(CaseExecutedEvent(case_id="CHAIN-001", agent_role="lawyer", task="/task").to_dict())
+    await event_bus.publish(CaseCompletedEvent(case_id="CHAIN-001", outcome="success", solution="Done").to_dict())
 
     assert len(events) == 3
     assert events == ["case.created", "case.executed", "case.completed"]
@@ -245,12 +229,8 @@ async def test_event_chain_sequence(event_bus: EventBus):
 @pytest.mark.asyncio
 async def test_event_history_tracking(event_bus: EventBus):
     """Test 11: EventBus tracks event history."""
-    await event_bus.publish(
-        CaseCreatedEvent(case_id="STATE-001", raw_input="Input 1").to_dict()
-    )
-    await event_bus.publish(
-        CaseCreatedEvent(case_id="STATE-002", raw_input="Input 2").to_dict()
-    )
+    await event_bus.publish(CaseCreatedEvent(case_id="STATE-001", raw_input="Input 1").to_dict())
+    await event_bus.publish(CaseCreatedEvent(case_id="STATE-002", raw_input="Input 2").to_dict())
 
     history = await event_bus.get_event_history()
     assert len(history) >= 2
@@ -259,15 +239,9 @@ async def test_event_history_tracking(event_bus: EventBus):
 @pytest.mark.asyncio
 async def test_event_history_filtering(event_bus: EventBus):
     """Test 12: EventBus filters history by type."""
-    await event_bus.publish(
-        CaseCreatedEvent(case_id="FILTER-001", raw_input="Input").to_dict()
-    )
-    await event_bus.publish(
-        CaseCreatedEvent(case_id="FILTER-002", raw_input="Input").to_dict()
-    )
-    await event_bus.publish(
-        CaseExecutedEvent(case_id="FILTER-001", agent_role="lawyer", task="/task").to_dict()
-    )
+    await event_bus.publish(CaseCreatedEvent(case_id="FILTER-001", raw_input="Input").to_dict())
+    await event_bus.publish(CaseCreatedEvent(case_id="FILTER-002", raw_input="Input").to_dict())
+    await event_bus.publish(CaseExecutedEvent(case_id="FILTER-001", agent_role="lawyer", task="/task").to_dict())
 
     created = await event_bus.get_event_history(event_type="case.created")
     executed = await event_bus.get_event_history(event_type="case.executed")
@@ -285,9 +259,7 @@ async def test_event_replay(event_bus: EventBus):
         replayed.append(event)
 
     for i in range(3):
-        await event_bus.publish(
-            CaseCreatedEvent(case_id=f"REPLAY-{i:03d}", raw_input="Input").to_dict()
-        )
+        await event_bus.publish(CaseCreatedEvent(case_id=f"REPLAY-{i:03d}", raw_input="Input").to_dict())
 
     await event_bus.subscribe("case.created", handler)
     await event_bus.replay_events(event_type="case.created", limit=3)
@@ -306,9 +278,7 @@ async def test_concurrent_cases(agentic_system: AgenticSystem, tmp_path: Path):
     reference_file = tmp_path / "reference.txt"
     reference_file.write_text("Test content")
 
-    with patch.object(
-        agentic_system.agent_executor, "execute_task", new_callable=AsyncMock
-    ) as mock_execute:
+    with patch.object(agentic_system.agent_executor, "execute_task", new_callable=AsyncMock) as mock_execute:
         mock_execute.return_value = {"result": "success"}
 
         tasks = [

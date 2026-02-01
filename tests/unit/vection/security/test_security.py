@@ -1,6 +1,5 @@
 """Tests for Vection security functionality."""
 
-
 import pytest
 
 
@@ -174,7 +173,7 @@ class TestInputValidator:
 
         # Test SQL injection pattern
         sql_injection = "'; DROP TABLE users; --"
-        result = validator.validate_string(sql_injection, field_name="query")
+        validator.validate_string(sql_injection, field_name="query")
 
         # The validator should detect forbidden patterns
         assert validator._forbidden_patterns is not None

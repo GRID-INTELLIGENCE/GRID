@@ -28,6 +28,7 @@ logger = logging.getLogger(__name__)
 # Data Structures
 # ============================================================================
 
+
 @dataclass
 class ReinforcementSignature:
     """Signature of a reinforcement action."""
@@ -69,11 +70,7 @@ class FingerprintProfile:
     def is_suspicious(self) -> bool:
         """Check if this fingerprint shows suspicious behavior."""
         # Suspicious if: high burst rate, many sessions touched, or many violations
-        return (
-            self.burst_count > 3 or
-            len(self.sessions_touched) > 3 or
-            self.violation_count > 2
-        )
+        return self.burst_count > 3 or len(self.sessions_touched) > 3 or self.violation_count > 2
 
     @property
     def burst_ratio(self) -> float:
@@ -86,6 +83,7 @@ class FingerprintProfile:
 # ============================================================================
 # Cognitive Fingerprint Extractor
 # ============================================================================
+
 
 class CognitiveFingerprintExtractor:
     """Extracts unique cognitive fingerprints from call patterns."""
@@ -124,14 +122,11 @@ class CognitiveFingerprintExtractor:
             "module": caller_frame.filename,
             "line": caller_frame.lineno,
             "function": caller_frame.function,
-
             # Contextual information
             "thread_id": threading.get_ident(),
             "process_id": id(self),
-
             # Temporal patterns
             "timestamp_bucket": int(time.time() // 60),  # 1-minute buckets
-
             # Call stack depth (indicates recursion/automation)
             "stack_depth": len(stack),
         }
@@ -166,17 +161,14 @@ class CognitiveFingerprintExtractor:
 # Fingerprint Registry
 # ============================================================================
 
+
 class FingerprintRegistry:
     """Registry for tracking cognitive fingerprints."""
 
     _lock = threading.Lock()
     _profiles: dict[str, FingerprintProfile] = {}
-    _reinforcement_history: dict[str, deque] = defaultdict(
-        lambda: deque(maxlen=100)
-    )
-    _creation_history: dict[str, deque] = defaultdict(
-        lambda: deque(maxlen=50)
-    )
+    _reinforcement_history: dict[str, deque] = defaultdict(lambda: deque(maxlen=100))
+    _creation_history: dict[str, deque] = defaultdict(lambda: deque(maxlen=50))
 
     def __init__(self) -> None:
         """Initialize the registry."""
@@ -243,20 +235,19 @@ class FingerprintRegistry:
                 profile.burst_count += 1
 
             # Record history
-            self._reinforcement_history[fingerprint].append({
-                "timestamp": now,
-                "signal_id": signal_id,
-                "boost": boost,
-                "session_id": session_id,
-            })
+            self._reinforcement_history[fingerprint].append(
+                {
+                    "timestamp": now,
+                    "signal_id": signal_id,
+                    "boost": boost,
+                    "session_id": session_id,
+                }
+            )
 
             # Calculate average interval
             history = self._reinforcement_history[fingerprint]
             if len(history) >= 2:
-                intervals = [
-                    history[i]["timestamp"] - history[i-1]["timestamp"]
-                    for i in range(1, len(history))
-                ]
+                intervals = [history[i]["timestamp"] - history[i - 1]["timestamp"] for i in range(1, len(history))]
                 profile.avg_reinforcement_interval = sum(intervals) / len(intervals)
 
         return profile
@@ -307,12 +298,14 @@ class FingerprintRegistry:
                 profile.sessions_touched.add(session_id)
 
             # Record history
-            self._creation_history[fingerprint].append({
-                "timestamp": now,
-                "signal_id": signal_id,
-                "description": description,
-                "session_id": session_id,
-            })
+            self._creation_history[fingerprint].append(
+                {
+                    "timestamp": now,
+                    "signal_id": signal_id,
+                    "description": description,
+                    "session_id": session_id,
+                }
+            )
 
         return profile
 

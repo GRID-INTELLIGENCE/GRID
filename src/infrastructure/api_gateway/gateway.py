@@ -289,12 +289,16 @@ class APIGateway:
         except httpx.TimeoutException:
             if circuit_breaker:
                 circuit_breaker.record_failure()
-            raise HTTPException(status_code=status.HTTP_504_GATEWAY_TIMEOUT, detail=f"Service timeout: {endpoint.name}") from None
+            raise HTTPException(
+                status_code=status.HTTP_504_GATEWAY_TIMEOUT, detail=f"Service timeout: {endpoint.name}"
+            ) from None
         except Exception as e:
             if circuit_breaker:
                 circuit_breaker.record_failure()
             logger.error(f"Request forwarding failed: {e}")
-            raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=f"Service unavailable: {endpoint.name}") from e
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY, detail=f"Service unavailable: {endpoint.name}"
+            ) from e
 
     async def route_request(self, request: Request) -> Response:
         """Route incoming request."""

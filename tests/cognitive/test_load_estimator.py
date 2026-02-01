@@ -179,27 +179,21 @@ class TestCognitiveLoadEstimator:
 
         # Load with expert profile (should be 0.8x)
         expert_profile = UserCognitiveProfile(
-            user_id="test_expert",
-            expertise_level=ExpertiseLevel.EXPERT,
-            working_memory_capacity=1.0
+            user_id="test_expert", expertise_level=ExpertiseLevel.EXPERT, working_memory_capacity=1.0
         )
         expert_load = estimator.estimate_load(operation, expert_profile)
         assert abs(expert_load - (base_load * 0.8)) < 0.01
 
         # Load with advanced profile (should be 0.8x)
         advanced_profile = UserCognitiveProfile(
-            user_id="test_advanced",
-            expertise_level=ExpertiseLevel.ADVANCED,
-            working_memory_capacity=1.0
+            user_id="test_advanced", expertise_level=ExpertiseLevel.ADVANCED, working_memory_capacity=1.0
         )
         advanced_load = estimator.estimate_load(operation, advanced_profile)
         assert abs(advanced_load - (base_load * 0.8)) < 0.01
 
         # Load with intermediate profile (should be unchanged)
         intermediate_profile = UserCognitiveProfile(
-            user_id="test_intermediate",
-            expertise_level=ExpertiseLevel.INTERMEDIATE,
-            working_memory_capacity=1.0
+            user_id="test_intermediate", expertise_level=ExpertiseLevel.INTERMEDIATE, working_memory_capacity=1.0
         )
         intermediate_load = estimator.estimate_load(operation, intermediate_profile)
         assert abs(intermediate_load - base_load) < 0.01
@@ -219,7 +213,7 @@ class TestCognitiveLoadEstimator:
         high_capacity_profile = UserCognitiveProfile(
             user_id="test_high_capacity",
             expertise_level=ExpertiseLevel.INTERMEDIATE,
-            working_memory_capacity=0.9  # Within valid range (0-1)
+            working_memory_capacity=0.9,  # Within valid range (0-1)
         )
         high_capacity_load = estimator.estimate_load(operation, high_capacity_profile)
 
@@ -227,7 +221,7 @@ class TestCognitiveLoadEstimator:
         low_capacity_profile = UserCognitiveProfile(
             user_id="test_low_capacity",
             expertise_level=ExpertiseLevel.INTERMEDIATE,
-            working_memory_capacity=0.3  # Within valid range (0-1)
+            working_memory_capacity=0.3,  # Within valid range (0-1)
         )
         low_capacity_load = estimator.estimate_load(operation, low_capacity_profile)
 
@@ -267,45 +261,31 @@ class TestCognitiveLoadEstimator:
 
     def test_working_memory_usage_calculation(self, estimator):
         """Test working memory usage estimation."""
-        operation = {
-            "information": {
-                "item_count": 9  # More than Miller's magic number 7
-            }
-        }
+        operation = {"information": {"item_count": 9}}  # More than Miller's magic number 7
 
         usage = estimator.estimate_working_memory_usage(operation)
         assert usage > 0.0, "Working memory usage should be > 0"
         assert usage <= 1.0, "Working memory usage should be <= 1.0"
 
         # Test with fewer items
-        low_items_operation = {
-            "information": {
-                "item_count": 3  # Less than Miller's magic number
-            }
-        }
+        low_items_operation = {"information": {"item_count": 3}}  # Less than Miller's magic number
 
         low_usage = estimator.estimate_working_memory_usage(low_items_operation)
         assert low_usage <= usage, "Fewer items should result in lower or equal usage"
 
     def test_working_memory_user_capacity_adjustment(self, estimator):
         """Test working memory usage adjustment for user capacity."""
-        operation = {
-            "information": {
-                "item_count": 10
-            }
-        }
+        operation = {"information": {"item_count": 10}}
 
         # High capacity user
         high_capacity_profile = UserCognitiveProfile(
-            user_id="test_high_mem",
-            working_memory_capacity=0.9  # Within valid range (0-1)
+            user_id="test_high_mem", working_memory_capacity=0.9  # Within valid range (0-1)
         )
         high_usage = estimator.estimate_working_memory_usage(operation, high_capacity_profile)
 
         # Low capacity user
         low_capacity_profile = UserCognitiveProfile(
-            user_id="test_low_mem",
-            working_memory_capacity=0.3  # Within valid range (0-1)
+            user_id="test_low_mem", working_memory_capacity=0.3  # Within valid range (0-1)
         )
         low_usage = estimator.estimate_working_memory_usage(operation, low_capacity_profile)
 
@@ -326,7 +306,11 @@ class TestCognitiveLoadEstimator:
 
         assert cognitive_state.estimated_load > 0.0
         assert cognitive_state.estimated_load <= 10.0
-        assert cognitive_state.load_type in [CognitiveLoadType.INTRINSIC, CognitiveLoadType.EXTRINSIC, CognitiveLoadType.GERMANE]
+        assert cognitive_state.load_type in [
+            CognitiveLoadType.INTRINSIC,
+            CognitiveLoadType.EXTRINSIC,
+            CognitiveLoadType.GERMANE,
+        ]
         assert cognitive_state.working_memory_usage >= 0.0
         assert cognitive_state.working_memory_usage <= 1.0
         assert cognitive_state.decision_complexity == 0.7

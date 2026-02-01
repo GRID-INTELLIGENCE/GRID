@@ -17,10 +17,9 @@ def mock_rag_engine():
     engine.config.conversation_enabled = True
     engine.config.multi_hop_enabled = False
     engine.config.conversation_context_window = 1000
-    engine.query = AsyncMock(return_value={
-        "answer": "Test answer",
-        "sources": [{"text": "source text", "metadata": {"path": "test.py"}}]
-    })
+    engine.query = AsyncMock(
+        return_value={"answer": "Test answer", "sources": [{"text": "source text", "metadata": {"path": "test.py"}}]}
+    )
     return engine
 
 
@@ -85,6 +84,7 @@ class TestConversationMemory:
 
         # Simulate time passing
         import time
+
         time.sleep(0.1)
 
         # Create another session to trigger cleanup
@@ -103,7 +103,7 @@ class TestConversationalRAGEngine:
         """Test creating conversational RAG engine."""
         engine = create_conversational_rag_engine()
         assert isinstance(engine, ConversationalRAGEngine)
-        assert hasattr(engine, 'conversation_memory')
+        assert hasattr(engine, "conversation_memory")
         assert engine.config.conversation_enabled
 
     @pytest.mark.asyncio
@@ -111,16 +111,9 @@ class TestConversationalRAGEngine:
         """Test query with conversation session."""
         # Mock the parent query method
         conversational_engine._rag_engine = Mock()
-        conversational_engine._rag_engine.query = AsyncMock(return_value={
-            "answer": "Mock answer",
-            "sources": []
-        })
+        conversational_engine._rag_engine.query = AsyncMock(return_value={"answer": "Mock answer", "sources": []})
 
-        result = await conversational_engine.query(
-            "test query",
-            session_id="test-session",
-            enable_multi_hop=False
-        )
+        result = await conversational_engine.query("test query", session_id="test-session", enable_multi_hop=False)
 
         assert "answer" in result
         assert "conversation_metadata" in result
@@ -149,10 +142,7 @@ class TestConversationalRAGEngine:
 
         # Mock query to simulate conversation
         conversational_engine._rag_engine = Mock()
-        conversational_engine._rag_engine.query = AsyncMock(return_value={
-            "answer": "Answer 1",
-            "sources": []
-        })
+        conversational_engine._rag_engine.query = AsyncMock(return_value={"answer": "Answer 1", "sources": []})
 
         await conversational_engine.query("Query 1", session_id="session1")
         await conversational_engine.query("Query 2", session_id="session1")
@@ -177,15 +167,7 @@ class TestConversationalRAGEngine:
 
     def test_improve_citation_quality(self, conversational_engine):
         """Test citation quality enhancement."""
-        sources = [
-            {
-                "text": "Sample text",
-                "metadata": {
-                    "path": "test.py",
-                    "chunk_index": 1
-                }
-            }
-        ]
+        sources = [{"text": "Sample text", "metadata": {"path": "test.py", "chunk_index": 1}}]
 
         enhanced_sources = conversational_engine._improve_citation_quality(sources)
 
@@ -201,12 +183,7 @@ class TestConversationalRAGEngine:
 
     def test_format_citation(self, conversational_engine):
         """Test citation formatting."""
-        source = {
-            "metadata": {
-                "path": "src/test.py",
-                "chunk_index": 5
-            }
-        }
+        source = {"metadata": {"path": "src/test.py", "chunk_index": 5}}
 
         citation = conversational_engine._format_citation(source)
         assert "src/test.py" in citation
@@ -227,23 +204,24 @@ class TestMultiHopReasoning:
 
         # Mock the base engine
         engine._rag_engine = Mock()
-        engine._rag_engine.query = AsyncMock(return_value={
-            "answer": "Base answer",
-            "sources": [{"text": "source1", "metadata": {"path": "file1.py"}}]
-        })
+        engine._rag_engine.query = AsyncMock(
+            return_value={"answer": "Base answer", "sources": [{"text": "source1", "metadata": {"path": "file1.py"}}]}
+        )
 
         # Mock multi-hop engine
         engine.multi_hop_engine = Mock()
-        engine.multi_hop_engine.chain_retrieve = AsyncMock(return_value={
-            "answer": "Multi-hop answer",
-            "sources": [{"text": "source2", "metadata": {"path": "file2.py"}}],
-            "multi_hop_used": True,
-            "hops_performed": 2
-        })
+        engine.multi_hop_engine.chain_retrieve = AsyncMock(
+            return_value={
+                "answer": "Multi-hop answer",
+                "sources": [{"text": "source2", "metadata": {"path": "file2.py"}}],
+                "multi_hop_used": True,
+                "hops_performed": 2,
+            }
+        )
 
         result = await engine.query("complex query", enable_multi_hop=True)
 
-        assert result["multi_hop_used"] == True
+        assert result["multi_hop_used"]
         assert "hops_performed" in result
         assert len(result["sources"]) > 0
 
@@ -275,6 +253,7 @@ class TestStreamingAPI:
 
         # Test that it's valid JSON
         import json
+
         parsed = json.loads(json_output)
         assert parsed["type"] == "test_type"
         assert parsed["data"]["data"] == "test"
@@ -294,13 +273,12 @@ if __name__ == "__main__":
 
         # Mock the RAG engine for demo
         engine._rag_engine = Mock()
-        engine._rag_engine.query = AsyncMock(return_value={
-            "answer": "This is a demo answer showing how conversation context is maintained.",
-            "sources": [{
-                "text": "Demo source text",
-                "metadata": {"path": "demo.py", "chunk_index": 1}
-            }]
-        })
+        engine._rag_engine.query = AsyncMock(
+            return_value={
+                "answer": "This is a demo answer showing how conversation context is maintained.",
+                "sources": [{"text": "Demo source text", "metadata": {"path": "demo.py", "chunk_index": 1}}],
+            }
+        )
 
         # Execute queries
         for i in range(3):

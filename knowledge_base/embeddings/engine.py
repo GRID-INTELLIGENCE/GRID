@@ -27,6 +27,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class EmbeddingResult:
     """Result of embedding generation."""
+
     text: str
     embedding: list[float]
     token_count: int
@@ -63,15 +64,13 @@ class EmbeddingEngine:
                 embedding=cached_embedding,
                 token_count=len(text.split()),
                 model=self.config.embeddings.model,
-                processing_time=time.time() - start_time
+                processing_time=time.time() - start_time,
             )
 
         try:
             # Call OpenAI API using new client
             response = self.client.embeddings.create(
-                model=self.config.embeddings.model,
-                input=text,
-                user="knowledge-base"
+                model=self.config.embeddings.model, input=text, user="knowledge-base"
             )
 
             embedding = response.data[0].embedding
@@ -89,7 +88,7 @@ class EmbeddingEngine:
                 embedding=embedding,
                 token_count=token_count,
                 model=self.config.embeddings.model,
-                processing_time=processing_time
+                processing_time=processing_time,
             )
 
         except Exception as e:
@@ -108,7 +107,7 @@ class EmbeddingEngine:
         batch_size = self.config.embeddings.batch_size
 
         for i in range(0, len(texts), batch_size):
-            batch_texts = texts[i:i + batch_size]
+            batch_texts = texts[i : i + batch_size]
 
             # Check cache for this batch
             uncached_texts = []
@@ -118,13 +117,15 @@ class EmbeddingEngine:
                 text_hash = hashlib.md5(text.encode()).hexdigest()
                 if text_hash in self.embedding_cache:
                     cached_embedding = self.embedding_cache[text_hash]
-                    results.append(EmbeddingResult(
-                        text=text,
-                        embedding=cached_embedding,
-                        token_count=len(text.split()),
-                        model=self.config.embeddings.model,
-                        processing_time=0.0  # Cached, no API call
-                    ))
+                    results.append(
+                        EmbeddingResult(
+                            text=text,
+                            embedding=cached_embedding,
+                            token_count=len(text.split()),
+                            model=self.config.embeddings.model,
+                            processing_time=0.0,  # Cached, no API call
+                        )
+                    )
                 else:
                     uncached_texts.append(text)
                     uncached_indices.append(j)
@@ -133,13 +134,10 @@ class EmbeddingEngine:
             if uncached_texts:
                 try:
                     response = self.client.embeddings.create(
-                        model=self.config.embeddings.model,
-                        input=uncached_texts,
-                        user="knowledge-base"
+                        model=self.config.embeddings.model, input=uncached_texts, user="knowledge-base"
                     )
 
                     for j, data in enumerate(response.data):
-                        original_index = uncached_indices[j]
                         text = uncached_texts[j]
                         embedding = data.embedding
 
@@ -147,25 +145,29 @@ class EmbeddingEngine:
                         text_hash = hashlib.md5(text.encode()).hexdigest()
                         self.embedding_cache[text_hash] = embedding
 
-                        results.append(EmbeddingResult(
-                            text=text,
-                            embedding=embedding,
-                            token_count=len(text.split()),
-                            model=self.config.embeddings.model,
-                            processing_time=time.time() - start_time
-                        ))
+                        results.append(
+                            EmbeddingResult(
+                                text=text,
+                                embedding=embedding,
+                                token_count=len(text.split()),
+                                model=self.config.embeddings.model,
+                                processing_time=time.time() - start_time,
+                            )
+                        )
 
                 except Exception as e:
                     logger.error(f"Batch embedding generation failed: {e}")
                     # Add failed results
                     for text in uncached_texts:
-                        results.append(EmbeddingResult(
-                            text=text,
-                            embedding=[],
-                            token_count=0,
-                            model=self.config.embeddings.model,
-                            processing_time=time.time() - start_time
-                        ))
+                        results.append(
+                            EmbeddingResult(
+                                text=text,
+                                embedding=[],
+                                token_count=0,
+                                model=self.config.embeddings.model,
+                                processing_time=time.time() - start_time,
+                            )
+                        )
 
         total_time = time.time() - start_time
         logger.info(f"Generated embeddings for {len(texts)} texts in {total_time:.2f}s")
@@ -175,11 +177,7 @@ class EmbeddingEngine:
     async def generate_embeddings_async(self, texts: list[str]) -> list[EmbeddingResult]:
         """Generate embeddings asynchronously."""
         loop = asyncio.get_event_loop()
-        return await loop.run_in_executor(
-            self.executor,
-            self.generate_embeddings_batch,
-            texts
-        )
+        return await loop.run_in_executor(self.executor, self.generate_embeddings_batch, texts)
 
     def update_chunk_embeddings(self, limit: int = 100) -> int:
         """Update embeddings for chunks that don't have them."""
@@ -187,11 +185,14 @@ class EmbeddingEngine:
 
         with self.db.session() as cursor:
             # Get chunks without embeddings
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT id, content FROM kb_chunks
                 WHERE embedding IS NULL OR embedding = '' OR embedding = '[]'
                 LIMIT ?
-            """, (limit,))
+            """,
+                (limit,),
+            )
 
             chunks = cursor.fetchall()
 
@@ -202,30 +203,31 @@ class EmbeddingEngine:
             # Extract texts for embedding
             chunk_data = []
             for row in chunks:
-                chunk_data.append({
-                    'id': row[0],
-                    'content': row[1]
-                })
+                chunk_data.append({"id": row[0], "content": row[1]})
 
             # Generate embeddings
-            texts = [chunk['content'] for chunk in chunk_data]
+            texts = [chunk["content"] for chunk in chunk_data]
             results = self.generate_embeddings_batch(texts)
 
             # Update chunks with embeddings
-            for chunk, result in zip(chunk_data, results):
+            for chunk, result in zip(chunk_data, results, strict=False):
                 if result.embedding:
-                    cursor.execute("""
+                    cursor.execute(
+                        """
                         UPDATE kb_chunks
                         SET embedding = ?
                         WHERE id = ?
-                    """, (json.dumps(result.embedding), chunk['id']))
+                    """,
+                        (json.dumps(result.embedding), chunk["id"]),
+                    )
                     updated_count += 1
 
         logger.info(f"Updated embeddings for {updated_count} chunks")
         return updated_count
 
-    def search_similar(self, query: str, limit: int = 10,
-                      threshold: float = 0.7) -> list[tuple[str, float, dict[str, Any]]]:
+    def search_similar(
+        self, query: str, limit: int = 10, threshold: float = 0.7
+    ) -> list[tuple[str, float, dict[str, Any]]]:
         """Find chunks similar to query using embeddings."""
         # Generate embedding for query
         query_result = self.generate_embedding(query)
@@ -235,11 +237,13 @@ class EmbeddingEngine:
 
         with self.db.session() as cursor:
             # Get all chunks with embeddings (simplified - in production use vector DB)
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT id, content, embedding, extra_metadata
                 FROM kb_chunks
                 WHERE embedding IS NOT NULL AND embedding != ''
-            """)
+            """
+            )
 
             rows = cursor.fetchall()
 
@@ -259,14 +263,9 @@ class EmbeddingEngine:
                     )
 
                     if similarity >= threshold:
-                        similar_chunks.append((
-                            content,
-                            float(similarity),
-                            {
-                                "chunk_id": chunk_id,
-                                "metadata": metadata
-                            }
-                        ))
+                        similar_chunks.append(
+                            (content, float(similarity), {"chunk_id": chunk_id, "metadata": metadata})
+                        )
 
         # Sort by similarity and return top results
         similar_chunks.sort(key=lambda x: x[1], reverse=True)
@@ -277,10 +276,12 @@ class EmbeddingEngine:
         total_chunks = self.db.get_chunk_count()
 
         with self.db.session() as cursor:
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT COUNT(*) FROM kb_chunks
                 WHERE embedding IS NOT NULL AND embedding != ''
-            """)
+            """
+            )
             embedded_chunks = cursor.fetchone()[0]
 
         return {
@@ -289,7 +290,7 @@ class EmbeddingEngine:
             "embedding_coverage": embedded_chunks / total_chunks if total_chunks > 0 else 0,
             "cache_size": len(self.embedding_cache),
             "model": self.config.embeddings.model,
-            "dimensions": self.config.embeddings.dimensions
+            "dimensions": self.config.embeddings.dimensions,
         }
 
     def clear_cache(self) -> None:
@@ -308,7 +309,7 @@ class EmbeddingEngine:
         results = self.generate_embeddings_batch(common_texts)
 
         # Cache them
-        for text, result in zip(common_texts, results):
+        for text, result in zip(common_texts, results, strict=False):
             if result.embedding:
                 text_hash = hashlib.md5(text.encode()).hexdigest()
                 self.embedding_cache[text_hash] = result.embedding

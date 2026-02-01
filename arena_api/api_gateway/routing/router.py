@@ -20,6 +20,7 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
+
 class DynamicRouter:
     """
     Dynamic router that provides intelligent routing decisions based on
@@ -56,34 +57,22 @@ class DynamicRouter:
             # 2. Get healthy service instances
             service_instances = await self._get_service_instances(service_name)
             if not service_instances:
-                return {
-                    "error": "Service unavailable",
-                    "service": service_name,
-                    "status_code": 503
-                }
+                return {"error": "Service unavailable", "service": service_name, "status_code": 503}
 
             # 3. Select service instance (load balancing)
             target_instance = self.load_balancer.select_instance(service_instances)
 
             # 4. Transform request if needed
-            transformed_request = await self.request_transformer.transform(
-                request, service_name, service_path
-            )
+            transformed_request = await self.request_transformer.transform(request, service_name, service_path)
 
             # 5. Route to service with circuit breaker
-            response = await self.circuit_breaker.call_service(
-                target_instance, transformed_request
-            )
+            response = await self.circuit_breaker.call_service(target_instance, transformed_request)
 
             return response
 
         except Exception as e:
             logger.error(f"Routing error for path {path}: {str(e)}")
-            return {
-                "error": "Internal routing error",
-                "details": str(e),
-                "status_code": 500
-            }
+            return {"error": "Internal routing error", "details": str(e), "status_code": 500}
 
     def _parse_service_path(self, path: str) -> tuple[str, str]:
         """
@@ -91,12 +80,12 @@ class DynamicRouter:
 
         Expected format: /service-name/api/v1/endpoint
         """
-        parts = path.strip('/').split('/')
+        parts = path.strip("/").split("/")
         if len(parts) < 2:
             return "default", path
 
         service_name = parts[0]
-        service_path = '/' + '/'.join(parts[1:])
+        service_path = "/" + "/".join(parts[1:])
         return service_name, service_path
 
     async def _get_service_instances(self, service_name: str) -> list[dict[str, Any]]:
@@ -109,13 +98,13 @@ class DynamicRouter:
             instances = await self.service_discovery.get_service_instances(service_name)
             # Filter for healthy instances
             healthy_instances = [
-                instance for instance in instances
-                if instance.get("health", {}).get("status") == "healthy"
+                instance for instance in instances if instance.get("health", {}).get("status") == "healthy"
             ]
             return healthy_instances
         except Exception as e:
             logger.error(f"Error getting service instances for {service_name}: {str(e)}")
             return []
+
 
 class CircuitBreaker:
     """
@@ -187,11 +176,8 @@ class CircuitBreaker:
         # Simulate service call - replace with actual HTTP client
         await asyncio.sleep(0.1)  # Simulate network latency
 
-        return {
-            "status": "success",
-            "data": {"message": f"Response from {instance_url}"},
-            "status_code": 200
-        }
+        return {"status": "success", "data": {"message": f"Response from {instance_url}"}, "status_code": 200}
+
 
 class LoadBalancer:
     """
@@ -217,6 +203,7 @@ class LoadBalancer:
 
         return selected_instance
 
+
 class RequestTransformer:
     """
     Transform requests before routing to services.
@@ -232,7 +219,7 @@ class RequestTransformer:
             "path": service_path,
             "headers": dict(request.headers),
             "query_params": dict(request.query_params),
-            "service_name": service_name
+            "service_name": service_name,
         }
 
         # Add service-specific transformations

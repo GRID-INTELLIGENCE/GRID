@@ -9,7 +9,7 @@ import sys
 import time
 
 # Add src to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "src"))
 
 from tools.rag.conversational_rag import create_conversational_rag_engine
 
@@ -21,11 +21,7 @@ async def test_fallback_performance():
     engine = create_conversational_rag_engine()
 
     # Test query that should trigger fallback
-    queries = [
-        "What is the meaning of life?",
-        "Explain quantum computing",
-        "Who won the world series in 2020?"
-    ]
+    queries = ["What is the meaning of life?", "Explain quantum computing", "Who won the world series in 2020?"]
 
     for query in queries:
         start_time = time.perf_counter()
@@ -38,7 +34,7 @@ async def test_fallback_performance():
         print(f"Fallback used: {result.get('fallback_used', False)}")
         print(f"Sources: {len(result['sources'])}")
 
-        if len(result['answer']) > 50:
+        if len(result["answer"]) > 50:
             print(f"Answer preview: {result['answer'][:50]}...")
 
 
@@ -49,11 +45,7 @@ async def test_conversation_performance():
     engine = create_conversational_rag_engine()
     session_id = engine.create_session("test-performance")
 
-    queries = [
-        "What is GRID?",
-        "How does it work?",
-        "What are the main components?"
-    ]
+    queries = ["What is GRID?", "How does it work?", "What are the main components?"]
 
     for i, query in enumerate(queries):
         start_time = time.perf_counter()
@@ -106,6 +98,7 @@ async def main():
     except Exception as e:
         print(f"\nError during testing: {e}")
         import traceback
+
         traceback.print_exc()
 
 

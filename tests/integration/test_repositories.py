@@ -457,7 +457,7 @@ class TestRepositoryIntegration:
         # Simulate error that triggers rollback
         mock_session.commit.side_effect = Exception("Database error")
 
-        with pytest.raises(Exception):
+        with pytest.raises(RuntimeError):
             await agentic_repo.create_case(case_id="case_123", raw_input="test input", user_id="test_user")
 
         # Rollback should be called

@@ -1,4 +1,3 @@
-
 import pytest
 
 from cognitive.patterns.recognition import TemporalIntent, TimePattern

@@ -15,7 +15,9 @@ if TYPE_CHECKING:
     from light_of_the_seven.light_of_the_seven.cognitive_layer.integration.capability_registry import (  # type: ignore
         CapabilityRegistry,
     )
-    from light_of_the_seven.light_of_the_seven.cognitive_layer.integration.scope_manager import ScopeManager  # type: ignore
+    from light_of_the_seven.light_of_the_seven.cognitive_layer.integration.scope_manager import (
+        ScopeManager,  # type: ignore
+    )
     from light_of_the_seven.light_of_the_seven.cognitive_layer.navigation.enhanced_path_navigator import (  # type: ignore
         EnhancedPathNavigator,
         NavigationPlan,
@@ -258,7 +260,9 @@ async def create_navigation_plan(
     - "Learning" is local-only and can be disabled per request.
     - Authentication context (if present) is passed through into planning context for auditing/traceability.
     """
-    from light_of_the_seven.light_of_the_seven.cognitive_layer.navigation.input_processor import InputProcessingError  # type: ignore[import-not-found]
+    from light_of_the_seven.light_of_the_seven.cognitive_layer.navigation.input_processor import (
+        InputProcessingError,  # type: ignore[import-not-found]
+    )
     from light_of_the_seven.light_of_the_seven.cognitive_layer.navigation.schemas.navigation_input import (  # type: ignore[import-not-found]
         NavigationRequest,
     )

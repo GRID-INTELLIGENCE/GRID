@@ -25,9 +25,11 @@ import aiohttp
 
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class ServiceInstance:
     """Represents a service instance."""
+
     id: str
     service_name: str
     url: str
@@ -43,15 +45,18 @@ class ServiceInstance:
         if self.tags is None:
             self.tags = []
 
+
 @dataclass
 class ServiceHealth:
     """Service health information."""
+
     status: str
     response_time: float
     last_check: datetime
     consecutive_failures: int
     total_checks: int
     uptime_percentage: float
+
 
 class ServiceDiscovery:
     """
@@ -80,7 +85,7 @@ class ServiceDiscovery:
         self._tasks = [
             asyncio.create_task(self._heartbeat_monitor()),
             asyncio.create_task(self._health_checker()),
-            asyncio.create_task(self._service_cleanup())
+            asyncio.create_task(self._service_cleanup()),
         ]
 
     async def stop(self):
@@ -111,10 +116,7 @@ class ServiceDiscovery:
             required_fields = ["service_name", "url", "health_url"]
             for field in required_fields:
                 if field not in service_data:
-                    return {
-                        "success": False,
-                        "error": f"Missing required field: {field}"
-                    }
+                    return {"success": False, "error": f"Missing required field: {field}"}
 
             service_name = service_data["service_name"]
             instance_id = service_data.get("id", f"{service_name}-{int(time.time()*1000)}")
@@ -130,7 +132,7 @@ class ServiceDiscovery:
                 last_heartbeat=datetime.utcnow(),
                 status="registering",
                 version=service_data.get("version", "1.0.0"),
-                tags=service_data.get("tags", [])
+                tags=service_data.get("tags", []),
             )
 
             # Add to services registry
@@ -138,10 +140,7 @@ class ServiceDiscovery:
                 self.services[service_name] = []
 
             # Remove existing instance if it exists
-            self.services[service_name] = [
-                inst for inst in self.services[service_name]
-                if inst.id != instance_id
-            ]
+            self.services[service_name] = [inst for inst in self.services[service_name] if inst.id != instance_id]
 
             self.services[service_name].append(instance)
 
@@ -152,23 +151,16 @@ class ServiceDiscovery:
                 last_check=datetime.utcnow(),
                 consecutive_failures=0,
                 total_checks=0,
-                uptime_percentage=0.0
+                uptime_percentage=0.0,
             )
 
             logger.info(f"Registered service instance: {service_name}/{instance_id}")
 
-            return {
-                "success": True,
-                "instance_id": instance_id,
-                "service_name": service_name
-            }
+            return {"success": True, "instance_id": instance_id, "service_name": service_name}
 
         except Exception as e:
             logger.error(f"Service registration error: {str(e)}")
-            return {
-                "success": False,
-                "error": str(e)
-            }
+            return {"success": False, "error": str(e)}
 
     async def deregister_service(self, service_name: str, instance_id: str) -> dict[str, Any]:
         """
@@ -183,16 +175,10 @@ class ServiceDiscovery:
         """
         try:
             if service_name not in self.services:
-                return {
-                    "success": False,
-                    "error": f"Service not found: {service_name}"
-                }
+                return {"success": False, "error": f"Service not found: {service_name}"}
 
             original_count = len(self.services[service_name])
-            self.services[service_name] = [
-                inst for inst in self.services[service_name]
-                if inst.id != instance_id
-            ]
+            self.services[service_name] = [inst for inst in self.services[service_name] if inst.id != instance_id]
 
             if len(self.services[service_name]) < original_count:
                 # Clean up health tracking
@@ -201,23 +187,13 @@ class ServiceDiscovery:
 
                 logger.info(f"Deregistered service instance: {service_name}/{instance_id}")
 
-                return {
-                    "success": True,
-                    "service_name": service_name,
-                    "instance_id": instance_id
-                }
+                return {"success": True, "service_name": service_name, "instance_id": instance_id}
             else:
-                return {
-                    "success": False,
-                    "error": f"Instance not found: {instance_id}"
-                }
+                return {"success": False, "error": f"Instance not found: {instance_id}"}
 
         except Exception as e:
             logger.error(f"Service deregistration error: {str(e)}")
-            return {
-                "success": False,
-                "error": str(e)
-            }
+            return {"success": False, "error": str(e)}
 
     async def get_services(self) -> dict[str, list[dict[str, Any]]]:
         """
@@ -229,11 +205,7 @@ class ServiceDiscovery:
         result = {}
         for service_name, instances in self.services.items():
             result[service_name] = [
-                {
-                    **asdict(instance),
-                    "health": asdict(self.service_health.get(instance.id))
-                }
-                for instance in instances
+                {**asdict(instance), "health": asdict(self.service_health.get(instance.id))} for instance in instances
             ]
         return result
 
@@ -253,10 +225,7 @@ class ServiceDiscovery:
         instances = []
         for instance in self.services[service_name]:
             health = self.service_health.get(instance.id)
-            instances.append({
-                **asdict(instance),
-                "health": asdict(health) if health else None
-            })
+            instances.append({**asdict(instance), "health": asdict(health) if health else None})
 
         return instances
 
@@ -271,10 +240,7 @@ class ServiceDiscovery:
             List of healthy service instances
         """
         instances = await self.get_service_instances(service_name)
-        return [
-            instance for instance in instances
-            if instance.get("health", {}).get("status") == "healthy"
-        ]
+        return [instance for instance in instances if instance.get("health", {}).get("status") == "healthy"]
 
     async def update_heartbeat(self, service_name: str, instance_id: str) -> dict[str, Any]:
         """
@@ -289,10 +255,7 @@ class ServiceDiscovery:
         """
         try:
             if service_name not in self.services:
-                return {
-                    "success": False,
-                    "error": f"Service not found: {service_name}"
-                }
+                return {"success": False, "error": f"Service not found: {service_name}"}
 
             instance = None
             for inst in self.services[service_name]:
@@ -301,10 +264,7 @@ class ServiceDiscovery:
                     break
 
             if not instance:
-                return {
-                    "success": False,
-                    "error": f"Instance not found: {instance_id}"
-                }
+                return {"success": False, "error": f"Instance not found: {instance_id}"}
 
             instance.last_heartbeat = datetime.utcnow()
             instance.status = "healthy"
@@ -313,15 +273,12 @@ class ServiceDiscovery:
                 "success": True,
                 "service_name": service_name,
                 "instance_id": instance_id,
-                "last_heartbeat": instance.last_heartbeat.isoformat()
+                "last_heartbeat": instance.last_heartbeat.isoformat(),
             }
 
         except Exception as e:
             logger.error(f"Heartbeat update error: {str(e)}")
-            return {
-                "success": False,
-                "error": str(e)
-            }
+            return {"success": False, "error": str(e)}
 
     async def _heartbeat_monitor(self):
         """Monitor service heartbeats and mark unhealthy services."""
@@ -393,7 +350,11 @@ class ServiceDiscovery:
 
                     # Calculate uptime percentage
                     total_time = (datetime.utcnow() - instance.registered_at).total_seconds()
-                    healthy_time = total_time * (health_info.total_checks - health_info.consecutive_failures) / max(health_info.total_checks, 1)
+                    healthy_time = (
+                        total_time
+                        * (health_info.total_checks - health_info.consecutive_failures)
+                        / max(health_info.total_checks, 1)
+                    )
                     health_info.uptime_percentage = (healthy_time / total_time) * 100 if total_time > 0 else 0
 
         except Exception as e:
@@ -428,8 +389,7 @@ class ServiceDiscovery:
 
                         # Remove instances that haven't sent heartbeat in over an hour
                         # or have been registered for too long without activity
-                        if (time_since_heartbeat < cleanup_threshold and
-                            time_since_registration < timedelta(hours=24)):
+                        if time_since_heartbeat < cleanup_threshold and time_since_registration < timedelta(hours=24):
                             active_instances.append(instance)
                         else:
                             logger.info(f"Cleaning up stale service instance: {service_name}/{instance.id}")
@@ -470,5 +430,5 @@ class ServiceDiscovery:
             "total_instances": total_instances,
             "healthy_instances": healthy_instances,
             "unhealthy_instances": unhealthy_instances,
-            "health_percentage": (healthy_instances / total_instances * 100) if total_instances > 0 else 0
+            "health_percentage": (healthy_instances / total_instances * 100) if total_instances > 0 else 0,
         }

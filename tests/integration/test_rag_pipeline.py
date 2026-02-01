@@ -24,6 +24,7 @@ def temp_rag_dir():
     yield tmpdir
     # Clean up
     import shutil
+
     try:
         shutil.rmtree(tmpdir, ignore_errors=True)
     except Exception:
@@ -63,9 +64,7 @@ def sample_documents():
 def test_rag_pipeline_end_to_end(temp_rag_dir, sample_documents):
     """Test complete RAG pipeline: index → query → retrieve."""
     # Create vector store
-    store = ChromaDBVectorStore(
-        collection_name="pipeline_test", persist_directory=temp_rag_dir
-    )
+    store = ChromaDBVectorStore(collection_name="pipeline_test", persist_directory=temp_rag_dir)
 
     # Create embeddings (simple mock embeddings)
     embeddings = [
@@ -102,9 +101,7 @@ def test_rag_pipeline_end_to_end(temp_rag_dir, sample_documents):
 def test_rag_pipeline_fallback_chain(temp_rag_dir, sample_documents):
     """Test fallback from primary to secondary vector store."""
     # Primary store (might fail)
-    primary_store = ChromaDBVectorStore(
-        collection_name="primary", persist_directory=temp_rag_dir
-    )
+    primary_store = ChromaDBVectorStore(collection_name="primary", persist_directory=temp_rag_dir)
 
     # Fallback store (in-memory)
     fallback_store = InMemoryDenseStore()
@@ -139,9 +136,7 @@ def test_rag_pipeline_fallback_chain(temp_rag_dir, sample_documents):
 
 def test_rag_pipeline_batch_processing(temp_rag_dir):
     """Test batch document processing for scalability."""
-    store = ChromaDBVectorStore(
-        collection_name="batch_test", persist_directory=temp_rag_dir
-    )
+    store = ChromaDBVectorStore(collection_name="batch_test", persist_directory=temp_rag_dir)
 
     # Create large batch of documents
     batch_size = 50
@@ -167,9 +162,7 @@ def test_rag_pipeline_batch_processing(temp_rag_dir):
 
 def test_rag_pipeline_deletion_and_updates(temp_rag_dir, sample_documents):
     """Test updating/deleting documents in RAG pipeline."""
-    store = ChromaDBVectorStore(
-        collection_name="deletion_test", persist_directory=temp_rag_dir
-    )
+    store = ChromaDBVectorStore(collection_name="deletion_test", persist_directory=temp_rag_dir)
 
     embeddings = [[0.1 * (i + 1)] * 5 for i in range(len(sample_documents))]
     ids = [doc["id"] for doc in sample_documents]
@@ -197,9 +190,7 @@ def test_rag_pipeline_deletion_and_updates(temp_rag_dir, sample_documents):
 def test_rag_pipeline_persistence(temp_rag_dir, sample_documents):
     """Test data persistence across store instances."""
     # First session: create store and index
-    store1 = ChromaDBVectorStore(
-        collection_name="persist_test", persist_directory=temp_rag_dir
-    )
+    store1 = ChromaDBVectorStore(collection_name="persist_test", persist_directory=temp_rag_dir)
 
     embeddings = [[0.1 * (i + 1)] * 5 for i in range(len(sample_documents))]
     ids = [doc["id"] for doc in sample_documents]
@@ -210,9 +201,7 @@ def test_rag_pipeline_persistence(temp_rag_dir, sample_documents):
     initial_count = store1.count()
 
     # Second session: create new store instance from same directory
-    store2 = ChromaDBVectorStore(
-        collection_name="persist_test", persist_directory=temp_rag_dir
-    )
+    store2 = ChromaDBVectorStore(collection_name="persist_test", persist_directory=temp_rag_dir)
 
     # Data should persist
     assert store2.count() == initial_count

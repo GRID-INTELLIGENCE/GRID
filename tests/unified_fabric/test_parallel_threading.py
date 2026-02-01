@@ -9,6 +9,7 @@ Comprehensive tests for concurrent/parallel behavior including:
 - Deadlock prevention
 - Performance under load
 """
+
 import asyncio
 import random
 import threading
@@ -23,6 +24,7 @@ from src.unified_fabric.safety_router import SafetyDecision, SafetyFirstRouter, 
 # ============================================================================
 # Test Fixtures
 # ============================================================================
+
 
 @pytest.fixture
 def event_bus():
@@ -46,6 +48,7 @@ def audit_logger(tmp_path):
 # Concurrent Event Publishing Tests
 # ============================================================================
 
+
 class TestConcurrentEventPublishing:
     """Test concurrent event publishing behavior"""
 
@@ -63,19 +66,10 @@ class TestConcurrentEventPublishing:
         await event_bus.start()
 
         # Create 100 events
-        events = [
-            Event(
-                event_type="concurrent.test",
-                payload={"index": i},
-                source_domain="test"
-            )
-            for i in range(100)
-        ]
+        events = [Event(event_type="concurrent.test", payload={"index": i}, source_domain="test") for i in range(100)]
 
         # Publish all concurrently
-        await asyncio.gather(*[
-            event_bus.publish(e, wait_for_handlers=True) for e in events
-        ])
+        await asyncio.gather(*[event_bus.publish(e, wait_for_handlers=True) for e in events])
 
         await event_bus.stop()
 
@@ -108,11 +102,7 @@ class TestConcurrentEventPublishing:
 
         await event_bus.start()
 
-        event = Event(
-            event_type="multi.handler",
-            payload={"test": True},
-            source_domain="test"
-        )
+        event = Event(event_type="multi.handler", payload={"test": True}, source_domain="test")
 
         await event_bus.publish(event, wait_for_handlers=True)
         await event_bus.stop()
@@ -137,11 +127,7 @@ class TestConcurrentEventPublishing:
 
         # Publish events with sequence numbers
         for i in range(50):
-            event = Event(
-                event_type="order.test",
-                payload={"sequence": i},
-                source_domain="test"
-            )
+            event = Event(event_type="order.test", payload={"sequence": i}, source_domain="test")
             await event_bus.publish(event, wait_for_handlers=True)
 
         await event_bus.stop()
@@ -174,28 +160,18 @@ class TestConcurrentEventPublishing:
         # Publish events to different domains concurrently
         events = [
             Event(
-                event_type="cross.domain",
-                payload={"domain": "safety"},
-                source_domain="test",
-                target_domains=["safety"]
+                event_type="cross.domain", payload={"domain": "safety"}, source_domain="test", target_domains=["safety"]
             ),
-            Event(
-                event_type="cross.domain",
-                payload={"domain": "grid"},
-                source_domain="test",
-                target_domains=["grid"]
-            ),
+            Event(event_type="cross.domain", payload={"domain": "grid"}, source_domain="test", target_domains=["grid"]),
             Event(
                 event_type="cross.domain",
                 payload={"domain": "coinbase"},
                 source_domain="test",
-                target_domains=["coinbase"]
+                target_domains=["coinbase"],
             ),
         ]
 
-        await asyncio.gather(*[
-            event_bus.publish(e, wait_for_handlers=True) for e in events
-        ])
+        await asyncio.gather(*[event_bus.publish(e, wait_for_handlers=True) for e in events])
 
         await event_bus.stop()
 
@@ -207,6 +183,7 @@ class TestConcurrentEventPublishing:
 # ============================================================================
 # Thread Safety Tests
 # ============================================================================
+
 
 class TestThreadSafety:
     """Test thread safety of all components"""
@@ -231,9 +208,7 @@ class TestThreadSafety:
             ("Another safe message", "user5"),
         ] * 20  # 100 validations
 
-        await asyncio.gather(*[
-            validate_content(c, u) for c, u in contents
-        ])
+        await asyncio.gather(*[validate_content(c, u) for c, u in contents])
 
         assert len(results) == 100
         # Verify consistency of decisions
@@ -257,15 +232,10 @@ class TestThreadSafety:
                 results.append(report)
 
         # 100 requests from same user
-        await asyncio.gather(*[
-            make_request("single_user") for _ in range(100)
-        ])
+        await asyncio.gather(*[make_request("single_user") for _ in range(100)])
 
         # First 50 should pass, rest should be rate limited
-        rate_limited = sum(
-            1 for r in results
-            if any(v.category == "rate_limit" for v in r.violations)
-        )
+        rate_limited = sum(1 for r in results if any(v.category == "rate_limit" for v in r.violations))
 
         # Should have exactly 50 rate limited requests
         assert rate_limited == 50
@@ -279,13 +249,11 @@ class TestThreadSafety:
             async def handler(event):
                 with lock:
                     results.append((thread_id, event.event_id))
+
             event_bus.subscribe(f"thread.{thread_id}", handler)
 
         # Subscribe from multiple threads
-        threads = [
-            threading.Thread(target=subscribe_from_thread, args=(i,))
-            for i in range(10)
-        ]
+        threads = [threading.Thread(target=subscribe_from_thread, args=(i,)) for i in range(10)]
 
         for t in threads:
             t.start()
@@ -299,6 +267,7 @@ class TestThreadSafety:
 # ============================================================================
 # Parallel Audit Logging Tests
 # ============================================================================
+
 
 class TestParallelAuditLogging:
     """Test parallel audit logging behavior"""
@@ -315,7 +284,7 @@ class TestParallelAuditLogging:
                 project_id="test",
                 domain="test",
                 action=f"action_{i}",
-                user_id=f"user_{i}"
+                user_id=f"user_{i}",
             )
             for i in range(100)
         ]
@@ -336,10 +305,7 @@ class TestParallelAuditLogging:
         # Write more than buffer size
         for i in range(25):
             await audit_logger.log(
-                event_type=AuditEventType.SYSTEM_EVENT,
-                project_id="test",
-                domain="test",
-                action=f"action_{i}"
+                event_type=AuditEventType.SYSTEM_EVENT, project_id="test", domain="test", action=f"action_{i}"
             )
 
         await audit_logger.stop()
@@ -375,6 +341,7 @@ class TestParallelAuditLogging:
 # Race Condition Detection Tests
 # ============================================================================
 
+
 class TestRaceConditionPrevention:
     """Test for race conditions in critical sections"""
 
@@ -409,30 +376,20 @@ class TestRaceConditionPrevention:
     @pytest.mark.asyncio
     async def test_reply_resolution_race(self, event_bus):
         """Test request-reply doesn't race with response delivery"""
+
         async def delayed_handler(event):
             await asyncio.sleep(0.05)  # Delay before reply
-            event_bus.reply(event.event_id, EventResponse(
-                success=True,
-                data={"handled": True},
-                event_id=event.event_id
-            ))
+            event_bus.reply(
+                event.event_id, EventResponse(success=True, data={"handled": True}, event_id=event.event_id)
+            )
 
         event_bus.subscribe("reply.race", delayed_handler)
         await event_bus.start()
 
         # Send multiple request-reply calls concurrently
-        events = [
-            Event(
-                event_type="reply.race",
-                payload={"id": i},
-                source_domain="test"
-            )
-            for i in range(10)
-        ]
+        events = [Event(event_type="reply.race", payload={"id": i}, source_domain="test") for i in range(10)]
 
-        responses = await asyncio.gather(*[
-            event_bus.request_reply(e, timeout=1.0) for e in events
-        ])
+        responses = await asyncio.gather(*[event_bus.request_reply(e, timeout=1.0) for e in events])
 
         await event_bus.stop()
 
@@ -445,10 +402,9 @@ class TestRaceConditionPrevention:
         # Simulate content that triggers violations
         harmful_content = "violence attack weapon harm kill"
 
-        reports = await asyncio.gather(*[
-            safety_router.validate(harmful_content, "grid", f"user_{i}")
-            for i in range(50)
-        ])
+        reports = await asyncio.gather(
+            *[safety_router.validate(harmful_content, "grid", f"user_{i}") for i in range(50)]
+        )
 
         # All reports should have consistent violation counts
         violation_counts = [len(r.violations) for r in reports]
@@ -461,6 +417,7 @@ class TestRaceConditionPrevention:
 # Deadlock Prevention Tests
 # ============================================================================
 
+
 class TestDeadlockPrevention:
     """Test for potential deadlock scenarios"""
 
@@ -471,11 +428,7 @@ class TestDeadlockPrevention:
 
         async def outer_handler(event):
             # Publish another event from within handler
-            inner_event = Event(
-                event_type="inner.event",
-                payload={"from": "outer"},
-                source_domain="test"
-            )
+            inner_event = Event(event_type="inner.event", payload={"from": "outer"}, source_domain="test")
             await event_bus.publish(inner_event, wait_for_handlers=True)
 
         async def inner_handler(event):
@@ -486,17 +439,10 @@ class TestDeadlockPrevention:
 
         await event_bus.start()
 
-        outer_event = Event(
-            event_type="outer.event",
-            payload={"test": True},
-            source_domain="test"
-        )
+        outer_event = Event(event_type="outer.event", payload={"test": True}, source_domain="test")
 
         # Should complete without deadlock
-        await asyncio.wait_for(
-            event_bus.publish(outer_event, wait_for_handlers=True),
-            timeout=5.0
-        )
+        await asyncio.wait_for(event_bus.publish(outer_event, wait_for_handlers=True), timeout=5.0)
 
         await event_bus.stop()
 
@@ -513,21 +459,19 @@ class TestDeadlockPrevention:
             a_triggered.append(event.event_id)
             depth = event.payload.get("depth", 0)
             if depth < max_depth:
-                await event_bus.publish(Event(
-                    event_type="event.b",
-                    payload={"depth": depth + 1},
-                    source_domain="test"
-                ), wait_for_handlers=True)
+                await event_bus.publish(
+                    Event(event_type="event.b", payload={"depth": depth + 1}, source_domain="test"),
+                    wait_for_handlers=True,
+                )
 
         async def handler_b(event):
             b_triggered.append(event.event_id)
             depth = event.payload.get("depth", 0)
             if depth < max_depth:
-                await event_bus.publish(Event(
-                    event_type="event.a",
-                    payload={"depth": depth + 1},
-                    source_domain="test"
-                ), wait_for_handlers=True)
+                await event_bus.publish(
+                    Event(event_type="event.a", payload={"depth": depth + 1}, source_domain="test"),
+                    wait_for_handlers=True,
+                )
 
         event_bus.subscribe("event.a", handler_a)
         event_bus.subscribe("event.b", handler_b)
@@ -536,12 +480,10 @@ class TestDeadlockPrevention:
 
         # Start the chain
         await asyncio.wait_for(
-            event_bus.publish(Event(
-                event_type="event.a",
-                payload={"depth": 0},
-                source_domain="test"
-            ), wait_for_handlers=True),
-            timeout=5.0
+            event_bus.publish(
+                Event(event_type="event.a", payload={"depth": 0}, source_domain="test"), wait_for_handlers=True
+            ),
+            timeout=5.0,
         )
 
         await event_bus.stop()
@@ -554,6 +496,7 @@ class TestDeadlockPrevention:
 # ============================================================================
 # Performance Under Load Tests
 # ============================================================================
+
 
 class TestPerformanceUnderLoad:
     """Test performance characteristics under heavy load"""
@@ -576,17 +519,10 @@ class TestPerformanceUnderLoad:
         start_time = time.perf_counter()
 
         events = [
-            Event(
-                event_type="throughput.test",
-                payload={"i": i},
-                source_domain="test"
-            )
-            for i in range(num_events)
+            Event(event_type="throughput.test", payload={"i": i}, source_domain="test") for i in range(num_events)
         ]
 
-        await asyncio.gather(*[
-            event_bus.publish(e, wait_for_handlers=True) for e in events
-        ])
+        await asyncio.gather(*[event_bus.publish(e, wait_for_handlers=True) for e in events])
 
         elapsed = time.perf_counter() - start_time
         await event_bus.stop()
@@ -625,10 +561,7 @@ class TestPerformanceUnderLoad:
 
         for i in range(500):
             await audit_logger.log(
-                event_type=AuditEventType.SYSTEM_EVENT,
-                project_id="perf_test",
-                domain="test",
-                action=f"action_{i}"
+                event_type=AuditEventType.SYSTEM_EVENT, project_id="perf_test", domain="test", action=f"action_{i}"
             )
 
         elapsed = time.perf_counter() - start_time
@@ -644,6 +577,7 @@ class TestPerformanceUnderLoad:
 # Integration Tests
 # ============================================================================
 
+
 class TestParallelIntegration:
     """Integration tests for all components working together"""
 
@@ -654,11 +588,7 @@ class TestParallelIntegration:
 
         async def process_request(request_id: int):
             # Validate
-            report = await safety_router.validate(
-                f"Request {request_id}: Normal content",
-                "grid",
-                f"user_{request_id}"
-            )
+            report = await safety_router.validate(f"Request {request_id}: Normal content", "grid", f"user_{request_id}")
 
             # Log
             log_id = await audit_logger.log(
@@ -666,14 +596,14 @@ class TestParallelIntegration:
                 project_id="integration",
                 domain="grid",
                 action=f"request_{request_id}",
-                status=report.decision.value
+                status=report.decision.value,
             )
 
             # Publish event
             event = Event(
                 event_type="request.processed",
                 payload={"request_id": request_id, "log_id": log_id},
-                source_domain="grid"
+                source_domain="grid",
             )
             await event_bus.publish(event)
 

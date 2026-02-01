@@ -21,7 +21,7 @@ from datetime import datetime
 from typing import Any
 
 # Add src to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "src"))
 
 from tools.rag.config import RAGConfig
 from tools.rag.conversational_rag import ConversationalRAGEngine
@@ -94,12 +94,9 @@ class BenchmarkResult:
         """Save benchmark results to file."""
         stats = self.calculate_stats()
 
-        result = {
-            "benchmark": stats,
-            "metrics": [m.to_dict() for m in self.metrics]
-        }
+        result = {"benchmark": stats, "metrics": [m.to_dict() for m in self.metrics]}
 
-        with open(filename, 'w', encoding='utf-8') as f:
+        with open(filename, "w", encoding="utf-8") as f:
             json.dump(result, f, indent=2, ensure_ascii=False)
 
 
@@ -123,7 +120,7 @@ class RAGPerformanceBenchmark:
             "Describe the streaming API capabilities",
             "How are citations improved in conversational RAG?",
             "What performance optimizations are implemented?",
-            "Explain the session management system"
+            "Explain the session management system",
         ]
 
         # Create session IDs for testing
@@ -160,7 +157,7 @@ class RAGPerformanceBenchmark:
             "engine_type": type(engine).__name__,
             "result_size": len(str(result)) if success else 0,
             "source_count": len(result.get("sources", [])) if success else 0,
-            "conversation_metadata": result.get("conversation_metadata", {}) if success else {}
+            "conversation_metadata": result.get("conversation_metadata", {}) if success else {},
         }
 
         return PerformanceMetrics(
@@ -168,7 +165,7 @@ class RAGPerformanceBenchmark:
             duration_ms=duration_ms,
             memory_usage_mb=memory_usage_mb,
             success=success,
-            metadata=metadata
+            metadata=metadata,
         )
 
     async def measure_session_management(self, engine) -> list[PerformanceMetrics]:
@@ -193,13 +190,15 @@ class RAGPerformanceBenchmark:
             memory_usage_mb = peak / (1024 * 1024)
             tracemalloc.stop()
 
-            metrics.append(PerformanceMetrics(
-                operation="session_creation",
-                duration_ms=duration_ms,
-                memory_usage_mb=memory_usage_mb,
-                success=success,
-                metadata={"session_id": session_id}
-            ))
+            metrics.append(
+                PerformanceMetrics(
+                    operation="session_creation",
+                    duration_ms=duration_ms,
+                    memory_usage_mb=memory_usage_mb,
+                    success=success,
+                    metadata={"session_id": session_id},
+                )
+            )
 
         # Test session retrieval
         for session_id in self.session_ids:
@@ -220,13 +219,18 @@ class RAGPerformanceBenchmark:
             memory_usage_mb = peak / (1024 * 1024)
             tracemalloc.stop()
 
-            metrics.append(PerformanceMetrics(
-                operation="session_retrieval",
-                duration_ms=duration_ms,
-                memory_usage_mb=memory_usage_mb,
-                success=success,
-                metadata={"session_id": session_id, "turn_count": session_info.get("turn_count", 0) if session_info else 0}
-            ))
+            metrics.append(
+                PerformanceMetrics(
+                    operation="session_retrieval",
+                    duration_ms=duration_ms,
+                    memory_usage_mb=memory_usage_mb,
+                    success=success,
+                    metadata={
+                        "session_id": session_id,
+                        "turn_count": session_info.get("turn_count", 0) if session_info else 0,
+                    },
+                )
+            )
 
         return metrics
 
@@ -236,7 +240,7 @@ class RAGPerformanceBenchmark:
 
         # Enable multi-hop for this test
         original_setting = None
-        if hasattr(engine.config, 'multi_hop_enabled'):
+        if hasattr(engine.config, "multi_hop_enabled"):
             original_setting = engine.config.multi_hop_enabled
             engine.config.multi_hop_enabled = True
 
@@ -271,19 +275,21 @@ class RAGPerformanceBenchmark:
                 "query": query,
                 "session_id": session_id,
                 "hops_performed": hops,
-                "multi_hop_used": result.get("multi_hop_used", False) if success else False
+                "multi_hop_used": result.get("multi_hop_used", False) if success else False,
             }
 
-            metrics.append(PerformanceMetrics(
-                operation="multi_hop_query",
-                duration_ms=duration_ms,
-                memory_usage_mb=memory_usage_mb,
-                success=success,
-                metadata=metadata
-            ))
+            metrics.append(
+                PerformanceMetrics(
+                    operation="multi_hop_query",
+                    duration_ms=duration_ms,
+                    memory_usage_mb=memory_usage_mb,
+                    success=success,
+                    metadata=metadata,
+                )
+            )
 
         # Restore original setting
-        if hasattr(engine.config, 'multi_hop_enabled'):
+        if hasattr(engine.config, "multi_hop_enabled"):
             engine.config.multi_hop_enabled = original_setting
 
         return metrics
@@ -327,7 +333,7 @@ class RAGPerformanceBenchmark:
         metadata = {
             "batch_size": len(batch),
             "successful_queries": sum(1 for r in results if "answer" in r),
-            "failed_queries": sum(1 for r in results if "answer" not in r)
+            "failed_queries": sum(1 for r in results if "answer" not in r),
         }
 
         return PerformanceMetrics(
@@ -335,7 +341,7 @@ class RAGPerformanceBenchmark:
             duration_ms=duration_ms,
             memory_usage_mb=memory_usage_mb,
             success=success,
-            metadata=metadata
+            metadata=metadata,
         )
 
     async def run_comprehensive_benchmark(self) -> BenchmarkResult:
@@ -345,15 +351,15 @@ class RAGPerformanceBenchmark:
             metrics=[],
             config={
                 "engine_config": {
-                    "conversation_enabled": getattr(self.config, 'conversation_enabled', False),
-                    "multi_hop_enabled": getattr(self.config, 'multi_hop_enabled', False),
-                    "conversation_memory_size": getattr(self.config, 'conversation_memory_size', 10),
-                    "embedding_model": getattr(self.config, 'embedding_model', 'nomic-embed-text:latest'),
-                    "llm_model_local": getattr(self.config, 'llm_model_local', 'ministral-3:3b')
+                    "conversation_enabled": getattr(self.config, "conversation_enabled", False),
+                    "multi_hop_enabled": getattr(self.config, "multi_hop_enabled", False),
+                    "conversation_memory_size": getattr(self.config, "conversation_memory_size", 10),
+                    "embedding_model": getattr(self.config, "embedding_model", "nomic-embed-text:latest"),
+                    "llm_model_local": getattr(self.config, "llm_model_local", "ministral-3:3b"),
                 },
                 "test_queries_count": len(self.test_queries),
-                "test_sessions_count": len(self.session_ids)
-            }
+                "test_sessions_count": len(self.session_ids),
+            },
         )
 
         print("Running Comprehensive RAG Performance Benchmark")
@@ -366,7 +372,7 @@ class RAGPerformanceBenchmark:
             session_id = self.session_ids[i % len(self.session_ids)]
             metric = await self.measure_query_performance(self.conversational_engine, query, session_id)
             result.add_metric(metric)
-            status = 'OK' if metric.success else 'FAILED'
+            status = "OK" if metric.success else "FAILED"
             print(f"  Query {i+1}: {metric.duration_ms:.1f}ms, {metric.memory_usage_mb:.2f}MB, {status}")
 
         # Test 2: Session management
@@ -384,7 +390,7 @@ class RAGPerformanceBenchmark:
             print(f"  Session Retrieval: Avg {sum(retrieval_times)/len(retrieval_times):.1f}ms")
 
         # Test 3: Multi-hop performance
-        if hasattr(self.conversational_engine.config, 'multi_hop_enabled'):
+        if hasattr(self.conversational_engine.config, "multi_hop_enabled"):
             print("\nTesting Multi-hop Reasoning...")
             multi_hop_metrics = await self.measure_multi_hop_performance(self.conversational_engine)
             for metric in multi_hop_metrics:
@@ -398,8 +404,10 @@ class RAGPerformanceBenchmark:
         print("\nTesting Batch Query Performance...")
         batch_metric = await self.measure_batch_performance(self.conversational_engine)
         result.add_metric(batch_metric)
-        status = 'OK' if batch_metric.success else 'FAILED'
-        print(f"  Batch Query: {batch_metric.duration_ms:.1f}ms for {batch_metric.metadata.get('batch_size', 0)} queries, {status}")
+        status = "OK" if batch_metric.success else "FAILED"
+        print(
+            f"  Batch Query: {batch_metric.duration_ms:.1f}ms for {batch_metric.metadata.get('batch_size', 0)} queries, {status}"
+        )
 
         # Test 5: Comparison with original RAG
         print("\nComparing with Original RAG...")
@@ -410,9 +418,11 @@ class RAGPerformanceBenchmark:
             result.add_metric(original_metric)
             result.add_metric(conversational_metric)
 
-            orig_status = 'OK' if original_metric.success else 'FAILED'
-            conv_status = 'OK' if conversational_metric.success else 'FAILED'
-            print(f"  Query {i+1}: Original {original_metric.duration_ms:.1f}ms ({orig_status}) vs Conversational {conversational_metric.duration_ms:.1f}ms ({conv_status})")
+            orig_status = "OK" if original_metric.success else "FAILED"
+            conv_status = "OK" if conversational_metric.success else "FAILED"
+            print(
+                f"  Query {i+1}: Original {original_metric.duration_ms:.1f}ms ({orig_status}) vs Conversational {conversational_metric.duration_ms:.1f}ms ({conv_status})"
+            )
 
         result.end_time = datetime.now()
         print(f"\nBenchmark completed in {(result.end_time - result.start_time).total_seconds():.1f} seconds")
@@ -426,11 +436,11 @@ class RAGPerformanceBenchmark:
             metrics=[],
             config={
                 "engine_config": {
-                    "conversation_enabled": getattr(self.config, 'conversation_enabled', False),
-                    "multi_hop_enabled": getattr(self.config, 'multi_hop_enabled', False)
+                    "conversation_enabled": getattr(self.config, "conversation_enabled", False),
+                    "multi_hop_enabled": getattr(self.config, "multi_hop_enabled", False),
                 },
-                "test_type": "streaming_api"
-            }
+                "test_type": "streaming_api",
+            },
         )
 
         print("Running Streaming API Performance Benchmark")
@@ -440,7 +450,9 @@ class RAGPerformanceBenchmark:
             from application.mothership.routers.rag_streaming import StreamChunk, chunk_text
 
             # Test text chunking performance
-            sample_text = "This is a sample response that will be streamed to the client in chunks for real-time display."
+            sample_text = (
+                "This is a sample response that will be streamed to the client in chunks for real-time display."
+            )
 
             tracemalloc.start()
             start_time = time.perf_counter()
@@ -454,13 +466,15 @@ class RAGPerformanceBenchmark:
             memory_usage_mb = peak / (1024 * 1024)
             tracemalloc.stop()
 
-            result.add_metric(PerformanceMetrics(
-                operation="text_chunking",
-                duration_ms=duration_ms,
-                memory_usage_mb=memory_usage_mb,
-                success=True,
-                metadata={"text_length": len(sample_text), "chunk_count": len(chunks), "chunk_size": 20}
-            ))
+            result.add_metric(
+                PerformanceMetrics(
+                    operation="text_chunking",
+                    duration_ms=duration_ms,
+                    memory_usage_mb=memory_usage_mb,
+                    success=True,
+                    metadata={"text_length": len(sample_text), "chunk_count": len(chunks), "chunk_size": 20},
+                )
+            )
 
             print(f"  Text Chunking: {duration_ms:.2f}ms for {len(chunks)} chunks")
 
@@ -478,25 +492,29 @@ class RAGPerformanceBenchmark:
             memory_usage_mb = peak / (1024 * 1024)
             tracemalloc.stop()
 
-            result.add_metric(PerformanceMetrics(
-                operation="stream_chunk_creation",
-                duration_ms=duration_ms,
-                memory_usage_mb=memory_usage_mb,
-                success=True,
-                metadata={"chunk_size": len(json_data)}
-            ))
+            result.add_metric(
+                PerformanceMetrics(
+                    operation="stream_chunk_creation",
+                    duration_ms=duration_ms,
+                    memory_usage_mb=memory_usage_mb,
+                    success=True,
+                    metadata={"chunk_size": len(json_data)},
+                )
+            )
 
             print(f"  Stream Chunk Creation: {duration_ms:.2f}ms")
 
         except ImportError as e:
             print(f"  ⚠️ Streaming components not available: {e}")
-            result.add_metric(PerformanceMetrics(
-                operation="streaming_import",
-                duration_ms=0,
-                memory_usage_mb=0,
-                success=False,
-                metadata={"error": str(e)}
-            ))
+            result.add_metric(
+                PerformanceMetrics(
+                    operation="streaming_import",
+                    duration_ms=0,
+                    memory_usage_mb=0,
+                    success=False,
+                    metadata={"error": str(e)},
+                )
+            )
 
         result.end_time = datetime.now()
         return result

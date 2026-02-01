@@ -7,7 +7,6 @@ Provides search, ingestion, and management capabilities.
 """
 
 
-
 def create_kb_interface(api_base_url: str = "http://localhost:8000") -> str:
     """Create HTML interface for the knowledge base."""
 
@@ -478,7 +477,7 @@ def save_kb_interface(file_path: str, api_base_url: str = "http://localhost:8000
     """Save the knowledge base interface to a file."""
     html_content = create_kb_interface(api_base_url)
 
-    with open(file_path, 'w', encoding='utf-8') as f:
+    with open(file_path, "w", encoding="utf-8") as f:
         f.write(html_content)
 
     print(f"Knowledge Base interface saved to: {file_path}")

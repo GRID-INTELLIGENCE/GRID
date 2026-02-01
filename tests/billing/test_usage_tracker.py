@@ -10,12 +10,14 @@ from src.grid.infrastructure.database import DatabaseManager
 def db_path(tmp_path):
     return str(tmp_path / "test_grid.db")
 
+
 @pytest.fixture
 async def db_manager(db_path):
     db = DatabaseManager(db_path)
     await db.initialize_schema()  # Creates usage_logs table
     yield db
     await db.close()
+
 
 @pytest.fixture
 async def usage_tracker(db_manager):
@@ -24,6 +26,7 @@ async def usage_tracker(db_manager):
     await tracker.start()
     yield tracker
     await tracker.stop()
+
 
 @pytest.mark.asyncio
 async def test_track_event_buffering(usage_tracker, db_manager):
@@ -43,6 +46,7 @@ async def test_track_event_buffering(usage_tracker, db_manager):
     logs = await db_manager.fetch_all("SELECT * FROM usage_logs")
     assert len(logs) == 2
     assert logs[0]["user_id"] == "u1"
+
 
 @pytest.mark.asyncio
 async def test_manual_flush(usage_tracker, db_manager):
