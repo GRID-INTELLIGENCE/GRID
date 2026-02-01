@@ -7,11 +7,10 @@ import logging
 from datetime import UTC, datetime
 from enum import Enum
 
-from src.application.mothership.config import MothershipSettings
+from src.grid.config.runtime_settings import BillingSettings
 from src.grid.infrastructure.database import DatabaseManager
 
 logger = logging.getLogger(__name__)
-settings = MothershipSettings.from_env()
 
 
 class CostTier(str, Enum):
@@ -23,33 +22,34 @@ class CostTier(str, Enum):
     ENTERPRISE = "enterprise"
 
 
-# Tier limits configuration (from settings or constants)
-TIER_LIMITS = {
-    CostTier.FREE: {
-        "relationship_analysis": settings.billing.free_tier_relationship_analyses,
-        "entity_extraction": settings.billing.free_tier_entity_extractions,
-        "resonance_event": settings.billing.free_tier_resonance_events,
-        "monthly_price_cents": 0,
-    },
-    CostTier.STARTER: {
-        "relationship_analysis": settings.billing.starter_tier_relationship_analyses,
-        "entity_extraction": settings.billing.starter_tier_entity_extractions,
-        "resonance_event": settings.billing.starter_tier_resonance_events,
-        "monthly_price_cents": settings.billing.starter_monthly_price,
-    },
-    CostTier.PRO: {
-        "relationship_analysis": settings.billing.pro_tier_relationship_analyses,
-        "entity_extraction": settings.billing.pro_tier_entity_extractions,
-        "resonance_event": settings.billing.pro_tier_resonance_events,
-        "monthly_price_cents": settings.billing.pro_monthly_price,
-    },
-    CostTier.ENTERPRISE: {
-        "relationship_analysis": -1,  # Unlimited
-        "entity_extraction": -1,
-        "resonance_event": -1,
-        "monthly_price_cents": 0,  # Custom pricing
-    },
-}
+def build_tier_limits(billing: BillingSettings) -> dict[CostTier, dict[str, int]]:
+    """Build tier limits using provided billing settings."""
+    return {
+        CostTier.FREE: {
+            "relationship_analysis": billing.free_tier_relationship_analyses,
+            "entity_extraction": billing.free_tier_entity_extractions,
+            "resonance_event": billing.free_tier_resonance_events,
+            "monthly_price_cents": 0,
+        },
+        CostTier.STARTER: {
+            "relationship_analysis": billing.starter_tier_relationship_analyses,
+            "entity_extraction": billing.starter_tier_entity_extractions,
+            "resonance_event": billing.starter_tier_resonance_events,
+            "monthly_price_cents": billing.starter_monthly_price,
+        },
+        CostTier.PRO: {
+            "relationship_analysis": billing.pro_tier_relationship_analyses,
+            "entity_extraction": billing.pro_tier_entity_extractions,
+            "resonance_event": billing.pro_tier_resonance_events,
+            "monthly_price_cents": billing.pro_monthly_price,
+        },
+        CostTier.ENTERPRISE: {
+            "relationship_analysis": -1,
+            "entity_extraction": -1,
+            "resonance_event": -1,
+            "monthly_price_cents": 0,
+        },
+    }
 
 
 class UsageAggregator:

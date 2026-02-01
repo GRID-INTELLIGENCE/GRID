@@ -100,7 +100,7 @@ def route_models(
 
 async def route_ensemble_models(
     query: str,
-    workspace_root: str = "e:/grid",
+    workspace_root: str | None = None,
     base_config: RAGConfig | None = None,
 ) -> dict:
     """
@@ -113,8 +113,14 @@ async def route_ensemble_models(
     if query_kind in {"architecture", "code"}:
         try:
             import grid.knowledge.multi_model_orchestrator
+            from application.canvas.territory_map import get_grid_map
 
-            orchestrator = grid.knowledge.multi_model_orchestrator.MultiModelOrchestrator(workspace_root=workspace_root)
+            config = base_config or RAGConfig.from_env()
+            orchestrator = grid.knowledge.multi_model_orchestrator.MultiModelOrchestrator(
+                workspace_root=workspace_root,
+                grid_map_provider=get_grid_map,
+                model_lister=lambda: list_ollama_models(config.ollama_base_url),
+            )
             return await orchestrator.reason_ensemble(query)
         except ImportError:
             # Fallback to single model if ensemble not available

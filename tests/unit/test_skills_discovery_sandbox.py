@@ -33,8 +33,7 @@ def temp_skill_package(tmp_path: Path):
 
     # Skill file with a simple class exposing id/run
     skill_file = skills_dir / "sample_skill.py"
-    skill_file.write_text(
-        """
+    skill_file.write_text("""
 class SampleSkill:
     id = "sample.skill"
     name = "Sample Skill"
@@ -45,8 +44,7 @@ class SampleSkill:
         return {"ok": True, "args": args}
 
 sample_skill = SampleSkill()
-"""
-    )
+""")
 
     sys.path.insert(0, str(tmp_path))
     yield "temp_skills_pkg.skills", skill_file

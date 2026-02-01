@@ -5,11 +5,9 @@ from typing import Any
 
 import stripe
 
-from src.application.mothership.config import MothershipSettings
+from src.grid.config.runtime_settings import RuntimeSettings
 
 logger = logging.getLogger(__name__)
-
-settings = MothershipSettings.from_env()
 
 
 class StripeService:
@@ -19,9 +17,10 @@ class StripeService:
     Provides mock fallback if Stripe is disabled.
     """
 
-    def __init__(self):
-        self.api_key = settings.payment.stripe_secret_key
-        self.enabled = settings.payment.stripe_enabled
+    def __init__(self, settings: RuntimeSettings | None = None):
+        runtime = settings or RuntimeSettings.from_env()
+        self.api_key = runtime.payment.stripe_secret_key
+        self.enabled = runtime.payment.stripe_enabled
 
         if self.enabled:
             if self.api_key:

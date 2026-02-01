@@ -13,6 +13,7 @@ class LLMProviderType(str, Enum):
 
     OLLAMA_LOCAL = "ollama-local"  # Local Ollama models (default)
     OLLAMA_CLOUD = "ollama-cloud"  # Cloud Ollama models
+    COPILOT = "copilot"  # GitHub Copilot SDK with web fetching
     SIMPLE = "simple"  # Simple fallback
 
 
@@ -36,6 +37,8 @@ def get_llm_provider(
     if provider_type is None:
         if config.llm_mode == ModelMode.CLOUD:
             provider_type = LLMProviderType.OLLAMA_CLOUD.value
+        elif config.llm_mode == ModelMode.COPILOT:
+            provider_type = LLMProviderType.COPILOT.value
         else:
             provider_type = LLMProviderType.OLLAMA_LOCAL.value
 
@@ -45,6 +48,8 @@ def get_llm_provider(
     if model is None:
         if config.llm_mode == ModelMode.CLOUD:
             model = config.llm_model_cloud or "llama2"
+        elif config.llm_mode == ModelMode.COPILOT:
+            model = config.llm_model_copilot
         else:
             model = config.llm_model_local
 
@@ -56,6 +61,9 @@ def get_llm_provider(
                 "Cloud LLM mode requires OLLAMA_CLOUD_URL to be set. " "For local-only operation, use local mode."
             )
         return OllamaCloudLLM(model=model, cloud_url=config.ollama_cloud_url)
+    elif provider_type == LLMProviderType.COPILOT.value:
+        from .copilot import CopilotLLM
+        return CopilotLLM(model=model)
     elif provider_type == LLMProviderType.SIMPLE.value:
         from .simple import SimpleLLM
 

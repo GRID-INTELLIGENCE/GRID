@@ -381,7 +381,7 @@ async def index_command(args) -> int:
 
             # Show file tracker stats for incremental mode
             if not args.rebuild:
-                from tools.rag.file_tracker import FileTracker
+                from tools.rag.indexing.file_tracker import FileTracker
 
                 tracker = FileTracker(persist_dir=config.vector_store_path)
                 tracker_stats = tracker.get_stats()

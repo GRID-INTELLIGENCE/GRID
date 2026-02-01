@@ -184,8 +184,7 @@ def show_integration_architecture():
     print(" " * 25 + "INTEGRATION ARCHITECTURE")
     print("=" * 80)
     print()
-    print(
-        """
+    print("""
     +-------------------------------------------------------------------+
     |                         CANVAS ROUTING                            |
     |                                                                   |
@@ -240,8 +239,7 @@ def show_integration_architecture():
     3. Agents are created or moved on the wheel based on routing results
     4. Wheel continuously spins and updates agent positions
     5. Visualization available in text (ASCII) and JSON formats
-    """
-    )
+    """)
     print()
 
 

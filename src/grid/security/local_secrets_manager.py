@@ -10,6 +10,7 @@ import json
 import logging
 import os
 import secrets
+import time
 import sqlite3
 from dataclasses import dataclass
 from pathlib import Path
@@ -128,8 +129,7 @@ class LocalSecretsManager:
         conn.execute("PRAGMA journal_mode=WAL")
         conn.execute("PRAGMA synchronous=NORMAL")
 
-        conn.executescript(
-            """
+        conn.executescript("""
             CREATE TABLE IF NOT EXISTS secrets (
                 key TEXT PRIMARY KEY,
                 encrypted_value TEXT NOT NULL,
@@ -146,8 +146,7 @@ class LocalSecretsManager:
             );
 
             CREATE INDEX IF NOT EXISTS idx_secrets_updated ON secrets(updated_at DESC);
-        """
-        )
+        """)
 
         conn.commit()
         conn.close()
@@ -194,7 +193,7 @@ class LocalSecretsManager:
         """
         try:
             encrypted_value, salt, nonce = self._encrypt(value)
-            now = secrets.token_hex(8)  # Simple timestamp
+            now = time.time()
 
             conn = sqlite3.connect(str(self.storage_path))
             conn.execute(

@@ -17,7 +17,7 @@ import sys
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 # Add GRID to path
 grid_root = Path(__file__).parent.parent.parent
@@ -42,13 +42,6 @@ except ImportError:
     print("MCP library not found. Please install: pip install mcp")
     sys.exit(1)
 
-try:
-    from tools.rag.conversational_rag import create_conversational_rag_engine
-    from tools.rag.utils import check_ollama_connection
-except ImportError:
-    print("GRID RAG tools not found. Please ensure GRID is properly installed.")
-    sys.exit(1)
-
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -67,15 +60,31 @@ class RAGSession:
 class EnhancedRAGMCPServer:
     """Enhanced RAG MCP Server with conversational capabilities."""
 
-    def __init__(self):
+    def __init__(
+        self,
+        rag_engine_factory: Callable[[], Any] | None = None,
+        ollama_checker: Callable[[], bool] | None = None,
+    ):
         """Initialize enhanced RAG server."""
+        if rag_engine_factory is None or ollama_checker is None:
+            try:
+                import importlib
+
+                rag_module = importlib.import_module("tools.rag.conversational_rag")
+                utils_module = importlib.import_module("tools.rag.utils")
+                rag_engine_factory = rag_engine_factory or rag_module.create_conversational_rag_engine
+                ollama_checker = ollama_checker or utils_module.check_ollama_connection
+            except ImportError:
+                print("GRID RAG tools not found. Please ensure GRID is properly installed.")
+                sys.exit(1)
+
         self.server = Server("grid-rag-enhanced")
-        self.rag_engine = create_conversational_rag_engine()
+        self.rag_engine = rag_engine_factory()
         self.sessions: dict[str, RAGSession] = {}
         self._register_handlers()
 
         # Check Ollama connection
-        if not check_ollama_connection():
+        if not ollama_checker():
             logger.warning("Ollama connection not available. Some features may be limited.")
 
     def _register_handlers(self):

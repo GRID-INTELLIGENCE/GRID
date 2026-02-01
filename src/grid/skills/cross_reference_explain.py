@@ -27,8 +27,12 @@ def _explain(args: Mapping[str, Any]) -> dict[str, Any]:
 
     if use_llm:
         try:
-            from tools.rag.config import RAGConfig
-            from tools.rag.llm.factory import get_llm_provider
+            import importlib
+
+            rag_config_module = importlib.import_module("tools.rag.config")
+            rag_llm_module = importlib.import_module("tools.rag.llm.factory")
+            RAGConfig = rag_config_module.RAGConfig
+            get_llm_provider = rag_llm_module.get_llm_provider
 
             config = RAGConfig.from_env()
             config.ensure_local_only()

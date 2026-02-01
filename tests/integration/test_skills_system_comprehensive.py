@@ -66,8 +66,7 @@ class TestSkillsDiscoveryEngine:
 
             # Create basic skill file
             basic_skill = skills_path / "data_analyzer.py"
-            basic_skill.write_text(
-                '''
+            basic_skill.write_text('''
 def analyze_data(data):
     """Analyzes input data and returns insights"""
     return {
@@ -85,8 +84,7 @@ SKILL_CONFIG = {
     "permissions": ["file_read", "memory_alloc"],
     "author": "Test Author",
 }
-'''
-            )
+''')
             yield skills_path
 
     def test_discover_skills_from_directory(self, temp_skills_directory):

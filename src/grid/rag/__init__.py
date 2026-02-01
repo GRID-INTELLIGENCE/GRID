@@ -9,59 +9,37 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any
 
-# Re-export core tools.rag functionality
-# Use tools bridge for better integration, fallback to direct import for backward compatibility
-try:
-    # Try to use tools bridge first for better integration
-    from grid.integration.tools_bridge import get_tools_bridge
+_EXPORTS = [
+    "ChromaDBVectorStore",
+    "ModelMode",
+    "OllamaEmbedding",
+    "OllamaLocalLLM",
+    "RAGConfig",
+    "RAGEngine",
+    "chunk_text",
+    "get_embedding_provider",
+    "get_llm_provider",
+    "index_repository",
+    "read_file_content",
+]
 
-    bridge = get_tools_bridge()
-    if bridge.is_rag_available():
-        # Import through tools integration for consistency
-        from tools.rag import (
-            ChromaDBVectorStore,
-            ModelMode,
-            OllamaEmbedding,
-            OllamaLocalLLM,
-            RAGConfig,
-            RAGEngine,
-            chunk_text,
-            get_embedding_provider,
-            get_llm_provider,
-            index_repository,
-            read_file_content,
-        )
-    else:
-        raise ImportError("RAG not available through tools bridge")
-except ImportError:
-    # Fallback to direct import for backward compatibility
+
+def __getattr__(name: str) -> Any:
+    if name not in _EXPORTS:
+        raise AttributeError(name)
     try:
-        from tools.rag import (
-            ChromaDBVectorStore,
-            ModelMode,
-            OllamaEmbedding,
-            OllamaLocalLLM,
-            RAGConfig,
-            RAGEngine,
-            chunk_text,
-            get_embedding_provider,
-            get_llm_provider,
-            index_repository,
-            read_file_content,
-        )
-    except ImportError:
-        # Graceful degradation if tools.rag not available
-        RAGEngine = None  # type: ignore
-        RAGConfig = None  # type: ignore
-        ModelMode = None  # type: ignore
-        get_embedding_provider = None  # type: ignore
-        OllamaEmbedding = None  # type: ignore
-        get_llm_provider = None  # type: ignore
-        OllamaLocalLLM = None  # type: ignore
-        ChromaDBVectorStore = None  # type: ignore
-        index_repository = None  # type: ignore
-        chunk_text = None  # type: ignore
-        read_file_content = None  # type: ignore
+        from grid.integration.tools_bridge import get_tools_bridge
+
+        bridge = get_tools_bridge()
+        if bridge.is_rag_available():
+            return getattr(__import__("tools.rag", fromlist=[name]), name)
+    except Exception:
+        pass
+
+    import importlib
+
+    rag_module = importlib.import_module("tools.rag")
+    return getattr(rag_module, name)
 
 
 # --- Core Types ---
@@ -321,15 +299,5 @@ __all__ = [
     "to_scored_chunk",
     "normalize_results",
     # Re-exported from tools.rag
-    "RAGEngine",
-    "RAGConfig",
-    "ModelMode",
-    "get_embedding_provider",
-    "OllamaEmbedding",
-    "get_llm_provider",
-    "OllamaLocalLLM",
-    "ChromaDBVectorStore",
-    "index_repository",
-    "chunk_text",
-    "read_file_content",
+    *_EXPORTS,
 ]

@@ -192,13 +192,11 @@ def demonstrate_rag_fallback() -> None:
 
     print("When RAG engine finds no documents, it returns:")
     print("-" * 80)
-    print(
-        """{
+    print("""{
     "answer": "No relevant documents found in the knowledge base.",
     "sources": [],
     "context": ""
-}"""
-    )
+}""")
     print()
 
     print("This is different from returning a low-quality first result.")

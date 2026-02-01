@@ -31,9 +31,10 @@ class ToolsBridge:
         """Lazy load tools integration."""
         if self._tools_integration is None:
             try:
-                from tools.integration import get_tools_integration
+                import importlib
 
-                self._tools_integration = get_tools_integration()
+                integration_module = importlib.import_module("tools.integration")
+                self._tools_integration = integration_module.get_tools_integration()
             except ImportError:
                 logger.warning("Tools integration not available")
                 return None

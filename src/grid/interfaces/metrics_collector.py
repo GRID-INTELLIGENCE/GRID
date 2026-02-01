@@ -151,6 +151,7 @@ class MetricsCollector:
         trace_store: TraceStore | None = None,
         json_scanner: JSONScanner | None = None,
         json_parser: JSONParser | None = None,
+        audit_log_model: Any | None = None,
     ):
         """Initialize metrics collector.
 
@@ -164,6 +165,7 @@ class MetricsCollector:
         self.trace_store = trace_store or TraceStore()
         self.json_scanner = json_scanner or JSONScanner()
         self.json_parser = json_parser or JSONParser()
+        self.audit_log_model = audit_log_model
 
     def _is_bridge_action(self, action_type: str, resource_type: str, details: dict[str, Any]) -> bool:
         """Check if action is related to QuantumBridge.
@@ -396,19 +398,27 @@ class MetricsCollector:
             end_time = datetime.now(UTC)
 
         try:
-            from application.mothership.db.models_audit import AuditLogRow
+            audit_model = self.audit_log_model
+            if audit_model is None:
+                import importlib
+
+                audit_module = importlib.import_module("application.mothership.db.models_audit")
+                audit_model = getattr(audit_module, "AuditLogRow", None)
+            if audit_model is None:
+                logger.warning("AuditLogRow model not available, skipping audit log collection")
+                return [], []
 
             # Query audit logs related to interfaces
             stmt = (
-                select(AuditLogRow)
+                select(audit_model)
                 .where(
-                    AuditLogRow.created_at >= start_time,
-                    AuditLogRow.created_at <= end_time,
+                    audit_model.created_at >= start_time,
+                    audit_model.created_at <= end_time,
                 )
                 .where(
-                    (AuditLogRow.resource_type.like("grid.interfaces%"))
-                    | (AuditLogRow.action.like("%bridge%"))
-                    | (AuditLogRow.action.like("%sensory%"))
+                    (audit_model.resource_type.like("grid.interfaces%"))
+                    | (audit_model.action.like("%bridge%"))
+                    | (audit_model.action.like("%sensory%"))
                 )
             )
 

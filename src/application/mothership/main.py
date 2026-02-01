@@ -38,6 +38,11 @@ from pydantic import BaseModel
 
 from application.skills.api import router as skills_router
 
+# Observability & Documentation
+from application.monitoring import setup_metrics, get_metrics_router
+from application.tracing import setup_tracing, setup_fastapi_tracing
+from application.api_docs import setup_api_docs
+
 from .config import MothershipSettings, get_settings
 from .dependencies import get_cockpit_service, reset_cockpit_service
 from .exceptions import MothershipError
@@ -387,6 +392,40 @@ Development mode allows unauthenticated access.
         redoc_url="/redoc" if settings.is_development else None,
         openapi_url="/openapi.json" if settings.is_development else None,
         lifespan=lifespan,
+    )
+
+    # =========================================================================
+    # Setup Observability & Documentation
+    # =========================================================================
+
+    # Setup distributed tracing
+    setup_tracing(
+        service_name="grid-mothership",
+        jaeger_host=os.environ.get("JAEGER_HOST", "localhost"),
+        jaeger_port=int(os.environ.get("JAEGER_PORT", "4317")),
+        environment=settings.environment.value,
+    )
+    setup_fastapi_tracing(app, service_name="grid-mothership")
+
+    # Setup Prometheus metrics
+    setup_metrics(app)
+    app.include_router(get_metrics_router())
+
+    # Setup API documentation
+    setup_api_docs(
+        app,
+        title="GRID Mothership API",
+        version=settings.app_version,
+        description="Enterprise AI framework with local-first RAG, event-driven agentic system, and cognitive decision support",
+        contact={
+            "name": "GRID Support",
+            "url": "https://github.com/yourusername/grid",
+            "email": "irfankabir02@gmail.com",
+        },
+        servers=[
+            {"url": "http://localhost:8080", "description": "Development server"},
+            {"url": "https://api.grid.example.com", "description": "Production server"},
+        ],
     )
 
     # ==========================================================================

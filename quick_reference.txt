@@ -1,0 +1,342 @@
+# IDENTITY BRIDGING FIREWALL - QUICK REFERENCE
+
+## THE THREAT: How ML models link your family
+
+```
+Device A (Phone)          Device B (Laptop)
+    ↓                           ↓
+[SSID: HomeWifi-5G]      [SSID: HomeWifi-5G]
+[IP: 192.168.1.10]       [IP: 192.168.1.12]
+[BSSID: AA:BB:CC:DD]     [BSSID: AA:BB:CC:DD]
+        ↓                       ↓
+    api3.siftscience.com ←———————┘
+    "These are the same person"
+        ↓
+    ML Model: Merge identities
+    Result: One fraud flag = both devices flagged
+```
+
+---
+
+## THE SOLUTION: Three-Layer Defense
+
+### Layer 1: BLOCK (Stop data from leaving your network)
+**What:** Firewall rules that reject connections to tracking domains
+**How:** NextDNS, Pi-hole, or router firewall
+**Impact:** Prevents Sift, Tencent, Branch.io from seeing your device
+**Effort:** 15-60 minutes
+**Reversibility:** 100%
+
+### Layer 2: PERMISSIONS (Starve trackers of signal data)
+**What:** Revoke Location permission from apps
+**How:** Android: Settings > Apps > Permissions > Location
+**Impact:** Apps can't access SSID/BSSID
+**Effort:** 5 minutes per device
+**Reversibility:** 100%
+
+### Layer 3: ISOLATION (Prevent device-to-device correlation)
+**What:** Enable AP Isolation on router
+**How:** Router settings > Wireless > AP Isolation
+**Impact:** Devices can't verify they're on same network
+**Effort:** 1 minute
+**Reversibility:** 100%
+**Trade-off:** May break AirDrop, printer sharing
+
+---
+
+## DEPLOYMENT PATHS
+
+### Path A: LAZY (Easiest, 15 min)
+1. Go to nextdns.io
+2. Create account
+3. Add api3.siftscience.com, otheve.beacon.qq.com, api.branch.io
+4. Change router DNS to NextDNS
+5. Done
+
+**Effectiveness:** 85% | **Breaking changes:** Possible CAPTCHA on shopping
+
+---
+
+### Path B: THOROUGH (Balanced, 1 hour)
+1. Install Pi-hole on Raspberry Pi
+2. Add TIER 1 + TIER 2 blocklists
+3. Point router DNS to Pi-hole
+4. Enable AP Isolation in router
+5. Revoke Location permissions on all Android phones
+6. Monitor for 48 hours
+
+**Effectiveness:** 92% | **Breaking changes:** May need phone verification on some apps
+
+---
+
+### Path C: PARANOID (Maximum, 2 hours)
+1. Do Path B (above)
+2. Create Guest network for risky devices (games, shopping)
+3. Keep work/banking on Main network
+4. Block TIER 3 (Firebase, Meta) in addition to TIER 1+2
+5. Disable all analytics in app settings
+
+**Effectiveness:** 97% | **Breaking changes:** App instability, multiple CAPTCHAs
+
+---
+
+## CRITICAL DOMAINS (TIER 1)
+
+Block these minimum 7 for 85% protection:
+
+```
+# Copy-paste into NextDNS or Pi-hole blocklist:
+
+api3.siftscience.com
+otheve.beacon.qq.com
+api.branch.io
+cdn.siftscience.com
+monitor.uu.qq.com
+pixel.siftscience.com
+analytics.map.qq.com
+```
+
+---
+
+## NEXTDNS SETUP (5 MINUTES)
+
+```
+1. nextdns.io → Sign up (free)
+2. "Profiles" → Create: "Family-Identity-Block"
+3. "Lists" → "Add" → Paste TIER 1 domains above
+4. Copy your DNS IPs (from dashboard)
+5. Router login (192.168.1.1) → DNS settings
+6. Replace with NextDNS IPs → Reboot router
+7. Verify: nextdns.io/test in browser
+```
+
+Result: All family devices automatically protected
+
+---
+
+## PI-HOLE SETUP (45 MINUTES)
+
+```bash
+# Install
+curl -sSL https://install.pi-hole.net | bash
+
+# Access: http://[pi-ip]/admin
+# Default password: admin → change it
+
+# Add blocklist:
+Settings → Blocklists → Add
+api3.siftscience.com
+otheve.beacon.qq.com
+[etc...]
+
+# Router DNS → [Pi-hole IP]
+# Reboot router
+# Check Pi-hole dashboard for blocked queries
+```
+
+Result: Central control, real-time visibility, rollback easy
+
+---
+
+## AP ISOLATION (1 MINUTE)
+
+```
+Router login (192.168.1.1)
+→ Wireless / Wi-Fi settings
+→ "AP Isolation" or "Client Isolation"
+→ Enable
+→ Save & reboot
+
+Effect: Devices can't see each other
+        ML models can't verify same network even if same public IP
+```
+
+⚠️ May break: AirDrop, printer discovery, Chromecast
+
+---
+
+## ANDROID PERMISSION REVOKE (2 MINUTES PER PHONE)
+
+```
+Settings
+→ Apps (or Applications)
+→ Permissions
+→ Location
+→ Find: Tencent games, Shopify, any untrusted app
+→ Tap app → Revoke or "Deny"
+
+Result: Apps receive <unknown ssid> instead of real SSID
+        BSSID collection blocked at app level
+```
+
+Apps that legitimately need Location: Maps, Uber, weather apps
+Apps that DON'T need it: Games, e-commerce, social media
+
+---
+
+## TESTING (10 MINUTES)
+
+### Test 1: Is blocking active?
+```
+On your phone/computer:
+nslookup api3.siftscience.com
+
+Expected: NXDOMAIN or 0.0.0.0 (domain not found)
+If you get an IP address: blocking not working
+```
+
+### Test 2: Are there false positives?
+```
+1. Try shopping on Shopify
+2. Try ordering on DoorDash
+3. Try booking Airbnb
+4. Log into banking app
+
+Expected: Maybe 1-2 CAPTCHA requests first week
+If you see >5: disable some TIER 2 blocks and whitelist
+```
+
+### Test 3: Is AP Isolation working?
+```
+On laptop: ping 192.168.1.10 (phone's IP)
+Expected: No response / Unreachable
+If you get response: AP Isolation not enabled or ineffective
+```
+
+---
+
+## EXPECTED TIMELINE
+
+| Timeline | Experience |
+|----------|------------|
+| Minutes 0-5 | Domains blocked, devices can't reach tracking APIs |
+| Hours 0-2 | Apps may throw warnings (missing analytics) |
+| Hours 2-24 | First CAPTCHA requests on shopping apps |
+| Day 2-3 | ML models recalibrate, false positives decline |
+| Week 1-2 | Normal; some apps flag you as "unrecognized" |
+| Week 3+ | Smooth operation; family devices isolated |
+
+---
+
+## ROLLBACK (EMERGENCY, 5 MINUTES)
+
+**If something critical breaks:**
+
+### NextDNS:
+Settings → Disable blocklist → Wait 5 min
+
+### Pi-hole:
+Dashboard → Whitelist the domain → Wait 5 min
+
+### Router Firewall:
+Delete rule → Reboot → Test
+
+**Atomic rollback (full network):**
+1. Router settings → DNS → Reset to ISP default
+2. Reboot router
+3. Clear browser cache
+4. Restart app
+5. Test again (may take 10-15 minutes for DNS propagation)
+
+---
+
+## ONGOING MONITORING
+
+### Daily: Nothing
+### Weekly: 
+- Check NextDNS/Pi-hole dashboard
+- Should see 50-500 blocked queries (depends on activity)
+- If zero: Something's wrong with setup
+
+### Monthly:
+- Ask family: "Any app issues?"
+- Review logs for new suspicious domains
+- Update blocklist if adding new apps
+
+### Quarterly:
+- Check this guide for new domains (threat landscape evolving)
+- Add TIER 2 domains if family asks for more privacy
+
+---
+
+## COMMON ISSUES & FIXES
+
+| Issue | Cause | Fix |
+|-------|-------|-----|
+| Shopify won't load | api3.siftscience.com blocked | Whitelist that domain in blocklist |
+| DoorDash wants CAPTCHA every time | Sift can't build reputation | Add whitelist entry, wait 1 week |
+| Can't access Wi-Fi settings | Permissions issue | Reboot router |
+| Blocking not active | DNS not pointing to blocker | Verify router DNS settings |
+| AirDrop broken | AP Isolation enabled | Disable AP Isolation (less security) |
+| Family upset about CAPTCHA | Friction from blocking | Explain 1-week adjustment, offer weekly check-ins |
+
+---
+
+## WHAT YOUR FAMILY ACTUALLY EXPERIENCES
+
+### First attempt to use Shopify:
+```
+"Unusual activity detected. Please verify with email code."
+[User receives email, enters code]
+"Thanks, verified. Continue checkout."
+```
+
+### By day 7:
+```
+[Checkout proceeds normally, no CAPTCHA]
+```
+
+### Long-term:
+```
+[No difference from normal, but devices are now isolated in ML models]
+```
+
+**So:** Short-term friction, long-term privacy
+
+---
+
+## WHAT YOU'RE ACTUALLY DEFENDING
+
+✓ Prevents Mom's device from being linked to Dad's
+✓ Blocks your phone from "learning" cottage's BSSID
+✓ Stops teenager's gaming device from tainting family bank account reputation
+✓ Protects shared household from one person's fraud being amplified to everyone
+✓ Reduces cross-device targeting for ads
+✗ Does NOT prevent that device from being tracked individually
+✗ Does NOT hide traffic from ISP (they still see you're using internet)
+✗ Does NOT encrypt data (use VPN for that)
+
+**You're defending against correlation, not anonymity.**
+
+---
+
+## DECISION MATRIX
+
+| Situation | Recommendation | Why |
+|-----------|---|---|
+| "Just concerned about privacy" | Path A (NextDNS only) | Minimal friction, big benefit |
+| "Family member got fraud flagged" | Path B (NextDNS + AP Isolation) | Maximum isolation, reasonable trade-off |
+| "Teenager gaming + parent banking on same Wi-Fi" | Path C + Guest network | Isolate risky devices |
+| "Multiple homes, sharing accounts" | Block Tencent TIER 2 + revoke permissions | Prevent social network mapping |
+| "High-value accounts (crypto, business)" | All of Path C | Paranoia justified |
+
+---
+
+## SUMMARY
+
+**Minimum viable protection: 15 minutes**
+- NextDNS + TIER 1 blocklist + Router DNS change
+
+**Recommended: 45 minutes**
+- Above + AP Isolation + Permission audits
+
+**Maximum: 2 hours**
+- Pi-hole + TIER 1+2+3 + Guest network + Permissions + Ongoing monitoring
+
+**Your choice depends on:** Risk tolerance vs. app friction tolerance
+
+**Start small. You can always add more.**
+
+---
+
+**Questions? Check the full implementation guide or your blocker dashboard.**

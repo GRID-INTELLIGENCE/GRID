@@ -4,12 +4,11 @@ from datetime import UTC, datetime, timedelta
 
 import bcrypt
 
-from src.application.mothership.config import MothershipSettings
+from src.grid.config.runtime_settings import RuntimeSettings
 from src.grid.auth.token_manager import TokenManager
 from src.grid.infrastructure.database import DatabaseManager
 
 logger = logging.getLogger(__name__)
-settings = MothershipSettings.from_env()
 
 
 class AuthService:
@@ -17,10 +16,16 @@ class AuthService:
     Handles User Authentication, Registration, and Token Lifecycle.
     """
 
-    def __init__(self, db_manager: DatabaseManager, token_manager: TokenManager):
+    def __init__(
+        self,
+        db_manager: DatabaseManager,
+        token_manager: TokenManager,
+        settings: RuntimeSettings | None = None,
+    ):
         self.db = db_manager
         self.tm = token_manager
-        self._refresh_expiry_days = settings.security.refresh_token_expire_days
+        runtime = settings or RuntimeSettings.from_env()
+        self._refresh_expiry_days = runtime.security.refresh_token_expire_days
 
     async def register_user(self, username: str, password: str, role: str = "user") -> str:
         """Register a new user."""

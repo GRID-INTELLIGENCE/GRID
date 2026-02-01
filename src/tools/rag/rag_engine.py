@@ -58,6 +58,8 @@ class RAGEngine:
                     )
                 else:
                     print(f"Warning: Ollama not accessible at {config.ollama_base_url}. Local LLM will fail.")
+        elif config.llm_mode == ModelMode.COPILOT:
+            print("Using GitHub Copilot SDK - no Ollama required")
 
         # Try to find available models for Ollama provider
         if config.embedding_provider == "ollama":
@@ -109,6 +111,22 @@ class RAGEngine:
                     provider,
                     collection_name=config.collection_name,
                     persist_directory=config.vector_store_path,
+                )
+            elif provider == "pinecone":
+                # Pinecone configuration from environment or config
+                import os
+
+                api_key = os.getenv("PINECONE_API_KEY")
+                index_name = os.getenv("PINECONE_INDEX_NAME", config.collection_name)
+
+                self.vector_store = VectorStoreRegistry.create(
+                    provider,
+                    api_key=api_key,
+                    index_name=index_name,
+                    dimension=768,  # nomic-embed-text dimension
+                    metric="cosine",
+                    cloud="aws",
+                    region="us-east-1",
                 )
             elif provider == "in_memory":
                 self.vector_store = VectorStoreRegistry.create(provider)

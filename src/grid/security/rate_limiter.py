@@ -4,12 +4,10 @@ import time
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from src.application.mothership.config import MothershipSettings
+from src.grid.config.runtime_settings import RuntimeSettings
 from src.grid.infrastructure.cache import CacheFactory
 
 logger = logging.getLogger(__name__)
-
-settings = MothershipSettings.from_env()
 
 
 class RateLimiter:
@@ -17,11 +15,12 @@ class RateLimiter:
     Rate limiter using Token Bucket or Fixed Window algorithm via CacheInterface.
     """
 
-    def __init__(self):
-        self.cache = CacheFactory.create(settings.cache.backend)
-        self.enabled = settings.security.rate_limit_enabled
-        self.limit = settings.security.rate_limit_requests
-        self.window = settings.security.rate_limit_window_seconds
+    def __init__(self, settings: RuntimeSettings | None = None):
+        runtime = settings or RuntimeSettings.from_env()
+        self.cache = CacheFactory.create(runtime.cache.backend)
+        self.enabled = runtime.security.rate_limit_enabled
+        self.limit = runtime.security.rate_limit_requests
+        self.window = runtime.security.rate_limit_window_seconds
 
     async def check_limit(self, key: str) -> bool:
         """

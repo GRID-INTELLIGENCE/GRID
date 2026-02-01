@@ -22,6 +22,7 @@ class ModelMode(str, Enum):
 
     LOCAL = "local"  # Use local Ollama models
     CLOUD = "cloud"  # Use cloud Ollama models
+    COPILOT = "copilot"  # Use GitHub Copilot SDK
 
 
 @dataclass
@@ -36,6 +37,7 @@ class RAGConfig:
     # LLM configuration
     llm_model_local: str = "ministral-3:3b"  # Default local model
     llm_model_cloud: str | None = None  # Cloud model if using cloud mode
+    llm_model_copilot: str = "gpt-4o"  # Default Copilot model
     llm_mode: ModelMode = ModelMode.LOCAL
 
     # Vector store configuration
@@ -97,6 +99,7 @@ class RAGConfig:
             embedding_provider=os.getenv("RAG_EMBEDDING_PROVIDER", "ollama"),
             llm_model_local=os.getenv("RAG_LLM_MODEL_LOCAL", "ministral-3:3b"),
             llm_model_cloud=os.getenv("RAG_LLM_MODEL_CLOUD", None),
+            llm_model_copilot=os.getenv("RAG_LLM_MODEL_COPILOT", "gpt-4o"),
             llm_mode=ModelMode(os.getenv("RAG_LLM_MODE", "local")),
             # Vector store config
             vector_store_provider=os.getenv("RAG_VECTOR_STORE_PROVIDER", "chromadb"),
@@ -147,3 +150,4 @@ class RAGConfig:
             raise ValueError(
                 "Cloud LLM mode requires OLLAMA_CLOUD_URL to be set. For local-only operation, set RAG_LLM_MODE=local"
             )
+        # Copilot mode is allowed as it uses GitHub's infrastructure

@@ -64,7 +64,11 @@ def run_command(args: argparse.Namespace) -> int:
     if component == "rag":
         # Launch interactive RAG chat
         try:
-            from tools.rag.chat import ChatConfig, interactive_loop
+            import importlib
+
+            chat_module = importlib.import_module("tools.rag.chat")
+            ChatConfig = chat_module.ChatConfig
+            interactive_loop = chat_module.interactive_loop
         except ImportError as e:
             raise SystemExit(f"Unable to import RAG chat module: {e}") from e
 
@@ -92,7 +96,10 @@ def run_command(args: argparse.Namespace) -> int:
 def chat_command(args: argparse.Namespace) -> int:
     """Handle interactive RAG chat command."""
     try:
-        from tools.rag.chat import ChatConfig, main_async
+        import importlib
+
+        chat_module = importlib.import_module("tools.rag.chat")
+        ChatConfig = chat_module.ChatConfig
     except ImportError as e:
         raise SystemExit(f"Unable to import RAG chat module: {e}") from e
 
@@ -107,7 +114,13 @@ def chat_command(args: argparse.Namespace) -> int:
 
     # Single query mode
     if args.query:
-        from tools.rag.chat import RAGChatSession
+        try:
+            import importlib
+
+            chat_module = importlib.import_module("tools.rag.chat")
+            RAGChatSession = chat_module.RAGChatSession
+        except ImportError as e:
+            raise SystemExit(f"Unable to import RAG chat module: {e}") from e
 
         async def single_query():
             session = RAGChatSession(config)
@@ -118,7 +131,13 @@ def chat_command(args: argparse.Namespace) -> int:
         return asyncio.run(single_query())
 
     # Interactive mode
-    from tools.rag.chat import interactive_loop
+    try:
+        import importlib
+
+        chat_module = importlib.import_module("tools.rag.chat")
+        interactive_loop = chat_module.interactive_loop
+    except ImportError as e:
+        raise SystemExit(f"Unable to import RAG chat module: {e}") from e
 
     asyncio.run(interactive_loop(config))
     return 0
@@ -197,7 +216,10 @@ def analyze_command(args: argparse.Namespace) -> int:
 
 def serve_command(args: argparse.Namespace) -> int:
     try:
-        from application.mothership.main import main as server_main
+        import importlib
+
+        server_module = importlib.import_module("application.mothership.main")
+        server_main = server_module.main
     except Exception as e:
         raise SystemExit(f"Unable to import backend server entrypoint: {e}") from e
 

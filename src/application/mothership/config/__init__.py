@@ -25,7 +25,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 try:
-    from .security.secret_validation import (  # type: ignore[import-not-found]
+    from ..security.secret_validation import (  # type: ignore[import-not-found]
         SecretValidationError,
         validate_secret_strength,
     )

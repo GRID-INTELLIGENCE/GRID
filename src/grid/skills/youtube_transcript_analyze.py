@@ -84,8 +84,12 @@ def _analyze(args: Mapping[str, Any]) -> dict[str, Any]:
     use_rag = bool(args.get("use_rag") or args.get("useRag"))
     if use_rag:
         try:
-            from tools.rag.config import RAGConfig
-            from tools.rag.rag_engine import RAGEngine
+            import importlib
+
+            rag_config_module = importlib.import_module("tools.rag.config")
+            rag_engine_module = importlib.import_module("tools.rag.rag_engine")
+            RAGConfig = rag_config_module.RAGConfig
+            RAGEngine = rag_engine_module.RAGEngine
 
             config = RAGConfig.from_env()
             config.ensure_local_only()

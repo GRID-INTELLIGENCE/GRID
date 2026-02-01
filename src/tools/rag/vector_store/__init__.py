@@ -18,10 +18,17 @@ try:
 except ImportError:
     DatabricksVectorStore = None  # type: ignore[misc,assignment]
 
+# Optional Pinecone dependency
+try:
+    from .pinecone_store import PineconeVectorStore
+except ImportError:
+    PineconeVectorStore = None  # type: ignore[misc,assignment]
+
 __all__ = [
     "BaseVectorStore",
     "ChromaDBVectorStore",
     "InMemoryDenseVectorStore",
     "InMemoryDenseStore",  # Backward compatibility alias
     "DatabricksVectorStore",
+    "PineconeVectorStore",
 ]

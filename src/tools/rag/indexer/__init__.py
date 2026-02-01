@@ -32,11 +32,15 @@ def _load_exports() -> None:
         from ..indexing.indexer import (
             read_file_content as _read_file_content,
         )
+        from ..indexing.indexer import (
+            update_index as _update_index,
+        )
 
         _exports["IndexingMetrics"] = _IndexingMetrics
         _exports["chunk_text"] = _chunk_text
         _exports["index_repository"] = _index_repository
         _exports["read_file_content"] = _read_file_content
+        _exports["update_index"] = _update_index
     except ImportError:
         # Provide fallback implementations
         from pathlib import Path as _Path
@@ -121,6 +125,7 @@ __all__ = [
     "chunk_text",
     "read_file_content",
     "index_repository",
+    "update_index",
     "IndexingMetrics",
     "SemanticChunker",
     "SemanticChunk",

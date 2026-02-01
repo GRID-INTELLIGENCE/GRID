@@ -8,7 +8,7 @@ and logs anomalies.
 import time
 
 try:
-    from prometheus_client import Histogram  # type: ignore[import-not-found]
+    from prometheus_client import Histogram, REGISTRY  # type: ignore[import-not-found]
 
     PROMETHEUS_AVAILABLE = True
 except ImportError:
@@ -26,13 +26,20 @@ except ImportError:
             return self
 
 
-# Prometheus metrics
-STREAM_DURATION = Histogram(
+def _get_or_create_histogram(name: str, documentation: str, labelnames: list[str]) -> Histogram:
+    if PROMETHEUS_AVAILABLE:
+        existing = getattr(REGISTRY, "_names_to_collectors", {}).get(name)
+        if existing is not None:
+            return existing
+    return Histogram(name, documentation, labelnames)
+
+
+STREAM_DURATION = _get_or_create_histogram(
     "http_stream_duration_seconds",
     "Duration of HTTP streaming responses in seconds",
     ["endpoint"],
 )
-STREAM_BYTES_SENT = Histogram(
+STREAM_BYTES_SENT = _get_or_create_histogram(
     "http_stream_bytes_sent",
     "Total bytes sent in streaming responses",
     ["endpoint"],

@@ -18,11 +18,9 @@ import logging
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
-from application.canvas.territory_map import TerritoryZone, get_grid_map
 from grid.knowledge.reasoning_orchestrator import ReasoningMode, ReasoningOrchestrator, ReasoningStep
-from tools.rag.utils import list_ollama_models
 
 logger = logging.getLogger(__name__)
 
@@ -98,15 +96,25 @@ class MultiModelOrchestrator(ReasoningOrchestrator):
 
     def __init__(
         self,
-        workspace_root: str = "e:/grid",
+        workspace_root: str | None = None,
         mode: ReasoningMode = ReasoningMode.PARALLEL,
+        grid_map_provider: Callable[[Path], Any] | None = None,
+        model_lister: Callable[[], list[str]] | None = None,
     ) -> None:
         super().__init__(mode=mode)
-        self.root = workspace_root
-        self.grid_map = get_grid_map(Path(workspace_root))
+        self.root = workspace_root or str(Path.cwd())
+        self._grid_map_provider = grid_map_provider
+        self._model_lister = model_lister
+        self.grid_map = None
+        if self._grid_map_provider is not None:
+            try:
+                self.grid_map = self._grid_map_provider(Path(self.root))
+            except Exception:
+                logger.warning("Failed to initialize territory map provider.")
         self.available_models = []
         try:
-            self.available_models = list_ollama_models()
+            if self._model_lister is not None:
+                self.available_models = self._model_lister()
         except Exception:
             logger.warning("Could not list Ollama models. Defaulting to mistral-nemo.")
 
@@ -157,15 +165,17 @@ class MultiModelOrchestrator(ReasoningOrchestrator):
         """Gathers context from the Territory Map (The Harness)."""
         # Logic to guess which zone the query relates to
         q = query.lower()
-        zone = TerritoryZone.CORE
+        zone = "core"
         if any(x in q for x in ["app", "mothership", "api", "router"]):
-            zone = TerritoryZone.APPLICATION
+            zone = "application"
         elif any(x in q for x in ["rag", "tool", "script"]):
-            zone = TerritoryZone.TOOLS
+            zone = "tools"
         elif any(x in q for x in ["cognitive", "reasoning", "mind"]):
-            zone = TerritoryZone.COGNITIVE
+            zone = "cognitive"
 
-        zone_data = self.grid_map.get_zone_map().get(zone.value, {})
+        zone_data: dict[str, Any] = {}
+        if self.grid_map is not None and hasattr(self.grid_map, "get_zone_map"):
+            zone_data = self.grid_map.get_zone_map().get(zone, {})
         node_count = zone_data.get("count", 0)
 
         # Enhanced metrics for deeper context
@@ -178,7 +188,7 @@ class MultiModelOrchestrator(ReasoningOrchestrator):
         has_debug_terms = any(x in q for x in ["error", "bug", "fix", "debug"])
 
         return {
-            "zone": zone.value,
+            "zone": zone,
             "node_count": node_count,
             "standing": stability_indicator,
             "hierarchy": "L2_MODULES",

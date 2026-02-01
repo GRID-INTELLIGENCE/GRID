@@ -56,9 +56,10 @@ class NavigatorPersona(Persona):
         """Lazy load territory map."""
         if self._map is None:
             try:
-                from application.canvas.territory_map import get_grid_map
+                import importlib
 
-                self._map = get_grid_map()
+                canvas_module = importlib.import_module("application.canvas.territory_map")
+                self._map = canvas_module.get_grid_map()
             except ImportError:
                 logger.warning("Territory map not available")
                 self._map = None
@@ -119,9 +120,10 @@ class ResonancePersona(Persona):
         """Lazy load activity resonance."""
         if self._resonance is None:
             try:
-                from application.resonance.activity_resonance import ActivityResonance
+                import importlib
 
-                self._resonance = ActivityResonance()
+                resonance_module = importlib.import_module("application.resonance.activity_resonance")
+                self._resonance = resonance_module.ActivityResonance()
             except ImportError:
                 logger.warning("Activity resonance not available")
                 self._resonance = None

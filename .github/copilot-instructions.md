@@ -4,13 +4,13 @@ This document guides AI agents through the GRID (Geometric Resonance Intelligenc
 
 ## Project Identity
 
-GRID is a Python-based framework exploring complex systems through geometric resonance patterns. It combines a layered architecture (core → API → service → database), local-only RAG (Retrieval-Augmented Generation), cognitive decision support, and pattern recognition using 9 cognition patterns (Flow, Spatial, Rhythm, Color, Repetition, Deviation, Cause, Time, Combination).
+GRID is a Python-based framework exploring complex systems through geometric resonance patterns. It combines a layered architecture (core → API → service → database), local-only RAG (Retrieval-Augmented Generation), cognitive decision support, event-driven agentic systems, and pattern recognition using 9 cognition patterns (Flow, Spatial, Rhythm, Color, Repetition, Deviation, Cause, Time, Combination).
 
 ## Architecture Overview
 
 ### Layered Structure
 ```
-Application Layer (API/CLI)
+Application Layer (FastAPI/CLI)
 ↓
 Service Layer (Business Logic)
 ↓
@@ -20,10 +20,11 @@ Core Layer (Foundation)
 ```
 
 **Key Modules**:
-- `grid/` - Core intelligence (essence, patterns, awareness, evolution, interfaces)
-- `light_of_the_seven/cognitive_layer/` - Cognitive decision support and mental models
-- `tools/rag/` - Local RAG system (ChromaDB + Ollama models)
-- `application/` - Application-specific code (API routes, skills)
+- `src/grid/` - Core intelligence (essence, patterns, awareness, evolution, agentic system)
+- `src/cognitive/` - Cognitive architecture and decision support
+- `src/tools/rag/` - Local RAG system (ChromaDB + Ollama models)
+- `src/application/` - FastAPI applications (Mothership, Canvas, Resonance)
+- `src/unified_fabric/` - Async event bus with domain routing (safety, grid, coinbase)
 - `docs/` - Documentation (indexed by RAG, use for context)
 
 ### Critical Boundaries
@@ -31,6 +32,7 @@ Core Layer (Foundation)
 - Services depend on core but NOT application
 - Database layer is pure data access (no business logic)
 - API layer orchestrates services, never accesses DB directly
+- Unified Fabric provides async pub/sub across domains (safety, grid, coinbase)
 
 ## Local-First Operation
 
@@ -42,11 +44,40 @@ Core Layer (Foundation)
 
 ## Developer Workflows
 
+### Environment Setup (UV-based)
+
+**This repo uses UV as the Python venv/package manager.** Do not use `python -m venv` or `pip` directly—use UV for all venv and package operations.
+
+```bash
+# Quick setup with UV (recommended)
+cd e:\grid
+uv venv --python 3.13 --clear
+.\.venv\Scripts\Activate.ps1
+uv sync --group dev --group test
+
+# Verify setup
+pytest tests/unit/ -v
+ruff check .
+```
+
 ### Core Commands
 
 **Tests** (default task, runs pytest with verbose output and coverage):
 ```bash
+# All tests
 pytest tests/ -v --tb=short
+
+# Unit tests only (fast)
+pytest tests/unit/ -v
+
+# Integration tests
+pytest tests/integration/ -v
+
+# Exclude slow tests
+pytest -m "not slow"
+
+# Coverage report
+pytest --cov=src --cov-report=html
 ```
 
 **RAG Operations**:
@@ -56,44 +87,57 @@ python -m tools.rag.cli query "How does pattern recognition work?"
 
 # Index/rebuild docs
 python -m tools.rag.cli index docs/ --rebuild --curate
+
+# RAG statistics
+python -m tools.rag.cli stats
 ```
 
-**Skills** (domain transformations and utilities):
+**Skills** (domain transformations and utilities with automated discovery):
 ```bash
+# List available skills (auto-discovered from src/grid/skills/)
+python -m grid skills list
+
 # Run a skill with JSON args
 python -m grid skills run transform.schema_map --args-json '{"text":"...", "target_schema":"resonance"}'
 
-# List available skills
-python -m grid skills list
+# Common skills: transform.schema_map, context.refine, compress.articulate, cross_reference.explain
 ```
 
-**Validation** (IDE context validation task):
+**API Server**:
 ```bash
-python scripts/validate_ide_context.py
+# Start Mothership API (main application)
+python -m application.mothership.main
+
+# Development server with reload
+uvicorn application.mothership.main:app --reload --host 0.0.0.0 --port 8080
 ```
 
-### Topic-Branch Workflow
-The repo includes `scripts/git-topic` for theme-oriented work:
+**Code Quality**:
 ```bash
-# Create feature branch with metadata
-python scripts/git-topic create --theme research --short "entity clustering" --issue 123 --push
+# Linting (Ruff)
+ruff check .
+ruff check --fix .
 
-# Check branch metadata
-python scripts/git-topic info
+# Formatting (Black)
+black .
 
-# Prepare PR from topic branch
-python scripts/git-topic finish --open-pr
+# Type checking (mypy)
+mypy src/
+
+# All quality checks (via Makefile)
+make lint
+make format
 ```
 
 ### Git Convention
-- Branch naming: `{theme}-{short-desc}-#{issue}` (git-topic handles this)
+- Branch naming: `{theme}-{short-desc}-#{issue}` (if using git-topic script)
 - Commits should reference issue numbers
 - Prefer making a backup branch before `git reset --hard`
 
 ## Code Standards
 
 ### Python Essentials
-- **Version**: Python 3.11+ (pattern matching, improved errors)
+- **Version**: Python 3.13+ (pattern matching, improved errors)
 - **Type hints**: Required for ALL functions, methods, class attributes
 - **Formatter**: Black (120 char line length, configured in `pyproject.toml`)
 - **Linter**: Ruff (pre-commit)
@@ -120,14 +164,24 @@ from tools.rag.rag_engine import RAGEngine
 ### Test Organization
 ```
 tests/
-├── unit/           # Pure function tests
-├── integration/    # Component interaction
+├── unit/           # Pure function tests (fast, isolated)
+├── integration/    # Component interaction (slower, cross-module)
 ├── api/           # API endpoint tests
-├── benchmarks/    # Performance tests
+├── security/      # Security and authentication tests
+├── unified_fabric/ # Event bus and safety bridge tests
+├── skills/        # Skills system tests
 └── fixtures/      # Shared test data
 ```
 
 Pattern: `test_{module_name}.py` mirrors source structure with `≥80%` coverage target.
+
+**Test Markers** (use pytest markers):
+- `@pytest.mark.unit` - Unit tests (fast, isolated)
+- `@pytest.mark.integration` - Integration tests (slower, cross-module)
+- `@pytest.mark.api` - API endpoint tests
+- `@pytest.mark.critical` - Critical path tests (must pass)
+- `@pytest.mark.slow` - Slow running tests (> 1 second)
+- `@pytest.mark.scratch` - Experimental tests (excluded from CI)
 
 ## Pattern References
 
@@ -146,22 +200,95 @@ When implementing features, consider which patterns apply:
 Check `docs/pattern_language.md` and search for similar implementations using RAG before creating new patterns.
 
 ### Cognitive Layer Integration
-Use `light_of_the_seven/cognitive_layer/` for:
+Use `src/cognitive/cognitive_layer/` for:
 - User-facing decision support
 - Information presentation design
 - Cognitive load estimation
 - Bounded rationality constraints
 
 ```python
-from light_of_the_seven.cognitive_layer.decision_support import BoundedRationalityEngine
+from cognitive.cognitive_layer.decision_support import BoundedRationalityEngine
 # Apply cognitive factors to user-facing features
 ```
 
 ### Skills Registry Pattern
 Domain transformations use `grid.skills.registry`:
 - Implement `Skill` protocol (has `run(args: Mapping[str, Any]) -> Dict[str, Any]`)
-- Register in `default_registry`
-- Examples: `transform.schema_map`, `context.refine`, `compress.articulate`
+- Auto-discovery from `src/grid/skills/` (no manual registration needed)
+- Common skills: `transform.schema_map`, `context.refine`, `compress.articulate`, `intelligence.git_analyze`
+
+```bash
+# Run with strict JSON parameters
+python -m grid skills run transform.schema_map --args-json '{"text": "...", "target_schema": "resonance"}'
+```
+
+### Unified Fabric Event System
+Async event bus for cross-domain communication using a pub/sub pattern:
+- **Domains**: `safety`, `grid`, `coinbase`, `all`
+- **Subscription**: Use wildcards like `safety.*` to catch related events
+- **Request-Reply**: Supports async futures for pseudo-synchronous needs
+
+```python
+from unified_fabric import get_event_bus, Event, EventDomain
+
+event_bus = get_event_bus()
+
+# Subscribe to domain-specific events
+async def handle_safety_alert(event: Event):
+    print(f"Safety breach in {event.source_domain}: {event.payload}")
+
+event_bus.subscribe("safety.alert", handle_safety_alert, domain=EventDomain.SAFETY)
+
+# Publish an event
+await event_bus.publish(Event(
+    event_type="safety.alert",
+    payload={"threat": "path_traversal", "path": "/etc/passwd"},
+    source_domain="grid"
+))
+```
+
+### Agentic System Pattern
+Implements a structured receptionist-lawyer-client workflow:
+1. **Receptionist (Intake)**: Receives `CaseCreatedEvent` (raw input), converts to `CaseCategorizedEvent`.
+2. **Lawyer (Processing)**: Generates `CaseReferenceGeneratedEvent` (references, workflow, roles).
+3. **Executor (Action)**: Triggers `CaseExecutedEvent` and final `CaseCompletedEvent`.
+4. **Learning**: Uses `intelligence_evaluator.py` to refine future responses based on results.
+
+```python
+from grid.agentic import AgenticSystem
+from pathlib import Path
+
+system = AgenticSystem(knowledge_base_path=Path("prompts/"))
+# Triggers receptionist -> lawyer -> executor pipeline
+result = await system.execute_case(case_id="123", reference_file_path="cases/ref.json")
+```
+
+### 4-Phase RAG Optimization
+The RAG system in `src/tools/rag/` follows a strict performance pipeline:
+1. **Semantic Chunking**: Split documentation at logical boundaries (functions, headers) via `SemanticChunker`.
+2. **Hybrid Search**: Combine BM25 (sparse) and vector (dense) retrieval with `RRF` (Reciprocal Rank Fusion).
+3. **Cross-Encoder Reranking**: Refine top-K results with a secondary pass using `OllamaReranker`.
+4. **Evaluation**: Automated scoring of `Context Relevance` and `Answer Accuracy` via `evaluation.py`.
+
+```python
+# Enable via environment
+export RAG_USE_HYBRID=true
+export RAG_USE_RERANKER=true
+```
+
+### Testing Patterns & Fixtures
+Use `tests/conftest.py` for shared isolation logic:
+- `setup_env`: Disables DB and Redis connections to prevent test hangs.
+- `reset_services`: Clears singleton states between tests.
+- **Async Testing**: Always use `@pytest.mark.asyncio`.
+
+```python
+@pytest.mark.asyncio
+async def test_event_flow(event_bus, sample_event):
+    await event_bus.start()
+    # Test logic here...
+    await event_bus.stop()
+```
 
 ## Before Making Changes
 
@@ -201,12 +328,14 @@ python -m tools.rag.cli query "Where is X pattern implemented?"
 - Request/response models via Pydantic
 - Middleware for CORS, logging, security
 - Never access DB directly from routes (use services)
+- Main app: `src/application/mothership/main.py`
 
 ### Database Operations
 - Use SQLAlchemy ORM (async-compatible)
 - Manage sessions through dependency injection
 - Keep database layer free of business logic
 - Use migrations via Alembic for schema changes
+- Test mode uses `sqlite:///:memory:` (configured in `tests/conftest.py`)
 
 ### Cognitive Decision Points
 For user-facing features, consider:
@@ -215,19 +344,26 @@ For user-facing features, consider:
 - Bounded rationality (simplify complex decisions)
 - Information chunking (break into manageable pieces)
 
+### Unified Fabric Integration
+- Use `unified_fabric` for async event-driven communication
+- Domain routing: `safety`, `grid`, `coinbase`
+- Safety bridge: `AISafetyBridge` for cross-project validation
+- Event schemas: `unified_fabric.event_schemas.validate_event()`
+
 ## File Reference Guide
 
 | File/Directory | Purpose | Key Files |
 |---|---|---|
 | `.cursorrules` | Core project conventions | Main reference |
-| `.cursor/rules/` | Detailed architecture guides | `architecture.md`, `coding_standards.md` |
-| `.windsurf/rules/` | Exhibit & canon governance | `grid-canon-policy.md` |
-| `docs/` | Project documentation | `WHAT_CAN_I_DO.md`, `SKILLS_RAG_QUICKSTART.md` |
-| `grid/` | Core intelligence | `essence/`, `patterns/`, `awareness/` |
-| `light_of_the_seven/` | Cognitive architecture | `cognitive_layer/` |
-| `tools/rag/` | RAG system | `rag_engine.py`, `cli.py` |
-| `application/` | Application code | API, CLI, services |
-| `tests/` | Test suite | Follow mirror structure |
+| `docs/` | Project documentation | `INTELLIGENT_SKILLS_SYSTEM.md`, `SKILLS_RAG_QUICKSTART.md`, `DEVELOPMENT_GUIDE.md` |
+| `src/grid/` | Core intelligence | `essence/`, `patterns/`, `awareness/`, `agentic/`, `skills/` |
+| `src/cognitive/` | Cognitive architecture | `cognitive_layer/`, `cognitive_engine.py` |
+| `src/tools/rag/` | RAG system | `rag_engine.py`, `cli.py` |
+| `src/application/` | FastAPI applications | `mothership/`, `canvas/`, `resonance/` |
+| `src/unified_fabric/` | Event bus & safety | `event_bus.py`, `safety_bridge.py`, `domain_routing.py` |
+| `tests/` | Test suite | Follow mirror structure with markers |
+| `pyproject.toml` | Project config | Dependencies, tool configs, pytest settings |
+| `Makefile` | Build commands | `make test`, `make lint`, `make format` |
 
 ## Decision-Making Framework
 
@@ -252,3 +388,6 @@ For user-facing features, consider:
 - Verify Ollama models installed: `ollama list`
 - Run tests with `pytest tests/ -v --tb=short`
 - Check `benchmark_metrics.json` for performance SLA compliance (0.1ms guard)
+- Verify UV environment: `uv sync --group dev --group test`
+- Check test isolation: `pytest tests/unit/ -v` (should not require external services)
+- Verify unified_fabric event bus: `pytest tests/unified_fabric/ -v`

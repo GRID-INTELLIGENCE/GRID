@@ -5,6 +5,7 @@ Comprehensive Knowledge Base Test Script
 
 Tests document ingestion, search functionality, and LLM generation.
 """
+
 import pytest
 
 pytest.importorskip("openai", reason="openai not installed")

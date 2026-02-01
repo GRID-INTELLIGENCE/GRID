@@ -1,12 +1,11 @@
-"""Streams activity events to Databricks with local SQLite fallback."""
+"""Streams activity events to a persistent store with local SQLite fallback."""
 
 import json
 import logging
-from typing import Any
+from typing import Any, Callable
 
 from sqlalchemy import text
 
-from application.mothership.db.databricks_connector import DatabricksConnector
 from grid.skills.intelligence_inventory import IntelligenceInventory
 
 logger = logging.getLogger(__name__)
@@ -15,14 +14,20 @@ logger = logging.getLogger(__name__)
 class DatabaseStreamer:
     """Handles streaming of events to persistent storage."""
 
-    def __init__(self, use_databricks: bool = True):
+    def __init__(
+        self,
+        use_databricks: bool = True,
+        databricks_connector_factory: Callable[[], Any] | None = None,
+    ):
         self.use_databricks = use_databricks
         self.local_inventory = IntelligenceInventory.get_instance()
         self.databricks = None
 
         if use_databricks:
             try:
-                self.databricks = DatabricksConnector()
+                if databricks_connector_factory is None:
+                    raise RuntimeError("Databricks connector factory not provided")
+                self.databricks = databricks_connector_factory()
                 logger.info("DatabaseStreamer: Connected to Databricks")
             except Exception as e:
                 logger.warning(f"DatabaseStreamer: Databricks connection failed, using local only: {e}")
@@ -64,9 +69,7 @@ class DatabaseStreamer:
         engine = self.databricks.create_engine()
         with engine.begin() as conn:
             # Ensure table exists (Heist Aware Schema)
-            conn.execute(
-                text(
-                    """
+            conn.execute(text("""
                 CREATE TABLE IF NOT EXISTS codebase_activity (
                     timestamp TIMESTAMP,
                     event_type STRING,
@@ -74,9 +77,7 @@ class DatabaseStreamer:
                     details STRING,
                     severity STRING
                 )
-            """
-                )
-            )
+            """))
 
             # Insert events
             for event in events:
@@ -97,7 +98,6 @@ class DatabaseStreamer:
 
 
 if __name__ == "__main__":
-    # Basic test
     from grid.security.codebase_tracker import ActivityEvent
 
     streamer = DatabaseStreamer(use_databricks=False)

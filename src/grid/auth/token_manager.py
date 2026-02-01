@@ -5,13 +5,10 @@ from typing import Any
 
 from jose import JWTError, jwt
 
-from src.application.mothership.config import MothershipSettings
+from src.grid.config.runtime_settings import RuntimeSettings
 from src.grid.infrastructure.cache import CacheFactory
 
 logger = logging.getLogger(__name__)
-
-# Load settings once or inject dependency
-settings = MothershipSettings.from_env()
 
 
 class TokenManager:
@@ -20,14 +17,16 @@ class TokenManager:
     Uses Cache backend for Denylist (Revocation).
     """
 
-    def __init__(self):
-        self.secret_key = settings.security.secret_key or "insecure-dev-secret"
-        self.algorithm = settings.security.algorithm
-        self.access_expiry = settings.security.access_token_expire_minutes
-        self.cache = CacheFactory.create(settings.cache.backend)
+    def __init__(self, settings: RuntimeSettings | None = None):
+        runtime = settings or RuntimeSettings.from_env()
+        if not runtime.security.secret_key:
+            logger.critical("Missing MOTHERSHIP_SECRET_KEY; refusing to start without a valid secret.")
+            raise ValueError("MOTHERSHIP_SECRET_KEY is required")
 
-        if not settings.security.secret_key and not settings.is_development:
-            logger.critical("No Secret Key set in Production!")
+        self.secret_key = runtime.security.secret_key
+        self.algorithm = runtime.security.algorithm
+        self.access_expiry = runtime.security.access_token_expire_minutes
+        self.cache = CacheFactory.create(runtime.cache.backend)
 
     def create_access_token(self, data: dict, expires_delta: timedelta | None = None) -> str:
         """Create a new JWT access token."""

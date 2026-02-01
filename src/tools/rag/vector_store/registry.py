@@ -138,6 +138,13 @@ def _register_builtins() -> None:
     except ImportError:
         logger.debug("In-memory vector store not available, skipping registration")
 
+    try:
+        from .pinecone_store import PineconeVectorStore
+
+        VectorStoreRegistry.register("pinecone", PineconeVectorStore)
+    except ImportError:
+        logger.debug("Pinecone not available, skipping registration")
+
 
 # Register built-in backends on module load
 _register_builtins()

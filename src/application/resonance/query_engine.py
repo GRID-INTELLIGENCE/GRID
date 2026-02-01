@@ -23,8 +23,7 @@ class ResonanceQueryEngine:
     def _init_db(self):
         """Ensure the schema is ready for querying."""
         with sqlite3.connect(self.db_path) as conn:
-            conn.executescript(
-                """
+            conn.executescript("""
                 CREATE TABLE IF NOT EXISTS activity_log (
                     id TEXT PRIMARY KEY,
                     type TEXT,
@@ -42,8 +41,7 @@ class ResonanceQueryEngine:
                     created_at TIMESTAMP,
                     FOREIGN KEY (activity_id) REFERENCES activity_log (id)
                 );
-            """
-            )
+            """)
 
     def execute_query(self, sql: str) -> pd.DataFrame:
         """

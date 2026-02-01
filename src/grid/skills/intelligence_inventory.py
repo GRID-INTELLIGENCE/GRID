@@ -129,8 +129,7 @@ class IntelligenceInventory:
 
     def _create_schema_v2(self, conn: sqlite3.Connection) -> None:
         """Create Phase 2 schema from scratch."""
-        conn.executescript(
-            """
+        conn.executescript("""
             CREATE TABLE IF NOT EXISTS skill_metadata (
                 skill_id TEXT PRIMARY KEY,
                 name TEXT NOT NULL,
@@ -185,8 +184,7 @@ class IntelligenceInventory:
                 captured_at REAL NOT NULL,
                 FOREIGN KEY (skill_id) REFERENCES skill_metadata(skill_id)
             );
-        """
-        )
+        """)
         conn.commit()
         logger.info("Created Phase 2 schema")
 
@@ -210,15 +208,13 @@ class IntelligenceInventory:
 
     def _ensure_indexes(self, conn: sqlite3.Connection) -> None:
         """Ensure all indexes exist."""
-        conn.executescript(
-            """
+        conn.executescript("""
             CREATE INDEX IF NOT EXISTS idx_exec_skill ON execution_records(skill_id);
             CREATE INDEX IF NOT EXISTS idx_exec_time ON execution_records(timestamp);
             CREATE INDEX IF NOT EXISTS idx_intel_skill ON intelligence_records(skill_id);
             CREATE INDEX IF NOT EXISTS idx_baseline_skill ON performance_baselines(skill_id);
             CREATE INDEX IF NOT EXISTS idx_baseline_version ON performance_baselines(skill_id, skill_version);
-        """
-        )
+        """)
         conn.commit()
 
     @classmethod

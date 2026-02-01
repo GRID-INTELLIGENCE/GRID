@@ -13,6 +13,10 @@
     "editor.defaultFormatter": null
   },
   "breadcrumbs.enabled": true,
+  "editor.stickyScroll.enabled": true,
+  "editor.minimap.maxColumn": 80,
+  "workbench.editor.limit.enabled": true,
+  "workbench.editor.limit.value": 10,
   "cSpell.enableFiletypes": [
     "!markdown",
     "!yaml",
@@ -38,6 +42,12 @@
   "editor.lineHeight": 24,
   "editor.minimap.enabled": true,
   "editor.minimap.renderCharacters": false,
+  "editor.rulers": [
+    80,
+    100,
+    120
+  ],
+  "editor.multiCursorModifier": "alt",
   "editor.renderLineHighlight": "gutter",
   "editor.renderWhitespace": "selection",
   "editor.smoothScrolling": true,
@@ -83,103 +93,127 @@
     "**/build/**": true,
     "**/dist/**": true,
     "**/node_modules/**": true,
-    "**/venv/**": true
-  },
-  "git.autofetch": true,
-  "git.confirmSync": false,
-  // ===== Extensions =====
-  "git.enableSmartCommit": true,
-  "gitlens.codeLens.enabled": false,
-  "gitlens.hovers.currentLine.over": "line",
-  "javascript.preferences.importModuleSpecifier": "relative",
-  "javascript.suggest.autoImports": true,
-  // ===== JavaScript/TypeScript =====
-  "javascript.updateImportsOnFileMove.enabled": "always",
-  "prettier.printWidth": 100,
-  "prettier.semi": false,
-  "prettier.singleQuote": true,
-  "prettier.trailingComma": "es5",
-  "python.analysis.autoImportCompletions": true,
-  "python.analysis.autoSearchPaths": true,
-  "python.analysis.diagnosticMode": "workspace",
-  "python.analysis.typeCheckingMode": "basic",
-  // ===== Python =====
-  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
-  "python.terminal.activateEnvironment": true,
-  "python.testing.pytestArgs": [
-    "."
-  ],
-  "python.testing.pytestEnabled": true,
-  // ===== Performance =====
-  "search.exclude": {
-    "**/*.code-search": true,
-    "**/bower_components": true,
-    "**/build": true,
-    "**/dist": true,
-    "**/node_modules": true
-  },
-  "search.followSymlinks": false,
-  "search.useGlobalIgnoreFiles": true,
-  "search.useIgnoreFiles": true,
-  // ===== Security =====
-  "security.workspace.trust.enabled": true,
-  "security.workspace.trust.untrustedFiles": "prompt",
-  "terminal.integrated.confirmOnExit": "hasChildProcesses",
-  "terminal.integrated.copyOnSelection": true,
-  "terminal.integrated.cursorBlinking": true,
-  "terminal.integrated.cursorStyle": "line",
-  "terminal.integrated.defaultProfile.windows": "PowerShell",
-  // ===== Terminal =====
-  "terminal.integrated.fontFamily": "Fira Code",
-  "terminal.integrated.fontSize": 15,
-  "terminal.integrated.profiles.windows": {
-    "Command Prompt": {
-      "icon": "terminal-cmd",
-      "path": "cmd.exe"
+    "git.enableSmartCommit": true,
+    "git.blame.statusBarItem.enabled": true,
+    "git.blame.editorDecoration.enabled": false,
+    "diffEditor.renderSideBySide": true,
+    "diffEditor.ignoreTrimWhitespace": false,
+    // ===== Extensions =====
+    "git.autofetch": true,
+    "git.confirmSync": false,
+    // ===== Extensions =====
+    "git.enableSmartCommit": true,
+    "gitlens.codeLens.enabled": false,
+    "gitlens.hovers.currentLine.over": "line",
+    "javascript.preferences.importModuleSpecifier": "relative",
+    "javascript.suggest.autoImports": true,
+    // ===== JavaScript/TypeScript =====
+    "javascript.updateImportsOnFileMove.enabled": "always",
+    "prettier.printWidth": 100,
+    "prettier.semi": false,
+    "prettier.singleQuote": true,
+    "prettier.trailingComma": "es5",
+    "python.analysis.autoImportCompletions": true,
+    "python.analysis.autoSearchPaths": true,
+    "python.analysis.diagnosticMode": "workspace",
+    "python.analysis.typeCheckingMode": "basic",
+    // ===== Python =====
+    "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
+    "python.terminal.activateEnvironment": true,
+    "python.testing.pytestArgs": [
+      "."
+    ],
+    "python.testing.pytestEnabled": true,
+    // ===== Performance =====
+    "search.exclude": {
+      "**/*.code-search": true,
+      "**/bower_components": true,
+      "**/build": true,
+      "**/dist": true,
+      "**/node_modules": true
     },
-    "Git Bash": {
-      "icon": "terminal-bash",
-      "path": "C:\\Program Files\\Git\\bin\\bash.exe"
+    "search.followSymlinks": false,
+    "search.useGlobalIgnoreFiles": true,
+    "search.useIgnoreFiles": true,
+    // ===== Security =====
+    "security.workspace.trust.enabled": true,
+    "security.workspace.trust.untrustedFiles": "prompt",
+    "terminal.integrated.confirmOnExit": "hasChildProcesses",
+    "terminal.integrated.copyOnSelection": true,
+    "terminal.integrated.cursorBlinking": true,
+    "terminal.integrated.cursorStyle": "line",
+    "terminal.integrated.defaultProfile.windows": "PowerShell",
+    // ===== Terminal (Security Protocol 0x9A) =====
+    "terminal.integrated.fontFamily": "Fira Code",
+    "terminal.integrated.fontSize": 15,
+    "terminal.integrated.env.windows": {
+      "OLLAMA_HOST": "127.0.0.1:11434",
+      "DO_NOT_TRACK": "1",
+      "SCARF_NO_ANALYTICS": "1",
+      "HF_HUB_DISABLE_TELEMETRY": "1"
     },
-    "PowerShell": {
-      "icon": "terminal-powershell",
-      "source": "PowerShell"
+    "terminal.integrated.profiles.windows": {
+      "Command Prompt": {
+        "icon": "terminal-cmd",
+        "path": "cmd.exe"
+      },
+      "Git Bash": {
+        "icon": "terminal-bash",
+        "path": "C:\\Program Files\\Git\\bin\\bash.exe"
+      },
+      "PowerShell": {
+        "icon": "terminal-powershell",
+        "source": "PowerShell",
+        "args": [
+          "-NoProfile",
+          "-NoExit",
+          "-Command",
+          "$env:PYTHONPATH='src'; function flythrough { python scripts/satellite_flythrough.py }; function rag-query { python -m tools.rag.cli query $args }; function start-mothership { python -m application.mothership.main }"
+        ]
+      },
+      "Ubuntu (WSL)": {
+        "args": [
+          "-d",
+          "Ubuntu"
+        ],
+        "icon": "terminal-linux",
+        "path": "wsl.exe"
+      }
     },
-    "Ubuntu (WSL)": {
-      "args": [
-        "-d",
-        "Ubuntu"
-      ],
-      "icon": "terminal-linux",
-      "path": "wsl.exe"
-    }
-  },
-  "terminal.integrated.scrollback": 10000,
-  "todo-tree.general.tags": [
-    "BUG",
-    "HACK",
-    "FIXME",
-    "TODO",
-    "XXX",
-    "[ ]",
-    "[x]"
-  ],
-  "todo-tree.highlights.defaultHighlight": {
-    "background": "#FF2E00",
-    "foreground": "white",
-    "icon": "alert",
-    "iconColour": "#FF2E00"
-  },
-  "typescript.preferences.importModuleSpecifier": "relative",
-  "typescript.suggest.autoImports": true,
-  "typescript.updateImportsOnFileMove.enabled": "always",
-  "window.title": "${dirty}${activeEditorShort}${separator}${rootName}",
-  "window.zoomLevel": 0,
-  // ===== UI/UX =====
-  "workbench.colorTheme": "Visual Studio Dark",
-  "workbench.editor.enablePreview": true,
-  "workbench.editor.highlightModifiedTabs": true,
-  "workbench.iconTheme": "symbols",
-  "workbench.list.smoothScrolling": true,
-  "workbench.startupEditor": "newUntitledFile"
-}
+    "terminal.integrated.scrollback": 10000,
+    "todo-tree.general.tags": [
+      "BUG",
+      "HACK",
+      "FIXME",
+      "TODO",
+      "XXX",
+      "[ ]",
+      "[x]"
+    ],
+    "todo-tree.highlights.defaultHighlight": {
+      "background": "#FF2E00",
+      "foreground": "white",
+      "icon": "alert",
+      "iconColour": "#FF2E00"
+    },
+    "typescript.preferences.importModuleSpecifier": "relative",
+    "typescript.suggest.autoImports": true,
+    "typescript.updateImportsOnFileMove.enabled": "always",
+    "window.title": "${dirty}${activeEditorShort}${separator}${rootName}",
+    "window.zoomLevel": 0,
+    // ===== UI/UX =====
+    "workbench.colorTheme": "Visual Studio Dark",
+    "workbench.editor.enablePreview": true,
+    "workbench.editor.highlightModifiedTabs": true,
+    "workbench.iconTheme": "symbols",
+    "workbench.list.smoothScrolling": true,
+    "workbench.startupEditor": "newUntitledFile",
+    // ===== NETWORK SHELTER (Protocol 0x99) =====
+    "telemetry.telemetryLevel": "off",
+    "redhat.telemetry.enabled": false,
+    "update.mode": "manual",
+    "extensions.autoUpdate": false,
+    "workbench.enableExperiments": false,
+    "http.proxySupport": "override",
+    "search.followSymlinks": false
+  }

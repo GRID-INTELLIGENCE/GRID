@@ -15,6 +15,12 @@ def db_path(tmp_path):
     return str(tmp_path / "e2e_grid.db")
 
 
+@pytest.fixture(autouse=True)
+def auth_env(monkeypatch):
+    monkeypatch.setenv("MOTHERSHIP_SECRET_KEY", "test-secret-key-123")
+    monkeypatch.setenv("MOTHERSHIP_JWT_ALGORITHM", "HS256")
+
+
 @pytest.fixture
 async def services(db_path):
     # Setup Infrastructure

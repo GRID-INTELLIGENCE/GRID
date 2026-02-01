@@ -4,12 +4,11 @@ Billing Service - Cost Calculation and Plan Management.
 
 import logging
 
-from src.application.mothership.config import MothershipSettings
-from src.grid.billing.aggregation import TIER_LIMITS, CostTier, UsageAggregator
+from src.grid.billing.aggregation import CostTier, UsageAggregator, build_tier_limits
+from src.grid.config.runtime_settings import RuntimeSettings
 from src.grid.infrastructure.database import DatabaseManager
 
 logger = logging.getLogger(__name__)
-settings = MothershipSettings.from_env()
 
 
 class BillingService:
@@ -17,9 +16,11 @@ class BillingService:
     Domain service for Billing logic: Cost Calculation, Plan Limits, Tier Management.
     """
 
-    def __init__(self, db_manager: DatabaseManager):
+    def __init__(self, db_manager: DatabaseManager, settings: RuntimeSettings | None = None):
         self.db = db_manager
         self.aggregator = UsageAggregator(db_manager)
+        runtime = settings or RuntimeSettings.from_env()
+        self._billing = runtime.billing
 
     async def get_user_tier(self, user_id: str) -> CostTier:
         """Get user's current subscription tier."""
@@ -68,7 +69,8 @@ class BillingService:
         """Calculate current bill in cents based on usage and tier overages."""
         usage = await self.get_total_usage(user_id)
         tier = await self.get_user_tier(user_id)
-        limits = TIER_LIMITS.get(tier, TIER_LIMITS[CostTier.FREE])
+        tier_limits = build_tier_limits(self._billing)
+        limits = tier_limits.get(tier, tier_limits[CostTier.FREE])
 
         # Base price
         total_cents = limits.get("monthly_price_cents", 0)
@@ -84,7 +86,7 @@ class BillingService:
             if used > limit:
                 overage = used - limit
                 # Get overage rate from settings
-                overage_rate = getattr(settings.billing, f"{event_type}_overage_cents", 1)  # Default 1 cent per unit
+                overage_rate = getattr(self._billing, f"{event_type}_overage_cents", 1)
                 total_cents += overage * overage_rate
 
         return total_cents
@@ -95,7 +97,8 @@ class BillingService:
         Returns False if user has exceeded their tier limit.
         """
         tier = await self.get_user_tier(user_id)
-        limits = TIER_LIMITS.get(tier, TIER_LIMITS[CostTier.FREE])
+        tier_limits = build_tier_limits(self._billing)
+        limits = tier_limits.get(tier, tier_limits[CostTier.FREE])
         limit = limits.get(resource_type, 0)
 
         if limit == -1:  # Unlimited
@@ -110,7 +113,8 @@ class BillingService:
         """Get comprehensive usage summary with limits and overages."""
         tier = await self.get_user_tier(user_id)
         usage = await self.get_total_usage(user_id)
-        limits = TIER_LIMITS.get(tier, TIER_LIMITS[CostTier.FREE])
+        tier_limits = build_tier_limits(self._billing)
+        limits = tier_limits.get(tier, tier_limits[CostTier.FREE])
         bill = await self.calculate_current_bill(user_id)
 
         summary = {
