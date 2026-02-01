@@ -242,6 +242,10 @@ class TestSpatialReasoning:
         ai_brain = AIBrain()
         bridge = KnowledgeGraphBridge(ai_brain)
 
+        # Clear any existing state to ensure test isolation
+        bridge.spatial_index.clear()
+        bridge.graph.clear()
+
         # Add test nodes
         await bridge.add_navigation_node((1.0, 1.0), {"type": "intersection"})
         await bridge.add_navigation_node((2.0, 2.0), {"type": "road"})
