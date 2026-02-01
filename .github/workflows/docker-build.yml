@@ -1,4 +1,6 @@
 
+name: Docker Build and Scan
+
 on:
   push:
     branches:
