@@ -149,7 +149,7 @@ def main(args):
         code = """
 import time
 def main(args):
-    time.sleep(100)
+    time.sleep(1)
     return {}
 """
         # This should timeout
