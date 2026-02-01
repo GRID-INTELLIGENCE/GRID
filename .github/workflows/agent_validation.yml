@@ -293,6 +293,7 @@ jobs:
 
       - name: Install dependencies
         run: |
+          uv sync --frozen
           uv pip install jsonschema pytest pytest-cov pyyaml
 
       - name: Validate JSON files against schemas
