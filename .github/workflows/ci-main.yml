@@ -39,6 +39,8 @@ on:
         required: false
         default: false
         type: boolean
+  repository_dispatch:
+    types: [feedback-loop]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
