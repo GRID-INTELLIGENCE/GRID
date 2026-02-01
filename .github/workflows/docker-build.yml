@@ -5,12 +5,17 @@ on:
   push:
     branches:
       - main
+      - develop
       - architecture/**
+      - "feature/**"
+      - "release/**"
+      - "hotfix/**"
     tags:
       - "v*"
   pull_request:
     branches:
       - main
+      - develop
   workflow_dispatch: {}
 
 concurrency:
