@@ -571,6 +571,7 @@ pip.conf
 
 *.md
 !README.md
+!CLAUDE.md
 !PROJECT_CHECKPOINT.md
 !.windsurf/rules/README.md
 
