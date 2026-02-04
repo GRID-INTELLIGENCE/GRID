@@ -1,219 +1,264 @@
 {
-  "[javascript]": {
-    "editor.defaultFormatter": null
-  },
-  "[json]": {
-    "editor.defaultFormatter": null
-  },
-  "[python]": {
-    "editor.defaultFormatter": "ms-python.python",
-    "editor.formatOnSave": true
-  },
-  "[typescript]": {
-    "editor.defaultFormatter": null
-  },
-  "breadcrumbs.enabled": true,
-  "editor.stickyScroll.enabled": true,
-  "editor.minimap.maxColumn": 80,
-  "workbench.editor.limit.enabled": true,
-  "workbench.editor.limit.value": 10,
-  "cSpell.enableFiletypes": [
-    "!markdown",
-    "!yaml",
-    "!json",
-    "!git-commit"
-  ],
-  // ===== Spell Check =====
-  "cSpell.userWords": [],
-  "editor.bracketPairColorization.enabled": true,
+  "window.title": "${dirty}${activeEditorShort}${separator}${rootName}",
+  "window.zoomLevel": 0,
+  "editor.fontSize": 14,
+  "editor.fontFamily": "Fira Code, Consolas, 'Courier New', monospace",
+  "editor.fontLigatures": true,
+  "editor.lineHeight": 24,
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": false,
+  "editor.trimAutoWhitespace": true,
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": false,
   "editor.codeActionsOnSave": {
     "source.fixAll": "explicit",
     "source.organizeImports": "explicit"
   },
-  "editor.cursorSmoothCaretAnimation": "on",
   "editor.defaultFormatter": null,
-  "editor.detectIndentation": false,
-  // ===== Core Editor =====
-  "editor.fontFamily": "Fira Code, Consolas, 'Courier New', monospace",
-  "editor.fontLigatures": true,
-  "editor.fontSize": 14,
-  "editor.formatOnSave": true,
-  "editor.guides.bracketPairs": "active",
-  "editor.lineHeight": 24,
-  "editor.minimap.enabled": true,
-  "editor.minimap.renderCharacters": false,
   "editor.rulers": [
     80,
     100,
     120
   ],
-  "editor.multiCursorModifier": "alt",
   "editor.renderLineHighlight": "gutter",
   "editor.renderWhitespace": "selection",
   "editor.smoothScrolling": true,
-  "editor.tabSize": 2,
-  "eslint.validate": [
-    "javascript",
-    "javascriptreact",
-    "typescript",
-    "typescriptreact"
-  ],
-  "explorer.confirmDelete": false,
-  "explorer.confirmDragAndDrop": false,
+  "editor.cursorSmoothCaretAnimation": "on",
+  "editor.multiCursorModifier": "alt",
+  "editor.bracketPairColorization.enabled": true,
+  "editor.guides.bracketPairs": "active",
+  "editor.minimap.enabled": true,
+  "editor.minimap.renderCharacters": false,
+  "editor.minimap.maxColumn": 80,
+  "editor.stickyScroll.enabled": true,
+  "editor.wordWrap": "off",
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.python",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll": "explicit",
+      "source.organizeImports": "explicit"
+    }
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": null
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": null
+  },
+  "[json]": {
+    "editor.defaultFormatter": null
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": null
+  },
+  "files.autoSave": "onFocusChange",
+  "files.autoSaveDelay": 1000,
+  "files.insertFinalNewline": true,
+  "files.trimFinalNewlines": true,
+  "files.trimTrailingWhitespace": true,
   "files.associations": {
     "*.js": "javascript",
     "*.jsx": "javascriptreact",
     "*.ts": "typescript",
-    "*.tsx": "typescriptreact"
+    "*.tsx": "typescriptreact",
+    "*.env*": "dotenv"
   },
-  // ===== Files =====
-  "files.autoSave": "onFocusChange",
-  "files.autoSaveDelay": 1000,
   "files.exclude": {
     "**/__pycache__": true,
+    "**/.pytest_cache": true,
+    "**/.mypy_cache": true,
+    "**/.ruff_cache": true,
+    "**/*.pyc": true,
     "**/.DS_Store": true,
     "**/.git": true,
     "**/.hg": true,
-    "**/.pytest_cache": true,
     "**/.svn": true,
-    "**/*.pyc": true,
-    "**/build": true,
-    "**/coverage": true,
     "**/CVS": true,
+    "**/Thumbs.db": true,
+    "**/build": true,
     "**/dist": true,
-    "**/node_modules": true,
-    "**/Thumbs.db": true
+    "**/coverage": true,
+    "**/node_modules": true
   },
-  "files.insertFinalNewline": true,
-  "files.trimFinalNewlines": true,
-  "files.trimTrailingWhitespace": true,
   "files.watcherExclude": {
     "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
     "**/.venv/**": true,
+    "**/node_modules/**": true,
     "**/build/**": true,
     "**/dist/**": true,
-    "**/node_modules/**": true,
-    "git.enableSmartCommit": true,
-    "git.blame.statusBarItem.enabled": true,
-    "git.blame.editorDecoration.enabled": false,
-    "diffEditor.renderSideBySide": true,
-    "diffEditor.ignoreTrimWhitespace": false,
-    // ===== Extensions =====
-    "git.autofetch": true,
-    "git.confirmSync": false,
-    // ===== Extensions =====
-    "git.enableSmartCommit": true,
-    "gitlens.codeLens.enabled": false,
-    "gitlens.hovers.currentLine.over": "line",
-    "javascript.preferences.importModuleSpecifier": "relative",
-    "javascript.suggest.autoImports": true,
-    // ===== JavaScript/TypeScript =====
-    "javascript.updateImportsOnFileMove.enabled": "always",
-    "prettier.printWidth": 100,
-    "prettier.semi": false,
-    "prettier.singleQuote": true,
-    "prettier.trailingComma": "es5",
-    "python.analysis.autoImportCompletions": true,
-    "python.analysis.autoSearchPaths": true,
-    "python.analysis.diagnosticMode": "workspace",
-    "python.analysis.typeCheckingMode": "basic",
-    // ===== Python =====
-    "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
-    "python.terminal.activateEnvironment": true,
-    "python.testing.pytestArgs": [
-      "."
-    ],
-    "python.testing.pytestEnabled": true,
-    // ===== Performance =====
-    "search.exclude": {
-      "**/*.code-search": true,
-      "**/bower_components": true,
-      "**/build": true,
-      "**/dist": true,
-      "**/node_modules": true
+    "**/.pytest_cache/**": true,
+    "**/.mypy_cache/**": true,
+    "**/.ruff_cache/**": true
+  },
+  "search.exclude": {
+    "**/*.code-search": true,
+    "**/bower_components": true,
+    "**/build": true,
+    "**/dist": true,
+    "**/node_modules": true,
+    "**/.venv": true,
+    "**/.git": true
+  },
+  "search.followSymlinks": false,
+  "search.useGlobalIgnoreFiles": true,
+  "search.useIgnoreFiles": true,
+  "explorer.confirmDelete": false,
+  "explorer.confirmDragAndDrop": false,
+  "breadcrumbs.enabled": true,
+  "workbench.colorTheme": "Visual Studio Dark",
+  "workbench.iconTheme": "vscode-icons",
+  "workbench.startupEditor": "newUntitledFile",
+  "workbench.editor.enablePreview": true,
+  "workbench.editor.highlightModifiedTabs": true,
+  "workbench.editor.limit.enabled": true,
+  "workbench.editor.limit.value": 10,
+  "workbench.list.smoothScrolling": true,
+  "terminal.integrated.defaultProfile.windows": "PowerShell",
+  "terminal.integrated.fontFamily": "Fira Code",
+  "terminal.integrated.fontSize": 15,
+  "terminal.integrated.cursorStyle": "line",
+  "terminal.integrated.cursorBlinking": true,
+  "terminal.integrated.copyOnSelection": true,
+  "terminal.integrated.confirmOnExit": "hasChildProcesses",
+  "terminal.integrated.scrollback": 10000,
+  "terminal.integrated.env.windows": {
+    "PYTHONPATH": "src",
+    "OLLAMA_HOST": "127.0.0.1:11434",
+    "DO_NOT_TRACK": "1",
+    "SCARF_NO_ANALYTICS": "1",
+    "HF_HUB_DISABLE_TELEMETRY": "1"
+  },
+  "terminal.integrated.profiles.windows": {
+    "Command Prompt": {
+      "path": "cmd.exe",
+      "icon": "terminal-cmd"
     },
-    "search.followSymlinks": false,
-    "search.useGlobalIgnoreFiles": true,
-    "search.useIgnoreFiles": true,
-    // ===== Security =====
-    "security.workspace.trust.enabled": true,
-    "security.workspace.trust.untrustedFiles": "prompt",
-    "terminal.integrated.confirmOnExit": "hasChildProcesses",
-    "terminal.integrated.copyOnSelection": true,
-    "terminal.integrated.cursorBlinking": true,
-    "terminal.integrated.cursorStyle": "line",
-    "terminal.integrated.defaultProfile.windows": "PowerShell",
-    // ===== Terminal (Security Protocol 0x9A) =====
-    "terminal.integrated.fontFamily": "Fira Code",
-    "terminal.integrated.fontSize": 15,
-    "terminal.integrated.env.windows": {
-      "OLLAMA_HOST": "127.0.0.1:11434",
-      "DO_NOT_TRACK": "1",
-      "SCARF_NO_ANALYTICS": "1",
-      "HF_HUB_DISABLE_TELEMETRY": "1"
+    "PowerShell": {
+      "source": "PowerShell",
+      "icon": "terminal-powershell",
+      "args": [
+        "-NoProfile"
+      ]
     },
-    "terminal.integrated.profiles.windows": {
-      "Command Prompt": {
-        "icon": "terminal-cmd",
-        "path": "cmd.exe"
-      },
-      "Git Bash": {
-        "icon": "terminal-bash",
-        "path": "C:\\Program Files\\Git\\bin\\bash.exe"
-      },
-      "PowerShell": {
-        "icon": "terminal-powershell",
-        "source": "PowerShell",
-        "args": [
-          "-NoProfile",
-          "-NoExit",
-          "-Command",
-          "$env:PYTHONPATH='src'; function flythrough { python scripts/satellite_flythrough.py }; function rag-query { python -m tools.rag.cli query $args }; function start-mothership { python -m application.mothership.main }"
-        ]
-      },
-      "Ubuntu (WSL)": {
-        "args": [
-          "-d",
-          "Ubuntu"
-        ],
-        "icon": "terminal-linux",
-        "path": "wsl.exe"
-      }
-    },
-    "terminal.integrated.scrollback": 10000,
-    "todo-tree.general.tags": [
-      "BUG",
-      "HACK",
-      "FIXME",
-      "TODO",
-      "XXX",
-      "[ ]",
-      "[x]"
-    ],
-    "todo-tree.highlights.defaultHighlight": {
-      "background": "#FF2E00",
-      "foreground": "white",
-      "icon": "alert",
-      "iconColour": "#FF2E00"
-    },
-    "typescript.preferences.importModuleSpecifier": "relative",
-    "typescript.suggest.autoImports": true,
-    "typescript.updateImportsOnFileMove.enabled": "always",
-    "window.title": "${dirty}${activeEditorShort}${separator}${rootName}",
-    "window.zoomLevel": 0,
-    // ===== UI/UX =====
-    "workbench.colorTheme": "Visual Studio Dark",
-    "workbench.editor.enablePreview": true,
-    "workbench.editor.highlightModifiedTabs": true,
-    "workbench.iconTheme": "symbols",
-    "workbench.list.smoothScrolling": true,
-    "workbench.startupEditor": "newUntitledFile",
-    // ===== NETWORK SHELTER (Protocol 0x99) =====
-    "telemetry.telemetryLevel": "off",
-    "redhat.telemetry.enabled": false,
-    "update.mode": "manual",
-    "extensions.autoUpdate": false,
-    "workbench.enableExperiments": false,
-    "http.proxySupport": "override",
-    "search.followSymlinks": false
-  }
+    "Git Bash": {
+      "path": "C:\\Program Files\\Git\\bin\\bash.exe",
+      "icon": "terminal-bash"
+    }
+  },
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
+  "python.terminal.activateEnvironment": true,
+  "python.analysis.typeCheckingMode": "basic",
+  "python.analysis.diagnosticMode": "workspace",
+  "python.analysis.autoSearchPaths": true,
+  "python.analysis.autoImportCompletions": true,
+  "python.testing.pytestEnabled": true,
+  "python.testing.pytestArgs": [
+    "."
+  ],
+  "git.autofetch": true,
+  "git.confirmSync": false,
+  "git.enableSmartCommit": true,
+  "diffEditor.renderSideBySide": true,
+  "diffEditor.ignoreTrimWhitespace": false,
+  "security.workspace.trust.enabled": true,
+  "security.workspace.trust.untrustedFiles": "prompt",
+  "security.workspace.trust.startupPrompt": "once",
+  "security.enableIntegrityCheckOnStart": true,
+  "security.promptOnSourceControlFailure": true,
+  "telemetry.telemetryLevel": "off",
+  "telemetry.enableTelemetry": false,
+  "redhat.telemetry.enabled": false,
+  "update.mode": "manual",
+  "update.showReleaseNotes": false,
+  "extensions.autoUpdate": false,
+  "extensions.ignoreRecommendations": false,
+  "extensions.recommendations": true,
+  "workbench.enableExperiments": false,
+  "workbench.settings.openDefaultSettings": false,
+  "http.proxySupport": "override",
+  "http.proxyStrictSSL": true,
+  "http.systemCertificates": true,
+  "http.proxy": "",
+  "http.proxyAuthorization": false,
+  "debug.onTaskErrors": "prompt",
+  "debug.showInStatusBar": "onFirstSessionStart",
+  "debug.logToFile": false,
+  "debug.showDebugOutput": false,
+  "extensions.recommended": false,
+  "extensions.verifySignature": true,
+  "notebook.cellToolbarLocation": "right",
+  "notebook.diff.enablePreview": true,
+  "notebook.diff.showMetadata": false,
+  "[markdown]": {
+    "editor.wordWrap": "on"
+  },
+  "remote.SSH.showLoginTerminal": false,
+  "remote.SSH.enableRemoteCommand": false,
+  "remote.extensionKind": {
+    "ms-vscode-remote.vscode-remote-extensionpack": "ui"
+  },
+  "settingsSync.keybindingsPerPlatform": false,
+  "settingsSync.machineSettingsSync": false,
+  "settingsSync.ignoredExtensions": [],
+  "settingsSync.logLevel": "off",
+  "comments.openView": "gutter",
+  "comments.collapseState": "collapsed",
+  "editor.quickSuggestions": {
+    "other": "off",
+    "comments": "off",
+    "strings": "off"
+  },
+  "editor.suggest.maxVisibleSuggestions": 12,
+  "editor.suggest.showStatusBar": false,
+  "github.authentication.enabled": true,
+  "github.authentication.useEdgeRuntime": false,
+  "github.copilot.enable": {
+    "*": true,
+    "plaintext": false,
+    "markdown": false,
+    "scminput": false
+  },
+  "github.copilot.advanced": {
+    "debug.overrideCacheDir": null,
+    "debug.overrideEngine": null,
+    "debug.overrideProxyUrl": null,
+    "debug.testOverrideProxyUrl": null,
+    "debug.overrideAuthorizationHeader": null,
+    "debug.overrideCacheDirForcompletions": null
+  },
+  "scm.autoReveal": false,
+  "scm.diffDecorationsIgnoreWhitespace": "all",
+  "scm.inputFontFamily": "editor",
+  "scm.showHistoryMax": 50,
+  "customData": [],
+  "html.autoClosingTags": true,
+  "html.autoClosingBrackets": true,
+  "html.format.wrapLineLength": 120,
+  "html.format.wrapAttributes": "auto",
+  "html.validate.scripts": true,
+  "html.validate.styles": true,
+  "css.lint.universalSelector": "warning",
+  "css.lint.float": "warning",
+  "css.lint.fontFaceProperties": "warning",
+  "json.maxItemsComputed": 5000,
+  "json.schemaDownload.enable": true,
+  "json.schemas": [],
+  "yaml.maxItemsComputed": 5000,
+  "yaml.schemas": {},
+  "yaml.validate": true,
+  "errorLens.excludePattern": [],
+  "errorLens.enableOnDiagnosticRelatedInformation": true,
+  "errorLens.showAtEndOfLine": false,
+  "cSpell.checkOnlyEnabledFileTypes": false,
+  "cSpell.ignoreWords": [],
+  "cSpell.language": "en,en-US",
+  "cSpell.onlyShowSuggestionsOnRightClick": false,
+  "cSpell.showStatus": false,
+  "cSpell.showSuggestionsLightBulb": false,
+  "cSpell.suggestionMenuType": "quickPick",
+  "cSpell.useReferenceProviderWithRename": false,
+  "cSpell.userWords": []
+}

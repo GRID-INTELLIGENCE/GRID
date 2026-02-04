@@ -20,7 +20,7 @@ from .base import SimpleSkill
 
 # Import after path is set
 try:
-    from scripts.git_intelligence import GitIntelligence
+    from scripts.git_intelligence import ComplexityEstimator, OllamaClient
 
     _INTELLIGENCE_AVAILABLE = True
 except ImportError:
@@ -29,20 +29,22 @@ except ImportError:
 
 def _analyze_git(args: Mapping[str, Any]) -> dict[str, Any]:
     """Analyze current git changes with AI."""
-    verbose = args.get("verbose", False)
-
     if not _INTELLIGENCE_AVAILABLE:
         return {
             "skill": "intelligence.git_analyze",
             "status": "error",
-            "error": "GitIntelligence module not available",
+            "error": "Git intelligence module not available",
         }
 
+    import subprocess
+
     try:
-        intel = GitIntelligence(verbose=verbose)
+        # Initialize clients
+        ollama_client = OllamaClient()
+        estimator = ComplexityEstimator(ollama_client)
 
         # Check if Ollama is available
-        if not intel.client.is_available():
+        if not ollama_client.is_available():
             return {
                 "skill": "intelligence.git_analyze",
                 "status": "offline",
@@ -50,17 +52,33 @@ def _analyze_git(args: Mapping[str, Any]) -> dict[str, Any]:
                 "message": "Install Ollama: curl https://ollama.ai/install.sh | sh",
             }
 
-        # Run analysis
-        result = intel.analyze()
+        # Get git changes
+        result = subprocess.run(["git", "diff", "--cached"], capture_output=True, text=True, timeout=30)
+        if result.returncode != 0:
+            return {
+                "skill": "intelligence.git_analyze",
+                "status": "error",
+                "error": "Failed to get git diff",
+            }
+
+        # Get staged files
+        result_files = subprocess.run(
+            ["git", "diff", "--cached", "--name-only"], capture_output=True, text=True, timeout=30
+        )
+        staged_files = result_files.stdout.strip().split("\n") if result_files.returncode == 0 else []
+
+        # Run complexity analysis
+        complexity_score = estimator.estimate(result.stdout, staged_files)
+        model = estimator.select_model(complexity_score)
 
         # Normalize output
         return {
             "skill": "intelligence.git_analyze",
-            "status": result.get("status", "analyzed"),
-            "complexity": result.get("complexity", 0),
-            "model": result.get("model", "unknown"),
-            "analysis": result.get("analysis", ""),
-            "message": result.get("message", ""),
+            "status": "analyzed",
+            "complexity": complexity_score,
+            "model": model,
+            "analysis": f"Analyzed {len(staged_files)} staged files",
+            "message": f"Complexity: {complexity_score:.2f}/10 (using {model})",
         }
 
     except Exception as e:
