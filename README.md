@@ -1,22 +1,47 @@
 # GRID - Geometric Resonance Intelligence Driver
 
-[![Tests](https://github.com/irfankabir02/GRID/actions/workflows/ci-test.yml/badge.svg?branch=main)](https://github.com/irfankabir02/GRID/actions/workflows/ci-test.yml)
-[![Quality](https://github.com/irfankabir02/GRID/actions/workflows/ci-quality.yml/badge.svg?branch=main)](https://github.com/irfankabir02/GRID/actions/workflows/ci-quality.yml)
-[![Codecov](https://codecov.io/gh/irfankabir02/GRID/branch/main/graph/badge.svg)](https://codecov.io/gh/irfankabir02/GRID)
+[![Tests](https://github.com/caraxesthebloodwyrm02/GRID/actions/workflows/ci-test.yml/badge.svg?branch=main)](https://github.com/caraxesthebloodwyrm02/GRID/actions/workflows/ci-test.yml)
+[![Quality](https://github.com/caraxesthebloodwyrm02/GRID/actions/workflows/ci-quality.yml/badge.svg?branch=main)](https://github.com/caraxesthebloodwyrm02/GRID/actions/workflows/ci-quality.yml)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Python 3.13+](https://img.shields.io/badge/python-3.13%2B-blue.svg)](https://www.python.org/downloads/)
 
-## 🌐 Landing Page
+## 🎬 Interactive Demo
 
-**Live Site:** [https://grid-intelligence.netlify.app](https://grid-intelligence.netlify.app)
+**🌐 Live Demo:** [https://grid-intelligence.netlify.app](https://grid-intelligence.netlify.app)
 
-The GRID landing page showcases the framework's capabilities, features, and philosophy. It includes:
-- Interactive product demonstration
-- Comprehensive feature overview
-- Pricing and beta signup
-- About section with project evolution story
-- FAQ with simplified, accessible answers
+Experience GRID's capabilities through our interactive terminal demo on the landing page. Watch as GRID:
 
-The landing page is located in the `landing/` directory and can be deployed to any static hosting service.
+```
+$ grid analyze src/
+
+🔍 Analyzing codebase structure...
+✓ Found 142 Python files
+✓ Detected 89 classes, 437 functions
+✓ Mapped 12 core modules
+
+📊 Complexity Analysis:
+  • Cyclomatic complexity: 8.2 avg (healthy)
+  • Maintainability index: 76/100 (good)
+  • Code duplication: 3.1% (low)
+
+🧠 Pattern Recognition:
+  • Flow patterns: Event-driven architecture (15 events)
+  • Spatial patterns: Layered DDD structure (4 layers)
+  • Cause patterns: 23 dependency chains detected
+
+💡 Recommendations:
+  1. Extract shared logic in auth module → reduce duplication by 40%
+  2. Consider breaking down UserService (complexity: 12) → target: <10
+  3. Add integration tests for payment flows → coverage gap detected
+```
+
+**Features showcased:**
+- 🎯 **Interactive Terminal** - Real-time code analysis simulation
+- 📊 **Visual Insights** - Pattern recognition and complexity metrics
+- 🤖 **AI-Powered** - Local-first intelligence with Ollama
+- 🔒 **Privacy-First** - Your code never leaves your machine
+
+**Visit the demo:** The landing page includes comprehensive features, pricing, FAQ, and project evolution story. Located in `landing/` directory.
 
 ## Overview
 
