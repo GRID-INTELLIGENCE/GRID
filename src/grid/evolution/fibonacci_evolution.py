@@ -174,9 +174,7 @@ class FibonacciEvolutionEngine:
         }
         self.evolution_history.append(evolution_state)
 
-        logger.info(
-            f"Evolved state with Fibonacci pattern: step={evolution_step}, " f"growth_factor={growth_factor:.3f}"
-        )
+        logger.info(f"Evolved state with Fibonacci pattern: step={evolution_step}, growth_factor={growth_factor:.3f}")
 
         return evolved_state
 

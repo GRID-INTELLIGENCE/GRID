@@ -312,7 +312,7 @@ def generate_assessment_report(baseline: BenchmarkResults, refined: BenchmarkRes
 - **Cost Savings**: ${cost_savings:.2f} ({cost_savings_percent:.1f}% reduction)
 - **Throughput Improvement**: {throughput_improvement:.1f}% faster
 - **Latency Improvement**: {latency_improvement:.1f}% lower average latency
-- **Accuracy Trade-off**: {refined.accuracy:.3f} vs {baseline.accuracy:.3f} ({(refined.accuracy - baseline.accuracy)*100:+.1f}%)
+- **Accuracy Trade-off**: {refined.accuracy:.3f} vs {baseline.accuracy:.3f} ({(refined.accuracy - baseline.accuracy) * 100:+.1f}%)
 
 ## Detailed Metrics
 
@@ -353,7 +353,7 @@ def generate_assessment_report(baseline: BenchmarkResults, refined: BenchmarkRes
 - **Scalability**: Can handle {refined.throughput_assets_per_second / baseline.throughput_assets_per_second:.1f}x more load
 
 ### Quality Impact
-- **Accuracy Change**: {(refined.accuracy - baseline.accuracy)*100:+.1f}% (acceptable trade-off)
+- **Accuracy Change**: {(refined.accuracy - baseline.accuracy) * 100:+.1f}% (acceptable trade-off)
 - **Precision**: {refined.precision:.3f} (maintained)
 - **Recall**: {refined.recall:.3f} (maintained)
 

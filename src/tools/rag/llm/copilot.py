@@ -33,11 +33,7 @@ class CopilotLLM(BaseLLMProvider):
     def _check_copilot_cli(self) -> bool:
         """Check if Copilot CLI is installed and available."""
         try:
-            result = subprocess.run(
-                ["copilot", "--version"],
-                capture_output=True,
-                timeout=5
-            )
+            result = subprocess.run(["copilot", "--version"], capture_output=True, timeout=5)
             return result.returncode == 0
         except (FileNotFoundError, subprocess.TimeoutExpired):
             return False
@@ -61,7 +57,7 @@ class CopilotLLM(BaseLLMProvider):
                 with httpx.Client(timeout=10) as client:
                     response = client.get(url)
                     response.raise_for_status()
-                    soup = BeautifulSoup(response.text, 'html.parser')
+                    soup = BeautifulSoup(response.text, "html.parser")
 
                     # Remove script and style elements
                     for script in soup(["script", "style"]):
@@ -70,14 +66,14 @@ class CopilotLLM(BaseLLMProvider):
                     title = soup.title.string if soup.title else url
                     main_content = ""
 
-                    for tag in ['article', 'main', '.content', 'body']:
+                    for tag in ["article", "main", ".content", "body"]:
                         element = soup.select_one(tag)
                         if element:
-                            main_content = element.get_text(separator=' ', strip=True)
+                            main_content = element.get_text(separator=" ", strip=True)
                             break
 
                     if not main_content:
-                        main_content = soup.get_text(separator=' ', strip=True)
+                        main_content = soup.get_text(separator=" ", strip=True)
 
                     if len(main_content) > 2000:
                         main_content = main_content[:2000] + "..."
@@ -95,6 +91,7 @@ class CopilotLLM(BaseLLMProvider):
             return prompt
 
         import re
+
         url_pattern = r'https?://[^\s<>"]+|www\.[^\s<>"]+'
         urls = re.findall(url_pattern, prompt)
 
@@ -124,7 +121,7 @@ class CopilotLLM(BaseLLMProvider):
                 ["copilot", "chat", "--model", self.model, enhanced_prompt],
                 capture_output=True,
                 text=True,
-                timeout=self.timeout
+                timeout=self.timeout,
             )
 
             if result.returncode == 0:
@@ -144,7 +141,7 @@ class CopilotLLM(BaseLLMProvider):
         system: str | None = None,
         temperature: float = 0.7,
         **kwargs: Any,
-    ) -> Generator[str, None, None]:
+    ) -> Generator[str]:
         """Stream text generation."""
         yield self.generate(prompt, system, temperature, **kwargs)
 
@@ -168,7 +165,7 @@ class CopilotLLM(BaseLLMProvider):
         system: str | None = None,
         temperature: float = 0.7,
         **kwargs: Any,
-    ) -> AsyncGenerator[str, None]:
+    ) -> AsyncGenerator[str]:
         """Stream text generation asynchronously."""
         result = await self.async_generate(prompt, system, temperature, **kwargs)
         yield result

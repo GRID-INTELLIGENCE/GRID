@@ -65,7 +65,7 @@ class LoadTest:
 
             except Exception as e:
                 errors += 1
-                print(f"  User {user_id} query {i+1} failed: {e}")
+                print(f"  User {user_id} query {i + 1} failed: {e}")
 
         # Delete session
         self.engine.delete_session(session_id)
@@ -79,7 +79,9 @@ class LoadTest:
             "p95_latency_ms": (
                 statistics.quantiles(latencies, n=100)[94]
                 if len(latencies) >= 100
-                else max(latencies) if latencies else 0
+                else max(latencies)
+                if latencies
+                else 0
             ),
         }
 
@@ -87,10 +89,10 @@ class LoadTest:
         self, num_users: int = 100, queries_per_user: int = 10, concurrent_users: int = 10
     ) -> dict[str, any]:
         """Run load test with multiple concurrent users."""
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print(f"LOAD TEST: {num_users} users, {queries_per_user} queries each")
         print(f"Concurrent users: {concurrent_users}")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
 
         start_time = time.perf_counter()
 
@@ -125,9 +127,9 @@ class LoadTest:
         success_rate = ((total_queries - total_errors) / total_queries) * 100 if total_queries > 0 else 0
         queries_per_second = total_queries / total_time if total_time > 0 else 0
 
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print("LOAD TEST RESULTS")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
         print(f"Total Users:     {num_users}")
         print(f"Total Queries:   {total_queries}")
         print(f"Total Errors:    {total_errors}")
@@ -142,9 +144,9 @@ class LoadTest:
         print(f"  P99:           {statistics.quantiles(all_latencies, n=100)[98]:.2f}ms")
 
         # Performance targets
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print("PERFORMANCE TARGETS")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
 
         target_success = "✅ PASS" if success_rate >= 99 else "❌ FAIL"
         print(f"  Success Rate (≥99%):         {target_success} ({success_rate:.2f}%)")
@@ -172,9 +174,9 @@ class LoadTest:
 
     async def test_stress_load(self, max_users: int = 200) -> dict[str, any]:
         """Test system under increasing load."""
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print("STRESS TEST: Increasing Load")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
 
         results = []
 
@@ -191,9 +193,9 @@ class LoadTest:
                 print(f"\n⚠️  System degraded at {num_users} users")
                 break
 
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print("STRESS TEST SUMMARY")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
 
         for i, result in enumerate(results):
             print(f"\n{result['num_users']} users:")

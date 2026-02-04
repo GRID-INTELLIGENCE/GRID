@@ -73,13 +73,13 @@ A workflow or tool that bridges the gap between complex imagination and daily ca
 {manifest_text}
 
 ## 🏰 The Staircase (Strategic Route)
-{self._format_route(path.output.get('route', []))}
+{self._format_route(path.output.get("route", []))}
 
 ## 🛠️ Relevant Skills
-{self._format_skills(skills.output.get('skills', []))}
+{self._format_skills(skills.output.get("skills", []))}
 
 ## 📝 Daily Resonance
-{spark(raw_input, persona="resonance").output.get('message', 'Stay static in your purpose while the stairs move.')}
+{spark(raw_input, persona="resonance").output.get("message", "Stay static in your purpose while the stairs move.")}
 
 ---
 *Created by Spark Manifest Pipeline*

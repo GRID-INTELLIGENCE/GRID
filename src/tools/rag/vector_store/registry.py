@@ -83,7 +83,7 @@ class VectorStoreRegistry:
 
         if backend_class is None:
             available = ", ".join(cls.list_backends())
-            raise ValueError(f"Unknown vector store provider: '{provider}'. " f"Available: {available}")
+            raise ValueError(f"Unknown vector store provider: '{provider}'. Available: {available}")
 
         try:
             logger.info(f"Creating vector store with provider: {provider}")

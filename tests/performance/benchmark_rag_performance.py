@@ -38,9 +38,9 @@ class PerformanceBenchmark:
 
     async def benchmark_query_latency(self, num_queries: int = 100) -> dict[str, float]:
         """Benchmark query latency."""
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print("Benchmarking Query Latency")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
 
         queries = [
             "What is GRID?",
@@ -62,7 +62,7 @@ class PerformanceBenchmark:
             latencies.append(latency_ms)
 
             if i % 10 == 0:
-                print(f"  Query {i+1}/{num_queries}: {latency_ms:.2f}ms")
+                print(f"  Query {i + 1}/{num_queries}: {latency_ms:.2f}ms")
 
         self.results["query_latencies"] = latencies
 
@@ -78,9 +78,9 @@ class PerformanceBenchmark:
 
     async def benchmark_session_management(self, num_sessions: int = 100) -> dict[str, float]:
         """Benchmark session management operations."""
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print("Benchmarking Session Management")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
 
         # Session creation
         create_latencies = []
@@ -95,7 +95,7 @@ class PerformanceBenchmark:
             create_latencies.append(latency_ms)
 
             if i % 10 == 0:
-                print(f"    Created {i+1}/{num_sessions} sessions")
+                print(f"    Created {i + 1}/{num_sessions} sessions")
 
         self.results["session_create_latencies"] = create_latencies
 
@@ -111,7 +111,7 @@ class PerformanceBenchmark:
             get_latencies.append(latency_ms)
 
             if i % 10 == 0:
-                print(f"    Retrieved {i+1}/{num_sessions} sessions")
+                print(f"    Retrieved {i + 1}/{num_sessions} sessions")
 
         self.results["session_get_latencies"] = get_latencies
 
@@ -127,7 +127,7 @@ class PerformanceBenchmark:
             delete_latencies.append(latency_ms)
 
             if i % 10 == 0:
-                print(f"    Deleted {i+1}/{num_sessions} sessions")
+                print(f"    Deleted {i + 1}/{num_sessions} sessions")
 
         self.results["session_delete_latencies"] = delete_latencies
 
@@ -139,9 +139,9 @@ class PerformanceBenchmark:
 
     async def benchmark_concurrent_queries(self, num_concurrent: int = 50) -> dict[str, float]:
         """Benchmark concurrent query handling."""
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print(f"Benchmarking Concurrent Queries ({num_concurrent} concurrent)")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
 
         query = "What is the GRID architecture?"
         session_id = "concurrent-benchmark-session"
@@ -172,9 +172,9 @@ class PerformanceBenchmark:
 
     async def benchmark_memory_usage(self) -> dict[str, float]:
         """Benchmark memory usage."""
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print("Benchmarking Memory Usage")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
 
         tracemalloc.start()
 
@@ -214,9 +214,9 @@ class PerformanceBenchmark:
 
     def print_summary(self):
         """Print benchmark summary."""
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print("PERFORMANCE BENCHMARK SUMMARY")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
 
         # Query latency
         if self.results["query_latencies"]:
@@ -246,9 +246,9 @@ class PerformanceBenchmark:
             print(f"  P95:    {statistics.quantiles(cq, n=100)[94]:.2f}ms")
 
         # Performance targets
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print("PERFORMANCE TARGETS")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
 
         if self.results["query_latencies"]:
             p95 = statistics.quantiles(self.results["query_latencies"], n=100)[94]
@@ -267,9 +267,9 @@ class PerformanceBenchmark:
 
     async def run_all_benchmarks(self):
         """Run all benchmarks."""
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print("ENHANCED RAG SERVER PERFORMANCE BENCHMARK")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
 
         # Query latency
         await self.benchmark_query_latency(num_queries=100)

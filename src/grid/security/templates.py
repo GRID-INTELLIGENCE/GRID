@@ -144,7 +144,7 @@ def generate_docker_compose(config: dict[str, Any], output_path: str) -> None:
     restart: unless-stopped
 
     environment:
-{chr(10).join(f'      - {k}={v}' for k, v in config.items() if v and not k.startswith('GRID_K8S'))}
+{chr(10).join(f"      - {k}={v}" for k, v in config.items() if v and not k.startswith("GRID_K8S"))}
 
     volumes:
       - ./logs:/app/logs
@@ -155,11 +155,11 @@ def generate_docker_compose(config: dict[str, Any], output_path: str) -> None:
 
     resources:
       limits:
-        memory: {config.get('GRID_MAX_MEMORY_MB', '2048')}M
+        memory: {config.get("GRID_MAX_MEMORY_MB", "2048")}M
         cpus: '{config.get("GRID_MAX_CPU_PERCENT", "80")}%'
 
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000{config.get('GRID_HEALTH_ENDPOINT', '/health')}"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000{config.get("GRID_HEALTH_ENDPOINT", "/health")}"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -191,9 +191,9 @@ def generate_kubernetes_manifests(config: dict[str, Any], output_dir: str) -> No
 kind: ConfigMap
 metadata:
   name: grid-config
-  namespace: {config.get('GRID_NAMESPACE', 'default')}
+  namespace: {config.get("GRID_NAMESPACE", "default")}
 data:
-{chr(10).join(f'  {k}: "{v}"' for k, v in config.items() if v and not any(sensitive in k for sensitive in ['TOKEN', 'KEY', 'SECRET', 'PASSWORD']))}
+{chr(10).join(f'  {k}: "{v}"' for k, v in config.items() if v and not any(sensitive in k for sensitive in ["TOKEN", "KEY", "SECRET", "PASSWORD"]))}
 """
 
     # Secret (for sensitive values)
@@ -201,7 +201,7 @@ data:
 kind: Secret
 metadata:
   name: grid-secrets
-  namespace: {config.get('GRID_NAMESPACE', 'default')}
+  namespace: {config.get("GRID_NAMESPACE", "default")}
 type: Opaque
 data:
   # Values should be base64 encoded
@@ -213,7 +213,7 @@ data:
 kind: Deployment
 metadata:
   name: grid-deployment
-  namespace: {config.get('GRID_NAMESPACE', 'default')}
+  namespace: {config.get("GRID_NAMESPACE", "default")}
 spec:
   replicas: 3
   selector:
@@ -241,19 +241,19 @@ spec:
             memory: "512Mi"
             cpu: "250m"
           limits:
-            memory: "{config.get('GRID_MAX_MEMORY_MB', '2048')}Mi"
-            cpu: "{config.get('GRID_MAX_CPU_PERCENT', '80')}%"
+            memory: "{config.get("GRID_MAX_MEMORY_MB", "2048")}Mi"
+            cpu: "{config.get("GRID_MAX_CPU_PERCENT", "80")}%"
 
         livenessProbe:
           httpGet:
-            path: {config.get('GRID_LIVENESS_PATH', '/health/live')}
+            path: {config.get("GRID_LIVENESS_PATH", "/health/live")}
             port: 8000
           initialDelaySeconds: 30
           periodSeconds: 10
 
         readinessProbe:
           httpGet:
-            path: {config.get('GRID_READINESS_PATH', '/health/ready')}
+            path: {config.get("GRID_READINESS_PATH", "/health/ready")}
             port: 8000
           initialDelaySeconds: 5
           periodSeconds: 5
@@ -276,8 +276,8 @@ spec:
     service = f"""apiVersion: v1
 kind: Service
 metadata:
-  name: {config.get('GRID_SERVICE_NAME', 'grid-service')}
-  namespace: {config.get('GRID_NAMESPACE', 'default')}
+  name: {config.get("GRID_SERVICE_NAME", "grid-service")}
+  namespace: {config.get("GRID_NAMESPACE", "default")}
 spec:
   selector:
     app: grid

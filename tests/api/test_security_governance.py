@@ -1218,7 +1218,6 @@ class TestSecurityIntegrationScenarios:
                 await asyncio.sleep(0.1)
 
         async def streaming_handler(payload: dict):
-
             return EventSourceResponse(stream_generator())
 
         registry = get_ghost_registry()

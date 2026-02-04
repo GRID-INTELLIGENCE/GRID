@@ -56,6 +56,24 @@ class GhostSkillEngine:
         return {"status": "simulated", "result": f"Mock result for {skill_id}"}
 
 
+class EventBusAdapter:
+    """Adapter for GRID EventBus to match EventBusProtocol."""
+
+    def __init__(self, bus: Any) -> None:
+        self._bus = bus
+
+    async def emit(self, event_name: str, data: dict[str, Any]) -> None:
+        if hasattr(self._bus, "emit"):
+            await self._bus.emit(event_name, data)
+            return
+
+        if hasattr(self._bus, "publish"):
+            await self._bus.publish({"event_type": event_name, **data})
+            return
+
+        raise AttributeError("Event bus does not support emit or publish")
+
+
 # --- Hook System (Debug & Observability) ---
 
 
@@ -103,7 +121,7 @@ class GridBridge:
         try:
             from grid.agentic.event_bus import EventBus
 
-            cls._event_bus = EventBus()
+            cls._event_bus = EventBusAdapter(EventBus())
             logger.info("Connected to GRID EventBus")
         except ImportError:
             logger.info("GRID EventBus not found, using GhostEventBus")
@@ -113,7 +131,7 @@ class GridBridge:
     def _load_skill_engine(cls):
         # Hypothetical import path for skill engine adapter in grid
         try:
-            from grid.skills.engine import SkillCallingEngine
+            from grid.skills.calling_engine import SkillCallingEngine
 
             cls._skill_engine = SkillCallingEngine()
             logger.info("Connected to GRID SkillEngine")

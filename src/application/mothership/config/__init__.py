@@ -362,7 +362,7 @@ class SecuritySettings:
                 try:
                     import hashlib
 
-                    from .security.secret_validation import mask_secret
+                    from ..security.secret_validation import mask_secret
 
                     secret_hash = hashlib.sha256(self.secret_key.encode()).hexdigest()[:16]
                     masked_secret = mask_secret(self.secret_key)
@@ -755,7 +755,7 @@ class MothershipSettings:
             SecretValidationError: If fail_fast=True and in production with critical security issues
             ValueError: If fail_fast=True and in production with critical configuration issues
         """
-        from .security.secret_validation import SecretValidationError
+        from ..security.secret_validation import SecretValidationError
 
         environment = self.environment.value.lower()
         issues = []

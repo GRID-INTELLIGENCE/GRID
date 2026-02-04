@@ -1,11 +1,12 @@
 import logging
 import time
+from typing import Any, Callable
 
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from src.grid.config.runtime_settings import RuntimeSettings
-from src.grid.infrastructure.cache import CacheFactory
+from grid.config.runtime_settings import RuntimeSettings
+from grid.infrastructure.cache import CacheFactory
 
 logger = logging.getLogger(__name__)
 
@@ -53,12 +54,12 @@ class RateLimiter:
 
 
 class RateLimitMiddleware(BaseHTTPMiddleware):
-    def __init__(self, app, exclude_paths: list[str] = None):
+    def __init__(self, app: Any, exclude_paths: list[str] | None = None):
         super().__init__(app)
         self.limiter = RateLimiter()
         self.exclude_paths = exclude_paths or ["/docs", "/openapi.json", "/health", "/metrics"]
 
-    async def dispatch(self, request: Request, call_next):
+    async def dispatch(self, request: Request, call_next: Callable[..., Any]) -> Response:
         if any(request.url.path.startswith(p) for p in self.exclude_paths):
             return await call_next(request)
 

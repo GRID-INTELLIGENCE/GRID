@@ -323,9 +323,9 @@ class AgenticSystem:
 
         results = []
         for i in range(max_iterations):
-            logger.info(f"Lawyer iteration {i+1}/{max_iterations}")
+            logger.info(f"Lawyer iteration {i + 1}/{max_iterations}")
             result = await self.execute_case(
-                case_id=case_id, reference_file_path=reference_file_path, agent_role="Lawyer", task=f"/iterate/{i+1}"
+                case_id=case_id, reference_file_path=reference_file_path, agent_role="Lawyer", task=f"/iterate/{i + 1}"
             )
             results.append(result)
 

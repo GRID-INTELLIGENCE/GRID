@@ -149,7 +149,7 @@ class AISafetyGuard:
             # Add safety disclaimer
             if response.safety_level != AISafetyLevel.PROHIBITED:
                 response.explanation = (
-                    f"{response.explanation or ''}\n" "[AI Safety: This response has been filtered and sanitized]"
+                    f"{response.explanation or ''}\n[AI Safety: This response has been filtered and sanitized]"
                 )
 
         return response

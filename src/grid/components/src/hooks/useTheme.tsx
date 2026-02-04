@@ -1,21 +1,21 @@
 import React, { ReactNode, createContext, useContext } from "react";
 import { Theme } from "../types";
 
-// Default theme configuration
+// Default theme configuration using GRID branding tokens
 export const defaultTheme: Theme = {
   colors: {
-    primary: "#3b82f6", // Blue-500
-    secondary: "#64748b", // Slate-500
-    accent: "#8b5cf6", // Violet-500
-    background: "#0f172a", // Slate-900
-    surface: "#1e293b", // Slate-800
-    text: "#f1f5f9", // Slate-100
-    textSecondary: "#94a3b8", // Slate-400
-    border: "#334155", // Slate-700
-    error: "#ef4444", // Red-500
-    warning: "#f59e0b", // Amber-500
-    success: "#10b981", // Emerald-500
-    info: "#06b6d4", // Cyan-500
+    primary: "#00D9FF", // Cyan-500
+    secondary: "#5A5A6E", // Graphite-500
+    accent: "#33E0FF", // Cyan-400
+    background: "#0A0A0F", // Graphite-950
+    surface: "#14141A", // Graphite-900
+    text: "#FAFAFC", // Graphite-50
+    textSecondary: "#BABAC8", // Graphite-300
+    border: "#2A2A36", // Graphite-700
+    error: "#EF4444", // Red-500
+    warning: "#F59E0B", // Amber-500
+    success: "#10B981", // Emerald-500
+    info: "#00D9FF", // Cyan-500
   },
   spacing: {
     xs: "0.25rem", // 4px
@@ -27,7 +27,7 @@ export const defaultTheme: Theme = {
   },
   typography: {
     fontFamily:
-      'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      "'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
     fontSize: {
       xs: "0.75rem", // 12px
       sm: "0.875rem", // 14px

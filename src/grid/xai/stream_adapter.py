@@ -4,13 +4,24 @@ Handles streaming XAI responses with chunking and progress tracking.
 """
 
 import asyncio
+import inspect
 import logging
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 logger = logging.getLogger(__name__)
+
+if TYPE_CHECKING:
+    from grid.xai.explainer import XAIExplainer
+
+else:
+    try:
+        from grid.xai.explainer import XAIExplainer  # type: ignore
+    except ImportError:
+        XAIExplainer = None  # type: ignore
+        logger.warning("XAIExplainer not available, using fallback implementation")
 
 
 @dataclass
@@ -21,9 +32,9 @@ class StreamChunk:
     content: str
     sequence_number: int
     is_complete: bool = False
-    metadata: dict[str, Any] = None
+    metadata: dict[str, Any] | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.metadata is None:
             self.metadata = {}
 
@@ -34,7 +45,7 @@ class StreamProgress:
 
     total_chunks: int = 0
     processed_chunks: int = 0
-    start_time: datetime = None
+    start_time: datetime | None = None
     estimated_completion: float = 0.0
 
     def get_completion_percentage(self) -> float:
@@ -44,6 +55,10 @@ class StreamProgress:
 
     def get_eta(self) -> str:
         if self.processed_chunks == 0 or self.estimated_completion == 0:
+            return "Calculating..."
+
+        # Check if start_time is None to avoid errors
+        if self.start_time is None:
             return "Calculating..."
 
         elapsed = (datetime.now() - self.start_time).total_seconds()
@@ -99,7 +114,7 @@ class XAIStreamAdapter:
         Returns:
             List of processed chunks
         """
-        chunks = []
+        chunks: list[StreamChunk] = []
         progress = StreamProgress(total_chunks=0, processed_chunks=0, start_time=datetime.now())
 
         try:
@@ -108,12 +123,22 @@ class XAIStreamAdapter:
                     await self.pause_event.wait()
 
                 # Process chunk based on response format
-                if hasattr(chunk_data, "content"):
+                if isinstance(chunk_data, dict):
+                    content = chunk_data.get("content") or chunk_data.get("text") or str(chunk_data)
+                    raw_metadata = chunk_data.get("metadata")
+                    metadata = raw_metadata if isinstance(raw_metadata, dict) else {}
+                    chunk = StreamChunk(
+                        chunk_id=f"{stream_id}_{len(chunks)}",
+                        content=str(content),
+                        sequence_number=len(chunks),
+                        metadata=metadata,
+                    )
+                elif hasattr(chunk_data, "content"):
                     chunk = StreamChunk(
                         chunk_id=f"{stream_id}_{len(chunks)}",
                         content=chunk_data.content,
                         sequence_number=len(chunks),
-                        metadata=chunk_data.get("metadata", {}),
+                        metadata=getattr(chunk_data, "metadata", {}) or {},
                     )
                 elif hasattr(chunk_data, "text"):
                     chunk = StreamChunk(
@@ -137,14 +162,18 @@ class XAIStreamAdapter:
                 # Call progress callback if provided
                 if progress_callback:
                     try:
-                        await progress_callback(stream_id, progress)
+                        callback_result = progress_callback(stream_id, progress)
+                        await self._maybe_await(callback_result)
                     except Exception as e:
                         logger.error(f"Progress callback error: {e}")
 
                 # Call explanation generator if provided
                 if explanation_generator:
                     try:
-                        explanation = await explanation_generator(chunk, progress)
+                        explanation_result = explanation_generator(chunk, progress)
+                        explanation = await self._maybe_await(explanation_result)
+                        if chunk.metadata is None:
+                            chunk.metadata = {}
                         chunk.metadata["explanation"] = explanation
                     except Exception as e:
                         logger.error(f"Explanation generator error: {e}")
@@ -153,9 +182,16 @@ class XAIStreamAdapter:
                 await asyncio.sleep(0.01)
 
                 # Check if stream is complete
-                if hasattr(chunk_data, "done") and chunk_data.done:
+                if not isinstance(chunk_data, dict) and hasattr(chunk_data, "done") and chunk_data.done:
                     chunk.is_complete = True
-                    progress.estimated_completion = (datetime.now() - progress.start_time).total_seconds()
+                    # Only calculate estimated completion if start_time is not None
+                    if progress.start_time is not None:
+                        progress.estimated_completion = (datetime.now() - progress.start_time).total_seconds()
+                    break
+                if isinstance(chunk_data, dict) and chunk_data.get("done"):
+                    chunk.is_complete = True
+                    if progress.start_time is not None:
+                        progress.estimated_completion = (datetime.now() - progress.start_time).total_seconds()
                     break
 
         except Exception as e:
@@ -209,7 +245,7 @@ class XAIStreamAdapter:
         """
         return self.active_streams.copy()
 
-    async def cleanup_completed_streams(self):
+    async def cleanup_completed_streams(self) -> None:
         """
         Clean up completed streams from memory.
         """
@@ -239,43 +275,76 @@ class XAIStreamAdapter:
             "max_concurrent_streams": self.max_concurrent_streams,
         }
 
+    async def _maybe_await(self, result: Any) -> Any:
+        if inspect.isawaitable(result):
+            return await result
+        return result
 
-# Integration with existing XAI explainer
-try:
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
     from grid.xai.explainer import XAIExplainer
 
-    class EnhancedXAIAdapter(XAIStreamAdapter):
+else:
+    try:
+        from grid.xai.explainer import XAIExplainer  # type: ignore
+    except ImportError:
+        XAIExplainer = None  # type: ignore
+        logger.warning("XAIExplainer not available, using fallback implementation")
+
+
+class EnhancedXAIAdapter(XAIStreamAdapter):
+    """
+    Enhanced adapter that combines streaming capabilities with XAI explanations.
+    Falls back to basic explanations when XAIExplainer is unavailable.
+    """
+
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+        self.explainer = XAIExplainer() if XAIExplainer is not None else None
+
+    async def process_with_explanation(
+        self,
+        response_stream: Any,
+        stream_id: str,
+        context: dict[str, Any] | None = None,
+        progress_callback: Callable | None = None,
+    ) -> dict[str, Any]:
         """
-        Enhanced adapter that combines streaming capabilities with XAI explanations.
+        Process streaming response with enhanced explanations.
         """
+        explanation_generator = self._generate_explanation if self.explainer is not None else None
+        chunks = await self.process_streaming_response(
+            response_stream=response_stream,
+            stream_id=stream_id,
+            explanation_generator=explanation_generator,
+            progress_callback=progress_callback,
+        )
 
-        def __init__(self, **kwargs):
-            super().__init__(**kwargs)
-            self.explainer = XAIExplainer()
+        if self.explainer is None:
+            fallback_explanation = {
+                "stream_id": stream_id,
+                "chunks_processed": len(chunks),
+                "status": "completed"
+                if chunks and all(hasattr(c, "is_complete") and c.is_complete for c in chunks)
+                else "in_progress",
+                "cognitive_load": len(chunks) / 100.0 if chunks else 0.0,  # Simple load metric
+            }
 
-        async def process_with_explanation(
-            self,
-            response_stream: Any,
-            stream_id: str,
-            context: dict[str, Any] = None,
-            progress_callback: Callable | None = None,
-        ) -> dict[str, Any]:
-            """
-            Process streaming response with enhanced explanations.
-            """
-            chunks = await self.process_streaming_response(
-                response_stream=response_stream,
-                stream_id=stream_id,
-                explanation_generator=self._generate_explanation,
-                progress_callback=progress_callback,
-            )
-
-            # Generate comprehensive explanation
-            final_explanation = await self.explainer.synthesize_explanation(
+            return {
+                "stream_id": stream_id,
+                "chunks": len(chunks),
+                "explanation": fallback_explanation,
+                "performance_metrics": self.get_performance_metrics(),
+            }
+        else:
+            final_explanation = self.explainer.synthesize_explanation(
                 decision_id=stream_id,
-                context=context,
+                context=context or {},  # Ensure context is not None
                 detected_patterns=[],  # Could be extracted from response
                 cognitive_state={},  # Could be derived from context
+                rationale="Generated explanation for streaming response",
             )
 
             return {
@@ -285,55 +354,28 @@ try:
                 "performance_metrics": self.get_performance_metrics(),
             }
 
-        async def _generate_explanation(self, chunk: StreamChunk, progress: StreamProgress) -> dict[str, Any]:
-            """
-            Generate explanation for a specific chunk.
-            """
-            return await self.explainer.explain_case_execution(
+    async def _generate_explanation(self, chunk: StreamChunk, progress: StreamProgress) -> dict[str, Any]:
+        """
+        Generate explanation for a specific chunk.
+        """
+        if self.explainer is None:
+            return {
+                "chunk_id": chunk.chunk_id,
+                "content": chunk.content,
+                "metadata": chunk.metadata or {},
+                "cognitive_state": {
+                    "load": progress.processed_chunks / progress.total_chunks if progress.total_chunks > 0 else 0,
+                    "processing_mode": "streaming",
+                },
+            }
+        else:
+            explanation = self.explainer.explain_case_execution(
                 case_id=chunk.chunk_id,
-                result={"content": chunk.content, "metadata": chunk.metadata},
+                result={"content": chunk.content, "metadata": chunk.metadata or {}},
                 cognitive_state={
-                    "load": progress.processed_chunks / progress.total_chunks,
+                    "load": progress.processed_chunks / progress.total_chunks if progress.total_chunks > 0 else 0,
                     "processing_mode": "streaming",
                 },
             )
 
-except ImportError:
-    logger.warning("XAIExplainer not available, using fallback implementation")
-
-    class EnhancedXAIAdapter(XAIStreamAdapter):
-        """
-        Fallback enhanced adapter without XAI explainer integration.
-        """
-
-        async def process_with_explanation(
-            self,
-            response_stream: Any,
-            stream_id: str,
-            context: dict[str, Any] = None,
-            progress_callback: Callable | None = None,
-        ) -> dict[str, Any]:
-            """
-            Process streaming response with fallback explanations.
-            """
-            chunks = await self.process_streaming_response(
-                response_stream=response_stream,
-                stream_id=stream_id,
-                explanation_generator=None,  # No explanation generator
-                progress_callback=progress_callback,
-            )
-
-            # Simple fallback explanation
-            fallback_explanation = {
-                "stream_id": stream_id,
-                "chunks_processed": len(chunks),
-                "status": "completed" if all(c.is_complete for c in chunks) else "in_progress",
-                "cognitive_load": len(chunks) / 100.0,  # Simple load metric
-            }
-
-            return {
-                "stream_id": stream_id,
-                "chunks": len(chunks),
-                "explanation": fallback_explanation,
-                "performance_metrics": self.get_performance_metrics(),
-            }
+            return explanation

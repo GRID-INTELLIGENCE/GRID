@@ -108,7 +108,7 @@ class MetricsWriter:
                 compression_ratio, coherence_level, entanglement_count, integrity_check,
                 success, source_module, metadata
             )
-            VALUES {','.join(values)}
+            VALUES {",".join(values)}
             """
 
             try:
@@ -174,7 +174,7 @@ class MetricsWriter:
                 timestamp, trace_id, modality, duration_ms, coherence, raw_size,
                 source, success, error_message, metadata
             )
-            VALUES {','.join(values)}
+            VALUES {",".join(values)}
             """
 
             try:

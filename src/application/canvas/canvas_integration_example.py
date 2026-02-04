@@ -68,7 +68,7 @@ async def canvas_wheel_integration_demo():
 
     for i, routing_task in enumerate(routing_queries, 1):
         print(f"   Operation {i}: {routing_task['description']}")
-        print(f"   Query: \"{routing_task['query']}\"")
+        print(f'   Query: "{routing_task["query"]}"')
 
         # Perform routing
         result = await canvas.route(query=routing_task["query"], max_results=3, enable_motivation=False)

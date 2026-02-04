@@ -61,7 +61,7 @@ async def demo_conversational_rag():
     ]
 
     for i, (query, answer) in enumerate(mock_responses):
-        print(f"\n   Query {i+1}: {query}")
+        print(f"\n   Query {i + 1}: {query}")
 
         # Create mock result
         result = {
@@ -69,7 +69,7 @@ async def demo_conversational_rag():
             "sources": [
                 {
                     "text": "Documentation about GRID system.",
-                    "metadata": {"path": f"docs/grid_system_doc_{i+1}.md", "chunk_index": 1},
+                    "metadata": {"path": f"docs/grid_system_doc_{i + 1}.md", "chunk_index": 1},
                 }
             ],
             "conversation_metadata": {
@@ -132,7 +132,7 @@ async def demo_streaming_api():
     print(f"   Chunk count: {len(chunks)}")
 
     for i, chunk in enumerate(chunks):
-        print(f"     Chunk {i+1}: {chunk}")
+        print(f"     Chunk {i + 1}: {chunk}")
 
     # Demo stream chunk format
     try:

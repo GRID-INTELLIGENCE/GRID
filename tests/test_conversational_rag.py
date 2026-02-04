@@ -282,8 +282,8 @@ if __name__ == "__main__":
 
         # Execute queries
         for i in range(3):
-            result = await engine.query(f"Demo query {i+1}", session_id=session_id)
-            print(f"Query {i+1}: {result['answer'][:50]}...")
+            result = await engine.query(f"Demo query {i + 1}", session_id=session_id)
+            print(f"Query {i + 1}: {result['answer'][:50]}...")
             print(f"Sources: {len(result['sources'])}")
 
         # Show session info

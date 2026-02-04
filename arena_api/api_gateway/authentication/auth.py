@@ -178,7 +178,7 @@ class AuthManager:
         return all(perm in user_permissions for perm in required_permissions)
 
     def generate_jwt_token(
-        self, user_id: str, permissions: list[str] = None, roles: list[str] = None, expires_in: int = 3600
+        self, user_id: str, permissions: list[str] | None = None, roles: list[str] | None = None, expires_in: int = 3600
     ) -> str:
         """
         Generate a JWT token for authenticated users.
@@ -209,7 +209,9 @@ class AuthManager:
         token = jwt.encode(payload, self.jwt_secret, algorithm=self.jwt_algorithm)
         return token
 
-    def generate_service_token(self, service_name: str, permissions: list[str] = None, expires_in: int = 3600) -> str:
+    def generate_service_token(
+        self, service_name: str, permissions: list[str] | None = None, expires_in: int = 3600
+    ) -> str:
         """
         Generate a service-to-service token.
 

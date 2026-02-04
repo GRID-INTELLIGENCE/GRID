@@ -34,7 +34,7 @@ class CrossEncoderReranker(BaseReranker):
     ):
         if not HAS_CROSS_ENCODER:
             raise ImportError(
-                "sentence-transformers required for CrossEncoderReranker. " "Install with: uv add sentence-transformers"
+                "sentence-transformers required for CrossEncoderReranker. Install with: uv add sentence-transformers"
             )
 
         self.model = CrossEncoder(model_name, device=device)

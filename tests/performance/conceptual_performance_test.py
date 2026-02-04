@@ -172,7 +172,7 @@ async def test_conversation_performance():
     print(f"\nConversation Session: {session_id}")
     for i, query in enumerate(queries):
         result = await engine.query(query, session_id=session_id)
-        print(f"  Turn {i+1}: '{query}'")
+        print(f"  Turn {i + 1}: '{query}'")
         print(f"    Latency: {result['latency_ms']:.1f}ms")
         print(f"    Context used: {result['conversation_metadata']['context_used']}")
         print(f"    Turn count: {result['conversation_metadata']['turn_count']}")

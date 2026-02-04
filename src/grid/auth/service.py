@@ -4,9 +4,9 @@ from datetime import UTC, datetime, timedelta
 
 import bcrypt
 
-from src.grid.config.runtime_settings import RuntimeSettings
-from src.grid.auth.token_manager import TokenManager
-from src.grid.infrastructure.database import DatabaseManager
+from grid.auth.token_manager import TokenManager
+from grid.config.runtime_settings import RuntimeSettings
+from grid.infrastructure.database import DatabaseManager
 
 logger = logging.getLogger(__name__)
 
@@ -84,15 +84,27 @@ class AuthService:
         # Ideally ensure row['expires_at'] is parsed or compatible.
         # For robustness, we'll try to parse if string.
         expires_at = row["expires_at"]
-        if isinstance(expires_at, str):
+        expires_dt: datetime | None = None
+        if isinstance(expires_at, datetime):
+            expires_dt = expires_at
+        elif isinstance(expires_at, (int, float)):
+            expires_dt = datetime.fromtimestamp(expires_at, tz=UTC)
+        elif isinstance(expires_at, str):
             try:
-                expires_at = datetime.fromisoformat(expires_at)
+                expires_dt = datetime.fromisoformat(expires_at)
             except ValueError:
-                pass  # Already timestamp? or fail.
+                expires_dt = None
 
-        # If localized/naive mismatch, assume UTC
         now = datetime.now(UTC)
-        if expires_at.replace(tzinfo=UTC) < now:
+        if expires_dt is None:
+            await self.db.execute("UPDATE tokens SET revoked = 1 WHERE token_id = ?", (refresh_token,))
+            await self.db.commit()
+            raise ValueError("Refresh token expired")
+
+        if expires_dt.tzinfo is None:
+            expires_dt = expires_dt.replace(tzinfo=UTC)
+
+        if expires_dt < now:
             await self.db.execute("UPDATE tokens SET revoked = 1 WHERE token_id = ?", (refresh_token,))
             await self.db.commit()
             raise ValueError("Refresh token expired")

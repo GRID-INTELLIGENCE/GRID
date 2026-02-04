@@ -14,7 +14,7 @@ from __future__ import annotations
 import logging
 from collections import defaultdict
 from collections.abc import Awaitable, Callable
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict
 from datetime import datetime
 from typing import Any
 
@@ -232,7 +232,7 @@ class CognitiveProcessor:
                 text = repr(input_data)
 
             matches = self._pattern_manager.find_matches({"text": text})
-            return matches if matches else []
+            return [pattern_id for pattern_id, _, _ in matches] if matches else []
 
         except Exception as e:
             logger.warning(f"Pattern detection error: {e}")
@@ -241,11 +241,13 @@ class CognitiveProcessor:
     async def _analyze_temporal(self) -> dict[str, Any]:
         """Analyze temporal context."""
         try:
-            context = self._time_manager.get_context(scope="processing")
+            context = self._time_manager.get_context("processing")
+            if context is None:
+                context = self._time_manager.create_context("processing")
             now = datetime.now()
 
             return {
-                **context,
+                **asdict(context),
                 "hour": now.hour,
                 "weekday": now.weekday(),
                 "is_business_hours": 9 <= now.hour <= 17 and now.weekday() < 5,

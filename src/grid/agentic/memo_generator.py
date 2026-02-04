@@ -48,12 +48,12 @@ class MemoGenerator:
         with open(memo_path, encoding="utf-8") as f:
             memo = json.load(f)
 
-        md_content = f"""# Architectural Enforcement Memo: {memo['memo_id']}
-**Date**: {memo['timestamp']}
-**Case Reference**: {memo['case_id']}
+        md_content = f"""# Architectural Enforcement Memo: {memo["memo_id"]}
+**Date**: {memo["timestamp"]}
+**Case Reference**: {memo["case_id"]}
 
 ## Executive Summary
-{memo['executive_summary']}
+{memo["executive_summary"]}
 
 ## Boolean Decisions
 """

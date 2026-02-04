@@ -23,7 +23,7 @@ from tools.rag.config import RAGConfig
 from tools.rag.rag_engine import RAGEngine
 
 
-def _query_knowledge(args: Mapping[str, Any]) -> dict[str, Any]:
+async def _query_knowledge(args: Mapping[str, Any]) -> dict[str, Any]:
     """Query GRID's knowledge base (RAG system)."""
     query = args.get("query")
     if not query:
@@ -41,7 +41,7 @@ def _query_knowledge(args: Mapping[str, Any]) -> dict[str, Any]:
         config.ensure_local_only()
 
         engine = RAGEngine(config=config)
-        result = engine.query(
+        result = await engine.query(
             query_text=query,
             top_k=top_k,
             temperature=temperature,

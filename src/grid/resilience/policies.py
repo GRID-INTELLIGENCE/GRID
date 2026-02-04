@@ -265,7 +265,7 @@ def get_policy_for_operation(operation_type: str) -> OperationPolicy:
     """
     if operation_type not in _POLICY_REGISTRY:
         available = ", ".join(sorted(_POLICY_REGISTRY.keys()))
-        raise ValueError(f"Unknown operation type: {operation_type}. " f"Available types: {available}")
+        raise ValueError(f"Unknown operation type: {operation_type}. Available types: {available}")
     return _POLICY_REGISTRY[operation_type]
 
 

@@ -36,12 +36,12 @@ from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
-from application.skills.api import router as skills_router
+from application.api_docs import setup_api_docs
 
 # Observability & Documentation
-from application.monitoring import setup_metrics, get_metrics_router
-from application.tracing import setup_tracing, setup_fastapi_tracing
-from application.api_docs import setup_api_docs
+from application.monitoring import get_metrics_router, setup_metrics
+from application.skills.api import router as skills_router
+from application.tracing import setup_fastapi_tracing, setup_tracing
 
 from .config import MothershipSettings, get_settings
 from .dependencies import get_cockpit_service, reset_cockpit_service

@@ -58,11 +58,12 @@ def get_llm_provider(
     elif provider_type == LLMProviderType.OLLAMA_CLOUD.value:
         if not config.ollama_cloud_url:
             raise ValueError(
-                "Cloud LLM mode requires OLLAMA_CLOUD_URL to be set. " "For local-only operation, use local mode."
+                "Cloud LLM mode requires OLLAMA_CLOUD_URL to be set. For local-only operation, use local mode."
             )
         return OllamaCloudLLM(model=model, cloud_url=config.ollama_cloud_url)
     elif provider_type == LLMProviderType.COPILOT.value:
         from .copilot import CopilotLLM
+
         return CopilotLLM(model=model)
     elif provider_type == LLMProviderType.SIMPLE.value:
         from .simple import SimpleLLM
@@ -70,6 +71,5 @@ def get_llm_provider(
         return SimpleLLM()
     else:
         raise ValueError(
-            f"Unknown LLM provider type: {provider_type}. "
-            f"Available: {', '.join([e.value for e in LLMProviderType])}"
+            f"Unknown LLM provider type: {provider_type}. Available: {', '.join([e.value for e in LLMProviderType])}"
         )

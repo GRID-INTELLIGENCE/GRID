@@ -5,7 +5,7 @@ from typing import Any
 
 import stripe
 
-from src.grid.config.runtime_settings import RuntimeSettings
+from grid.config.runtime_settings import RuntimeSettings
 
 logger = logging.getLogger(__name__)
 
@@ -37,10 +37,15 @@ class StripeService:
 
         try:
             loop = asyncio.get_running_loop()
+
             # Use metadata to link back to our user_id
-            customer = await loop.run_in_executor(
-                None, lambda: stripe.Customer.create(email=email, name=name, metadata={"user_id": user_id})
-            )
+            def _create_customer():
+                params: dict[str, Any] = {"email": email, "metadata": {"user_id": user_id}}
+                if name is not None:
+                    params["name"] = name
+                return stripe.Customer.create(**params)
+
+            customer = await loop.run_in_executor(None, _create_customer)
             return customer.id
         except Exception as e:
             logger.error(f"Stripe create_customer failed: {e}")
@@ -75,7 +80,7 @@ class StripeService:
             loop = asyncio.get_running_loop()
             await loop.run_in_executor(
                 None,
-                lambda: stripe.SubscriptionItem.create_usage_record(
+                lambda: stripe.SubscriptionItem.create_usage_record(  # type: ignore[attr-defined]
                     subscription_item_id, quantity=quantity, timestamp=int(time.time()), action="increment"
                 ),
             )

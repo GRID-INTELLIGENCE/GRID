@@ -26,20 +26,15 @@ from collections.abc import AsyncIterator, Awaitable, Callable
 from dataclasses import dataclass, field
 from enum import Enum
 from functools import wraps
-from typing import (
-    Any,
-    TypeVar,
-)
+from typing import TYPE_CHECKING, Any, TypeVar
+
+if TYPE_CHECKING:
+    import httpx as httpx_typing
 
 try:
     import httpx
 except ImportError:
     httpx = None  # type: ignore
-
-try:
-    import google.generativeai as genai  # type: ignore[import-not-found]
-except ImportError:
-    genai = None  # type: ignore
 
 
 logger = logging.getLogger(__name__)
@@ -213,7 +208,7 @@ class GeminiStudioClient:
         if api_key:
             self.config.api_key = api_key
 
-        self._http_client: httpx.AsyncClient | None = None
+        self._http_client: httpx_typing.AsyncClient | None = None
         self._initialized = False
         self._dry_run = not self.config.validate()
 
@@ -232,6 +227,7 @@ class GeminiStudioClient:
         if httpx is None:
             raise ImportError("httpx is required for GeminiStudioClient. Install with: pip install httpx")
 
+        assert httpx is not None
         self._http_client = httpx.AsyncClient(
             timeout=httpx.Timeout(self.config.timeout),
             headers={
@@ -349,10 +345,12 @@ class GeminiStudioClient:
             await self.initialize()
 
         assert self._http_client is not None
+        assert httpx is not None
 
         url = self._build_url("generateContent")
         payload = self._build_payload(prompt, system_instruction, **kwargs)
 
+        assert httpx is not None
         try:
             response = await self._http_client.post(
                 url,
@@ -395,10 +393,12 @@ class GeminiStudioClient:
             await self.initialize()
 
         assert self._http_client is not None
+        assert httpx is not None
 
         url = self._build_url("streamGenerateContent")
         payload = self._build_payload(prompt, system_instruction, **kwargs)
 
+        assert httpx is not None
         try:
             async with self._http_client.stream(
                 "POST",
@@ -456,6 +456,7 @@ class GeminiStudioClient:
             await self.initialize()
 
         assert self._http_client is not None
+        assert httpx is not None
 
         # Convert messages to Gemini format
         contents = []
@@ -483,6 +484,7 @@ class GeminiStudioClient:
 
         url = self._build_url("generateContent")
 
+        assert httpx is not None
         try:
             response = await self._http_client.post(
                 url,

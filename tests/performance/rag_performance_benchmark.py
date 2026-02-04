@@ -373,7 +373,7 @@ class RAGPerformanceBenchmark:
             metric = await self.measure_query_performance(self.conversational_engine, query, session_id)
             result.add_metric(metric)
             status = "OK" if metric.success else "FAILED"
-            print(f"  Query {i+1}: {metric.duration_ms:.1f}ms, {metric.memory_usage_mb:.2f}MB, {status}")
+            print(f"  Query {i + 1}: {metric.duration_ms:.1f}ms, {metric.memory_usage_mb:.2f}MB, {status}")
 
         # Test 2: Session management
         print("\nTesting Session Management...")
@@ -385,9 +385,9 @@ class RAGPerformanceBenchmark:
         retrieval_times = [m.duration_ms for m in session_metrics if m.operation == "session_retrieval"]
 
         if creation_times:
-            print(f"  Session Creation: Avg {sum(creation_times)/len(creation_times):.1f}ms")
+            print(f"  Session Creation: Avg {sum(creation_times) / len(creation_times):.1f}ms")
         if retrieval_times:
-            print(f"  Session Retrieval: Avg {sum(retrieval_times)/len(retrieval_times):.1f}ms")
+            print(f"  Session Retrieval: Avg {sum(retrieval_times) / len(retrieval_times):.1f}ms")
 
         # Test 3: Multi-hop performance
         if hasattr(self.conversational_engine.config, "multi_hop_enabled"):
@@ -398,7 +398,7 @@ class RAGPerformanceBenchmark:
 
             hop_times = [m.duration_ms for m in multi_hop_metrics]
             if hop_times:
-                print(f"  Multi-hop Queries: Avg {sum(hop_times)/len(hop_times):.1f}ms")
+                print(f"  Multi-hop Queries: Avg {sum(hop_times) / len(hop_times):.1f}ms")
 
         # Test 4: Batch performance
         print("\nTesting Batch Query Performance...")
@@ -421,7 +421,7 @@ class RAGPerformanceBenchmark:
             orig_status = "OK" if original_metric.success else "FAILED"
             conv_status = "OK" if conversational_metric.success else "FAILED"
             print(
-                f"  Query {i+1}: Original {original_metric.duration_ms:.1f}ms ({orig_status}) vs Conversational {conversational_metric.duration_ms:.1f}ms ({conv_status})"
+                f"  Query {i + 1}: Original {original_metric.duration_ms:.1f}ms ({orig_status}) vs Conversational {conversational_metric.duration_ms:.1f}ms ({conv_status})"
             )
 
         result.end_time = datetime.now()

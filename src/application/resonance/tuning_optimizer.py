@@ -282,8 +282,8 @@ class TuningOptimizer:
 
         # Format metrics safely
         density_str = f"{avg_density}/min" if avg_density is not None else "elevated"
-        efficiency_str = f"{efficiency*100:.1f}%" if efficiency is not None else "below threshold"
-        ratio_str = f"{dominant_ratio*100:.1f}%" if dominant_ratio is not None else "imbalanced"
+        efficiency_str = f"{efficiency * 100:.1f}%" if efficiency is not None else "below threshold"
+        ratio_str = f"{dominant_ratio * 100:.1f}%" if dominant_ratio is not None else "imbalanced"
 
         rationales = {
             (

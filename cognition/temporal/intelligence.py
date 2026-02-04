@@ -189,7 +189,7 @@ class TemporalIntelligence:
             optimal_period = TimePeriod.MORNING
             confidence = 0.3
         else:
-            optimal_period = max(scores, key=scores.get)
+            optimal_period = max(scores, key=lambda period: scores[period])
             max_score = max(scores.values())
             confidence = min(0.95, max_score)
 
@@ -244,8 +244,14 @@ class TemporalIntelligence:
         grouped = defaultdict(list)
         for activity in self._activity_log:
             timestamp = activity.get("timestamp")
+            if not timestamp:
+                continue
             if isinstance(timestamp, str):
                 timestamp = datetime.fromisoformat(timestamp)
+            if not isinstance(timestamp, datetime):
+                continue
+
+            activity["timestamp"] = timestamp
 
             period = self._get_time_period(timestamp.hour)
             day_type = self._get_day_type(timestamp.weekday())

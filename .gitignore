@@ -251,7 +251,7 @@ reproduce_*.txt
 
 # Other editors
 .cursor/
-.cursorignore
+config/.cursorrules
 .claude/
 .windsurf/
 .zed/
@@ -263,7 +263,7 @@ reproduce_*.txt
 # Private/ignore files
 .private/
 **/.private/
-.agentignore
+config/.agentignore
 .cascadeignore
 
 # ==========================
@@ -495,6 +495,11 @@ artifacts/*.json
 artifacts/*.png
 artifacts/repo_analysis/
 artifacts/spacetime_viz/
+artifacts/debug_logs/
+
+# Completion reports (archived)
+docs/completion_reports/
+docs/reports/analysis/analysis_report/
 
 # Research and experimental
 research_snapshots/
@@ -654,3 +659,6 @@ mypy_final_report.txt
 **/vulnerability-scan/
 **/pentest-results/
 *.sarif
+
+# Local Netlify folder
+.netlify

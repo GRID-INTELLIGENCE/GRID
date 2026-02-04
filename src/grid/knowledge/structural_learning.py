@@ -260,7 +260,7 @@ class AdaptiveRelationshipModel:
             self.relationships[key] = rel
             self.relationship_history.append(rel)
 
-        logger.info(f"Relationship {relationship_type} ({source_id} -> {target_id}): " f"strength={strength:.2f}")
+        logger.info(f"Relationship {relationship_type} ({source_id} -> {target_id}): strength={strength:.2f}")
 
         return rel
 
@@ -281,9 +281,7 @@ class AdaptiveRelationshipModel:
             old_strength = rel.strength
             rel.update_strength(new_strength)
 
-            logger.info(
-                f"Adapted relationship ({source_id} -> {target_id}): " f"{old_strength:.2f} -> {new_strength:.2f}"
-            )
+            logger.info(f"Adapted relationship ({source_id} -> {target_id}): {old_strength:.2f} -> {new_strength:.2f}")
 
             return rel
 

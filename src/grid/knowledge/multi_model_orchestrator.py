@@ -211,13 +211,13 @@ class MultiModelOrchestrator(ReasoningOrchestrator):
     def _tailor_question(self, query: str, expert: ModelProfile, nav: dict[str, Any]) -> str:
         """Formulates a precise question based on model architecture and standing."""
         return f"""### ROLE: {expert.standings} ({expert.architecture})
-### CONTEXT: Zone={nav['zone']}, Standing={nav['standing']}
+### CONTEXT: Zone={nav["zone"]}, Standing={nav["standing"]}
 
 TASK: {expert.specialty_prompt}
 
 USER QUERY: {query}
 
-Please provide your insight tailored for the {nav['zone']} zone of this architecture."""
+Please provide your insight tailored for the {nav["zone"]} zone of this architecture."""
 
     async def _llm_call_expert(self, prompt: str, expert: ModelProfile) -> ReasoningStep:
         """Individual LLM call to an expert model."""

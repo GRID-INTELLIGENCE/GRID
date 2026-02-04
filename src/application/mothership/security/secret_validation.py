@@ -206,9 +206,7 @@ def get_secret_from_env(
 
     # Security audit log (without exposing the secret)
     secret_hash = hashlib.sha256(secret.encode()).hexdigest()[:16]
-    logger.info(
-        f"Secret loaded from '{env_var}' (length={len(secret)}, " f"strength={strength.value}, hash={secret_hash})"
-    )
+    logger.info(f"Secret loaded from '{env_var}' (length={len(secret)}, strength={strength.value}, hash={secret_hash})")
 
     return secret
 

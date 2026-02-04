@@ -28,7 +28,8 @@ class ConversationalRAGEngine(RAGEngine):
 
         # Initialize conversation memory
         self.conversation_memory = ConversationMemory(
-            max_sessions=100, session_ttl_hours=self.config.conversation_memory_size * 24  # Convert days to hours
+            max_sessions=100,
+            session_ttl_hours=self.config.conversation_memory_size * 24,  # Convert days to hours
         )
 
         # Initialize multi-hop reasoning engine

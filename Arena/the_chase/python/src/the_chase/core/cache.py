@@ -242,7 +242,7 @@ class CacheLayer:
         if len(self.mem._store) > self.mem.max_size:
             self.mem._evict_lru()
 
-    def get(self, key: str) -> "CacheEntry" | None:
+    def get(self, key: str) -> "CacheEntry | None":
         """Get entry with metadata."""
         return self.mem.get(key)
 

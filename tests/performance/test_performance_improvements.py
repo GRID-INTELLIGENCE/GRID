@@ -49,7 +49,7 @@ async def test_conversation_flow():
         result = await engine.query(query, session_id=session_id)
         latency = (time.perf_counter() - start_time) * 1000
 
-        print(f"\nQuery {i+1}: '{query}'")
+        print(f"\nQuery {i + 1}: '{query}'")
         print(f"Latency: {latency:.1f}ms")
         print(f"Answer: {result['answer'][:80]}...")
         print(f"Turn count: {result['conversation_metadata']['turn_count']}")

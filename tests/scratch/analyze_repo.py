@@ -60,11 +60,11 @@ def analyze_repo(repo_path):
                 pass
 
     print(f"Total Files: {file_count}")
-    print(f"Total Size: {total_size / (1024*1024):.2f} MB")
+    print(f"Total Size: {total_size / (1024 * 1024):.2f} MB")
     print("\nTop Directories by file count:")
     sorted_stats = sorted(dir_stats.items(), key=lambda x: x[1]["files"], reverse=True)
     for d, s in sorted_stats[:20]:
-        print(f"{d:30} : {s['files']:6} files, {s['size']/(1024*1024):7.2f} MB")
+        print(f"{d:30} : {s['files']:6} files, {s['size'] / (1024 * 1024):7.2f} MB")
 
 
 if __name__ == "__main__":

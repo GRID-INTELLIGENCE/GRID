@@ -10,8 +10,8 @@ import json
 import logging
 import os
 import secrets
-import time
 import sqlite3
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -29,9 +29,9 @@ class Secret:
 
     key: str
     value: str
-    metadata: dict[str, Any] = None
-    created_at: float = None
-    updated_at: float = None
+    metadata: dict[str, Any] | None = None
+    created_at: float | None = None
+    updated_at: float | None = None
 
 
 class LocalSecretsManager:
@@ -179,7 +179,7 @@ class LocalSecretsManager:
         plaintext = aesgcm.decrypt(nonce_bytes, ciphertext, None)
         return plaintext.decode("utf-8")
 
-    def set(self, key: str, value: str, metadata: dict | None = None) -> bool:
+    def set(self, key: str, value: str, metadata: dict[str, Any] | None = None) -> bool:
         """
         Set a secret value.
 
@@ -319,19 +319,19 @@ class LocalSecretsManager:
 
 
 # Convenience functions
-def get_local_secrets_manager(storage_path: Path | None = None, environment: str = None) -> LocalSecretsManager:
+def get_local_secrets_manager(storage_path: Path | None = None, environment: str | None = None) -> LocalSecretsManager:
     """Get a LocalSecretsManager instance."""
     env = environment or os.getenv("GRID_ENVIRONMENT", "development")
     return LocalSecretsManager(storage_path=storage_path, environment=env)
 
 
-def set_secret(key: str, value: str, environment: str = None) -> bool:
+def set_secret(key: str, value: str, environment: str | None = None) -> bool:
     """Convenience function to set a secret."""
     manager = get_local_secrets_manager(environment=environment)
     return manager.set(key, value)
 
 
-def get_secret(key: str, default: str = None, environment: str = None) -> str | None:
+def get_secret(key: str, default: str | None = None, environment: str | None = None) -> str | None:
     """Convenience function to get a secret."""
     manager = get_local_secrets_manager(environment=environment)
     return manager.get(key, default)

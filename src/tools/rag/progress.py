@@ -96,5 +96,5 @@ class IndexProgress:
             if eta < 60:
                 parts.append(f"ETA {eta:.0f}s")
             else:
-                parts.append(f"ETA {eta/60:.1f}m")
+                parts.append(f"ETA {eta / 60:.1f}m")
         return " | ".join(parts)

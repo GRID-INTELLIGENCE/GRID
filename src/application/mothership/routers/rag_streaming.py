@@ -96,23 +96,30 @@ async def query_rag_stream(request: RAGQueryRequest) -> StreamingResponse:
         """Generate streaming response chunks."""
 
         # Stage 1: Query analysis and retrieval start
-        yield StreamChunk(
-            type="analysis_started",
-            data={
-                "query": request.query,
-                "session_id": request.session_id,
-                "timestamp": asyncio.get_event_loop().time(),
-            },
-        ).to_json() + "\n"
+        yield (
+            StreamChunk(
+                type="analysis_started",
+                data={
+                    "query": request.query,
+                    "session_id": request.session_id,
+                    "timestamp": asyncio.get_event_loop().time(),
+                },
+            ).to_json()
+            + "\n"
+        )
 
         # Stage 2: Retrieval process
         yield StreamChunk(type="retrieval_started", data={"query": request.query}).to_json() + "\n"
 
         # Stage 3: Simulate retrieval progress
         for progress in range(0, 101, 20):
-            yield StreamChunk(
-                type="retrieval_progress", data={"progress": progress, "status": f"Retrieving documents... {progress}%"}
-            ).to_json() + "\n"
+            yield (
+                StreamChunk(
+                    type="retrieval_progress",
+                    data={"progress": progress, "status": f"Retrieving documents... {progress}%"},
+                ).to_json()
+                + "\n"
+            )
             await asyncio.sleep(0.1)  # Simulate work
 
         # Stage 4: Execute query
@@ -127,54 +134,66 @@ async def query_rag_stream(request: RAGQueryRequest) -> StreamingResponse:
             )
 
             # Stage 5: Documents retrieved
-            yield StreamChunk(
-                type="documents_retrieved",
-                data={
-                    "count": len(result.get("sources", [])),
-                    "sources_preview": [
-                        {
-                            "path": source.get("metadata", {}).get("path", "Unknown"),
-                            "confidence": source.get("confidence", 0.0),
-                        }
-                        for source in result.get("sources", [])[:3]
-                    ],
-                },
-            ).to_json() + "\n"
+            yield (
+                StreamChunk(
+                    type="documents_retrieved",
+                    data={
+                        "count": len(result.get("sources", [])),
+                        "sources_preview": [
+                            {
+                                "path": source.get("metadata", {}).get("path", "Unknown"),
+                                "confidence": source.get("confidence", 0.0),
+                            }
+                            for source in result.get("sources", [])[:3]
+                        ],
+                    },
+                ).to_json()
+                + "\n"
+            )
 
             # Stage 6: Answer generation
             if result.get("multi_hop_used", False):
-                yield StreamChunk(
-                    type="multi_hop_completed",
-                    data={
-                        "hops": result.get("hops_performed", 1),
-                        "follow_up_queries": result.get("follow_up_queries", []),
-                    },
-                ).to_json() + "\n"
+                yield (
+                    StreamChunk(
+                        type="multi_hop_completed",
+                        data={
+                            "hops": result.get("hops_performed", 1),
+                            "follow_up_queries": result.get("follow_up_queries", []),
+                        },
+                    ).to_json()
+                    + "\n"
+                )
 
             # Stage 7: Stream answer
             answer = result.get("answer", "")
             for i, chunk in enumerate(chunk_text(answer, chunk_size=50)):
-                yield StreamChunk(
-                    type="answer_chunk",
-                    data={
-                        "chunk": chunk,
-                        "chunk_number": i + 1,
-                        "total_chunks": (len(answer) // 50) + 1,
-                        "progress": min(100, int((i + 1) / ((len(answer) // 50) + 1) * 100)),
-                    },
-                ).to_json() + "\n"
+                yield (
+                    StreamChunk(
+                        type="answer_chunk",
+                        data={
+                            "chunk": chunk,
+                            "chunk_number": i + 1,
+                            "total_chunks": (len(answer) // 50) + 1,
+                            "progress": min(100, int((i + 1) / ((len(answer) // 50) + 1) * 100)),
+                        },
+                    ).to_json()
+                    + "\n"
+                )
                 await asyncio.sleep(0.05)  # Simulate streaming
 
             # Stage 8: Final result
-            yield StreamChunk(
-                type="complete",
-                data={
-                    "answer": result.get("answer", ""),
-                    "sources": result.get("sources", []),
-                    "conversation_metadata": result.get("conversation_metadata", {}),
-                    "multi_hop_used": result.get("multi_hop_used", False),
-                },
-            ).to_json() + "\n"
+            yield (
+                StreamChunk(
+                    type="complete",
+                    data={
+                        "answer": result.get("answer", ""),
+                        "sources": result.get("sources", []),
+                        "conversation_metadata": result.get("conversation_metadata", {}),
+                        "multi_hop_used": result.get("multi_hop_used", False),
+                    },
+                ).to_json()
+                + "\n"
+            )
 
         except Exception as e:
             yield StreamChunk(type="error", data={"error": str(e), "query": request.query}).to_json() + "\n"
@@ -204,15 +223,18 @@ async def query_rag_batch(requests: list[RAGQueryRequest]) -> dict[str, Any]:
         results = []
         for i, request in enumerate(requests):
             # Progress update
-            yield StreamChunk(
-                type="query_progress",
-                data={
-                    "current": i + 1,
-                    "total": total_queries,
-                    "progress": int((i + 1) / total_queries * 100),
-                    "query": request.query,
-                },
-            ).to_json() + "\n"
+            yield (
+                StreamChunk(
+                    type="query_progress",
+                    data={
+                        "current": i + 1,
+                        "total": total_queries,
+                        "progress": int((i + 1) / total_queries * 100),
+                        "query": request.query,
+                    },
+                ).to_json()
+                + "\n"
+            )
 
             # Execute query
             try:
@@ -230,20 +252,27 @@ async def query_rag_batch(requests: list[RAGQueryRequest]) -> dict[str, Any]:
             except Exception as e:
                 results.append({"query": request.query, "error": str(e)})
 
-            yield StreamChunk(
-                type="query_completed", data={"index": i, "query": request.query, "success": "error" not in results[-1]}
-            ).to_json() + "\n"
+            yield (
+                StreamChunk(
+                    type="query_completed",
+                    data={"index": i, "query": request.query, "success": "error" not in results[-1]},
+                ).to_json()
+                + "\n"
+            )
 
         # Final batch result
-        yield StreamChunk(
-            type="batch_completed",
-            data={
-                "total_queries": total_queries,
-                "successful_queries": sum(1 for r in results if "error" not in r),
-                "failed_queries": sum(1 for r in results if "error" in r),
-                "results": results,
-            },
-        ).to_json() + "\n"
+        yield (
+            StreamChunk(
+                type="batch_completed",
+                data={
+                    "total_queries": total_queries,
+                    "successful_queries": sum(1 for r in results if "error" not in r),
+                    "failed_queries": sum(1 for r in results if "error" in r),
+                    "results": results,
+                },
+            ).to_json()
+            + "\n"
+        )
 
     return StreamingResponse(
         batch_process(),

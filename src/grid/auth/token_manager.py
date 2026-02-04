@@ -5,8 +5,8 @@ from typing import Any
 
 from jose import JWTError, jwt
 
-from src.grid.config.runtime_settings import RuntimeSettings
-from src.grid.infrastructure.cache import CacheFactory
+from grid.config.runtime_settings import RuntimeSettings
+from grid.infrastructure.cache import CacheFactory
 
 logger = logging.getLogger(__name__)
 

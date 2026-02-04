@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Test GitHub Copilot SDK integration."""
+
 import os
 import sys
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
 
 from tools.rag.llm.factory import get_llm_provider
 from tools.rag.config import RAGConfig

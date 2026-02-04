@@ -104,7 +104,7 @@ class DataConnector(ABC):
 class FileConnector(DataConnector):
     """Connector for local file system."""
 
-    def __init__(self, directory: str, file_patterns: list[str] = None, manifest_path: str | None = None):
+    def __init__(self, directory: str, file_patterns: list[str] | None = None, manifest_path: str | None = None):
         self.directory = Path(directory)
         self.file_patterns = file_patterns or ["*.txt", "*.md", "*.pdf", "*.docx"]
         self.supported_extensions = {
@@ -308,7 +308,7 @@ class FileConnector(DataConnector):
 class WebConnector(DataConnector):
     """Connector for web URLs."""
 
-    def __init__(self, urls: list[str], headers: dict[str, str] = None):
+    def __init__(self, urls: list[str], headers: dict[str, str] | None = None):
         self.urls = urls
         self.headers = headers or {"User-Agent": "KnowledgeBase/1.0"}
 
@@ -374,7 +374,9 @@ class WebConnector(DataConnector):
 class APIConnector(DataConnector):
     """Connector for REST APIs."""
 
-    def __init__(self, base_url: str, endpoints: list[str], headers: dict[str, str] = None, auth_token: str = None):
+    def __init__(
+        self, base_url: str, endpoints: list[str], headers: dict[str, str] | None = None, auth_token: str | None = None
+    ):
         self.base_url = base_url.rstrip("/")
         self.endpoints = endpoints
         self.headers = headers or {"Content-Type": "application/json"}

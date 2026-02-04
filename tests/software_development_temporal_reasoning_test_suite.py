@@ -238,7 +238,8 @@ class SoftwareDevelopmentTemporalReasoningTestSuite:
 
         # Analyze feature integration across different product areas
         references = software_temporal_reasoning_instance.perform_cross_referencing(
-            CrossReferenceDomain.TOPIC, CrossReferenceDomain.SUBJECT  # Programming languages  # System components
+            CrossReferenceDomain.TOPIC,
+            CrossReferenceDomain.SUBJECT,  # Programming languages  # System components
         )
 
         execution_time = time.perf_counter() - start_time

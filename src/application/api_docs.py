@@ -270,7 +270,7 @@ def export_html_docs(app: FastAPI, output_path: str | Path) -> None:
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>{openapi_schema.get('info', {}).get('title', 'API Documentation')}</title>
+        <title>{openapi_schema.get("info", {}).get("title", "API Documentation")}</title>
         <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css">
         <style>
             body {{
@@ -340,9 +340,7 @@ def add_example_responses(
                 method_schema["responses"][str(status_code)] = {}
 
             # Add examples
-            method_schema["responses"][str(status_code)]["content"] = {
-                "application/json": {"examples": examples}
-            }
+            method_schema["responses"][str(status_code)]["content"] = {"application/json": {"examples": examples}}
 
     # Update schema
     app.openapi_schema = openapi_schema

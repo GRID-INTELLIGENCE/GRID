@@ -84,8 +84,7 @@ class DistributedSparkIndexer:
 
         if not all([host, token, http_path]):
             raise RuntimeError(
-                "Databricks configuration incomplete. "
-                "Required: DATABRICKS_HOST, DATABRICKS_TOKEN, DATABRICKS_HTTP_PATH"
+                "Databricks configuration incomplete. Required: DATABRICKS_HOST, DATABRICKS_TOKEN, DATABRICKS_HTTP_PATH"
             )
 
     def index_documents_distributed(
@@ -125,7 +124,7 @@ class DistributedSparkIndexer:
             "job_id": None,
         }
 
-        logger.info(f"Distributed indexing submitted. " f"Monitors status at: {metrics['status']}")
+        logger.info(f"Distributed indexing submitted. Monitors status at: {metrics['status']}")
 
         return metrics
 

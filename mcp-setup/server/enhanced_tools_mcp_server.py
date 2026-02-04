@@ -46,9 +46,9 @@ server = Server("grid-enhanced-tools")
 def format_tool_output(tool_name: str, result: dict[str, Any], execution_time: float) -> str:
     """Format tool execution output."""
     return f"""
-🔧 **{tool_name.replace('_', ' ').title()} Results:**
+🔧 **{tool_name.replace("_", " ").title()} Results:**
 ✅ Execution completed in {execution_time:.2f}s
-📊 {json.dumps(result, indent=2)[:500]}{'...' if len(json.dumps(result)) > 500 else ''}
+📊 {json.dumps(result, indent=2)[:500]}{"..." if len(json.dumps(result)) > 500 else ""}
 """
 
 

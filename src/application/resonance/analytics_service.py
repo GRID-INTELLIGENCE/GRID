@@ -356,7 +356,7 @@ class AnalyticsService:
                 alert = await self._create_alert(
                     severity=AlertSeverity.WARNING,
                     insight_type=InsightType.IMBALANCE,
-                    message=f"Modality imbalance detected: {dominant} at {max_ratio*100:.1f}% (threshold: {self.IMBALANCE_THRESHOLD*100:.0f}%)",
+                    message=f"Modality imbalance detected: {dominant} at {max_ratio * 100:.1f}% (threshold: {self.IMBALANCE_THRESHOLD * 100:.0f}%)",
                     data={
                         "distribution": distribution,
                         "dominant_type": dominant,
@@ -413,7 +413,7 @@ class AnalyticsService:
             alert = await self._create_alert(
                 severity=AlertSeverity.WARNING,
                 insight_type=InsightType.EFFICIENCY_DROP,
-                message=f"Low efficiency detected: {efficiency*100:.1f}% (threshold: {self.EFFICIENCY_LOW_THRESHOLD*100:.0f}%)",
+                message=f"Low efficiency detected: {efficiency * 100:.1f}% (threshold: {self.EFFICIENCY_LOW_THRESHOLD * 100:.0f}%)",
                 data={
                     "efficiency": efficiency,
                     "total_events": total,
@@ -428,7 +428,7 @@ class AnalyticsService:
             self._efficiency_metrics = self._efficiency_metrics[-100:]
 
         logger.debug(
-            f"Efficiency metrics: {efficiency*100:.1f}% efficiency, cost: ${cost_per_meaningful:.4f}/meaningful event"
+            f"Efficiency metrics: {efficiency * 100:.1f}% efficiency, cost: ${cost_per_meaningful:.4f}/meaningful event"
         )
         return metrics
 

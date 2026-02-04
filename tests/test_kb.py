@@ -60,7 +60,7 @@ def main():
     # Ingest documents
     ingestion_results = []
     for i, doc in enumerate(sample_docs, 1):
-        print(f'  Processing document {i}: {doc["title"]}')
+        print(f"  Processing document {i}: {doc['title']}")
 
         # Create document data
         doc_data = DocumentData(
@@ -129,7 +129,7 @@ def main():
 
         print(f"    Generated answer in {generation_time:.3f}s")
         print(f"    Answer: {answer.answer[:200]}...")
-        print(f'    Confidence: {answer.confidence_score}, Tokens: {answer.token_usage["total_tokens"]}')
+        print(f"    Confidence: {answer.confidence_score}, Tokens: {answer.token_usage['total_tokens']}")
     else:
         print("    No context found for generation test")
 
@@ -137,7 +137,7 @@ def main():
     print("📈 Final Knowledge Base Statistics:")
     print(f"  Documents: {db.get_document_count()}")
     print(f"  Chunks: {db.get_chunk_count()}")
-    print(f'  Embedding coverage: {embedding_engine.get_embedding_stats()["embedding_coverage"]:.1%}')
+    print(f"  Embedding coverage: {embedding_engine.get_embedding_stats()['embedding_coverage']:.1%}")
 
     db.disconnect()
     print("✅ Comprehensive Knowledge Base test completed successfully!")

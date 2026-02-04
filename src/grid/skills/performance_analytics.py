@@ -619,7 +619,7 @@ class SkillsPerformanceAnalytics:
             if metric_name == MetricType.EXECUTION_TIME.value:
                 if metric_data["mean"] > 5.0:  # 5 seconds
                     recommendations.append(
-                        "Consider optimizing skill execution time (current avg: " f"{metric_data['mean']:.2f}s)"
+                        f"Consider optimizing skill execution time (current avg: {metric_data['mean']:.2f}s)"
                     )
 
             elif metric_name == MetricType.ERROR_RATE.value:

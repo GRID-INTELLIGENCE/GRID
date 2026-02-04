@@ -72,7 +72,7 @@ async def demo_analytics_service():
     if alerts:
         print("\n🚨 Active Alerts:")
         for alert in alerts[:3]:
-            print(f"  • [{alert.severity.value.upper()}] {alert.title}")
+            print(f"  • [{alert.severity.value.upper()}] {alert.message}")
 
     # Show insights
     insights = analytics.get_insights()
@@ -211,21 +211,27 @@ async def demo_cost_optimizer():
         )
 
     current_metrics = optimizer.get_current_cost_metrics()
-    print("\n📊 Cost Metrics:")
-    print(f"  • Total events: {current_metrics.total_events}")
-    print(f"  • Meaningful events: {current_metrics.meaningful_events}")
-    print(f"  • DBU consumed: {current_metrics.dbu_consumed:.2f}")
-    print(f"  • Total cost: ${current_metrics.cost_usd:.4f}")
-    print(f"  • Cost per event: ${current_metrics.cost_per_event:.6f}")
-    print(f"  • Cost per meaningful event: ${current_metrics.cost_per_meaningful_event:.6f}")
+    if current_metrics is not None:
+        print("\n📊 Cost Metrics:")
+        print(f"  • Total events: {current_metrics.total_events}")
+        print(f"  • Meaningful events: {current_metrics.meaningful_events}")
+        print(f"  • DBU consumed: {current_metrics.dbu_consumed:.2f}")
+        print(f"  • Total cost: ${current_metrics.cost_usd:.4f}")
+        print(f"  • Cost per event: ${current_metrics.cost_per_event:.6f}")
+        print(f"  • Cost per meaningful event: ${current_metrics.cost_per_meaningful_event:.6f}")
+    else:
+        print("\n📊 Cost Metrics: No metrics available")
 
     # Queue billing events
-    print("\n📊 Queueing billing event...")
-    optimizer.queue_meter_event(
-        customer_id="cus_demo123",
-        event_name="resonance_meaningful_events",
-        value=current_metrics.meaningful_events,
-    )
+    if current_metrics is not None:
+        print("\n📊 Queueing billing event...")
+        optimizer.queue_meter_event(
+            customer_id="cus_demo123",
+            event_name="resonance_meaningful_events",
+            value=current_metrics.meaningful_events,
+        )
+    else:
+        print("\n📊 No metrics available for billing event")
 
     # Flush to Stripe
     print("\n📤 Flushing to Stripe billing...")
@@ -300,7 +306,10 @@ async def demo_stripe_billing():
     print("\n💵 Invoice Previews:")
     for cus_id, _, name in customers:
         preview = await billing.get_upcoming_invoice(cus_id)
-        print(f"  • {name}: ${preview.amount_due:.2f} {preview.currency.upper()}")
+        if preview is not None:
+            print(f"  • {name}: ${preview.amount_due:.2f} {preview.currency.upper()}")
+        else:
+            print(f"  • {name}: No invoice data available")
 
     # Get billing stats
     stats = billing.get_billing_stats()

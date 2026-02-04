@@ -121,7 +121,7 @@ def ring1_mutate(
 
             if requires_ring0 and current > PrivilegeRing.RING_0:
                 raise PermissionError(
-                    f"Function {func.__name__} requires Ring 0 privilege, " f"but current ring is {current.name}"
+                    f"Function {func.__name__} requires Ring 0 privilege, but current ring is {current.name}"
                 )
 
             previous_ring = current

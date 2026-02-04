@@ -615,9 +615,9 @@ class TestGradualTTLDecay:
         third_entry_after = cache.mem.get("third")
 
         # One should be evicted
-        assert (
-            sum([old_entry_after is not None, new_entry_after is not None, third_entry_after is not None]) == 2
-        ), "One entry should be evicted"
+        assert sum([old_entry_after is not None, new_entry_after is not None, third_entry_after is not None]) == 2, (
+            "One entry should be evicted"
+        )
 
     def test_gradual_decay_curve(self):
         """Test that decay follows exponential curve."""

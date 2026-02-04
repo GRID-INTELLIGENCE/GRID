@@ -20,9 +20,9 @@ class GridIntegrationTests:
 
     def print_header(self, title):
         """Print formatted header"""
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print(f"  {title}")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
 
     def print_test(self, name, status, details=""):
         """Print test result"""
@@ -200,7 +200,7 @@ class GridIntegrationTests:
                 data = json.loads(output)
                 total = data.get("total_cases", 0)
                 success_rate = data.get("success_rate", 0)
-                self.print_test("Get experience", True, f"Total: {total}, Success: {success_rate*100:.1f}%")
+                self.print_test("Get experience", True, f"Total: {total}, Success: {success_rate * 100:.1f}%")
             except Exception:
                 self.print_test("Get experience", False, "Failed to parse response")
         else:
@@ -280,7 +280,7 @@ class GridIntegrationTests:
         total = self.passed + self.failed
         print(f"  Passed: {self.passed}/{total}")
         print(f"  Failed: {self.failed}/{total}")
-        print(f"  Success Rate: {self.passed/total*100:.1f}%" if total > 0 else "  No tests run")
+        print(f"  Success Rate: {self.passed / total * 100:.1f}%" if total > 0 else "  No tests run")
 
         if self.failed == 0:
             print("\n  ✓ All systems operational!")

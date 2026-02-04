@@ -39,7 +39,7 @@ class ServiceInstance:
     last_heartbeat: datetime
     status: str = "unknown"  # unknown, healthy, unhealthy, down
     version: str = "1.0.0"
-    tags: list[str] = None
+    tags: list[str] | None = None
 
     def __post_init__(self):
         if self.tags is None:
@@ -119,7 +119,7 @@ class ServiceDiscovery:
                     return {"success": False, "error": f"Missing required field: {field}"}
 
             service_name = service_data["service_name"]
-            instance_id = service_data.get("id", f"{service_name}-{int(time.time()*1000)}")
+            instance_id = service_data.get("id", f"{service_name}-{int(time.time() * 1000)}")
 
             # Create service instance
             instance = ServiceInstance(
@@ -205,7 +205,11 @@ class ServiceDiscovery:
         result = {}
         for service_name, instances in self.services.items():
             result[service_name] = [
-                {**asdict(instance), "health": asdict(self.service_health.get(instance.id))} for instance in instances
+                {
+                    **asdict(instance),
+                    "health": asdict(health) if (health := self.service_health.get(instance.id)) else None,
+                }
+                for instance in instances
             ]
         return result
 

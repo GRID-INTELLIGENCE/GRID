@@ -200,16 +200,16 @@ class AdvancedProtocolHandler:
         # Nuance: Rare case indicators
         if structure.category.value == "rare":
             nuances.append(
-                "Case doesn't fit standard categories - may require " "custom solution or new category definition"
+                "Case doesn't fit standard categories - may require custom solution or new category definition"
             )
 
         # Insight: Similar cases found
         if memory_results:
-            insights.append(f"Found {len(memory_results)} similar cases in memory - " "review solutions for patterns")
+            insights.append(f"Found {len(memory_results)} similar cases in memory - review solutions for patterns")
 
         # Insight: Keyword patterns
         if len(structure.keywords) > 5:
-            insights.append(f"Rich keyword set ({len(structure.keywords)} keywords) - " "case has multiple dimensions")
+            insights.append(f"Rich keyword set ({len(structure.keywords)} keywords) - case has multiple dimensions")
 
         # Insight: User context available
         if structure.user_examples or structure.user_scenarios:

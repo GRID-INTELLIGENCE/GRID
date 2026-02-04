@@ -7,8 +7,8 @@ import logging
 from datetime import UTC, datetime
 from enum import Enum
 
-from src.grid.config.runtime_settings import BillingSettings
-from src.grid.infrastructure.database import DatabaseManager
+from grid.config.runtime_settings import BillingSettings
+from grid.infrastructure.database import DatabaseManager
 
 logger = logging.getLogger(__name__)
 

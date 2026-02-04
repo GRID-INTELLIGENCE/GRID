@@ -177,7 +177,7 @@ class ContextProvider:
             return "Test context: Run pytest, check coverage, verify fixtures."
         if "api" in query_lower or "endpoint" in query_lower:
             return "API context: FastAPI routes, middleware, request/response models."
-        return f"Context: {query[:max_length-20]}"
+        return f"Context: {query[: max_length - 20]}"
 
     def _provide_code_context(self, query: str, max_length: int) -> str:
         """Provide code-specific context."""

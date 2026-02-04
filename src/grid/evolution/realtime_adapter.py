@@ -112,7 +112,7 @@ class DynamicWeightNetwork:
 
         self.adaptation_count += 1
 
-        logger.debug(f"Updated weight {layer}.{weight_name}: {old_value:.3f} -> {new_value:.3f} " f"({reason})")
+        logger.debug(f"Updated weight {layer}.{weight_name}: {old_value:.3f} -> {new_value:.3f} ({reason})")
 
         return update
 

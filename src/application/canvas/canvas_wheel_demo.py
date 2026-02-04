@@ -109,8 +109,7 @@ async def main():
     for zone_name, zone_data in sorted(json_data["zones"].items()):
         if zone_data["agent_count"] > 0:
             print(
-                f"  {zone_name:15s}: {zone_data['agent_count']:2d} agents, "
-                f"activity {zone_data['activity_level']:.2f}"
+                f"  {zone_name:15s}: {zone_data['agent_count']:2d} agents, activity {zone_data['activity_level']:.2f}"
             )
     print()
 

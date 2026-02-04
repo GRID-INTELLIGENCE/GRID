@@ -1,5 +1,4 @@
 class MermaidDiagramGenerator:
-
     def generate_xychart(self, title: str, x_axis: list[str], y_axis: str, data: list[float]) -> str:
         return f"""
 xychart-beta

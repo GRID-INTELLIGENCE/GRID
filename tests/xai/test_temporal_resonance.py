@@ -89,7 +89,10 @@ class TestXAITemporalResonance:
         )
 
         assert "coffee_metaphor_narrative" in explanation
-        assert "Cold Brew" in explanation["coffee_metaphor_narrative"] or "deliberate" in explanation["coffee_metaphor_narrative"].lower()
+        assert (
+            "Cold Brew" in explanation["coffee_metaphor_narrative"]
+            or "deliberate" in explanation["coffee_metaphor_narrative"].lower()
+        )
 
     def test_explain_pattern_with_coffee_metaphor_multiple_features(self, explainer):
         """Test pattern explanation with flow pattern and coffee features."""
@@ -98,7 +101,12 @@ class TestXAITemporalResonance:
             "detected": True,
             "confidence": 0.85,
             "explanation": "Flow state maintained.",
-            "features": {"coffee_mode": "Cold Brew", "processing_mode": "comprehensive", "momentum": "low", "chunk_size": 128},
+            "features": {
+                "coffee_mode": "Cold Brew",
+                "processing_mode": "comprehensive",
+                "momentum": "low",
+                "chunk_size": 128,
+            },
         }
         explanation = explainer.explain_pattern_with_coffee_metaphor(pattern_detection)
         assert "coffee_metaphor" in explanation

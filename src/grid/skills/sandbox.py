@@ -69,8 +69,8 @@ class SandboxConfig:
     max_disk_space: int = 100 * 1024 * 1024  # 100MB
     allow_network: bool = False
     allow_filesystem: bool = True
-    allowed_paths: set[Path] = None
-    environment_variables: dict[str, str] = None
+    allowed_paths: set[Path] | None = None
+    environment_variables: dict[str, str] | None = None
     timeout: float = 60.0  # seconds
 
     def __post_init__(self):
@@ -251,16 +251,16 @@ else:
 
         try:
             # Set memory limit
-            resource.setrlimit(resource.RLIMIT_AS, (self.config.max_memory, self.config.max_memory))
+            resource.setrlimit(resource.RLIMIT_AS, (self.config.max_memory, self.config.max_memory))  # type: ignore[attr-defined]
 
             # Set CPU time limit
-            resource.setrlimit(resource.RLIMIT_CPU, (self.config.max_cpu_time, self.config.max_cpu_time))
+            resource.setrlimit(resource.RLIMIT_CPU, (self.config.max_cpu_time, self.config.max_cpu_time))  # type: ignore[attr-defined]
 
             # Set process limit
-            resource.setrlimit(
-                resource.RLIMIT_NPROC,
+            resource.setrlimit(  # type: ignore[attr-defined]
+                resource.RLIMIT_NPROC,  # type: ignore[attr-defined]
                 (10, 10),  # Max 10 processes
-            )
+            )  # type: ignore[attr-defined]
 
             logger.debug("Resource limits applied")
 
@@ -357,7 +357,8 @@ else:
         env = os.environ.copy()
 
         # Add sandbox-specific variables
-        env.update(self.config.environment_variables)
+        if self.config.environment_variables:
+            env.update(self.config.environment_variables)
         env["SANDBOX_EXECUTION"] = "true"
         env["SANDBOX_START_TIME"] = datetime.now().isoformat()
 
@@ -375,30 +376,35 @@ else:
 
     async def _monitor_resources(self, execution_id: str, pid: int) -> None:
         """Monitor resource usage during execution."""
-        if not HAS_PSUTIL:
+        if not HAS_PSUTIL or psutil is None:
             # psutil not available - skip resource monitoring
             logger.debug(f"Resource monitoring skipped for {execution_id}: psutil not installed")
             return
 
         try:
             process = psutil.Process(pid)
-            self._resource_monitors[execution_id] = asyncio.current_task()
+            monitor_task = asyncio.current_task()
+            if monitor_task:
+                self._resource_monitors[execution_id] = monitor_task
 
             while process.is_running() and process.status() != psutil.STATUS_ZOMBIE:
                 try:
                     # Collect metrics
+                    num_fds_func = getattr(process, "num_fds", None)
                     metrics = {
                         "cpu_percent": process.cpu_percent(),
                         "memory_mb": process.memory_info().rss / 1024 / 1024,
                         "memory_percent": process.memory_percent(),
                         "num_threads": process.num_threads(),
-                        "num_fds": process.num_fds() if hasattr(process, "num_fds") else 0,
+                        "num_fds": num_fds_func() if callable(num_fds_func) else 0,
                         "timestamp": datetime.now().isoformat(),
                     }
 
                     # Store metrics
                     if execution_id not in self._active_executions:
-                        self._active_executions[execution_id] = asyncio.current_task()
+                        active_task = asyncio.current_task()
+                        if active_task:
+                            self._active_executions[execution_id] = active_task
 
                     # Check limits
                     if metrics["memory_mb"] > self.config.max_memory / 1024 / 1024:

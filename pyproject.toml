@@ -180,6 +180,9 @@ exclude = [
     "dev/**",
     "reports/**",
     "docs-ext/**",
+    "docs/completion_reports/**",
+    "docs/reports/analysis/analysis_report/**",
+    "artifacts/debug_logs/**",
     "light_of_the_seven/**",
     "datakit/**",
     "archival/**",
@@ -251,6 +254,9 @@ exclude = [
     "logs/",
     "analysis_report/",
     "artifacts/",
+    "artifacts/debug_logs/",
+    "docs/completion_reports/",
+    "docs/reports/analysis/analysis_report/",
     "research_snapshots/",
     "venv/",
     ".venv/",
@@ -303,7 +309,7 @@ known-first-party = ["grid", "application", "cognitive", "tools"]
 [tool.black]
 line-length = 120
 target-version = ["py313"]
-exclude = "(light_of_the_seven/|datakit/|archival/|core/|SEGA/|data/|logs/|analysis_report/|artifacts/|research_snapshots/|venv/|\\.venv/|\\.venv_locked/|__pycache__/|.*\\.pyc|Arena/|frontend/|grid_exercises/|\\.case_references/|\\.case_memory/|archive/|EUFLE/|research/|examples/.*\\.ipynb)"
+exclude = "(light_of_the_seven/|datakit/|archival/|core/|SEGA/|data/|logs/|analysis_report/|artifacts/|artifacts/debug_logs/|docs/completion_reports/|docs/reports/analysis/|research_snapshots/|venv/|\\.venv/|\\.venv_locked/|__pycache__/|.*\\.pyc|Arena/|frontend/|grid_exercises/|\\.case_references/|\\.case_memory/|archive/|EUFLE/|research/|examples/.*\\.ipynb)"
 
 [tool.mypy]
 python_version = "3.13"

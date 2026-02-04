@@ -346,7 +346,7 @@ class DefinitiveStepResponse(BaseResponse):
                     "activity_id": "550e8400-e29b-41d4-a716-446655440000",
                     "progress": 0.65,
                     "canvas_before": (
-                        "Canvas inverted: free-form work looks chaotic because " "the viewing frame is flipped."
+                        "Canvas inverted: free-form work looks chaotic because the viewing frame is flipped."
                     ),
                     "canvas_after": "Canvas flipped: context, options, and structured intent become visible.",
                     "summary": "At the ~65% checkpoint, Resonance aligns the view and produces structured output.",

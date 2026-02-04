@@ -121,8 +121,7 @@ class DomainTracker:
         self.domains[domain].add_snapshot(snapshot)
 
         logger.info(
-            f"Tracked domain '{domain}': {len(patterns)} patterns, "
-            f"{len(structural_changes or {})} structural changes"
+            f"Tracked domain '{domain}': {len(patterns)} patterns, {len(structural_changes or {})} structural changes"
         )
 
         return snapshot

@@ -41,7 +41,7 @@ def check_inference_elasticity():
 
     sys.path.append(str(project_root))
     try:
-        from src.grid.services.inference_harness import InferenceHarness
+        from grid.services.inference_harness import InferenceHarness
 
         harness = InferenceHarness()
         available = [t.value for t, p in harness.providers.items() if p.is_available()]
@@ -62,7 +62,8 @@ def check_ollama():
 
         resp = requests.get("http://localhost:11434/api/tags", timeout=2)
         if resp.status_code == 200:
-            models = [m["name"] for m in resp.model_dump_json().get("models", [])]
+            data = resp.json()
+            models = [m["name"] for m in data.get("models", [])]
             print(f"[+] Ollama reachable. Available models: {', '.join(models[:3])}...")
             return True
     except Exception:

@@ -58,6 +58,110 @@ class AuthorizationError(SecurityException):
 from .rbac import Role, get_permissions_for_role
 
 
+def _check_development_bypass(allow_development_bypass: bool, settings) -> dict[str, Any] | None:
+    """
+    Hardened development authentication bypass with multiple security checks.
+
+    SECURITY UPDATE 2026-02-02: Enhanced with defense-in-depth approach.
+
+    This function provides a development-only authentication bypass with strict
+    safeguards to prevent accidental production use. Multiple layers of checks
+    ensure this cannot be enabled in production.
+
+    Security Features:
+    - BLOCKS all bypass attempts in production environment
+    - Requires THREE separate environment variables
+    - Extensive security logging with timestamps
+    - Machine ID tracking for audit trails
+    - Returns None if any check fails (deny by default)
+
+    Args:
+        allow_development_bypass: Explicit function parameter
+        settings: Application settings with environment info
+
+    Returns:
+        dict with SUPER_ADMIN permissions if all checks pass, None otherwise
+
+    Raises:
+        SecurityException: If bypass attempted in production
+    """
+    from datetime import datetime
+
+    # CRITICAL SECURITY CHECK #1: NEVER allow in production
+    if hasattr(settings, "environment") and settings.environment == "production":
+        logger.critical(
+            "SECURITY VIOLATION: Development bypass attempted in PRODUCTION environment. "
+            "This is a critical security violation. Blocking and logging incident."
+        )
+        raise SecurityException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Development bypass not allowed in production",
+            code="DEV_BYPASS_PRODUCTION_BLOCKED",
+        )
+
+    # CRITICAL SECURITY CHECK #2: Explicit opt-in required
+    if not allow_development_bypass:
+        return None
+
+    # CRITICAL SECURITY CHECK #3: Development mode required
+    if not settings.is_development:
+        logger.error("SECURITY: Development bypass rejected - is_development=False")
+        return None
+
+    # DEFENSE IN DEPTH: Require THREE environment variables
+    # This makes accidental production deployment much less likely
+    bypass_enabled = os.getenv("MOTHERSHIP_ALLOW_DEV_BYPASS") == "1"
+    bypass_confirmed = os.getenv("MOTHERSHIP_DEV_BYPASS_CONFIRMED") == "yes_i_understand_the_risk"
+    dev_machine_id = os.getenv("DEV_MACHINE_ID")  # Unique identifier for developer's machine
+
+    # DENY BY DEFAULT: If any variable missing, bypass rejected
+    if not (bypass_enabled and bypass_confirmed and dev_machine_id):
+        missing = []
+        if not bypass_enabled:
+            missing.append("MOTHERSHIP_ALLOW_DEV_BYPASS")
+        if not bypass_confirmed:
+            missing.append("MOTHERSHIP_DEV_BYPASS_CONFIRMED")
+        if not dev_machine_id:
+            missing.append("DEV_MACHINE_ID")
+
+        logger.warning(f"SECURITY: Development bypass incomplete - missing: {', '.join(missing)}")
+        return None
+
+    # EXTENSIVE SECURITY LOGGING
+    # Log with maximum detail for audit trails
+    timestamp = datetime.now().isoformat()
+    logger.warning("=" * 80)
+    logger.warning("SECURITY WARNING: DEVELOPMENT AUTHENTICATION BYPASS ACTIVE")
+    logger.warning(f"Timestamp: {timestamp}")
+    logger.warning(f"Machine ID: {dev_machine_id}")
+    logger.warning(f"Environment: {settings.environment if hasattr(settings, 'environment') else 'unknown'}")
+    logger.warning(f"Is Development: {settings.is_development}")
+    logger.warning("Granted Role: SUPER_ADMIN")
+    logger.warning("Authenticated: False (bypass - no real authentication)")
+    logger.warning("")
+    logger.warning("SECURITY IMPLICATIONS:")
+    logger.warning("- This grants SUPER_ADMIN privileges without authentication")
+    logger.warning("- ALL API endpoints are accessible")
+    logger.warning("- ALL data can be read, modified, or deleted")
+    logger.warning("- NEVER enable this in production or shared environments")
+    logger.warning("- Use only on isolated development machines")
+    logger.warning("")
+    logger.warning("TO DISABLE: Unset MOTHERSHIP_ALLOW_DEV_BYPASS environment variable")
+    logger.warning("=" * 80)
+
+    # Return bypass credentials with audit information
+    return {
+        "authenticated": False,  # Clearly mark as not truly authenticated
+        "method": "dev_bypass",
+        "user_id": f"dev_superuser_{dev_machine_id}",
+        "role": Role.SUPER_ADMIN.value,
+        "permissions": get_permissions_for_role(Role.SUPER_ADMIN),
+        "dev_bypass_active": True,  # Flag for additional logging/monitoring
+        "bypass_timestamp": timestamp,
+        "machine_id": dev_machine_id,
+    }
+
+
 def verify_api_key(api_key: str | None, require_valid: bool = True) -> dict[str, Any]:
     """
     Verify API key authentication with strict validation and RBAC integration.
@@ -214,18 +318,9 @@ async def verify_authentication_required(
     if api_key:
         return verify_api_key(api_key, require_valid=True)
 
-    # 3. Development bypass (must be explicit)
+    # 3. Development bypass (HARDENED 2026-02-02: Multiple security checks)
     if allow_development_bypass and settings.is_development:
-        # Check for explicit bypass flag in environment to prevent accidental leak
-        if os.getenv("MOTHERSHIP_ALLOW_DEV_BYPASS") == "1":
-            logger.warning("SECURITY: Bypassing authentication in development mode")
-            return {
-                "authenticated": False,
-                "method": "dev_bypass",
-                "user_id": "dev_superuser",
-                "role": Role.SUPER_ADMIN.value,
-                "permissions": get_permissions_for_role(Role.SUPER_ADMIN),
-            }
+        return _check_development_bypass(allow_development_bypass, settings)
 
     # Deny by default
     raise AuthenticationError("Active authentication required to access this resource")

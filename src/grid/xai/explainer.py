@@ -533,7 +533,7 @@ class XAIExplainer:
             momentum = features.get("momentum", "balanced")
 
             coffee_explanation = (
-                f"Flow detected in {coffee_mode} mode. " f"Processing: {processing_mode}, " f"Momentum: {momentum}. "
+                f"Flow detected in {coffee_mode} mode. Processing: {processing_mode}, Momentum: {momentum}. "
             )
             if coffee_mode == "Espresso":
                 coffee_explanation += "Ultra-focused precision with rapid decision-making."

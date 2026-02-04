@@ -60,9 +60,9 @@ class SkillGenerator:
 {solution}
 
 ## Agent Experience
-- Role: {experience.get('agent_role', 'N/A')}
-- Task: {experience.get('task', 'N/A')}
-- Execution Time: {experience.get('execution_time_seconds', 'N/A')}s
+- Role: {experience.get("agent_role", "N/A")}
+- Task: {experience.get("task", "N/A")}
+- Execution Time: {experience.get("execution_time_seconds", "N/A")}s
 """
         with open(skill_dir / "artifacts" / "overview.md", "w") as f:
             f.write(overview)

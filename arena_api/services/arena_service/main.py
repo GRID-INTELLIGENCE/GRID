@@ -30,15 +30,15 @@ from enum import Enum
 from typing import Any
 
 import uvicorn
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.schedulers.asyncio import AsyncIOScheduler  # type: ignore[import-not-found]
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "..", "Arena", "the_chase", "python", "src"))
 
-from the_chase.core.adsr_envelope import ADSREnvelope, EnvelopePhase
-from the_chase.overwatch.rewards import Achievement, AchievementType, CharacterRewardState
+from the_chase.core.adsr_envelope import ADSREnvelope, EnvelopePhase  # type: ignore[import-not-found]
+from the_chase.overwatch.rewards import Achievement, AchievementType, CharacterRewardState  # type: ignore[import-not-found]
 
 logger = logging.getLogger(__name__)
 

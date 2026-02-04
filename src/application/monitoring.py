@@ -23,15 +23,15 @@ from typing import Callable
 
 from fastapi import FastAPI, Request, Response
 from prometheus_client import (
-    Counter,
-    Histogram,
-    Gauge,
-    CollectorRegistry,
-    generate_latest,
     CONTENT_TYPE_LATEST,
+    CollectorRegistry,
+    Counter,
+    Gauge,
+    Histogram,
+    generate_latest,
 )
-from starlette.routing import Match
 from starlette.responses import Response as StarletteResponse
+from starlette.routing import Match
 
 # ============================================================================
 # Prometheus Metrics Registry
@@ -196,9 +196,7 @@ async def track_event_processing(domain: str, event_type: str):
         yield
     finally:
         duration = time.time() - start_time
-        event_bus_event_processing_duration_seconds.labels(
-            domain=domain, event_type=event_type
-        ).observe(duration)
+        event_bus_event_processing_duration_seconds.labels(domain=domain, event_type=event_type).observe(duration)
 
 
 @asynccontextmanager
@@ -235,9 +233,7 @@ async def track_skill_execution(skill_name: str):
         raise
     finally:
         duration = time.time() - start_time
-        skill_execution_duration_seconds.labels(skill_name=skill_name).observe(
-            duration
-        )
+        skill_execution_duration_seconds.labels(skill_name=skill_name).observe(duration)
         skill_executions_total.labels(skill_name=skill_name, status=status).inc()
 
 
@@ -271,26 +267,18 @@ def setup_metrics(app: FastAPI) -> None:
             response = await call_next(request)
         except Exception as exc:
             duration = time.time() - start_time
-            http_request_duration_seconds.labels(
-                method=request.method, endpoint=endpoint
-            ).observe(duration)
-            http_requests_total.labels(
-                method=request.method, endpoint=endpoint, status_code=500
-            ).inc()
+            http_request_duration_seconds.labels(method=request.method, endpoint=endpoint).observe(duration)
+            http_requests_total.labels(method=request.method, endpoint=endpoint, status_code=500).inc()
             raise exc
 
         duration = time.time() - start_time
-        http_request_duration_seconds.labels(
-            method=request.method, endpoint=endpoint
-        ).observe(duration)
-        http_requests_total.labels(
-            method=request.method, endpoint=endpoint, status_code=response.status_code
-        ).inc()
+        http_request_duration_seconds.labels(method=request.method, endpoint=endpoint).observe(duration)
+        http_requests_total.labels(method=request.method, endpoint=endpoint, status_code=response.status_code).inc()
 
         return response
 
 
-def get_metrics_router() -> "APIRouter":  # noqa: F821
+def get_metrics_router() -> APIRouter:  # noqa: F821
     """
     Get router with metrics endpoint.
 

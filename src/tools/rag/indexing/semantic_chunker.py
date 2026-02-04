@@ -156,7 +156,7 @@ class SemanticChunker:
                 chunks.append(
                     SemanticChunk(
                         content=current_chunk.strip(),
-                        metadata={"paragraphs": f"{current_start_paragraph}-{i-1}", "type": "text_block"},
+                        metadata={"paragraphs": f"{current_start_paragraph}-{i - 1}", "type": "text_block"},
                     )
                 )
                 current_chunk = p
@@ -168,7 +168,7 @@ class SemanticChunker:
             chunks.append(
                 SemanticChunk(
                     content=current_chunk.strip(),
-                    metadata={"paragraphs": f"{current_start_paragraph}-{len(paragraphs)-1}", "type": "text_final"},
+                    metadata={"paragraphs": f"{current_start_paragraph}-{len(paragraphs) - 1}", "type": "text_final"},
                 )
             )
 

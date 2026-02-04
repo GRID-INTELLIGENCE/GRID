@@ -56,7 +56,10 @@ context = time_manager.create_context(context_id="dev_session", timezone_offset=
 
 # Add a time window for focused work
 window = time_manager.window_manager.create_window(
-    window_id="focus_time", start_time=time.time(), duration=3600, activity_type="deep_work"  # 1 hour
+    window_id="focus_time",
+    start_time=time.time(),
+    duration=3600,
+    activity_type="deep_work",  # 1 hour
 )
 
 context.add_window(window)

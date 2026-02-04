@@ -111,7 +111,7 @@ def _load_builtin_skills(registry: SkillRegistry) -> None:
                 logger.error(f"Failed to register {metadata.id}: {e}")
                 failed += 1
 
-        logger.info(f"Skill registration complete: {registered} registered, " f"{skipped} skipped, {failed} failed")
+        logger.info(f"Skill registration complete: {registered} registered, {skipped} skipped, {failed} failed")
 
         # Register skills with intelligence inventory if persistence is enabled
         if os.getenv("GRID_SKILLS_PERSIST", "true").lower() == "true":

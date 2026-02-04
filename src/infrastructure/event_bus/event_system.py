@@ -476,7 +476,6 @@ class TradingSignalHandler(EventHandler):
         start_time = time.time()
 
         try:
-
             # Validate signal
             # Check risk limits
             # Execute trade if approved

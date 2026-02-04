@@ -3,7 +3,7 @@ import logging
 from datetime import UTC, datetime
 from typing import Any
 
-from src.grid.infrastructure.database import DatabaseManager
+from grid.infrastructure.database import DatabaseManager
 
 logger = logging.getLogger(__name__)
 

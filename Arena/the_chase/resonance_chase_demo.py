@@ -74,7 +74,7 @@ def run_chase_simulation():
     # Note: ADSR parameters are hardcoded in the simulation loop for this demo
 
     # 4. Setup Arena Integration (The Reward Engine)
-    goal = Goal(name="Catch the Prey", target_score=10.0)
+    goal = Goal(name="Catch the Prey", target_score=10)
     rules = [
         Rule(condition="distance < 1.0", action="REWARD", target="Proximity Bonus"),
         Rule(condition="distance < 0.2", action="REWARD", target="Capture Bonus"),

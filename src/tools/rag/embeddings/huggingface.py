@@ -24,7 +24,7 @@ class HuggingFaceEmbeddingProvider(BaseEmbeddingProvider):
             from sentence_transformers import SentenceTransformer
         except ImportError:
             raise ImportError(
-                "sentence-transformers not installed. " "Please install with: pip install sentence-transformers"
+                "sentence-transformers not installed. Please install with: pip install sentence-transformers"
             ) from None
 
         self.model_name = model_name

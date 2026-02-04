@@ -54,7 +54,7 @@ class SafetyCheck:
     severity: SafetyLevel
     details: dict[str, Any]
     timestamp: datetime
-    recommendations: list[str] = None
+    recommendations: list[str] | None = None
 
     def __post_init__(self):
         if self.recommendations is None:

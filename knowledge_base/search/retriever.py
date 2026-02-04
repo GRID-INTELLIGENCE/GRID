@@ -68,7 +68,9 @@ class VectorSearchStrategy(SearchStrategy):
 
         # Find similar chunks using embeddings
         similar_chunks = self.embedding_engine.search_similar(
-            query.text, limit=query.limit * 2, threshold=query.threshold  # Get more for reranking
+            query.text,
+            limit=query.limit * 2,
+            threshold=query.threshold,  # Get more for reranking
         )
 
         results = []

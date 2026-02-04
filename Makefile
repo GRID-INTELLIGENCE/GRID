@@ -1,5 +1,6 @@
 # Makefile for GRID Development
 # Streamlines local development with uv
+# Note: Dotfiles (.agentignore, .cursorrules, .python-version, .secrets.baseline) in config/
 
 .PHONY: help install run test lint format clean
 

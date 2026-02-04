@@ -185,6 +185,10 @@ archive/* linguist-vendored
 .github/ export-ignore
 .vscode/ export-ignore
 .cursor/ export-ignore
+config/.agentignore export-ignore
+config/.cursorrules export-ignore
+config/.python-version export-ignore
+config/.secrets.baseline export-ignore
 .env* export-ignore
 __pycache__/ export-ignore
 *.pyc export-ignore

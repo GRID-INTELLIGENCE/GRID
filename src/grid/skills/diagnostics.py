@@ -189,7 +189,7 @@ class SkillsDiagnostics:
         total = report.error_counts.get("total_executions", 0)
         failed = report.error_counts.get("failed_executions", 0)
         if total > 0 and (failed / total) > 0.1:
-            recs.append(f"High failure rate ({failed/total:.1%}). Review errors.")
+            recs.append(f"High failure rate ({failed / total:.1%}). Review errors.")
 
         return recs
 

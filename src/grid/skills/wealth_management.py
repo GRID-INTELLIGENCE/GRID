@@ -51,9 +51,9 @@ class WealthManagementSkill:
 
         # 2. Initialize KG and Awareness
         kg = StructuralLearningLayer()
-        from grid.awareness.domain_tracking import WealthDomainTracker
+        from grid.awareness.domain_tracking import DomainTracker
 
-        wealth_tracker = WealthDomainTracker()
+        wealth_tracker = DomainTracker()
 
         # 3. Add Entities
         # Client
@@ -124,11 +124,14 @@ class WealthManagementSkill:
         savings_rate = 0.0  # TBD
         dependency_ratio = dependents_count / 1.0  # 1 earner
 
-        snapshot = wealth_tracker.track_wealth_metrics(
-            net_worth=total_assets_value,
-            monthly_income=total_monthly_income,
-            savings_rate=savings_rate,
-            dependency_ratio=dependency_ratio,
+        snapshot = wealth_tracker.track_domain(
+            domain="wealth",
+            metrics={
+                "net_worth": total_assets_value,
+                "monthly_income": total_monthly_income,
+                "savings_rate": savings_rate,
+                "dependency_ratio": dependency_ratio,
+            },
             patterns=["STABLE_ASSETS" if total_assets_value > 0 else "NO_ASSETS"],
         )
 

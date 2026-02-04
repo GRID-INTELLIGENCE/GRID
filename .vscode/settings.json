@@ -26,8 +26,6 @@
   "editor.smoothScrolling": true,
   "editor.cursorSmoothCaretAnimation": "on",
   "editor.multiCursorModifier": "alt",
-  "editor.bracketPairColorization.enabled": true,
-  "editor.guides.bracketPairs": "active",
   "editor.minimap.enabled": true,
   "editor.minimap.renderCharacters": false,
   "editor.minimap.maxColumn": 80,
@@ -54,7 +52,6 @@
     "editor.defaultFormatter": null
   },
   "files.autoSave": "onFocusChange",
-  "files.autoSaveDelay": 1000,
   "files.insertFinalNewline": true,
   "files.trimFinalNewlines": true,
   "files.trimTrailingWhitespace": true,
@@ -109,7 +106,7 @@
   "explorer.confirmDragAndDrop": false,
   "breadcrumbs.enabled": true,
   "workbench.colorTheme": "Visual Studio Dark",
-  "workbench.iconTheme": "vscode-icons",
+  "workbench.iconTheme": "vs-dark",
   "workbench.startupEditor": "newUntitledFile",
   "workbench.editor.enablePreview": true,
   "workbench.editor.highlightModifiedTabs": true,
@@ -169,7 +166,6 @@
   "security.enableIntegrityCheckOnStart": true,
   "security.promptOnSourceControlFailure": true,
   "telemetry.telemetryLevel": "off",
-  "telemetry.enableTelemetry": false,
   "redhat.telemetry.enabled": false,
   "update.mode": "manual",
   "update.showReleaseNotes": false,
@@ -189,7 +185,9 @@
   "debug.showDebugOutput": false,
   "extensions.recommended": false,
   "extensions.verifySignature": true,
-  "notebook.cellToolbarLocation": "right",
+  "notebook.cellToolbarLocation": {
+    "default": "right"
+  },
   "notebook.diff.enablePreview": true,
   "notebook.diff.showMetadata": false,
   "[markdown]": {
@@ -204,14 +202,13 @@
   "settingsSync.machineSettingsSync": false,
   "settingsSync.ignoredExtensions": [],
   "settingsSync.logLevel": "off",
-  "comments.openView": "gutter",
+  "comments.openView": "file",
   "comments.collapseState": "collapsed",
   "editor.quickSuggestions": {
     "other": "off",
     "comments": "off",
     "strings": "off"
   },
-  "editor.suggest.maxVisibleSuggestions": 12,
   "editor.suggest.showStatusBar": false,
   "github.authentication.enabled": true,
   "github.authentication.useEdgeRuntime": false,
@@ -221,14 +218,7 @@
     "markdown": false,
     "scminput": false
   },
-  "github.copilot.advanced": {
-    "debug.overrideCacheDir": null,
-    "debug.overrideEngine": null,
-    "debug.overrideProxyUrl": null,
-    "debug.testOverrideProxyUrl": null,
-    "debug.overrideAuthorizationHeader": null,
-    "debug.overrideCacheDirForcompletions": null
-  },
+  "github.copilot.advanced": {},
   "scm.autoReveal": false,
   "scm.diffDecorationsIgnoreWhitespace": "all",
   "scm.inputFontFamily": "editor",

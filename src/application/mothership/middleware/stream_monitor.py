@@ -8,7 +8,7 @@ and logs anomalies.
 import time
 
 try:
-    from prometheus_client import Histogram, REGISTRY  # type: ignore[import-not-found]
+    from prometheus_client import REGISTRY, Histogram  # type: ignore[import-not-found]
 
     PROMETHEUS_AVAILABLE = True
 except ImportError:

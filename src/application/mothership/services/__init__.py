@@ -489,7 +489,7 @@ class OperationService:
             )
         )
 
-        logger.info(f"Operation completed: {operation_id} " f"(duration: {operation.duration_seconds:.2f}s)")
+        logger.info(f"Operation completed: {operation_id} (duration: {operation.duration_seconds:.2f}s)")
         return operation
 
     def fail_operation(

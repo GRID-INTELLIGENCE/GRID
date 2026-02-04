@@ -7,7 +7,7 @@
       "name": "grid-rag",
       "description": "RAG-powered knowledge base and document search",
       "enabled": true,
-      "command": "python",
+      "command": "C:\\\\Users\\\\irfan\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python313\\\\python.exe",
       "args": [
         "mcp-setup/server/grid_rag_mcp_server.py"
       ],
@@ -33,7 +33,7 @@
       "name": "grid-agentic",
       "description": "Agentic system for enhanced workflows with cognitive awareness",
       "enabled": true,
-      "command": "python",
+      "command": "C:\\\\Users\\\\irfan\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python313\\\\python.exe",
       "args": [
         "workspace/mcp/servers/agentic/server.py"
       ],
@@ -52,7 +52,7 @@
       "name": "memory",
       "description": "In-memory data storage and retrieval",
       "enabled": true,
-      "command": "python",
+      "command": "C:\\\\Users\\\\irfan\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python313\\\\python.exe",
       "args": [
         "workspace/mcp/servers/memory/server.py"
       ],
@@ -71,7 +71,7 @@
       "name": "grid-rag-enhanced",
       "description": "Enhanced RAG with conversation memory and multi-hop reasoning",
       "enabled": true,
-      "command": "python",
+      "command": "C:\\\\Users\\\\irfan\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python313\\\\python.exe",
       "args": [
         "-m",
         "grid.mcp.enhanced_rag_server"
@@ -98,7 +98,7 @@
       "name": "grid-enhanced-tools",
       "description": "Enhanced development tools (profiling, security, docs, quality)",
       "enabled": true,
-      "command": "python",
+      "command": "C:\\\\Users\\\\irfan\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python313\\\\python.exe",
       "args": [
         "mcp-setup/server/enhanced_tools_mcp_server.py"
       ],
@@ -117,7 +117,7 @@
       "name": "portfolio-safety-lens",
       "description": "Portfolio Safety Lens - Context-aware secure portfolio analytics with full guardrails",
       "enabled": true,
-      "command": "python",
+      "command": "C:\\\\Users\\\\irfan\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python313\\\\python.exe",
       "args": [
         "mcp-setup/server/portfolio_safety_mcp_server.py"
       ],

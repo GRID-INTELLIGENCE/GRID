@@ -88,15 +88,8 @@ def _detect_entities(args: Mapping[str, Any]) -> dict[str, Any]:
         entity_types = ["PERSON", "ORG", "DOMAIN"]
 
     try:
-        # Try to use GRID's NER service
-        try:
-            from application.mothership.ner_service import NERService
-
-            ner = NERService()
-            entities = ner.extract(text, entity_types=entity_types)
-        except ImportError:
-            # Fallback to simple detection
-            entities = _simple_entity_detection(text, entity_types)
+        # Use heuristic-based entity detection
+        entities = _simple_entity_detection(text, entity_types)
 
         return {
             "skill": "patterns.detect_entities",

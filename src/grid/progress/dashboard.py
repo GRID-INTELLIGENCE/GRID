@@ -107,7 +107,7 @@ class ShiftDashboard:
         # Shift estimate
         print("\n📈 Gear Progression:")
         rpm_needed = self.engine.GEARS["3rd"]["rpm_min"]
-        print(f"   3rd Gear (Shift): {metrics.rpm}/{rpm_needed} RPM ({int(metrics.rpm/rpm_needed*100)}%)")
+        print(f"   3rd Gear (Shift): {metrics.rpm}/{rpm_needed} RPM ({int(metrics.rpm / rpm_needed * 100)}%)")
 
         print("\n" + "=" * 80 + "\n")
 

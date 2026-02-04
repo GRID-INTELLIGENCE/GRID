@@ -3,10 +3,11 @@ Billing Service - Cost Calculation and Plan Management.
 """
 
 import logging
+from datetime import UTC, datetime
 
-from src.grid.billing.aggregation import CostTier, UsageAggregator, build_tier_limits
-from src.grid.config.runtime_settings import RuntimeSettings
-from src.grid.infrastructure.database import DatabaseManager
+from grid.billing.aggregation import CostTier, UsageAggregator, build_tier_limits
+from grid.config.runtime_settings import RuntimeSettings
+from grid.infrastructure.database import DatabaseManager
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +33,7 @@ class BillingService:
                 return CostTier.FREE
         return CostTier.FREE
 
-    async def set_user_tier(self, user_id: str, tier: CostTier, stripe_sub_id: str = None) -> None:
+    async def set_user_tier(self, user_id: str, tier: CostTier, stripe_sub_id: str | None = None) -> None:
         """Set or update user's subscription tier."""
         import uuid
 
@@ -49,8 +50,10 @@ class BillingService:
             )
         await self.db.commit()
 
-    async def get_total_usage(self, user_id: str, month: str = None) -> dict[str, int]:
+    async def get_total_usage(self, user_id: str, month: str | None = None) -> dict[str, int]:
         """Get aggregated usage for a user (from aggregation table if available)."""
+        if month is None:
+            month = datetime.now(UTC).strftime("%Y-%m")
         usage = await self.aggregator.get_monthly_aggregation(user_id, month)
         if usage:
             return usage

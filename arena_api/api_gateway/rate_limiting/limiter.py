@@ -216,7 +216,7 @@ class RateLimiter:
                 limit=limit_info.get("limit", 0),
             )
 
-    def set_user_limit(self, user_id: str, requests_per_second: int, burst_limit: int = None):
+    def set_user_limit(self, user_id: str, requests_per_second: int, burst_limit: int | None = None):
         """Set custom rate limit for a user."""
         if burst_limit is None:
             burst_limit = requests_per_second * 2
