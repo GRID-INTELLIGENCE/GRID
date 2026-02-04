@@ -4,11 +4,9 @@ on:
   workflow_dispatch:  # Manual trigger only - GitHub Actions free tier blocked
   # Uncomment below and comment workflow_dispatch when billing is resolved
   # push:
-  #   branches: [main]
+  #   branches: [main, develop]
   # pull_request:
-  #   branches: [main]
-      - main
-      - develop
+  #   branches: [main, develop]
 
 jobs:
   # Stable jobs that are consistently passing - locked for success

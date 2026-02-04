@@ -9,31 +9,6 @@ name: GRID CI/CD Pipeline
 
 on:
   workflow_dispatch:  # Manual trigger only - GitHub Actions free tier blocked
-  # Uncomment below and comment workflow_dispatch when billing is resolved
-  # push:
-  #   branches: [main, master, develop]
-  # pull_request:
-  #   branches: [main, master, develop]
-      - "feature/**"
-      - "release/**"
-      - "hotfix/**"
-      - "architecture/**"
-    paths-ignore:
-      - "**.md"
-      - "docs/**"
-      - "*.txt"
-      - ".gitignore"
-      - "LICENSE"
-  pull_request:
-    branches:
-      - main
-      - master
-      - develop
-    types:
-      - opened
-      - synchronize
-      - reopened
-  workflow_dispatch:
     inputs:
       run_slow_tests:
         description: "Run slow/integration tests"
@@ -42,6 +17,18 @@ on:
         type: boolean
   repository_dispatch:
     types: [feedback-loop]
+  # Uncomment below when billing is resolved
+  # push:
+  #   branches: [main, master, develop, "feature/**", "release/**", "hotfix/**", "architecture/**"]
+  #   paths-ignore:
+  #     - "**.md"
+  #     - "docs/**"
+  #     - "*.txt"
+  #     - ".gitignore"
+  #     - "LICENSE"
+  # pull_request:
+  #   branches: [main, master, develop]
+  #   types: [opened, synchronize, reopened]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
