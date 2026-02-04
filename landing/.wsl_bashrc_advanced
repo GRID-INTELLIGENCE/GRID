@@ -1,0 +1,189 @@
+# Advanced WSL Bash Profile for GRID
+# Enhanced terminal profiling and productivity features
+
+# ============================================================
+# HISTORY CONFIGURATION
+# ============================================================
+export HISTSIZE=10000
+export HISTFILESIZE=20000
+export HISTCONTROL=ignoreboth:erasedups
+export HISTIGNORE='ls:ll:la:cd:exit:clear:history'
+shopt -s histappend
+shopt -s cmdhist
+shopt -s checkwinsize
+
+# Save history after each command
+export PROMPT_COMMAND='history -a; history -n'
+
+# ============================================================
+# ADVANCED PROMPT WITH GIT STATUS
+# ============================================================
+if [ -f /usr/lib/git-core/git-sh-prompt ]; then
+    source /usr/lib/git-core/git-sh-prompt
+    export GIT_PS1_SHOWDIRTYSTATE=1
+    export GIT_PS1_SHOWSTASHSTATE=1
+    export GIT_PS1_SHOWUNTRACKEDFILES=1
+    export GIT_PS1_SHOWUPSTREAM=auto
+    export GIT_PS1_DESCRIBE_STYLE=contains
+fi
+
+# Color prompt
+if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
+    PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]$(__git_ps1 " \[\033[01;33m\](%s)\[\033[00m\]")\$ '
+else
+    PS1='\u@\h:\w\$ '
+fi
+
+# ============================================================
+# ALIASES & SHORTCUTS
+# ============================================================
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'
+alias grep='grep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias egrep='egrep --color=auto'
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+
+# GRID workspace shortcuts
+alias cdgrid='cd /mnt/e/grid'
+alias gstatus='cd /mnt/e/grid && git status'
+alias glog='cd /mnt/e/grid && git log --oneline --graph --decorate -20'
+alias gdiff='cd /mnt/e/grid && git diff'
+
+# Python shortcuts
+alias py='python3'
+alias pip='python3 -m pip'
+alias venv='python3 -m venv'
+alias activate='source .venv/bin/activate'
+
+# ============================================================
+# COMMAND TIMING & PROFILING
+# ============================================================
+function timer_start {
+    timer=${timer:-$SECONDS}
+}
+
+function timer_stop {
+    elapsed_time=$((SECONDS - timer))
+    if [ $elapsed_time -gt 0 ]; then
+        echo "⏱️  Command took ${elapsed_time}s"
+    fi
+    unset timer
+}
+
+trap 'timer_start' DEBUG
+PROMPT_COMMAND="timer_stop; $PROMPT_COMMAND"
+
+# ============================================================
+# DIRECTORY NAVIGATION ENHANCEMENTS
+# ============================================================
+# Auto cd into directory by typing its name
+shopt -s autocd
+
+# Correct minor spelling errors
+shopt -s cdspell
+
+# ============================================================
+# COMPLETION ENHANCEMENTS
+# ============================================================
+if ! shopt -oq posix; then
+  if [ -f /usr/share/bash-completion/bash_completion ]; then
+    . /usr/share/bash-completion/bash_completion
+  elif [ -f /etc/bash_completion ]; then
+    . /etc/bash_completion
+  fi
+fi
+
+# ============================================================
+# GRID WORKSPACE AUTO-SETUP
+# ============================================================
+if [ -d /mnt/e/grid ]; then
+    export GRID_HOME=/mnt/e/grid
+    export GRID_SRC=/mnt/e/grid/src
+    export GRID_DATA=/mnt/e/grid/data
+    export PYTHONPATH="/mnt/e/grid:/mnt/e/grid/src:/mnt/e/grid/grid:/mnt/e/grid/tools:$PYTHONPATH"
+    
+    # Auto-activate venv if in grid directory
+    if [[ $PWD == /mnt/e/grid* ]] && [ -f /mnt/e/grid/.venv/bin/activate ]; then
+        source /mnt/e/grid/.venv/bin/activate 2>/dev/null
+    fi
+fi
+
+# ============================================================
+# PERFORMANCE MONITORING
+# ============================================================
+function sysinfo {
+    echo "=== System Information ==="
+    echo "CPU: $(nproc) cores"
+    echo "Memory: $(free -h | awk '/^Mem:/ {print $2}')"
+    echo "Disk: $(df -h / | awk 'NR==2 {print $4}')"
+    echo "Uptime: $(uptime -p)"
+}
+
+# ============================================================
+# FILE OPERATIONS
+# ============================================================
+function mkcd {
+    mkdir -p "$1" && cd "$1"
+}
+
+function extract {
+    if [ -f "$1" ]; then
+        case "$1" in
+            *.tar.bz2)   tar xjf "$1"     ;;
+            *.tar.gz)    tar xzf "$1"     ;;
+            *.bz2)       bunzip2 "$1"     ;;
+            *.rar)       unrar e "$1"     ;;
+            *.gz)        gunzip "$1"      ;;
+            *.tar)       tar xf "$1"      ;;
+            *.tbz2)      tar xjf "$1"    ;;
+            *.tgz)       tar xzf "$1"     ;;
+            *.zip)       unzip "$1"       ;;
+            *.Z)         uncompress "$1"  ;;
+            *.7z)        7z x "$1"        ;;
+            *)           echo "'$1' cannot be extracted via extract()" ;;
+        esac
+    else
+        echo "'$1' is not a valid file"
+    fi
+}
+
+# ============================================================
+# GIT ENHANCEMENTS
+# ============================================================
+function gac {
+    git add . && git commit -m "$1"
+}
+
+function gpush {
+    git push origin $(git branch --show-current)
+}
+
+function gpull {
+    git pull origin $(git branch --show-current)
+}
+
+# ============================================================
+# PYTHON ENHANCEMENTS
+# ============================================================
+function pyclean {
+    find . -type f -name '*.pyc' -delete
+    find . -type d -name '__pycache__' -delete
+    find . -type d -name '*.egg-info' -exec rm -r {} + 2>/dev/null
+}
+
+# ============================================================
+# NETWORK & SYSTEM
+# ============================================================
+alias ports='netstat -tulanp'
+alias update='sudo apt update && sudo apt upgrade -y'
+alias upgrade='sudo apt update && sudo apt upgrade -y && sudo apt autoremove -y'
+
+# ============================================================
+# COLOR OUTPUT
+# ============================================================
+export CLICOLOR=1
+export LS_COLORS='di=1;34:ln=1;36:so=1;35:pi=1;33:ex=1;32:bd=46;34:cd=43;34:su=41;30:sg=46;30:tw=42;30:ow=43;30'

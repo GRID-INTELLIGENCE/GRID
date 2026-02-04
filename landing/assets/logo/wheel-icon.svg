@@ -1,0 +1,37 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="wheelGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FBBF24;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#F59E0B;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#D97706;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Outer rim -->
+  <circle cx="50" cy="50" r="45" fill="url(#wheelGradient)" filter="url(#glow)" opacity="0.9"/>
+  
+  <!-- Inner hub circle -->
+  <circle cx="50" cy="50" r="15" fill="#D97706" opacity="0.8"/>
+  
+  <!-- Spokes (8 spokes) -->
+  <g stroke="#FBBF24" stroke-width="3" stroke-linecap="round">
+    <line x1="50" y1="50" x2="50" y2="20" opacity="0.9"/>
+    <line x1="50" y1="50" x2="70.7" y2="29.3" opacity="0.9"/>
+    <line x1="50" y1="50" x2="80" y2="50" opacity="0.9"/>
+    <line x1="50" y1="50" x2="70.7" y2="70.7" opacity="0.9"/>
+    <line x1="50" y1="50" x2="50" y2="80" opacity="0.9"/>
+    <line x1="50" y1="50" x2="29.3" y2="70.7" opacity="0.9"/>
+    <line x1="50" y1="50" x2="20" y2="50" opacity="0.9"/>
+    <line x1="50" y1="50" x2="29.3" y2="29.3" opacity="0.9"/>
+  </g>
+  
+  <!-- Center dot -->
+  <circle cx="50" cy="50" r="5" fill="#FFFFFF" opacity="0.95"/>
+</svg>

@@ -5,6 +5,19 @@
 [![Codecov](https://codecov.io/gh/irfankabir02/GRID/branch/main/graph/badge.svg)](https://codecov.io/gh/irfankabir02/GRID)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
+## 🌐 Landing Page
+
+**Live Site:** [https://grid-intelligence.netlify.app](https://grid-intelligence.netlify.app)
+
+The GRID landing page showcases the framework's capabilities, features, and philosophy. It includes:
+- Interactive product demonstration
+- Comprehensive feature overview
+- Pricing and beta signup
+- About section with project evolution story
+- FAQ with simplified, accessible answers
+
+The landing page is located in the `landing/` directory and can be deployed to any static hosting service.
+
 ## Overview
 
 GRID (Geometric Resonance Intelligence Driver) is a comprehensive framework for exploring and understanding complex systems through:
@@ -116,6 +129,7 @@ e:\grid/
 ├── scripts/                # Build and development scripts
 ├── tools/                  # Development tools
 ├── workspace/              # MCP workspace
+├── landing/                # Landing page (HTML/CSS/JS)
 └── pyproject.toml         # Project configuration
 ```
 

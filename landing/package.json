@@ -1,0 +1,20 @@
+{
+  "name": "grid-analyzer-landing",
+  "version": "1.0.0",
+  "description": "GRID Analyzer landing page",
+  "scripts": {
+    "generate:css": "node scripts/generate-css-variables.js",
+    "build:brand": "npm run generate:css",
+    "validate:brand": "node scripts/validate-brand.js"
+  },
+  "keywords": [
+    "landing-page",
+    "branding",
+    "grid-analyzer"
+  ],
+  "author": "GRID Team",
+  "license": "MIT",
+  "devDependencies": {
+    "sharp": "~0.34.5"
+  }
+}

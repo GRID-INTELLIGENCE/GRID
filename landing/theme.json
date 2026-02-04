@@ -1,0 +1,63 @@
+{
+  "_deprecated": true,
+  "_message": "This file is deprecated. Use branding.json as the single source of truth.",
+  "_migration": "All values have been migrated to branding.json. This file will be removed in a future version.",
+  "_deprecatedDate": "2026-02-04",
+  "brand": {
+    "name": "GRID Analyzer",
+    "shortName": "GRID",
+    "entity": "GRID Team",
+    "tagline": "Understand Any Codebase in Minutes",
+    "description": "Privacy-first code analysis with local AI",
+    "icon": "wheel",
+    "iconEmoji": "🛞"
+  },
+  "colors": {
+    "graphite": {
+      "50": "#FAFAFC",
+      "100": "#F5F5F8",
+      "200": "#E0E0E8",
+      "300": "#BABAC8",
+      "400": "#8A8A9E",
+      "500": "#5A5A6E",
+      "600": "#3A3A4A",
+      "700": "#2A2A36",
+      "800": "#1F1F28",
+      "900": "#14141A",
+      "950": "#0A0A0F"
+    },
+    "cyan": {
+      "300": "#66E8FF",
+      "400": "#33E0FF",
+      "500": "#00D9FF",
+      "600": "#00B8D4",
+      "700": "#0099B3"
+    },
+    "semantic": {
+      "success": "#10B981",
+      "warning": "#F59E0B",
+      "error": "#EF4444"
+    },
+    "amber": {
+      "600": "#D97706",
+      "500": "#F59E0B",
+      "400": "#FBBF24",
+      "700": "#EA580C"
+    }
+  },
+  "fonts": {
+    "display": "Space Grotesk",
+    "body": "Manrope",
+    "mono": "JetBrains Mono"
+  },
+  "assets": {
+    "logo": {
+      "icon": "assets/logo/wheel-icon.svg",
+      "favicon": "assets/logo/favicon.ico",
+      "appleTouch": "assets/logo/apple-touch-icon.png"
+    },
+    "audio": {
+      "backgroundMusic": "assets/audio/background-music.mp3"
+    }
+  }
+}

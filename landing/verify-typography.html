@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manrope Typography Verification</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            line-height: 1.65;
+            letter-spacing: -0.01em;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: #FAFAFA;
+        }
+        .test-section {
+            background: white;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            margin-bottom: 1rem;
+        }
+        .metric {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #4F46E5;
+        }
+        .check {
+            color: #10B981;
+            font-weight: 500;
+        }
+        .error {
+            color: #EF4444;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <h1>Manrope Typography Verification</h1>
+    
+    <div class="test-section">
+        <h2>Font Loading Test</h2>
+        <p id="font-check">Checking if Manrope is loaded...</p>
+        <p id="line-height-check">Checking line-height...</p>
+        <p id="letter-spacing-check">Checking letter-spacing...</p>
+    </div>
+    
+    <div class="test-section">
+        <h2>Typography Sample</h2>
+        <p>This is body text using Manrope at 400 weight. The line-height is set to 1.65 for improved readability, and letter-spacing is -0.01em for a modern, tight feel.</p>
+        <p><strong>This is medium weight (500)</strong> for emphasis. Notice how Manrope maintains excellent readability at both weights.</p>
+        <p>Paragraph spacing should be 1.5rem (24px) between paragraphs, creating generous breathing room for the content.</p>
+    </div>
+    
+    <div class="test-section">
+        <h2>Headline Pairing</h2>
+        <h1 style="font-family: 'Space Grotesk', sans-serif;">Space Grotesk Headline</h1>
+        <p>This demonstrates how Space Grotesk (headlines) pairs with Manrope (body text). Both are geometric sans-serifs that create a cohesive, modern look.</p>
+    </div>
+    
+    <div class="test-section">
+        <h2>Metrics Display</h2>
+        <div class="metric">2.3 min</div>
+        <p>Metric numbers use Space Grotesk for consistency with headlines.</p>
+    </div>
+    
+    <script>
+        // Check if Manrope font is loaded
+        document.fonts.ready.then(() => {
+            const manropeLoaded = document.fonts.check('1em Manrope');
+            const fontCheck = document.getElementById('font-check');
+            
+            if (manropeLoaded) {
+                fontCheck.innerHTML = '<span class="check">✓</span> Manrope font is loaded correctly';
+            } else {
+                fontCheck.innerHTML = '<span class="error">✗</span> Manrope font may not be loaded';
+            }
+            
+            // Check computed styles
+            const body = getComputedStyle(document.body);
+            const lineHeight = body.lineHeight;
+            const letterSpacing = body.letterSpacing;
+            const fontFamily = body.fontFamily;
+            
+            const lineHeightCheck = document.getElementById('line-height-check');
+            const letterSpacingCheck = document.getElementById('letter-spacing-check');
+            
+            // Line-height should be around 1.65 (26.4px for 16px base)
+            const expectedLineHeight = parseFloat(lineHeight) / parseFloat(body.fontSize);
+            if (Math.abs(expectedLineHeight - 1.65) < 0.1) {
+                lineHeightCheck.innerHTML = `<span class="check">✓</span> Line-height: ${lineHeight} (ratio: ${expectedLineHeight.toFixed(2)})`;
+            } else {
+                lineHeightCheck.innerHTML = `<span class="error">✗</span> Line-height: ${lineHeight} (expected ~1.65)`;
+            }
+            
+            // Letter-spacing should be -0.01em
+            if (letterSpacing.includes('-0.01em') || letterSpacing === '-0.16px') {
+                letterSpacingCheck.innerHTML = `<span class="check">✓</span> Letter-spacing: ${letterSpacing}`;
+            } else {
+                letterSpacingCheck.innerHTML = `<span class="error">✗</span> Letter-spacing: ${letterSpacing} (expected -0.01em)`;
+            }
+            
+            // Log font family
+            console.log('Font family:', fontFamily);
+            console.log('Line-height:', lineHeight, 'Ratio:', expectedLineHeight.toFixed(2));
+            console.log('Letter-spacing:', letterSpacing);
+        });
+    </script>
+</body>
+</html>

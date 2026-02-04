@@ -1,0 +1,8 @@
+# GRID Landing Page - Production Deployment
+# windsurf_deployment.yaml
+
+project_id: grid-analyzer-landing
+framework: static
+build_command: null
+output_directory: .
+environment_variables: {}
