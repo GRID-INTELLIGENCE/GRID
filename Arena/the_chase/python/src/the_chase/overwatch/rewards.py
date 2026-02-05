@@ -47,11 +47,11 @@ class Achievement:
 class CharacterRewardState:
     """Player reward state"""
 
-    def __init__(self, entity_id: str = "default"):
+    def __init__(self, entity_id: str = "default") -> None:
         self.entity_id = entity_id
         self.honor = 0.0
         self._level = RewardLevel.NEUTRAL
-        self.achievements = []
+        self.achievements: list[Achievement] = []
 
     @property
     def level(self) -> RewardLevel:
@@ -59,7 +59,7 @@ class CharacterRewardState:
         return self._level
 
     @level.setter
-    def level(self, value: RewardLevel):
+    def level(self, value: RewardLevel) -> None:
         """Set reward level."""
         self._level = value
 
@@ -69,7 +69,7 @@ class CharacterRewardState:
         return self._level
 
     @reward_level.setter
-    def reward_level(self, value: RewardLevel):
+    def reward_level(self, value: RewardLevel) -> None:
         """Alias for level (test compatibility)."""
         self._level = value
 
@@ -78,18 +78,18 @@ class CharacterRewardState:
         """Return count of achievements."""
         return len(self.achievements)
 
-    def add_achievement(self, achievement: Achievement):
+    def add_achievement(self, achievement: Achievement) -> None:
         """Add achievement and increase honor"""
         self.achievements.append(achievement)
         self.honor += achievement.points
         self._update_level()
 
-    def decay_honor(self, rate: float = 0.01):
+    def decay_honor(self, rate: float = 0.01) -> None:
         """Apply honor decay (MISSING FEATURE)"""
         self.honor = max(0.0, self.honor * (1 - rate))
         self._update_level()
 
-    def _update_level(self):
+    def _update_level(self) -> None:
         """Update reward level based on honor"""
         if self.honor >= 50:
             self._level = RewardLevel.PROMOTED

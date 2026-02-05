@@ -1,19 +1,21 @@
-import os
+import json
+import subprocess
 import sys
 import time
-import subprocess
-import json
-from typing import Optional, Dict, Any
+from typing import Any
+
 
 def run_command(command: str, check: bool = True) -> subprocess.CompletedProcess:
     print(f"Running: {command}")
     return subprocess.run(command, shell=True, capture_output=True, text=True, check=check)
 
-def get_latest_run(workflow_name: str) -> Optional[Dict[str, Any]]:
+
+def get_latest_run(workflow_name: str) -> dict[str, Any] | None:
     cmd = f'gh run list --workflow "{workflow_name}" --limit 1 --json databaseId,status,conclusion,url'
     result = run_command(cmd)
     runs = json.loads(result.stdout)
     return runs[0] if runs else None
+
 
 def trigger_workflow(event_type: str = "feedback-loop"):
     print(f"Triggering workflow with event type: {event_type}")
@@ -21,21 +23,22 @@ def trigger_workflow(event_type: str = "feedback-loop"):
     cmd = f'gh api repos/:owner/:repo/dispatches -f event_type="{event_type}"'
     run_command(cmd)
 
+
 def monitor_run(workflow_name: str, skip_trigger: bool = False):
     if not skip_trigger:
         # Get latest run ID before triggering to distinguish the new one
         last_run = get_latest_run(workflow_name)
-        last_id = last_run['databaseId'] if last_run else None
+        last_id = last_run["databaseId"] if last_run else None
 
         trigger_workflow()
 
         # Wait for new run to start
         print("Waiting for new run to start...")
         new_run = None
-        for _ in range(30): # 30 seconds timeout to start
+        for _ in range(30):  # 30 seconds timeout to start
             time.sleep(2)
             current_run = get_latest_run(workflow_name)
-            if current_run and current_run['databaseId'] != last_id:
+            if current_run and current_run["databaseId"] != last_id:
                 new_run = current_run
                 break
     else:
@@ -45,18 +48,18 @@ def monitor_run(workflow_name: str, skip_trigger: bool = False):
         print("No run found.")
         return
 
-    run_id = new_run['databaseId']
+    run_id = new_run["databaseId"]
     print(f"Monitoring run {run_id}: {new_run['url']}")
 
     # Wait for completion
     while True:
         run = get_latest_run(workflow_name)
-        if not run or run['databaseId'] != run_id:
+        if not run or run["databaseId"] != run_id:
             print("Run lost or changed.")
             break
 
-        status = run['status']
-        conclusion = run['conclusion']
+        status = run["status"]
+        conclusion = run["conclusion"]
         print(f"Current status: {status} (Conclusion: {conclusion})")
 
         if status == "completed":
@@ -69,6 +72,7 @@ def monitor_run(workflow_name: str, skip_trigger: bool = False):
                 return False
 
         time.sleep(10)
+
 
 def fetch_failure_logs(run_id: int):
     print(f"Fetching logs for failed run {run_id}...")
@@ -86,6 +90,7 @@ def fetch_failure_logs(run_id: int):
         print("-------------------\n")
     except Exception as e:
         print(f"Error fetching logs: {e}")
+
 
 if __name__ == "__main__":
     workflow = "GRID CI/CD Pipeline"

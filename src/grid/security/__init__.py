@@ -13,6 +13,17 @@ from .templates import (
     generate_env_file,
     generate_kubernetes_manifests,
 )
+from .path_manager import SecurePathManager, PathManagerReport, PathValidationResult
+from .path_validator import PathValidator, SecurityError
+from .startup import (
+    ENABLE_HARDENING,
+    HardeningLevel,
+    EnvironmentReport,
+    get_environment_status,
+    get_hardening_level,
+    harden_environment,
+    should_harden_environment,
+)
 
 # Import local secrets manager
 try:
@@ -148,6 +159,20 @@ __all__ = [
     "STAGING_CONFIG",
     "generate_env_file",
     "generate_kubernetes_manifests",
+    # Path management
+    "SecurePathManager",
+    "PathManagerReport",
+    "PathValidationResult",
+    "PathValidator",
+    "SecurityError",
+    # Startup hardening
+    "harden_environment",
+    "EnvironmentReport",
+    "HardeningLevel",
+    "get_environment_status",
+    "get_hardening_level",
+    "should_harden_environment",
+    "ENABLE_HARDENING",
     # General
     "initialize_security",
     "get_security_status",

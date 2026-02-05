@@ -77,7 +77,7 @@ class ExecutionBehavior:
 
     metadata: dict[str, Any] = field(default_factory=dict)
 
-    def finalize(self, outcome: ExecutionOutcome = ExecutionOutcome.SUCCESS):
+    def finalize(self, outcome: ExecutionOutcome = ExecutionOutcome.SUCCESS) -> None:
         """Finalize the trace with end time and outcome."""
         self.end_time = time.time()
         self.outcome = outcome
@@ -89,7 +89,7 @@ class ExecutionBehavior:
             return (time.time() - self.start_time) * 1000
         return (self.end_time - self.start_time) * 1000
 
-    def add_decision(self, **kwargs):
+    def add_decision(self, **kwargs: Any) -> None:
         """Add a decision point to the trace."""
         decision = DecisionPoint(**kwargs)
         self.decisions.append(decision)

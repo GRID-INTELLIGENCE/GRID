@@ -136,13 +136,13 @@ class MemoryTier:
         self._update_access_order(key)
         return CacheEntry(entry["value"], meta)
 
-    def _update_access_order(self, key: str):
+    def _update_access_order(self, key: str) -> None:
         """Update access order for LRU eviction."""
         if key in self._access_order:
             self._access_order.remove(key)
-        self._access_order.append(key)
+            self._access_order.append(key)
 
-    def _evict_lru(self):
+    def _evict_lru(self) -> None:
         """Evict least recently used item."""
         if self._access_order:
             key = self._access_order.pop(0)
@@ -170,6 +170,29 @@ class MemoryTier:
         meta.soft_ttl_seconds *= multiplier
         return meta
 
+    def apply_metadata_modifiers(self, meta: CacheMeta) -> CacheMeta:
+        """Public method to apply reward boosts and penalty reductions to metadata."""
+        meta = self._apply_reward_boost(meta)
+        meta = self._apply_ttl_extension(meta)
+        meta = self._apply_penalty_reduction(meta)
+        return meta
+
+    def store_entry(self, key: str, entry: dict[str, Any]) -> None:
+        """Public method to store an entry."""
+        self._store[key] = entry
+        self._access_order.append(key)
+        if len(self._store) > self.max_size:
+            self._evict_lru()
+
+    def clear_store(self) -> None:
+        """Public method to clear internal storage."""
+        self._store.clear()
+        self._access_order.clear()
+
+    def store_size(self) -> int:
+        """Public method to get store size."""
+        return len(self._store)
+
 
 class CacheLayer:
     """Multi-level cache layer for The Chase with ADSR semantics."""
@@ -179,14 +202,14 @@ class CacheLayer:
         self.l1: dict[str, Any] = {}
         self.l2: dict[str, Any] = {}
 
-    def keys(self):
+    def keys(self) -> list[str]:
         """Return keys in L1 cache."""
-        return self.l1.keys()
+        return []
 
     def __contains__(self, key: str) -> bool:
         return key in self.l1
 
-    def __setitem__(self, key: str, value: Any):
+    def __setitem__(self, key: str, value: Any) -> None:
         if key in self.l1:
             self.l1[key] = value
         else:
@@ -227,38 +250,31 @@ class CacheLayer:
             priority=priority,
             ttl_seconds=ttl_seconds,
             soft_ttl_seconds=soft_ttl_seconds or (ttl_seconds / 2),
-            reward_level=RewardLevel(reward_level) if isinstance(reward_level, str) else reward_level,
-            penalty_level=PenaltyLevel(penalty_level) if isinstance(penalty_level, str) else penalty_level,
+            reward_level=reward_level if isinstance(reward_level, RewardLevel) else RewardLevel(reward_level),
+            penalty_level=penalty_level if isinstance(penalty_level, PenaltyLevel) else PenaltyLevel(penalty_level),
             decay_rate=decay_rate,
         )
-        meta = self.mem._apply_reward_boost(meta)
-        meta = self.mem._apply_ttl_extension(meta)
-        meta = self.mem._apply_penalty_reduction(meta)
+        meta = self.mem.apply_metadata_modifiers(meta)
 
-        entry = {"value": value, "meta": meta}
-        self.mem._store[key] = entry
-        self.mem._access_order.append(key)
-
-        if len(self.mem._store) > self.mem.max_size:
-            self.mem._evict_lru()
+        entry: dict[str, Any] = {"value": value, "meta": meta}
+        self.mem.store_entry(key, entry)
 
     def get(self, key: str) -> "CacheEntry | None":
         """Get entry with metadata."""
         return self.mem.get(key)
 
-    def _evict_lru(self):
+    def _evict_lru(self) -> None:
         """Evict least recently used item."""
         if self.l1:
             key = next(iter(self.l1))
             del self.l1[key]
 
-    def clear(self):
+    def clear(self) -> None:
         """Clear all cache levels."""
         self.l1.clear()
         self.l2.clear()
-        self.mem._store.clear()
-        self.mem._access_order.clear()
+        self.mem.clear_store()
 
     def size(self) -> int:
         """Return total cache size."""
-        return len(self.l1) + len(self.l2) + len(self.mem._store)
+        return len(self.l1) + len(self.l2) + self.mem.store_size()

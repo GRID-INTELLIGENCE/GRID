@@ -110,4 +110,4 @@ class OpenAIEmbeddingProvider(BaseEmbeddingProvider):
             except Exception:
                 # Default to common OpenAI embedding dimension for safety
                 self._dimension = 1536
-        return cast(int, self._dimension)
+        return self._dimension

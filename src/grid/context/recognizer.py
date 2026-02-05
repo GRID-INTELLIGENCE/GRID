@@ -85,7 +85,7 @@ class ContextualRecognizer:
     def get_contextual_suggestions(self) -> list[dict[str, Any]]:
         """Get contextual suggestions based on current context."""
         context = self.recognize_current_context()
-        suggestions = []
+        suggestions: list[dict[str, Any]] = []
 
         # Time-based suggestions
         time_of_day = context["time_of_day"]

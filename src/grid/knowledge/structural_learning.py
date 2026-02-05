@@ -426,7 +426,7 @@ class HierarchyEvolutionTracker:
         if len(self.hierarchy_snapshots) < 2:
             return []
 
-        changes = []
+        changes: list[dict[str, Any]] = []
         previous = self.hierarchy_snapshots[-2]
         current = self.hierarchy_snapshots[-1]
 

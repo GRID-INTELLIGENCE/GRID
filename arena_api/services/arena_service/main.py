@@ -38,7 +38,11 @@ from pydantic import BaseModel
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "..", "Arena", "the_chase", "python", "src"))
 
 from the_chase.core.adsr_envelope import ADSREnvelope, EnvelopePhase  # type: ignore[import-not-found]
-from the_chase.overwatch.rewards import Achievement, AchievementType, CharacterRewardState  # type: ignore[import-not-found]
+from the_chase.overwatch.rewards import (  # type: ignore[import-not-found]
+    Achievement,
+    AchievementType,
+    CharacterRewardState,
+)
 
 logger = logging.getLogger(__name__)
 

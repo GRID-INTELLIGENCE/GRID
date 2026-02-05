@@ -2,17 +2,13 @@
 Tests for distributed tracing module.
 """
 
-import pytest
 from unittest.mock import Mock, patch
+
+import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from application.tracing import (
-    setup_tracing,
-    setup_fastapi_tracing,
-    get_tracer,
-    SpanContext,
-)
+from application.tracing import SpanContext, get_tracer, setup_fastapi_tracing, setup_tracing
 
 
 @pytest.fixture
@@ -71,7 +67,7 @@ def test_span_context_with_error() -> None:
     tracer = get_tracer(__name__)
 
     try:
-        with SpanContext(tracer, "test_span") as span:
+        with SpanContext(tracer, "test_span"):
             raise ValueError("Test error")
     except ValueError:
         pass  # Expected

@@ -127,11 +127,11 @@ class OllamaProvider:
 
     def is_available(self) -> bool:
         try:
-            import requests  # type: ignore[import-untyped]
+            import requests
 
             health_url = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434") + "/api/tags"
             response = requests.get(health_url, timeout=1)
-            return response.status_code == 200
+            return response.status_code == 200  # type: ignore[no-any-return]
         except Exception:
             return False
 
@@ -139,7 +139,7 @@ class OllamaProvider:
         """Executes generation via Ollama REST API."""
         import time
 
-        import requests  # type: ignore[import-untyped]
+        import requests
 
         start_time = time.perf_counter()
 
@@ -235,7 +235,7 @@ class TransformersProvider:
 
     def __init__(self, model_name: str = "microsoft/phi-2") -> None:
         self.model_name = model_name
-        self._pipeline = None
+        self._pipeline: Any = None
         self._available: bool | None = None
 
     def is_available(self) -> bool:

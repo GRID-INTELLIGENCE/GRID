@@ -660,5 +660,9 @@ mypy_final_report.txt
 **/pentest-results/
 *.sarif
 
+# Environment audit reports (may contain redacted but sensitive info)
+environment_audit_report*.json
+environment_accountability_report.json
+
 # Local Netlify folder
 .netlify

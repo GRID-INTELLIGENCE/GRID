@@ -204,7 +204,7 @@ class CognitiveTrace:
     decay_rate: float = 0.1
     """Rate at which activation decays over time (0.0-1.0)."""
 
-    metadata: dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=lambda: {})
     """Additional metadata about the event."""
 
     def get_current_activation(self, current_time: float) -> float:
@@ -225,16 +225,16 @@ class CognitiveState:
     - Recent cognitive traces
     """
 
-    working_memory: list[Any] = field(default_factory=list)
+    working_memory: list[Any] = field(default_factory=lambda: [])
     """Current contents of working memory (limited capacity)."""
 
     attention_focus: str = ""
     """Current object of attention."""
 
-    background_factors: dict[BackgroundFactor, float] = field(default_factory=dict)
+    background_factors: dict[BackgroundFactor, float] = field(default_factory=lambda: {})
     """Current levels of background factors (0.0-1.0)."""
 
-    recent_traces: list[CognitiveTrace] = field(default_factory=list)
+    recent_traces: list[CognitiveTrace] = field(default_factory=lambda: [])
     """Recent cognitive events (limited to last 10)."""
 
     current_domain: ActivityDomain = ActivityDomain.SOFTWARE_DEVELOPMENT
@@ -287,13 +287,13 @@ class Scenario:
     domain: ActivityDomain
     """Domain of activity for this scenario."""
 
-    active_factors: dict[BackgroundFactor, float] = field(default_factory=dict)
+    active_factors: dict[BackgroundFactor, float] = field(default_factory=lambda: {})
     """Background factors active in this scenario."""
 
-    relevant_patterns: list[str] = field(default_factory=list)
+    relevant_patterns: list[str] = field(default_factory=lambda: [])
     """Cognition patterns relevant to this scenario."""
 
-    expected_events: list[CognitiveEvent] = field(default_factory=list)
+    expected_events: list[CognitiveEvent] = field(default_factory=lambda: [])
     """Expected cognitive events in this scenario."""
 
     def __post_init__(self):

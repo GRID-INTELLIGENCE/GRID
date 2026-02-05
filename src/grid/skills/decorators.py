@@ -4,7 +4,7 @@ import functools
 import time
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, cast
 
 
 @dataclass
@@ -28,12 +28,12 @@ def skill_function(
     category: str = "low-level",
     timeout_ms: int = 30000,
     retry_policy: dict[str, Any] | None = None,
-):
+) -> Callable[[Callable[..., Any]], Callable[..., dict[str, Any]]]:
     """Decorator to convert functions into skills with automated calling."""
 
-    def decorator(func: Callable) -> Callable:
+    def decorator(func: Callable[..., Any]) -> Callable[..., dict[str, Any]]:
         @functools.wraps(func)
-        def wrapper(*args, **kwargs) -> dict[str, Any]:
+        def wrapper(*args: Any, **kwargs: Any) -> dict[str, Any]:
             from .execution_tracker import ExecutionStatus, SkillExecutionTracker
 
             start_time = time.time()
@@ -82,11 +82,11 @@ def skill_function(
                 raise
 
         # Register the skill automatically
-        from .base import SimpleSkill
+        from .base import SimpleSkill, Skill
         from .registry import default_registry
 
         skill = SimpleSkill(id=id, name=name, description=description, handler=wrapper, version=version)
-        default_registry.register(skill)
+        default_registry.register(cast(Skill, skill))
 
         return wrapper
 

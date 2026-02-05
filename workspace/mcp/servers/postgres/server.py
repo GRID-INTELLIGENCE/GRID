@@ -8,20 +8,24 @@ import asyncio
 import json
 import logging
 import os
+from collections.abc import Mapping, Sequence
 from datetime import datetime
-from typing import Any
+from typing import Any, Protocol, cast
 
 import asyncpg
 
 # Real MCP imports - optional dependency
-from mcp.server import Server  # type: ignore
-from mcp.server.models import InitializationOptions  # type: ignore
-from mcp.server.stdio import stdio_server  # type: ignore
-from mcp.types import (  # type: ignore
+from mcp.server import Server
+from mcp.server.models import InitializationOptions
+from mcp.server.stdio import stdio_server
+from mcp.types import (
     CallToolResult,
+    ListToolsRequest,
     ListToolsResult,
+    ServerCapabilities,
     TextContent,
     Tool,
+    ToolsCapability,
 )
 
 # Configure logging
@@ -29,15 +33,31 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
+class _Connection(Protocol):
+    async def fetch(self, query: str, *args: Any) -> Sequence[Mapping[str, Any]]: ...
+
+    async def fetchval(self, query: str, *args: Any) -> Any: ...
+
+    async def execute(self, query: str, *args: Any) -> str: ...
+
+
+class _Pool(Protocol):
+    def acquire(self) -> Any: ...  # Returns AsyncContextManager[_Connection]
+
+    def get_size(self) -> int: ...
+
+    def get_idle_size(self) -> int: ...
+
+
 class ProductionPostgresMCPServer:
     """Production PostgreSQL MCP Server using real MCP library"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.server = Server("postgres")
-        self.connection_pool = None
+        self.connection_pool: _Pool | None = None
         self._register_handlers()
 
-    async def _initialize_connection_pool(self):
+    async def _initialize_connection_pool(self) -> None:
         """Initialize PostgreSQL connection pool"""
         database_url = os.getenv("DATABASE_URL")
         if not database_url:
@@ -45,17 +65,20 @@ class ProductionPostgresMCPServer:
             return
 
         try:
-            self.connection_pool = await asyncpg.create_pool(database_url, min_size=2, max_size=10, command_timeout=60)  # type: ignore
+            self.connection_pool = cast(
+                _Pool,
+                await asyncpg.create_pool(database_url, min_size=2, max_size=10, command_timeout=60),
+            )
             logger.info("PostgreSQL connection pool created successfully")
         except Exception as e:
             logger.error(f"Failed to create connection pool: {e}")
             # Continue without database connection for testing
 
-    def _register_handlers(self):
+    def _register_handlers(self) -> None:
         """Register MCP handlers"""
 
-        @self.server.list_tools()
-        async def list_tools() -> ListToolsResult:
+        @self.server.list_tools()  # type: ignore[untyped-decorator]
+        async def list_tools(_request: ListToolsRequest) -> ListToolsResult:
             """List available PostgreSQL tools"""
             tools = [
                 Tool(
@@ -70,7 +93,14 @@ class ProductionPostgresMCPServer:
                         "required": ["sql"],
                     },
                 ),
-                Tool(name="list_tables", description="List all tables in database"),
+                Tool(
+                    name="list_tables",
+                    description="List all tables in database",
+                    inputSchema={
+                        "type": "object",
+                        "properties": {},
+                    },
+                ),
                 Tool(
                     name="describe_table",
                     description="Get table schema",
@@ -80,11 +110,18 @@ class ProductionPostgresMCPServer:
                         "required": ["table"],
                     },
                 ),
-                Tool(name="get_connection_info", description="Get database connection information"),
+                Tool(
+                    name="get_connection_info",
+                    description="Get database connection information",
+                    inputSchema={
+                        "type": "object",
+                        "properties": {},
+                    },
+                ),
             ]
             return ListToolsResult(tools=tools)
 
-        @self.server.call_tool()
+        @self.server.call_tool()  # type: ignore[untyped-decorator]
         async def call_tool(name: str, arguments: dict[str, Any]) -> CallToolResult:
             """Handle tool calls"""
             try:
@@ -109,8 +146,11 @@ class ProductionPostgresMCPServer:
         sql = arguments.get("sql")
         params = arguments.get("params", [])
 
-        if not sql:
+        if not isinstance(sql, str) or not sql:
             return CallToolResult(content=[TextContent(text="Error: SQL query is required", type="text")], isError=True)
+
+        if not isinstance(params, list):
+            params = [params]
 
         if not self.connection_pool:
             return CallToolResult(
@@ -249,7 +289,7 @@ class ProductionPostgresMCPServer:
             try:
                 async with self.connection_pool.acquire() as conn:
                     version = await conn.fetchval("SELECT version()")
-                    info["server_version"] = version
+                    info["server_version"] = str(version)
                     info["pool_size"] = self.connection_pool.get_size()
                     info["pool_idle"] = self.connection_pool.get_idle_size()
             except Exception as e:
@@ -257,7 +297,7 @@ class ProductionPostgresMCPServer:
 
         return CallToolResult(content=[TextContent(text=json.dumps(info, indent=2), type="text")])
 
-    async def run(self, read_stream, write_stream, options):
+    async def run(self, read_stream: Any, write_stream: Any, options: InitializationOptions) -> None:
         """Run the MCP server"""
         # Initialize connection pool
         await self._initialize_connection_pool()
@@ -268,17 +308,14 @@ class ProductionPostgresMCPServer:
 server = ProductionPostgresMCPServer()
 
 
-async def main():
+async def main() -> None:
     """Main server function"""
     # Run the server
     async with stdio_server() as (read_stream, write_stream):
-        await server.run(
-            read_stream,
-            write_stream,
-            InitializationOptions(
-                server_name="postgres", server_version="1.0.0", capabilities={"tools": {}, "resources": {}}
-            ),
-        )
+        tools_cap = ToolsCapability()
+        capabilities = ServerCapabilities(tools=tools_cap)
+        init_options = InitializationOptions(server_name="postgres", server_version="1.0.0", capabilities=capabilities)
+        await server.run(read_stream, write_stream, init_options)
 
 
 if __name__ == "__main__":

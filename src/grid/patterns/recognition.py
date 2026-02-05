@@ -10,7 +10,7 @@ from grid.essence.core_state import EssentialState
 class PatternRecognition:
     """Fast heuristic recognizer (no ML) for sub-0.1ms SLA."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.quantum_field = np.zeros((64, 64))
         self.resonance_patterns: list[str] = []
 

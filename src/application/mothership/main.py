@@ -43,7 +43,17 @@ from application.monitoring import get_metrics_router, setup_metrics
 from application.skills.api import router as skills_router
 from application.tracing import setup_fastapi_tracing, setup_tracing
 
+try:
+    from dotenv import load_dotenv
+
+    load_dotenv()
+except ImportError:
+    pass
+
+from infrastructure.parasite_guard import add_parasite_guard
+
 from .config import MothershipSettings, get_settings
+from .db.engine import dispose_async_engine, get_async_engine
 from .dependencies import get_cockpit_service, reset_cockpit_service
 from .exceptions import MothershipError
 from .middleware.stream_monitor import StreamMonitorMiddleware
@@ -261,8 +271,59 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     logger.info(f"Starting {settings.app_name} v{settings.app_version}")
     logger.info(f"Environment: {settings.environment.value}")
 
+    # Harden environment before starting any services
+    try:
+        from grid.security.startup import (
+            get_hardening_level,
+            harden_environment,
+            should_harden_environment,
+        )
+
+        if should_harden_environment():
+            level = get_hardening_level()
+            base_dir = Path(__file__).parent.parent.parent.parent  # Project root
+            report = harden_environment(
+                level=level,
+                base_dir=base_dir,
+                fail_on_critical=not settings.is_development,
+            )
+
+            if report.success:
+                logger.info(
+                    f"Environment hardened (level: {level.value}, "
+                    f"cleaned {len(report.sys_path_cleaned)} sys.path entries, "
+                    f"{len(report.pythonpath_cleaned)} PYTHONPATH entries)"
+                )
+                if report.warnings:
+                    for warning in report.warnings[:5]:  # Limit warnings
+                        logger.warning(f"Environment hardening warning: {warning}")
+            else:
+                logger.error(f"Environment hardening failed: {report.errors}")
+                if report.has_critical_issues and not settings.is_development:
+                    raise RuntimeError("Environment hardening failed with critical issues")
+        else:
+            logger.debug("Environment hardening disabled via GRID_ENABLE_ENV_HARDENING")
+    except ImportError as e:
+        logger.warning(f"Environment hardening unavailable: {e}")
+    except Exception as e:
+        if settings.is_development:
+            logger.warning(f"Environment hardening error (continuing in dev): {e}")
+        else:
+            logger.error(f"Environment hardening failed: {e}")
+            raise
+
     # Startup
     try:
+        # Initialize database engine explicitly to catch connection errors early
+        get_async_engine()
+        logger.info("Database engine initialized")
+
+        # Start DB metrics updater
+        from .db.metrics_updater import start_metrics_updater
+
+        await start_metrics_updater()
+        logger.info("DB metrics updater started")
+
         # Initialize cockpit service
         cockpit = get_cockpit_service()
         logger.info("Cockpit service initialized")
@@ -333,6 +394,24 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         reset_cockpit_service()
         logger.info("Cockpit service shut down")
 
+        # Stop DB metrics updater
+        from .db.metrics_updater import stop_metrics_updater
+
+        await stop_metrics_updater()
+        logger.info("DB metrics updater stopped")
+
+        # Dispose database engine
+        await dispose_async_engine()
+
+        # Wait for parasite sanitization to complete
+        from infrastructure.parasite_guard import wait_for_sanitization
+
+        try:
+            await wait_for_sanitization(timeout=30.0)
+            logger.info("Parasite sanitization completed before shutdown")
+        except Exception as e:
+            logger.warning(f"Error waiting for sanitization: {e}")
+
         # Shutdown CPU executor (ProcessPoolExecutor)
         from .utils.cpu_executor import shutdown_executor
 
@@ -398,14 +477,18 @@ Development mode allows unauthenticated access.
     # Setup Observability & Documentation
     # =========================================================================
 
-    # Setup distributed tracing
-    setup_tracing(
-        service_name="grid-mothership",
-        jaeger_host=os.environ.get("JAEGER_HOST", "localhost"),
-        jaeger_port=int(os.environ.get("JAEGER_PORT", "4317")),
-        environment=settings.environment.value,
-    )
-    setup_fastapi_tracing(app, service_name="grid-mothership")
+    # Setup distributed tracing (only if enabled)
+    if settings.telemetry.tracing_enabled:
+        setup_tracing(
+            service_name="grid-mothership",
+            jaeger_host=os.environ.get("JAEGER_HOST", "localhost"),
+            jaeger_port=int(os.environ.get("JAEGER_PORT", "4317")),
+            environment=settings.environment.value,
+        )
+        setup_fastapi_tracing(app, service_name="grid-mothership")
+        logger.info("Distributed tracing enabled")
+    else:
+        logger.info("Distributed tracing disabled (set MOTHERSHIP_TRACING_ENABLED=true to enable)")
 
     # Setup Prometheus metrics
     setup_metrics(app)
@@ -488,13 +571,23 @@ Development mode allows unauthenticated access.
             "Install prometheus_client for metrics: pip install prometheus_client"
         )
 
+    # 5. Parasite Guard (Total Rickall Defense)
+    # Phase 3: Enable Sanitization (Production Enabled)
+    if settings.security.parasite_guard_enabled:
+        # Add parasite guard with appropriate mode based on pruning flag
+        mode = "full" if settings.security.parasite_guard_pruning_enabled else "detect"
+        add_parasite_guard(app, mode=mode)
+        logger.info("Parasite Guard integrated (mode=%s)", mode)
+
     # ==========================================================================
     # Prometheus Metrics (Phase 1 Gap Fix)
     # ==========================================================================
 
     if settings.telemetry.metrics_enabled:
         try:
-            from prometheus_fastapi_instrumentator import Instrumentator  # type: ignore[import-not-found]
+            from prometheus_fastapi_instrumentator import (
+                Instrumentator,  # type: ignore[import-not-found]
+            )
 
             instrumentator = Instrumentator(
                 should_group_status_codes=True,

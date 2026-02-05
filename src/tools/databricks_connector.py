@@ -120,7 +120,7 @@ class DatabricksClient(BaseDataClient):
 class DatabricksQuery(QueryInterface):
     """Databricks query implementation using GRID patterns."""
 
-    def _execute_with_client(self, query: str, parameters: dict) -> QueryResult:
+    def _execute_with_client(self, query: str, parameters: dict[str, Any]) -> QueryResult:
         """Execute SQL query on Databricks."""
         if self.client._status.value != "connected":
             raise ConnectionError("Not connected to Databricks")
@@ -157,7 +157,7 @@ class DatabricksQuery(QueryInterface):
                 status="error", data=[], rows_affected=0, execution_time=execution_time, error_message=str(e)
             )
 
-    def _format_query(self, query: str, parameters: dict) -> str:
+    def _format_query(self, query: str, parameters: dict[str, Any]) -> str:
         """Format query with parameters (simple implementation)."""
         if not parameters:
             return query
@@ -192,7 +192,9 @@ def test_databricks_connection(prefix: str = "DATABRICKS") -> dict[str, Any]:
         return {"status": "error", "message": str(e)}
 
 
-def execute_databricks_query(query: str, parameters: dict | None = None, prefix: str = "DATABRICKS") -> QueryResult:
+def execute_databricks_query(
+    query: str, parameters: dict[str, Any] | None = None, prefix: str = "DATABRICKS"
+) -> QueryResult:
     """Execute query on Databricks using environment variables."""
     client, query_interface = create_databricks_connector(prefix)
 

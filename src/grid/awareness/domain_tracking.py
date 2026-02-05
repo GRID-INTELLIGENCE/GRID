@@ -143,7 +143,7 @@ class DomainTracker:
         if not evolution or len(evolution.snapshots) < 2:
             return []
 
-        emerging = []
+        emerging: list[dict[str, Any]] = []
         latest = evolution.snapshots[-1]
 
         # Detect new patterns

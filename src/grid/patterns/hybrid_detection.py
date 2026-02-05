@@ -78,7 +78,10 @@ class StatisticalPatternDetector:
             patterns.extend(distribution_changes)
 
             # Calculate confidence based on history depth
-            confidence = min(len(self.history) / (window_size * 2), 1.0)
+            if window_size > 0:
+                confidence = min(len(self.history) / (window_size * 2), 1.0)
+            else:
+                confidence = 0.0
 
         return PatternDetectionResult(
             patterns=patterns,
@@ -116,7 +119,7 @@ class StatisticalPatternDetector:
         recent = self.history[-window_size:]
 
         # Get all metric keys
-        all_keys = set()
+        all_keys: set[str] = set()
         for entry in recent:
             all_keys.update(entry.keys())
 
@@ -146,7 +149,7 @@ class StatisticalPatternDetector:
         new_window = self.history[-window_size:]
 
         # Get all metric keys
-        all_keys = set()
+        all_keys: set[str] = set()
         for entry in old_window + new_window:
             all_keys.update(entry.keys())
 
@@ -294,7 +297,7 @@ class NeuralPatternDetector:
     """
 
     def __init__(self) -> None:
-        self.learned_patterns: dict[str, float] = {}
+        self.learned_patterns: dict[str, dict[str, float]] = {}
         self.pattern_weights: dict[str, float] = {}
 
     async def detect(self, state: EssentialState) -> PatternDetectionResult:
@@ -321,7 +324,7 @@ class NeuralPatternDetector:
         # Learn new patterns if confidence is high
         if len(patterns) == 0 and state.coherence_factor > 0.7:
             pattern_name = f"pattern_{len(self.learned_patterns)}"
-            self.learned_patterns[pattern_name] = features
+            self.learned_patterns[pattern_name] = features.copy()
             self.pattern_weights[pattern_name] = state.coherence_factor
 
         # Calculate confidence based on pattern matches and coherence
@@ -407,9 +410,9 @@ class HybridPatternDetector:
 
         # Calculate weighted confidence
         confidence_scores = {
-            "statistical": statistical_result.confidence * weights["statistical"],
-            "syntactic": syntactic_result.confidence * weights["syntactic"],
-            "neural": neural_result.confidence * weights["neural"],
+            "statistical": statistical_result.confidence * weights.get("statistical", 0.33),
+            "syntactic": syntactic_result.confidence * weights.get("syntactic", 0.33),
+            "neural": neural_result.confidence * weights.get("neural", 0.34),
         }
 
         overall_confidence = sum(confidence_scores.values())

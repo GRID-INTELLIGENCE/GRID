@@ -16,7 +16,18 @@ try:
     REDIS_AVAILABLE = True
 except ImportError:
     REDIS_AVAILABLE = False
-    redis = None
+import uuid
+from dataclasses import dataclass, field
+
+import redis.asyncio as redis
+
+
+@dataclass(frozen=True)
+class Subscription:
+    """Handle for a subscription."""
+    event_type: str
+    handler: Callable
+    id: uuid.UUID = field(default_factory=uuid.uuid4)
 
 
 class EventBus:
@@ -49,7 +60,8 @@ class EventBus:
 
         # In-memory event queue (fallback)
         self.event_queue: asyncio.Queue = asyncio.Queue()
-        self.handlers: dict[str, list[Callable]] = defaultdict(list)
+        self.handlers: dict[str, list[Subscription]] = defaultdict(list)
+        self._subscription_index: dict[uuid.UUID, Subscription] = {}
         self.event_history: deque[dict[str, Any]] = deque(maxlen=max_history)
 
         # Initialize Redis if enabled
@@ -110,31 +122,54 @@ class EventBus:
         # Trigger handlers synchronously
         await self._trigger_handlers(event_type, event_data)
 
-    async def subscribe(self, event_type: str, handler: Callable) -> None:
+    async def subscribe(self, event_type: str, handler: Callable) -> Subscription:
         """Subscribe to events of a specific type.
 
         Args:
             event_type: Event type to subscribe to (e.g., "case.created")
             handler: Async handler function that takes event dict as argument
         """
-        self.handlers[event_type].append(handler)
-        logger.debug(f"Subscribed handler to {event_type}")
+        sub = Subscription(event_type=event_type, handler=handler)
+        self.handlers[event_type].append(sub)
+        self._subscription_index[sub.id] = sub
+        logger.debug(f"Subscribed handler to {event_type} (id={sub.id})")
 
-        # Subscribe to Redis if enabled
+        # Subscribe to Redis if enabled... (unchanged)
         if self.use_redis and self.redis_pubsub:
             try:
                 await self.redis_pubsub.subscribe(f"events:{event_type}")
             except Exception as e:
                 logger.warning(f"Failed to subscribe to Redis: {e}")
 
-    async def subscribe_all(self, handler: Callable) -> None:
+        return sub
+
+    async def unsubscribe(self, subscription: Subscription | uuid.UUID) -> bool:
+        """Unsubscribe a handler.
+
+        Args:
+            subscription: Subscription object or UUID returned by subscribe()
+        """
+        sub_id = subscription.id if isinstance(subscription, Subscription) else subscription
+        if sub_id not in self._subscription_index:
+            return False
+
+        sub = self._subscription_index.pop(sub_id)
+        if sub in self.handlers[sub.event_type]:
+            self.handlers[sub.event_type].remove(sub)
+
+        logger.debug(f"Unsubscribed handler from {sub.event_type} (id={sub_id})")
+        return True
+
+    async def subscribe_all(self, handler: Callable) -> Subscription:
         """Subscribe to all events.
 
         Args:
             handler: Async handler function that takes event dict as argument
         """
-        self.handlers["*"].append(handler)
-        logger.debug("Subscribed handler to all events")
+        sub = Subscription(event_type="*", handler=handler)
+        self.handlers["*"].append(sub)
+        self._subscription_index[sub.id] = sub
+        logger.debug(f"Subscribed handler to all events (id={sub.id})")
 
         # Subscribe to Redis if enabled
         if self.use_redis and self.redis_pubsub:
@@ -142,6 +177,8 @@ class EventBus:
                 await self.redis_pubsub.subscribe("events:all")
             except Exception as e:
                 logger.warning(f"Failed to subscribe to Redis: {e}")
+
+        return sub
 
     async def _trigger_handlers(self, event_type: str, event_data: dict[str, Any]) -> None:
         """Trigger handlers for an event type.
@@ -151,16 +188,16 @@ class EventBus:
             event_data: Event data dictionary
         """
         # Trigger specific handlers
-        for handler in self.handlers.get(event_type, []):
+        for sub in self.handlers.get(event_type, []):
             try:
-                await handler(event_data)
+                await sub.handler(event_data)
             except Exception as e:
                 logger.error(f"Error in handler for {event_type}: {e}")
 
         # Trigger universal handlers
-        for handler in self.handlers.get("*", []):
+        for sub in self.handlers.get("*", []):
             try:
-                await handler(event_data)
+                await sub.handler(event_data)
             except Exception as e:
                 logger.error(f"Error in universal handler: {e}")
 

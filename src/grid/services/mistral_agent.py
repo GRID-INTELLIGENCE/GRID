@@ -27,11 +27,13 @@ else:
     load_dotenv()  # Try default locations
 
 # Import Mistral SDK (optional - only required when actually used)
-_Mistral = None
+_Mistral: type[Any] | None = None
 _mistral_import_error: str | None = None
 
 try:
-    from mistralai import Mistral as _Mistral  # type: ignore[import-not-found]
+    from mistralai import Mistral
+
+    _Mistral = Mistral
 except ImportError:
     _mistral_import_error = "mistralai package not installed. Run: pip install mistralai"
 

@@ -1,0 +1,65 @@
+# Prometheus alerts for parasitic leak remediation
+
+groups:
+  - name: parasitic_leaks
+    interval: 30s
+    rules:
+      - alert: EventBusSubscriptionLeak
+        expr: eventbus_active_subscriptions > 1000
+        for: 5m
+        labels:
+          severity: warning
+          component: eventbus
+        annotations:
+          summary: "High EventBus subscription count"
+          description: "EventBus has {{ $value }} active subscriptions (threshold: 1000)"
+
+      - alert: EventBusSubscriptionCritical
+        expr: eventbus_active_subscriptions > 5000
+        for: 1m
+        labels:
+          severity: critical
+          component: eventbus
+        annotations:
+          summary: "Critical EventBus subscription leak"
+          description: "EventBus has {{ $value }} active subscriptions (critical threshold: 5000)"
+
+      - alert: DBConnectionPoolLeak
+        expr: db_active_connections > 50
+        for: 5m
+        labels:
+          severity: warning
+          component: database
+        annotations:
+          summary: "High DB connection pool utilization"
+          description: "DB has {{ $value }} active connections (threshold: 50)"
+
+      - alert: DBConnectionPoolCritical
+        expr: db_active_connections > 100
+        for: 1m
+        labels:
+          severity: critical
+          component: database
+        annotations:
+          summary: "Critical DB connection pool leak"
+          description: "DB has {{ $value }} active connections (critical threshold: 100)"
+
+      - alert: ParasiticGuardCleanupFailure
+        expr: rate(parasite_guard_db_engine_disposal_failures_total[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+          component: parasite_guard
+        annotations:
+          summary: "High Parasite Guard cleanup failure rate"
+          description: "Parasite Guard cleanup failing at {{ $value }}/sec"
+
+      - alert: HealthCheckUnhealthy
+        expr: health_check_status == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: health
+        annotations:
+          summary: "Health check failing"
+          description: "System health check is failing"

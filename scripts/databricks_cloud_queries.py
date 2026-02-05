@@ -1,6 +1,6 @@
-import sys
-import os
 import logging
+import os
+import sys
 
 # Add src to path
 SRC_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src"))

@@ -50,7 +50,7 @@ class LoadBalancingMetrics:
     capacity: int = 0
     last_updated: datetime = field(default_factory=datetime.now)
 
-    def update_load(self, new_load: float, response_time: float):
+    def update_load(self, new_load: float, response_time: float) -> None:
         """Update load metrics."""
         self.response_times.append(response_time)
         # Keep only last 100 response times
@@ -96,7 +96,7 @@ class XAICache:
         self.misses = 0
         self.evictions = 0
 
-    def _generate_key(self, prefix: str, **kwargs) -> str:
+    def _generate_key(self, prefix: str, **kwargs: Any) -> str:
         """Generate cache key from parameters."""
         key_data = json.dumps(kwargs, sort_keys=True, default=str)
         return f"{prefix}:{hashlib.md5(key_data.encode()).hexdigest()}"
@@ -202,7 +202,7 @@ class XAILoadBalancer:
         self.current_round_robin = 0
         self.health_checks: dict[str, datetime] = {}
 
-    def add_server(self, server_id: str, capacity: int = 100):
+    def add_server(self, server_id: str, capacity: int = 100) -> None:
         """Add a server to the load balancer."""
         self.servers[server_id] = LoadBalancingMetrics(
             server_id=server_id, load_score=0.0, active_tasks=0, capacity=capacity, last_updated=datetime.now()
@@ -210,7 +210,7 @@ class XAILoadBalancer:
 
         self.health_checks[server_id] = datetime.now()
 
-    def update_server_health(self, server_id: str, is_healthy: bool):
+    def update_server_health(self, server_id: str, is_healthy: bool) -> None:
         """Update server health status."""
         if server_id in self.servers:
             if is_healthy:
@@ -246,7 +246,7 @@ class XAILoadBalancer:
             self.current_round_robin = (self.current_round_robin + 1) % len(available_servers)
             return server
 
-    def update_server_load(self, server_id: str, response_time: float, task_complexity: float = 1.0):
+    def update_server_load(self, server_id: str, response_time: float, task_complexity: float = 1.0) -> None:
         """Update server load metrics."""
         if server_id in self.servers:
             self.servers[server_id].update_load(response_time, task_complexity)
@@ -289,12 +289,12 @@ class XAIAdaptiveProcessor:
         self.adaptation_threshold = 0.8  # Trigger adaptation at 80% load
         self.processing_mode = "normal"  # fast, normal, thorough
 
-    def update_load(self, new_load: float):
+    def update_load(self, new_load: float) -> None:
         """Update current system load."""
         alpha = 0.1  # Smoothing factor
         self.current_load = alpha * new_load + (1 - alpha) * self.current_load
 
-    def record_performance(self, response_time: float):
+    def record_performance(self, response_time: float) -> None:
         """Record performance metrics."""
         self.performance_history.append(response_time)
         if len(self.performance_history) > 100:

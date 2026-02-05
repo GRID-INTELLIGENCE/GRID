@@ -60,7 +60,7 @@ class WorkflowAutomation:
 
     def check_routine_triggers(self) -> list[str]:
         """Check which routines should be triggered based on current context."""
-        triggered = []
+        triggered: list[str] = []
 
         context = self.recognizer.recognize_current_context()
         now = datetime.now()
@@ -118,7 +118,7 @@ class WorkflowAutomation:
             return {"status": "skipped", "message": "Routine is disabled"}
 
         actions = routine.get("actions", [])
-        results = []
+        results: list[dict[str, Any]] = []
 
         for action in actions:
             action_type = action.get("type")
@@ -177,7 +177,7 @@ class WorkflowAutomation:
     async def run_scheduled_routines(self) -> list[dict[str, Any]]:
         """Run all triggered routines."""
         triggered = self.check_routine_triggers()
-        results = []
+        results: list[dict[str, Any]] = []
 
         for routine_id in triggered:
             result = await self.execute_routine(routine_id)
@@ -192,7 +192,7 @@ class WorkflowAutomation:
 
     def get_routine_suggestions(self) -> list[dict[str, Any]]:
         """Suggest routines based on detected patterns."""
-        suggestions = []
+        suggestions: list[dict[str, Any]] = []
 
         if self.context_manager.profile is None:
             return suggestions

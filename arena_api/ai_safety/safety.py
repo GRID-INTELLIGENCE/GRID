@@ -135,11 +135,11 @@ class AISafetyManager:
             "racial_bias": {"ethnic_terms": ["race", "ethnic", "origin", "background"], "threshold": 0.2},
         }
 
-    def set_monitoring(self, monitoring):
+    def set_monitoring(self, monitoring: Any) -> None:
         """Inject monitoring dependency."""
         self.monitoring = monitoring
 
-    async def check_request(self, request) -> dict[str, Any]:
+    async def check_request(self, request: Any) -> dict[str, Any]:
         """
         Perform comprehensive safety check on incoming request.
 
@@ -213,7 +213,7 @@ class AISafetyManager:
             logger.error(f"Safety check error: {str(e)}")
             return {"safe": False, "error": str(e), "severity": SafetyLevel.CRITICAL.value}
 
-    async def _validate_input(self, request) -> SafetyCheck:
+    async def _validate_input(self, request: Any) -> SafetyCheck:
         """Validate and sanitize input data."""
         try:
             # Check content length
@@ -225,7 +225,7 @@ class AISafetyManager:
                         passed=False,
                         severity=SafetyLevel.HIGH,
                         details={"reason": "Input too large", "size": content_length},
-                        timestamp=datetime.utcnow(),
+                        timestamp=datetime.now(datetime.timezone.utc),
                         recommendations=["Reduce input size", "Implement streaming for large inputs"],
                     )
 
@@ -269,7 +269,7 @@ class AISafetyManager:
                 passed=True,
                 severity=SafetyLevel.LOW,
                 details={"input_length": len(body_content)},
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(datetime.timezone.utc),
             )
 
         except Exception as e:
@@ -281,7 +281,7 @@ class AISafetyManager:
                 timestamp=datetime.utcnow(),
             )
 
-    async def _analyze_content_safety(self, request) -> SafetyCheck:
+    async def _analyze_content_safety(self, request: Any) -> SafetyCheck:
         """Analyze content for safety violations."""
         try:
             content = await self._extract_request_content(request)
@@ -331,7 +331,7 @@ class AISafetyManager:
                 timestamp=datetime.utcnow(),
             )
 
-    async def _check_compliance(self, request) -> SafetyCheck:
+    async def _check_compliance(self, request: Any) -> SafetyCheck:
         """Check compliance with relevant standards."""
         try:
             content = await self._extract_request_content(request)
@@ -358,7 +358,11 @@ class AISafetyManager:
             if violations:
                 # Record compliance violation
                 self.compliance_violations.append(
-                    {"timestamp": datetime.utcnow(), "violations": violations, "request_path": request.url.path}
+                    {
+                        "timestamp": datetime.now(datetime.timezone.utc),
+                        "violations": violations,
+                        "request_path": request.url.path,
+                    }
                 )
 
                 return SafetyCheck(
@@ -387,7 +391,7 @@ class AISafetyManager:
                 timestamp=datetime.utcnow(),
             )
 
-    async def _detect_bias(self, request) -> SafetyCheck:
+    async def _detect_bias(self, request: Any) -> SafetyCheck:
         """Detect potential bias in content."""
         try:
             content = await self._extract_request_content(request)
@@ -458,7 +462,7 @@ class AISafetyManager:
                 timestamp=datetime.utcnow(),
             )
 
-    async def _detect_anomalies(self, request) -> SafetyCheck:
+    async def _detect_anomalies(self, request: Any) -> SafetyCheck:
         """Detect anomalous request patterns."""
         try:
             # This would integrate with ML models for anomaly detection
@@ -507,7 +511,7 @@ class AISafetyManager:
                 timestamp=datetime.utcnow(),
             )
 
-    async def _extract_request_content(self, request) -> str:
+    async def _extract_request_content(self, request: Any) -> str:
         """Extract content from request for analysis."""
         try:
             if hasattr(request, "body"):
@@ -517,11 +521,11 @@ class AISafetyManager:
         except Exception:
             return ""
 
-    async def _log_safety_check(self, request, checks: list[SafetyCheck], overall_safe: bool):
+    async def _log_safety_check(self, request: Any, checks: list[SafetyCheck], overall_safe: bool) -> None:
         """Log safety check results."""
         try:
             log_entry = {
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(datetime.timezone.utc).isoformat(),
                 "request_path": request.url.path,
                 "client_ip": getattr(request.client, "host", None) if request.client else None,
                 "overall_safe": overall_safe,
@@ -548,7 +552,9 @@ class AISafetyManager:
 
                 # Analyze recent safety checks for patterns
                 recent_checks = [
-                    check for check in self.safety_checks if (datetime.utcnow() - check.timestamp) < timedelta(hours=1)
+                    check
+                    for check in self.safety_checks
+                    if (datetime.now(datetime.timezone.utc) - check.timestamp) < timedelta(hours=1)
                 ]
 
                 if recent_checks:
@@ -572,7 +578,9 @@ class AISafetyManager:
     def get_safety_report(self) -> dict[str, Any]:
         """Generate safety and compliance report."""
         recent_checks = [
-            check for check in self.safety_checks if (datetime.utcnow() - check.timestamp) < timedelta(days=7)
+            check
+            for check in self.safety_checks
+            if (datetime.now(datetime.timezone.utc) - check.timestamp) < timedelta(days=7)
         ]
 
         return {
@@ -586,5 +594,5 @@ class AISafetyManager:
 
     def get_compliance_violations(self, days: int = 30) -> list[dict[str, Any]]:
         """Get compliance violations from the last N days."""
-        cutoff = datetime.utcnow() - timedelta(days=days)
+        cutoff = datetime.now(datetime.timezone.utc) - timedelta(days=days)
         return [violation for violation in self.compliance_violations if violation["timestamp"] > cutoff]

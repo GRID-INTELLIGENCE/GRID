@@ -24,7 +24,7 @@ class SkillMetadata:
 class SkillDiscoveryEngine:
     """Discovers and registers skills across the codebase."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._skills: dict[str, SkillMetadata] = {}
         self._logger = logging.getLogger(__name__)
 

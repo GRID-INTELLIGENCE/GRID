@@ -2,15 +2,17 @@
 """
 GRID MCP Server Health Check & Configuration Validator
 """
-import json
+
 import asyncio
-import subprocess
+import json
 import logging
+import subprocess
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Any
 
 try:
     import httpx
+
     HTTPX_AVAILABLE = True
 except ImportError:
     HTTPX_AVAILABLE = False
@@ -27,44 +29,52 @@ class MCPValidator:
 
     def validate_config(self, config_path: str) -> bool:
         logger.info(f"Validating: {config_path}")
-        
+
         config_file = Path(config_path)
         if not config_file.exists():
             self.error(f"Config file not found: {config_path}")
             return False
-        
+
         try:
             with open(config_file) as f:
                 config = json.load(f)
         except json.JSONDecodeError as e:
             self.error(f"Invalid JSON: {e}")
             return False
-        
+
         if "$schema" not in config:
             self.warning("Missing $schema field")
-        
+
         servers = config.get("servers", config.get("mcpServers", []))
-        if not isinstance(servers, list):
-            self.error(f"'servers' must be list, got {type(servers)}")
+        if isinstance(servers, dict):
+            for name, server_config in servers.items():
+                if isinstance(server_config, dict):
+                    server_config["name"] = name
+                    self._validate_server(server_config, 0)
+        elif isinstance(servers, list):
+            for i, server in enumerate(servers):
+                self._validate_server(server, i + 1)
+        else:
+            self.error(f"'servers' must be list or dict, got {type(servers)}")
             return False
-        
-        for i, server in enumerate(servers):
-            self._validate_server(server, i + 1)
-        
+
         return self.error_count == 0
 
-    def _validate_server(self, server: Dict[str, Any], index: int):
+    def _validate_server(self, server: dict[str, Any], index: int):
         name = server.get("name", f"server_{index}")
         logger.info(f"Validating server: {name}")
-        
+
         required = ["name", "command"]
         for field in required:
             if field not in server:
                 self.error(f"Server '{name}' missing: {field}")
 
         command = server.get("command", "")
-        if command and not Path(command).exists():
-            self.error(f"Command not found: {command}")
+        if command:
+            import shutil
+
+            if not (Path(command).exists() or shutil.which(command)):
+                self.error(f"Command not found: {command}")
 
         if "port" in server:
             port = server["port"]
@@ -76,7 +86,7 @@ class MCPValidator:
             return True
         if ports is None:
             ports = [8000, 8001, 8002, 8005]
-        
+
         logger.info("Checking MCP server health...")
         async with httpx.AsyncClient(timeout=5.0) as client:
             for port in ports:
@@ -94,13 +104,13 @@ class MCPValidator:
             if result.returncode != 0:
                 self.error("Ollama not responding")
                 return False
-            
+
             output = result.stdout
             models_ok = ["nomic-embed-text", "ministral"]
             for model in models_ok:
                 if model in output:
                     logger.info(f"[OK] {model}")
-            
+
             return True
         except Exception as e:
             self.error(f"Ollama error: {e}")
@@ -155,15 +165,15 @@ async def main():
     print("=" * 60)
     print("GRID MCP Server Health Check & Configuration Validator")
     print("=" * 60)
-    
+
     validator.validate_config(".cursor/mcp_config.json")
     validator.validate_config("mcp-setup/mcp_config.json")
-    
+
     print("\nChecking environment...")
     validator.check_virtual_env()
     validator.check_ollama_models()
     validator.check_rag_db()
-    
+
     validator.summary()
     exit(0 if validator.error_count == 0 else 1)
 

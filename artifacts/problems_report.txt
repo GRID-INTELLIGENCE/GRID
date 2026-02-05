@@ -1,0 +1,170 @@
+Problems report (partial)
+Generated: 2026-02-05
+
+Scope: Arena/the_chase (complete)
+
+- Arena/the_chase/python/src/the_chase/overwatch/models.py
+  - Line 6: Import "List" is not accessed
+
+- Arena/the_chase/fix_types_incrementally.py
+  - Line 17: Import "Literal" is not accessed
+  - Line 348: Variable "returncode" is not accessed
+
+Scope: workspace/mcp/servers/postgres/server.py
+
+Phase 1: Critical (Breaks Build)
+- Line 14: Stub file not found for "asyncpg" (may break type checking)
+- Line 57: Decorator argument type mismatch for @self.server.list_tools()
+
+Phase 2: High (Runtime/Type Risk)
+- Line 73: Tool(name=...) missing required parameter "inputSchema"
+- Line 83: Tool(name=...) missing required parameter "inputSchema"
+- Line 124, 158, 187, 250: Type of "acquire"/"conn" partially unknown (asyncpg pool usage)
+- Line 129, 130, 132, 139, 159, 162, 164, 189, 205, 218, 221, 222, 241, 251: Type of "fetch", "rows", "columns", "result", "tables", "primary_keys", "pk", "col", "append", "info", "version" partially unknown (asyncpg result handling)
+
+Phase 3: Medium (Best Practice)
+- Line 260: Type annotation missing for parameters "read_stream", "write_stream", "options" in async def run()
+- Line 264, 275: Argument type unknown for server.run(...)
+
+Phase 4: Low (Style/Lint)
+- No lint/style issues detected by Ruff (auto-fixed or clean)
+
+Notes:
+- All lint/style issues were auto-fixed by Ruff and none remain.
+- For full remediation, address critical and high issues first (type errors, missing parameters, asyncpg usage).
+- Medium issues are best-practice improvements (type annotations).
+- Low issues are style/naming and currently clean.
+
+Recommendations for workspace/mcp/servers/postgres/server.py
+
+Phase 1: Critical
+- Line 14: Install asyncpg stubs or add type ignore for missing stubs to avoid type checking failures.
+- Line 57: Refactor decorator usage to match expected signature; ensure the function returns Awaitable[list[Tool]] or Awaitable[ListToolsResult].
+
+Phase 2: High
+- Line 73, 83: Add required inputSchema argument to Tool constructor.
+- Line 124, 158, 187, 250: Add explicit type annotations for asyncpg pool and connection objects; use type hints or cast as needed.
+- Line 129, 130, 132, 139, 159, 162, 164, 189, 205, 218, 221, 222, 241, 251: Add type hints for fetch results, rows, columns, tables, primary_keys, pk, col, append, info, version; use explicit types or type casting to clarify intent and satisfy type checker.
+
+Phase 3: Medium
+- Line 260: Add type annotations for read_stream, write_stream, options in async def run().
+- Line 264, 275: Ensure arguments passed to server.run() match expected types; add type hints or cast as needed.
+
+Phase 4: Low
+- No action needed; style/lint issues are clean.
+
+General:
+- Address critical and high issues first to restore type safety and runtime reliability.
+- Use mypy and Ruff to validate fixes iteratively.
+- For asyncpg, consider using TypedDict or custom types for query results if possible.
+
+Scope: src/grid/ (core GRID functionality)
+
+Phase 1: Critical (Breaks Build)
+- src/grid/auth/middleware.py
+  - Line 18: Type of parameter "app" is unknown; type annotation missing for "app"
+  - Line 19: Argument type is unknown for "app" in super().__init__(app)
+  - Line 23: Type annotation missing for parameter "call_next" in async def dispatch
+
+- src/grid/context/user_context_manager.py
+  - Line 68, 69: "preferences" is not a known attribute of "None" (possible NoneType access)
+  - Line 72: "metadata" is not a known attribute of "None"
+  - Line 84, 86, 92: "file_access_patterns" is not a known attribute of "None"
+
+Phase 2: High (Runtime/Type Risk)
+- src/grid/auth/service.py
+  - Multiple lines (33, 42, 51, 55, 59, 60, 66, 76, 86, 100, 108, 113, 116, 120, 121, 126):
+    - Type of "fetch_one", "execute", "user", "row", "user_data", "create_access_token" is partially unknown (missing type hints, generic dict usage)
+    - Type of "encode" is unknown; argument type is unknown for bcrypt.checkpw
+    - Type of "expires_at" is unknown
+
+- src/grid/auth/token_manager.py
+  - Line 31, 33, 39, 40: Expected type arguments for generic class "dict"; type of parameter "data" is partially unknown; type of "to_encode" and "update" is partially unknown; argument type is partially unknown for jwt.encode
+
+- src/grid/awareness/domain_tracking.py
+  - Line 43, 44, 45: Type of "snapshots", "trend_indicators", "structural_shifts" is partially unknown (missing type hints)
+  - Line 154, 164, 172: Type of "append" is partially unknown; return type "list[Unknown]" is partially unknown
+
+- src/grid/agentic/agentic_system.py
+  - Line 103, 108, 288, 306, 316, 330, 339, 340, 342, 337, 359: Multiple type unknowns in tuple unpacking, list comprehensions, dict usage, and function arguments
+
+- src/grid/agentic/intelligence_evaluator.py
+  - Line 63, 64, 76, 92, 105, 115, 133: Type of "get", "items", lambda parameters, return types, and list comprehensions is partially unknown
+
+Phase 3: Medium (Best Practice)
+- src/grid/awareness/context.py
+  - Line 65, 67: Unnecessary isinstance calls; "dict[str, Any]" is always an instance of "dict[Unknown, Unknown]"; "str" is always an instance of "str"
+  - Line 80, 133, 148: Argument of type "type[TechnologyDomainTracker] | None" cannot be assigned to parameter "class_or_tuple" in isinstance; None cannot be used for instance or class checks
+
+Phase 4: Low (Style/Lint)
+- No lint/style issues detected by Ruff (auto-fixed or clean)
+
+Recommendations for src/grid/
+
+Phase 1: Critical
+- Add explicit type annotations for all parameters and arguments flagged as unknown, especially for "app" and "call_next" in middleware and for attributes accessed on possibly NoneType objects in user_context_manager.
+- Refactor logic to ensure attributes like "preferences", "metadata", and "file_access_patterns" are never accessed on None; add guards or default initializations.
+
+Phase 2: High
+- Add type hints for all dicts, lists, and function return values flagged as partially unknown; use Dict[str, Any] or TypedDict as appropriate.
+- Refactor database access patterns to use explicit types for query results; avoid generic dict usage where possible.
+- For cryptographic and JWT operations, ensure argument types are explicit and match expected signatures.
+- In agentic and domain tracking modules, clarify types for list comprehensions, tuple unpacking, and dict usage.
+
+Phase 3: Medium
+- Remove unnecessary isinstance checks for types that are always true (e.g., isinstance(x, str) when x is always str).
+- Refactor isinstance usage to avoid passing None as the class argument; ensure only valid class or tuple of classes is used.
+
+Phase 4: Low
+- No action needed; style/lint issues are clean.
+
+General:
+- Address critical and high issues first to restore type safety and runtime reliability in core GRID modules.
+- Use mypy and Ruff to validate fixes iteratively.
+- For database and agentic patterns, consider using TypedDict or custom types for query results and adaptation objects.
+- Ensure all public functions and class attributes have type hints as per project standards.
+
+Scope: src/tools/ (utilities, RAG, security, integration)
+
+Phase 1: Critical (Breaks Build)
+- src/tools/__init__.py
+  - Line 60: "DATABRICKS_AVAILABLE" is constant (uppercase) and cannot be redefined
+  - Lines 65-71: Symbols specified in __all__ ("PulseMonitor", "AmbientSoundGenerator", "ZoologyMapper", "SoundMetrics", "SensoryConfiguration", "ToolsIntegration", "get_tools_integration") are not present in module
+
+Phase 2: High (Runtime/Type Risk)
+- src/tools/__init__.py
+  - Line 54: Type of "execute_databricks_query" is partially unknown (missing type hints for dict argument)
+  - Lines 103, 107, 111, 115, 119: Return type is unknown for several functions returning classes
+
+- src/tools/architectural_audit.py
+  - Line 15, 132, 153, 154, 155, 193: Type of "MOTHERSHIP_PATTERN" is partially unknown (missing type hints for dict)
+  - Lines 64, 80, 91, 97, 103, 111, 113, 117, 137, 140, 143, 145, 161, 163, 165, 167, 179, 184, 186, 194, 196: Type of "append", "extend", "join", "exists", "init_file", "expected_dir" is partially unknown (missing type hints for list, set, and function arguments)
+  - Line 135: Type of "missing_dirs" is partially unknown (set operation)
+
+Phase 3: Medium (Best Practice)
+- src/tools/architectural_audit.py
+  - Line 145, 167, 186, 196: Return type "list[Unknown]" is partially unknown (should specify list[str] or similar)
+
+Phase 4: Low (Style/Lint)
+- No lint/style issues detected by Ruff (auto-fixed or clean)
+
+Recommendations for src/tools/
+
+Phase 1: Critical
+- Refactor src/tools/__init__.py to avoid redefining constants; ensure all symbols listed in __all__ are present in the module or remove them from __all__.
+
+Phase 2: High
+- Add explicit type hints for all dicts, lists, and function return values flagged as partially unknown, especially for "execute_databricks_query" and "MOTHERSHIP_PATTERN".
+- For functions returning classes, specify the return type as Type[ClassName] or similar.
+- Clarify types for list, set, and function arguments in architectural_audit.py; use List[str], Set[str], etc.
+
+Phase 3: Medium
+- Specify concrete return types for functions currently returning "list[Unknown]"; use list[str] or list[Issue] as appropriate.
+
+Phase 4: Low
+- No action needed; style/lint issues are clean.
+
+General:
+- Address critical and high issues first to restore type safety and runtime reliability in tools modules.
+- Use mypy and Ruff to validate fixes iteratively.
+- Ensure all public functions and class attributes have type hints as per project standards.

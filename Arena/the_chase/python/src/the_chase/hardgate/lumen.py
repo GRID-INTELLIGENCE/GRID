@@ -35,7 +35,7 @@ class PIIDetector:
     and Protected Health Information (PHI)
     """
 
-    PATTERNS = {
+    PATTERNS: dict[str, re.Pattern[str]] = {
         "PERSON_NAME": re.compile(r"\b([A-Z][a-z]+\s+[A-Z][a-z]+)\b"),
         "SSN": re.compile(r"\b(\d{3}-\d{2}-\d{4})\b"),
         "EMAIL": re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"),
@@ -45,7 +45,7 @@ class PIIDetector:
 
     def detect_pii(self, text: str) -> list[PIIEntity]:
         """Detect all PII/PHI entities in text"""
-        entities = []
+        entities: list[PIIEntity] = []
         for entity_type, pattern in self.PATTERNS.items():
             for match in pattern.finditer(text):
                 sensitivity = (
@@ -69,7 +69,7 @@ class PIIDetector:
 class Lumen:
     """Boundary validation guardian (enhanced with PIIDetector)"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.pii_detector = PIIDetector()  # Reuse Wellness Studio implementation
 
     def validate_boundary(self, data: str) -> bool:

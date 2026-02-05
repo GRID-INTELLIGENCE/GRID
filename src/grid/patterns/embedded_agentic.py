@@ -113,7 +113,7 @@ class EmbeddedAgenticDetector:
         Returns:
             Structure analysis with agentic indicators
         """
-        analysis = {
+        analysis: dict[str, Any] = {
             "has_structure": False,
             "has_flow": False,
             "has_connections": False,
@@ -163,7 +163,8 @@ class EmbeddedAgenticDetector:
             List of all detected patterns (base + embedded agentic)
         """
         result = await self.detect_embedded_agentic(state)
-        return result["all_patterns"]
+        all_patterns: list[str] = result.get("all_patterns", [])
+        return all_patterns
 
 
 # Integration with existing PatternRecognition
@@ -174,7 +175,7 @@ class ExtendedPatternRecognition(PatternRecognition):
     pattern detection while maintaining backward compatibility.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize extended pattern recognition."""
         super().__init__()
         # Pass None to avoid recursion - detector will create its own base recognizer
@@ -198,10 +199,11 @@ class ExtendedPatternRecognition(PatternRecognition):
         embedded_result = await self.embedded_detector.detect_embedded_agentic(state)
 
         # Combine patterns
-        all_patterns = base_patterns + embedded_result["embedded_agentic_species"]
+        embedded_patterns: list[str] = embedded_result.get("embedded_agentic_species", [])
+        all_patterns = base_patterns + embedded_patterns
 
         # Store embedded patterns for reference
-        self.embedded_patterns = embedded_result["embedded_agentic_species"]
+        self.embedded_patterns = embedded_patterns
 
         return all_patterns
 

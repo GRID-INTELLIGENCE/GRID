@@ -58,7 +58,7 @@ class AgentIntelligenceEvaluator:
 
         # Calculate error categories
         errors = [t.error_category for t in role_traces if t.error_category]
-        error_counts = {}
+        error_counts: dict[str, int] = {}
         for err in errors:
             error_counts[err] = error_counts.get(err, 0) + 1
         common_errors = sorted(error_counts.items(), key=lambda x: x[1], reverse=True)[:5]
@@ -81,8 +81,8 @@ class AgentIntelligenceEvaluator:
         self, agent_role: str, traces: list[ExecutionBehavior], min_occurrences: int = 5
     ) -> list[BehavioralPattern]:
         """Detect recurring behavioral patterns from traces."""
-        patterns = []
-        role_traces = [t for t in traces if t.agent_role == agent_role]
+        patterns: list[BehavioralPattern] = []
+        role_traces: list[ExecutionBehavior] = [t for t in traces if t.agent_role == agent_role]
 
         # Pattern 1: High confidence but failure (Overconfidence)
         overconfident_failures = [
@@ -119,7 +119,7 @@ class AgentIntelligenceEvaluator:
     ) -> str:
         """Recommend the best agent role for a task based on historical performance."""
         # Simple heuristic: Success Rate / Average Latency
-        scores = {}
+        scores: dict[str, float] = {}
         for role, stats in historical_stats.items():
             if stats.success_rate > 0:
                 # Latency in seconds for normalization

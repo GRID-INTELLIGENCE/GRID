@@ -72,6 +72,11 @@ class SkillExecutionTracker:
         self._last_flush_time = time.time()
         self._flush_lock = threading.Lock()
 
+        # FIXED: Dead-letter queue for failed persistence
+        self._dead_letter: list[SkillExecutionRecord] = []
+        self._dead_letter_lock = threading.Lock()
+        self._max_dead_letter_size = 10000
+
         # Lazy inventory connection
         self._inventory: IntelligenceInventory | None = None
         self._inventory_available = True  # Assume available until proven otherwise
@@ -111,7 +116,7 @@ class SkillExecutionTracker:
     def _start_flush_timer(self) -> None:
         """Start background timer for periodic flushes."""
 
-        def flush_loop():
+        def flush_loop() -> None:
             while True:
                 time.sleep(self.FLUSH_INTERVAL)
                 try:
@@ -190,27 +195,61 @@ class SkillExecutionTracker:
                 self._flush_batch()
 
     def _flush_batch(self) -> None:
-        """Flush batch buffer to inventory."""
+        """
+        Flush batch buffer to inventory with dead-letter queue fallback.
+        
+        FIXED: Records that fail to persist are moved to dead-letter queue
+        for later retry instead of being silently dropped.
+        """
         if not self._batch_buffer:
             return
 
         inventory = self._get_inventory()
+        
+        # If inventory unavailable, move all to dead-letter
         if not inventory:
-            self._logger.debug("Skipping flush - inventory unavailable")
+            with self._dead_letter_lock:
+                self._dead_letter.extend(self._batch_buffer)
+                # Trim dead-letter if too large
+                if len(self._dead_letter) > self._max_dead_letter_size:
+                    self._dead_letter = self._dead_letter[-self._max_dead_letter_size:]
+            self._logger.warning(f"Inventory unavailable, moved {len(self._batch_buffer)} records to dead-letter")
+            self._batch_buffer.clear()
             return
 
-        try:
-            for record in self._batch_buffer:
-                inventory.store_execution(record)
+        # Attempt to flush with retry
+        failed_records = []
+        max_retries = 3
+        
+        for attempt in range(max_retries):
+            try:
+                for record in self._batch_buffer:
+                    inventory.store_execution(record)
 
-            inventory.flush_all()
-            count = len(self._batch_buffer)
+                inventory.flush_all()
+                count = len(self._batch_buffer)
+                self._batch_buffer.clear()
+                self._last_flush_time = time.time()
+                self._logger.debug(f"Flushed {count} execution records")
+                return  # Success - exit early
+
+            except Exception as e:
+                self._logger.error(f"Batch flush failed (attempt {attempt + 1}/{max_retries}): {e}")
+                if attempt < max_retries - 1:
+                    time.sleep(2 ** attempt)  # Exponential backoff
+                else:
+                    # Final failure - move to dead-letter
+                    failed_records = self._batch_buffer.copy()
+
+        # Move failed records to dead-letter queue
+        if failed_records:
+            with self._dead_letter_lock:
+                self._dead_letter.extend(failed_records)
+                # Trim dead-letter if too large
+                if len(self._dead_letter) > self._max_dead_letter_size:
+                    self._dead_letter = self._dead_letter[-self._max_dead_letter_size:]
+            self._logger.error(f"Moved {len(failed_records)} failed records to dead-letter after {max_retries} attempts")
             self._batch_buffer.clear()
-            self._last_flush_time = time.time()
-            self._logger.debug(f"Flushed {count} execution records")
-
-        except Exception as e:
-            self._logger.error(f"Batch flush failed: {e}")
 
     def _immediate_persist(self, record: SkillExecutionRecord) -> None:
         """Persist single record immediately."""
@@ -283,7 +322,7 @@ class SkillExecutionTracker:
     def get_error_patterns(self, skill_id: str) -> dict[str, int]:
         """Get error patterns for a specific skill."""
         executions = [r for r in self._history if r.skill_id == skill_id and r.error]
-        error_counts = {}
+        error_counts: dict[str, int] = {}
 
         for record in executions:
             error = record.error or "unknown"
@@ -296,7 +335,7 @@ class SkillExecutionTracker:
         if format == "json":
             import json
 
-            def serialize_record(r):
+            def serialize_record(r: SkillExecutionRecord) -> dict[str, Any]:
                 d = r.__dict__.copy()
                 d["status"] = d["status"].value
                 return d

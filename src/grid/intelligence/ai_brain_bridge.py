@@ -63,7 +63,7 @@ class Relationship:
 
 @dataclass
 class SpatialPattern:
-    coordinates: list[tuple[float, float, float]]
+    coordinates: list[tuple[float, float]]
     relationships: list[str]
     confidence: float
     pattern_type: str
@@ -80,16 +80,16 @@ class NavigationEnhancement:
 class KnowledgeGraphBridge:
     """Bridge between AI Brain and Navigation System"""
 
-    def __init__(self, ai_brain: AIBrain):
+    def __init__(self, ai_brain: AIBrain) -> None:
         self.ai_brain = ai_brain
         self.graph = nx.DiGraph()
-        self.spatial_index = {}
-        self.pattern_cache = {}
+        self.spatial_index: dict[str, tuple[float, float]] = {}
+        self.pattern_cache: dict[str, Any] = {}
         self._lock = asyncio.Lock()
         self.store = PersistentJSONKnowledgeStore(Path("dev/navigation_graph.json"))
         self._load_from_store()
 
-    def _load_from_store(self):
+    def _load_from_store(self) -> None:
         """Load persistent navigation nodes into memory"""
         self.store.connect()
         stats = self.store.get_graph_statistics()
@@ -161,7 +161,7 @@ class KnowledgeGraphBridge:
             if x1 <= coords[0] <= x2 and y1 <= coords[1] <= y2:
                 region_nodes.append(node_id)
 
-        patterns = []
+        patterns: list[SpatialPattern] = []
 
         # Pattern 1: Clustering detection
         if len(region_nodes) >= 3:
@@ -205,7 +205,7 @@ class KnowledgeGraphBridge:
 
         # Generate AI-enhanced path suggestions
         base_path = self._calculate_base_path(current_position, target_position)
-        enhanced_paths = []
+        enhanced_paths: list[list[tuple[float, float]]] = []
 
         for pattern in patterns:
             if pattern.pattern_type == "path" and pattern.confidence > 0.7:
@@ -218,7 +218,7 @@ class KnowledgeGraphBridge:
             enhanced_paths = [self._apply_spatial_reasoning(base_path, context)]
 
         # Calculate confidence scores
-        confidence_scores = []
+        confidence_scores: list[float] = []
         for path in enhanced_paths:
             confidence = self._calculate_path_confidence(path, patterns, context)
             confidence_scores.append(confidence)
@@ -235,7 +235,7 @@ class KnowledgeGraphBridge:
 
     def _detect_clusters(self, nodes: list[str]) -> list[list[str]]:
         """Detect clusters of nodes using spatial proximity"""
-        clusters = []
+        clusters: list[list[str]] = []
         visited = set()
 
         for node_id in nodes:
@@ -265,7 +265,7 @@ class KnowledgeGraphBridge:
 
     def _detect_paths(self, nodes: list[str]) -> list[list[str]]:
         """Detect linear paths through nodes"""
-        paths = []
+        paths: list[list[str]] = []
 
         # Simple path detection: find sequences of connected nodes
         for start_node in nodes:
@@ -295,7 +295,7 @@ class KnowledgeGraphBridge:
     def _get_spatial_neighbors(self, node: str, visited: set, candidates: list[str]) -> list[str]:
         """Get unvisited spatial neighbors of a node"""
         node_coords = self.spatial_index[node]
-        neighbors = []
+        neighbors: list[str] = []
 
         for candidate in candidates:
             if candidate in visited:
@@ -348,7 +348,7 @@ class KnowledgeGraphBridge:
         distance = ((end[0] - start[0]) ** 2 + (end[1] - start[1]) ** 2) ** 0.5
         steps = max(int(distance / 0.5), 2)  # Point every 0.5 units
 
-        path = []
+        path: list[tuple[float, float]] = []
         for i in range(steps + 1):
             t = i / steps
             x = start[0] + t * (end[0] - start[0])
@@ -369,7 +369,7 @@ class KnowledgeGraphBridge:
         self, base_path: list[tuple[float, float]], context: dict[str, Any]
     ) -> list[tuple[float, float]]:
         """Apply spatial reasoning to enhance base path"""
-        enhanced_path = []
+        enhanced_path: list[tuple[float, float]] = []
 
         for point in base_path:
             # Add some spatial reasoning-based modifications
@@ -414,7 +414,7 @@ class KnowledgeGraphBridge:
 
     def _get_relationships(self, nodes: list[str]) -> list[str]:
         """Get relationships between nodes"""
-        relationships = []
+        relationships: list[str] = []
         for i, node1 in enumerate(nodes):
             for node2 in nodes[i + 1 :]:
                 if self.graph.has_edge(node1, node2):
@@ -428,7 +428,7 @@ class KnowledgeGraphBridge:
         if not nodes:
             return 0.0
 
-        confidences = []
+        confidences: list[float] = []
         for node_id in nodes:
             if node_id in self.graph.nodes:
                 node_data = self.graph.nodes[node_id]
@@ -440,12 +440,12 @@ class KnowledgeGraphBridge:
 class AIBrainIntegration:
     """Main integration class for AI Brain with GRID systems"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.ai_brain = AIBrain()
         self.knowledge_bridge = KnowledgeGraphBridge(self.ai_brain)
         self._initialized = False
 
-    async def initialize(self):
+    async def initialize(self) -> None:
         """Initialize the AI Brain integration"""
         if self._initialized:
             return

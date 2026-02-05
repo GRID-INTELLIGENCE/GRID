@@ -126,7 +126,7 @@ class ShiftDashboard:
             return f"{hours}h {minutes}m"
         return f"{minutes}m"
 
-    def _print_bar(self, percentage: float):
+    def _print_bar(self, percentage: float) -> None:
         """Print a progress bar."""
         bar_length = 30
         filled = int(bar_length * percentage / 100)
@@ -134,7 +134,7 @@ class ShiftDashboard:
         print(f"[{bar}]")
 
 
-def print_dashboard():
+def print_dashboard() -> None:
     """Print dashboard to console."""
     dashboard = ShiftDashboard()
     dashboard.print_status()

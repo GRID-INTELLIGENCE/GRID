@@ -123,57 +123,61 @@ class TraceManager:
         tags: set[str] | None = None,
         input_data: dict[str, Any] | None = None,
     ) -> Iterator[ActionTrace]:
-        """Context manager for tracing an action.
-
-        Args:
-            action_type: Type of action
-            action_name: Human-readable action name
-            origin: Origin type
-            user_id: User identifier
-            org_id: Organization identifier
-            session_id: Session identifier
-            request_id: Request identifier
-            operation_id: Operation identifier
-            metadata: Additional metadata
-            tags: Tags for categorization
-            input_data: Input data snapshot
-
-        Yields:
-            Action trace
         """
-        trace = self.create_trace(
-            action_type=action_type,
-            action_name=action_name,
-            origin=origin,
-            user_id=user_id,
-            org_id=org_id,
-            session_id=session_id,
-            request_id=request_id,
-            operation_id=operation_id,
-            metadata=metadata,
-            tags=tags,
-            skip_frames=1,
-        )
+        Context manager for tracing an action.
+        
+        FIXED: Only pushes to context stack after successful trace creation,
+        preventing stack corruption if create_trace raises an exception.
+        """
+        # Create trace first - may raise exception
+        try:
+            trace = self.create_trace(
+                action_type=action_type,
+                action_name=action_name,
+                origin=origin,
+                user_id=user_id,
+                org_id=org_id,
+                session_id=session_id,
+                request_id=request_id,
+                operation_id=operation_id,
+                metadata=metadata,
+                tags=tags,
+                skip_frames=1,
+            )
+        except Exception:
+            # Don't modify stack if creation failed
+            raise
 
+        # Only set input data and push to stack after successful creation
         if input_data:
             trace.input_data = input_data
+
+        # FIXED: Push to stack only after successful creation
+        self._context_stack.append(trace.context)
 
         try:
             yield trace
             trace.complete(success=True)
         except Exception as e:
             import traceback
-
             trace.complete(success=False, error=f"{str(e)}\n{traceback.format_exc()}")
             raise
         finally:
+            # FIXED: Pop only the exact context we pushed (verified by trace_id)
+            if self._context_stack and self._context_stack[-1].trace_id == trace.trace_id:
+                self._context_stack.pop()
+            elif trace.trace_id in self._context_stack:
+                # Context is in stack but not at top - log error but still remove
+                idx = next((i for i, ctx in enumerate(self._context_stack) if ctx.trace_id == trace.trace_id), None)
+                if idx is not None:
+                    self._context_stack.pop(idx)
+                    logger.error(f"Trace stack out of order: removed {trace.trace_id} from middle of stack")
+            else:
+                logger.error(f"Trace {trace.trace_id} not found in context stack during cleanup")
+
             # Remove from active traces
             if trace.trace_id in self._active_traces:
                 del self._active_traces[trace.trace_id]
-
-            # Pop context stack
-            if self._context_stack:
-                self._context_stack.pop()
 
             # Store trace
             if self.store:

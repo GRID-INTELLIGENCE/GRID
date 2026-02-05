@@ -25,7 +25,7 @@ class TaskPerformanceBucket:
     failure_count: int = 0
     max_history: int = 100
 
-    def add_record(self, duration_ms: float, success: bool):
+    def add_record(self, duration_ms: float, success: bool) -> None:
         """Add a new performance record."""
         self.execution_times.append(duration_ms)
         if len(self.execution_times) > self.max_history:

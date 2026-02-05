@@ -17,7 +17,7 @@ class LearningEngine:
     def __init__(
         self,
         context_manager: UserContextManager,
-    ):
+    ) -> None:
         """Initialize learning engine.
 
         Args:
@@ -66,7 +66,7 @@ class LearningEngine:
         corrections = self.storage.load_corrections()
 
         # Group corrections by type
-        by_type = {}
+        by_type: dict[str, list[Correction]] = {}
         for c in corrections:
             if c.correction_type not in by_type:
                 by_type[c.correction_type] = []
@@ -171,6 +171,9 @@ class LearningEngine:
         """Apply learned preferences to user profile."""
         learned_prefs = self.get_learned_preferences()
 
+        if self.context_manager.profile is None:
+            return
+
         for pref_type, preference in learned_prefs.items():
             if preference.confidence < 0.5:
                 continue  # Skip low-confidence preferences
@@ -199,7 +202,7 @@ class LearningEngine:
         learned_prefs = self.get_learned_preferences()
 
         # Group corrections by type
-        correction_types = {}
+        correction_types: dict[str, int] = {}
         for correction in corrections:
             if correction.correction_type not in correction_types:
                 correction_types[correction.correction_type] = 0

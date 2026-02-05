@@ -107,7 +107,8 @@ def get_contextual_suggestions(user_id: str = "default") -> dict[str, Any]:
     recognizer = services.get("recognizer")
     if recognizer:
         try:
-            return recognizer.get_context_summary()
+            result = recognizer.get_context_summary()
+            return result  # type: ignore[no-any-return]
         except Exception as e:
             logger.warning(f"Failed to get contextual suggestions: {e}")
             return {}

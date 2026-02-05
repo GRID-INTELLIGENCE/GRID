@@ -100,16 +100,16 @@ class TestVectorStoreOperations:
         # Filter by topic
         ai_results = vector_store.similarity_search(query="learning", k=10, where={"topic": "AI"})
 
-        assert all(result.metadata.get("topic") == "AI" for result in ai_results), (
-            "All results should have AI topic when filtered by AI topic"
-        )
+        assert all(
+            result.metadata.get("topic") == "AI" for result in ai_results
+        ), "All results should have AI topic when filtered by AI topic"
 
         # Filter by source
         source_results = vector_store.similarity_search(query="content", k=10, where={"source": "ai_basics.txt"})
 
-        assert all(result.metadata.get("source") == "ai_basics.txt" for result in source_results), (
-            "All results should come from specified source"
-        )
+        assert all(
+            result.metadata.get("source") == "ai_basics.txt" for result in source_results
+        ), "All results should come from specified source"
 
     def test_error_handling_invalid_input(self, vector_store):
         """Scenario: Handle malformed input gracefully with proper error messages"""

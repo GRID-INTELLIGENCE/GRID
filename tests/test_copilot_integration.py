@@ -6,8 +6,8 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
 
-from tools.rag.llm.factory import get_llm_provider
 from tools.rag.config import RAGConfig
+from tools.rag.llm.factory import get_llm_provider
 
 # Test environment setup
 os.environ["RAG_LLM_MODE"] = "copilot"

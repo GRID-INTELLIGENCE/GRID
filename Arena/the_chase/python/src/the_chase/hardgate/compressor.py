@@ -2,6 +2,8 @@
 Compressor guardian for rate limiting
 """
 
+from __future__ import annotations
+
 import threading
 from dataclasses import dataclass
 from datetime import datetime
@@ -57,9 +59,9 @@ class RateLimiter:
 
     def __init__(self, config: RateLimitConfig | None = None):
         self.config = config or RateLimitConfig()
-        self._storage: dict[str, dict] = {}
+        self._storage: dict[str, dict[str, Any]] = {}
         self._lock = threading.RLock()
-        self._violation_log: list[dict] = []
+        self._violation_log: list[dict[str, Any]] = []
 
     def _get_key(self, identifier: str, scope: RateLimitScope | None = None) -> str:
         """Generate storage key based on scope"""
@@ -72,7 +74,7 @@ class RateLimiter:
         current_time = datetime.now().timestamp()
 
         if key not in self._storage:
-            self._storage[key] = {"count": 0, "window_start": current_time}
+            self._storage[key]: dict[str, Any] = {"count": 0, "window_start": current_time}
 
         storage = self._storage[key]
         elapsed = current_time - storage["window_start"]
@@ -92,6 +94,6 @@ class RateLimiter:
             self._log_violation(key, "rate_limit_exceeded")
             return {"allowed": False, "remaining": 0, "reset_at": storage["window_start"] + self.config.window_seconds}
 
-    def _log_violation(self, key: str, reason: str):
+    def _log_violation(self, key: str, reason: str) -> None:
         """Log a rate limit violation"""
         self._violation_log.append({"key": key, "reason": reason, "timestamp": datetime.now().timestamp()})

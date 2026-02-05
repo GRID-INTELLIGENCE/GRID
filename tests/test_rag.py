@@ -127,9 +127,9 @@ def test_ollama_rag_demo(tmp_path: Path):
 
     # Verify we can load it back
     new_store = VectorStore.from_ndjson(data)
-    assert len(new_store.docs) == len(docs), (
-        f"Expected {len(docs)} documents after loading from NDJSON, got {len(new_store.docs)}"
-    )
+    assert len(new_store.docs) == len(
+        docs
+    ), f"Expected {len(docs)} documents after loading from NDJSON, got {len(new_store.docs)}"
 
     new_docs, _, _ = new_store.query(query_emb, k=1)
     assert new_docs == store.query(query_emb, k=1)[0]

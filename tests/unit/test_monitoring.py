@@ -7,13 +7,13 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from application.monitoring import (
-    setup_metrics,
     get_metrics_router,
     http_request_duration_seconds,
     rag_query_duration_seconds,
-    track_rag_query,
-    track_event_processing,
+    setup_metrics,
     track_db_operation,
+    track_event_processing,
+    track_rag_query,
     track_skill_execution,
 )
 

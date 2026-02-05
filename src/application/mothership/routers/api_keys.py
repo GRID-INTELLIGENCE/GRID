@@ -7,7 +7,7 @@ Endpoints for creating, listing, and managing API keys.
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta, timezone
 from typing import List
 
 import bcrypt
@@ -85,7 +85,7 @@ async def create_api_key(
     # Calculate expiration
     expires_at = None
     if request.expires_in_days:
-        expires_at = datetime.now(timezone.utc) + timedelta(days=request.expires_in_days)
+        expires_at = datetime.now(UTC) + timedelta(days=request.expires_in_days)
 
     # Get user's subscription tier (default to FREE for now)
     # TODO: Integrate with subscription repository in Phase 1.2
@@ -110,7 +110,7 @@ async def create_api_key(
     )
 
 
-@router.get("/", response_model=List[APIKeyResponse])
+@router.get("/", response_model=list[APIKeyResponse])
 async def list_api_keys(
     auth: RequiredAuth,
     uow: UoW,

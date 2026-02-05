@@ -12,7 +12,7 @@ from typing import Any
 class ArchitecturalDivergenceAnalyzer:
     """Analyzes modules for divergence from Mothership pattern."""
 
-    MOTHERSHIP_PATTERN = {
+    MOTHERSHIP_PATTERN: dict[str, Any] = {
         "structure": ["routers", "services", "repositories"],
         "naming": {
             "router": r".*_router\.py$|routers/.*\.py$",
@@ -54,7 +54,7 @@ class ArchitecturalDivergenceAnalyzer:
             Dictionary with divergence analysis
         """
         divergence_score = 0.0
-        issues = []
+        issues: list[str] = []
 
         if module_path.is_dir():
             # Analyze directory structure
@@ -128,11 +128,11 @@ class ArchitecturalDivergenceAnalyzer:
 
     def _analyze_directory_structure(self, directory: Path) -> list[str]:
         """Analyze directory structure for Mothership pattern."""
-        issues = []
-        expected_dirs = set(self.MOTHERSHIP_PATTERN["structure"])
-        actual_dirs = {d.name for d in directory.iterdir() if d.is_dir()}
+        issues: list[str] = []
+        expected_dirs: set[str] = set(self.MOTHERSHIP_PATTERN["structure"])
+        actual_dirs: set[str] = {d.name for d in directory.iterdir() if d.is_dir()}
 
-        missing_dirs = expected_dirs - actual_dirs
+        missing_dirs: set[str] = expected_dirs - actual_dirs
         if missing_dirs:
             issues.append(f"Missing directories: {', '.join(missing_dirs)}")
 
@@ -146,7 +146,7 @@ class ArchitecturalDivergenceAnalyzer:
 
     def _check_naming_conventions(self, module_path: Path, content: str) -> list[str]:
         """Check if file follows Mothership naming conventions."""
-        issues = []
+        issues: list[str] = []
         filename = module_path.name
 
         # Check if filename matches expected patterns
@@ -168,7 +168,7 @@ class ArchitecturalDivergenceAnalyzer:
 
     def _check_import_patterns(self, content: str) -> list[str]:
         """Check if imports follow Mothership patterns."""
-        issues = []
+        issues: list[str] = []
 
         # Check for Mothership imports
         any(pattern in content for pattern in ["from application.mothership", "from application.exceptions"])
@@ -187,7 +187,7 @@ class ArchitecturalDivergenceAnalyzer:
 
     def _check_exception_handling(self, content: str) -> list[str]:
         """Check exception handling patterns."""
-        issues = []
+        issues: list[str] = []
 
         if "except" in content:
             if self.MOTHERSHIP_PATTERN["exception_handling"] not in content:
@@ -197,10 +197,10 @@ class ArchitecturalDivergenceAnalyzer:
 
     def _check_ast_structure(self, tree: ast.AST, module_path: Path) -> list[str]:
         """Check AST structure for Mothership patterns."""
-        issues = []
+        issues: list[str] = []
 
         # Check for class definitions
-        classes = [node for node in ast.walk(tree) if isinstance(node, ast.ClassDef)]
+        classes: list[ast.ClassDef] = [node for node in ast.walk(tree) if isinstance(node, ast.ClassDef)]
 
         # Check if classes follow naming conventions
         for cls in classes:
@@ -216,7 +216,7 @@ class ArchitecturalDivergenceAnalyzer:
 
         return issues
 
-    def generate_migration_path(self, analysis: dict) -> list[str]:
+    def generate_migration_path(self, analysis: dict[str, Any]) -> list[str]:
         """
         Generate automated migration path for a module.
 
@@ -226,7 +226,7 @@ class ArchitecturalDivergenceAnalyzer:
         Returns:
             List of migration steps
         """
-        steps = []
+        steps: list[str] = []
         module_path = Path(analysis["module"])
 
         # Determine target domain from path
@@ -286,7 +286,7 @@ class ArchitecturalDivergenceAnalyzer:
 
         return "application/<domain>"
 
-    def analyze_codebase(self, base_path: Path, patterns: list[str] | None = None) -> list[dict]:
+    def analyze_codebase(self, base_path: Path, patterns: list[str] | None = None) -> list[dict[str, Any]]:
         """
         Analyze entire codebase for architectural divergence.
 
@@ -300,7 +300,7 @@ class ArchitecturalDivergenceAnalyzer:
         if patterns is None:
             patterns = ["**/*.py"]
 
-        results = []
+        results: list[dict[str, Any]] = []
 
         for pattern in patterns:
             for file_path in base_path.glob(pattern):

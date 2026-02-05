@@ -382,14 +382,14 @@ async def motivate() -> GearMetrics:
     return metrics
 
 
-def print_motivation():
+def print_motivation() -> None:
     """Print motivational report to console."""
     engine = MotivationEngine()
     metrics = engine.measure_current_state()
     print(engine.generate_report(metrics))
 
 
-def save_progress(metrics: GearMetrics, filepath: Path | None = None):
+def save_progress(metrics: GearMetrics, filepath: Path | None = None) -> None:
     """Save metrics to JSON for historical tracking."""
     if filepath is None:
         filepath = Path(__file__).parent.parent.parent.parent / "progress_history.json"

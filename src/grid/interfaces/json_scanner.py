@@ -5,13 +5,14 @@ from __future__ import annotations
 import json
 import logging
 from datetime import UTC, datetime, timedelta
+from enum import Enum
 from pathlib import Path
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
-class JSONFileType:
+class JSONFileType(Enum):
     """Types of JSON files we can identify."""
 
     BENCHMARK_METRICS = "benchmark_metrics"
@@ -58,7 +59,7 @@ class JSONScanner:
             ]
 
         cutoff_time = datetime.now(UTC) - timedelta(days=days)
-        results = []
+        results: list[tuple[Path, JSONFileType, dict[str, Any]]] = []
 
         for pattern in patterns:
             try:
@@ -175,7 +176,7 @@ class JSONScanner:
         if search_paths is None:
             search_paths = ["data", "grid/logs/traces"]
 
-        results = []
+        results: list[tuple[Path, dict[str, Any]]] = []
 
         for search_path in search_paths:
             search_dir = self.base_path / search_path

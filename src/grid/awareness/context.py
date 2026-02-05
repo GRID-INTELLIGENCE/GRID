@@ -3,14 +3,17 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 # Optional import for domain tracking
-try:
+if TYPE_CHECKING:
     from grid.awareness.domain_tracking import DomainTracker, TechnologyDomainTracker
-except ImportError:
-    DomainTracker = None  # type: ignore
-    TechnologyDomainTracker = None  # type: ignore
+else:
+    try:
+        from grid.awareness.domain_tracking import DomainTracker, TechnologyDomainTracker
+    except ImportError:
+        DomainTracker = None  # type: ignore[misc,assignment]
+        TechnologyDomainTracker = None  # type: ignore[misc,assignment]
 
 
 @dataclass
@@ -59,25 +62,28 @@ class Context:
             return
 
         # Extract patterns from state
-        patterns = []
-        if "patterns" in state.quantum_state:
-            patterns = state.quantum_state["patterns"]
-        elif isinstance(state.quantum_state, dict):
-            # Try to infer patterns from quantum state structure
-            patterns = [k for k in state.quantum_state.keys() if isinstance(k, str)]
+        patterns: list[str] = []
+        patterns_value = state.quantum_state.get("patterns")
+        if isinstance(patterns_value, list):
+            patterns = [p for p in patterns_value if isinstance(p, str)]
+        else:
+            # Infer patterns from quantum state keys
+            patterns = list(state.quantum_state.keys())
 
         # Extract metrics from spatial field or quantum state
-        metrics = spatial_field.get("domain_metrics", {})
-        if not metrics and "domain_metrics" in state.quantum_state:
-            metrics = state.quantum_state["domain_metrics"]
+        metrics: dict[str, Any] = spatial_field.get("domain_metrics", {})
+        metrics_value = state.quantum_state.get("domain_metrics")
+        if not metrics and isinstance(metrics_value, dict):
+            metrics = metrics_value
 
         # Extract structural changes
-        structural_changes = spatial_field.get("structural_changes", {})
-        if not structural_changes and "structural_changes" in state.quantum_state:
-            structural_changes = state.quantum_state["structural_changes"]
+        structural_changes: dict[str, Any] = spatial_field.get("structural_changes", {})
+        structural_value = state.quantum_state.get("structural_changes")
+        if not structural_changes and isinstance(structural_value, dict):
+            structural_changes = structural_value
 
         # Track domain changes - handle TechnologyDomainTracker specially
-        if isinstance(self.domain_tracker, TechnologyDomainTracker):
+        if TechnologyDomainTracker is not None and isinstance(self.domain_tracker, TechnologyDomainTracker):
             # Use technology-specific tracking
             if metrics:
                 self.domain_tracker.track_technology_metrics(
@@ -106,14 +112,12 @@ class Context:
         Returns:
             New Context with domain tracking enabled
         """
-        if DomainTracker is None:
-            # Domain tracking not available
-            return self
+        tracker: Any = None
 
-        if tracker_type == "technology" and TechnologyDomainTracker:
+        if tracker_type == "technology" and TechnologyDomainTracker is not None:
             tracker = TechnologyDomainTracker()
-        else:
-            tracker = DomainTracker() if DomainTracker else None
+        elif DomainTracker is not None:
+            tracker = DomainTracker()
 
         return Context(
             temporal_depth=self.temporal_depth,
@@ -130,7 +134,7 @@ class Context:
             return None
 
         # Handle TechnologyDomainTracker specially
-        if isinstance(self.domain_tracker, TechnologyDomainTracker):
+        if TechnologyDomainTracker is not None and isinstance(self.domain_tracker, TechnologyDomainTracker):
             return self.domain_tracker.get_technology_evolution()
 
         # Use general domain tracking
@@ -145,12 +149,14 @@ class Context:
             return []
 
         # Handle TechnologyDomainTracker specially
-        if isinstance(self.domain_tracker, TechnologyDomainTracker):
-            return self.domain_tracker.detect_technology_shifts()
+        if TechnologyDomainTracker is not None and isinstance(self.domain_tracker, TechnologyDomainTracker):
+            result: list[dict[str, Any]] = self.domain_tracker.detect_technology_shifts()
+            return result
 
         # Use general domain tracking
         if hasattr(self.domain_tracker, "detect_emerging_structures"):
-            return self.domain_tracker.detect_emerging_structures(self.active_domain)
+            general_result: list[dict[str, Any]] = self.domain_tracker.detect_emerging_structures(self.active_domain)
+            return general_result
 
         return []
 

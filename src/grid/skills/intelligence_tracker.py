@@ -167,7 +167,7 @@ class IntelligenceTracker:
             return {"error": "No records for skill"}
 
         # Group by time periods
-        trends = {}
+        trends: dict[int, list[float]] = {}
         for record in records:
             period = int(record.timestamp / 3600)  # Hourly periods
             trends[period] = trends.get(period, []) + [record.confidence]

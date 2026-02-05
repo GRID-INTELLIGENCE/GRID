@@ -308,7 +308,7 @@ class CaseFilingSystem:
                 category_scores[category] = score / len(keywords)
 
         if category_scores:
-            best_category = max(category_scores, key=category_scores.get)
+            best_category = max(category_scores, key=lambda k: category_scores[k])
             confidence = category_scores[best_category]
         else:
             best_category = CaseCategory.RARE

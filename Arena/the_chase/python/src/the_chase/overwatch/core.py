@@ -4,6 +4,7 @@ OVERWATCH core for The Chase
 
 from dataclasses import dataclass
 from enum import Enum
+from typing import Any
 
 
 class MorphState(Enum):
@@ -41,11 +42,11 @@ class OverwatchConfig:
 class Overwatch:
     """Real-time monitoring and enforcement"""
 
-    def __init__(self, config: OverwatchConfig):
+    def __init__(self, config: OverwatchConfig) -> None:
         self.config = config
         self.morph_state = MorphState.GREEN
 
-    def monitor_action(self, action: dict) -> dict:
+    def monitor_action(self, action: dict[str, Any]) -> dict[str, Any]:
         """Monitor and validate game actions"""
         # Implementation
         return {}

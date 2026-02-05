@@ -145,7 +145,7 @@ class WorkflowOrchestrator:
 
     def get_workflow_suggestions(self) -> list[dict[str, Any]]:
         """Get workflow optimization suggestions based on patterns."""
-        suggestions = []
+        suggestions: list[dict[str, Any]] = []
 
         if self.context_manager.profile is None:
             return suggestions

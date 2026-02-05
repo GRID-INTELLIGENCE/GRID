@@ -9,11 +9,25 @@ from sqlalchemy.pool import NullPool
 
 from ..config import get_settings
 
+try:
+    # Import centralized metrics to avoid duplicates
+    from infrastructure.metrics import db_active_connections as _db_connections
+    METRICS_ENABLED = True
+except ImportError:
+    METRICS_ENABLED = False
+
 logger = logging.getLogger(__name__)
 
 _engine: AsyncEngine | None = None
 _sessionmaker: async_sessionmaker[AsyncSession] | None = None
 _databricks_sync_engine = None  # For Databricks synchronous operations
+_disposed: bool = False  # Disposal flag to prevent double-disposal
+_engine_lock = asyncio.Lock()  # Lock for thread-safe engine operations
+
+# Safe defaults for connection pooling
+POOL_SIZE_DEFAULT = 20
+MAX_OVERFLOW_DEFAULT = 10
+POOL_TIMEOUT_DEFAULT = 30
 
 
 def _normalize_async_db_url(url: str) -> str:
@@ -127,6 +141,10 @@ def get_async_engine() -> AsyncEngine:
         )
 
     _engine = create_async_engine(url, **kwargs)
+
+    if METRICS_ENABLED and _engine.pool and hasattr(_engine.pool, "size"):
+        _db_connections.set(_engine.pool.size())
+
     if _should_auto_init_sqlite(url):
         try:
             asyncio.get_event_loop().create_task(_init_sqlite_schema(_engine))
@@ -143,3 +161,75 @@ def get_async_sessionmaker() -> async_sessionmaker[AsyncSession]:
     engine = get_async_engine()
     _sessionmaker = async_sessionmaker(engine, expire_on_commit=False)
     return _sessionmaker
+
+
+async def dispose_async_engine() -> None:
+    """
+    Dispose of the async engine and close all connections.
+
+    FIXED: Properly closes connection pool on application shutdown.
+    Should be called during FastAPI lifespan shutdown or application exit.
+    Idempotent - safe to call multiple times.
+    """
+    global _engine, _sessionmaker, _databricks_sync_engine, _disposed
+
+    async with _engine_lock:
+        # Check if already disposed
+        if _disposed:
+            logger.debug("Database engine already disposed, skipping")
+            return
+
+        _disposed = True
+
+        if _sessionmaker is not None:
+            _sessionmaker = None
+            logger.info("Session maker cleared")
+
+        if _engine is not None:
+            await _engine.dispose()
+            pool_size = _engine.pool.size() if _engine.pool else 0
+            _engine = None
+            if METRICS_ENABLED:
+                _db_connections.set(0)
+            logger.info(f"Async engine disposed (pool size was {pool_size})")
+
+        # Dispose Databricks sync engine if it exists
+        if _databricks_sync_engine is not None:
+            _databricks_sync_engine.dispose()
+            _databricks_sync_engine = None
+            logger.info("Databricks sync engine disposed")
+
+
+def init_db_lifespan(app):
+    """
+    Initialize database with FastAPI lifespan hooks.
+
+    Usage:
+        app = FastAPI(lifespan=init_db_lifespan)
+
+    Or with @asynccontextmanager:
+        @asynccontextmanager
+        async def lifespan(app: FastAPI):
+            await startup_db()
+            yield
+            await shutdown_db()
+    """
+    from contextlib import asynccontextmanager
+
+    @asynccontextmanager
+    async def lifespan(app):
+        # Startup
+        get_async_engine()  # Force engine creation
+        logger.info("Database engine initialized")
+
+        yield
+
+        # Shutdown
+        await dispose_async_engine()
+        logger.info("Database engine disposed")
+
+    return lifespan
+
+
+# Backwards compatibility alias
+shutdown_db = dispose_async_engine

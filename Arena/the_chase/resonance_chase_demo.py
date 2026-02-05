@@ -8,6 +8,8 @@ in action within a "Chase" scenario.
 import os
 import sys
 import time
+from typing import Any
+from typing import Any
 
 import numpy as np
 
@@ -27,7 +29,7 @@ from application.resonance import (
 )
 
 
-def run_chase_simulation():
+def run_chase_simulation() -> None:
     print("--- 🌌 Initializing The Resonance Chase ---")
 
     # Check for Databricks Telemetry
@@ -51,7 +53,7 @@ def run_chase_simulation():
             # or just run it. For this demo, let's just start it in a thread.
             import threading
 
-            def start_loop(loop):
+            def start_loop(loop: asyncio.AbstractEventLoop) -> None:
                 asyncio.set_event_loop(loop)
                 loop.run_forever()
 
@@ -118,7 +120,7 @@ def run_chase_simulation():
         hunter_pos = gravity.apply_gravity(hunter_pos)
 
         # Check Arena Rewards
-        event_context = {"action": "MOVE", "distance": distance}
+        event_context: dict[str, Any] = {"action": "MOVE", "distance": distance}
         arena.process_event(event_context)
 
         if distance < 1.0:

@@ -22,6 +22,8 @@ class UsageTracker:
         self._flush_interval = flush_interval
         self._running = False
         self._flush_task: asyncio.Task | None = None
+        self._dead_letter: list[dict[str, Any]] = []
+        self._max_dead_letter_size = 10000
 
     async def start(self) -> None:
         """Start the periodic flush task."""
@@ -58,30 +60,33 @@ class UsageTracker:
             asyncio.create_task(self.flush())
 
     async def flush(self) -> None:
-        """Write buffered events to database."""
+        """Write buffered events to database with dead-letter fallback."""
         async with self._lock:
-            if not self._buffer:
+            if not self._buffer and not self._dead_letter:
                 return
 
-            batch = self._buffer[:]
+            # Combine buffer and dead-letter for retry
+            batch = self._dead_letter + self._buffer
             self._buffer.clear()
+            self._dead_letter.clear()
 
         try:
             query = "INSERT INTO usage_logs (user_id, event_type, quantity, timestamp) VALUES (?, ?, ?, ?)"
-            # Ensure order matches query params
             params = [(e["user_id"], e["event_type"], e["quantity"], e["timestamp"]) for e in batch]
 
             await self.db.execute_many(query, params)
             await self.db.commit()
 
-            # TODO: Add aggregation logic here if needed (e.g. update monthly stats)
-
             logger.debug(f"Flushed {len(batch)} usage events.")
 
         except Exception as e:
             logger.error(f"Failed to flush usage logs: {e}")
-            # Optional: Re-buffer failed events?
-            # For simplicity/safety against poison pills, we discard and log.
+            # FIXED: Move back to dead-letter instead of dropping
+            async with self._lock:
+                self._dead_letter.extend(batch)
+                if len(self._dead_letter) > self._max_dead_letter_size:
+                    self._dead_letter = self._dead_letter[-self._max_dead_letter_size:]
+            logger.info(f"Re-buffered {len(batch)} events to dead-letter queue")
 
     async def _periodic_flush(self) -> None:
         while self._running:

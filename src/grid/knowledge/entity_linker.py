@@ -85,7 +85,7 @@ class EntityLinker:
         logger.info(f"Linked entities: {entity_a.entity_id} <-> {entity_b.entity_id} ({confidence})")
         return True
 
-    def process_new_entity(self, entity: Entity):
+    def process_new_entity(self, entity: Entity) -> None:
         """Scan for matches and link automatically for a new entity."""
         matches = self.find_potential_matches(entity)
         for match in matches:

@@ -6,17 +6,16 @@ Transforms bandit-report.json from diagnostic tool into a blocking gate.
 Enforces security thresholds before allowing pipeline to proceed.
 """
 
+import argparse
 import json
 import sys
-import argparse
-from pathlib import Path
-from typing import Dict, Any
+from typing import Any
 
 
-def load_security_report(report_path: str) -> Dict[str, Any]:
+def load_security_report(report_path: str) -> dict[str, Any]:
     """Load and validate the bandit security report."""
     try:
-        with open(report_path, "r") as f:
+        with open(report_path) as f:
             data = json.load(f)
         return data
     except FileNotFoundError:
@@ -27,7 +26,7 @@ def load_security_report(report_path: str) -> Dict[str, Any]:
         sys.exit(1)
 
 
-def extract_severity_counts(report_data: Dict[str, Any]) -> Dict[str, int]:
+def extract_severity_counts(report_data: dict[str, Any]) -> dict[str, int]:
     """Extract severity counts from bandit report."""
     totals = report_data.get("metrics", {}).get("_totals", {}).get("SEVERITY", {})
 
@@ -39,7 +38,7 @@ def extract_severity_counts(report_data: Dict[str, Any]) -> Dict[str, int]:
     }
 
 
-def check_security_thresholds(severity_counts: Dict[str, int], max_high: int = 0, max_medium: int = 5) -> bool:
+def check_security_thresholds(severity_counts: dict[str, int], max_high: int = 0, max_medium: int = 5) -> bool:
     """
     Check if security issues exceed acceptable thresholds.
 
@@ -65,7 +64,7 @@ def check_security_thresholds(severity_counts: Dict[str, int], max_high: int = 0
     return True
 
 
-def print_security_summary(severity_counts: Dict[str, int], report_path: str):
+def print_security_summary(severity_counts: dict[str, int], report_path: str):
     """Print a formatted security summary."""
     print("\n" + "=" * 60)
     print("🛡️  GRID SECURITY GATE SUMMARY")
@@ -77,7 +76,7 @@ def print_security_summary(severity_counts: Dict[str, int], report_path: str):
     print("=" * 60)
 
 
-def generate_github_summary(severity_counts: Dict[str, int]) -> str:
+def generate_github_summary(severity_counts: dict[str, int]) -> str:
     """Generate GitHub Actions step summary markdown."""
     summary = []
     summary.append("## 🛡️ Security Scan Results")

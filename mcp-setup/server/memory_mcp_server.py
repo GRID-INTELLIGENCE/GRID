@@ -7,11 +7,12 @@ Provides local memory storage and retrieval for agents
 import asyncio
 import json
 import logging
-from typing import Any, Dict, List
 from pathlib import Path
-from mcp.server.stdio import stdio_server
+from typing import Any
+
 from mcp.server import Server
-from mcp.types import Tool, TextContent
+from mcp.server.stdio import stdio_server
+from mcp.types import TextContent, Tool
 
 logger = logging.getLogger(__name__)
 
@@ -80,7 +81,7 @@ async def call_tool(name: str, args: dict[str, Any]) -> list[TextContent]:
             return [TextContent("Memory not found")]
 
     elif name == "list_memory":
-        memories: List[Dict] = []
+        memories: list[dict] = []
         for memory_file in MEMORY_DIR.glob("*.json"):
             data = json.loads(memory_file.read_text())
             memories.append({"key": data["key"], "tags": data.get("tags", [])})

@@ -4,6 +4,7 @@ Billing Service - Cost Calculation and Plan Management.
 
 import logging
 from datetime import UTC, datetime
+from typing import Any
 
 from grid.billing.aggregation import CostTier, UsageAggregator, build_tier_limits
 from grid.config.runtime_settings import RuntimeSettings
@@ -112,7 +113,7 @@ class BillingService:
 
         return used < limit
 
-    async def get_usage_summary(self, user_id: str) -> dict:
+    async def get_usage_summary(self, user_id: str) -> dict[str, Any]:
         """Get comprehensive usage summary with limits and overages."""
         tier = await self.get_user_tier(user_id)
         usage = await self.get_total_usage(user_id)
@@ -120,7 +121,7 @@ class BillingService:
         limits = tier_limits.get(tier, tier_limits[CostTier.FREE])
         bill = await self.calculate_current_bill(user_id)
 
-        summary = {
+        summary: dict[str, Any] = {
             "tier": tier.value,
             "monthly_price_cents": limits.get("monthly_price_cents", 0),
             "current_bill_cents": bill,

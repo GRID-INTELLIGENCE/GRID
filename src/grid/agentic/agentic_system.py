@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 import os
 from pathlib import Path
-from typing import Any, cast
+from typing import Any, Protocol, cast
 
 from cognitive import CognitiveEngine, InteractionEvent, get_cognitive_engine
 from cognitive.light_of_the_seven.cognitive_layer.schemas.cognitive_state import CognitiveState
@@ -20,6 +20,17 @@ from .memo_generator import MemoGenerator
 from .skill_retriever import SkillRetriever
 
 logger = logging.getLogger(__name__)
+
+
+class _Adaptation(Protocol):
+    adaptation_type: str
+
+
+class _CaseLike(Protocol):
+    case_id: str
+    category: str
+    solution: str
+    outcome: str
 
 
 class AgenticSystem:
@@ -100,11 +111,12 @@ class AgenticSystem:
                 cognitive_state = await self.cognitive_engine.track_interaction(interaction)
 
                 # Get adaptations based on cognitive state
-                _, adaptations = await self.cognitive_engine.adapt_response(
+                _, adaptations_raw = await self.cognitive_engine.adapt_response(
                     query=task or "/execute",
                     context={"case_id": case_id},
                     user_id=user_id,
                 )
+                adaptations = cast(list[_Adaptation], adaptations_raw)
                 cognitive_adaptations = [a.adaptation_type for a in adaptations]
 
                 logger.debug(
@@ -134,7 +146,7 @@ class AgenticSystem:
             agent_role=agent_role or "Executor",
             task=task or "/execute",
         )
-        event_dict = executed_event.to_dict()
+        event_dict: dict[str, Any] = executed_event.to_dict()
         if cognitive_state:
             event_dict["cognitive_context"] = {
                 "load": cognitive_state.estimated_load,
@@ -145,7 +157,7 @@ class AgenticSystem:
 
         # Execute task
         try:
-            result = await self.agent_executor.execute_task(
+            result: dict[str, Any] = await self.agent_executor.execute_task(
                 case_id=case_id,
                 reference_file_path=reference_file_path,
                 agent_role=agent_role,
@@ -189,14 +201,14 @@ class AgenticSystem:
                 },
                 execution_time_seconds=execution_time,
             )
-            event_dict = completed_event.to_dict()
+            completed_event_dict: dict[str, Any] = completed_event.to_dict()
             if cognitive_state:
-                event_dict["cognitive_context"] = {
+                completed_event_dict["cognitive_context"] = {
                     "load": cognitive_state.estimated_load,
                     "mode": cognitive_state.processing_mode.value,
                     "adaptations": cognitive_adaptations,
                 }
-            await self.event_bus.publish(event_dict)
+            await self.event_bus.publish(completed_event_dict)
 
             logger.info(f"Case {case_id} executed successfully in {execution_time:.2f}s")
 
@@ -260,14 +272,14 @@ class AgenticSystem:
             List of recommendation dictionaries
         """
         # 1. Look in local Antigravity Skill Store first
-        recommendations = []
+        recommendations: list[dict[str, Any]] = []
 
         # Load reference to get category and keywords
         import json
 
         try:
             with open(reference_file_path) as f:
-                reference = json.load(f)
+                reference = cast(dict[str, Any], json.load(f))
         except FileNotFoundError as e:
             logger.error(f"Reference file not found: {reference_file_path}", exc_info=True)
             raise SkillStoreError(f"Reference file not found: {reference_file_path}") from e
@@ -282,7 +294,9 @@ class AgenticSystem:
         keywords = reference.get("structured_data", {}).get("keywords", [])
 
         # Find historical skills
-        historical_skills = self.skill_retriever.find_relevant_skills(category=category, keywords=keywords, limit=5)
+        historical_skills: list[dict[str, Any]] = self.skill_retriever.find_relevant_skills(
+            category=category, keywords=keywords, limit=5
+        )
 
         for skill in historical_skills:
             recommendations.append(
@@ -297,10 +311,13 @@ class AgenticSystem:
 
         # 2. Then look in repository if available
         if self.repository:
-            similar_cases = await self.repository.find_similar_cases(
-                category=category,
-                keywords=keywords,
-                limit=5,
+            similar_cases = cast(
+                list[_CaseLike],
+                await self.repository.find_similar_cases(
+                    category=category,
+                    keywords=keywords,
+                    limit=5,
+                ),
             )
             for case in similar_cases:
                 recommendations.append(
@@ -321,7 +338,7 @@ class AgenticSystem:
         """Perform iterative execution for the Lawyer phase."""
         logger.info(f"Starting iterative execution for case {case_id}")
 
-        results = []
+        results: list[dict[str, Any]] = []
         for i in range(max_iterations):
             logger.info(f"Lawyer iteration {i + 1}/{max_iterations}")
             result = await self.execute_case(
@@ -334,7 +351,7 @@ class AgenticSystem:
                 break
 
         # Synthesize final result
-        summary_report = {
+        summary_report: dict[str, Any] = {
             "case_id": case_id,
             "iterations": len(results),
             "final_outcome": results[-1].get("outcome"),
@@ -343,7 +360,7 @@ class AgenticSystem:
         }
 
         # Synthesize XAI explanation for the final decision
-        xai_trace = explainer.synthesize_explanation(
+        xai_trace: dict[str, Any] = explainer.synthesize_explanation(
             decision_id=f"DEC-{case_id}-MAIN",
             context={
                 "resonance": 0.992,  # Hardcoded for demo coherence
@@ -386,7 +403,8 @@ class AgenticSystem:
         """
         if self.cognitive_engine:
             state = await self.cognitive_engine.get_cognitive_state(user_id)
-            return state.model_dump(mode="json")
+            result: dict[str, Any] = state.model_dump(mode="json")
+            return result
         return None
 
     def clear_cognitive_context(self, case_id: str | None = None) -> None:

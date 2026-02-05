@@ -419,7 +419,7 @@ class DatabricksCoinbaseMCPServer:
             return CallToolResult(content=[TextContent(type="text", text=f"Failed to list files: {e}")])
 
 
-async def main():
+async def main() -> None:
     """Main server entry point"""
     logger.info("Starting Databricks-Coinbase MCP Server...")
     server = DatabricksCoinbaseMCPServer()

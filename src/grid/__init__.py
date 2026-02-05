@@ -128,6 +128,24 @@ try:  # pragma: no cover
 except Exception:
     pass
 
+# Environment sanitization startup hook
+try:  # pragma: no cover
+    from .security.environment import sanitize_environment
+
+    # Sanitize environment on import
+    _sanitization_report = sanitize_environment()
+
+    # Optionally log the sanitization report
+    if _sanitization_report and __name__ != '__main__':
+        import logging
+        logger = logging.getLogger(__name__)
+        for category, messages in _sanitization_report.items():
+            for message in messages:
+                logger.debug(f"Environment Sanitization ({category}): {message}")
+except ImportError:  # pragma: no cover
+    # If environment sanitization fails, continue normally
+    pass
+
 __all__ = [
     # Core
     *(["EssentialState"] if EssentialState is not None else []),

@@ -19,7 +19,7 @@ sys.path.insert(0, str(grid_root))
 from grid.skills.base import SimpleSkill
 
 # Import after path is set
-from scripts.git_intelligence import OllamaClient, ComplexityEstimator
+from scripts.git_intelligence import ComplexityEstimator, OllamaClient
 
 
 def _analyze_git(args: Mapping[str, Any]) -> dict[str, Any]:
@@ -42,6 +42,7 @@ def _analyze_git(args: Mapping[str, Any]) -> dict[str, Any]:
 
         # Get git changes
         import subprocess
+
         result = subprocess.run(["git", "diff", "--cached"], capture_output=True, text=True, timeout=30)
         if result.returncode != 0:
             return {
@@ -51,7 +52,9 @@ def _analyze_git(args: Mapping[str, Any]) -> dict[str, Any]:
             }
 
         # Get staged files
-        result_files = subprocess.run(["git", "diff", "--cached", "--name-only"], capture_output=True, text=True, timeout=30)
+        result_files = subprocess.run(
+            ["git", "diff", "--cached", "--name-only"], capture_output=True, text=True, timeout=30
+        )
         staged_files = result_files.stdout.strip().split("\n") if result_files.returncode == 0 else []
 
         # Run complexity analysis

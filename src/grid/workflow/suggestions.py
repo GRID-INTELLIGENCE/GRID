@@ -40,7 +40,7 @@ class PredictiveSuggestions:
         Returns:
             List of task suggestions
         """
-        suggestions = []
+        suggestions: list[dict[str, Any]] = []
 
         # Get predicted next activity
         predicted = self.pattern_service.predict_next_activity()
@@ -183,7 +183,7 @@ class PredictiveSuggestions:
 
     def get_workflow_suggestions(self) -> list[dict[str, Any]]:
         """Get workflow optimization suggestions."""
-        suggestions = []
+        suggestions: list[dict[str, Any]] = []
 
         if self.context_manager.profile is None:
             return suggestions

@@ -120,7 +120,7 @@ class KnowledgeGraphSchema:
     property schemas, and validation rules.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the KG schema."""
         self.entity_schemas: dict[EntityType, EntitySchema] = {}
         self.relationship_schemas: dict[RelationType, list[RelationshipSchema]] = {}

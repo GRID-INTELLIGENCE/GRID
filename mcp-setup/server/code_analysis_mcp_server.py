@@ -3,53 +3,37 @@
 GRID Code Analysis MCP Server
 Provides static analysis, code quality checks, and security scanning
 """
-import sys
+
 import json
 import subprocess
+import sys
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Any
 
 
-def run_command(cmd: List[str], cwd: str = None) -> Dict[str, Any]:
+def run_command(cmd: list[str], cwd: str = None) -> dict[str, Any]:
     """Run a command and return the result"""
     try:
-        result = subprocess.run(
-            cmd,
-            cwd=cwd,
-            capture_output=True,
-            text=True,
-            timeout=30
-        )
+        result = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, timeout=30)
         return {
             "success": result.returncode == 0,
             "stdout": result.stdout,
             "stderr": result.stderr,
-            "returncode": result.returncode
+            "returncode": result.returncode,
         }
     except subprocess.TimeoutExpired:
-        return {
-            "success": False,
-            "error": "Command timed out"
-        }
+        return {"success": False, "error": "Command timed out"}
     except Exception as e:
-        return {
-            "success": False,
-            "error": str(e)
-        }
+        return {"success": False, "error": str(e)}
 
 
-def analyze_code(file_path: str) -> Dict[str, Any]:
+def analyze_code(file_path: str) -> dict[str, Any]:
     """Analyze a Python file for code quality issues"""
     path = Path(file_path)
     if not path.exists():
         return {"error": "File not found"}
 
-    results = {
-        "file": str(path),
-        "ruff": None,
-        "mypy": None,
-        "black_check": None
-    }
+    results = {"file": str(path), "ruff": None, "mypy": None, "black_check": None}
 
     # Ruff linting
     ruff_result = run_command(["ruff", "check", str(path)])
@@ -66,7 +50,7 @@ def analyze_code(file_path: str) -> Dict[str, Any]:
     return results
 
 
-def check_security(file_path: str) -> Dict[str, Any]:
+def check_security(file_path: str) -> dict[str, Any]:
     """Check for security issues in a file"""
     path = Path(file_path)
     if not path.exists():
@@ -76,61 +60,37 @@ def check_security(file_path: str) -> Dict[str, Any]:
     issues = []
 
     # Check for hardcoded secrets
-    secret_patterns = [
-        "api_key",
-        "secret_key",
-        "password",
-        "token",
-        "private_key"
-    ]
+    secret_patterns = ["api_key", "secret_key", "password", "token", "private_key"]
 
     for pattern in secret_patterns:
         if pattern in content.lower():
-            issues.append({
-                "type": "potential_secret",
-                "pattern": pattern,
-                "severity": "high"
-            })
+            issues.append({"type": "potential_secret", "pattern": pattern, "severity": "high"})
 
     # Check for dangerous imports
-    dangerous_imports = [
-        "eval(",
-        "exec(",
-        "os.system(",
-        "subprocess.call(",
-        "pickle.loads("
-    ]
+    dangerous_imports = ["eval(", "exec(", "os.system(", "subprocess.call(", "pickle.loads("]
 
     for imp in dangerous_imports:
         if imp in content:
-            issues.append({
-                "type": "dangerous_function",
-                "function": imp,
-                "severity": "medium"
-            })
+            issues.append({"type": "dangerous_function", "function": imp, "severity": "medium"})
 
-    return {
-        "file": str(path),
-        "issues": issues,
-        "total_issues": len(issues)
-    }
+    return {"file": str(path), "issues": issues, "total_issues": len(issues)}
 
 
-def get_complexity(file_path: str) -> Dict[str, Any]:
+def get_complexity(file_path: str) -> dict[str, Any]:
     """Get code complexity metrics"""
     path = Path(file_path)
     if not path.exists():
         return {"error": "File not found"}
 
     content = path.read_text()
-    lines = content.split('\n')
+    lines = content.split("\n")
 
     return {
         "file": str(path),
         "total_lines": len(lines),
-        "code_lines": len([l for l in lines if l.strip() and not l.strip().startswith('#')]),
+        "code_lines": len([l for l in lines if l.strip() and not l.strip().startswith("#")]),
         "blank_lines": len([l for l in lines if not l.strip()]),
-        "comment_lines": len([l for l in lines if l.strip().startswith('#')])
+        "comment_lines": len([l for l in lines if l.strip().startswith("#")]),
     }
 
 
@@ -146,10 +106,7 @@ def main():
             method = request.get("method")
             params = request.get("params", {})
 
-            response = {
-                "jsonrpc": "2.0",
-                "id": request.get("id")
-            }
+            response = {"jsonrpc": "2.0", "id": request.get("id")}
 
             if method == "tools/list":
                 response["result"] = {
@@ -159,34 +116,28 @@ def main():
                             "description": "Analyze Python code for quality issues",
                             "inputSchema": {
                                 "type": "object",
-                                "properties": {
-                                    "file_path": {"type": "string"}
-                                },
-                                "required": ["file_path"]
-                            }
+                                "properties": {"file_path": {"type": "string"}},
+                                "required": ["file_path"],
+                            },
                         },
                         {
                             "name": "check_security",
                             "description": "Check for security issues",
                             "inputSchema": {
                                 "type": "object",
-                                "properties": {
-                                    "file_path": {"type": "string"}
-                                },
-                                "required": ["file_path"]
-                            }
+                                "properties": {"file_path": {"type": "string"}},
+                                "required": ["file_path"],
+                            },
                         },
                         {
                             "name": "get_complexity",
                             "description": "Get code complexity metrics",
                             "inputSchema": {
                                 "type": "object",
-                                "properties": {
-                                    "file_path": {"type": "string"}
-                                },
-                                "required": ["file_path"]
-                            }
-                        }
+                                "properties": {"file_path": {"type": "string"}},
+                                "required": ["file_path"],
+                            },
+                        },
                     ]
                 }
 
@@ -210,11 +161,7 @@ def main():
                     response["error"] = {"code": -32601, "message": "Method not found"}
 
             elif method == "initialize":
-                response["result"] = {
-                    "capabilities": {
-                        "tools": {}
-                    }
-                }
+                response["result"] = {"capabilities": {"tools": {}}}
 
             elif method == "shutdown":
                 break

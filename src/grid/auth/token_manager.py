@@ -28,16 +28,16 @@ class TokenManager:
         self.access_expiry = runtime.security.access_token_expire_minutes
         self.cache = CacheFactory.create(runtime.cache.backend)
 
-    def create_access_token(self, data: dict, expires_delta: timedelta | None = None) -> str:
+    def create_access_token(self, data: dict[str, Any], expires_delta: timedelta | None = None) -> str:
         """Create a new JWT access token."""
-        to_encode = data.copy()
+        to_encode: dict[str, Any] = data.copy()
         if expires_delta:
             expire = datetime.now(UTC) + expires_delta
         else:
             expire = datetime.now(UTC) + timedelta(minutes=self.access_expiry)
 
         to_encode.update({"exp": expire, "iat": datetime.now(UTC), "jti": str(uuid.uuid4())})
-        encoded_jwt = jwt.encode(to_encode, self.secret_key, algorithm=self.algorithm)
+        encoded_jwt: str = jwt.encode(to_encode, self.secret_key, algorithm=self.algorithm)
         return encoded_jwt
 
     async def verify_token(self, token: str) -> dict[str, Any]:
@@ -48,7 +48,7 @@ class TokenManager:
             raise ValueError("Token has been revoked")
 
         try:
-            payload = jwt.decode(token, self.secret_key, algorithms=[self.algorithm])
+            payload: dict[str, Any] = jwt.decode(token, self.secret_key, algorithms=[self.algorithm])
             return payload
         except JWTError as e:
             raise ValueError(f"Could not validate credentials: {e}")

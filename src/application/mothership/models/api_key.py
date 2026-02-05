@@ -7,8 +7,8 @@ Models for API key management and authentication.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from typing import Any, Dict, Optional
+from datetime import UTC, datetime
+from typing import Any
 
 from .payment import SubscriptionTier
 
@@ -23,7 +23,7 @@ def generate_id(prefix: str = "") -> str:
 
 def utc_now() -> datetime:
     """Get current UTC timestamp."""
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 @dataclass
@@ -36,10 +36,10 @@ class APIKey:
     key_prefix: str = "grid"  # First 8 chars for identification
     tier: SubscriptionTier = SubscriptionTier.FREE
     name: str = ""  # User-friendly name for the key
-    last_used_at: Optional[datetime] = None
-    expires_at: Optional[datetime] = None
+    last_used_at: datetime | None = None
+    expires_at: datetime | None = None
     is_active: bool = True
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     created_at: datetime = field(default_factory=utc_now)
     updated_at: datetime = field(default_factory=utc_now)
 
@@ -58,7 +58,7 @@ class APIKey:
         self.last_used_at = utc_now()
         self.updated_at = utc_now()
 
-    def to_dict(self, include_hash: bool = False) -> Dict[str, Any]:
+    def to_dict(self, include_hash: bool = False) -> dict[str, Any]:
         """Serialize to dictionary."""
         result = {
             "id": self.id,

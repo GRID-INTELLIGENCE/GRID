@@ -2,15 +2,16 @@
 Tests for API documentation module.
 """
 
-import pytest
 from pathlib import Path
+
+import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from application.api_docs import (
-    setup_api_docs,
-    export_openapi_spec,
     export_html_docs,
+    export_openapi_spec,
+    setup_api_docs,
 )
 
 

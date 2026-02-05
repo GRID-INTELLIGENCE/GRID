@@ -10,7 +10,7 @@ class OverwatchPlanMode:
 
     def create_plan(self, task: str) -> dict[str, Any]:
         """Create detailed implementation plan"""
-        plan = {"steps": [], "dependencies": [], "risks": [], "timeline": {}}
+        plan: dict[str, Any] = {"steps": [], "dependencies": [], "risks": [], "timeline": {}}
         # Placeholder for plan generation logic
         plan["steps"].append(f"Define objective for: {task}")
         plan["steps"].append("Break down into smaller sub-tasks")

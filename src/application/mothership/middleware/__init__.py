@@ -418,6 +418,16 @@ def setup_middleware(app: FastAPI, settings: Any) -> None:
         debug=getattr(settings, "debug_enabled", False),
     )
 
+    # Parasite Guard (Total Rickall Defense - detects parasitic calls)
+    if getattr(settings, "security", None) and getattr(settings.security, "parasite_guard_enabled", False):
+        try:
+            from grid.security.parasite_guard import ParasiteDetectorMiddleware
+
+            app.add_middleware(ParasiteDetectorMiddleware)
+            logger.info("Parasite Guard middleware enabled")
+        except ImportError as e:
+            logger.warning(f"Parasite Guard not available: {e}")
+
     # Security headers
     app.add_middleware(SecurityHeadersMiddleware)
 
@@ -533,6 +543,13 @@ def get_circuit_manager():
     return get_circuit_manager()
 
 
+def get_parasite_guard_middleware():
+    """Get ParasiteDetectorMiddleware class (lazy import)."""
+    from grid.security.parasite_guard import ParasiteDetectorMiddleware
+
+    return ParasiteDetectorMiddleware
+
+
 __all__ = [
     # Context functions
     "get_request_id",
@@ -548,6 +565,7 @@ __all__ = [
     "get_circuit_breaker_middleware",
     "get_security_enforcer_middleware",
     "get_circuit_manager",
+    "get_parasite_guard_middleware",
     # Setup function
     "setup_middleware",
 ]

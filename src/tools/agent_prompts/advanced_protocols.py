@@ -9,22 +9,30 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
-try:
-    from .case_filing import CaseStructure  # type: ignore[import-not-found]
-except ImportError:
-    # For standalone execution
-    import sys
+if TYPE_CHECKING:
+    from .case_filing import CaseStructure
+else:
+    try:
+        from .case_filing import CaseStructure as RuntimeCaseStructure
+    except ImportError:
+        # For standalone execution
+        import sys
 
-    sys.path.insert(0, str(Path(__file__).parent))
-    from case_filing import CaseStructure  # type: ignore[import-not-found]
+        sys.path.insert(0, str(Path(__file__).parent))
+        try:
+            from case_filing import CaseStructure as RuntimeCaseStructure
+        except ImportError:
+            RuntimeCaseStructure = Any  # type: ignore[assignment]
+
+    CaseStructure = RuntimeCaseStructure
 
 
 class AdvancedProtocolHandler:
     """Handles advanced protocols for rare cases."""
 
-    def __init__(self, memory_path: Path | None = None, enable_web_search: bool = True):
+    def __init__(self, memory_path: Path | None = None, enable_web_search: bool = True) -> None:
         """Initialize advanced protocols handler.
 
         Args:
@@ -38,7 +46,7 @@ class AdvancedProtocolHandler:
         self.memory_path.mkdir(parents=True, exist_ok=True)
 
         # Load existing memory
-        self.memory = self._load_memory()
+        self.memory: dict[str, Any] = self._load_memory()
 
     def handle_rare_case(
         self, case_id: str, structured_data: CaseStructure, raw_input: str, reference_file_path: str
@@ -96,7 +104,9 @@ class AdvancedProtocolHandler:
         if memory_file.exists():
             try:
                 with open(memory_file) as f:
-                    return json.load(f)
+                    data = json.load(f)
+                    if isinstance(data, dict):
+                        return data
             except Exception:
                 pass
 
@@ -219,12 +229,12 @@ class AdvancedProtocolHandler:
 
     def _generate_contextualization_queries(
         self, structure: CaseStructure, raw_input: str, nuances: list[str], insights: list[str]
-    ) -> list[dict[str, str]]:
+    ) -> list[dict[str, Any]]:
         """Generate MCQ-style queries for contextualization.
 
         Similar to custom mode where agent asks questions to contextualize.
         """
-        queries = []
+        queries: list[dict[str, Any]] = []
 
         # Query 1: Category confirmation
         if structure.confidence < 0.7:
@@ -284,7 +294,7 @@ class AdvancedProtocolHandler:
 
         return queries
 
-    def _update_reference_file(self, reference_file_path: str, metadata: dict[str, Any]):
+    def _update_reference_file(self, reference_file_path: str, metadata: dict[str, Any]) -> None:
         """Update reference file with advanced protocol data."""
         reference_path = Path(reference_file_path)
         if not reference_path.exists():
@@ -299,7 +309,7 @@ class AdvancedProtocolHandler:
         with open(reference_path, "w") as f:
             json.dump(reference, f, indent=2)
 
-    def _store_in_memory(self, case_id: str, structure: CaseStructure, metadata: dict[str, Any]):
+    def _store_in_memory(self, case_id: str, structure: CaseStructure, metadata: dict[str, Any]) -> None:
         """Store case in memory for future reference."""
         case_entry = {
             "case_id": case_id,

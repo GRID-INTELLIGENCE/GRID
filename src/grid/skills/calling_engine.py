@@ -26,7 +26,7 @@ class SkillCallResult:
 class SkillCallingEngine:
     """Automated skill calling with intelligent routing."""
 
-    def __init__(self, registry: Any | None = None):
+    def __init__(self, registry: Any | None = None) -> None:
         self._logger = logging.getLogger(__name__)
         if registry is None:
             from .registry import default_registry
@@ -89,15 +89,15 @@ class SkillCallingEngine:
     ) -> dict[str, SkillCallResult]:
         """Call multiple skills with intelligent routing."""
         if strategy == CallStrategy.SEQUENTIAL:
-            results = {}
+            sequential_results: dict[str, SkillCallResult] = {}
             for skill_id in skill_ids:
-                results[skill_id] = await self.call_skill(skill_id, args)
-            return results
+                sequential_results[skill_id] = await self.call_skill(skill_id, args)
+            return sequential_results
 
         elif strategy == CallStrategy.PARALLEL:
             tasks = [self.call_skill(skill_id, args) for skill_id in skill_ids]
-            results = await asyncio.gather(*tasks)
-            return {skill_id: result for skill_id, result in zip(skill_ids, results, strict=False)}
+            parallel_results: list[SkillCallResult] = await asyncio.gather(*tasks)
+            return {skill_id: result for skill_id, result in zip(skill_ids, parallel_results, strict=False)}
 
         else:  # ADAPTIVE
             # Start with parallel, fall back to sequential if needed

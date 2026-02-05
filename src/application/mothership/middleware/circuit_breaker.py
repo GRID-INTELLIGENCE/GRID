@@ -531,9 +531,13 @@ class CircuitBreakerMiddleware(BaseHTTPMiddleware):
                 },
             )
 
-        # Track half-open requests
+        # Track half-open requests with context manager to guarantee cleanup
         if circuit.state == CircuitState.HALF_OPEN:
             circuit.half_open_requests += 1
+            # FIXED: Use try/finally to ensure counter is decremented even on exception
+            decrement_on_exit = True
+        else:
+            decrement_on_exit = False
 
         # Process request
         try:
@@ -592,6 +596,10 @@ class CircuitBreakerMiddleware(BaseHTTPMiddleware):
                 },
                 headers={"X-Circuit-State": circuit.state.value},
             )
+        finally:
+            # FIXED: Guarantee decrement of half_open_requests on exit
+            if decrement_on_exit and circuit.state == CircuitState.HALF_OPEN:
+                circuit.half_open_requests = max(0, circuit.half_open_requests - 1)
 
 
 # =============================================================================

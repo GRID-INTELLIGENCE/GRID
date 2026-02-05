@@ -10,16 +10,24 @@ import os
 import sys
 from pathlib import Path
 
-# Add the 'src' directory to sys.path to ensure absolute imports work correctly
-# regardless of how the script is invoked.
+# Add paths using SecurePathManager for secure path management
 current_dir = Path(__file__).parent.absolute()
-if str(current_dir) not in sys.path:
-    sys.path.insert(0, str(current_dir))
-
-# Ensure the root directory is also in sys.path
 root_dir = current_dir.parent.absolute()
-if str(root_dir) not in sys.path:
-    sys.path.insert(0, str(root_dir))
+
+try:
+    from grid.security.path_manager import SecurePathManager
+
+    manager = SecurePathManager(base_dir=root_dir)
+    if str(current_dir) not in sys.path:
+        manager.add_path(current_dir, validate=True)
+    if str(root_dir) not in sys.path:
+        manager.add_path(root_dir, validate=True)
+except ImportError:
+    # Fallback to direct sys.path manipulation if SecurePathManager unavailable
+    if str(current_dir) not in sys.path:
+        sys.path.insert(0, str(current_dir))
+    if str(root_dir) not in sys.path:
+        sys.path.insert(0, str(root_dir))
 
 try:
     # Attempt to load the API Gateway as the primary entry point

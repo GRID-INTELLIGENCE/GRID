@@ -1,6 +1,7 @@
 import logging
 import uuid
 from datetime import UTC, datetime, timedelta
+from typing import TypedDict, cast
 
 import bcrypt
 
@@ -9,6 +10,20 @@ from grid.config.runtime_settings import RuntimeSettings
 from grid.infrastructure.database import DatabaseManager
 
 logger = logging.getLogger(__name__)
+
+
+class _UserRow(TypedDict):
+    id: str
+    username: str
+    password_hash: str
+    role: str
+
+
+class _TokenRow(TypedDict, total=False):
+    token_id: str
+    user_id: str
+    revoked: int
+    expires_at: datetime | str | int | float | None
 
 
 class AuthService:
@@ -48,15 +63,16 @@ class AuthService:
 
     async def login(self, username: str, password: str) -> dict[str, str]:
         """Login user and return tokens."""
-        user = await self.db.fetch_one("SELECT * FROM users WHERE username = ?", (username,))
-        if not user:
+        user_raw = await self.db.fetch_one("SELECT * FROM users WHERE username = ?", (username,))
+        if not user_raw:
             raise ValueError("Invalid credentials")
 
+        user = cast(_UserRow, dict(user_raw))
         if not bcrypt.checkpw(password.encode("utf-8"), user["password_hash"].encode("utf-8")):
             raise ValueError("Invalid credentials")
 
         # Issue tokens
-        user_data = {"sub": user["id"], "role": user["role"], "username": user["username"]}
+        user_data: dict[str, str] = {"sub": user["id"], "role": user["role"], "username": user["username"]}
         access_token = self.tm.create_access_token(user_data)
 
         # Create Opaque Refresh Token (Store in DB)
@@ -73,9 +89,11 @@ class AuthService:
     async def refresh_access(self, refresh_token: str) -> dict[str, str]:
         """Rotate refresh token and issue new access token."""
         # Validate refresh token
-        row = await self.db.fetch_one("SELECT * FROM tokens WHERE token_id = ? AND revoked = 0", (refresh_token,))
-        if not row:
+        row_raw = await self.db.fetch_one("SELECT * FROM tokens WHERE token_id = ? AND revoked = 0", (refresh_token,))
+        if not row_raw:
             raise ValueError("Invalid refresh token")
+
+        row = cast(_TokenRow, row_raw)
 
         # Check expiry
         # SQLite stores timestamps as strings usually, depends on adapter.
@@ -113,11 +131,12 @@ class AuthService:
         await self.db.execute("UPDATE tokens SET revoked = 1 WHERE token_id = ?", (refresh_token,))
 
         # Issue new tokens
-        user = await self.db.fetch_one("SELECT * FROM users WHERE id = ?", (row["user_id"],))
-        if not user:
+        user_raw = await self.db.fetch_one("SELECT * FROM users WHERE id = ?", (row["user_id"],))
+        if not user_raw:
             raise ValueError("User not found")
 
-        user_data = {"sub": user["id"], "role": user["role"], "username": user["username"]}
+        user = cast(_UserRow, dict(user_raw))
+        user_data: dict[str, str] = {"sub": user["id"], "role": user["role"], "username": user["username"]}
         new_access = self.tm.create_access_token(user_data)
 
         new_refresh = str(uuid.uuid4())

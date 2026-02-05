@@ -130,9 +130,9 @@ class TestHybridSearch:
         hybrid_financial_count = sum(1 for t in hybrid_types if t == "financial")
         vector_financial_count = sum(1 for t in vector_types if t == "financial")
 
-        assert hybrid_financial_count >= vector_financial_count, (
-            "Hybrid search should prioritize keyword matches for financial query"
-        )
+        assert (
+            hybrid_financial_count >= vector_financial_count
+        ), "Hybrid search should prioritize keyword matches for financial query"
 
     def test_hybrid_vs_keyword_only_semantic_query(self, hybrid_retriever, sample_documents):
         """Scenario: Hybrid should outperform pure keyword search for semantic queries"""
@@ -400,9 +400,9 @@ class TestCrossEncoderReranker:
             assert len(reranked) == len(initial_results), "Should return same number of results"
 
         # Verify batching occurred
-        assert any(size < len(sample_documents_for_reranking) for size in batch_sizes), (
-            "Should use batch processing for large result sets"
-        )
+        assert any(
+            size < len(sample_documents_for_reranking) for size in batch_sizes
+        ), "Should use batch processing for large result sets"
 
     def test_reranker_error_handling(self, mock_reranker):
         """Scenario: Handle errors gracefully"""
@@ -480,9 +480,9 @@ class TestHybridRerankerIntegration:
             # AI/ML docs should rank higher
             ml_keywords = ["learning", "AI", "machine", "programming"]
             top_content = results[0].content.lower()
-            assert any(keyword in top_content for keyword in ml_keywords), (
-                "Top result should be ML-related after reranking"
-            )
+            assert any(
+                keyword in top_content for keyword in ml_keywords
+            ), "Top result should be ML-related after reranking"
 
     def test_performance_with_reranking(self, sample_documents):
         """Scenario: Performance impact of adding reranking"""

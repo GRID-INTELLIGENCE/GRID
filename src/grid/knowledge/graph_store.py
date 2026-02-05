@@ -17,15 +17,18 @@ from uuid import uuid4
 
 logger = logging.getLogger(__name__)
 
-Driver = Session = Record = Any
-Neo4jGraphDatabase = Any
+Driver = Any  # type: ignore[misc]
+Session = Any  # type: ignore[misc]
+Record = Any  # type: ignore[misc]
+Neo4jGraphDatabase = Any  # type: ignore[misc]
 
 try:
-    from neo4j import GraphDatabase as _GraphDatabase  # type: ignore[import-not-found]
+    from neo4j import GraphDatabase  # type: ignore[import-not-found]
 
+    _GraphDatabase = GraphDatabase
     NEO4J_AVAILABLE = True
 except ImportError:  # pragma: no cover - optional dependency
-    _GraphDatabase = None  # type: ignore[assignment]
+    _GraphDatabase = None
     NEO4J_AVAILABLE = False
 
 from ..knowledge.graph_schema import EntityType, RelationType, get_kg_schema

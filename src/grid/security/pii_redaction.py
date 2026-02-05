@@ -148,7 +148,7 @@ class PIIRedactor:
         Apply partial masking (show first 2 and last 2 chars).
         """
 
-        def mask_match(match):
+        def mask_match(match: re.Match[str]) -> str:
             matched = match.group()
             if len(matched) <= 4:
                 return pattern.replacement
@@ -161,7 +161,7 @@ class PIIRedactor:
         Apply audit-mode masking (hash-based anonymization).
         """
 
-        def mask_match(match):
+        def mask_match(match: re.Match[str]) -> str:
             matched = match.group()
             # Use SHA256 hash for consistency
             hashed = hashlib.sha256(matched.encode()).hexdigest()[:8]
@@ -212,7 +212,7 @@ def redact_log_message(message: str, mask_mode: RedactionMode = RedactionMode.FU
     return redactor.redact(message, mask_mode)
 
 
-def setup_logging_with_redaction():
+def setup_logging_with_redaction() -> None:
     """
     Configure Python logging to automatically redact PII.
 
@@ -222,7 +222,7 @@ def setup_logging_with_redaction():
     class RedactingFormatter(logging.Formatter):
         """Log formatter with automatic PII redaction."""
 
-        def format(self, record):
+        def format(self, record: logging.LogRecord) -> str:
             # Format the message first
             formatted = super().format(record)
             # Redact PII
@@ -231,7 +231,8 @@ def setup_logging_with_redaction():
     # Apply to all handlers
     root_logger = logging.getLogger()
     for handler in root_logger.handlers:
-        handler.setFormatter(RedactingFormatter(handler.formatter._fmt if hasattr(handler.formatter, "_fmt") else None))
+        fmt = handler.formatter._fmt if handler.formatter and hasattr(handler.formatter, "_fmt") else None
+        handler.setFormatter(RedactingFormatter(fmt))
 
     logger.info("PII redaction enabled for all logging")
 

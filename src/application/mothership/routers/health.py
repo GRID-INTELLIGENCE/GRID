@@ -774,4 +774,21 @@ async def metrics(
     }
 
 
+@router.get(
+    "/health/parasitic-leaks",
+    summary="Parasitic Leak Health Check",
+    description="Health check for EventBus and DB engine leak prevention",
+)
+async def parasitic_leaks_health() -> dict[str, Any]:
+    """
+    Health check for parasitic leak remediation components.
+
+    Returns status of EventBus and DB engine leak prevention systems.
+    """
+    from ..health import health_check
+
+    health_data = await health_check()
+    return health_data
+
+
 __all__ = ["router"]

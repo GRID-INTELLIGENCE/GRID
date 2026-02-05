@@ -7,15 +7,25 @@ Audio engineering-inspired approach:
 - Sequential processing: Process changes one at a time to avoid conflicts
 """
 
+from __future__ import annotations
+
 import importlib
+import importlib.util
+import inspect
 import logging
 import shutil
 import sys
 import threading
 import time
+import tracemalloc
 from collections import deque
+from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any, ClassVar, cast
+
+# Import safe module utilities
+from grid.security.module_utils import safe_reload, cleanup_module
 
 # Note: watchdog is an optional dependency for hot-reloading
 try:
@@ -29,6 +39,31 @@ try:
     WATCHDOG_AVAILABLE = True
 except ImportError:
     WATCHDOG_AVAILABLE = False
+
+    class FileCreatedEvent:  # type: ignore[no-redef]
+        pass
+
+    class FileModifiedEvent:  # type: ignore[no-redef]
+        pass
+
+    class FileSystemEventHandler:  # type: ignore[no-redef]
+        pass
+
+    class Observer:  # type: ignore[no-redef]
+        def is_alive(self) -> bool:  # pragma: no cover - stub for typing
+            return False
+
+        def schedule(self, handler: Any, path: str, recursive: bool = False) -> None:  # pragma: no cover - stub
+            return None
+
+        def start(self) -> None:  # pragma: no cover - stub
+            return None
+
+        def stop(self) -> None:  # pragma: no cover - stub
+            return None
+
+        def join(self) -> None:  # pragma: no cover - stub
+            return None
 
 
 @dataclass
@@ -50,17 +85,18 @@ class HotReloadManager:
     MAX_RELOAD_TIMEOUT_S = 10
     BACKUP_DIR = Path("./data/skills_backups")
 
-    _instance = None
-    _lock = threading.Lock()
+    _instance: ClassVar[HotReloadManager | None] = None
+    _lock: ClassVar[threading.Lock] = threading.Lock()
+    _initialized: bool = False
 
-    def __new__(cls, *args, **kwargs):
+    def __new__(cls, *args: Any, **kwargs: Any) -> HotReloadManager:
         with cls._lock:
             if cls._instance is None:
                 cls._instance = super().__new__(cls)
             return cls._instance
 
-    def __init__(self, skills_dir: Path | None = None):
-        if hasattr(self, "_initialized") and self._initialized:
+    def __init__(self, skills_dir: Path | None = None) -> None:
+        if self._initialized:
             return
 
         self._logger = logging.getLogger(__name__)
@@ -70,8 +106,8 @@ class HotReloadManager:
         # Tracking
         self._pending_changes: dict[str, float] = {}  # skill_id -> last change timestamp
         self._reload_queue: deque[str] = deque(maxlen=50)
-        self._processing = False
-        self._observer = None
+        self._processing: bool = False
+        self._observer: Observer | None = None
 
         self._backup_dir = Path(self.BACKUP_DIR)
         self._backup_dir.mkdir(parents=True, exist_ok=True)
@@ -79,9 +115,10 @@ class HotReloadManager:
         self._timer: threading.Timer | None = None
 
     @classmethod
-    def get_instance(cls) -> "HotReloadManager":
+    def get_instance(cls) -> HotReloadManager:
         if cls._instance is None:
             cls()
+        assert cls._instance is not None
         return cls._instance
 
     def start(self) -> bool:
@@ -129,6 +166,46 @@ class HotReloadManager:
             self._logger.error(f"Failed to create backup for {skill_id}: {e}")
             return None
 
+    @contextmanager
+    def _isolate_module(self, module_name: str):
+        """
+        Safely isolate module state during reloading.
+        Backs up the module in sys.modules and restores it if needed.
+        """
+        backup = sys.modules.get(module_name)
+        try:
+            yield
+        except Exception:
+            if backup:
+                sys.modules[module_name] = backup
+            raise
+        finally:
+            pass
+
+    def _verify_module_cleanup(self, module_name: str, before_modules: set[str]) -> None:
+        """Verify that no orphan sub-modules were leaked."""
+        after_modules = set(sys.modules.keys())
+        leaked = after_modules - before_modules
+        if leaked:
+            self._logger.warning(f"Detection: Module {module_name} reload leaked sub-modules: {leaked}")
+        else:
+            self._logger.debug(f"Integrity check passed for {module_name}")
+
+    def _safe_reload(self, module_name: str) -> Any:
+        """
+        Perform a safe reload using importlib.util for fresh state.
+        Avoids direct 'del sys.modules[name]' which can cause reference orphaning.
+        """
+        spec = importlib.util.find_spec(module_name)
+        if spec is None:
+            raise ImportError(f"Cannot find module spec for {module_name}")
+
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[module_name] = module
+        if spec.loader:
+            spec.loader.exec_module(module)
+        return module
+
     def _reload_skill(self, skill_id: str) -> ReloadResult:
         """Reload a specific skill with rollback on failure."""
         self._logger.info(f"Attempting to reload skill: {skill_id}")
@@ -142,21 +219,33 @@ class HotReloadManager:
             # Module name resolution
             module_name = f"grid.skills.{skill_id}"
 
-            # Clear from sys.modules to force full reload
-            if module_name in sys.modules:
-                del sys.modules[module_name]
+            # Step 1: Record module state before reload
+            before_modules = set(sys.modules.keys())
 
-            # Import again
-            module = importlib.import_module(module_name)
-            importlib.reload(module)
+            # Start memory tracking if not already started
+            if not tracemalloc.is_tracing():
+                tracemalloc.start()
+            snapshot_before = tracemalloc.take_snapshot()
+
+            # Step 2: Safe reload within isolation context
+            with self._isolate_module(module_name):
+                # Use the new safe_reload utility instead of _safe_reload
+                module = safe_reload(module_name)
+
+            # Step 3: Verify integrity and memory
+            self._verify_module_cleanup(module_name, before_modules)
+
+            snapshot_after = tracemalloc.take_snapshot()
+            stats = snapshot_after.compare_to(snapshot_before, "lineno")
+            top_stats = stats[:3]
+            if top_stats:
+                self._logger.debug(f"Memory delta for {module_name} reload: {top_stats}")
 
             # Re-registry logic
-            from .discovery_engine import SkillDiscoveryEngine
             from .registry import default_registry
 
-            # We use discovery engine to find the Skill instance in the module
-            engine = SkillDiscoveryEngine()
-            skills = engine.discover_in_module(module_name, module)
+            # Discover Skill instances directly from the reloaded module
+            skills = self._discover_skills_in_module(module)
 
             if not skills:
                 raise ValueError(f"No Skill instances found in reloaded module {module_name}")
@@ -192,7 +281,7 @@ class HotReloadManager:
                 skill_id=skill_id, status="failed", timestamp=time.time(), error=str(e), rollback_from=None
             )
 
-    def _on_file_changed(self, skill_id: str):
+    def _on_file_changed(self, skill_id: str) -> None:
         """Handle debounced file change."""
         with self._lock:
             if skill_id not in self._reload_queue:
@@ -201,7 +290,7 @@ class HotReloadManager:
             if not self._processing:
                 self._process_queue()
 
-    def _process_queue(self):
+    def _process_queue(self) -> None:
         """Process reload queue sequentially."""
         if not self._reload_queue:
             self._processing = False
@@ -211,14 +300,14 @@ class HotReloadManager:
         skill_id = self._reload_queue.popleft()
 
         # Run in thread to avoid blocking
-        def run_reload():
+        def run_reload() -> None:
             self._reload_skill(skill_id)
             with self._lock:
                 self._process_queue()
 
         threading.Thread(target=run_reload, daemon=True).start()
 
-    def schedule_reload(self, skill_id: str):
+    def schedule_reload(self, skill_id: str) -> None:
         """Schedule a reload with debouncing."""
         if self._timer:
             self._timer.cancel()
@@ -226,20 +315,49 @@ class HotReloadManager:
         self._timer = threading.Timer(self.DEBOUNCE_DELAY_S, self._on_file_changed, args=[skill_id])
         self._timer.start()
 
+    def _discover_skills_in_module(self, module: Any) -> list[Any]:
+        """Discover Skill instances in a module (used for hot reload)."""
+        from .base import Skill
+
+        discovered: list[Skill] = []
+        for name, obj in inspect.getmembers(module):
+            if name.startswith("_"):
+                continue
+
+            if hasattr(obj, "id") and hasattr(obj, "run") and callable(getattr(obj, "run", None)):
+                if inspect.isclass(obj):
+                    try:
+                        obj = obj()
+                    except Exception:
+                        continue
+
+                if getattr(obj, "id", None):
+                    discovered.append(cast(Skill, obj))
+
+        return discovered
+
+
+class _BaseSkillFileChangeHandler:
+    def __init__(self, manager: HotReloadManager) -> None:
+        self.manager = manager
+
+    def on_modified(self, event: Any) -> None:
+        return None
+
+    def on_created(self, event: Any) -> None:
+        return None
+
 
 if WATCHDOG_AVAILABLE:
 
-    class SkillFileChangeHandler(FileSystemEventHandler):
-        def __init__(self, manager: HotReloadManager):
-            self.manager = manager
-
-        def on_modified(self, event):
+    class SkillFileChangeHandler(FileSystemEventHandler, _BaseSkillFileChangeHandler):
+        def on_modified(self, event: FileModifiedEvent) -> None:
             if not event.is_directory and event.src_path.endswith(".py"):
                 skill_id = Path(event.src_path).stem
                 if not skill_id.startswith("_"):
                     self.manager.schedule_reload(skill_id)
 
-        def on_created(self, event):
+        def on_created(self, event: FileCreatedEvent) -> None:
             if not event.is_directory and event.src_path.endswith(".py"):
                 skill_id = Path(event.src_path).stem
                 if not skill_id.startswith("_"):
@@ -247,5 +365,9 @@ if WATCHDOG_AVAILABLE:
 
 else:
 
-    class SkillFileChangeHandler:
-        pass
+    class SkillFileChangeHandler(_BaseSkillFileChangeHandler):
+        def on_modified(self, event: Any) -> None:
+            pass
+
+        def on_created(self, event: Any) -> None:
+            pass

@@ -7,9 +7,16 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-# Add GRID to path
+# Add GRID to path using SecurePathManager
 grid_root = Path(__file__).parent.parent.parent
-sys.path.insert(0, str(grid_root / "src"))
+try:
+    from grid.security.path_manager import SecurePathManager
+
+    manager = SecurePathManager(base_dir=grid_root)
+    manager.add_path(grid_root / "src", validate=True)
+except ImportError:
+    # Fallback to direct sys.path manipulation if SecurePathManager unavailable
+    sys.path.insert(0, str(grid_root / "src"))
 
 # Also add the global Python site-packages to path
 import site

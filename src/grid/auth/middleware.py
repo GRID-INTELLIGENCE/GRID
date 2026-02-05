@@ -1,8 +1,9 @@
 import logging
 
 from fastapi import Request
-from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.responses import JSONResponse
+from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
+from starlette.responses import JSONResponse, Response
+from starlette.types import ASGIApp
 
 from .token_manager import TokenManager
 
@@ -15,12 +16,12 @@ class AuthMiddleware(BaseHTTPMiddleware):
     Populates request.state.user with token payload.
     """
 
-    def __init__(self, app, token_manager: TokenManager, exclude_paths: list[str] | None = None):
+    def __init__(self, app: ASGIApp, token_manager: TokenManager, exclude_paths: list[str] | None = None):
         super().__init__(app)
         self.token_manager = token_manager
         self.exclude_paths = exclude_paths or ["/docs", "/openapi.json", "/auth/login", "/health", "/metrics"]
 
-    async def dispatch(self, request: Request, call_next):
+    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
         # Allow OPTIONS for CORS (usually handled by CORSMiddleware before this, but good practice)
         if request.method == "OPTIONS":
             return await call_next(request)

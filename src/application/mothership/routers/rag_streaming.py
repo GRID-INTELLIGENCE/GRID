@@ -367,54 +367,110 @@ def chunk_text(text: str, chunk_size: int = 50) -> list[str]:
     return chunks
 
 
-# WebSocket endpoint for real-time collaboration
+# WebSocket endpoint for real-time collaboration with heartbeat
+HEARTBEAT_INTERVAL = 30  # seconds
+
+
 @router.websocket("/ws/{session_id}")
 async def rag_websocket_endpoint(websocket, session_id: str):
-    """WebSocket endpoint for real-time RAG collaboration."""
+    """
+    WebSocket endpoint for real-time RAG collaboration.
+    
+    FIXED: Added heartbeat/ping and timeout detection to prevent ghost connections.
+    """
     await websocket.accept()
     engine = get_rag_engine()
-
+    last_activity = time.time()
+    
+    # Start heartbeat task
+    heartbeat_task = None
+    
+    async def send_heartbeat():
+        """Send periodic ping to keep connection alive."""
+        while True:
+            try:
+                await asyncio.sleep(HEARTBEAT_INTERVAL)
+                await websocket.send_json({"type": "ping", "timestamp": time.time()})
+            except Exception:
+                # Connection likely closed, exit heartbeat loop
+                break
+    
+    heartbeat_task = asyncio.create_task(send_heartbeat())
+    
     try:
         while True:
-            data = await websocket.receive_text()
-            message = json.loads(data)
-
-            if message.get("type") == "query":
-                # Handle query through WebSocket
-                query = message.get("query", "")
-
-                if not query:
-                    await websocket.send_text(json.dumps({"type": "error", "error": "No query provided"}))
+            try:
+                # Wait for message with timeout
+                data = await asyncio.wait_for(
+                    websocket.receive_text(),
+                    timeout=HEARTBEAT_INTERVAL * 2  # 2x heartbeat interval
+                )
+                last_activity = time.time()
+                
+                message = json.loads(data)
+                
+                # Handle ping/pong
+                if message.get("type") == "pong":
                     continue
+                
+                if message.get("type") == "query":
+                    # Handle query through WebSocket
+                    query = message.get("query", "")
 
-                # Execute query
-                result = await engine.query(query_text=query, session_id=session_id, use_conversation=True)
+                    if not query:
+                        await websocket.send_text(json.dumps({"type": "error", "error": "No query provided"}))
+                        continue
 
-                # Send response
-                await websocket.send_text(
-                    json.dumps(
-                        {
-                            "type": "result",
-                            "query": query,
-                            "answer": result.get("answer", ""),
-                            "sources_count": len(result.get("sources", [])),
-                            "session_id": session_id,
-                        }
+                    # Execute query
+                    result = await engine.query(query_text=query, session_id=session_id, use_conversation=True)
+
+                    # Send response
+                    await websocket.send_text(
+                        json.dumps(
+                            {
+                                "type": "result",
+                                "query": query,
+                                "answer": result.get("answer", ""),
+                                "sources_count": len(result.get("sources", [])),
+                                "session_id": session_id,
+                            }
+                        )
                     )
-                )
 
-            elif message.get("type") == "session_info":
-                # Provide session information
-                session_info = engine.get_session_info(session_id)
-                await websocket.send_text(
-                    json.dumps({"type": "session_info", "session_id": session_id, "info": session_info or {}})
-                )
+                elif message.get("type") == "session_info":
+                    # Provide session information
+                    session_info = engine.get_session_info(session_id)
+                    await websocket.send_text(
+                        json.dumps({"type": "session_info", "session_id": session_id, "info": session_info or {}})
+                    )
 
-            elif message.get("type") == "close":
-                break
-
+                elif message.get("type") == "close":
+                    break
+                    
+            except asyncio.TimeoutError:
+                # No activity for 2x heartbeat interval, check if still alive
+                idle_time = time.time() - last_activity
+                if idle_time > HEARTBEAT_INTERVAL * 2:
+                    logger.info(f"WebSocket idle timeout for session {session_id}")
+                    break
+                # Otherwise continue waiting
+                continue
+                
+    except WebSocketDisconnect:
+        logger.info(f"Client disconnected from session {session_id}")
     except Exception as e:
-        logger.error(f"WebSocket error: {e}")
-        await websocket.send_text(json.dumps({"type": "error", "error": str(e)}))
+        logger.error(f"WebSocket error for session {session_id}: {e}")
+        try:
+            await websocket.send_text(json.dumps({"type": "error", "error": str(e)}))
+        except Exception:
+            pass  # Client already gone
     finally:
+        # Cancel heartbeat task
+        if heartbeat_task:
+            heartbeat_task.cancel()
+            try:
+                await heartbeat_task
+            except asyncio.CancelledError:
+                pass
         await websocket.close()
+        logger.info(f"WebSocket closed for session {session_id}")

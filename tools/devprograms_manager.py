@@ -8,7 +8,7 @@ Manages program-specific configurations, workflows, and skills.
 import argparse
 import json
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Any
 
 PROGRAMS_DIR = Path(".cursor/devprograms/programs")
 WORKFLOWS_DIR = Path(".cursor/devprograms/workflows")
@@ -22,9 +22,9 @@ class DevProgramsManager:
         self.current_program = "default"
         self.configs = {}
 
-    def list_programs(self) -> List[Dict[str, Any]]:
+    def list_programs(self) -> list[dict[str, Any]]:
         """List all available dev programs"""
-        programs = []
+        programs: list[dict[str, Any]] = []
         if PROGRAMS_DIR.exists():
             for config_file in PROGRAMS_DIR.glob("*.yml"):
                 config = self._load_config(config_file)
@@ -53,7 +53,7 @@ class DevProgramsManager:
 
         return programs
 
-    def get_program_config(self, program: str) -> Dict[str, Any]:
+    def get_program_config(self, program: str) -> dict[str, Any]:
         """Get configuration for a specific program"""
         if program == "default":
             return self._get_default_config()
@@ -82,11 +82,13 @@ class DevProgramsManager:
             return True
         return False
 
-    def get_current_config(self) -> Dict[str, Any]:
+    def get_current_config(self) -> dict[str, Any]:
         """Get current program configuration"""
         return self.get_program_config(self.current_program)
 
-    def list_workflows(self, program: str = None) -> List[Dict[str, Any]]:
+    from typing import Optional
+
+    def list_workflows(self, program: str | None = None) -> list[dict[str, Any]]:
         """List workflows for a program"""
         if program is None:
             program = self.current_program
@@ -95,7 +97,7 @@ class DevProgramsManager:
         if not workflows_dir.exists():
             return []
 
-        workflows = []
+        workflows: list[dict[str, Any]] = []
         for workflow_file in workflows_dir.glob("*.json"):
             workflow = self._load_json(workflow_file)
             if workflow:
@@ -103,13 +105,13 @@ class DevProgramsManager:
 
         return workflows
 
-    def list_skills(self, program: str = None) -> List[str]:
+    def list_skills(self, program: str | None = None) -> list[str]:
         """List skills available for a program"""
         if program is None:
             program = self.current_program
 
         skills_dir = SKILLS_DIR / program
-        skills = []
+        skills: list[str] = []
 
         # Add global skills
         global_skills = SKILLS_DIR / "global"
@@ -136,12 +138,12 @@ class DevProgramsManager:
 
         # Validate model exists
         model = config.get("model")
-        if not self._model_available(model):
+        if not self._model_available(str(model)):
             return False
 
         return True
 
-    def _load_config(self, config_path: Path) -> Dict[str, Any]:
+    def _load_config(self, config_path: Path) -> dict[str, Any]:
         """Load YAML configuration"""
         import yaml
 
@@ -154,7 +156,7 @@ class DevProgramsManager:
         except Exception:
             return {}
 
-    def _load_json(self, json_path: Path) -> Dict[str, Any]:
+    def _load_json(self, json_path: Path) -> dict[str, Any]:
         """Load JSON file"""
         if not json_path.exists():
             return {}
@@ -165,7 +167,7 @@ class DevProgramsManager:
         except Exception:
             return {}
 
-    def _get_default_config(self) -> Dict[str, Any]:
+    def _get_default_config(self) -> dict[str, Any]:
         """Get default program configuration"""
         return {
             "program": "default",
@@ -179,18 +181,17 @@ class DevProgramsManager:
             "blocked_tools": ["external_api", "network"],
         }
 
+    def _model_available(self, model: str) -> bool:
+        """Check if model is available"""
+        if not model or model == "None":
+            return True
+        import subprocess
 
-def _model_available(self, model: str) -> bool:
-    """Check if model is available"""
-    if not model:
-        return True
-    import subprocess
-
-    try:
-        result = subprocess.run(["ollama", "list"], capture_output=True, text=True, timeout=10)
-        return model in result.stdout
-    except Exception:
-        return model == "ministral"
+        try:
+            result = subprocess.run(["ollama", "list"], capture_output=True, text=True, timeout=10)
+            return model in result.stdout
+        except Exception:
+            return model == "ministral"
 
 
 def main():
@@ -198,7 +199,7 @@ def main():
     subparsers = parser.add_subparsers(dest="command", help="Command to execute")
 
     # List programs
-    list_cmd = subparsers.add_parser("list", help="List all dev programs")
+    subparsers.add_parser("list", help="List all dev programs")
 
     # Set program
     set_cmd = subparsers.add_parser("set", help="Set active dev program")
@@ -249,9 +250,9 @@ def main():
     elif args.command == "validate":
         program = args.program
         if manager.validate_program(program):
-            print(f"✓ Program '{program}' configuration is valid")
+            print(f"[OK] Program '{program}' configuration is valid")
         else:
-            print(f"✗ Program '{program}' configuration is invalid")
+            print(f"[ERROR] Program '{program}' configuration is invalid")
 
     elif args.command is None:
         parser.print_help()

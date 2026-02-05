@@ -47,7 +47,7 @@ class CloudSecretsProvider(ABC):
 class GCPSecretsProvider(CloudSecretsProvider):
     """GCP Secret Manager provider."""
 
-    def __init__(self, project_id: str = None):
+    def __init__(self, project_id: str | None = None):
         try:
             from google.cloud import secretmanager  # type: ignore[import-untyped]
 

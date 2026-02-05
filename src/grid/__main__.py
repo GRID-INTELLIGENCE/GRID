@@ -122,7 +122,7 @@ def chat_command(args: argparse.Namespace) -> int:
         except ImportError as e:
             raise SystemExit(f"Unable to import RAG chat module: {e}") from e
 
-        async def single_query():
+        async def single_query() -> int:
             session = RAGChatSession(config)
             await session.initialize()
             await session.chat(args.query)
@@ -157,7 +157,7 @@ def _format_output(payload: dict[str, Any], output: str) -> str:
 
     if output == "yaml":
         try:
-            import yaml  # type: ignore
+            import yaml
         except Exception as e:
             raise SystemExit(f"YAML output requested but PyYAML is not installed: {e}") from e
         return cast(str, yaml.safe_dump(payload, sort_keys=False, allow_unicode=True))

@@ -245,6 +245,9 @@ class SecuritySettings:
     input_sanitization_enabled: bool = True  # Enable input sanitization for all requests
     circuit_breaker_enabled: bool = False  # Enable circuit breaker for external service calls
     block_insecure_transport: bool = False  # Block HTTP requests (require HTTPS) in strict mode
+    # Parasite Guard (Total Rickall Defense)
+    parasite_guard_enabled: bool = True  # Enable/disable the guard system
+    parasite_guard_pruning_enabled: bool = True  # Enable automatic pruning of parasitic code paths (Production Ready)
 
     @classmethod
     def from_env(cls) -> SecuritySettings:
@@ -267,6 +270,9 @@ class SecuritySettings:
             input_sanitization_enabled=_parse_bool(env.get("MOTHERSHIP_INPUT_SANITIZATION_ENABLED"), True),
             circuit_breaker_enabled=_parse_bool(env.get("MOTHERSHIP_CIRCUIT_BREAKER_ENABLED"), False),
             block_insecure_transport=_parse_bool(env.get("MOTHERSHIP_BLOCK_INSECURE_TRANSPORT"), False),
+            # Parasite Guard
+            parasite_guard_enabled=_parse_bool(env.get("MOTHERSHIP_PARASITE_GUARD_ENABLED"), True),
+            parasite_guard_pruning_enabled=_parse_bool(env.get("MOTHERSHIP_PARASITE_GUARD_PRUNING_ENABLED"), True),
         )
 
     def validate(self, environment: str | None = None, fail_fast: bool = False) -> list[str]:
@@ -283,7 +289,11 @@ class SecuritySettings:
         Raises:
             SecretValidationError: If fail_fast=True and in production with critical security issues
         """
-        from ..security.secret_validation import SecretStrength, SecretValidationError, validate_secret_strength
+        from ..security.secret_validation import (
+            SecretStrength,
+            SecretValidationError,
+            validate_secret_strength,
+        )
 
         if environment is None:
             environment = os.getenv("MOTHERSHIP_ENVIRONMENT", "production").lower()

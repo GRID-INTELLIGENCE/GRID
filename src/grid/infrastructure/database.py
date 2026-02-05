@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 import aiosqlite
 
@@ -29,7 +30,7 @@ class DatabaseManager:
             self._connection = None
             logger.info("Closed SQLite connection")
 
-    async def execute(self, query: str, parameters: tuple = ()) -> aiosqlite.Cursor:
+    async def execute(self, query: str, parameters: tuple[Any, ...] = ()) -> aiosqlite.Cursor:
         """Execute a SQL query."""
         if not self._connection:
             await self.connect()
@@ -38,14 +39,14 @@ class DatabaseManager:
         assert self._connection is not None
         return await self._connection.execute(query, parameters)
 
-    async def execute_many(self, query: str, parameters: list[tuple]) -> aiosqlite.Cursor:
+    async def execute_many(self, query: str, parameters: list[tuple[Any, ...]]) -> aiosqlite.Cursor:
         """Execute multiple SQL queries (bulk insert)."""
         if not self._connection:
             await self.connect()
         assert self._connection is not None
         return await self._connection.executemany(query, parameters)
 
-    async def fetch_all(self, query: str, parameters: tuple = ()) -> list[dict]:
+    async def fetch_all(self, query: str, parameters: tuple[Any, ...] = ()) -> list[dict[str, Any]]:
         """Execute query and verify return all rows as dicts."""
         if not self._connection:
             await self.connect()
@@ -54,7 +55,7 @@ class DatabaseManager:
             rows = await cursor.fetchall()
             return [dict(row) for row in rows]
 
-    async def fetch_one(self, query: str, parameters: tuple = ()) -> dict | None:
+    async def fetch_one(self, query: str, parameters: tuple[Any, ...] = ()) -> dict[str, Any] | None:
         """Execute query and return one row as dict."""
         if not self._connection:
             await self.connect()

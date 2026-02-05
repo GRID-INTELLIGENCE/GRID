@@ -53,7 +53,7 @@ class EntityInfluenceCalculator:
                 avg_confidence = sum(getattr(e, "confidence", 0.0) for e in matching) / len(matching)
                 score += self.entity_weights.get(opt_type, 0.5) * avg_confidence
 
-        return min(score * context_weight, 1.0)
+        return min(float(score * context_weight), 1.0)
 
 
 class RAGEntityContextManager:

@@ -23,6 +23,28 @@ import aiofiles  # type: ignore[import-not-found,import-untyped]
 import redis.asyncio as redis
 from aio_pika import DeliveryMode, ExchangeType, Message
 
+try:
+    from prometheus_client import REGISTRY, Counter, Gauge
+
+    def get_or_create_counter(name, documentation, **kwargs):
+        if name in REGISTRY._names_to_collectors:
+            return REGISTRY._names_to_collectors[name]
+        return Counter(name, documentation, **kwargs)
+
+    def get_or_create_gauge(name, documentation, **kwargs):
+        if name in REGISTRY._names_to_collectors:
+            return REGISTRY._names_to_collectors[name]
+        return Gauge(name, documentation, **kwargs)
+
+    _subscriptions_created = get_or_create_counter("eventbus_subscriptions_created_total", "Total subscriptions created")
+    _subscriptions_removed = get_or_create_counter("eventbus_subscriptions_removed_total", "Total subscriptions removed")
+    _active_subscriptions = get_or_create_gauge("eventbus_active_subscriptions", "Active subscriptions", labelnames=["event_type"])
+    METRICS_ENABLED = True
+except ImportError:
+    METRICS_ENABLED = False
+except Exception:
+    METRICS_ENABLED = False
+
 T = TypeVar("T")
 
 
@@ -85,6 +107,39 @@ class EventResult:
     error: str | None = None
     processing_time: float = 0.0
     timestamp: float = field(default_factory=time.time)
+
+
+@dataclass(frozen=True)
+class Subscription:
+    """
+    Immutable handle representing a subscription.
+
+    Provides a convenient interface for managing subscription lifecycle.
+
+    Attributes:
+        event_type: The event type this subscription listens to.
+        handler: The callback function to invoke.
+        id: Unique subscription identifier.
+        created_at: When the subscription was created.
+    """
+
+    event_type: str = field(compare=False)
+    handler: Callable[..., Any] = field(compare=False)
+    id: uuid.UUID = field(default_factory=uuid.uuid4)
+    created_at: float = field(default_factory=time.time, compare=False)
+
+    async def unsubscribe(self) -> bool:
+        """Unsubscribe this subscription."""
+        return await unsubscribe(self)
+
+    def to_dict(self) -> dict[str, Any]:
+        """Serialize subscription to dictionary (excluding handler)."""
+        return {
+            "id": str(self.id),
+            "event_type": self.event_type,
+            "created_at": self.created_at,
+            "handler_name": getattr(self.handler, "__name__", str(self.handler)),
+        }
 
 
 class EventHandler[T](ABC):
@@ -248,7 +303,16 @@ class EventRouter:
 class EventBus:
     """
     Main event bus for the event-driven architecture.
+
+    Singleton pattern with thread-safe operations for parasitic leak prevention.
     """
+
+    _instance: "EventBus | None" = None
+    _lock: asyncio.Lock = asyncio.Lock()
+
+    def __new__(cls, *args: Any, **kwargs: Any) -> "EventBus":
+        """Prevent direct instantiation - use get_eventbus() instead."""
+        raise RuntimeError("Use get_eventbus() to get EventBus instance")
 
     def __init__(
         self,
@@ -267,13 +331,28 @@ class EventBus:
         self.redis_url = redis_url
         self.rabbitmq_url = rabbitmq_url
 
-        self.subscribers: dict[str, list[Callable]] = defaultdict(list)
+        # Thread-safe subscription storage
+        self._subscribers: dict[str, list[Subscription]] = defaultdict(list)
+        self._index: dict[uuid.UUID, tuple[str, int]] = {}  # O(1) removal index
+        self._state_lock = asyncio.Lock()
+
         self.running = False
 
         # Metrics
         self.events_processed = 0
         self.events_failed = 0
         self.processing_times: list[float] = []
+
+    @classmethod
+    async def get_eventbus(cls, *args: Any, **kwargs: Any) -> "EventBus":
+        """Get singleton EventBus instance."""
+        async with cls._lock:
+            if cls._instance is None:
+                # Bypass __new__ by calling object.__new__
+                instance = object.__new__(cls)
+                instance.__init__(*args, **kwargs)
+                cls._instance = instance
+            return cls._instance
 
     async def start(self):
         """Start the event bus."""
@@ -377,10 +456,63 @@ class EventBus:
 
         return event.id
 
-    async def subscribe(self, event_type: str, handler: Callable):
-        """Subscribe to events."""
-        self.subscribers[event_type].append(handler)
-        logging.info(f"Subscribed to {event_type}")
+    async def subscribe(self, event_type: str, handler: Callable) -> Subscription:
+        """
+        Subscribe to events with thread-safe operations.
+
+        Returns a Subscription handle for unsubscription.
+        """
+        sub = Subscription(event_type=event_type, handler=handler)
+
+        # Async-safe modification with lock
+        async with self._state_lock:
+            # Add to subscribers list
+            self._subscribers[event_type].append(sub)
+
+            # Add to index for O(1) removal
+            self._index[sub.id] = (event_type, len(self._subscribers[event_type]) - 1)
+
+            # Update metrics
+            if METRICS_ENABLED:
+                _subscriptions_created.inc()
+                _active_subscriptions.labels(event_type=event_type).inc()
+
+        logging.info(f"Subscribed to {event_type} (id={sub.id})")
+        return sub
+
+    async def unsubscribe(self, subscription: Subscription | uuid.UUID) -> bool:
+        """
+        Unsubscribe a handler with O(1) index lookup.
+
+        Returns True if successful, False if subscription not found.
+        """
+        sub_id = subscription.id if isinstance(subscription, Subscription) else subscription
+
+        async with self._state_lock:
+            if sub_id not in self._index:
+                logging.warning(f"Attempted to unsubscribe unknown subscription {sub_id}")
+                return False
+
+            event_type, index = self._index[sub_id]
+
+            # Remove from subscribers list
+            if index < len(self._subscribers[event_type]):
+                self._subscribers[event_type].pop(index)
+
+                # Rebuild index for remaining subscriptions
+                for i, sub in enumerate(self._subscribers[event_type]):
+                    self._index[sub.id] = (event_type, i)
+
+            # Clean up index
+            del self._index[sub_id]
+
+            # Update metrics
+            if METRICS_ENABLED:
+                _subscriptions_removed.inc()
+                _active_subscriptions.labels(event_type=event_type).dec()
+
+        logging.info(f"Unsubscribed {sub_id}")
+        return True
 
     async def subscribe_to_pattern(self, pattern: str, handler: Callable):
         """Subscribe to event patterns (Redis pub/sub)."""
@@ -410,6 +542,10 @@ class EventBus:
 
     async def get_metrics(self) -> dict[str, Any]:
         """Get event bus metrics."""
+        async with self._state_lock:
+            total_subs = sum(len(subs) for subs in self._subscribers.values())
+            subs_by_type = {k: len(v) for k, v in self._subscribers.items()}
+
         return {
             "events_processed": self.events_processed,
             "events_failed": self.events_failed,
@@ -422,8 +558,86 @@ class EventBus:
                 sum(self.processing_times) / len(self.processing_times) if self.processing_times else 0
             ),
             "handlers_registered": len(self.event_router.handlers),
-            "subscribers": len(self.subscribers),
+            "total_subscriptions": total_subs,
+            "subscriptions_by_type": subs_by_type,
         }
+
+    async def get_subscription_count(self, event_type: str | None = None) -> int:
+        """Get count of active subscriptions.
+
+        Args:
+            event_type: Optional event type to filter by.
+
+        Returns:
+            Number of active subscriptions.
+        """
+        async with self._state_lock:
+            if event_type:
+                return len(self._subscribers.get(event_type, []))
+            return sum(len(subs) for subs in self._subscribers.values())
+
+    async def get_subscriptions(self, event_type: str | None = None) -> list[Subscription]:
+        """Get list of active subscriptions.
+
+        Args:
+            event_type: Optional event type to filter by.
+
+        Returns:
+            List of Subscription objects.
+        """
+        async with self._state_lock:
+            if event_type:
+                return list(self._subscribers.get(event_type, []))
+            all_subs = []
+            for subs in self._subscribers.values():
+                all_subs.extend(subs)
+            return all_subs
+
+    async def clear_all(self) -> int:
+        """Clear all subscriptions.
+
+        Returns:
+            Number of subscriptions cleared.
+        """
+        async with self._state_lock:
+            total = sum(len(subs) for subs in self._subscribers.values())
+            self._subscribers.clear()
+            self._index.clear()
+
+            if METRICS_ENABLED:
+                _subscriptions_removed.inc(total)
+
+            logging.info(f"Cleared {total} subscriptions")
+            return total
+
+    async def clear_stale_subscriptions(self, max_age_seconds: float = 3600) -> int:
+        """Clear subscriptions older than max_age_seconds.
+
+        Args:
+            max_age_seconds: Maximum age in seconds (default: 1 hour).
+
+        Returns:
+            Number of stale subscriptions cleared.
+        """
+        now = time.time()
+        stale_ids: list[uuid.UUID] = []
+
+        async with self._state_lock:
+            for event_type, subs in self._subscribers.items():
+                for sub in subs:
+                    if now - sub.created_at > max_age_seconds:
+                        stale_ids.append(sub.id)
+
+        # Unsubscribe stale subscriptions outside the lock
+        cleared = 0
+        for sub_id in stale_ids:
+            if await self.unsubscribe(sub_id):
+                cleared += 1
+
+        if cleared > 0:
+            logging.warning(f"Cleared {cleared} stale subscriptions (older than {max_age_seconds}s)")
+
+        return cleared
 
 
 # ============================================================================
@@ -493,6 +707,72 @@ class TradingSignalHandler(EventHandler):
             return EventResult(
                 event_id=event.id, status=EventStatus.FAILED, error=str(e), processing_time=time.time() - start_time
             )
+
+
+# ============================================================================
+# Module-level API
+# ============================================================================
+
+_eventbus_instance: EventBus | None = None
+_eventbus_lock = asyncio.Lock()
+
+
+async def get_eventbus(*args: Any, **kwargs: Any) -> EventBus:
+    """Get or create the singleton EventBus instance."""
+    global _eventbus_instance
+    async with _eventbus_lock:
+        if _eventbus_instance is None:
+            _eventbus_instance = await EventBus.get_eventbus(*args, **kwargs)
+        return _eventbus_instance
+
+
+async def subscribe(event_type: str, handler: Callable) -> Subscription:
+    """Subscribe to events using the singleton EventBus."""
+    bus = await get_eventbus()
+    return await bus.subscribe(event_type, handler)
+
+
+async def unsubscribe(subscription: Subscription | uuid.UUID) -> bool:
+    """Unsubscribe using the singleton EventBus."""
+    bus = await get_eventbus()
+    return await bus.unsubscribe(subscription)
+
+
+async def publish(
+    event_type: str,
+    data: dict[str, Any],
+    source: str = "unknown",
+    priority: EventPriority = EventPriority.NORMAL,
+    correlation_id: str | None = None,
+    routing_key: str | None = None,
+) -> str:
+    """Publish an event using the singleton EventBus."""
+    bus = await get_eventbus()
+    return await bus.publish(event_type, data, source, priority, correlation_id, routing_key)
+
+
+async def clear_all() -> None:
+    """Clear all subscriptions using the singleton EventBus."""
+    bus = await get_eventbus()
+    await bus.clear_all()
+
+
+__all__ = [
+    "EventBus",
+    "Event",
+    "EventResult",
+    "EventPriority",
+    "EventStatus",
+    "Subscription",
+    "EventHandler",
+    "EventStore",
+    "EventRouter",
+    "get_eventbus",
+    "subscribe",
+    "unsubscribe",
+    "publish",
+    "clear_all",
+]
 
 
 # ============================================================================

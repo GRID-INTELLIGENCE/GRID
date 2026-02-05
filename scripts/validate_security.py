@@ -410,7 +410,7 @@ class SecurityValidator:
         found_issues = []
         for pattern, description in hardcoded_patterns:
             for py_file in self.project_root.rglob("*.py"):
-                if "test" in py_file.name or "venv" in py_file or "site-packages" in py_file:
+                if "test" in py_file.name or "venv" in str(py_file) or "site-packages" in str(py_file):
                     continue
                 try:
                     content = py_file.read_text()

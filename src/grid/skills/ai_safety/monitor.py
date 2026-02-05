@@ -15,7 +15,7 @@ from typing import Any
 
 from grid.skills.base import SimpleSkill
 
-from .base import SafetyReport, calculate_safety_score, determine_threat_level
+from .base import SafetyReport, ThreatLevel, calculate_safety_score, determine_threat_level
 from .config import get_config
 from .rules import evaluate_rules, load_rules
 
@@ -109,7 +109,7 @@ class SafetyMonitor:
         if not session or not session.active:
             return SafetyReport(
                 overall_score=0.0,
-                threat_level="high",
+                threat_level=ThreatLevel.HIGH,
                 violations=[],
                 metadata={"error": "Invalid or inactive session"},
             )

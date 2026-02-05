@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-import yaml  # type: ignore[import-untyped]
+import yaml
 
 
 class EUFLEBridge:
@@ -22,7 +22,8 @@ class EUFLEBridge:
         """Load sync configuration."""
         if self.config_path.exists():
             with open(self.config_path) as f:
-                return yaml.safe_load(f)
+                config = yaml.safe_load(f)
+                return config if isinstance(config, dict) else {}
         return {}
 
     def sync_settings(self) -> dict[str, Any]:

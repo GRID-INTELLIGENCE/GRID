@@ -64,7 +64,7 @@ class OverwatchAuditLogger:
         status: str = "success",
         user_id: str | None = None,
         resource_id: str | None = None,
-        details: dict | None = None,
+        details: dict[str, Any] | None = None,
         ip_address: str | None = None,
         user_agent: str | None = None,
     ) -> AuditEvent:
@@ -87,13 +87,13 @@ class OverwatchAuditLogger:
             self._flush_buffer()
         return event
 
-    def _flush_buffer(self):
+    def _flush_buffer(self) -> None:
         """Flush event buffer to disk"""
         for event in self.event_buffer:
             self._write_event(event)
         self.event_buffer.clear()
 
-    def _write_event(self, event: AuditEvent):
+    def _write_event(self, event: AuditEvent) -> None:
         """Write event to persistent log"""
         date_str = datetime.now().strftime("%Y%m%d")
         log_file = self.log_dir / f"audit_{date_str}.jsonl"

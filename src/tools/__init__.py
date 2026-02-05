@@ -21,6 +21,7 @@ Usage:
 from __future__ import annotations
 
 import logging
+from typing import TYPE_CHECKING, Any
 
 logger = logging.getLogger(__name__)
 
@@ -55,10 +56,10 @@ try:
         test_databricks_connection,
     )
 
-    DATABRICKS_AVAILABLE = True
+    _databricks_available = True
 except ImportError:
-    DATABRICKS_AVAILABLE = False
     logger.warning("Databricks dependencies not found. Databricks tools will be unavailable.")
+    _databricks_available = False
 
 # Lazy imports to avoid dependency issues
 __all__ = [
@@ -83,38 +84,48 @@ __all__ = [
     "connector_registry",
     "get_connector",
     "register_connector",
-    "DatabricksConfig",
-    "DatabricksClient",
-    "DatabricksQuery",
-    "create_databricks_connector",
-    "test_databricks_connection",
-    "execute_databricks_query",
 ]
 
+if _databricks_available:
+    __all__.extend(
+        [
+            "DatabricksConfig",
+            "DatabricksClient",
+            "DatabricksQuery",
+            "create_databricks_connector",
+            "test_databricks_connection",
+            "execute_databricks_query",
+        ]
+    )
 
-from typing import Any
+
+if TYPE_CHECKING:
+    from tools.ambient_sound import AmbientSoundGenerator, SoundMetrics
+    from tools.integration import ToolsIntegration, get_tools_integration
+    from tools.pulse_monitor import PulseMonitor
+    from tools.zoology_mapper import SensoryConfiguration, ZoologyMapper
 
 
 def __getattr__(name: str) -> Any:
     """Lazy import mechanism for tools."""
     if name == "PulseMonitor":
-        from tools.pulse_monitor import PulseMonitor  # type: ignore[import-not-found]
+        from tools.pulse_monitor import PulseMonitor
 
         return PulseMonitor
     elif name == "AmbientSoundGenerator":
-        from tools.ambient_sound import AmbientSoundGenerator  # type: ignore[import-not-found]
+        from tools.ambient_sound import AmbientSoundGenerator
 
         return AmbientSoundGenerator
     elif name == "SoundMetrics":
-        from tools.ambient_sound import SoundMetrics  # type: ignore[import-not-found]
+        from tools.ambient_sound import SoundMetrics
 
         return SoundMetrics
     elif name == "ZoologyMapper":
-        from tools.zoology_mapper import ZoologyMapper  # type: ignore[import-not-found]
+        from tools.zoology_mapper import ZoologyMapper
 
         return ZoologyMapper
     elif name == "SensoryConfiguration":
-        from tools.zoology_mapper import SensoryConfiguration  # type: ignore[import-not-found]
+        from tools.zoology_mapper import SensoryConfiguration
 
         return SensoryConfiguration
     elif name == "ToolsIntegration":

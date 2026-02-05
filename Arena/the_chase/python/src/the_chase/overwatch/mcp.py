@@ -2,16 +2,18 @@
 MCP Server integration for The Chase
 """
 
-from typing import Any
+from typing import Any, Dict
 
 
 class OverwatchMCP:
     """MCP Server integration for OVERWATCH"""
 
-    def __init__(self, mcp_config: dict):
+    mcp_servers: Dict[str, Any]
+
+    def __init__(self, mcp_config: Dict[str, Any]):
         self.mcp_servers = mcp_config.get("servers", {})
 
-    def call_mcp_tool(self, server: str, tool: str, args: dict) -> Any:
+    def call_mcp_tool(self, server: str, tool: str, args: Dict[str, Any]) -> Any:
         """Call MCP tool on server"""
         # Placeholder for MCP tool call logic
         if server in self.mcp_servers:

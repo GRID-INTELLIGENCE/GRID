@@ -8,6 +8,7 @@ from typing import Any
 from .schemas import (
     FileAccessPattern,
     TaskPattern,
+    TimeOfDay,
     ToolUsagePattern,
     UserPreferences,
     UserProfile,
@@ -48,48 +49,54 @@ class UserContextManager:
             )
             self.save_profile()
 
+    def _require_profile(self) -> UserProfile:
+        """Return a loaded user profile or raise if unavailable."""
+        if self.profile is None:
+            self._load_profile()
+        if self.profile is None:
+            raise RuntimeError("User profile could not be loaded")
+        return self.profile
+
     def save_profile(self) -> bool:
         """Save user profile to storage."""
         if self.profile is None:
             return False
-        return self.storage.save_user_profile(self.profile)
+        result: bool = self.storage.save_user_profile(self.profile)
+        return result
 
     def get_preferences(self) -> UserPreferences:
         """Get user preferences."""
-        if self.profile is None:
-            self._load_profile()
-        return self.profile.preferences if self.profile else UserPreferences()
+        profile = self._require_profile()
+        return profile.preferences
 
     def update_preference(self, key: str, value: Any) -> None:
         """Update a user preference."""
-        if self.profile is None:
-            self._load_profile()
+        profile = self._require_profile()
 
-        if hasattr(self.profile.preferences, key):
-            setattr(self.profile.preferences, key, value)
+        if hasattr(profile.preferences, key):
+            setattr(profile.preferences, key, value)
         else:
             # Store in metadata for unknown preferences
-            self.profile.metadata[f"preference_{key}"] = value
+            profile.metadata[f"preference_{key}"] = value
 
         self.save_profile()
 
     def track_file_access(self, file_path: str, project: str | None = None) -> None:
         """Track file access for pattern recognition."""
-        if self.profile is None:
-            self._load_profile()
+        profile = self._require_profile()
 
         # Normalize path
         normalized_path = str(Path(file_path).resolve())
 
-        if normalized_path not in self.profile.file_access_patterns:
+        if normalized_path not in profile.file_access_patterns:
             file_type = Path(file_path).suffix.lower()
-            self.profile.file_access_patterns[normalized_path] = FileAccessPattern(
+            profile.file_access_patterns[normalized_path] = FileAccessPattern(
                 file_path=normalized_path,
                 project=project,
                 file_type=file_type,
             )
 
-        pattern = self.profile.file_access_patterns[normalized_path]
+        pattern = profile.file_access_patterns[normalized_path]
         pattern.access_count += 1
         pattern.last_accessed = datetime.now()
 
@@ -102,15 +109,14 @@ class UserContextManager:
         duration_seconds: float | None = None,
     ) -> None:
         """Track tool usage for pattern recognition."""
-        if self.profile is None:
-            self._load_profile()
+        profile = self._require_profile()
 
-        if tool_name not in self.profile.tool_usage_patterns:
-            self.profile.tool_usage_patterns[tool_name] = ToolUsagePattern(
+        if tool_name not in profile.tool_usage_patterns:
+            profile.tool_usage_patterns[tool_name] = ToolUsagePattern(
                 tool_name=tool_name,
             )
 
-        pattern = self.profile.tool_usage_patterns[tool_name]
+        pattern = profile.tool_usage_patterns[tool_name]
         pattern.usage_count += 1
         pattern.last_used = datetime.now()
 
@@ -136,15 +142,14 @@ class UserContextManager:
 
     def track_work_pattern(
         self,
-        time_of_day: str,
+        time_of_day: TimeOfDay,
         day_of_week: int,
         activity_type: str,
         duration_minutes: float,
         project_focus: str | None = None,
     ) -> None:
         """Track work pattern for routine recognition."""
-        if self.profile is None:
-            self._load_profile()
+        profile = self._require_profile()
 
         pattern = WorkPattern(
             time_of_day=time_of_day,
@@ -154,11 +159,11 @@ class UserContextManager:
             project_focus=project_focus,
         )
 
-        self.profile.work_patterns.append(pattern)
+        profile.work_patterns.append(pattern)
 
         # Keep only last 1000 patterns to avoid unbounded growth
-        if len(self.profile.work_patterns) > 1000:
-            self.profile.work_patterns = self.profile.work_patterns[-1000:]
+        if len(profile.work_patterns) > 1000:
+            profile.work_patterns = profile.work_patterns[-1000:]
 
         self.save_profile()
 
@@ -170,15 +175,14 @@ class UserContextManager:
         success: bool = True,
     ) -> None:
         """Track task completion pattern."""
-        if self.profile is None:
-            self._load_profile()
+        profile = self._require_profile()
 
-        if task_type not in self.profile.task_patterns:
-            self.profile.task_patterns[task_type] = TaskPattern(
+        if task_type not in profile.task_patterns:
+            profile.task_patterns[task_type] = TaskPattern(
                 task_type=task_type,
             )
 
-        pattern = self.profile.task_patterns[task_type]
+        pattern = profile.task_patterns[task_type]
         pattern.frequency += 1
         pattern.sequence = sequence
 
@@ -245,7 +249,8 @@ class UserContextManager:
         from collections import Counter
 
         project_counts = Counter(projects)
-        return project_counts.most_common(1)[0][0]
+        most_common_project: str = project_counts.most_common(1)[0][0]
+        return most_common_project
 
     def get_context_summary(self) -> dict[str, Any]:
         """Get summary of current user context."""

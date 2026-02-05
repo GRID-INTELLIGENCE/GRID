@@ -47,9 +47,9 @@ class InputValidator:
 class Aegis:
     """Safety guardian (enhanced with InputValidator)"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.validator = InputValidator()  # Reuse Wellness Studio implementation
 
-    def validate_action(self, action: dict) -> ValidationResult:
+    def validate_action(self, action: dict[str, Any]) -> ValidationResult:
         """Validate action against safety level"""
         return self.validator.validate(str(action))
