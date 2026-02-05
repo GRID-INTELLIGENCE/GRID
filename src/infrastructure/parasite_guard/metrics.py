@@ -20,17 +20,13 @@ logger = logging.getLogger(__name__)
 try:
     from prometheus_client import REGISTRY, Counter, Gauge, Histogram
 
-    def _get_or_create_counter(
-        name: str, documentation: str, labelnames: list[str] | None = None
-    ) -> Counter:
+    def _get_or_create_counter(name: str, documentation: str, labelnames: list[str] | None = None) -> Counter:
         """Get existing counter or create new one."""
         if name in REGISTRY._names_to_collectors:
             return REGISTRY._names_to_collectors[name]
         return Counter(name, documentation, labelnames=labelnames or [])
 
-    def _get_or_create_gauge(
-        name: str, documentation: str, labelnames: list[str] | None = None
-    ) -> Gauge:
+    def _get_or_create_gauge(name: str, documentation: str, labelnames: list[str] | None = None) -> Gauge:
         """Get existing gauge or create new one."""
         if name in REGISTRY._names_to_collectors:
             return REGISTRY._names_to_collectors[name]
@@ -60,7 +56,7 @@ except ImportError:
 
     # Stub classes for when prometheus is not available
     class _StubMetric:
-        def labels(self, *args: Any, **kwargs: Any) -> "_StubMetric":
+        def labels(self, *args: Any, **kwargs: Any) -> _StubMetric:
             return self
 
         def inc(self, amount: float = 1) -> None:
@@ -324,12 +320,8 @@ def record_detection(
         detector_name: Name of the detector.
     """
     if METRICS_ENABLED:
-        parasite_detected_total.labels(
-            component=component, pattern=pattern, severity=severity
-        ).inc()
-        detection_duration_seconds.labels(detector=detector_name).observe(
-            duration_seconds
-        )
+        parasite_detected_total.labels(component=component, pattern=pattern, severity=severity).inc()
+        detection_duration_seconds.labels(detector=detector_name).observe(duration_seconds)
         active_parasites.labels(component=component).inc()
 
 
@@ -367,9 +359,7 @@ def record_state_transition(
         guard_current_state.labels(state=to_state).set(1)
 
         # Record duration in previous state
-        guard_state_duration_seconds.labels(state=from_state).observe(
-            duration_in_previous_state
-        )
+        guard_state_duration_seconds.labels(state=from_state).observe(duration_in_previous_state)
 
 
 def record_precision_metrics(
@@ -405,12 +395,8 @@ def record_sanitization(
         duration_seconds: Time to sanitize.
     """
     if METRICS_ENABLED:
-        sanitization_attempts_total.labels(
-            component=component, success=str(success).lower()
-        ).inc()
-        sanitization_duration_seconds.labels(component=component).observe(
-            duration_seconds
-        )
+        sanitization_attempts_total.labels(component=component, success=str(success).lower()).inc()
+        sanitization_duration_seconds.labels(component=component).observe(duration_seconds)
         if success:
             active_parasites.labels(component=component).dec()
 
@@ -470,9 +456,5 @@ def record_chaos_result(
         error_budget_consumed: Error budget consumed.
     """
     if METRICS_ENABLED:
-        chaos_recovery_seconds.labels(experiment_type=experiment_type).observe(
-            recovery_seconds
-        )
-        chaos_error_budget_consumed.labels(experiment_type=experiment_type).set(
-            error_budget_consumed
-        )
+        chaos_recovery_seconds.labels(experiment_type=experiment_type).observe(recovery_seconds)
+        chaos_error_budget_consumed.labels(experiment_type=experiment_type).set(error_budget_consumed)

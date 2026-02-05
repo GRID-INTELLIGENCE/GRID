@@ -1,0 +1,126 @@
+version: 1.0.0
+service_name: grid-mothership
+description: |
+  Accountability contracts for Grid Mothership API.
+  Defines strict requirements for all endpoints to ensure data integrity,
+  performance, and security.
+
+defaults:
+  security:
+    authentication_required: true
+    required_roles: ["user"]
+    rate_limit: 60
+    request_signing_required: false
+    response_encryption_required: false
+
+  compliance:
+    gdpr: true
+    hipaa: false
+    pci_dss: false
+    data_retention_days: 90
+    audit_logging: true
+    data_classification: "confidential"
+
+endpoints:
+  - path: /api/v1/rag/query/stream
+    methods: ["POST"]
+    description: Streaming RAG query endpoint
+    performance:
+      max_latency_ms: 5000
+      max_error_rate: 0.01
+      min_throughput_rps: 50
+      timeout_ms: 30000
+    security:
+      authentication_required: true
+      required_roles: ["user", "rag_user"]
+      rate_limit: 30
+    request_validation:
+      query:
+        type: string
+        required: true
+        min_length: 1
+        max_length: 1000
+      session_id:
+        type: string
+        required: false
+        pattern: "^[a-f0-9-]{36}$"
+      top_k:
+        type: integer
+        required: false
+        min_value: 1
+        max_value: 100
+      temperature:
+        type: number
+        required: false
+        min_value: 0
+        max_value: 2
+    response_validation:
+      type:
+        type: string
+        required: true
+        enum: ["analysis_started", "retrieval_started", "documents_retrieved", "answer_chunk", "complete", "error"]
+      data:
+        type: object
+        required: true
+
+  - path: /api/v1/rag/ws/*
+    methods: ["WEBSOCKET"]
+    description: WebSocket endpoint for real-time RAG collaboration
+    security:
+      authentication_required: true
+      required_roles: ["user", "rag_user"]
+      rate_limit: 60
+    performance:
+      max_latency_ms: 1000
+      max_error_rate: 0.05
+      min_throughput_rps: 100
+    tags: ["websocket", "realtime"]
+
+  - path: /api/v1/data/upload
+    methods: ["POST"]
+    description: Upload data to the system
+    security:
+      authentication_required: true
+      required_roles: ["data_uploader", "admin"]
+      rate_limit: 10
+    compliance:
+      data_classification: "restricted"
+      audit_logging: true
+    request_validation:
+      file:
+        type: object
+        required: true
+      metadata:
+        type: object
+        required: true
+      tags:
+        type: array
+        required: false
+
+service_level_objectives:
+  - name: "api_availability"
+    description: "API availability should be at least 99.9%"
+    measurement: "availability"
+    threshold: 99.9
+    threshold_type: "gte"
+    window: "1h"
+    severity: "critical"
+    penalty_points: 100
+
+  - name: "rag_query_latency"
+    description: "95th percentile RAG query latency should be under 2 seconds"
+    measurement: "latency_p95"
+    threshold: 2000
+    threshold_type: "lte"
+    window: "5m"
+    severity: "high"
+    penalty_points: 50
+
+  - name: "authentication_failure_rate"
+    description: "Authentication failure rate should be under 1%"
+    measurement: "error_rate"
+    threshold: 0.01
+    threshold_type: "lte"
+    window: "15m"
+    severity: "high"
+    penalty_points: 75

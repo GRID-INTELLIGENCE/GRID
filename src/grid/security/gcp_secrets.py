@@ -9,7 +9,8 @@ import logging
 import os
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from pathlib import Path
+
+from grid.security.environment import environment_settings
 
 logger = logging.getLogger(__name__)
 
@@ -52,9 +53,9 @@ class GCPSecretsProvider(CloudSecretsProvider):
             from google.cloud import secretmanager  # type: ignore[import-untyped]
 
             self.client = secretmanager.SecretManagerServiceAsyncClient()
-            self.project_id = project_id or os.getenv("GOOGLE_CLOUD_PROJECT")
+            self.project_id = project_id or environment_settings.GOOGLE_CLOUD_PROJECT
             if not self.project_id:
-                raise ValueError("GOOGLE_CLOUD_PROJECT environment variable is required")
+                raise ValueError("GCP project ID is not configured.")
             logger.info(f"Initialized GCP Secret Manager provider for project: {self.project_id}")
         except ImportError:
             raise ImportError("google-cloud-secret-manager package required for GCP Secret Manager")
@@ -106,8 +107,7 @@ class GCPSecretsProvider(CloudSecretsProvider):
 
 def get_gcp_provider() -> GCPSecretsProvider | None:
     """Auto-detect and initialize GCP secrets provider."""
-    # Check for GCP credentials
-    if os.getenv("GOOGLE_APPLICATION_CREDENTIALS") or os.getenv("GOOGLE_CLOUD_PROJECT"):
+    if environment_settings.GOOGLE_CLOUD_PROJECT or os.getenv("GOOGLE_APPLICATION_CREDENTIALS"):
         return GCPSecretsProvider()
 
     logger.warning("GCP credentials not detected")
@@ -128,33 +128,15 @@ async def get_secret(secret_name: str, required: bool = True) -> str | None:
         try:
             return await provider.get_secret(secret_name)
         except Exception as e:
-            environment = os.getenv("MOTHERSHIP_ENVIRONMENT", "development").lower()
-            if environment == "production":
+            if environment_settings.is_production:
                 raise ValueError(f"Required secret {secret_name} not found in GCP Secret Manager: {e}")
 
     # Fallback to environment variables (development only)
     value = os.getenv(secret_name)
     if required and not value:
-        environment = os.getenv("MOTHERSHIP_ENVIRONMENT", "development").lower()
-        if environment == "production":
+        if environment_settings.is_production:
             raise ValueError(f"Required secret {secret_name} not found and GCP Secret Manager not available")
         raise ValueError(f"Required secret {secret_name} not found in environment variables")
     return value
 
 
-# Load configuration from YAML
-def load_secrets_config() -> dict:
-    """Load secrets manager configuration."""
-    config_path = Path(__file__).parent.parent.parent.parent / "config" / "secrets_manager.yaml"
-
-    if config_path.exists():
-        import yaml  # type: ignore[import-untyped]
-
-        with open(config_path) as f:
-            return yaml.safe_load(f)
-
-    # Default configuration
-    return {
-        "provider": {"type": "gcp", "allow_fallback": False},
-        "gcp": {"project_id": os.getenv("GOOGLE_CLOUD_PROJECT"), "prefix": "grid-production-"},
-    }

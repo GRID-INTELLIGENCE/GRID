@@ -118,7 +118,7 @@ class TestSafetyMonitorEdgeCases:
         assert len(result.violations) > 0
         assert result.overall_score < 1.0
 
-    @patch('grid.skills.ai_safety.monitor.load_rules')
+    @patch("grid.skills.ai_safety.monitor.load_rules")
     def test_check_content_rules_loading_error(self, mock_load) -> None:
         """Test handling of rules loading error."""
         mock_load.side_effect = Exception("Rules loading failed")
@@ -234,7 +234,7 @@ class TestMonitoringSessionEdgeCases:
             "metadata": {
                 "nested": {"data": [1, 2, 3]},
                 "special_chars": "!@#$%^&*()",
-            }
+            },
         }
         session.history.append(complex_data)
 

@@ -43,6 +43,7 @@ try:
         models_audit,  # noqa: F401
         models_billing,  # noqa: F401
         models_cockpit,  # noqa: F401
+        models_drt,  # noqa: F401
     )
 except ImportError as e:
     print(f"Warning: Could not import all models: {e}")

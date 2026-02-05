@@ -19,9 +19,9 @@ logger = logging.getLogger(__name__)
 
 def add_parasite_guard(
     app: Any,
-    config: Optional[ParasiteGuardConfig] = None,
-    enable_components: Optional[list[str]] = None,
-    mode: Optional[str] = None,
+    config: ParasiteGuardConfig | None = None,
+    enable_components: list[str] | None = None,
+    mode: str | None = None,
     enable_pruning: bool = False,
 ) -> ParasiteGuardMiddleware:
     """
@@ -123,7 +123,7 @@ def add_parasite_guard(
 
 def add_parasite_guard_to_lifespan(
     app: Any,
-    config: Optional[ParasiteGuardConfig] = None,
+    config: ParasiteGuardConfig | None = None,
 ) -> ParasiteGuardMiddleware:
     """
     Add parasite guard integrated into FastAPI lifespan.
@@ -157,7 +157,7 @@ def add_parasite_guard_to_lifespan(
 
 async def wait_for_sanitization(
     middleware: ParasiteGuardMiddleware,
-    timeout: Optional[float] = 30.0,
+    timeout: float | None = 30.0,
 ) -> None:
     """
     Wait for all active sanitization tasks to complete.
@@ -175,7 +175,7 @@ async def wait_for_sanitization(
             logger.info("All parasite sanitizations completed before shutdown")
         else:
             logger.debug("Middleware does not support sanitization waiting")
-    except asyncio.TimeoutError:
+    except TimeoutError:
         logger.warning(f"Timeout waiting for sanitization after {timeout}s")
     except Exception as e:
         logger.error(f"Error waiting for sanitization: {e}", exc_info=True)
@@ -183,7 +183,7 @@ async def wait_for_sanitization(
 
 def create_middleware(
     app: Any,
-    config: Optional[ParasiteGuardConfig] = None,
+    config: ParasiteGuardConfig | None = None,
 ) -> ParasiteGuardMiddleware:
     """
     Create (but don't install) parasite guard middleware.

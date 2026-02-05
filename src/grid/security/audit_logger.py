@@ -136,7 +136,7 @@ class AuditLogger:
 
         logger.info(f"File-based audit logging initialized: {audit_path}")
 
-    def _log_event(
+    def log_event(
         self,
         event_type: AuditEventType,
         message: str,
@@ -185,7 +185,7 @@ class AuditLogger:
 
     def log_auth_success(self, user_id: str, ip_address: str, method: str = "password") -> None:
         """Log successful authentication."""
-        self._log_event(
+        self.log_event(
             event_type=AuditEventType.AUTH_LOGIN_SUCCESS,
             message=f"User authenticated via {method}",
             user_id=user_id,
@@ -195,7 +195,7 @@ class AuditLogger:
 
     def log_auth_failure(self, username: str, ip_address: str, reason: str) -> None:
         """Log failed authentication attempt."""
-        self._log_event(
+        self.log_event(
             event_type=AuditEventType.AUTH_LOGIN_FAILURE,
             message=f"Authentication failed: {reason}",
             user_id=username,
@@ -210,7 +210,7 @@ class AuditLogger:
         if "financial" in data_type.lower():
             event_type = AuditEventType.DATA_ACCESS_FINANCIAL
 
-        self._log_event(
+        self.log_event(
             event_type=event_type,
             message=f"User {access_type} {data_type} data",
             user_id=user_id,
@@ -220,7 +220,7 @@ class AuditLogger:
 
     def log_wealth_data_access(self, user_id: str, operation: str, asset_count: int = 0) -> None:
         """Log wealth management data access."""
-        self._log_event(
+        self.log_event(
             event_type=AuditEventType.WEALTH_DATA_ACCESS,
             message=f"Wealth management {operation} operation",
             user_id=user_id,
@@ -228,9 +228,10 @@ class AuditLogger:
             metadata={"operation": operation, "asset_count": asset_count},
         )
 
+
     def log_secret_access(self, secret_name: str, user_id: str = "system", success: bool = True) -> None:
         """Log secret access event."""
-        self._log_event(
+        self.log_event(
             event_type=AuditEventType.SECRET_ACCESS if success else AuditEventType.SECRET_FAILED_RETRIEVAL,
             message=f"Secret {secret_name} {'accessed' if success else 'failed to access'}",
             user_id=user_id,

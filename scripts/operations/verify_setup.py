@@ -4,8 +4,8 @@ Environment Verification Script
 Validates that all environment setup steps completed successfully.
 """
 
-import sys
 import importlib
+import sys
 
 
 def verify_environment():

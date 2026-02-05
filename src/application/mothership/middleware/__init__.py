@@ -259,23 +259,29 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 
 class RateLimitMiddleware(BaseHTTPMiddleware):
     """
-    Simple in-memory rate limiting middleware.
+    Memory-efficient rate limiting middleware with TTL-based expiration.
 
-    For production, use Redis-backed rate limiting.
+    Optimized for high traffic with automatic cleanup and bounded memory usage.
     """
 
     def __init__(
         self,
         app: ASGIApp,
-        requests_per_minute: int = 60,
-        burst_size: int = 10,
+        requests_per_minute: int = 120,  # Increased default for high traffic
+        burst_size: int = 20,
         exclude_paths: list[str] | None = None,
+        max_store_size: int = 10000,  # Prevent unbounded memory growth
+        cleanup_interval: int = 100,  # Cleanup every N requests
     ):
         super().__init__(app)
         self.requests_per_minute = requests_per_minute
         self.burst_size = burst_size
-        self.exclude_paths = exclude_paths or ["/health", "/ping"]
+        self.exclude_paths = exclude_paths or ["/health", "/ping", "/metrics"]
+        self.max_store_size = max_store_size
+        self.cleanup_interval = cleanup_interval
         self._store: dict[str, list[float]] = {}
+        self._request_count = 0  # Counter for periodic cleanup
+        self._lock = asyncio.Lock()  # Thread-safe access
 
     def _get_client_key(self, request: Request) -> str:
         """Get identifier for rate limiting (IP or API key)."""
@@ -288,19 +294,64 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         client_ip = request.client.host if request.client else "unknown"
         return f"ip:{client_ip}"
 
+    def _cleanup_old_entries(self) -> None:
+        """Remove expired entries to prevent memory bloat."""
+        now = time.time()
+        window = 60.0
+        expired_keys = []
+
+        for key, timestamps in self._store.items():
+            # Keep only timestamps within the window
+            valid = [ts for ts in timestamps if now - ts < window]
+            if valid:
+                self._store[key] = valid
+            else:
+                expired_keys.append(key)
+
+        # Remove empty entries
+        for key in expired_keys:
+            del self._store[key]
+
+    def _evict_if_needed(self) -> None:
+        """Evict oldest entries if store exceeds max size."""
+        if len(self._store) > self.max_store_size:
+            # Remove oldest 10% of entries
+            sorted_keys = sorted(
+                self._store.keys(),
+                key=lambda k: max(self._store[k]) if self._store[k] else 0
+            )
+            evict_count = int(self.max_store_size * 0.1)
+            for key in sorted_keys[:evict_count]:
+                del self._store[key]
+
     def _is_rate_limited(self, key: str) -> bool:
-        """Check if key has exceeded rate limit."""
+        """Check if key has exceeded rate limit with periodic cleanup."""
         now = time.time()
         window = 60.0  # 1 minute window
+
+        # Periodic cleanup to prevent memory bloat
+        self._request_count += 1
+        if self._request_count >= self.cleanup_interval:
+            self._cleanup_old_entries()
+            self._request_count = 0
+
+        # Evict old entries if store is too large
+        if len(self._store) > self.max_store_size:
+            self._evict_if_needed()
 
         # Get request timestamps for this key
         if key not in self._store:
             self._store[key] = []
 
-        # Remove old timestamps
-        self._store[key] = [ts for ts in self._store[key] if now - ts < window]
+        # Remove old timestamps efficiently (in-place)
+        cutoff = now - window
+        self._store[key] = [ts for ts in self._store[key] if ts > cutoff]
 
-        # Check limit
+        # Check burst limit first (immediate rejection)
+        if len(self._store[key]) >= self.burst_size:
+            return True
+
+        # Check sustained rate limit
         if len(self._store[key]) >= self.requests_per_minute:
             return True
 
@@ -486,6 +537,17 @@ def setup_middleware(app: FastAPI, settings: Any) -> None:
     # Timing
     app.add_middleware(TimingMiddleware)
 
+    # Accountability (endpoint delivery profiling and scoring)
+    # Enabled when telemetry is enabled or explicitly via accountability_enabled
+    accountability_enabled = getattr(settings, "telemetry", None) and settings.telemetry.enabled
+    if not accountability_enabled:
+        accountability_enabled = getattr(settings, "accountability_enabled", False)
+    if accountability_enabled:
+        from .accountability import AccountabilityMiddleware
+
+        app.add_middleware(AccountabilityMiddleware)
+        logger.info("Accountability middleware enabled")
+
     # Request ID (runs last, sets up context for others)
     app.add_middleware(RequestIDMiddleware)
 
@@ -550,6 +612,13 @@ def get_parasite_guard_middleware():
     return ParasiteDetectorMiddleware
 
 
+def get_accountability_middleware():
+    """Get AccountabilityMiddleware class (lazy import)."""
+    from .accountability import AccountabilityMiddleware
+
+    return AccountabilityMiddleware
+
+
 __all__ = [
     # Context functions
     "get_request_id",
@@ -566,6 +635,7 @@ __all__ = [
     "get_security_enforcer_middleware",
     "get_circuit_manager",
     "get_parasite_guard_middleware",
+    "get_accountability_middleware",
     # Setup function
     "setup_middleware",
 ]

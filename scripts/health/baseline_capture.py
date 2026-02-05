@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Capture 24h baseline metrics snapshots for parasitic leak remediation."""
 
-import asyncio
 import datetime as dt
 import json
 import time

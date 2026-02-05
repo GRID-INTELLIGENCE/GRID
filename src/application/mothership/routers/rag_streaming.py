@@ -164,22 +164,27 @@ async def query_rag_stream(request: RAGQueryRequest) -> StreamingResponse:
                     + "\n"
                 )
 
-            # Stage 7: Stream answer
+            # Stage 7: Stream answer efficiently
             answer = result.get("answer", "")
-            for i, chunk in enumerate(chunk_text(answer, chunk_size=50)):
+            chunks = chunk_text(answer, chunk_size=CHUNK_SIZE)
+            total_chunks = len(chunks)
+
+            for i, chunk in enumerate(chunks):
                 yield (
                     StreamChunk(
                         type="answer_chunk",
                         data={
                             "chunk": chunk,
                             "chunk_number": i + 1,
-                            "total_chunks": (len(answer) // 50) + 1,
-                            "progress": min(100, int((i + 1) / ((len(answer) // 50) + 1) * 100)),
+                            "total_chunks": total_chunks,
+                            "progress": min(100, int((i + 1) / total_chunks * 100)),
                         },
                     ).to_json()
                     + "\n"
                 )
-                await asyncio.sleep(0.05)  # Simulate streaming
+                # Minimal delay for smooth streaming without bandwidth waste
+                if i < total_chunks - 1:
+                    await asyncio.sleep(CHUNK_DELAY)
 
             # Stage 8: Final result
             yield (
@@ -359,15 +364,19 @@ async def get_rag_stats() -> dict[str, Any]:
 # Utility functions
 
 
-def chunk_text(text: str, chunk_size: int = 50) -> list[str]:
-    """Split text into chunks for streaming."""
+def chunk_text(text: str, chunk_size: int = CHUNK_SIZE) -> list[str]:
+    """Split text into chunks for streaming. Optimized for network efficiency."""
+    if not text:
+        return []
     chunks = []
     for i in range(0, len(text), chunk_size):
         chunks.append(text[i : i + chunk_size])
     return chunks
 
 
-# WebSocket endpoint for real-time collaboration with heartbeat
+# Optimized streaming constants for bandwidth efficiency
+CHUNK_SIZE = 200  # Increased from 50 to reduce packet overhead
+CHUNK_DELAY = 0.01  # Reduced from 0.05 for smoother streaming
 HEARTBEAT_INTERVAL = 30  # seconds
 
 
@@ -375,16 +384,16 @@ HEARTBEAT_INTERVAL = 30  # seconds
 async def rag_websocket_endpoint(websocket, session_id: str):
     """
     WebSocket endpoint for real-time RAG collaboration.
-    
+
     FIXED: Added heartbeat/ping and timeout detection to prevent ghost connections.
     """
     await websocket.accept()
     engine = get_rag_engine()
     last_activity = time.time()
-    
+
     # Start heartbeat task
     heartbeat_task = None
-    
+
     async def send_heartbeat():
         """Send periodic ping to keep connection alive."""
         while True:
@@ -394,25 +403,25 @@ async def rag_websocket_endpoint(websocket, session_id: str):
             except Exception:
                 # Connection likely closed, exit heartbeat loop
                 break
-    
+
     heartbeat_task = asyncio.create_task(send_heartbeat())
-    
+
     try:
         while True:
             try:
                 # Wait for message with timeout
                 data = await asyncio.wait_for(
                     websocket.receive_text(),
-                    timeout=HEARTBEAT_INTERVAL * 2  # 2x heartbeat interval
+                    timeout=HEARTBEAT_INTERVAL * 2,  # 2x heartbeat interval
                 )
                 last_activity = time.time()
-                
+
                 message = json.loads(data)
-                
+
                 # Handle ping/pong
                 if message.get("type") == "pong":
                     continue
-                
+
                 if message.get("type") == "query":
                     # Handle query through WebSocket
                     query = message.get("query", "")
@@ -446,8 +455,8 @@ async def rag_websocket_endpoint(websocket, session_id: str):
 
                 elif message.get("type") == "close":
                     break
-                    
-            except asyncio.TimeoutError:
+
+            except TimeoutError:
                 # No activity for 2x heartbeat interval, check if still alive
                 idle_time = time.time() - last_activity
                 if idle_time > HEARTBEAT_INTERVAL * 2:
@@ -455,7 +464,7 @@ async def rag_websocket_endpoint(websocket, session_id: str):
                     break
                 # Otherwise continue waiting
                 continue
-                
+
     except WebSocketDisconnect:
         logger.info(f"Client disconnected from session {session_id}")
     except Exception as e:

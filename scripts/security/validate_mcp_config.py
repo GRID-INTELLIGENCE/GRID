@@ -16,6 +16,7 @@ sys.path.insert(0, str(project_root / "src"))
 
 try:
     from grid.security.path_manager import SecurePathManager
+
     PATH_MANAGER_AVAILABLE = True
 except ImportError:
     PATH_MANAGER_AVAILABLE = False
@@ -101,9 +102,7 @@ def validate_mcp_config(config_path: Path | None = None) -> dict[str, Any]:
                             # Use SecurePathManager for validation
                             result = manager.validate_path(path)
                             if not result.is_valid:
-                                server_issues.append(
-                                    f"Invalid PYTHONPATH entry '{path_str}': {result.reason}"
-                                )
+                                server_issues.append(f"Invalid PYTHONPATH entry '{path_str}': {result.reason}")
                         else:
                             # Basic validation
                             if not path.exists():

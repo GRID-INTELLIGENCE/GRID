@@ -10,10 +10,11 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 # Add src to path for testing
 sys.path.insert(0, str(Path(__file__).parent / "src"))
+
 
 class TestEnvironmentalIntegrity(unittest.TestCase):
     """Test environmental integrity fixes."""
@@ -24,7 +25,7 @@ class TestEnvironmentalIntegrity(unittest.TestCase):
         self.original_environ = dict(os.environ)
 
         # Clean up any existing grid modules to prevent registry conflicts
-        grid_modules = [name for name in sys.modules.keys() if name.startswith('grid.')]
+        grid_modules = [name for name in sys.modules.keys() if name.startswith("grid.")]
         for module in grid_modules:
             if module in sys.modules:
                 del sys.modules[module]
@@ -32,6 +33,7 @@ class TestEnvironmentalIntegrity(unittest.TestCase):
         # Clean up Prometheus registry if it exists
         try:
             from prometheus_client import REGISTRY
+
             # Clear existing metrics to avoid conflicts
             collectors = list(REGISTRY._collector_to_names.keys())
             for collector in collectors:
@@ -49,7 +51,7 @@ class TestEnvironmentalIntegrity(unittest.TestCase):
         current_modules = set(sys.modules.keys())
         new_modules = current_modules - self.original_modules
         for module in new_modules:
-            if module.startswith('test_') or module.startswith('grid.'):
+            if module.startswith("test_") or module.startswith("grid."):
                 try:
                     del sys.modules[module]
                 except KeyError:
@@ -57,21 +59,23 @@ class TestEnvironmentalIntegrity(unittest.TestCase):
 
     def test_module_utils_import(self):
         """Test that module utils can be imported."""
-        from grid.security.module_utils import safe_reload, cleanup_module, isolate_module
+        from grid.security.module_utils import cleanup_module, isolate_module, safe_reload
+
         self.assertTrue(callable(safe_reload))
         self.assertTrue(callable(cleanup_module))
         self.assertTrue(callable(isolate_module))
 
     def test_environment_sanitization_import(self):
         """Test that environment sanitization can be imported."""
-        from grid.security.environment import sanitize_environment, get_environment_report
+        from grid.security.environment import get_environment_report, sanitize_environment
+
         self.assertTrue(callable(sanitize_environment))
         self.assertTrue(callable(get_environment_report))
 
     def test_safe_reload_creates_fresh_module(self):
         """Test that safe_reload creates a fresh module state."""
         # Create a test module
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
             f.write("""
 TEST_VAR = 42
 def test_func():
@@ -112,55 +116,57 @@ def test_func():
         from grid.security.environment import sanitize_path
 
         # Set up a polluted PATH
-        original_path = os.environ.get('PATH', '')
-        test_path = os.pathsep.join([
-            '/valid/path',
-            '/another/valid/path',
-            '/valid/path',  # duplicate
-            '/nonexistent/path',  # invalid
-            '/valid/path',  # another duplicate
-        ])
-        os.environ['PATH'] = test_path
+        original_path = os.environ.get("PATH", "")
+        test_path = os.pathsep.join(
+            [
+                "/valid/path",
+                "/another/valid/path",
+                "/valid/path",  # duplicate
+                "/nonexistent/path",  # invalid
+                "/valid/path",  # another duplicate
+            ]
+        )
+        os.environ["PATH"] = test_path
 
         # Sanitize
         sanitize_path()
 
         # Check result
-        sanitized = os.environ['PATH'].split(os.pathsep)
+        sanitized = os.environ["PATH"].split(os.pathsep)
         self.assertEqual(len(sanitized), 2)  # Should have removed duplicates and invalid
-        self.assertIn('/valid/path', sanitized)
-        self.assertIn('/another/valid/path', sanitized)
+        self.assertIn("/valid/path", sanitized)
+        self.assertIn("/another/valid/path", sanitized)
 
         # Restore
-        os.environ['PATH'] = original_path
+        os.environ["PATH"] = original_path
 
     def test_sensitive_environment_variable_removal(self):
         """Test that sensitive environment variables are removed."""
         from grid.security.environment import sanitize_environment
 
         # Set sensitive variables
-        os.environ['GITHUB_TOKEN'] = 'secret_token'
-        os.environ['DATABASE_URL'] = 'postgresql://user:pass@localhost/db'
-        os.environ['SECRET_KEY'] = 'super_secret'
+        os.environ["GITHUB_TOKEN"] = "secret_token"
+        os.environ["DATABASE_URL"] = "postgresql://user:pass@localhost/db"
+        os.environ["SECRET_KEY"] = "super_secret"
 
         # Sanitize
         report = sanitize_environment()
 
         # Check that they were removed
-        self.assertNotIn('GITHUB_TOKEN', os.environ)
-        self.assertNotIn('DATABASE_URL', os.environ)
-        self.assertNotIn('SECRET_KEY', os.environ)
+        self.assertNotIn("GITHUB_TOKEN", os.environ)
+        self.assertNotIn("DATABASE_URL", os.environ)
+        self.assertNotIn("SECRET_KEY", os.environ)
 
         # Check report
-        self.assertIn('security', report)
-        self.assertEqual(len(report['security']), 3)
+        self.assertIn("security", report)
+        self.assertEqual(len(report["security"]), 3)
 
     def test_module_isolation_context_manager(self):
         """Test that the isolate_module context manager works correctly."""
         from grid.security.module_utils import isolate_module
 
         # Create a test module name
-        test_module = 'test_isolation_module'
+        test_module = "test_isolation_module"
 
         # Ensure it's not in sys.modules
         if test_module in sys.modules:
@@ -179,7 +185,7 @@ def test_func():
         from grid.security.module_utils import get_module_dependencies
 
         # Test with a module that has dependencies
-        deps = get_module_dependencies('os')
+        deps = get_module_dependencies("os")
         self.assertIsInstance(deps, set)
 
         # os module should have some dependencies
@@ -192,21 +198,21 @@ def test_func():
         report = get_environment_report()
 
         # Check structure
-        self.assertIn('python', report)
-        self.assertIn('environment', report)
+        self.assertIn("python", report)
+        self.assertIn("environment", report)
 
         # Check Python info
-        python_info = report['python']
-        self.assertIn('executable', python_info)
-        self.assertIn('version', python_info)
-        self.assertIn('path', python_info)
+        python_info = report["python"]
+        self.assertIn("executable", python_info)
+        self.assertIn("version", python_info)
+        self.assertIn("path", python_info)
 
         # Check environment info
-        env_info = report['environment']
-        self.assertIn('path', env_info)
-        self.assertIn('pythonpath', env_info)
+        env_info = report["environment"]
+        self.assertIn("path", env_info)
+        self.assertIn("pythonpath", env_info)
 
-    @patch('logging.getLogger')
+    @patch("logging.getLogger")
     def test_grid_init_sanitization(self, mock_get_logger):
         """Test that grid init performs sanitization."""
         mock_logger = MagicMock()
@@ -218,7 +224,8 @@ def test_func():
         # Check that logger was called (indicating sanitization ran)
         # Note: This might not work if sanitization report is empty
         # but at least test that import succeeds
-        self.assertTrue(hasattr(grid, '__all__'))
+        self.assertTrue(hasattr(grid, "__all__"))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

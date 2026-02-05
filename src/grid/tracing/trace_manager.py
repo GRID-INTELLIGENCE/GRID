@@ -125,7 +125,7 @@ class TraceManager:
     ) -> Iterator[ActionTrace]:
         """
         Context manager for tracing an action.
-        
+
         FIXED: Only pushes to context stack after successful trace creation,
         preventing stack corruption if create_trace raises an exception.
         """
@@ -160,6 +160,7 @@ class TraceManager:
             trace.complete(success=True)
         except Exception as e:
             import traceback
+
             trace.complete(success=False, error=f"{str(e)}\n{traceback.format_exc()}")
             raise
         finally:

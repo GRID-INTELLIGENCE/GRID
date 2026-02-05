@@ -38,9 +38,21 @@ from .state_machine import (
     TransitionRecord,
 )
 
+# Anomaly detection factory functions and config
+from .anomaly_detector import (
+    AdaptiveAnomalyDetector,
+    AnomalyResult,
+    BaselineMetrics,
+    MultiWindowAnomalyDetector,
+    RateLimitAnomalyDetector,
+    create_adaptive_anomaly_detector,
+    create_multi_window_detector,
+    create_rate_limit_detector,
+)
+from .config import ComponentConfig, GuardMode, ParasiteGuardConfig
+
 # Lazy imports for optional components (to avoid import cycles and heavy deps)
 # These can be imported explicitly when needed:
-# - from .anomaly_detector import AdaptiveAnomalyDetector
 # - from .precision_validator import PrecisionValidator
 # - from .metrics import *
 
@@ -85,4 +97,18 @@ __all__ = [
     "SecurityAuditChannel",
     "WebhookAlertChannel",
     "InMemoryAlertChannel",
+    # Configuration
+    "ParasiteGuardConfig",
+    "ComponentConfig",
+    "GuardMode",
+    # Anomaly detection
+    "AdaptiveAnomalyDetector",
+    "MultiWindowAnomalyDetector",
+    "RateLimitAnomalyDetector",
+    "AnomalyResult",
+    "BaselineMetrics",
+    # Factory functions (config-driven)
+    "create_adaptive_anomaly_detector",
+    "create_multi_window_detector",
+    "create_rate_limit_detector",
 ]

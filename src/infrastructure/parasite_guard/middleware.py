@@ -41,6 +41,7 @@ class ParasiteGuardMiddleware:
     def __init__(self, app: Any, config: ParasiteGuardConfig):
         self.app = app
         self.config = config
+        self.event_bus = None
 
         # Initialize detector chain
         self.detector_chain = self._create_detector_chain()
@@ -73,6 +74,34 @@ class ParasiteGuardMiddleware:
         detectors.append(DBConnectionOrphanDetector(self.config))
 
         return DetectorChain(detectors, self.config)
+
+    def wire_event_bus(self, event_bus: Any) -> None:
+        """
+        Wire EventBus to the EventSubscriptionLeakDetector.
+
+        This must be called after middleware initialization to enable
+        subscription leak detection on the actual EventBus instance.
+
+        Args:
+            event_bus: The EventBus instance to monitor
+        """
+        self.event_bus = event_bus
+        logger.info("Wired EventBus to ParasiteGuardMiddleware")
+
+        # Find EventSubscriptionLeakDetector and wire the event bus
+        # Note: DetectorChain stores detectors in .detectors (not ._detectors)
+        for detector in self.detector_chain.detectors:
+            if hasattr(detector, 'set_event_bus'):
+                detector.set_event_bus(event_bus)
+                logger.info(f"Wired EventBus to {detector.name} detector")
+                break
+        else:
+            logger.warning("EventSubscriptionLeakDetector not found in detector chain")
+
+        # Also wire to sanitizer
+        if hasattr(self.deferred_sanitizer, 'set_event_bus'):
+            self.deferred_sanitizer.set_event_bus(event_bus)
+            logger.info("Wired EventBus to DeferredSanitizer")
 
     async def __call__(self, scope: dict, receive: Callable, send: Callable) -> None:
         """
@@ -148,6 +177,36 @@ class ParasiteGuardMiddleware:
         """
         # Record detection
         await self.profiler.record_detection(DetectionResult(detected=True, context=context), request)
+
+        # Emit security event
+        if self.event_bus:
+            try:
+                # Create event payload
+                event_data = {
+                    "parasite_id": str(context.id),
+                    "component": context.component,
+                    "pattern": context.pattern,
+                    "severity": context.severity.name,
+                    "client_ip": request.client.host,
+                    "path": request.url.path,
+                    "timestamp": context.timestamp.isoformat(),
+                }
+
+                # Publish event (fire and forget via create_task to avoid blocking response)
+                from infrastructure.event_bus import Event
+
+                event = Event(
+                    topic="system.security.parasite_detected",
+                    data=event_data,
+                    source="parasite_guard"
+                )
+
+                asyncio.create_task(
+                    self.event_bus.publish(event),
+                    name=f"emit_parasite_event_{context.id}"
+                )
+            except Exception as e:
+                logger.error(f"Failed to emit parasite event: {e}")
 
         # Resolve source (async but fire-and-forget)
         asyncio.create_task(

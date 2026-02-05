@@ -74,10 +74,12 @@ class TestMonitorHandlerEdgeCases:
     def test_handler_check_operation_success(self, reset_monitor: None) -> None:
         """Test successful content check via handler."""
         # First create a session
-        session_result = monitor_handler({
-            "operation": "create",
-            "stream_id": "test_stream",
-        })
+        session_result = monitor_handler(
+            {
+                "operation": "create",
+                "stream_id": "test_stream",
+            }
+        )
         session_id = session_result["session_id"]
 
         args = {
@@ -110,10 +112,12 @@ class TestMonitorHandlerEdgeCases:
     def test_handler_stats_operation_specific_session(self, reset_monitor: None) -> None:
         """Test getting stats for specific session via handler."""
         # First create a session
-        session_result = monitor_handler({
-            "operation": "create",
-            "stream_id": "test_stream",
-        })
+        session_result = monitor_handler(
+            {
+                "operation": "create",
+                "stream_id": "test_stream",
+            }
+        )
         session_id = session_result["session_id"]
 
         args = {
@@ -145,10 +149,12 @@ class TestMonitorHandlerEdgeCases:
     def test_handler_stop_operation_success(self, reset_monitor: None) -> None:
         """Test successful session stop via handler."""
         # First create a session
-        session_result = monitor_handler({
-            "operation": "create",
-            "stream_id": "test_stream",
-        })
+        session_result = monitor_handler(
+            {
+                "operation": "create",
+                "stream_id": "test_stream",
+            }
+        )
         session_id = session_result["session_id"]
 
         args = {
@@ -218,10 +224,12 @@ class TestMonitorHandlerEdgeCases:
 
     def test_handler_with_complex_context(self, reset_monitor: None) -> None:
         """Test handler with complex context data."""
-        session_result = monitor_handler({
-            "operation": "create",
-            "stream_id": "test_stream",
-        })
+        session_result = monitor_handler(
+            {
+                "operation": "create",
+                "stream_id": "test_stream",
+            }
+        )
         session_id = session_result["session_id"]
 
         complex_context = {
@@ -231,7 +239,7 @@ class TestMonitorHandlerEdgeCases:
                 "timestamp": "2024-01-01T00:00:00Z",
                 "tags": ["test", "safety"],
                 "nested": {"key": "value"},
-            }
+            },
         }
 
         args = {
@@ -247,10 +255,12 @@ class TestMonitorHandlerEdgeCases:
 
     def test_handler_with_unicode_content(self, reset_monitor: None) -> None:
         """Test handler with unicode and special characters."""
-        session_result = monitor_handler({
-            "operation": "create",
-            "stream_id": "test_stream",
-        })
+        session_result = monitor_handler(
+            {
+                "operation": "create",
+                "stream_id": "test_stream",
+            }
+        )
         session_id = session_result["session_id"]
 
         unicode_content = "Test with emojis 🚀 and special chars: ñáéíóú"
@@ -278,33 +288,41 @@ class TestMonitorHandlerEdgeCases:
     def test_handler_multiple_operations_sequence(self, reset_monitor: None) -> None:
         """Test sequence of multiple handler operations."""
         # Create session
-        create_result = monitor_handler({
-            "operation": "create",
-            "stream_id": "test_stream",
-        })
+        create_result = monitor_handler(
+            {
+                "operation": "create",
+                "stream_id": "test_stream",
+            }
+        )
         session_id = create_result["session_id"]
 
         # Check content
-        check_result = monitor_handler({
-            "operation": "check",
-            "session_id": session_id,
-            "content": "test content",
-        })
+        check_result = monitor_handler(
+            {
+                "operation": "check",
+                "session_id": session_id,
+                "content": "test content",
+            }
+        )
         assert check_result["success"] is True
 
         # Get stats
-        stats_result = monitor_handler({
-            "operation": "stats",
-            "session_id": session_id,
-        })
+        stats_result = monitor_handler(
+            {
+                "operation": "stats",
+                "session_id": session_id,
+            }
+        )
         assert stats_result["success"] is True
         assert stats_result["session"]["contents_checked"] == 1
 
         # Stop session
-        stop_result = monitor_handler({
-            "operation": "stop",
-            "session_id": session_id,
-        })
+        stop_result = monitor_handler(
+            {
+                "operation": "stop",
+                "session_id": session_id,
+            }
+        )
         assert stop_result["success"] is True
 
     def test_handler_create_missing_stream_id(self, reset_monitor: None) -> None:

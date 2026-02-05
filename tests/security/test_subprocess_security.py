@@ -5,10 +5,11 @@ Tests command injection prevention, path validation, input sanitization,
 and timeout handling in the SecureSubprocess wrapper.
 """
 
-import pytest
 import subprocess
 import tempfile
 from pathlib import Path
+
+import pytest
 
 from grid.security.subprocess_wrapper import (
     SecureSubprocess,
@@ -181,9 +182,7 @@ class TestSecureSubprocess:
 
         async def run_async_timeout() -> None:
             runner = SecureSubprocess(default_timeout=1)
-            result = await runner.run_async(
-                ["python", "-c", "import time; time.sleep(5)"], timeout=1
-            )
+            result = await runner.run_async(["python", "-c", "import time; time.sleep(5)"], timeout=1)
 
             assert result.returncode == -1
             assert not result.success
@@ -271,9 +270,7 @@ class TestPathValidation:
         with tempfile.TemporaryDirectory() as tmpdir:
             runner = SecureSubprocess(allowed_directories=[tmpdir])
 
-            result = runner.run(
-                ["python", "--version"], cwd=Path(tmpdir).resolve(), timeout=5
-            )
+            result = runner.run(["python", "--version"], cwd=Path(tmpdir).resolve(), timeout=5)
             assert result.success
 
     def test_path_outside_base_rejected(self) -> None:
@@ -283,6 +280,4 @@ class TestPathValidation:
 
             with tempfile.TemporaryDirectory() as other_dir:
                 with pytest.raises(SubprocessSecurityError):
-                    runner.run(
-                        ["python", "--version"], cwd=str(other_dir), timeout=5
-                    )
+                    runner.run(["python", "--version"], cwd=str(other_dir), timeout=5)

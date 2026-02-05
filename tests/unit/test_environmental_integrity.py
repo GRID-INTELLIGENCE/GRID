@@ -3,6 +3,7 @@ import sys
 from unittest.mock import MagicMock
 
 import pytest
+
 from grid.security.environment import sanitize_environment
 from grid.skills.hot_reload_manager import HotReloadManager
 

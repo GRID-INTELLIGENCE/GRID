@@ -136,8 +136,9 @@ try:  # pragma: no cover
     _sanitization_report = sanitize_environment()
 
     # Optionally log the sanitization report
-    if _sanitization_report and __name__ != '__main__':
+    if _sanitization_report and __name__ != "__main__":
         import logging
+
         logger = logging.getLogger(__name__)
         for category, messages in _sanitization_report.items():
             for message in messages:

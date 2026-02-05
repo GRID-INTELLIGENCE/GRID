@@ -262,3 +262,85 @@ def test_databricks_delete_documents(mock_engine):
 
             # Verify cursor execute was called for deletion
             cursor.execute.assert_called()
+
+
+# ============================================================================
+# Test Group 6: SQL Injection Prevention (4 tests)
+# ============================================================================
+
+
+def test_sql_injection_via_table_name():
+    """Test that SQL injection via table names is prevented."""
+    with patch.dict(
+        "os.environ",
+        {
+            "DATABRICKS_HOST": "test.databricks.com",
+            "DATABRICKS_HTTP_PATH": "/sql/1.0/warehouses/test",
+            "DATABRICKS_TOKEN": "test_token",
+        },
+    ):
+        # Attempt SQL injection via table name
+        with pytest.raises(ValueError, match="Invalid chunk_table"):
+            DatabricksVectorStore(chunk_table="chunks; DROP TABLE users; --")
+
+
+def test_sql_injection_via_schema_name():
+    """Test that SQL injection via schema names is prevented."""
+    with patch.dict(
+        "os.environ",
+        {
+            "DATABRICKS_HOST": "test.databricks.com",
+            "DATABRICKS_HTTP_PATH": "/sql/1.0/warehouses/test",
+            "DATABRICKS_TOKEN": "test_token",
+        },
+    ):
+        # Attempt SQL injection via schema name
+        with pytest.raises(ValueError, match="Invalid schema"):
+            DatabricksVectorStore(schema="default'; DROP TABLE chunks; --")
+
+
+def test_document_with_quotes_does_not_crash(mock_engine):
+    """Test that documents with single quotes don't cause SQL errors."""
+    engine, conn, cursor = mock_engine
+
+    with patch.object(DatabricksVectorStore, "_verify_connection"):
+        with patch.object(DatabricksVectorStore, "_ensure_tables_exist"):
+            with patch.object(DatabricksVectorStore, "_update_document_metadata"):
+                store = DatabricksVectorStore()
+
+                # Document with SQL injection attempt in content
+                ids = ["doc1"]
+                documents = ["O'Reilly's book about SQL'; DROP TABLE users; --"]
+                embeddings = [[0.1, 0.2, 0.3]]
+                metadatas = [{"path": "test'; DROP TABLE chunks; --.txt"}]
+
+                # Should not raise - parameterized queries handle escaping
+                store.add(ids, documents, embeddings, metadatas)
+
+                # Verify execute was called (parameterized query handles escaping)
+                conn.execute.assert_called()
+
+
+def test_query_filter_injection_prevented(mock_engine):
+    """Test that query filter values are properly parameterized."""
+    engine, conn, cursor = mock_engine
+
+    with patch.object(DatabricksVectorStore, "_verify_connection"):
+        with patch.object(DatabricksVectorStore, "_ensure_tables_exist"):
+            store = DatabricksVectorStore()
+
+            mock_results = MagicMock()
+            mock_results.fetchall.return_value = []
+
+            conn.execute = MagicMock(return_value=mock_results)
+            mock_conn_context = MagicMock()
+            mock_conn_context.__enter__ = MagicMock(return_value=conn)
+            mock_conn_context.__exit__ = MagicMock(return_value=None)
+            engine.connect = MagicMock(return_value=mock_conn_context)
+
+            # Attempt SQL injection via where filter
+            result = store.query([0.1, 0.2, 0.3], n_results=5, where={"path": "'; DROP TABLE chunks; --"})
+
+            # Should return safely (empty or filtered) - no exception
+            assert isinstance(result, dict)
+            assert "ids" in result

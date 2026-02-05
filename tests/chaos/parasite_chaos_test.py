@@ -18,9 +18,8 @@ import logging
 import random
 import time
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from typing import Any, Callable
-from unittest.mock import AsyncMock, MagicMock, patch
+from datetime import UTC, datetime
+from typing import Any
 
 import pytest
 
@@ -69,7 +68,7 @@ class SteadyStateMetrics:
     throughput: float = 0.0
     active_connections: int = 0
     slo_target: float = 0.99
-    timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    timestamp: datetime = field(default_factory=lambda: datetime.now(UTC))
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -402,9 +401,7 @@ class ParasiteChaosRunner:
         await chaos_task
 
         # Step 4: Wait for recovery
-        recovered, recovery_time = await self._wait_for_recovery(
-            self.recovery_timeout_seconds
-        )
+        recovered, recovery_time = await self._wait_for_recovery(self.recovery_timeout_seconds)
         logger.info(f"  Recovery: {recovered}, time={recovery_time:.2f}s")
 
         # Step 5: Calculate error budget
@@ -412,10 +409,7 @@ class ParasiteChaosRunner:
         logger.info(f"  Error budget consumed: {error_budget_consumed:.2%}")
 
         # Determine if experiment passed
-        passed = (
-            recovery_time < self.recovery_timeout_seconds
-            and error_budget_consumed < self.error_budget_threshold
-        )
+        passed = recovery_time < self.recovery_timeout_seconds and error_budget_consumed < self.error_budget_threshold
 
         return ResilienceMetrics(
             steady_state_slo=steady_state.slo_target,
@@ -523,9 +517,7 @@ class TestChaosExperiments:
         steady_state = SteadyStateMetrics(slo_target=0.99)
         chaos_metrics = {"error_rate": 0.005}  # 0.5% error rate
 
-        budget_consumed = chaos_runner._calculate_error_budget(
-            steady_state, chaos_metrics
-        )
+        budget_consumed = chaos_runner._calculate_error_budget(steady_state, chaos_metrics)
 
         # Error budget is 1% (1 - 0.99), 0.5% error = 50% consumed
         assert 0.4 <= budget_consumed <= 0.6
@@ -631,9 +623,7 @@ class TestPerformanceHypothesis:
         }
 
         # Calculate effect size (Cohen's d)
-        pooled_std = math.sqrt(
-            (baseline["std_latency"] ** 2 + current["std_latency"] ** 2) / 2
-        )
+        pooled_std = math.sqrt((baseline["std_latency"] ** 2 + current["std_latency"] ** 2) / 2)
         effect_size = (current["mean_latency"] - baseline["mean_latency"]) / pooled_std
 
         # Effect size > 0.5 is considered medium effect

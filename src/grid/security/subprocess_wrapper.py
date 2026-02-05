@@ -23,10 +23,9 @@ import shlex
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
 
 from .audit_logger import AuditEventType, AuditLogger
-from .path_validator import PathValidator, SecurityError
+from .path_validator import SecurityError
 
 logger = logging.getLogger(__name__)
 
@@ -135,9 +134,7 @@ class SecureSubprocess:
                     continue
 
             if not allowed:
-                raise SubprocessSecurityError(
-                    f"Working directory '{cwd_path}' not in allowed directories"
-                )
+                raise SubprocessSecurityError(f"Working directory '{cwd_path}' not in allowed directories")
 
     def _sanitize_command(self, command: str | list[str]) -> list[str]:
         """
@@ -441,7 +438,7 @@ class SecureSubprocess:
 
             try:
                 stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=timeout)
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 process.kill()
                 await process.wait()
                 raise subprocess.TimeoutExpired(cmd_list, timeout)
@@ -469,7 +466,7 @@ class SecureSubprocess:
 
             return subprocess_result
 
-        except subprocess.TimeoutExpired as e:
+        except subprocess.TimeoutExpired:
             duration_ms = (time.perf_counter() - start_time) * 1000
             error_msg = f"Command timed out after {timeout} seconds"
 

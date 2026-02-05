@@ -1,0 +1,34 @@
+{
+  "summary": {
+    "MEDIUM": 2,
+    "HIGH": 1,
+    "CRITICAL": 0,
+    "LOW": 0
+  },
+  "findings": [
+    {
+      "file": "scripts\\gh_feedback_loop.py",
+      "line": 2,
+      "risk": "MEDIUM",
+      "category": "suspicious_import",
+      "message": "Importing suspicious module 'subprocess'",
+      "context": "<module>"
+    },
+    {
+      "file": "scripts\\gh_feedback_loop.py",
+      "line": 9,
+      "risk": "MEDIUM",
+      "category": "suspicious_import",
+      "message": "Importing suspicious module 'shlex'",
+      "context": "<module>"
+    },
+    {
+      "file": "scripts\\gh_feedback_loop.py",
+      "line": 22,
+      "risk": "HIGH",
+      "category": "dangerous_execution",
+      "message": "Call to dangerous function 'subprocess.run'",
+      "context": "run_command"
+    }
+  ]
+}

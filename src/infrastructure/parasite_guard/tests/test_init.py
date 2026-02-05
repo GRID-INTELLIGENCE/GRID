@@ -4,11 +4,11 @@ Test initialization and shared fixtures for Parasite Guard tests.
 
 from __future__ import annotations
 
-import pytest
-from pathlib import Path
-
 # Ensure parasite_guard is importable
 import sys
+from pathlib import Path
+
+import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -16,7 +16,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 @pytest.fixture
 def test_config():
     """Create test configuration with all components enabled."""
-    from infrastructure.parasite_guard.config import ParasiteGuardConfig, GuardMode
+    from infrastructure.parasite_guard.config import GuardMode, ParasiteGuardConfig
 
     config = ParasiteGuardConfig()
     config.enabled = True
@@ -33,7 +33,7 @@ def test_config():
 @pytest.fixture
 def dry_run_config():
     """Create dry-run configuration for safe testing."""
-    from infrastructure.parasite_guard.config import ParasiteGuardConfig, GuardMode
+    from infrastructure.parasite_guard.config import GuardMode, ParasiteGuardConfig
 
     config = ParasiteGuardConfig()
     config.enabled = True
@@ -46,7 +46,7 @@ def dry_run_config():
 @pytest.fixture
 def detect_mode_config():
     """Create detect-mode configuration."""
-    from infrastructure.parasite_guard.config import ParasiteGuardConfig, GuardMode
+    from infrastructure.parasite_guard.config import GuardMode, ParasiteGuardConfig
 
     config = ParasiteGuardConfig()
     config.enabled = True
@@ -59,7 +59,7 @@ def detect_mode_config():
 @pytest.fixture
 def full_mode_config():
     """Create full-mode configuration with sanitization."""
-    from infrastructure.parasite_guard.config import ParasiteGuardConfig, GuardMode
+    from infrastructure.parasite_guard.config import GuardMode, ParasiteGuardConfig
 
     config = ParasiteGuardConfig()
     config.enabled = True
@@ -72,8 +72,9 @@ def full_mode_config():
 @pytest.fixture
 def sample_context():
     """Create a sample ParasiteContext for testing."""
-    from infrastructure.parasite_guard.models import ParasiteContext, ParasiteSeverity
     import uuid
+
+    from infrastructure.parasite_guard.models import ParasiteContext, ParasiteSeverity
 
     return ParasiteContext(
         id=uuid.UUID("12345678-1234-1234-1234-123456789abc"),

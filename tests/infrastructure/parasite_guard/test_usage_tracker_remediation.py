@@ -15,7 +15,7 @@ async def test_usage_tracker_flush_recovery():
     """Test that failed flushes move events to dead-letter queue and don't lose them."""
     # Mock DB manager
     db = MagicMock()
-    db.execute_many = AsyncMock(side_effect=[Exception("DB Error"), None]) # Fail first, succeed second
+    db.execute_many = AsyncMock(side_effect=[Exception("DB Error"), None])  # Fail first, succeed second
     db.commit = AsyncMock()
 
     tracker = UsageTracker(db, batch_size=2)
@@ -47,6 +47,7 @@ async def test_usage_tracker_flush_recovery():
     # Verify queues are empty now
     assert len(tracker._dead_letter) == 0
     assert len(tracker._buffer) == 0
+
 
 @pytest.mark.asyncio
 async def test_usage_tracker_dead_letter_limit():

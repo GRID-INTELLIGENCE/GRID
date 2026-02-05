@@ -15,6 +15,7 @@ async def test_agentic_event_bus_unsubscribe():
     bus = EventBus()
 
     events_received = []
+
     async def handler(event):
         events_received.append(event)
 
@@ -38,12 +39,14 @@ async def test_agentic_event_bus_unsubscribe():
     await bus.publish({"event_type": "agent.log", "msg": "world"})
     assert len(events_received) == 1  # Still 1
 
+
 @pytest.mark.asyncio
 async def test_agentic_event_bus_unsubscribe_all():
     """Test unsubscription for subscribe_all."""
     bus = EventBus()
 
     counter = 0
+
     async def handler(event):
         nonlocal counter
         counter += 1

@@ -85,7 +85,7 @@ class UsageTracker:
             async with self._lock:
                 self._dead_letter.extend(batch)
                 if len(self._dead_letter) > self._max_dead_letter_size:
-                    self._dead_letter = self._dead_letter[-self._max_dead_letter_size:]
+                    self._dead_letter = self._dead_letter[-self._max_dead_letter_size :]
             logger.info(f"Re-buffered {len(batch)} events to dead-letter queue")
 
     async def _periodic_flush(self) -> None:

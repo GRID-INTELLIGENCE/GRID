@@ -25,7 +25,7 @@ from pathlib import Path
 from typing import Any, ClassVar, cast
 
 # Import safe module utilities
-from grid.security.module_utils import safe_reload, cleanup_module
+from grid.security.module_utils import cleanup_module, safe_reload
 
 # Note: watchdog is an optional dependency for hot-reloading
 try:

@@ -8,13 +8,12 @@ type signatures and injecting parasite metadata.
 
 from __future__ import annotations
 
-import json
 import logging
-from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional, Union
+from datetime import datetime
+from typing import Any, Union
 
-from .models import ParasiteContext
 from .config import ParasiteGuardConfig
+from .models import ParasiteContext
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +32,7 @@ class FractalNullFacade:
     def __init__(self, config: ParasiteGuardConfig):
         self.config = config
 
-    def build_null_response(self, schema: Any, parasite_context: ParasiteContext) -> Dict[str, Any]:
+    def build_null_response(self, schema: Any, parasite_context: ParasiteContext) -> dict[str, Any]:
         """
         Build a fractal null response based on schema.
 
@@ -58,7 +57,7 @@ class FractalNullFacade:
 
         return base_payload
 
-    def _build_null_object(self, schema: Any) -> Dict[str, Any]:
+    def _build_null_object(self, schema: Any) -> dict[str, Any]:
         """
         Recursively walk schema and build null object.
 
@@ -111,10 +110,10 @@ class FractalNullFacade:
             return self.NULL_SENTINEL
 
         # Containers
-        elif origin is list or origin is List:
+        elif origin is list or origin is list:
             return []
 
-        elif origin is dict or origin is Dict:
+        elif origin is dict or origin is dict:
             return {}
 
         elif origin is set or origin is frozenset:
@@ -223,16 +222,18 @@ class DummyResponseGenerator:
         else:
             return str(schema)
 
-    def _create_response(self, payload: Dict[str, Any]) -> Any:
+    def _create_response(self, payload: dict[str, Any]) -> Any:
         """
         Create ASGI response object.
 
-        Returns FastAPI JSONResponse.
+        Returns FastAPI JSONResponse with configured status code.
+        Default is 403 Forbidden to signal blocked parasite.
+        Set PARASITE_RESPONSE_STATUS_CODE=200 for stealth mode.
         """
         from fastapi.responses import JSONResponse
 
         return JSONResponse(
             content=payload,
-            status_code=200,
+            status_code=self.config.parasite_response_status_code,
             media_type="application/json",
         )

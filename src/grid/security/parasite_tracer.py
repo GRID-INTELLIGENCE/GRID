@@ -21,11 +21,10 @@ import gc
 import inspect
 import os
 import sys
-import traceback
 import uuid
 from collections import defaultdict
-from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from dataclasses import dataclass
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Callable
 
@@ -290,8 +289,7 @@ class ParasiteCallTracer:
         """Check if file is from stdlib or site-packages."""
         path_str = str(file_path).lower()
         return any(
-            marker in path_str
-            for marker in ["site-packages", "dist-packages", "lib/python", "stdlib", "<frozen"]
+            marker in path_str for marker in ["site-packages", "dist-packages", "lib/python", "stdlib", "<frozen"]
         )
 
     def extract_trace(self, detection_rule: str) -> ParasiteTrace:
@@ -317,11 +315,13 @@ class ParasiteCallTracer:
         call_graph = self._build_call_graph(chain)
 
         # Determine if async
-        is_async = any(asyncio.iscoroutinefunction(getattr(sys.modules.get(loc.module), loc.function, None)) for loc in chain)
+        is_async = any(
+            asyncio.iscoroutinefunction(getattr(sys.modules.get(loc.module), loc.function, None)) for loc in chain
+        )
 
         return ParasiteTrace(
             id=uuid.uuid4(),
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
             detection_rule=detection_rule,
             environment=environment,
             source=chain[-1],
@@ -381,14 +381,18 @@ class ParasiteCallTracer:
         helpers: list[HelperLocation] = []
 
         # Find seed index
-        seed_idx = next((i for i, loc in enumerate(chain) if loc.module == seed.module and loc.function == seed.function), 0)
+        seed_idx = next(
+            (i for i, loc in enumerate(chain) if loc.module == seed.module and loc.function == seed.function), 0
+        )
 
         for idx in range(seed_idx + 1, len(chain)):
             loc = chain[idx]
 
             # Check if it's a decorator/property/etc
             is_decorator = self._is_decorator(loc)
-            is_property = loc.function in ("__get__", "__set__", "__delete__") or "@property" in "".join(loc.code_context)
+            is_property = loc.function in ("__get__", "__set__", "__delete__") or "@property" in "".join(
+                loc.code_context
+            )
             is_async = asyncio.iscoroutinefunction(getattr(sys.modules.get(loc.module), loc.function, None))
 
             helpers.append(

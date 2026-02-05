@@ -66,7 +66,7 @@ class OllamaLLM(LLMProvider):
         except Exception as e:
             logger.debug(f"Native client failed, trying subprocess: {e}")
 
-        # Fallback to async subprocess
+        # Fallback to async subprocess (safe: argv from code, no exec())
         try:
             proc = await asyncio.create_subprocess_exec(
                 "ollama",

@@ -3,7 +3,7 @@
 import asyncio
 import logging
 
-from .engine import _db_connections, METRICS_ENABLED, get_async_engine
+from .engine import METRICS_ENABLED, _db_connections, get_async_engine
 
 logger = logging.getLogger(__name__)
 

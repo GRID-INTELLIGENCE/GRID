@@ -86,6 +86,32 @@ class DatabricksVectorStore(BaseVectorStore):
     - Metadata filtering optimization
     """
 
+    # Valid identifier pattern for table/schema names (SQL injection prevention)
+    _IDENTIFIER_PATTERN = r"^[a-zA-Z_][a-zA-Z0-9_]*$"
+
+    @classmethod
+    def _validate_identifier(cls, name: str, label: str = "identifier") -> str:
+        """Validate SQL identifier to prevent injection via table/schema names.
+
+        Args:
+            name: The identifier to validate
+            label: Description for error messages
+
+        Returns:
+            The validated identifier
+
+        Raises:
+            ValueError: If identifier contains invalid characters
+        """
+        import re
+
+        if not name or not re.match(cls._IDENTIFIER_PATTERN, name):
+            raise ValueError(
+                f"Invalid {label}: '{name}'. "
+                f"Must start with letter/underscore and contain only alphanumeric/underscore."
+            )
+        return name
+
     def __init__(
         self,
         chunk_table: str = "rag_chunks",
@@ -124,6 +150,11 @@ class DatabricksVectorStore(BaseVectorStore):
             raise ValueError("DATABRICKS_HTTP_PATH is required")
         if not self._token:
             raise ValueError("DATABRICKS_TOKEN or DATABRICKS_ACCESS_TOKEN is required")
+
+        # Validate table/schema names to prevent SQL injection
+        self._validate_identifier(chunk_table, "chunk_table")
+        self._validate_identifier(document_table, "document_table")
+        self._validate_identifier(schema, "schema")
 
         self.chunk_table = f"{schema}.{chunk_table}" if schema != "default" else chunk_table
         self.document_table = f"{schema}.{document_table}" if schema != "default" else document_table
@@ -317,7 +348,7 @@ class DatabricksVectorStore(BaseVectorStore):
                 batch_embs = embeddings[i : i + batch_size]
                 batch_metas = metadatas[i : i + batch_size]
 
-                values = []
+                params = []
                 for doc_id, doc, emb, meta in zip(batch_ids, batch_docs, batch_embs, batch_metas, strict=False):
                     # Extract document_id and chunk_index from id (format: "path#chunk_index")
                     parts = doc_id.split("#")
@@ -325,21 +356,22 @@ class DatabricksVectorStore(BaseVectorStore):
                     chunk_index = int(parts[1]) if len(parts) > 1 and parts[1].isdigit() else 0
 
                     path = meta.get("path", "")
-                    # Databricks SQL expects array(1.0, 2.0, ...), not array([1.0, 2.0])
-                    emb_vals = ",".join(str(float(x)) for x in emb)
                     metadata_json = json.dumps(meta)
                     embedding_model = meta.get("embedding_model", "")
 
-                    values.append(
-                        f"('{doc_id}', '{document_id}', {chunk_index}, "
-                        f"'{self._escape_sql(doc)}', "
-                        f"array({emb_vals}), "
-                        f"'{self._escape_sql(path)}', "
-                        f"'{self._escape_sql(metadata_json)}', "
-                        f"CAST('{now.isoformat()}' AS TIMESTAMP), "
-                        f"CAST('{now.isoformat()}' AS TIMESTAMP), "
-                        f"'{self._escape_sql(embedding_model)}', "
-                        f"{embedding_dim})"
+                    params.append(
+                        {
+                            "id": doc_id,
+                            "document_id": document_id,
+                            "chunk_index": chunk_index,
+                            "text": doc,
+                            "embedding": emb,
+                            "path": path,
+                            "metadata": metadata_json,
+                            "now": now,
+                            "model": embedding_model,
+                            "dim": embedding_dim,
+                        }
                     )
 
                 sql = f"""
@@ -347,13 +379,15 @@ class DatabricksVectorStore(BaseVectorStore):
                     id, document_id, chunk_index, text, embedding, path, metadata,
                     created_at, updated_at, embedding_model, embedding_dimension
                 )
-                VALUES {",".join(values)}
+                VALUES (
+                    :id, :document_id, :chunk_index, :text, :embedding, :path, :metadata,
+                    :now, :now, :model, :dim
+                )
                 """
 
                 with self._connect() as conn:
-                    with conn.cursor() as cur:
-                        cur.execute(sql)
-                logger.debug(f"Inserted batch of {len(values)} chunks")
+                    conn.execute(text(sql), params)
+                logger.debug(f"Inserted batch of {len(params)} chunks")
 
             # Update document metadata (chunk counts)
             self._update_document_metadata(ids, metadatas)
@@ -384,16 +418,20 @@ class DatabricksVectorStore(BaseVectorStore):
             path = doc_paths.get(document_id, "")
             file_type = doc_types.get(document_id, "")
 
-            # Use MERGE for upsert
+        for document_id, chunk_count in doc_counts.items():
+            path = doc_paths.get(document_id, "")
+            file_type = doc_types.get(document_id, "")
+
+            # Use MERGE for upsert with parameters
             sql = f"""
             MERGE INTO {self.document_table} AS target
             USING (
-                SELECT '{document_id}' AS document_id,
-                       '{self._escape_sql(path)}' AS path,
-                       '{self._escape_sql(file_type)}' AS file_type,
-                       CAST('{now.isoformat()}' AS TIMESTAMP) AS created_at,
-                       CAST('{now.isoformat()}' AS TIMESTAMP) AS updated_at,
-                       {chunk_count} AS chunk_count
+                SELECT :document_id AS document_id,
+                       :path AS path,
+                       :file_type AS file_type,
+                       CAST(:now AS TIMESTAMP) AS created_at,
+                       CAST(:now AS TIMESTAMP) AS updated_at,
+                       :chunk_count AS chunk_count
             ) AS source
             ON target.document_id = source.document_id
             WHEN MATCHED THEN
@@ -408,8 +446,16 @@ class DatabricksVectorStore(BaseVectorStore):
 
             try:
                 with self._connect() as conn:
-                    with conn.cursor() as cur:
-                        cur.execute(sql)
+                    conn.execute(
+                        text(sql),
+                        {
+                            "document_id": document_id,
+                            "path": path,
+                            "file_type": file_type,
+                            "now": now,
+                            "chunk_count": chunk_count,
+                        },
+                    )
             except Exception as e:
                 logger.warning(f"Failed to update document metadata for {document_id}: {e}")
 
@@ -452,16 +498,13 @@ class DatabricksVectorStore(BaseVectorStore):
 
         # Prepare SQL with server-side ranking
         # Note: Databricks SQL doesn't support parameterized arrays easily in plain SQL,
-        # so we format the array string safely.
+        # so we format the array string safely from floats (safe).
         query_vec_str = f"ARRAY({','.join(map(str, query_embedding))})"
 
-        similarity_sql = f"""
-        (ai_similarity(embedding, {query_vec_str}))
-        """
-        # Fallback if ai_similarity is not available (using standard array functions)
-        fallback_similarity_sql = f"""
-        (array_dot_product(embedding, {query_vec_str}) / (array_norm(embedding) * {query_norm}))
-        """
+        similarity_sql = f"(ai_similarity(embedding, {query_vec_str}))"
+        fallback_similarity_sql = (
+            f"(array_dot_product(embedding, {query_vec_str}) / (array_norm(embedding) * :query_norm))"
+        )
 
         sql = f"""
         SELECT id, document_id, chunk_index, text, path, metadata,
@@ -469,21 +512,25 @@ class DatabricksVectorStore(BaseVectorStore):
         FROM {self.chunk_table}
         """
 
+        params = {"query_norm": query_norm, "limit": int(n_results)}
+
         if where:
             conditions = []
-            for _key, value in where.items():
+            for i, (_key, value) in enumerate(where.items()):
                 if isinstance(value, str):
-                    conditions.append(f"path LIKE '%{self._escape_sql(value)}%'")
+                    param_name = f"path_filter_{i}"
+                    conditions.append(f"path LIKE :{param_name}")
+                    params[param_name] = f"%{value}%"
             if conditions:
                 sql += " WHERE " + " AND ".join(conditions)
 
-        sql += f" ORDER BY distance ASC LIMIT {int(n_results)}"
+        sql += " ORDER BY distance ASC LIMIT :limit"
 
         try:
             with self._connect() as conn:
                 # Set query timeout
                 conn.execute(text(f"SET STATEMENT SET @@session.statement_timeout = {self._query_timeout}"))
-                results = conn.execute(text(sql))
+                results = conn.execute(text(sql), params)
                 rows = results.fetchall()
         except (OperationalError, SQLAlchemyError) as e:
             logger.error(f"Failed to query embeddings server-side: {e}")
@@ -543,12 +590,12 @@ class DatabricksVectorStore(BaseVectorStore):
             try:
                 for batch_start in range(0, len(ids), batch_size):
                     batch_ids = ids[batch_start : batch_start + batch_size]
-                    ids_str = ", ".join(f"'{doc_id}'" for doc_id in batch_ids)
-                    sql = f"DELETE FROM {self.chunk_table} WHERE id IN ({ids_str})"
+                    param_placeholders = ", ".join([f":id_{j}" for j in range(len(batch_ids))])
+                    p = {f"id_{j}": doc_id for j, doc_id in enumerate(batch_ids)}
+                    sql = f"DELETE FROM {self.chunk_table} WHERE id IN ({param_placeholders})"
 
                     with self._connect() as conn:
-                        with conn.cursor() as cur:
-                            cur.execute(sql)
+                        conn.execute(text(sql), p)
                     logger.debug(f"Deleted batch of {len(batch_ids)} chunks")
             except Exception as e:
                 logger.error(f"Failed to delete documents by ID: {e}")
@@ -557,12 +604,11 @@ class DatabricksVectorStore(BaseVectorStore):
         if where and "path" in where:
             # Delete by path pattern
             path_pattern = where["path"]
-            sql = f"DELETE FROM {self.chunk_table} WHERE path LIKE '%{self._escape_sql(path_pattern)}%'"
+            sql = f"DELETE FROM {self.chunk_table} WHERE path LIKE :pattern"
 
             try:
                 with self._connect() as conn:
-                    with conn.cursor() as cur:
-                        cur.execute(sql)
+                    conn.execute(text(sql), {"pattern": f"%{path_pattern}%"})
                 logger.debug(f"Deleted chunks matching path pattern: {path_pattern}")
             except Exception as e:
                 logger.error(f"Failed to delete by path pattern: {e}")
@@ -579,9 +625,8 @@ class DatabricksVectorStore(BaseVectorStore):
 
         try:
             with self._connect() as conn:
-                with conn.cursor() as cur:
-                    cur.execute(sql)
-                    row = cur.fetchone()
+                results = conn.execute(text(sql))
+                row = results.fetchone()
             return int(row[0]) if row else 0
         except Exception as e:
             logger.error(f"Failed to count chunks: {e}")
@@ -603,8 +648,3 @@ class DatabricksVectorStore(BaseVectorStore):
             return 0.0
 
         return dot / (norm_a * norm_b)
-
-    @staticmethod
-    def _escape_sql(value: str) -> str:
-        """Escape single quotes for SQL."""
-        return value.replace("'", "''")

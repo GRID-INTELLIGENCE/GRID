@@ -197,7 +197,7 @@ class SkillExecutionTracker:
     def _flush_batch(self) -> None:
         """
         Flush batch buffer to inventory with dead-letter queue fallback.
-        
+
         FIXED: Records that fail to persist are moved to dead-letter queue
         for later retry instead of being silently dropped.
         """
@@ -205,14 +205,14 @@ class SkillExecutionTracker:
             return
 
         inventory = self._get_inventory()
-        
+
         # If inventory unavailable, move all to dead-letter
         if not inventory:
             with self._dead_letter_lock:
                 self._dead_letter.extend(self._batch_buffer)
                 # Trim dead-letter if too large
                 if len(self._dead_letter) > self._max_dead_letter_size:
-                    self._dead_letter = self._dead_letter[-self._max_dead_letter_size:]
+                    self._dead_letter = self._dead_letter[-self._max_dead_letter_size :]
             self._logger.warning(f"Inventory unavailable, moved {len(self._batch_buffer)} records to dead-letter")
             self._batch_buffer.clear()
             return
@@ -220,7 +220,7 @@ class SkillExecutionTracker:
         # Attempt to flush with retry
         failed_records = []
         max_retries = 3
-        
+
         for attempt in range(max_retries):
             try:
                 for record in self._batch_buffer:
@@ -236,7 +236,7 @@ class SkillExecutionTracker:
             except Exception as e:
                 self._logger.error(f"Batch flush failed (attempt {attempt + 1}/{max_retries}): {e}")
                 if attempt < max_retries - 1:
-                    time.sleep(2 ** attempt)  # Exponential backoff
+                    time.sleep(2**attempt)  # Exponential backoff
                 else:
                     # Final failure - move to dead-letter
                     failed_records = self._batch_buffer.copy()
@@ -247,8 +247,10 @@ class SkillExecutionTracker:
                 self._dead_letter.extend(failed_records)
                 # Trim dead-letter if too large
                 if len(self._dead_letter) > self._max_dead_letter_size:
-                    self._dead_letter = self._dead_letter[-self._max_dead_letter_size:]
-            self._logger.error(f"Moved {len(failed_records)} failed records to dead-letter after {max_retries} attempts")
+                    self._dead_letter = self._dead_letter[-self._max_dead_letter_size :]
+            self._logger.error(
+                f"Moved {len(failed_records)} failed records to dead-letter after {max_retries} attempts"
+            )
             self._batch_buffer.clear()
 
     def _immediate_persist(self, record: SkillExecutionRecord) -> None:

@@ -13,7 +13,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-
 # =============================================================================
 # ACK Tracker Integration Tests
 # =============================================================================
@@ -48,11 +47,13 @@ class TestAckTrackerIntegration:
         mock_ws = AsyncMock()
 
         # Simulate ACK response
-        ack_response = json.dumps({
-            "type": "ack",
-            "ack_id": message_envelope.id,
-            "status": "ok",
-        })
+        ack_response = json.dumps(
+            {
+                "type": "ack",
+                "ack_id": message_envelope.id,
+                "status": "ok",
+            }
+        )
         mock_ws.receive_text = AsyncMock(return_value=ack_response)
 
         result = await ack_tracker.send_with_ack(mock_ws, message_envelope)
@@ -67,7 +68,7 @@ class TestAckTrackerIntegration:
         mock_ws = AsyncMock()
 
         # Simulate timeout
-        mock_ws.receive_text = AsyncMock(side_effect=asyncio.TimeoutError())
+        mock_ws.receive_text = AsyncMock(side_effect=TimeoutError())
 
         result = await ack_tracker.send_with_ack(mock_ws, message_envelope)
 
@@ -80,12 +81,14 @@ class TestAckTrackerIntegration:
         mock_ws = AsyncMock()
 
         # Simulate NACK response
-        nack_response = json.dumps({
-            "type": "ack",
-            "ack_id": message_envelope.id,
-            "status": "error",
-            "error_code": "invalid_data",
-        })
+        nack_response = json.dumps(
+            {
+                "type": "ack",
+                "ack_id": message_envelope.id,
+                "status": "error",
+                "error_code": "invalid_data",
+            }
+        )
         mock_ws.receive_text = AsyncMock(return_value=nack_response)
 
         result = await ack_tracker.send_with_ack(mock_ws, message_envelope)
@@ -107,7 +110,7 @@ class TestAckTrackerIntegration:
     async def test_pending_messages_tracking(self, ack_tracker, message_envelope):
         """Test tracking of pending messages."""
         mock_ws = AsyncMock()
-        mock_ws.receive_text = AsyncMock(side_effect=asyncio.TimeoutError())
+        mock_ws.receive_text = AsyncMock(side_effect=TimeoutError())
 
         # Start send but don't wait for completion
         await ack_tracker.send_with_ack(mock_ws, message_envelope)
@@ -335,9 +338,7 @@ class TestAlerterIntegration:
         assert stats["escalations"] >= 1
 
     @pytest.mark.asyncio
-    async def test_state_machine_transition_on_escalation(
-        self, config, state_machine, parasite_context
-    ):
+    async def test_state_machine_transition_on_escalation(self, config, state_machine, parasite_context):
         """Test that escalation triggers state machine transition."""
         from infrastructure.parasite_guard.alerter import ParasiteAlerter
         from infrastructure.parasite_guard.contracts import Severity

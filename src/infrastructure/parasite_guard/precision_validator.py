@@ -50,7 +50,7 @@ class ConfidenceInterval:
         """Check if the interval contains a value."""
         return self.lower <= value <= self.upper
 
-    def overlaps(self, other: "ConfidenceInterval") -> bool:
+    def overlaps(self, other: ConfidenceInterval) -> bool:
         """Check if this interval overlaps with another."""
         return not (self.upper < other.lower or other.upper < self.lower)
 
@@ -127,12 +127,8 @@ class ValidationReport:
             "precision": self.precision,
             "recall": self.recall,
             "f1_score": self.f1_score,
-            "confidence_intervals": {
-                k: v.to_dict() for k, v in self.confidence_intervals.items()
-            },
-            "hypothesis_tests": {
-                k: v.to_dict() for k, v in self.hypothesis_tests.items()
-            },
+            "confidence_intervals": {k: v.to_dict() for k, v in self.confidence_intervals.items()},
+            "hypothesis_tests": {k: v.to_dict() for k, v in self.hypothesis_tests.items()},
             "recommendations": self.recommendations,
         }
 
@@ -288,9 +284,7 @@ class PrecisionValidator:
         ci_a = self.calculate_confidence_interval(data_a, confidence)
         ci_b = self.calculate_confidence_interval(data_b, confidence)
 
-        overlap = max(
-            0, min(ci_a.upper, ci_b.upper) - max(ci_a.lower, ci_b.lower)
-        )
+        overlap = max(0, min(ci_a.upper, ci_b.upper) - max(ci_a.lower, ci_b.lower))
 
         # Calculate effect size
         mean_a = sum(data_a) / len(data_a) if data_a else 0
@@ -382,17 +376,7 @@ class PrecisionValidator:
         """Approximate normal CDF."""
         t = 1.0 / (1.0 + 0.2316419 * abs(x))
         d = 0.3989422804014327  # 1/sqrt(2*pi)
-        poly = (
-            t
-            * (
-                0.319381530
-                + t
-                * (
-                    -0.356563782
-                    + t * (1.781477937 + t * (-1.821255978 + t * 1.330274429))
-                )
-            )
-        )
+        poly = t * (0.319381530 + t * (-0.356563782 + t * (1.781477937 + t * (-1.821255978 + t * 1.330274429))))
         cdf = 1.0 - d * math.exp(-0.5 * x * x) * poly
         return cdf if x >= 0 else 1.0 - cdf
 
@@ -423,21 +407,11 @@ class PrecisionValidator:
         total_actual_positives = true_positives + false_negatives
         total = true_positives + false_positives + true_negatives + false_negatives
 
-        report.precision = (
-            true_positives / total_positive_predictions
-            if total_positive_predictions > 0
-            else 0
-        )
-        report.recall = (
-            true_positives / total_actual_positives
-            if total_actual_positives > 0
-            else 0
-        )
+        report.precision = true_positives / total_positive_predictions if total_positive_predictions > 0 else 0
+        report.recall = true_positives / total_actual_positives if total_actual_positives > 0 else 0
 
         if report.precision + report.recall > 0:
-            report.f1_score = (
-                2 * report.precision * report.recall / (report.precision + report.recall)
-            )
+            report.f1_score = 2 * report.precision * report.recall / (report.precision + report.recall)
         else:
             report.f1_score = 0
 
@@ -448,9 +422,9 @@ class PrecisionValidator:
             p = report.precision
             n = total_positive_predictions
 
-            denom = 1 + z ** 2 / n
-            center = (p + z ** 2 / (2 * n)) / denom
-            margin = z * math.sqrt((p * (1 - p) + z ** 2 / (4 * n)) / n) / denom
+            denom = 1 + z**2 / n
+            center = (p + z**2 / (2 * n)) / denom
+            margin = z * math.sqrt((p * (1 - p) + z**2 / (4 * n)) / n) / denom
 
             report.confidence_intervals["precision"] = ConfidenceInterval(
                 lower=max(0, center - margin),
@@ -502,19 +476,12 @@ class PrecisionValidator:
         baseline_mean = sum(baseline) / len(baseline)
         current_mean = sum(current) / len(current)
 
-        degradation_percent = (
-            (current_mean - baseline_mean) / baseline_mean * 100
-            if baseline_mean > 0
-            else 0
-        )
+        degradation_percent = (current_mean - baseline_mean) / baseline_mean * 100 if baseline_mean > 0 else 0
 
         # Perform t-test
         test_result = self.perform_t_test(baseline, current)
 
-        degraded = (
-            test_result.significant
-            and degradation_percent > max_degradation_percent
-        )
+        degraded = test_result.significant and degradation_percent > max_degradation_percent
 
         return {
             "degraded": degraded,
@@ -552,12 +519,14 @@ def validate_implementation(
             else:
                 is_correct = output == test["expected"]
 
-            results["test_cases"].append({
-                "test_case": i + 1,
-                "status": "PASS" if is_correct else "FAIL",
-                "expected": test["expected"],
-                "actual": output,
-            })
+            results["test_cases"].append(
+                {
+                    "test_case": i + 1,
+                    "status": "PASS" if is_correct else "FAIL",
+                    "expected": test["expected"],
+                    "actual": output,
+                }
+            )
 
             if is_correct:
                 results["passed"] += 1
@@ -565,11 +534,13 @@ def validate_implementation(
                 results["failed"] += 1
 
         except Exception as e:
-            results["test_cases"].append({
-                "test_case": i + 1,
-                "status": "ERROR",
-                "error": str(e),
-            })
+            results["test_cases"].append(
+                {
+                    "test_case": i + 1,
+                    "status": "ERROR",
+                    "error": str(e),
+                }
+            )
             results["failed"] += 1
 
     total = results["passed"] + results["failed"]

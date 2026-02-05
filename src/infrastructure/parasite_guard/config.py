@@ -10,7 +10,7 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 class GuardMode(Enum):
@@ -30,12 +30,12 @@ class ComponentConfig:
     mode: GuardMode = GuardMode.DRY_RUN
     sanitize: bool = False
     async_delay_seconds: int = 5
-    thresholds: Dict[str, Any] = field(default_factory=dict)
-    whitelist: List[str] = field(default_factory=list)
-    blacklist: List[str] = field(default_factory=list)
+    thresholds: dict[str, Any] = field(default_factory=dict)
+    whitelist: list[str] = field(default_factory=list)
+    blacklist: list[str] = field(default_factory=list)
 
     @classmethod
-    def from_env(cls, component: str, prefix: str = "PARASITE_GUARD") -> "ComponentConfig":
+    def from_env(cls, component: str, prefix: str = "PARASITE_GUARD") -> ComponentConfig:
         """Create config from environment variables."""
         env_prefix = f"{prefix}_{component.upper()}"
 
@@ -88,18 +88,45 @@ class ParasiteGuardConfig:
     )
 
     # Global mode (overrides component modes if set)
-    global_mode: Optional[GuardMode] = field(
+    global_mode: GuardMode | None = field(
         default_factory=lambda: GuardMode[os.getenv("PARASITE_GUARD_MODE", "DISABLED").upper()]
         if os.getenv("PARASITE_GUARD_MODE")
         else None
     )
 
     # Component-specific configs
-    components: Dict[str, ComponentConfig] = field(default_factory=dict)
+    components: dict[str, ComponentConfig] = field(default_factory=dict)
 
     # Detection settings
     detection_timeout_ms: int = field(default_factory=lambda: int(os.getenv("PARASITE_DETECT_TIMEOUT_MS", "100")))
     max_detection_depth: int = field(default_factory=lambda: int(os.getenv("PARASITE_MAX_DEPTH", "5")))
+
+    # Anomaly detection settings (tunable thresholds)
+    anomaly_z_threshold: float = field(
+        default_factory=lambda: float(os.getenv("PARASITE_ANOMALY_Z_THRESHOLD", "3.5"))
+    )
+    anomaly_window_size: int = field(
+        default_factory=lambda: int(os.getenv("PARASITE_ANOMALY_WINDOW_SIZE", "60"))
+    )
+    anomaly_adaptive_percentile: float = field(
+        default_factory=lambda: float(os.getenv("PARASITE_ANOMALY_ADAPTIVE_PERCENTILE", "99.0"))
+    )
+    # Rate limit detector specific thresholds
+    rate_limit_window_seconds: float = field(
+        default_factory=lambda: float(os.getenv("PARASITE_RATE_LIMIT_WINDOW", "60.0"))
+    )
+    rate_limit_max_rate: float = field(
+        default_factory=lambda: float(os.getenv("PARASITE_RATE_LIMIT_MAX_RATE", "100.0"))
+    )
+    rate_limit_z_threshold: float = field(
+        default_factory=lambda: float(os.getenv("PARASITE_RATE_LIMIT_Z_THRESHOLD", "3.0"))
+    )
+
+    # Response settings for detected parasites
+    # 403 = Forbidden (explicit block), 200 = OK (stealth null response)
+    parasite_response_status_code: int = field(
+        default_factory=lambda: int(os.getenv("PARASITE_RESPONSE_STATUS_CODE", "403"))
+    )
 
     # Sanitization settings
     sanitize_async: bool = True
@@ -179,7 +206,7 @@ class ParasiteGuardConfig:
         self.components[component].mode = mode
         self.components[component].sanitize = sanitize
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert config to dictionary for logging/debugging."""
         return {
             "enabled": self.enabled,
@@ -199,4 +226,13 @@ class ParasiteGuardConfig:
             "sanitize_async": self.sanitize_async,
             "sanitize_timeout_seconds": self.sanitize_timeout_seconds,
             "max_concurrent_sanitizations": self.max_concurrent_sanitizations,
+            # Anomaly detection thresholds
+            "anomaly_z_threshold": self.anomaly_z_threshold,
+            "anomaly_window_size": self.anomaly_window_size,
+            "anomaly_adaptive_percentile": self.anomaly_adaptive_percentile,
+            "rate_limit_window_seconds": self.rate_limit_window_seconds,
+            "rate_limit_max_rate": self.rate_limit_max_rate,
+            "rate_limit_z_threshold": self.rate_limit_z_threshold,
+            # Response settings
+            "parasite_response_status_code": self.parasite_response_status_code,
         }

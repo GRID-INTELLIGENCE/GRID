@@ -22,6 +22,8 @@ project_root = Path(__file__).parents[2]
 sys.path.insert(0, str(project_root / "src"))
 
 try:
+    from infrastructure.parasite_guard.alerter import ParasiteAlerter
+    from infrastructure.parasite_guard.config import ParasiteGuardConfig
     from infrastructure.parasite_guard.contracts import (
         AlerterContract,
         DetectorContract,
@@ -34,8 +36,6 @@ try:
         GuardState,
         ParasiteGuardStateMachine,
     )
-    from infrastructure.parasite_guard.alerter import ParasiteAlerter
-    from infrastructure.parasite_guard.config import ParasiteGuardConfig
 
     IMPORTS_OK = True
 except ImportError as e:
@@ -208,14 +208,14 @@ def validate_detector(name: str, detector: Any) -> ValidationResult:
     # Check essential attributes/methods with lenient validation
     # Full contract validation is advisory for pre-existing components
     is_valid, validation_errors = validate_detector_contract(detector)
-    
+
     # For pre-existing detectors, treat contract mismatches as warnings
     # since the contracts are newly defined
     for err in validation_errors:
         if "Does not implement DetectorContract" in err:
             # Check if it has __call__ (legacy detector interface)
             if callable(detector):
-                warnings.append(f"Uses legacy __call__ interface instead of detect()")
+                warnings.append("Uses legacy __call__ interface instead of detect()")
             else:
                 errors.append(err)
         elif "Missing" in err:
@@ -230,7 +230,7 @@ def validate_detector(name: str, detector: Any) -> ValidationResult:
             warnings.append("Detector name is empty")
     else:
         warnings.append("Missing 'name' attribute (legacy component)")
-    
+
     if hasattr(detector, "component"):
         if not detector.component:
             warnings.append("Detector component is empty")
@@ -261,12 +261,12 @@ def validate_sanitizer(name: str, sanitizer: Any) -> ValidationResult:
 
     # Use contract validator with lenient handling
     is_valid, validation_errors = validate_sanitizer_contract(sanitizer)
-    
+
     # For pre-existing sanitizers, treat contract mismatches as warnings
     for err in validation_errors:
         if "Does not implement SanitizerContract" in err:
             # Check if it has sanitize method (essential)
-            if hasattr(sanitizer, "sanitize") and callable(getattr(sanitizer, "sanitize")):
+            if hasattr(sanitizer, "sanitize") and callable(sanitizer.sanitize):
                 warnings.append("Partially implements SanitizerContract")
             else:
                 errors.append(err)
@@ -390,19 +390,9 @@ def validate_contracts(verbose: bool = False) -> ValidationReport:
 
 def main() -> int:
     """Main entry point."""
-    parser = argparse.ArgumentParser(
-        description="Validate Parasite Guard contract compliance"
-    )
-    parser.add_argument(
-        "-v", "--verbose",
-        action="store_true",
-        help="Show detailed validation results"
-    )
-    parser.add_argument(
-        "--json",
-        action="store_true",
-        help="Output results as JSON"
-    )
+    parser = argparse.ArgumentParser(description="Validate Parasite Guard contract compliance")
+    parser.add_argument("-v", "--verbose", action="store_true", help="Show detailed validation results")
+    parser.add_argument("--json", action="store_true", help="Output results as JSON")
     args = parser.parse_args()
 
     print("Starting Parasite Guard Contract Validation...")

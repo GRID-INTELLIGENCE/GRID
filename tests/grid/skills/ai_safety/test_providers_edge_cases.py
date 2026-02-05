@@ -64,7 +64,7 @@ class TestOpenAIMappingFunctions:
 class TestOpenAIAPIEdgeCases:
     """Test OpenAI API edge cases with mocking."""
 
-    @patch('grid.skills.ai_safety.providers.openai.get_config')
+    @patch("grid.skills.ai_safety.providers.openai.get_config")
     def test_check_openai_safety_disabled_provider(self, mock_get_config):
         """Test check when provider is disabled."""
         mock_config = Mock()
@@ -74,7 +74,7 @@ class TestOpenAIAPIEdgeCases:
         violations = check_openai_safety("test content")
         assert violations == []
 
-    @patch('grid.skills.ai_safety.providers.openai.get_config')
+    @patch("grid.skills.ai_safety.providers.openai.get_config")
     def test_check_openai_safety_no_api_key(self, mock_get_config):
         """Test check when API key is not available."""
         mock_config = Mock()
@@ -85,7 +85,7 @@ class TestOpenAIAPIEdgeCases:
         violations = check_openai_safety("test content")
         assert violations == []
 
-    @patch('grid.skills.ai_safety.providers.openai.get_config')
+    @patch("grid.skills.ai_safety.providers.openai.get_config")
     def test_check_openai_safety_import_error(self, mock_get_config):
         """Test check when requests is not available."""
         mock_config = Mock()

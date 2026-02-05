@@ -11,6 +11,7 @@ Goals:
 
 import importlib.util
 import logging
+import os
 import sys
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
@@ -18,6 +19,26 @@ from datetime import UTC, datetime
 from enum import Enum
 from pathlib import Path
 from typing import Any
+
+
+def get_wellness_studio_default_path() -> str:
+    """Get default wellness studio path from environment or auto-detect."""
+    env_path = os.environ.get("WELLNESS_STUDIO_PATH")
+    if env_path:
+        return env_path
+
+    possible_paths = [
+        Path.home() / "CascadeProjects" / "windsurf-project-2" / "wellness_studio",
+        Path.home() / "wellness_studio",
+        Path("/mnt/c/Users/irfan/CascadeProjects/windsurf-project-2/wellness_studio"),
+    ]
+
+    for path in possible_paths:
+        if path.exists():
+            return str(path)
+
+    return str(possible_paths[0])
+
 
 from . import Event, EventDomain, EventResponse, get_event_bus, init_event_bus
 from .audit import AuditEventType, get_audit_logger
@@ -40,12 +61,16 @@ class SafetyBridgeConfig:
     """Configuration for safety bridge"""
 
     source: SafetySource = SafetySource.UNIFIED_FABRIC
-    wellness_studio_path: str = "C:/Users/irfan/CascadeProjects/windsurf-project-2/wellness_studio"
+    wellness_studio_path: str = ""
     enable_async: bool = True
     enable_audit: bool = True
     enable_events: bool = True
     cache_safety_results: bool = True
     cache_ttl_sec: float = 30.0
+
+    def __post_init__(self):
+        if not self.wellness_studio_path:
+            self.wellness_studio_path = get_wellness_studio_default_path()
 
 
 @dataclass

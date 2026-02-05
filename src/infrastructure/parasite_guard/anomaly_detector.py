@@ -7,6 +7,15 @@ Implements adaptive threshold anomaly detection using:
 - Multi-dimensional anomaly detection (optional, requires sklearn)
 
 Provides real-time detection of parasitic patterns based on statistical analysis.
+
+Configuration:
+    Thresholds can be configured via environment variables:
+    - PARASITE_ANOMALY_Z_THRESHOLD (default: 3.5)
+    - PARASITE_ANOMALY_WINDOW_SIZE (default: 60)
+    - PARASITE_ANOMALY_ADAPTIVE_PERCENTILE (default: 99.0)
+    - PARASITE_RATE_LIMIT_WINDOW (default: 60.0)
+    - PARASITE_RATE_LIMIT_MAX_RATE (default: 100.0)
+    - PARASITE_RATE_LIMIT_Z_THRESHOLD (default: 3.0)
 """
 
 from __future__ import annotations
@@ -15,8 +24,11 @@ import logging
 import math
 from collections import deque
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from typing import Any
+from datetime import UTC, datetime
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from .config import ParasiteGuardConfig
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +55,7 @@ class AnomalyResult:
     baseline_mean: float
     baseline_std: float
     value: float = 0.0
-    timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    timestamp: datetime = field(default_factory=lambda: datetime.now(UTC))
 
     def to_dict(self) -> dict[str, Any]:
         """Serialize to dictionary."""
@@ -165,17 +177,7 @@ class AdaptiveAnomalyDetector:
         # Using Horner's method for the polynomial approximation
         t = 1.0 / (1.0 + 0.2316419 * abs(x))
         d = 0.3989422804014327  # 1/sqrt(2*pi)
-        poly = (
-            t
-            * (
-                0.319381530
-                + t
-                * (
-                    -0.356563782
-                    + t * (1.781477937 + t * (-1.821255978 + t * 1.330274429))
-                )
-            )
-        )
+        poly = t * (0.319381530 + t * (-0.356563782 + t * (1.781477937 + t * (-1.821255978 + t * 1.330274429))))
         cdf = 1.0 - d * math.exp(-0.5 * x * x) * poly
         return cdf if x >= 0 else 1.0 - cdf
 
@@ -286,9 +288,7 @@ class AdaptiveAnomalyDetector:
             min_value=min(values),
             max_value=max(values),
             sample_size=len(values),
-            anomaly_rate=(
-                self._anomaly_count / self._total_count if self._total_count > 0 else 0.0
-            ),
+            anomaly_rate=(self._anomaly_count / self._total_count if self._total_count > 0 else 0.0),
         )
 
     def reset(self) -> None:
@@ -429,7 +429,7 @@ class RateLimitAnomalyDetector:
         Returns:
             AnomalyResult indicating if rate is anomalous.
         """
-        now = datetime.now(timezone.utc).timestamp()
+        now = datetime.now(UTC).timestamp()
         self._request_times.append(now)
 
         # Remove old requests
@@ -457,7 +457,7 @@ class RateLimitAnomalyDetector:
 
     def get_current_rate(self) -> float:
         """Get the current request rate."""
-        now = datetime.now(timezone.utc).timestamp()
+        now = datetime.now(UTC).timestamp()
         cutoff = now - self.window_seconds
 
         # Count requests in window
@@ -468,3 +468,109 @@ class RateLimitAnomalyDetector:
         """Reset the detector."""
         self._request_times.clear()
         self._rate_detector.reset()
+
+
+# =============================================================================
+# Factory functions for config-driven detector creation
+# =============================================================================
+
+
+def create_adaptive_anomaly_detector(
+    config: ParasiteGuardConfig | None = None,
+    component: str = "unknown",
+    **overrides: Any,
+) -> AdaptiveAnomalyDetector:
+    """Create an AdaptiveAnomalyDetector from config.
+
+    Uses ParasiteGuardConfig settings for z_threshold and window_size,
+    with optional overrides.
+
+    Args:
+        config: ParasiteGuardConfig instance. If None, uses defaults.
+        component: Component name for metrics.
+        **overrides: Override any parameter (window_size, z_threshold, adaptive_percentile).
+
+    Returns:
+        Configured AdaptiveAnomalyDetector instance.
+    """
+    if config is None:
+        # Use defaults
+        window_size = overrides.get("window_size", 60)
+        z_threshold = overrides.get("z_threshold", 3.5)
+        adaptive_percentile = overrides.get("adaptive_percentile", 99.0)
+    else:
+        window_size = overrides.get("window_size", config.anomaly_window_size)
+        z_threshold = overrides.get("z_threshold", config.anomaly_z_threshold)
+        adaptive_percentile = overrides.get("adaptive_percentile", config.anomaly_adaptive_percentile)
+
+    return AdaptiveAnomalyDetector(
+        window_size=window_size,
+        z_threshold=z_threshold,
+        adaptive_percentile=adaptive_percentile,
+        component=component,
+    )
+
+
+def create_multi_window_detector(
+    config: ParasiteGuardConfig | None = None,
+    component: str = "unknown",
+    **overrides: Any,
+) -> MultiWindowAnomalyDetector:
+    """Create a MultiWindowAnomalyDetector from config.
+
+    Args:
+        config: ParasiteGuardConfig instance. If None, uses defaults.
+        component: Component name for metrics.
+        **overrides: Override any parameter (short_window, medium_window, long_window, z_threshold).
+
+    Returns:
+        Configured MultiWindowAnomalyDetector instance.
+    """
+    if config is None:
+        z_threshold = overrides.get("z_threshold", 3.5)
+    else:
+        z_threshold = overrides.get("z_threshold", config.anomaly_z_threshold)
+
+    short_window = overrides.get("short_window", 10)
+    medium_window = overrides.get("medium_window", config.anomaly_window_size if config else 60)
+    long_window = overrides.get("long_window", 300)
+
+    return MultiWindowAnomalyDetector(
+        short_window=short_window,
+        medium_window=medium_window,
+        long_window=long_window,
+        z_threshold=z_threshold,
+        component=component,
+    )
+
+
+def create_rate_limit_detector(
+    config: ParasiteGuardConfig | None = None,
+    component: str = "rate_limit",
+    **overrides: Any,
+) -> RateLimitAnomalyDetector:
+    """Create a RateLimitAnomalyDetector from config.
+
+    Args:
+        config: ParasiteGuardConfig instance. If None, uses defaults.
+        component: Component name for metrics.
+        **overrides: Override any parameter (window_seconds, max_rate, z_threshold).
+
+    Returns:
+        Configured RateLimitAnomalyDetector instance.
+    """
+    if config is None:
+        window_seconds = overrides.get("window_seconds", 60.0)
+        max_rate = overrides.get("max_rate", 100.0)
+        z_threshold = overrides.get("z_threshold", 3.0)
+    else:
+        window_seconds = overrides.get("window_seconds", config.rate_limit_window_seconds)
+        max_rate = overrides.get("max_rate", config.rate_limit_max_rate)
+        z_threshold = overrides.get("z_threshold", config.rate_limit_z_threshold)
+
+    return RateLimitAnomalyDetector(
+        window_seconds=window_seconds,
+        max_rate=max_rate,
+        z_threshold=z_threshold,
+        component=component,
+    )

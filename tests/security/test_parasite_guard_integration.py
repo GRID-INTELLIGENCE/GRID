@@ -1,6 +1,5 @@
 """Tests for Parasite Guard integration with EventBus and DB engine."""
 
-import asyncio
 import sys
 import uuid
 from pathlib import Path
@@ -12,7 +11,7 @@ import pytest
 src_path = Path(__file__).parent.parent.parent / "src"
 sys.path.insert(0, str(src_path))
 
-from grid.security.parasite_guard import ParasiteContext, ParasiteStatus, PrunerOrchestrator
+from grid.security.parasite_guard import ParasiteContext, PrunerOrchestrator
 
 
 @pytest.mark.asyncio
@@ -31,9 +30,7 @@ async def test_parasite_context_cleanup_with_subscription() -> None:
 
     # Mock the unsubscribe function by patching the module import
     mock_unsubscribe = AsyncMock()
-    with patch.dict("sys.modules", {
-        "infrastructure.event_bus.event_system": MagicMock(unsubscribe=mock_unsubscribe)
-    }):
+    with patch.dict("sys.modules", {"infrastructure.event_bus.event_system": MagicMock(unsubscribe=mock_unsubscribe)}):
         await context.cleanup()
 
         # Verify unsubscribe was called
@@ -72,6 +69,7 @@ async def test_parasite_context_cleanup_hooks() -> None:
 @pytest.mark.asyncio
 async def test_parasite_context_cleanup_hooks_exception_handling() -> None:
     """Test that cleanup hooks handle exceptions gracefully."""
+
     async def failing_hook() -> None:
         raise RuntimeError("Hook failed")
 

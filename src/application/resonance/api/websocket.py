@@ -70,9 +70,7 @@ class MessageEnvelope:
             id=data.get("id", str(uuid.uuid4())),
             type=data.get("type", "message"),
             payload=data.get("payload", {}),
-            timestamp=datetime.fromisoformat(data["timestamp"])
-            if "timestamp" in data
-            else datetime.now(UTC),
+            timestamp=datetime.fromisoformat(data["timestamp"]) if "timestamp" in data else datetime.now(UTC),
             requires_ack=data.get("requires_ack", True),
         )
 
@@ -193,8 +191,7 @@ class AckTracker:
                     else:
                         # NACK received - client reported error
                         logger.warning(
-                            f"NACK received for message {envelope.id}: "
-                            f"{ack.get('error_code', 'unknown')}"
+                            f"NACK received for message {envelope.id}: " f"{ack.get('error_code', 'unknown')}"
                         )
                         del self._pending[envelope.id]
                         return False
@@ -209,19 +206,14 @@ class AckTracker:
                 self._stats["retries"] += 1
 
                 if attempt < self._max_retries - 1:
-                    logger.debug(
-                        f"ACK timeout for {envelope.id}, retry {attempt + 1}/{self._max_retries}"
-                    )
+                    logger.debug(f"ACK timeout for {envelope.id}, retry {attempt + 1}/{self._max_retries}")
                     # Retry send
                     try:
                         await ws.send_text(envelope.to_json())
                     except Exception:
                         break
                 else:
-                    logger.warning(
-                        f"ACK timeout for message {envelope.id} after "
-                        f"{self._max_retries} retries"
-                    )
+                    logger.warning(f"ACK timeout for message {envelope.id} after " f"{self._max_retries} retries")
 
             except json.JSONDecodeError:
                 # Not valid JSON, continue waiting
@@ -340,7 +332,6 @@ class WebSocketManager:
 
         # Add envelope metrics if available
         if feedback.envelope:
-
             feedback_data["envelope"] = {
                 "phase": (
                     feedback.envelope.phase.value
@@ -389,7 +380,6 @@ class WebSocketManager:
         if activity_id not in self._active_connections:
             return
 
-
         phase_str = envelope_metrics.phase.value if hasattr(envelope_metrics.phase, "value") else envelope_metrics.phase
 
         payload = {
@@ -404,7 +394,7 @@ class WebSocketManager:
                 "time_in_phase": envelope_metrics.time_in_phase,
                 "total_time": envelope_metrics.total_time,
                 "peak_amplitude": envelope_metrics.peak_amplitude,
-            }
+            },
         }
 
         envelope = MessageEnvelope(

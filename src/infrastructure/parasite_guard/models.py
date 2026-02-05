@@ -6,9 +6,9 @@ from __future__ import annotations
 
 import uuid
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum, auto
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 class ParasiteSeverity(Enum):
@@ -33,8 +33,8 @@ class SourceMap:
     function: str  # Function name (e.g., "websocket_send")
     line: int  # Line number
     file: str  # Full file path
-    package: Optional[str] = None  # Package name if applicable
-    class_name: Optional[str] = None  # Class name if method
+    package: str | None = None  # Package name if applicable
+    class_name: str | None = None  # Class name if method
 
 
 @dataclass
@@ -51,32 +51,32 @@ class ParasiteContext:
     pattern: str  # Pattern name (e.g., "no_ack", "leak")
     rule: str  # Detector name that fired
     severity: ParasiteSeverity
-    start_ts: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
-    end_ts: Optional[datetime] = None
+    start_ts: datetime = field(default_factory=lambda: datetime.now(UTC))
+    end_ts: datetime | None = None
 
     # Detection details
-    source: Optional[SourceMap] = None
-    detection_metadata: Dict[str, Any] = field(default_factory=dict)
+    source: SourceMap | None = None
+    detection_metadata: dict[str, Any] = field(default_factory=dict)
 
     # Sanitization tracking
     sanitized: bool = False
-    sanitization_result: Optional[SanitizationResult] = None
+    sanitization_result: SanitizationResult | None = None
 
     # Additional metadata
-    meta: Dict[str, Any] = field(default_factory=dict)
+    meta: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         """Ensure id is UUID."""
         if not isinstance(self.id, uuid.UUID):
             object.__setattr__(self, "id", uuid.UUID(self.id) if isinstance(self.id, str) else uuid.uuid4())
 
-    def complete(self, sanitized: bool, result: Optional[SanitizationResult] = None):
+    def complete(self, sanitized: bool, result: SanitizationResult | None = None):
         """Mark the parasite as handled."""
-        self.end_ts = datetime.now(timezone.utc)
+        self.end_ts = datetime.now(UTC)
         self.sanitized = sanitized
         self.sanitization_result = result
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for logging/serialization."""
         return {
             "id": str(self.id),
@@ -106,11 +106,11 @@ class DetectionResult:
     """Result from a detector."""
 
     detected: bool
-    context: Optional[ParasiteContext] = None
+    context: ParasiteContext | None = None
     reason: str = ""
     confidence: float = 1.0  # 0.0 to 1.0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "detected": self.detected,
             "context": self.context.to_dict() if self.context else None,
@@ -124,12 +124,12 @@ class SanitizationResult:
     """Result from a sanitizer."""
 
     success: bool
-    steps: List[str] = field(default_factory=list)
-    error: Optional[str] = None
+    steps: list[str] = field(default_factory=list)
+    error: str | None = None
     duration_ms: float = 0.0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "success": self.success,
             "steps": self.steps,
@@ -147,16 +147,16 @@ class ParasiteLogEntry:
     Used by ParasiteProfiler for consistent log formatting.
     """
 
-    timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    timestamp: datetime = field(default_factory=lambda: datetime.now(UTC))
     parasite_id: str = ""
     event_type: str = "detection"  # detection, profiling, tracing, sanitization
     component: str = ""
     pattern: str = ""
     severity: str = ""
     message: str = ""
-    data: Dict[str, Any] = field(default_factory=dict)
+    data: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "timestamp": self.timestamp.isoformat(),
             "parasite_id": self.parasite_id,

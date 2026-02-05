@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import Any
 
 from .environment import sanitize_environment, sanitize_path
-from .path_manager import SecurePathManager, PathManagerReport
+from .path_manager import PathManagerReport, SecurePathManager
 
 logger = logging.getLogger(__name__)
 
@@ -146,14 +146,10 @@ def harden_environment(
 
                 # Check for critical issues
                 if path_report["non_existent_paths"] > 0:
-                    report.warnings.append(
-                        f"Found {path_report['non_existent_paths']} non-existent paths in sys.path"
-                    )
+                    report.warnings.append(f"Found {path_report['non_existent_paths']} non-existent paths in sys.path")
 
                 if path_report["writable_paths"] > 5:  # Threshold for warning
-                    report.warnings.append(
-                        f"Found {path_report['writable_paths']} writable paths in sys.path"
-                    )
+                    report.warnings.append(f"Found {path_report['writable_paths']} writable paths in sys.path")
 
             except Exception as e:
                 report.warnings.append(f"Path validation warning: {e}")
@@ -164,9 +160,7 @@ def harden_environment(
         if report.has_critical_issues and fail_on_critical:
             from .path_validator import SecurityError
 
-            raise SecurityError(
-                f"Environment hardening failed with critical issues: {', '.join(report.errors)}"
-            )
+            raise SecurityError(f"Environment hardening failed with critical issues: {', '.join(report.errors)}")
 
         if report.warnings:
             logger.warning(f"Environment hardening completed with {len(report.warnings)} warnings")

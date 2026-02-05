@@ -44,6 +44,7 @@ async def test_event_bus_subscribe_unsubscribe():
         result_retry = await bus.unsubscribe(sub)
         assert result_retry is False
 
+
 @pytest.mark.asyncio
 async def test_event_bus_unsubscribe_by_id():
     """Test unsubscribing using only the UUID."""
@@ -51,7 +52,8 @@ async def test_event_bus_unsubscribe_by_id():
         bus = EventBus()
         bus.__init__()
 
-        async def dummy_handler(e): pass
+        async def dummy_handler(e):
+            pass
 
         sub = await bus.subscribe("test.event.2", dummy_handler)
         assert sub.id in bus._index
@@ -61,20 +63,23 @@ async def test_event_bus_unsubscribe_by_id():
         assert sub.id not in bus._index
         assert sub not in bus._subscribers["test.event.2"]
 
+
 @pytest.mark.asyncio
 async def test_event_bus_metrics_update():
     """Test that metrics are updated (if prometheus_client is waiting)."""
 
     with patch("infrastructure.event_bus.event_system.METRICS_ENABLED", True):
-        with patch("infrastructure.event_bus.event_system._subscriptions_created") as mock_created, \
-             patch("infrastructure.event_bus.event_system._subscriptions_removed") as mock_removed, \
-             patch("infrastructure.event_bus.event_system._active_subscriptions") as mock_active:
-
+        with (
+            patch("infrastructure.event_bus.event_system._subscriptions_created") as mock_created,
+            patch("infrastructure.event_bus.event_system._subscriptions_removed") as mock_removed,
+            patch("infrastructure.event_bus.event_system._active_subscriptions") as mock_active,
+        ):
             with patch.object(EventBus, "__new__", side_effect=object.__new__):
                 bus = EventBus()
                 bus.__init__()
 
-                async def h(e): pass
+                async def h(e):
+                    pass
 
                 sub = await bus.subscribe("m.event", h)
 

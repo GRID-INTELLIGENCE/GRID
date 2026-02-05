@@ -1,0 +1,22 @@
+{
+  "total_requests": 200,
+  "detected_parasites": 0,
+  "null_responses": 0,
+  "normal_responses": 200,
+  "avg_response_time_ms": 10376.903464794159,
+  "detection_rate": 0.0,
+  "state_transitions": [
+    {
+      "from": "INITIALIZING",
+      "to": "MONITORING",
+      "timestamp": "2026-02-05T02:32:38.592897+00:00",
+      "trigger": "simulation_start"
+    },
+    {
+      "from": "MONITORING",
+      "to": "DETECTING",
+      "timestamp": "2026-02-05T02:32:38.593153+00:00",
+      "trigger": "burst_missing_correlation"
+    }
+  ]
+}

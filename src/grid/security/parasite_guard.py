@@ -74,8 +74,8 @@ class ParasiteGuardConfig:
     detection_threshold: int = int(os.getenv("PARASITE_DETECT_THRESHOLD", "5"))
 
     # Path filtering
-    whitelisted_paths: list[str] = json.loads(os.getenv("PG_WHITELIST", '[]'))
-    blacklisted_paths: list[str] = json.loads(os.getenv("PG_BLACKLIST", '[]'))
+    whitelisted_paths: list[str] = json.loads(os.getenv("PG_WHITELIST", "[]"))
+    blacklisted_paths: list[str] = json.loads(os.getenv("PG_BLACKLIST", "[]"))
 
     # Pruning settings
     prune_attempts: int = int(os.getenv("PG_PRUNE_ATTEMPTS", "3"))
@@ -201,11 +201,9 @@ class ParasiteContext:
         if self.subscription is not None:
             try:
                 from infrastructure.event_bus.event_system import unsubscribe
+
                 await unsubscribe(self.subscription)
-                log.info(
-                    "EventBus subscription cleaned up for parasite %s",
-                    self.id
-                )
+                log.info("EventBus subscription cleaned up for parasite %s", self.id)
             except ImportError:
                 log.debug("EventBus not available for subscription cleanup")
             except Exception as e:
@@ -295,11 +293,7 @@ class HeaderAnomalyDetector:
         headers = dict(request.headers)
 
         # Check for missing correlation ID on non-external requests
-        if (
-            "x-correlation-id" not in headers
-            and "x-request-id" not in headers
-            and request.url.path.startswith("/api/")
-        ):
+        if "x-correlation-id" not in headers and "x-request-id" not in headers and request.url.path.startswith("/api/"):
             # This could indicate an internal loop or rogue request
             return ParasiteContext(
                 rule=self.name,
@@ -350,10 +344,7 @@ class FrequencyDetector:
 
         async with self._lock:
             # Clean old entries
-            self._counters[key] = [
-                ts for ts in self._counters[key]
-                if now - ts < self.window_seconds
-            ]
+            self._counters[key] = [ts for ts in self._counters[key] if now - ts < self.window_seconds]
 
             # Record this request
             self._counters[key].append(now)
@@ -1040,11 +1031,7 @@ class PrunerOrchestrator:
         before_count = len(self.app.routes)
 
         # Filter out routes from the offending module
-        self.app.routes = [
-            route
-            for route in self.app.routes
-            if not self._route_matches_source(route, source)
-        ]
+        self.app.routes = [route for route in self.app.routes if not self._route_matches_source(route, source)]
 
         after_count = len(self.app.routes)
         removed = before_count - after_count

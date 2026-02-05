@@ -77,7 +77,7 @@ async def main() -> None:
             print(f"  {key}: {value}")
 
         if db_stats.get("checked_out", 0) > db_stats.get("pool_size", 0) * 0.8:
-            print(f"  ⚠️  WARNING: High connection pool utilization!")
+            print("  ⚠️  WARNING: High connection pool utilization!")
     else:
         print("  Unable to detect DB leaks")
 

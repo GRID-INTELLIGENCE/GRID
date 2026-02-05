@@ -352,10 +352,10 @@ class ComponentPool:
             try:
                 await self._check_component_health()
                 await self._optimize_pool()
-                await asyncio.sleep(5)  # Monitor every 5 seconds
+                await asyncio.sleep(30)  # Increased from 5s to 30s for lower overhead
             except Exception as e:
                 logger.error(f"Component monitoring error: {e}")
-                await asyncio.sleep(1)
+                await asyncio.sleep(5)
 
     async def _check_component_health(self):
         """Check health of all components and recover if needed."""

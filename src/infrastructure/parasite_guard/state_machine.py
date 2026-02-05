@@ -10,48 +10,47 @@ class GuardState(Enum):
     MITIGATING = auto()
     ALERTING = auto()
 
+
 class InvalidTransitionError(Exception):
     def __init__(self, from_state: GuardState, to_state: GuardState):
         self.message = f"Invalid transition from {from_state} to {to_state}"
         super().__init__(self.message)
 
+
 @dataclass
 class TransitionProbability:
     """Probability weights for state transitions."""
+
     to_state: GuardState
     probability: float  # 0.0 to 1.0
-    confidence: float   # Statistical confidence
+    confidence: float  # Statistical confidence
 
 
 @dataclass
 class TransitionRecord:
     """Record of a state transition."""
+
     from_state: GuardState
     to_state: GuardState
     timestamp: datetime
     confidence: float = 1.0
 
+
 class ParasiteGuardStateMachine:
     """Manages guard state transitions with probabilistic validation."""
 
     VALID_TRANSITIONS: dict[GuardState, list[TransitionProbability]] = {
-        GuardState.INITIALIZING: [
-            TransitionProbability(GuardState.MONITORING, 1.0, 1.0)
-        ],
-        GuardState.MONITORING: [
-            TransitionProbability(GuardState.DETECTING, 0.95, 0.95)
-        ],
+        GuardState.INITIALIZING: [TransitionProbability(GuardState.MONITORING, 1.0, 1.0)],
+        GuardState.MONITORING: [TransitionProbability(GuardState.DETECTING, 0.95, 0.95)],
         GuardState.DETECTING: [
             TransitionProbability(GuardState.MITIGATING, 0.98, 0.98),
-            TransitionProbability(GuardState.MONITORING, 0.02, 0.95)  # False positive
+            TransitionProbability(GuardState.MONITORING, 0.02, 0.95),  # False positive
         ],
         GuardState.MITIGATING: [
             TransitionProbability(GuardState.MONITORING, 0.90, 0.90),  # Resolved
-            TransitionProbability(GuardState.ALERTING, 0.10, 0.95)    # Critical
+            TransitionProbability(GuardState.ALERTING, 0.10, 0.95),  # Critical
         ],
-        GuardState.ALERTING: [
-            TransitionProbability(GuardState.MONITORING, 1.0, 1.0)
-        ],
+        GuardState.ALERTING: [TransitionProbability(GuardState.MONITORING, 1.0, 1.0)],
     }
 
     def __init__(self):

@@ -36,9 +36,15 @@ try:
             return REGISTRY._names_to_collectors[name]
         return Gauge(name, documentation, **kwargs)
 
-    _subscriptions_created = get_or_create_counter("eventbus_subscriptions_created_total", "Total subscriptions created")
-    _subscriptions_removed = get_or_create_counter("eventbus_subscriptions_removed_total", "Total subscriptions removed")
-    _active_subscriptions = get_or_create_gauge("eventbus_active_subscriptions", "Active subscriptions", labelnames=["event_type"])
+    _subscriptions_created = get_or_create_counter(
+        "eventbus_subscriptions_created_total", "Total subscriptions created"
+    )
+    _subscriptions_removed = get_or_create_counter(
+        "eventbus_subscriptions_removed_total", "Total subscriptions removed"
+    )
+    _active_subscriptions = get_or_create_gauge(
+        "eventbus_active_subscriptions", "Active subscriptions", labelnames=["event_type"]
+    )
     METRICS_ENABLED = True
 except ImportError:
     METRICS_ENABLED = False

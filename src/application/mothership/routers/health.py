@@ -775,20 +775,138 @@ async def metrics(
 
 
 @router.get(
-    "/health/parasitic-leaks",
-    summary="Parasitic Leak Health Check",
-    description="Health check for EventBus and DB engine leak prevention",
+    "/health/chaos-resilience",
+    summary="Chaos Resilience Health Check",
+    description="Monitor chaos engineering resilience components",
 )
-async def parasitic_leaks_health() -> dict[str, Any]:
+async def chaos_resilience_health() -> dict[str, Any]:
     """
-    Health check for parasitic leak remediation components.
+    Health check for chaos engineering resilience components.
 
-    Returns status of EventBus and DB engine leak prevention systems.
+    Monitors circuit breakers, resource pools, and degradation levels
+    to ensure system stability under chaos testing conditions.
     """
-    from ..health import health_check
+    try:
+        from ..utils.resource_management import get_resource_pool, _resource_pools, _circuit_breakers
+        from ..utils.graceful_degradation import get_degradation_manager
+        from ..middleware.circuit_breaker import get_circuit_manager
 
-    health_data = await health_check()
-    return health_data
+        # Get degradation manager status
+        degradation_mgr = get_degradation_manager()
+        system_status = degradation_mgr.get_system_status()
+
+        # Get circuit breaker status from middleware
+        circuit_status = {}
+        try:
+            cb_manager = get_circuit_manager()
+            # Circuit manager may have different interface, try to get status
+            circuit_status = {"middleware_available": True}
+        except Exception:
+            circuit_status = {"middleware_available": False}
+
+        # Get resource pool status
+        resource_pools = {}
+        for pool_name, pool in _resource_pools.items():
+            resource_pools[pool_name] = {
+                "active_count": pool.active_count,
+                "available_count": pool.available_count,
+                "utilization_percent": pool.utilization_percent,
+                "max_concurrent": pool.max_concurrent,
+            }
+
+        # Get circuit breakers status
+        circuit_breakers = {}
+        for cb_name, cb in _circuit_breakers.items():
+            circuit_breakers[cb_name] = {
+                "state": cb._state,
+                "failure_count": cb._failure_count,
+                "success_count": cb._success_count,
+            }
+
+        # Overall resilience score
+        resilience_score = 1.0  # Start with perfect score
+
+        # Penalize for high resource utilization
+        for pool in resource_pools.values():
+            if pool["utilization_percent"] > 90:
+                resilience_score -= 0.3
+            elif pool["utilization_percent"] > 70:
+                resilience_score -= 0.1
+
+        # Penalize for open circuit breakers
+        for cb in circuit_breakers.values():
+            if cb["state"] == "open":
+                resilience_score -= 0.2
+            elif cb["state"] == "half_open":
+                resilience_score -= 0.1
+
+        # Penalize for system degradation
+        degradation_penalties = {
+            "normal": 0.0,
+            "degraded": 0.2,
+            "critical": 0.4,
+            "failsafe": 0.6,
+        }
+        resilience_score -= degradation_penalties.get(system_status["degradation_level"], 0.0)
+
+        resilience_score = max(0.0, min(1.0, resilience_score))  # Clamp to 0-1
+
+        return {
+            "timestamp": utc_now().isoformat(),
+            "resilience_score": resilience_score,
+            "overall_status": "healthy" if resilience_score > 0.7 else "degraded" if resilience_score > 0.3 else "critical",
+            "components": {
+                "degradation_manager": system_status,
+                "circuit_breakers": circuit_breakers,
+                "resource_pools": resource_pools,
+                "circuit_middleware": circuit_status,
+            },
+            "recommendations": _get_resilience_recommendations(resilience_score, system_status, resource_pools, circuit_breakers),
+        }
+
+    except ImportError as e:
+        return {
+            "timestamp": utc_now().isoformat(),
+            "status": "unavailable",
+            "error": f"Chaos resilience components not available: {e}",
+        }
+
+
+def _get_resilience_recommendations(
+    score: float,
+    system_status: dict,
+    resource_pools: dict,
+    circuit_breakers: dict,
+) -> list[str]:
+    """Generate recommendations based on resilience monitoring."""
+    recommendations = []
+
+    if score < 0.7:
+        recommendations.append("System resilience is degraded - consider scaling resources")
+
+    # Check resource pools
+    for pool_name, pool_data in resource_pools.items():
+        if pool_data["utilization_percent"] > 90:
+            recommendations.append(f"Critical: {pool_name} resource pool is over 90% utilized")
+        elif pool_data["utilization_percent"] > 70:
+            recommendations.append(f"Warning: {pool_name} resource pool is over 70% utilized")
+
+    # Check circuit breakers
+    for cb_name, cb_data in circuit_breakers.items():
+        if cb_data["state"] == "open":
+            recommendations.append(f"Circuit breaker {cb_name} is open - service may be failing")
+        elif cb_data["state"] == "half_open":
+            recommendations.append(f"Circuit breaker {cb_name} is recovering from failures")
+
+    # Check degradation level
+    degradation_level = system_status.get("degradation_level", "normal")
+    if degradation_level != "normal":
+        recommendations.append(f"System is in {degradation_level} degradation mode")
+
+    if not recommendations:
+        recommendations.append("All chaos resilience components operating normally")
+
+    return recommendations
 
 
 __all__ = ["router"]

@@ -82,24 +82,24 @@ class MetricsWriter:
 
         for i in range(0, len(metrics), batch_size):
             batch = metrics[i : i + batch_size]
-            values = []
+            params = []
 
             for m in batch:
-                values.append(
-                    f"("
-                    f"'{m.timestamp.isoformat()}', "
-                    f"'{m.trace_id}', "
-                    f"{m.transfer_latency_ms}, "
-                    f"{m.compressed_size}, "
-                    f"{m.raw_size}, "
-                    f"{m.compression_ratio}, "
-                    f"{m.coherence_level}, "
-                    f"{m.entanglement_count}, "
-                    f"'{m.integrity_check}', "
-                    f"{1 if m.success else 0}, "
-                    f"'{m.source_module}', "
-                    f"'{json.dumps(m.metadata).replace(chr(39), chr(39) + chr(39))}'"
-                    f")"
+                params.append(
+                    {
+                        "ts": m.timestamp.isoformat(),
+                        "tid": m.trace_id,
+                        "lat": m.transfer_latency_ms,
+                        "csz": m.compressed_size,
+                        "rsz": m.raw_size,
+                        "rat": m.compression_ratio,
+                        "coh": m.coherence_level,
+                        "ent": m.entanglement_count,
+                        "int": m.integrity_check,
+                        "suc": 1 if m.success else 0,
+                        "src": m.source_module,
+                        "meta": json.dumps(m.metadata),
+                    }
                 )
 
             sql = f"""
@@ -108,12 +108,14 @@ class MetricsWriter:
                 compression_ratio, coherence_level, entanglement_count, integrity_check,
                 success, source_module, metadata
             )
-            VALUES {",".join(values)}
+            VALUES (
+                :ts, :tid, :lat, :csz, :rsz, :rat, :coh, :ent, :int, :suc, :src, :meta
+            )
             """
 
             try:
                 with engine.connect() as conn:
-                    conn.execute(text(sql))
+                    conn.execute(text(sql), params)
                     conn.commit()
                     inserted += len(batch)
                     logger.info(f"Inserted {len(batch)} bridge metrics (total: {inserted})")
@@ -143,30 +145,22 @@ class MetricsWriter:
 
         for i in range(0, len(metrics), batch_size):
             batch = metrics[i : i + batch_size]
-            values = []
+            params = []
 
             for m in batch:
-                if m.error_message:
-                    error_msg = m.error_message.replace(chr(39), chr(39) + chr(39))
-                    error_sql = f"'{error_msg}'"
-                else:
-                    error_sql = "NULL"
-
-                metadata_json = json.dumps(m.metadata).replace(chr(39), chr(39) + chr(39))
-
-                values.append(
-                    f"("
-                    f"'{m.timestamp.isoformat()}', "
-                    f"'{m.trace_id}', "
-                    f"'{m.modality}', "
-                    f"{m.duration_ms}, "
-                    f"{m.coherence}, "
-                    f"{m.raw_size}, "
-                    f"'{m.source}', "
-                    f"{1 if m.success else 0}, "
-                    f"{error_sql}, "
-                    f"'{metadata_json}'"
-                    f")"
+                params.append(
+                    {
+                        "ts": m.timestamp.isoformat(),
+                        "tid": m.trace_id,
+                        "mod": m.modality,
+                        "dur": m.duration_ms,
+                        "coh": m.coherence,
+                        "rsz": m.raw_size,
+                        "src": m.source,
+                        "suc": 1 if m.success else 0,
+                        "err": m.error_message,
+                        "meta": json.dumps(m.metadata),
+                    }
                 )
 
             sql = f"""
@@ -174,12 +168,14 @@ class MetricsWriter:
                 timestamp, trace_id, modality, duration_ms, coherence, raw_size,
                 source, success, error_message, metadata
             )
-            VALUES {",".join(values)}
+            VALUES (
+                :ts, :tid, :mod, :dur, :coh, :rsz, :src, :suc, :err, :meta
+            )
             """
 
             try:
                 with engine.connect() as conn:
-                    conn.execute(text(sql))
+                    conn.execute(text(sql), params)
                     conn.commit()
                     inserted += len(batch)
                     logger.info(f"Inserted {len(batch)} sensory metrics (total: {inserted})")

@@ -3,10 +3,20 @@ import sys
 
 import pytest
 
-# Configure path to ensure correct shadowing of the light_of_the_seven package
-# We need to import the INNER light_of_the_seven (located at root/light_of_the_seven/light_of_the_seven)
-# So we must add root/light_of_the_seven to the path BEFORE root.
 
+def pytest_configure(config):
+    """Re-ensure src is at sys.path[0] after any plugin/pytest path changes."""
+    root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    src = os.path.join(root, "src")
+    for path in [src, root]:
+        while path in sys.path:
+            sys.path.remove(path)
+    sys.path.insert(0, src)
+    if root not in sys.path:
+        sys.path.append(root)
+
+
+# Additional paths needed for legacy modules (appended so src stays first)
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 LOTS_OUTER_DIR = os.path.join(ROOT_DIR, "light_of_the_seven")
 ARCHIVE_DIR = os.path.join(ROOT_DIR, "archive")
@@ -14,39 +24,22 @@ LEGACY_SRC_DIR = os.path.join(ARCHIVE_DIR, "legacy_src")
 LEGACY_DIR = os.path.join(ARCHIVE_DIR, "legacy")
 ARCHIVE_LOTS_DIR = os.path.join(ARCHIVE_DIR, "light_of_the_seven")
 SCRIPTS_DIR = os.path.join(ROOT_DIR, "scripts")
-# DEFINITION module is at src/cognitive/context/DEFINITION.py
 CONTEXT_DIR = os.path.join(ROOT_DIR, "src", "cognitive", "context")
 
-# Insert at specific index to prioritize over root (usually sys.path[0] or [1])
-if LOTS_OUTER_DIR not in sys.path:
-    sys.path.insert(0, LOTS_OUTER_DIR)
-
-# Add archive paths for legacy modules
-if LEGACY_SRC_DIR not in sys.path:
-    sys.path.insert(1, LEGACY_SRC_DIR)
-
-if LEGACY_DIR not in sys.path:
-    sys.path.insert(2, LEGACY_DIR)
-
-if ARCHIVE_LOTS_DIR not in sys.path:
-    sys.path.insert(3, ARCHIVE_LOTS_DIR)
-
-# Also ensure root is in path for 'application' packages
-if ROOT_DIR not in sys.path:
-    sys.path.insert(4, ROOT_DIR)
-
-# Add scripts directory for git_intelligence and other script modules
-if SCRIPTS_DIR not in sys.path:
-    sys.path.insert(5, SCRIPTS_DIR)
-
-# Add .context directory for GCI DEFINITION module
-context_candidates = [
+# Insert additional paths AFTER src (index 1+) so src remains first
+additional_paths = [
+    LOTS_OUTER_DIR,
+    LEGACY_SRC_DIR,
+    LEGACY_DIR,
+    ARCHIVE_LOTS_DIR,
+    SCRIPTS_DIR,
+    ROOT_DIR,
     CONTEXT_DIR,
-    os.path.join(ROOT_DIR, "src", "cognitive", "context"),
 ]
-for candidate in context_candidates:
-    if os.path.isdir(candidate) and candidate not in sys.path:
-        sys.path.insert(6, candidate)
+
+for path in additional_paths:
+    if os.path.exists(path) and path not in sys.path:
+        sys.path.append(path)
 
 
 @pytest.fixture(scope="session", autouse=True)

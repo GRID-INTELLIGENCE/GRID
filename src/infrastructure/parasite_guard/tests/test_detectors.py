@@ -6,23 +6,23 @@ Focus on C1 (WebSocket No-Ack Detector) for Phase 1 validation.
 
 from __future__ import annotations
 
-import asyncio
-import pytest
-from datetime import datetime, timezone
-from unittest.mock import AsyncMock, MagicMock, patch
+from datetime import UTC, datetime
+from unittest.mock import AsyncMock, MagicMock
 
-from infrastructure.parasite_guard.config import ParasiteGuardConfig, GuardMode
-from infrastructure.parasite_guard.models import (
-    ParasiteContext,
-    DetectionResult,
-    ParasiteSeverity,
-)
+import pytest
+
+from infrastructure.parasite_guard.config import GuardMode, ParasiteGuardConfig
 from infrastructure.parasite_guard.detectors import (
-    Detector,
-    WebSocketNoAckDetector,
-    EventSubscriptionLeakDetector,
     DBConnectionOrphanDetector,
+    Detector,
     DetectorChain,
+    EventSubscriptionLeakDetector,
+    WebSocketNoAckDetector,
+)
+from infrastructure.parasite_guard.models import (
+    DetectionResult,
+    ParasiteContext,
+    ParasiteSeverity,
 )
 
 
@@ -84,8 +84,8 @@ class TestWebSocketNoAckDetector:
         request.state.websocket = MagicMock()
 
         # Message sent 5 seconds ago (timeout is 3s)
-        send_time = datetime.now(timezone.utc)
-        send_time_minus_5 = datetime.fromtimestamp(send_time.timestamp() - 5, tz=timezone.utc)
+        send_time = datetime.now(UTC)
+        send_time_minus_5 = datetime.fromtimestamp(send_time.timestamp() - 5, tz=UTC)
 
         result = await websocket_detector(
             request,
@@ -113,8 +113,8 @@ class TestWebSocketNoAckDetector:
         request.state.websocket = MagicMock()
 
         # Message sent 1 second ago (timeout is 3s)
-        send_time = datetime.now(timezone.utc)
-        send_time_minus_1 = datetime.fromtimestamp(send_time.timestamp() - 1, tz=timezone.utc)
+        send_time = datetime.now(UTC)
+        send_time_minus_1 = datetime.fromtimestamp(send_time.timestamp() - 1, tz=UTC)
 
         result = await websocket_detector(
             request,
@@ -135,7 +135,7 @@ class TestWebSocketNoAckDetector:
         request.state = MagicMock()
         request.state.websocket = MagicMock()
 
-        send_time = datetime.now(timezone.utc)
+        send_time = datetime.now(UTC)
 
         result = await websocket_detector(
             request,

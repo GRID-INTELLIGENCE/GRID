@@ -7,18 +7,16 @@ that generated the original parasitic call.
 
 from __future__ import annotations
 
-import asyncio
 import inspect
 import logging
 import os
 import traceback
-import uuid
 from contextlib import asynccontextmanager
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
-from .models import SourceMap, ParasiteContext
+from .models import ParasiteContext, SourceMap
 
 logger = logging.getLogger(__name__)
 
@@ -52,9 +50,9 @@ class SourceTraceResolver:
 
     def __init__(self, config: Any):
         self.config = config
-        self._resolution_cache: Dict[str, SourceMap] = {}
+        self._resolution_cache: dict[str, SourceMap] = {}
 
-    async def resolve(self, context: ParasiteContext) -> Optional[SourceMap]:
+    async def resolve(self, context: ParasiteContext) -> SourceMap | None:
         """
         Resolve the source of the parasitic call.
 
@@ -88,7 +86,7 @@ class SourceTraceResolver:
         )
         return None
 
-    def _frame_to_source_map(self, frame: traceback.FrameSummary) -> Optional[SourceMap]:
+    def _frame_to_source_map(self, frame: traceback.FrameSummary) -> SourceMap | None:
         """
         Convert a stack frame to a SourceMap.
 
@@ -144,7 +142,7 @@ class SourceTraceResolver:
         except Exception:
             return "unknown"
 
-    def _detect_package(self, filename: str) -> Optional[str]:
+    def _detect_package(self, filename: str) -> str | None:
         """
         Detect the package name from the file path.
 
@@ -166,7 +164,7 @@ class SourceTraceResolver:
         except Exception:
             return None
 
-    def _detect_class_name(self, frame: traceback.FrameSummary) -> Optional[str]:
+    def _detect_class_name(self, frame: traceback.FrameSummary) -> str | None:
         """
         Try to detect the class name if this is a method call.
 
@@ -197,7 +195,7 @@ class SourceTraceResolver:
 
 
 @asynccontextmanager
-async def trace_action(resolver: SourceTraceResolver, phase: str, metadata: Dict[str, Any]):
+async def trace_action(resolver: SourceTraceResolver, phase: str, metadata: dict[str, Any]):
     """
     Context manager for tracing a phase of parasite handling.
 
@@ -206,13 +204,13 @@ async def trace_action(resolver: SourceTraceResolver, phase: str, metadata: Dict
             # Do detection work
             pass
     """
-    start_time = datetime.now(timezone.utc)
+    start_time = datetime.now(UTC)
 
     try:
         logger.debug(f"Starting trace phase: {phase}", extra={"phase": phase, "metadata": metadata})
         yield
     finally:
-        end_time = datetime.now(timezone.utc)
+        end_time = datetime.now(UTC)
         duration_ms = (end_time - start_time).total_seconds() * 1000
 
         logger.debug(

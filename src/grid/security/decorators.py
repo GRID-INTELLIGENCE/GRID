@@ -69,6 +69,7 @@ def audit_high_risk_operation(
         def execute_command(cmd: list[str]) -> str:
             ...
     """
+
     def decorator(func: F) -> F:
         @functools.wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
@@ -148,6 +149,7 @@ def validate_input(
         def process_user_input(text: str) -> str:
             ...
     """
+
     def decorator(func: F) -> F:
         @functools.wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
@@ -170,17 +172,14 @@ def validate_input(
                 if isinstance(param_value, str):
                     # Check max length
                     if max_length and len(param_value) > max_length:
-                        raise ValueError(
-                            f"Input '{param_name}' exceeds maximum length of {max_length}"
-                        )
+                        raise ValueError(f"Input '{param_name}' exceeds maximum length of {max_length}")
 
                     # Check allowed characters
                     if allowed_chars:
                         import re
+
                         if not re.match(allowed_chars, param_value):
-                            raise ValueError(
-                                f"Input '{param_name}' contains invalid characters"
-                            )
+                            raise ValueError(f"Input '{param_name}' contains invalid characters")
 
                     # Sanitize if enabled
                     if sanitizer:
@@ -309,8 +308,10 @@ def _redact_dict_or_list(obj: dict[str, Any] | list[Any]) -> dict[str, Any] | li
     """Recursively redact sensitive data from dict or list."""
     if isinstance(obj, dict):
         return {
-            k: "***REDACTED***" if any(s in k.lower() for s in ["password", "secret", "token", "key"])
-            else _redact_dict_or_list(v) if isinstance(v, (dict, list))
+            k: "***REDACTED***"
+            if any(s in k.lower() for s in ["password", "secret", "token", "key"])
+            else _redact_dict_or_list(v)
+            if isinstance(v, (dict, list))
             else v
             for k, v in obj.items()
         }
@@ -323,9 +324,7 @@ def _format_args(args: tuple[Any, ...], kwargs: dict[str, Any]) -> dict[str, Any
     """Format function arguments for logging."""
     return {
         "args": [str(arg)[:200] if len(str(arg)) > 200 else str(arg) for arg in args],
-        "kwargs": {
-            k: str(v)[:200] if len(str(v)) > 200 else str(v) for k, v in kwargs.items()
-        },
+        "kwargs": {k: str(v)[:200] if len(str(v)) > 200 else str(v) for k, v in kwargs.items()},
     }
 
 

@@ -4,9 +4,7 @@ from scipy import stats  # type: ignore
 
 
 def test_performance_degradation(
-    baseline_metrics: dict[str, Any],
-    current_metrics: dict[str, Any],
-    alpha: float = 0.01
+    baseline_metrics: dict[str, Any], current_metrics: dict[str, Any], alpha: float = 0.01
 ) -> dict[str, Any]:
     """Test if performance degradation is statistically significant."""
     t_stat, p_value = stats.ttest_ind_from_stats(
@@ -19,10 +17,7 @@ def test_performance_degradation(
         equal_var=False,
     )
 
-    effect_size = (
-        (current_metrics["mean_latency"] - baseline_metrics["mean_latency"]) /
-        baseline_metrics["std_latency"]
-    )
+    effect_size = (current_metrics["mean_latency"] - baseline_metrics["mean_latency"]) / baseline_metrics["std_latency"]
 
     return {
         "significant": bool(p_value < alpha),

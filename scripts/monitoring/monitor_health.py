@@ -2,14 +2,14 @@
 """Continuous health monitoring for parasitic leak remediation."""
 
 import asyncio
+
+# Add src to path
+import sys
 import time
 from pathlib import Path
 from typing import Any
 
 import requests
-
-# Add src to path
-import sys
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
 
@@ -80,7 +80,9 @@ async def monitor_loop() -> None:
             timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
             status = "✓" if health.get("status") == "healthy" else "✗"
 
-            print(f"[{timestamp}] {status} EventBus: {metrics.get('eventbus_active', 0):.0f} | DB: {metrics.get('db_active', 0):.0f}")
+            print(
+                f"[{timestamp}] {status} EventBus: {metrics.get('eventbus_active', 0):.0f} | DB: {metrics.get('db_active', 0):.0f}"
+            )
 
             # Print alerts
             for alert in alerts:

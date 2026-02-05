@@ -12,11 +12,11 @@ Comprehensive validation of the parasite guard integration with:
 
 import asyncio
 import sys
-import os
 from pathlib import Path
 
 # Add grid source to path
 sys.path.insert(0, str(Path(__file__).parent / "src"))
+
 
 async def validate_parasite_guard_integration():
     """Main validation function."""
@@ -30,14 +30,13 @@ async def validate_parasite_guard_integration():
         # Test 1: Import validation
         print("\n1️⃣ Testing imports...")
         from grid.security.parasite_guard import (
-            PrunerOrchestrator,
             ParasiteContext,
-            SourceMap,
             ParasiteStatus,
-            ParasiteProfiler,
-            _profiler
+            PrunerOrchestrator,
+            SourceMap,
+            _profiler,
         )
-        from application.mothership.db.engine import dispose_async_engine
+
         print("✅ All imports successful")
         results.append("imports")
 
@@ -48,11 +47,7 @@ async def validate_parasite_guard_integration():
     try:
         # Test 2: ParasiteContext creation
         print("\n2️⃣ Testing ParasiteContext...")
-        ctx = ParasiteContext(
-            id="test-123",
-            rule="test_rule",
-            meta={"test": "data"}
-        )
+        ctx = ParasiteContext(id="test-123", rule="test_rule", meta={"test": "data"})
         assert ctx.id == "test-123"
         assert ctx.rule == "test_rule"
         assert ctx.status == ParasiteStatus.DETECTED
@@ -67,11 +62,7 @@ async def validate_parasite_guard_integration():
         # Test 3: SourceMap creation
         print("\n3️⃣ Testing SourceMap...")
         src = SourceMap(
-            module="test_module",
-            function="test_function",
-            line=42,
-            file="/test/file.py",
-            package="test_package"
+            module="test_module", function="test_function", line=42, file="/test/file.py", package="test_package"
         )
         assert src.module == "test_module"
         assert src.function == "test_function"
@@ -86,8 +77,8 @@ async def validate_parasite_guard_integration():
         # Test 4: PrunerOrchestrator creation
         print("\n4️⃣ Testing PrunerOrchestrator...")
         pruner = PrunerOrchestrator()
-        assert hasattr(pruner, '_dispose_database_engine')
-        assert hasattr(pruner, '_cleanup_eventbus_subscriptions')
+        assert hasattr(pruner, "_dispose_database_engine")
+        assert hasattr(pruner, "_cleanup_eventbus_subscriptions")
         print("✅ PrunerOrchestrator creation successful")
         results.append("pruner_creation")
 
@@ -99,7 +90,7 @@ async def validate_parasite_guard_integration():
         # Test 5: DB engine disposal method exists and callable
         print("\n5️⃣ Testing DB engine disposal method...")
         pruner = PrunerOrchestrator()
-        assert callable(getattr(pruner, '_dispose_database_engine', None))
+        assert callable(getattr(pruner, "_dispose_database_engine", None))
         print("✅ DB engine disposal method available")
         results.append("db_disposal_method")
 
@@ -111,7 +102,7 @@ async def validate_parasite_guard_integration():
         # Test 6: EventBus cleanup method exists and callable
         print("\n6️⃣ Testing EventBus cleanup method...")
         pruner = PrunerOrchestrator()
-        assert callable(getattr(pruner, '_cleanup_eventbus_subscriptions', None))
+        assert callable(getattr(pruner, "_cleanup_eventbus_subscriptions", None))
         print("✅ EventBus cleanup method available")
         results.append("eventbus_cleanup_method")
 
@@ -123,9 +114,9 @@ async def validate_parasite_guard_integration():
         # Test 7: Metrics integration
         print("\n7️⃣ Testing metrics integration...")
         # Check if profiler has metrics methods
-        assert hasattr(_profiler, 'record_db_engine_disposal_success')
-        assert hasattr(_profiler, 'record_db_engine_disposal_failure')
-        assert hasattr(_profiler, 'record_eventbus_cleanup_success')
+        assert hasattr(_profiler, "record_db_engine_disposal_success")
+        assert hasattr(_profiler, "record_db_engine_disposal_failure")
+        assert hasattr(_profiler, "record_eventbus_cleanup_success")
         print("✅ Metrics methods available")
         results.append("metrics_integration")
 
@@ -138,10 +129,11 @@ async def validate_parasite_guard_integration():
         print("\n8️⃣ Testing prune method signature...")
         pruner = PrunerOrchestrator()
         import inspect
+
         sig = inspect.signature(pruner.prune)
         params = list(sig.parameters.keys())
-        assert 'source' in params
-        assert 'context' in params
+        assert "source" in params
+        assert "context" in params
         print("✅ Prune method signature correct")
         results.append("prune_signature")
 
@@ -180,6 +172,7 @@ async def validate_parasite_guard_integration():
         print(f"\n⚠️  {failed_tests} test(s) failed")
         print("❌ Integration needs attention")
         return False
+
 
 if __name__ == "__main__":
     success = asyncio.run(validate_parasite_guard_integration())

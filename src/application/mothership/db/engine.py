@@ -12,6 +12,7 @@ from ..config import get_settings
 try:
     # Import centralized metrics to avoid duplicates
     from infrastructure.metrics import db_active_connections as _db_connections
+
     METRICS_ENABLED = True
 except ImportError:
     METRICS_ENABLED = False
@@ -137,6 +138,8 @@ def get_async_engine() -> AsyncEngine:
                 "pool_size": settings.database.pool_size,
                 "max_overflow": settings.database.max_overflow,
                 "pool_timeout": settings.database.pool_timeout,
+                "pool_recycle": getattr(settings.database, "pool_recycle", 3600),
+                "pool_pre_ping": getattr(settings.database, "pool_pre_ping", True),
             }
         )
 

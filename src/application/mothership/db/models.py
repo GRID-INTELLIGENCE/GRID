@@ -10,6 +10,15 @@ from .models_cockpit import (
     CockpitSessionRow,
     CockpitStateRow,
 )
+from .models_drt import (
+    DRTBehavioralSignatureRow,
+    DRTAttackVectorRow,
+    DRTViolationRow,
+    DRTEscalatedEndpointRow,
+    DRTConfigurationRow,
+    DRTFalsePositiveRow,
+    DRTFalsePositivePatternRow,
+)
 
 __all__ = [
     "Base",
@@ -24,4 +33,11 @@ __all__ = [
     "CockpitComponentRow",
     "CockpitAlertRow",
     "AuditLogRow",
+    "DRTBehavioralSignatureRow",
+    "DRTAttackVectorRow",
+    "DRTViolationRow",
+    "DRTEscalatedEndpointRow",
+    "DRTConfigurationRow",
+    "DRTFalsePositiveRow",
+    "DRTFalsePositivePatternRow",
 ]

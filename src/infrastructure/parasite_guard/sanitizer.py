@@ -11,10 +11,9 @@ import asyncio
 import logging
 import sys
 from abc import ABC, abstractmethod
-from datetime import datetime, timezone
-from typing import Any, Dict, Optional
+from datetime import UTC, datetime
 
-from .config import ParasiteGuardConfig, GuardMode
+from .config import ParasiteGuardConfig
 from .models import (
     ParasiteContext,
     SanitizationResult,
@@ -55,7 +54,7 @@ class WebSocketSanitizer(Sanitizer):
     async def sanitize(self, context: ParasiteContext) -> SanitizationResult:
         """Sanitize WebSocket no-ack parasite."""
         steps = []
-        start_time = datetime.now(timezone.utc)
+        start_time = datetime.now(UTC)
 
         try:
             # Get WebSocket connection from context metadata
@@ -71,7 +70,7 @@ class WebSocketSanitizer(Sanitizer):
                 return SanitizationResult(
                     success=False,
                     error="WebSocket manager not available",
-                    duration_ms=(datetime.now(timezone.utc) - start_time).total_seconds() * 1000,
+                    duration_ms=(datetime.now(UTC) - start_time).total_seconds() * 1000,
                 )
 
             # Step 1: Send close frame
@@ -103,7 +102,7 @@ class WebSocketSanitizer(Sanitizer):
             return SanitizationResult(
                 success=True,
                 steps=steps,
-                duration_ms=(datetime.now(timezone.utc) - start_time).total_seconds() * 1000,
+                duration_ms=(datetime.now(UTC) - start_time).total_seconds() * 1000,
                 metadata={
                     "connection_id": connection_id,
                     "message_id": message_id,
@@ -116,7 +115,7 @@ class WebSocketSanitizer(Sanitizer):
                 success=False,
                 error=str(e),
                 steps=steps,
-                duration_ms=(datetime.now(timezone.utc) - start_time).total_seconds() * 1000,
+                duration_ms=(datetime.now(UTC) - start_time).total_seconds() * 1000,
             )
 
 
@@ -132,23 +131,39 @@ class EventBusSanitizer(Sanitizer):
 
     def __init__(self, config: ParasiteGuardConfig):
         self.config = config
+        self._event_bus = None
+
+    def set_event_bus(self, event_bus: Any) -> None:
+        """Set the EventBus instance for sanitization."""
+        self._event_bus = event_bus
 
     async def sanitize(self, context: ParasiteContext) -> SanitizationResult:
         """Sanitize Event Bus subscription leak."""
         steps = []
-        start_time = datetime.now(timezone.utc)
+        start_time = datetime.now(UTC)
 
         try:
-            # Get event bus
-            event_bus = sys.modules.get("infrastructure.event_bus.event_system")
-            if not event_bus:
-                event_bus = sys.modules.get("infrastructure.event_bus.event_system_fixed")
+            # Get event bus - prefer the instance set via set_event_bus
+            event_bus = self._event_bus
+            
+            # Fallback to sys.modules if instance not set
+            if event_bus is None:
+                event_bus_module = sys.modules.get("infrastructure.event_bus.event_system")
+                if not event_bus_module:
+                    event_bus_module = sys.modules.get("infrastructure.event_bus.event_system_fixed")
+                
+                if event_bus_module:
+                    # Try to get the actual EventRouter/EventBus instance from the module
+                    event_bus = getattr(event_bus_module, "_router", None) or \
+                               getattr(event_bus_module, "EventRouter", None) or \
+                               getattr(event_bus_module, "event_bus", None) or \
+                               event_bus_module
 
             if not event_bus:
                 return SanitizationResult(
                     success=False,
                     error="Event bus not available",
-                    duration_ms=(datetime.now(timezone.utc) - start_time).total_seconds() * 1000,
+                    duration_ms=(datetime.now(UTC) - start_time).total_seconds() * 1000,
                 )
 
             # Step 1: Remove stale subscriptions
@@ -204,7 +219,7 @@ class EventBusSanitizer(Sanitizer):
             return SanitizationResult(
                 success=True,
                 steps=steps,
-                duration_ms=(datetime.now(timezone.utc) - start_time).total_seconds() * 1000,
+                duration_ms=(datetime.now(UTC) - start_time).total_seconds() * 1000,
             )
 
         except Exception as e:
@@ -213,7 +228,7 @@ class EventBusSanitizer(Sanitizer):
                 success=False,
                 error=str(e),
                 steps=steps,
-                duration_ms=(datetime.now(timezone.utc) - start_time).total_seconds() * 1000,
+                duration_ms=(datetime.now(UTC) - start_time).total_seconds() * 1000,
             )
 
 
@@ -233,7 +248,7 @@ class DBEngineSanitizer(Sanitizer):
     async def sanitize(self, context: ParasiteContext) -> SanitizationResult:
         """Sanitize DB connection orphan."""
         steps = []
-        start_time = datetime.now(timezone.utc)
+        start_time = datetime.now(UTC)
 
         try:
             # Import and call dispose_async_engine
@@ -254,13 +269,13 @@ class DBEngineSanitizer(Sanitizer):
                     success=False,
                     error="DB engine module not found",
                     steps=steps,
-                    duration_ms=(datetime.now(timezone.utc) - start_time).total_seconds() * 1000,
+                    duration_ms=(datetime.now(UTC) - start_time).total_seconds() * 1000,
                 )
 
             return SanitizationResult(
                 success=True,
                 steps=steps,
-                duration_ms=(datetime.now(timezone.utc) - start_time).total_seconds() * 1000,
+                duration_ms=(datetime.now(UTC) - start_time).total_seconds() * 1000,
             )
 
         except Exception as e:
@@ -269,7 +284,7 @@ class DBEngineSanitizer(Sanitizer):
                 success=False,
                 error=str(e),
                 steps=steps,
-                duration_ms=(datetime.now(timezone.utc) - start_time).total_seconds() * 1000,
+                duration_ms=(datetime.now(UTC) - start_time).total_seconds() * 1000,
             )
 
 
@@ -289,8 +304,8 @@ class DeferredSanitizer:
 
     def __init__(self, config: ParasiteGuardConfig):
         self.config = config
-        self._sanitizers: Dict[str, Sanitizer] = {}
-        self._active_tasks: Dict[str, asyncio.Task] = {}
+        self._sanitizers: dict[str, Sanitizer] = {}
+        self._active_tasks: dict[str, asyncio.Task] = {}
         self._register_default_sanitizers()
 
     def _register_default_sanitizers(self):
@@ -298,6 +313,13 @@ class DeferredSanitizer:
         self._sanitizers["websocket"] = WebSocketSanitizer(self.config)
         self._sanitizers["eventbus"] = EventBusSanitizer(self.config)
         self._sanitizers["db"] = DBEngineSanitizer(self.config)
+
+    def set_event_bus(self, event_bus: Any) -> None:
+        """Set the EventBus instance for EventBus sanitizer."""
+        sanitizer = self._sanitizers.get("eventbus")
+        if sanitizer and hasattr(sanitizer, 'set_event_bus'):
+            sanitizer.set_event_bus(event_bus)
+            logger.info("Wired EventBus to EventBusSanitizer")
 
     def register_sanitizer(self, component: str, sanitizer: Sanitizer):
         """Register a custom sanitizer for a component."""
@@ -408,7 +430,7 @@ class DeferredSanitizer:
             # Clean up task reference
             self._active_tasks.pop(str(context.id), None)
 
-    async def wait_all(self, timeout: Optional[float] = None) -> None:
+    async def wait_all(self, timeout: float | None = None) -> None:
         """Wait for all active sanitization tasks to complete."""
         if not self._active_tasks:
             return

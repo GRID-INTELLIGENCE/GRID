@@ -11,9 +11,11 @@ class HealthStatus:
     error_rate: float
     confidence: float  # Statistical confidence level
 
+
 @dataclass
 class PrecisionMetrics:
     """Precision metrics for detector validation."""
+
     true_positives: int
     false_positives: int
     true_negatives: int
@@ -39,26 +41,33 @@ class PrecisionMetrics:
         total = self.true_positives + self.false_positives + self.true_negatives + self.false_negatives
         return (self.true_positives + self.true_negatives) / total if total > 0 else 0.0
 
+
 @dataclass
 class DetectionResult:
     """Standardized detection result."""
+
     detected: bool
     confidence: float
     details: dict[str, Any]
 
+
 @dataclass
 class ParasiteContext:
     """Context information for a potential parasite."""
+
     component: str
     severity: str
     pattern: str
     details: dict[str, Any]
 
+
 @dataclass
 class SanitizationResult:
     """Result of a sanitization attempt."""
+
     success: bool
     details: dict[str, Any]
+
 
 class Severity(Enum):
     LOW = "low"
@@ -66,9 +75,11 @@ class Severity(Enum):
     HIGH = "high"
     CRITICAL = "critical"
 
+
 @runtime_checkable
 class DetectorContract(Protocol):
     """Strict contract for all detectors."""
+
     name: str
     component: str
 
@@ -77,9 +88,11 @@ class DetectorContract(Protocol):
     def get_health(self) -> HealthStatus: ...
     def get_precision_metrics(self) -> PrecisionMetrics: ...
 
+
 @runtime_checkable
 class SanitizerContract(Protocol):
     """Strict contract for all sanitizers."""
+
     component: str
     success_rate: float  # Target: 99.2%+ for WebSocket, 97.5%+ for EventBus
 
@@ -87,9 +100,11 @@ class SanitizerContract(Protocol):
     async def rollback(self, context: ParasiteContext) -> bool: ...
     def can_sanitize(self, context: ParasiteContext) -> bool: ...
 
+
 @dataclass
 class Alert:
     """Alert structure."""
+
     id: str
     severity: Severity
     component: str
@@ -99,14 +114,18 @@ class Alert:
     context: Any | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
 
+
 @runtime_checkable
 class AlertChannel(Protocol):
     """Protocol for alert channels."""
+
     async def send(self, alert: Alert) -> None: ...
+
 
 @runtime_checkable
 class AlerterContract(Protocol):
     """Contract for alerting system."""
+
     async def alert(self, context: ParasiteContext, severity: Severity) -> None: ...
     async def escalate(self, context: ParasiteContext) -> None: ...
 
@@ -131,9 +150,7 @@ def validate_detector_contract(detector: Any) -> tuple[bool, list[str]]:
     if not hasattr(detector, "name") or not isinstance(getattr(detector, "name", None), str):
         errors.append("Missing or invalid 'name' attribute")
 
-    if not hasattr(detector, "component") or not isinstance(
-        getattr(detector, "component", None), str
-    ):
+    if not hasattr(detector, "component") or not isinstance(getattr(detector, "component", None), str):
         errors.append("Missing or invalid 'component' attribute")
 
     if not callable(getattr(detector, "detect", None)):
@@ -165,9 +182,7 @@ def validate_sanitizer_contract(sanitizer: Any) -> tuple[bool, list[str]]:
     if not isinstance(sanitizer, SanitizerContract):
         errors.append("Does not implement SanitizerContract protocol")
 
-    if not hasattr(sanitizer, "component") or not isinstance(
-        getattr(sanitizer, "component", None), str
-    ):
+    if not hasattr(sanitizer, "component") or not isinstance(getattr(sanitizer, "component", None), str):
         errors.append("Missing or invalid 'component' attribute")
 
     if not hasattr(sanitizer, "success_rate"):

@@ -24,10 +24,11 @@ class MockDetector(Detector):
                 component=self.component,
                 pattern="test_pattern",
                 rule=self.name,
-                severity=self.severity
+                severity=self.severity,
             )
             return DetectionResult(detected=True, context=context, reason="triggered")
         return DetectionResult(detected=False)
+
 
 @pytest.mark.asyncio
 async def test_middleware_passthrough():
@@ -51,6 +52,7 @@ async def test_middleware_passthrough():
         # Should call the next app
         app.assert_awaited_once()
 
+
 @pytest.mark.asyncio
 async def test_middleware_blocking():
     """Test middleware blocks request when parasite detected."""
@@ -62,11 +64,7 @@ async def test_middleware_blocking():
 
         # Mock detection result
         context = ParasiteContext(
-            id=uuid.uuid4(),
-            component="test",
-            pattern="test",
-            rule="test",
-            severity=ParasiteSeverity.CRITICAL
+            id=uuid.uuid4(), component="test", pattern="test", rule="test", severity=ParasiteSeverity.CRITICAL
         )
         middleware.detector_chain.detect = AsyncMock(return_value=DetectionResult(detected=True, context=context))
 

@@ -25,6 +25,7 @@ import redis.asyncio as redis
 @dataclass(frozen=True)
 class Subscription:
     """Handle for a subscription."""
+
     event_type: str
     handler: Callable
     id: uuid.UUID = field(default_factory=uuid.uuid4)

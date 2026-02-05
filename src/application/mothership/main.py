@@ -56,7 +56,8 @@ from .config import MothershipSettings, get_settings
 from .db.engine import dispose_async_engine, get_async_engine
 from .dependencies import get_cockpit_service, reset_cockpit_service
 from .exceptions import MothershipError
-from .middleware.stream_monitor import StreamMonitorMiddleware
+from .middleware.data_corruption import DataCorruptionDetectionMiddleware
+from .routers.corruption_monitoring import router as corruption_router
 from .routers import create_api_router
 from .routers.agentic import router as agentic_router
 from .routers.cockpit import router as cockpit_router
@@ -376,6 +377,21 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
             if settings.is_production:
                 raise RuntimeError("Security infrastructure must initialize in production") from e
 
+        if hasattr(app.state, "parasite_guard"):
+            try:
+                from infrastructure.event_bus.event_system import get_eventbus
+                from infrastructure.parasite_guard.eventbus_integration import wire_parasite_guard_to_eventbus
+
+                # Get singleton event bus (will initialize if needed, but usually configured elsewhere)
+                # Note: EventBus usually needs specific config, so we assume defaults or env vars handled it
+                event_bus = await get_eventbus()
+
+                # Wire it up
+                wire_parasite_guard_to_eventbus(app.state.parasite_guard, event_bus)
+                logger.info("ParasiteGuard wired to EventBus for security event emission")
+            except Exception as e:
+                logger.warning(f"Could not wire ParasiteGuard to EventBus: {e}")
+
         logger.info("Mothership Cockpit started successfully")
 
     except Exception as e:
@@ -411,6 +427,14 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
             logger.info("Parasite sanitization completed before shutdown")
         except Exception as e:
             logger.warning(f"Error waiting for sanitization: {e}")
+
+        # Shutdown DRT middleware
+        if hasattr(app.state, "drt_middleware"):
+            try:
+                await app.state.drt_middleware.shutdown()
+                logger.info("DRT middleware shut down")
+            except Exception as e:
+                logger.warning(f"Error shutting down DRT middleware: {e}")
 
         # Shutdown CPU executor (ProcessPoolExecutor)
         from .utils.cpu_executor import shutdown_executor
@@ -541,6 +565,9 @@ Development mode allows unauthenticated access.
 
     # 2. Mothership custom middlewares (Centralized Setup)
     from .middleware import setup_middleware
+    from .middleware.drt_middleware_unified import UnifiedDRTMiddleware, set_unified_drt_middleware
+    from .middleware.accountability_contract import AccountabilityContractMiddleware
+    from .routers.drt_monitoring_unified import router as drt_router
 
     # This sets up:
     # - ErrorHandlingMiddleware
@@ -571,12 +598,97 @@ Development mode allows unauthenticated access.
             "Install prometheus_client for metrics: pip install prometheus_client"
         )
 
-    # 5. Parasite Guard (Total Rickall Defense)
+    # 5. Data Corruption Detection Middleware
+    # Tracks and penalizes endpoints that cause data/environment corruption
+    try:
+        from grid.resilience.data_corruption_penalty import DataCorruptionPenaltyTracker
+
+        corruption_tracker = DataCorruptionPenaltyTracker()
+        app.add_middleware(
+            DataCorruptionDetectionMiddleware,
+            tracker=corruption_tracker,
+            critical_endpoints={
+                "/api/v1/data/upload",
+                "/api/v1/data/delete",
+                "/api/v1/config/update",
+                "/api/v1/cockpit/state",
+            },
+        )
+        logger.info("Data corruption detection middleware enabled")
+    except ImportError as e:
+        logger.warning(f"Data corruption detection middleware not available: {e}")
+
+    # 6. DRT (Don't Repeat Themselves) Monitoring Middleware
+    # Monitors endpoint behaviors for attack vector similarities and escalates protections
+    try:
+        # Create unified middleware instance with settings from SecuritySettings
+        drt_middleware = UnifiedDRTMiddleware(
+            app,
+            enabled=settings.security.drt_enabled,
+            similarity_threshold=settings.security.drt_behavioral_similarity_threshold,
+            retention_hours=settings.security.drt_retention_hours,
+            enforcement_mode=settings.security.drt_enforcement_mode,
+            websocket_monitoring_enabled=settings.security.drt_websocket_monitoring_enabled,
+            api_movement_logging_enabled=settings.security.drt_api_movement_logging_enabled,
+            penalty_points_enabled=settings.security.drt_penalty_points_enabled,
+            slo_evaluation_interval_seconds=settings.security.drt_slo_evaluation_interval_seconds,
+            slo_violation_penalty_base=settings.security.drt_slo_violation_penalty_base,
+            report_generation_enabled=settings.security.drt_report_generation_enabled,
+            sampling_rate=1.0,
+            escalation_timeout_minutes=60,
+            rate_limit_multiplier=0.5,
+            alert_on_escalation=True,
+        )
+
+        # Add middleware to app
+        app.add_middleware(
+            UnifiedDRTMiddleware,
+            enabled=settings.security.drt_enabled,
+            similarity_threshold=settings.security.drt_behavioral_similarity_threshold,
+            retention_hours=settings.security.drt_retention_hours,
+            enforcement_mode=settings.security.drt_enforcement_mode,
+            websocket_monitoring_enabled=settings.security.drt_websocket_monitoring_enabled,
+            api_movement_logging_enabled=settings.security.drt_api_movement_logging_enabled,
+            penalty_points_enabled=settings.security.drt_penalty_points_enabled,
+        )
+        # Store middleware instance for shutdown handling and router access
+        app.state.drt_middleware = drt_middleware
+        set_unified_drt_middleware(drt_middleware)
+        logger.info("Unified DRT behavioral monitoring middleware enabled")
+    except Exception as e:
+        logger.warning(f"DRT monitoring middleware not available: {e}")
+
+    # 6b. Accountability Contract Enforcement Middleware
+    # Enforces accountability contracts with RBAC and claims support
+    if settings.security.accountability_enabled:
+        try:
+            accountability_middleware = AccountabilityContractMiddleware(
+                app,
+                enforcement_mode=settings.security.accountability_enforcement_mode,
+                contract_path=settings.security.accountability_contract_path,
+                skip_paths=["/health", "/metrics", "/docs", "/redoc", "/openapi.json"],
+            )
+            app.add_middleware(
+                AccountabilityContractMiddleware,
+                enforcement_mode=settings.security.accountability_enforcement_mode,
+                contract_path=settings.security.accountability_contract_path,
+                skip_paths=["/health", "/metrics", "/docs", "/redoc", "/openapi.json"],
+            )
+            app.state.accountability_middleware = accountability_middleware
+            logger.info(
+                f"Accountability contract enforcement middleware enabled: mode={settings.security.accountability_enforcement_mode}"
+            )
+        except Exception as e:
+            logger.warning(f"Accountability contract middleware not available: {e}")
+
+    # 7. Parasite Guard (Total Rickall Defense)
     # Phase 3: Enable Sanitization (Production Enabled)
     if settings.security.parasite_guard_enabled:
         # Add parasite guard with appropriate mode based on pruning flag
         mode = "full" if settings.security.parasite_guard_pruning_enabled else "detect"
-        add_parasite_guard(app, mode=mode)
+        middleware = add_parasite_guard(app, mode=mode)
+        # Store for wiring in lifespan
+        app.state.parasite_guard = middleware
         logger.info("Parasite Guard integrated (mode=%s)", mode)
 
     # ==========================================================================
@@ -652,6 +764,12 @@ Development mode allows unauthenticated access.
                 "Grid Pulse router not loaded due to startup restriction: %s",
                 str(e),
             )
+
+    app.include_router(corruption_router)
+    logger.info("Corruption monitoring API endpoints registered")
+
+    app.include_router(drt_router)
+    logger.info("DRT monitoring API endpoints registered")
 
     app.include_router(api_router)
 

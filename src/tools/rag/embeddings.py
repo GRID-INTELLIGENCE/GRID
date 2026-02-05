@@ -42,6 +42,7 @@ class OllamaEmbedding(EmbeddingProvider):
     async def _async_subprocess_embed(self, text: str) -> dict[str, float]:
         """Get embeddings using Ollama via async subprocess."""
         try:
+            # Safe: asyncio.create_subprocess_exec (no dynamic code; argv from code)
             proc = await asyncio.create_subprocess_exec(
                 "ollama",
                 "run",

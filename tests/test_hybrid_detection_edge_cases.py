@@ -286,11 +286,11 @@ class TestHybridPatternDetectorEdgeCases:
         result = await detector.detect(base_state)
 
         assert isinstance(result, HybridPatternResult)
-        assert hasattr(result, 'statistical_patterns')
-        assert hasattr(result, 'syntactic_patterns')
-        assert hasattr(result, 'neural_patterns')
-        assert hasattr(result, 'combined_patterns')
-        assert hasattr(result, 'confidence_scores')
+        assert hasattr(result, "statistical_patterns")
+        assert hasattr(result, "syntactic_patterns")
+        assert hasattr(result, "neural_patterns")
+        assert hasattr(result, "combined_patterns")
+        assert hasattr(result, "confidence_scores")
 
     @pytest.mark.asyncio
     async def test_detect_with_custom_weights(self, detector, base_state):

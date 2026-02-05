@@ -37,9 +37,18 @@ class GridIntegrationTests:
         self.tests.append({"name": name, "status": status, "details": details})
 
     def run_command(self, cmd, timeout=10):
-        """Run command and return result"""
+        """Run command and return result.
+
+        Security: Uses shell=False to prevent shell injection.
+        Commands are converted from strings to lists for safety.
+        """
         try:
-            result = subprocess.run(cmd, capture_output=True, text=True, shell=True, timeout=timeout)
+            # Convert string commands to list for shell=False safety
+            if isinstance(cmd, str):
+                import shlex
+                cmd = shlex.split(cmd)
+
+            result = subprocess.run(cmd, capture_output=True, text=True, shell=False, timeout=timeout)
             return result.returncode == 0, result.stdout, result.stderr
         except subprocess.TimeoutExpired:
             return False, "", "Command timeout"

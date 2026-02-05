@@ -677,6 +677,12 @@ __all__ = [
     "ComponentRepository",
     "AlertRepository",
     "CockpitStateRepository",
+    # DRT Repositories
+    "DRTBehavioralSignatureRepository",
+    "DRTAttackVectorRepository", 
+    "DRTViolationRepository",
+    "DRTEscalatedEndpointRepository",
+    "DRTConfigurationRepository",
     # Unit of Work
     "UnitOfWork",
     "get_unit_of_work",

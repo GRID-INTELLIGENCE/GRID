@@ -1,115 +1,69 @@
 """
-Environment variable management and sanitization.
+Centralized environment management for GRID.
+
+Handles loading, validation, and secure access to environment variables using Pydantic.
 """
 
+import logging
 import os
-import sys
-from collections import defaultdict
-from pathlib import Path
-from typing import Any, Dict, List
+from functools import lru_cache
+from typing import Literal
+
+from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+logger = logging.getLogger(__name__)
 
 
-def sanitize_path() -> None:
+class EnvironmentSettings(BaseSettings):
+    """Defines and validates environment variables for the GRID application."""
+
+    # Environment Configuration
+    MOTHERSHIP_ENVIRONMENT: Literal["development", "staging", "production"] = Field(
+        default="development", description="The runtime environment for the application."
+    )
+
+    # GCP Configuration
+    GOOGLE_CLOUD_PROJECT: str | None = Field(
+        default=None, description="Google Cloud project ID, required for production secrets."
+    )
+
+    # Logging Configuration
+    LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = Field(
+        default="INFO", description="The log level for the application."
+    )
+
+    # Model Configuration
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+
+    @property
+    def is_production(self) -> bool:
+        """Returns True if the environment is production."""
+        return self.MOTHERSHIP_ENVIRONMENT == "production"
+
+    @property
+    def is_development(self) -> bool:
+        """Returns True if the environment is development."""
+        return self.MOTHERSHIP_ENVIRONMENT == "development"
+
+
+@lru_cache
+def get_environment_settings() -> EnvironmentSettings:
     """
-    Sanitize the system PATH environment variable.
+    Loads, validates, and returns the environment settings.
 
-    Removes duplicates, non-existent paths, and potentially dangerous paths.
+    Uses a cached instance to avoid repeated file I/O and validation.
     """
-    if "PATH" not in os.environ:
-        return
-
-    paths = os.environ["PATH"].split(os.pathsep)
-    seen = set()
-    clean_paths = []
-
-    for path in paths:
-        # Skip empty paths
-        if not path.strip():
-            continue
-
-        # Normalize path
-        try:
-            # Handle Windows paths correctly
-            norm_path = str(Path(path).expanduser().resolve())
-        except (OSError, RuntimeError):
-            # Fallback to absolute path if resolve fails (e.g. non-existent drive)
-            norm_path = str(Path(path).absolute())
-
-        # Skip duplicates (preserve first occurrence)
-        if norm_path.lower() in seen:
-            continue
-
-        # Skip potentially dangerous paths
-        if any(dangerous in norm_path.lower() for dangerous in ["/tmp", "/var/tmp", ";", "&&", "|"]):
-            continue
-
-        clean_paths.append(path)  # Keep original casing if possible
-        seen.add(norm_path.lower())
-
-    # Update PATH
-    os.environ["PATH"] = os.pathsep.join(clean_paths)
+    try:
+        settings = EnvironmentSettings()
+        if settings.is_production and not settings.GOOGLE_CLOUD_PROJECT:
+            raise ValueError("GOOGLE_CLOUD_PROJECT must be set in a production environment.")
+        logger.info(f"Environment loaded successfully for: {settings.MOTHERSHIP_ENVIRONMENT}")
+        return settings
+    except Exception as e:
+        logger.critical(f"Failed to load environment settings: {e}")
+        raise
 
 
-def sanitize_environment() -> Dict[str, List[str]]:
-    """
-    Sanitize the entire environment.
-
-    Returns:
-        Dict containing lists of sanitized variables by category
-    """
-    changes = defaultdict(list)
-
-    # Sanitize PATH
-    old_path = os.environ.get("PATH", "")
-    sanitize_path()
-    if os.environ.get("PATH") != old_path:
-        changes["path"].append("PATH sanitized")
-
-    # Remove sensitive variables that might have leaked
-    sensitive_vars = [
-        "AWS_ACCESS_KEY_ID",
-        "AWS_SECRET_ACCESS_KEY",
-        "GITHUB_TOKEN",
-        "DATABASE_URL",
-        "SECRET_KEY",
-        "PASSWORD",
-        "API_KEY",
-    ]
-
-    for var in sensitive_vars:
-        if var in os.environ:
-            changes["security"].append(f"Removed sensitive variable: {var}")
-            del os.environ[var]
-
-    # Normalize Python-related variables
-    python_vars = {
-        "PYTHONPATH": os.pathsep.join(
-            p for p in os.environ.get("PYTHONPATH", "").split(os.pathsep) if p.strip() and os.path.exists(p)
-        )
-    }
-
-    for var, value in python_vars.items():
-        if os.environ.get(var) != value:
-            os.environ[var] = value
-            changes["python"].append(f"Normalized {var}")
-
-    return dict(changes)
-
-
-def get_environment_report() -> Dict[str, Any]:
-    """Generate a report of the current environment state."""
-    return {
-        "python": {
-            "executable": sys.executable,
-            "version": sys.version,
-            "path": sys.path,
-            "prefix": sys.prefix,
-            "base_prefix": getattr(sys, "base_prefix", sys.prefix),
-            "real_prefix": getattr(sys, "real_prefix", None),
-        },
-        "environment": {
-            "path": os.environ.get("PATH", "").split(os.pathsep),
-            "pythonpath": os.environ.get("PYTHONPATH", "").split(os.pathsep),
-            "virtual_env": os.environ.get("VIRTUAL_ENV"),
-        },
-    }
+# Initialize and export a singleton instance
+environment_settings = get_environment_settings()

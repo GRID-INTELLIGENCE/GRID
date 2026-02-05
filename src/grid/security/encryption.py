@@ -5,6 +5,7 @@ AES-256-GCM encryption for sensitive data storage.
 Key management via GCP Secret Manager or local secure storage.
 """
 
+import asyncio
 import base64
 import hashlib
 import json
@@ -12,6 +13,8 @@ import logging
 import os
 from datetime import UTC, datetime
 from typing import Any
+
+from grid.security.environment import environment_settings
 
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
@@ -53,34 +56,53 @@ class DataEncryption:
         self.master_key = master_key
         logger.info("DataEncryption initialized with AES-256-GCM")
 
+    def _run_async_in_sync(self, coro):
+        """Runs an async coroutine in a sync context."""
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+        return loop.run_until_complete(coro)
+
     def _load_master_key(self) -> bytes:
         """
         Load master encryption key.
 
         Priority:
         1. GRID_ENCRYPTION_KEY environment variable (base64 encoded)
-        2. GCP Secret Manager
+        2. GCP Secret Manager (production only)
         3. Fail with error
         """
-        # Try environment variable
+        # Try environment variable first
         env_key = os.getenv("GRID_ENCRYPTION_KEY")
         if env_key:
+            logger.info("Loaded master encryption key from environment variable.")
             return base64.b64decode(env_key.encode())
 
-        # Try GCP Secret Manager
-        try:
-            from .gcp_secrets import get_secret
+        # If in production, try GCP Secret Manager
+        if environment_settings.is_production:
+            logger.info("Production environment detected, attempting to load master key from GCP.")
+            try:
+                from .gcp_secrets import get_secret
 
-            secret_key = get_secret("grid-production-wealth-data-encryption", required=False)
-            if secret_key:
-                return base64.b64decode(secret_key.encode())
-        except Exception as e:
-            logger.warning(f"Failed to load GCP secret key: {e}")
+                secret_key = self._run_async_in_sync(
+                    get_secret("grid-production-wealth-data-encryption", required=False)
+                )
+                if secret_key:
+                    logger.info("Successfully loaded master key from GCP Secret Manager.")
+                    return base64.b64decode(secret_key.encode())
+            except Exception as e:
+                logger.warning(f"Failed to load GCP secret key: {e}")
 
-        raise ValueError(
-            "Encryption key not found. Set GRID_ENCRYPTION_KEY environment variable "
-            "or configure grid-production-wealth-data-encryption in GCP Secret Manager."
+        # If we reach here, no key was found
+        error_msg = (
+            "Encryption key not found. Set GRID_ENCRYPTION_KEY environment variable."
         )
+        if environment_settings.is_production:
+            error_msg += " Or configure 'grid-production-wealth-data-encryption' in GCP Secret Manager."
+
+        raise ValueError(error_msg)
 
     def derive_key(self, password: str, salt: bytes) -> bytes:
         """

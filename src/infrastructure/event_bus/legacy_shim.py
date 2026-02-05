@@ -3,7 +3,7 @@
 import logging
 from typing import Any, Callable
 
-from .event_system import EventBus, Subscription
+from .event_system import Subscription
 
 logger = logging.getLogger(__name__)
 
@@ -25,8 +25,7 @@ async def subscribe_legacy(event: str, handler: Callable[[Any], None]) -> Subscr
         This is a legacy API. Use subscribe() instead.
     """
     logger.warning(
-        "subscribe_legacy is deprecated; use subscribe() instead. "
-        "This will be removed in a future version."
+        "subscribe_legacy is deprecated; use subscribe() instead. " "This will be removed in a future version."
     )
 
     # Get EventBus instance and subscribe

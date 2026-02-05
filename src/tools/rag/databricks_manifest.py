@@ -23,6 +23,32 @@ class DatabricksFileState:
 
 
 class DatabricksManifestTracker:
+    # Valid identifier pattern for table/schema names (SQL injection prevention)
+    _IDENTIFIER_PATTERN = r"^[a-zA-Z_][a-zA-Z0-9_]*$"
+
+    @classmethod
+    def _validate_identifier(cls, name: str, label: str = "identifier") -> str:
+        """Validate SQL identifier to prevent injection via table/schema names.
+
+        Args:
+            name: The identifier to validate
+            label: Description for error messages
+
+        Returns:
+            The validated identifier
+
+        Raises:
+            ValueError: If identifier contains invalid characters
+        """
+        import re
+
+        if not name or not re.match(cls._IDENTIFIER_PATTERN, name):
+            raise ValueError(
+                f"Invalid {label}: '{name}'. "
+                f"Must start with letter/underscore and contain only alphanumeric/underscore."
+            )
+        return name
+
     def __init__(
         self,
         *,
@@ -30,6 +56,10 @@ class DatabricksManifestTracker:
         table: str = "rag_file_manifest",
         repo: str,
     ) -> None:
+        # Validate identifiers to prevent SQL injection
+        self._validate_identifier(schema, "schema")
+        self._validate_identifier(table, "table")
+
         self.schema = schema
         self.table = f"{schema}.{table}" if schema and schema != "default" else table
         self.repo = repo
@@ -81,10 +111,6 @@ class DatabricksManifestTracker:
         t = "".join(t.splitlines()).strip()
         return t
 
-    @staticmethod
-    def _esc(s: str) -> str:
-        return s.replace("'", "''")
-
     def _ensure_table(self) -> None:
         create_sql = f"""
         CREATE TABLE IF NOT EXISTS {self.table} (
@@ -106,13 +132,13 @@ class DatabricksManifestTracker:
         sql_txt = f"""
         SELECT repo, path, file_hash, file_size, mtime_ms, chunk_count
         FROM {self.table}
-        WHERE repo = '{self._esc(self.repo)}'
+        WHERE repo = :repo
         """
 
         out: dict[str, DatabricksFileState] = {}
         with self._connect() as conn:
             with conn.cursor() as cur:
-                cur.execute(sql_txt)
+                cur.execute(sql_txt, {"repo": self.repo})
                 rows = cur.fetchall() or []
 
         for r in rows:
@@ -136,14 +162,21 @@ class DatabricksManifestTracker:
         batch_size = 200
         for i in range(0, len(paths), batch_size):
             batch = paths[i : i + batch_size]
-            in_list = ",".join(f"'{self._esc(p)}'" for p in batch)
+            params = {"repo": self.repo}
+            placeholders = []
+            for j, p in enumerate(batch):
+                param_name = f"path_{j}"
+                placeholders.append(f":{param_name}")
+                params[param_name] = p
+
+            in_list = ",".join(placeholders)
             sql_txt = f"""
             DELETE FROM {self.table}
-            WHERE repo = '{self._esc(self.repo)}' AND path IN ({in_list})
+            WHERE repo = :repo AND path IN ({in_list})
             """
             with self._connect() as conn:
                 with conn.cursor() as cur:
-                    cur.execute(sql_txt)
+                    cur.execute(sql_txt, params)
             deleted += len(batch)
 
         return deleted
@@ -160,16 +193,26 @@ class DatabricksManifestTracker:
             batch = states[i : i + batch_size]
 
             rows = []
-            for s in batch:
+            params = {"now": now}
+            for j, s in enumerate(batch):
+                p_repo = f"repo_{j}"
+                p_path = f"path_{j}"
+                p_hash = f"hash_{j}"
+                p_size = f"size_{j}"
+                p_mtime = f"mtime_{j}"
+                p_chunk = f"chunk_{j}"
+
+                params[p_repo] = s.repo
+                params[p_path] = s.path
+                params[p_hash] = s.file_hash
+                params[p_size] = s.file_size
+                params[p_mtime] = s.mtime_ms
+                params[p_chunk] = s.chunk_count
+
                 rows.append(
-                    "SELECT "
-                    f"'{self._esc(s.repo)}' AS repo, "
-                    f"'{self._esc(s.path)}' AS path, "
-                    f"'{self._esc(s.file_hash)}' AS file_hash, "
-                    f"{int(s.file_size)} AS file_size, "
-                    f"{int(s.mtime_ms)} AS mtime_ms, "
-                    f"{int(s.chunk_count)} AS chunk_count, "
-                    f"CAST('{now}' AS TIMESTAMP) AS indexed_at"
+                    f"SELECT :{p_repo} AS repo, :{p_path} AS path, :{p_hash} AS file_hash, "
+                    f":{p_size} AS file_size, :{p_mtime} AS mtime_ms, :{p_chunk} AS chunk_count, "
+                    f"CAST(:now AS TIMESTAMP) AS indexed_at"
                 )
 
             source_sql = "\nUNION ALL\n".join(rows)
@@ -194,7 +237,7 @@ class DatabricksManifestTracker:
 
             with self._connect() as conn:
                 with conn.cursor() as cur:
-                    cur.execute(sql_txt)
+                    cur.execute(sql_txt, params)
 
             upserted += len(batch)
 

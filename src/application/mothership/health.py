@@ -1,10 +1,8 @@
 """Health check endpoints for parasitic leak remediation."""
 
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
-
-from fastapi import HTTPException
 
 logger = logging.getLogger(__name__)
 
@@ -12,8 +10,6 @@ logger = logging.getLogger(__name__)
 async def check_eventbus_health() -> dict[str, Any]:
     """Check EventBus health."""
     try:
-        from infrastructure.event_bus.event_system import EventBus
-
         # Check if EventBus is initialized
         # For now, return healthy if module can be imported
         return {
@@ -88,5 +84,5 @@ async def health_check() -> dict[str, Any]:
     return {
         "status": status,
         "components": components,
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
     }

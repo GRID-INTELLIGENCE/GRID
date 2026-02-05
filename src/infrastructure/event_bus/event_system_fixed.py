@@ -271,7 +271,7 @@ class Subscription:
 class EventBus:
     """
     Main event bus for the event-driven architecture.
-    
+
     FIXED: Uses WeakMethod for automatic cleanup + explicit unsubscribe.
     Prevents memory leaks from accumulated subscribers.
     """
@@ -419,7 +419,7 @@ class EventBus:
         for callback_id, (weak_ref, metadata) in subscribers.items():
             # Resolve weak reference
             callback = weak_ref() if isinstance(weak_ref, ref) else weak_ref()
-            
+
             if callback is None:
                 # Callback was garbage collected
                 dead_refs.append(callback_id)
@@ -443,14 +443,14 @@ class EventBus:
     def subscribe(self, event_type: str, handler: Callable) -> Subscription:
         """
         Subscribe to events.
-        
+
         FIXED: Returns a Subscription object that can be used to unsubscribe.
         Also supports context manager usage for automatic cleanup.
-        
+
         Args:
             event_type: Type of event to subscribe to
             handler: Callback function to invoke
-            
+
         Returns:
             Subscription object with unsubscribe() method
         """
@@ -614,10 +614,12 @@ async def example_event_bus_setup():
     # Subscribe with automatic cleanup using context manager
     async def my_handler(event: Event):
         print(f"Received: {event.type}")
-    
+
     with event_bus.subscribe("portfolio.updated", my_handler) as sub:
         # Publish events
-        await event_bus.publish("portfolio.updated", {"user_id": "user123", "value": 25000.0}, source="portfolio_service")
+        await event_bus.publish(
+            "portfolio.updated", {"user_id": "user123", "value": 25000.0}, source="portfolio_service"
+        )
 
     # Or manual subscription with explicit unsubscribe
     sub = event_bus.subscribe("trading.signal.generated", my_handler)

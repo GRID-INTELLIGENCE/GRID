@@ -9,14 +9,15 @@ import importlib
 import importlib.util
 import sys
 import types
-import weakref
 from contextlib import contextmanager
-from typing import Any, Dict, Iterator, Optional, Set, TypeVar
+from typing import Iterator, TypeVar
 
 T = TypeVar("T")
 
+
 class ModuleIsolationError(Exception):
     """Raised when module isolation fails."""
+
 
 @contextmanager
 def isolate_module(module_name: str) -> Iterator[None]:
@@ -43,7 +44,7 @@ def isolate_module(module_name: str) -> Iterator[None]:
             # Save original attributes
             if original_module is not None:
                 for name, attr in vars(original_module).items():
-                    if not name.startswith('__'):
+                    if not name.startswith("__"):
                         original_attrs[name] = attr
 
             # Remove from sys.modules to force re-import
@@ -60,7 +61,7 @@ def isolate_module(module_name: str) -> Iterator[None]:
 
         # Copy only non-dunder attributes
         for name, attr in vars(module).items():
-            if not name.startswith('__'):
+            if not name.startswith("__"):
                 setattr(clean_module, name, attr)
 
         # Replace in sys.modules
@@ -76,6 +77,7 @@ def isolate_module(module_name: str) -> Iterator[None]:
             del sys.modules[module_name]
         if original_module is not None:
             sys.modules[module_name] = original_module
+
 
 def safe_reload(module_name: str) -> types.ModuleType:
     """
@@ -94,7 +96,8 @@ def safe_reload(module_name: str) -> types.ModuleType:
         module = importlib.import_module(module_name)
         return importlib.reload(module)
 
-def get_module_dependencies(module_name: str) -> Set[str]:
+
+def get_module_dependencies(module_name: str) -> set[str]:
     """
     Get all direct dependencies of a module.
 
@@ -112,12 +115,13 @@ def get_module_dependencies(module_name: str) -> Set[str]:
     for attr in dir(module):
         try:
             value = getattr(module, attr)
-            if hasattr(value, '__module__') and value.__module__ != module_name:
+            if hasattr(value, "__module__") and value.__module__ != module_name:
                 dependencies.add(value.__module__)
         except (AttributeError, ImportError):
             continue
 
     return dependencies
+
 
 def cleanup_module(module_name: str) -> None:
     """
@@ -130,7 +134,7 @@ def cleanup_module(module_name: str) -> None:
         # Clear module attributes
         module = sys.modules[module_name]
         for name in list(vars(module).keys()):
-            if not name.startswith('__'):
+            if not name.startswith("__"):
                 delattr(module, name)
 
         # Clear from sys.modules

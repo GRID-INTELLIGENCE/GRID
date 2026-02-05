@@ -10,14 +10,11 @@ from __future__ import annotations
 import asyncio
 import logging
 import uuid
-from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from enum import Enum
-from typing import Any
+from datetime import UTC, datetime
 
 from .config import ParasiteGuardConfig
-from .contracts import Alert, AlertChannel, AlerterContract, Severity
+from .contracts import Alert, AlertChannel, Severity
 from .models import ParasiteContext, ParasiteSeverity
 from .state_machine import GuardState, ParasiteGuardStateMachine
 
@@ -42,8 +39,7 @@ class LoggingAlertChannel:
         """Log the alert."""
         logger.log(
             self._level,
-            f"[PARASITE ALERT] [{alert.severity.value.upper()}] "
-            f"{alert.component}: {alert.message}",
+            f"[PARASITE ALERT] [{alert.severity.value.upper()}] " f"{alert.component}: {alert.message}",
             extra={
                 "alert_id": alert.id,
                 "component": alert.component,
@@ -134,9 +130,7 @@ class WebhookAlertChannel:
                 ) as response:
                     if response.status < 400:
                         return True
-                    logger.warning(
-                        f"Webhook returned status {response.status}: {await response.text()}"
-                    )
+                    logger.warning(f"Webhook returned status {response.status}: {await response.text()}")
                     return False
 
         except ImportError:
@@ -197,9 +191,7 @@ class EscalationPolicy:
 
     critical_threshold: int = 3
     escalation_window_seconds: float = 300.0  # 5 minutes
-    auto_escalate_patterns: list[str] = field(
-        default_factory=lambda: ["security_breach", "data_leak", "injection"]
-    )
+    auto_escalate_patterns: list[str] = field(default_factory=lambda: ["security_breach", "data_leak", "injection"])
     notify_on_escalation: bool = True
 
 
@@ -337,7 +329,7 @@ class ParasiteAlerter:
             component=context.component,
             pattern=context.pattern,
             message=f"{prefix}Detected parasite: {context.pattern} in {context.component}",
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
             context=context,
             metadata={
                 "rule": context.rule,
@@ -354,9 +346,7 @@ class ParasiteAlerter:
             severity: Severity level for the alert.
         """
         # Track alert count
-        self._alert_counts[context.pattern] = (
-            self._alert_counts.get(context.pattern, 0) + 1
-        )
+        self._alert_counts[context.pattern] = self._alert_counts.get(context.pattern, 0) + 1
 
         # Create alert
         alert = self._create_alert(context, severity)
@@ -396,12 +386,9 @@ class ParasiteAlerter:
         self._stats["escalations"] += 1
 
         # Create escalation alert
-        escalation_alert = self._create_alert(
-            context, Severity.CRITICAL, is_escalation=True
-        )
+        escalation_alert = self._create_alert(context, Severity.CRITICAL, is_escalation=True)
         escalation_alert.message = (
-            f"[ESCALATION] Critical parasite requires manual intervention: "
-            f"{context.pattern} in {context.component}"
+            f"[ESCALATION] Critical parasite requires manual intervention: " f"{context.pattern} in {context.component}"
         )
 
         # Send escalation to all channels
@@ -413,9 +400,7 @@ class ParasiteAlerter:
             try:
                 if self._state_machine.state == GuardState.MITIGATING:
                     self._state_machine.transition(GuardState.ALERTING, confidence=0.95)
-                    logger.warning(
-                        f"State machine transitioned to ALERTING for {context.pattern}"
-                    )
+                    logger.warning(f"State machine transitioned to ALERTING for {context.pattern}")
             except Exception as e:
                 logger.error(f"Failed to transition state machine: {e}")
 

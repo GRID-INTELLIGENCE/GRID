@@ -1,0 +1,89 @@
+{
+  "timestamp": "2026-02-05T08:15:59.809441",
+  "environment": "development",
+  "results": [
+    {
+      "category": "environment",
+      "name": "GRID_ENVIRONMENT set",
+      "status": "pass",
+      "message": "GRID_ENVIRONMENT=development"
+    },
+    {
+      "category": "environment",
+      "name": ".env file exists",
+      "status": "pass",
+      "message": "E:\\grid\\.env"
+    },
+    {
+      "category": "environment",
+      "name": "No real secrets in .env",
+      "status": "pass",
+      "message": "No real secrets detected"
+    },
+    {
+      "category": "secrets",
+      "name": "Secrets database exists",
+      "status": "pass",
+      "message": "C:\\Users\\irfan\\.grid\\secrets\\secrets.db"
+    },
+    {
+      "category": "secrets",
+      "name": "Secrets write",
+      "status": "pass",
+      "message": "Write operation successful"
+    },
+    {
+      "category": "secrets",
+      "name": "Secrets read",
+      "status": "pass",
+      "message": "Read operation successful"
+    },
+    {
+      "category": "secrets",
+      "name": "MOTHERSHIP_SECRET_KEY configured",
+      "status": "warn",
+      "message": "MOTHERSHIP_SECRET_KEY is not set"
+    },
+    {
+      "category": "secrets",
+      "name": "MISTRAL_API_KEY configured",
+      "status": "warn",
+      "message": "MISTRAL_API_KEY is not set"
+    },
+    {
+      "category": "dependencies",
+      "name": "cryptography installed",
+      "status": "pass",
+      "message": "version 46.0.4"
+    },
+    {
+      "category": "dependencies",
+      "name": "google-cloud-secretmanager installed",
+      "status": "warn",
+      "message": "google-cloud-secretmanager not installed (optional)"
+    },
+    {
+      "category": "dependencies",
+      "name": "google-cloud-logging installed",
+      "status": "warn",
+      "message": "google-cloud-logging not installed (optional)"
+    },
+    {
+      "category": "security_patterns",
+      "name": "No hardcoded secrets",
+      "status": "fail",
+      "message": "Found 3 potential issues"
+    },
+    {
+      "category": "security_patterns",
+      "name": "Secrets in .gitignore",
+      "status": "pass",
+      "message": "Secrets patterns found in .gitignore"
+    }
+  ],
+  "summary": {
+    "passed": 8,
+    "failed": 1,
+    "warnings": 4
+  }
+}

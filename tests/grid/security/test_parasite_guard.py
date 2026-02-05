@@ -10,17 +10,13 @@ Author: GRID Intelligence Framework
 
 from __future__ import annotations
 
-import asyncio
-import json
 import uuid
-from datetime import datetime, timezone
 from typing import Any
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 from fastapi import FastAPI, Request
 from fastapi.testclient import TestClient
-from starlette.testclient import TestClient as StarletteTestClient
 
 from src.grid.security.parasite_guard import (
     DummyResponseGenerator,
@@ -42,7 +38,6 @@ from src.grid.security.parasite_guard import (
     add_parasite_guard,
     report_false_positive,
 )
-
 
 # =============================================================================
 # Fixtures
@@ -405,14 +400,12 @@ class TestFractalNullFacade:
 
     def test_build_null_object_dict_origin(self) -> None:
         """Test building null object for dict type with typing origin."""
-        from typing import Dict
         # Plain dict type without typing origin returns None (null sentinel)
         result = FractalNullFacade.build_null_object(dict)
         assert result is None  # Null facade for plain types
 
     def test_build_null_object_list_origin(self) -> None:
         """Test building null object for list type with typing origin."""
-        from typing import List
         # Plain list type without typing origin returns None (null sentinel)
         result = FractalNullFacade.build_null_object(list)
         assert result is None  # Null facade for plain types

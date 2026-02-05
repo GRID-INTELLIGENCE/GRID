@@ -121,9 +121,12 @@ class DatabaseSettings:
     # Used when Databricks is enabled but not configured, or when connection fails.
     fallback_url: str = os.getenv("MOTHERSHIP_DB_FALLBACK_URL", "sqlite:///./mothership_fallback.db")
 
-    pool_size: int = 5
-    max_overflow: int = 10
+    # Optimized connection pooling for high traffic
+    pool_size: int = 20  # Increased from 5
+    max_overflow: int = 30  # Increased from 10 for burst handling
     pool_timeout: int = 30
+    pool_recycle: int = 3600  # Recycle connections after 1 hour
+    pool_pre_ping: bool = True  # Verify connections before use
     echo: bool = False
 
     # Databricks configuration
@@ -243,11 +246,30 @@ class SecuritySettings:
     # Explicit security mode fields (previously accessed via getattr fallbacks)
     strict_mode: bool = False  # Enable strict security mode (blocks violations instead of logging)
     input_sanitization_enabled: bool = True  # Enable input sanitization for all requests
-    circuit_breaker_enabled: bool = False  # Enable circuit breaker for external service calls
+    circuit_breaker_enabled: bool = True  # Enable circuit breaker for external service calls
     block_insecure_transport: bool = False  # Block HTTP requests (require HTTPS) in strict mode
     # Parasite Guard (Total Rickall Defense)
     parasite_guard_enabled: bool = True  # Enable/disable the guard system
     parasite_guard_pruning_enabled: bool = True  # Enable automatic pruning of parasitic code paths (Production Ready)
+
+    # DRT - Distributed Request Tracking (DRT) for focused monitoring
+    drt_enabled: bool = True  # Enable Distributed Request Tracking for attack vector analysis
+    drt_retention_hours: int = 96  # Retention period for DRT data (4 days)
+    drt_anomaly_detection_enabled: bool = True  # Enable real-time anomaly detection
+    drt_behavioral_similarity_threshold: float = 0.85  # Threshold for behavioral similarity (0.0-1.0)
+    drt_enforcement_mode: str = "monitor"  # monitor, enforce, disabled
+    drt_websocket_monitoring_enabled: bool = True  # Enable WebSocket traffic monitoring
+    drt_api_movement_logging_enabled: bool = True  # Enable API movement logging
+    drt_penalty_points_enabled: bool = True  # Enable penalty point system for violations
+    drt_slo_evaluation_interval_seconds: int = 300  # SLO evaluation interval (5 minutes)
+    drt_slo_violation_penalty_base: int = 10  # Base penalty points for SLO violations
+    drt_report_generation_enabled: bool = True  # Enable automated DRT report generation
+
+    # Accountability Contract Enforcement
+    accountability_enabled: bool = True  # Enable accountability contract enforcement
+    accountability_enforcement_mode: str = "monitor"  # monitor, enforce, disabled
+    accountability_contract_path: str = "config/accountability/contracts.yaml"  # Path to contract file
+    accountability_audit_logging: bool = True  # Enable audit logging for violations
 
     @classmethod
     def from_env(cls) -> SecuritySettings:
@@ -268,11 +290,28 @@ class SecuritySettings:
             # Explicit security mode fields
             strict_mode=_parse_bool(env.get("MOTHERSHIP_SECURITY_STRICT_MODE"), False),
             input_sanitization_enabled=_parse_bool(env.get("MOTHERSHIP_INPUT_SANITIZATION_ENABLED"), True),
-            circuit_breaker_enabled=_parse_bool(env.get("MOTHERSHIP_CIRCUIT_BREAKER_ENABLED"), False),
+            circuit_breaker_enabled=_parse_bool(env.get("MOTHERSHIP_CIRCUIT_BREAKER_ENABLED"), True),
             block_insecure_transport=_parse_bool(env.get("MOTHERSHIP_BLOCK_INSECURE_TRANSPORT"), False),
             # Parasite Guard
             parasite_guard_enabled=_parse_bool(env.get("MOTHERSHIP_PARASITE_GUARD_ENABLED"), True),
             parasite_guard_pruning_enabled=_parse_bool(env.get("MOTHERSHIP_PARASITE_GUARD_PRUNING_ENABLED"), True),
+            # DRT Monitoring
+            drt_enabled=_parse_bool(env.get("MOTHERSHIP_DRT_ENABLED"), True),
+            drt_retention_hours=int(env.get("MOTHERSHIP_DRT_RETENTION_HOURS", "96")),
+            drt_anomaly_detection_enabled=_parse_bool(env.get("MOTHERSHIP_DRT_ANOMALY_ENABLED"), True),
+            drt_behavioral_similarity_threshold=float(env.get("MOTHERSHIP_DRT_SIMILARITY_THRESHOLD", "0.85")),
+            drt_enforcement_mode=env.get("MOTHERSHIP_DRT_ENFORCEMENT_MODE", "monitor"),
+            drt_websocket_monitoring_enabled=_parse_bool(env.get("MOTHERSHIP_DRT_WEBSOCKET_ENABLED"), True),
+            drt_api_movement_logging_enabled=_parse_bool(env.get("MOTHERSHIP_DRT_API_LOGGING_ENABLED"), True),
+            drt_penalty_points_enabled=_parse_bool(env.get("MOTHERSHIP_DRT_PENALTY_ENABLED"), True),
+            drt_slo_evaluation_interval_seconds=int(env.get("MOTHERSHIP_DRT_SLO_INTERVAL", "300")),
+            drt_slo_violation_penalty_base=int(env.get("MOTHERSHIP_DRT_PENALTY_BASE", "10")),
+            drt_report_generation_enabled=_parse_bool(env.get("MOTHERSHIP_DRT_REPORT_ENABLED"), True),
+            # Accountability Contract Enforcement
+            accountability_enabled=_parse_bool(env.get("MOTHERSHIP_ACCOUNTABILITY_ENABLED"), True),
+            accountability_enforcement_mode=env.get("MOTHERSHIP_ACCOUNTABILITY_MODE", "monitor"),
+            accountability_contract_path=env.get("MOTHERSHIP_ACCOUNTABILITY_CONTRACT_PATH", "config/accountability/contracts.yaml"),
+            accountability_audit_logging=_parse_bool(env.get("MOTHERSHIP_ACCOUNTABILITY_AUDIT_LOGGING"), True),
         )
 
     def validate(self, environment: str | None = None, fail_fast: bool = False) -> list[str]:
@@ -880,6 +919,18 @@ class MothershipSettings:
                 "rate_limit_enabled": self.security.rate_limit_enabled,
                 "rate_limit_requests": self.security.rate_limit_requests,
                 "rate_limit_window_seconds": self.security.rate_limit_window_seconds,
+                # DRT Settings
+                "drt_enabled": self.security.drt_enabled,
+                "drt_retention_hours": self.security.drt_retention_hours,
+                "drt_anomaly_detection_enabled": self.security.drt_anomaly_detection_enabled,
+                "drt_behavioral_similarity_threshold": self.security.drt_behavioral_similarity_threshold,
+                "drt_enforcement_mode": self.security.drt_enforcement_mode,
+                "drt_websocket_monitoring_enabled": self.security.drt_websocket_monitoring_enabled,
+                "drt_api_movement_logging_enabled": self.security.drt_api_movement_logging_enabled,
+                "drt_penalty_points_enabled": self.security.drt_penalty_points_enabled,
+                "drt_slo_evaluation_interval_seconds": self.security.drt_slo_evaluation_interval_seconds,
+                "drt_slo_violation_penalty_base": self.security.drt_slo_violation_penalty_base,
+                "drt_report_generation_enabled": self.security.drt_report_generation_enabled,
             },
             "integrations": {
                 "gemini_enabled": self.integrations.gemini_enabled,

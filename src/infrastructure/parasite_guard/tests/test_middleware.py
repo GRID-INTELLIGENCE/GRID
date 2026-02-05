@@ -6,20 +6,17 @@ Tests the complete workflow: detection → response → sanitization.
 
 from __future__ import annotations
 
-import asyncio
-import pytest
-from datetime import datetime, timezone
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
-from infrastructure.parasite_guard.config import ParasiteGuardConfig, GuardMode
+import pytest
+
+from infrastructure.parasite_guard.config import GuardMode, ParasiteGuardConfig
+from infrastructure.parasite_guard.middleware import ParasiteGuardMiddleware as ParasiteDetectorMiddleware
 from infrastructure.parasite_guard.models import (
-    ParasiteContext,
     DetectionResult,
-    SanitizationResult,
+    ParasiteContext,
     ParasiteSeverity,
 )
-from infrastructure.parasite_guard.middleware import ParasiteGuardMiddleware as ParasiteDetectorMiddleware
-from infrastructure.parasite_guard.detectors import Detector, WebSocketNoAckDetector
 
 
 @pytest.fixture

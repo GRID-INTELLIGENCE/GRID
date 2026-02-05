@@ -16,7 +16,6 @@ async def test_db_engine_metrics_and_disposal():
         patch("application.mothership.db.engine._db_connections") as mock_gauge,
         patch("application.mothership.db.engine._should_auto_init_sqlite", return_value=False),
     ):
-
         # Setup mock engine
         mock_engine = AsyncMock()
         mock_engine.pool = MagicMock()

@@ -5,22 +5,42 @@ import time
 from typing import Any
 
 
-def run_command(command: str, check: bool = True) -> subprocess.CompletedProcess:
-    print(f"Running: {command}")
-    return subprocess.run(command, shell=True, capture_output=True, text=True, check=check)
+
+import shlex
+
+def run_command(command: str | list[str], check: bool = True) -> subprocess.CompletedProcess:
+    if isinstance(command, list):
+        cmd_args = command
+        cmd_str = " ".join(command)
+    else:
+        # Backward compatibility / lazy string splitting
+        cmd_str = command
+        # Simple split usually works for these CLI interactions
+        cmd_args = command.split()
+
+    print(f"Running: {cmd_str}")
+    return subprocess.run(cmd_args, shell=False, capture_output=True, text=True, check=check)
 
 
 def get_latest_run(workflow_name: str) -> dict[str, Any] | None:
-    cmd = f'gh run list --workflow "{workflow_name}" --limit 1 --json databaseId,status,conclusion,url'
-    result = run_command(cmd)
-    runs = json.loads(result.stdout)
-    return runs[0] if runs else None
+    # Use list for arguments
+    cmd = ["gh", "run", "list", "--workflow", workflow_name, "--limit", "1", "--json", "databaseId,status,conclusion,url"]
+    try:
+        result = run_command(cmd)
+        runs = json.loads(result.stdout)
+        return runs[0] if runs else None
+    except subprocess.CalledProcessError:
+        return None
 
 
 def trigger_workflow(event_type: str = "feedback-loop"):
     print(f"Triggering workflow with event type: {event_type}")
     # Using gh api to dispatch repository event
-    cmd = f'gh api repos/:owner/:repo/dispatches -f event_type="{event_type}"'
+    # cmd = f'gh api repos/:owner/:repo/dispatches -f event_type="{event_type}"'
+    # 'gh' allows passing just 'repos/:owner/:repo/dispatches' literal if inside a git repo?
+    # Or we can just use the path relative to authenticated user?
+    # Actually 'gh api' automatically handles :owner/:repo if current dir is a repo.
+    cmd = ["gh", "api", "repos/:owner/:repo/dispatches", "-f", f"event_type={event_type}"]
     run_command(cmd)
 
 
@@ -78,13 +98,13 @@ def fetch_failure_logs(run_id: int):
     print(f"Fetching logs for failed run {run_id}...")
     try:
         # Get failed logs
-        result = run_command(f"gh run view {run_id} --log-failed", check=False)
+        result = run_command(["gh", "run", "view", str(run_id), "--log-failed"], check=False)
         print("\n--- FAILED LOGS ---")
         print(result.stdout)
         print("-------------------\n")
 
         # Also check annotations
-        result = run_command(f"gh run view {run_id}", check=False)
+        result = run_command(["gh", "run", "view", str(run_id)], check=False)
         print("\n--- RUN SUMMARY ---")
         print(result.stdout)
         print("-------------------\n")
@@ -97,7 +117,7 @@ if __name__ == "__main__":
 
     # Check if gh is authenticated
     try:
-        run_command("gh auth status")
+        run_command(["gh", "auth", "status"])
     except subprocess.CalledProcessError:
         print("Error: GitHub CLI is not authenticated. Please run 'gh auth login'.")
         sys.exit(1)

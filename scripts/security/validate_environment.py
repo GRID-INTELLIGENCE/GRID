@@ -16,7 +16,6 @@ Usage:
 
 import json
 import os
-import stat
 import sys
 from pathlib import Path
 from typing import Any
@@ -28,6 +27,7 @@ sys.path.insert(0, str(project_root / "src"))
 # Import SecurePathManager for auto-fix functionality
 try:
     from grid.security.path_manager import SecurePathManager
+
     PATH_MANAGER_AVAILABLE = True
 except ImportError:
     PATH_MANAGER_AVAILABLE = False
@@ -86,7 +86,7 @@ class EnvironmentValidator:
                             # User/application paths are typically OK to be writable
                             pass
 
-            except (OSError, ValueError) as e:
+            except (OSError, ValueError):
                 # Skip invalid paths
                 continue
 
@@ -257,22 +257,16 @@ class EnvironmentValidator:
         """Generate recommendations based on found issues."""
         recommendations = []
 
-        has_writable_system = any(
-            issue["type"] == "writable_system_path" for issue in self.issues
-        )
+        has_writable_system = any(issue["type"] == "writable_system_path" for issue in self.issues)
         has_writable_python = any(
-            issue["type"] in ["writable_python_installation", "writable_python_lib"]
-            for issue in self.issues
+            issue["type"] in ["writable_python_installation", "writable_python_lib"] for issue in self.issues
         )
         has_non_existent_paths = any(
-            issue["type"] in ["non_existent_pythonpath", "non_existent_sys_path"]
-            for issue in self.issues
+            issue["type"] in ["non_existent_pythonpath", "non_existent_sys_path"] for issue in self.issues
         )
 
         if has_writable_system:
-            recommendations.append(
-                "Review and restrict write permissions on system directories in PATH"
-            )
+            recommendations.append("Review and restrict write permissions on system directories in PATH")
 
         if has_writable_python:
             recommendations.append(
@@ -415,17 +409,14 @@ class EnvironmentValidator:
         writable_issues = [
             i
             for i in self.issues
-            if i["type"]
-            in ["writable_system_path", "writable_python_installation", "writable_python_lib"]
+            if i["type"] in ["writable_system_path", "writable_python_installation", "writable_python_lib"]
         ]
         if writable_issues:
             results["warnings"].append(
                 f"Found {len(writable_issues)} permission issues that require manual intervention"
             )
 
-        total_fixed = (
-            pythonpath_result.get("count", 0) + sys_path_result.get("count", 0)
-        )
+        total_fixed = pythonpath_result.get("count", 0) + sys_path_result.get("count", 0)
         results["total_fixed"] = total_fixed
         results["success"] = total_fixed > 0 and not results["errors"]
 
@@ -490,12 +481,8 @@ def main() -> int:
     """Main entry point."""
     import argparse
 
-    parser = argparse.ArgumentParser(
-        description="Validate environment security configuration"
-    )
-    parser.add_argument(
-        "--json", action="store_true", help="Output results as JSON"
-    )
+    parser = argparse.ArgumentParser(description="Validate environment security configuration")
+    parser.add_argument("--json", action="store_true", help="Output results as JSON")
     parser.add_argument(
         "--fix",
         action="store_true",

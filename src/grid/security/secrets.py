@@ -11,6 +11,8 @@ from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
 from typing import Any
 
+from grid.security.environment import environment_settings
+
 logger = logging.getLogger(__name__)
 
 
@@ -262,7 +264,7 @@ def get_secrets_manager() -> SecretsManager | None:
     return _secrets_manager
 
 
-def initialize_secrets_manager(environment: str = "development") -> SecretsManager:
+def initialize_secrets_manager() -> SecretsManager:
     """Initialize secrets manager based on environment."""
     global _secrets_manager
 
@@ -277,7 +279,7 @@ def initialize_secrets_manager(environment: str = "development") -> SecretsManag
     except ImportError:
         logger.warning("Local Secrets Manager not available")
 
-    if environment == "production":
+    if environment_settings.is_production:
         # In production, also try GCP Secret Manager as additional layer
         try:
             from .gcp_secrets import get_gcp_provider
