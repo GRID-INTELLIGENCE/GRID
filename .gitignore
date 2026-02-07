@@ -605,6 +605,7 @@ docs/*.md
 # ==========================
 
 scripts/*.py
+!scripts/track_commit.py
 *.ps1
 !scripts/__init__.py
 !scripts/setup.py

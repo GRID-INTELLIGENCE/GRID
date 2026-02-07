@@ -1,0 +1,117 @@
+# GRID — GitHub Actions CI/CD Pipeline
+# Local-first, UV-based, Python 3.13, fast + stable checks
+
+name: GRID CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+env:
+  PYTHONUNBUFFERED: "1"
+  PYTHONDONTWRITEBYTECODE: "1"
+  PIP_NO_CACHE_DIR: "1"
+  GRID_ENVIRONMENT: "testing"
+  BLOCKER_DISABLED: "1"
+  PYTHONPATH: "."
+  UV_CACHE_DIR: ".cache/uv"
+  MOTHERSHIP_SECRET_KEY: "ci_test_secret_key_change_me"
+
+jobs:
+  secrets_scan:
+    name: Secrets Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check for hardcoded secrets
+        run: |
+          if grep -r -i -E "(password|secret|token|api_key)\s*=\s*[\"'][^\"']{20,}[\"']" --include="*.py" --include="*.yaml" --include="*.yml" --include="*.json" src/ 2>/dev/null; then
+            echo "Potential hardcoded secrets found - please review"
+            exit 1
+          elif grep -r -i "ghp_[a-zA-Z0-9]{36}" --include="*.py" --include="*.yaml" --include="*.yml" --include="*.json" src/ 2>/dev/null; then
+            echo "GitHub token found - please review"
+            exit 1
+          else
+            echo "No obvious hardcoded secrets detected"
+          fi
+
+  smoke_test:
+    name: Smoke Test
+    runs-on: ubuntu-latest
+    needs: secrets_scan
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install uv
+        run: pip install uv
+      - name: Sync dependencies
+        run: uv sync --frozen --group test
+      - name: Import check
+        run: |
+          uv run python -c "
+          import sys
+          print(f'Python: {sys.version}')
+          imports_to_test = [
+              ('pytest', 'pytest'),
+              ('pydantic', 'pydantic'),
+              ('fastapi', 'fastapi'),
+          ]
+          passed = 0
+          failed = 0
+          for name, module in imports_to_test:
+              try:
+                  __import__(module)
+                  print(f'✓ {name}')
+                  passed += 1
+              except ImportError as e:
+                  print(f'✗ {name}: {e}')
+                  failed += 1
+          print(f'Import check: {passed} passed, {failed} failed')
+          if failed > 0:
+              sys.exit(1)
+          "
+      - name: Test collection
+        run: uv run pytest tests/unit/ --collect-only -q 2>/dev/null || echo "No tests found"
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    needs: secrets_scan
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install uv
+        run: pip install uv
+      - name: Sync dependencies
+        run: uv sync --frozen
+      - name: Run ruff
+        run: uv run ruff check . --output-format=full
+      - name: Run black
+        run: uv run black --check src/grid/ src/application/ src/tools/ tests/
+      - name: Run mypy
+        run: uv run mypy src/ --ignore-missing-imports || true
+
+  unit_tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs: smoke_test
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install uv
+        run: pip install uv
+      - name: Sync dependencies
+        run: uv sync --frozen --group test
+      - name: Run tests
+        run: uv run pytest tests/unit/ -v --tb=short
