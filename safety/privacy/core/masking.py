@@ -12,12 +12,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Callable
-
-
-def _hash_value(value: str) -> str:
-    """Return a SHA-256 prefix of *value* — never stores plaintext PII."""
-    return hashlib.sha256(value.encode()).hexdigest()[:16]
-
+# (Fixed: removed redundant/duplicated _hash_value)
 
 class MaskStrategyType(Enum):
     """Types of masking strategies available."""
