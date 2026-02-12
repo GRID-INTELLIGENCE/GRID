@@ -1,13 +1,15 @@
 import pytest
 from fastapi.testclient import TestClient
+from typing import Generator
 from src.grid.api.main import app
 
 @pytest.fixture
-def client():
-    return TestClient(app)
+def client() -> Generator[TestClient, None, None]:
+    """Test client fixture"""
+    yield TestClient(app)
 
 @pytest.fixture
-def auth_client(client):
+def auth_client(client: TestClient) -> TestClient:
     """Client with authentication token"""
     # Get auth token
     response = client.post("/auth/token", data={"username": "testuser", "password": "testpass"})
@@ -16,20 +18,22 @@ def auth_client(client):
         headers = {"Authorization": f"Bearer {token}"}
         return TestClient(app, headers=headers)
     else:
+        # Log the failure for debugging
+        print(f"Auth failed with status {response.status_code}: {response.text}")
         # If auth fails, return client without auth (for testing endpoints that don't require auth)
         return client
 
-def test_health_check(client):
+def test_health_check(client: TestClient) -> None:
     response = client.get("/health")
     assert response.status_code == 200
     assert response.json() == {"status": "healthy", "version": "1.0.0"}
 
-def test_root_endpoint(client):
+def test_root_endpoint(client: TestClient) -> None:
     response = client.get("/")
     assert response.status_code == 200
     assert "GRID API" in response.json()["message"]
 
-def test_inference_endpoint(auth_client):
+def test_inference_endpoint(auth_client: TestClient) -> None:
     response = auth_client.post(
         "/api/v1/inference/",
         json={"prompt": "Test prompt", "model": "default"}
@@ -37,7 +41,7 @@ def test_inference_endpoint(auth_client):
     assert response.status_code == 200
     assert "result" in response.json()
 
-def test_privacy_detection(auth_client):
+def test_privacy_detection(auth_client: TestClient) -> None:
     response = auth_client.post(
         "/api/v1/privacy/detect",
         json={"text": "Contact me at test@example.com"}
