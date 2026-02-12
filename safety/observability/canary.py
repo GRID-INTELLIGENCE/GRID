@@ -3,9 +3,8 @@ Project GUARDIAN: Safety Canary Utility.
 Injects and detects hidden markers in AI responses to identify adversarial recycling.
 """
 
-import re
 import random
-from typing import List
+import re
 
 # These are invisible or rare UTF-8 sequences that won't disrupt UI but are easy to regex
 # Zero-width Joiner + specific sequence

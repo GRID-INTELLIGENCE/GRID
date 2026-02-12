@@ -7,9 +7,11 @@ Covers: CodeAnalyzer, ConfigValidator, PromptInspector, RecursiveInspector,
 
 from __future__ import annotations
 
-import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
+import pytest
+
+from safety.observability.security_monitoring import SecurityEventSeverity
 from safety.rules.manager import (
     CodeAnalyzer,
     ConfigValidator,
@@ -19,8 +21,6 @@ from safety.rules.manager import (
     SafetyRuleManager,
     TrustTier,
 )
-from safety.observability.security_monitoring import SecurityEventSeverity
-
 
 # =============================================================================
 # CodeAnalyzer

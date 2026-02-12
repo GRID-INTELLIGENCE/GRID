@@ -20,17 +20,18 @@ from __future__ import annotations
 import os
 import uuid
 from contextlib import asynccontextmanager
-from typing import Any, Optional
+from typing import Any
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
+from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 from pydantic import BaseModel, Field
-from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
 from starlette.responses import Response
 
-from safety.api.middleware import SafetyMiddleware
 from safety.api import observation_endpoints
-from safety.audit.db import check_health as check_db_health, close_db, init_db
+from safety.api.middleware import SafetyMiddleware
+from safety.audit.db import check_health as check_db_health
+from safety.audit.db import close_db, init_db
 from safety.escalation.handler import approve
 from safety.observability.logging_setup import get_logger, setup_logging
 from safety.observability.metrics import record_service_info
@@ -40,6 +41,9 @@ from safety.workers.worker_utils import (
     enqueue_request,
     get_queue_depth,
 )
+from safety.observability.runtime_observation import observation_service
+from safety.observability.security_monitoring import security_monitor, security_logger
+from safety.guardian.loader import get_rule_loader
 
 logger = get_logger("api.main")
 
@@ -49,7 +53,7 @@ logger = get_logger("api.main")
 DEGRADED_MODE = os.getenv("SAFETY_DEGRADED_MODE", "false").lower() == "true"
 
 if DEGRADED_MODE:
-    from unittest.mock import AsyncMock, MagicMock
+    from unittest.mock import AsyncMock
 
     # Mock Redis client for all modules
     class MockRedis:
@@ -149,10 +153,22 @@ async def lifespan(app: FastAPI):
     else:
         logger.warning("audit_db_skipped_degraded_mode")
 
+    # Start background services
+    await observation_service.start()
+    security_monitor.start_monitoring()
+    get_rule_loader().start_auto_reload()
+
     yield
 
     # Shutdown
     logger.info("safety_api_shutting_down")
+
+    # Stop background services
+    await observation_service.stop()
+    security_monitor.stop_monitoring()
+    security_logger.shutdown()
+    get_rule_loader().stop_auto_reload()
+
     if not DEGRADED_MODE:
         await close_db()
         await close_redis()
@@ -185,7 +201,7 @@ class InferRequest(BaseModel):
 class InferResponse(BaseModel):
     request_id: str
     status: str = "queued"
-    result: Optional[dict[str, Any]] = None
+    result: dict[str, Any] | None = None
 
 
 class ReviewRequest(BaseModel):

@@ -1,10 +1,11 @@
 import json
-import yaml
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import Any
+
+import yaml
 
 
-def load_rules(rule_file_path: str | Path | None = None) -> List[Dict[str, Any]]:
+def load_rules(rule_file_path: str | Path | None = None) -> list[dict[str, Any]]:
     """
     Load safety rules from JSON or YAML file.
 
@@ -25,7 +26,7 @@ def load_rules(rule_file_path: str | Path | None = None) -> List[Dict[str, Any]]
         return []
 
     try:
-        with open(path, 'r', encoding='utf-8') as f:
+        with open(path, encoding='utf-8') as f:
             if path.suffix.lower() == ".json":
                 data = json.load(f)
             else:

@@ -62,7 +62,7 @@ def main() -> None:
         sys.exit(1)
 
     entries = []
-    with open(args.file, "r", encoding="utf-8") as f:
+    with open(args.file, encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if line and not line.startswith("#"):

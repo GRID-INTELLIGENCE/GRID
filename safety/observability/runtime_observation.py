@@ -6,17 +6,16 @@ Unified observation framework for safety and security modules.
 from __future__ import annotations
 
 import asyncio
-import json
 import logging
+import queue as stdlib_queue
+import time
 from dataclasses import asdict, dataclass, field
-from datetime import UTC, datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
+from safety.observability.metrics import EVENT_BUS_DROPS_TOTAL, OBSERVATION_PENDING_DEPTH
 from safety.observability.risk_score import risk_manager
 from safety.observability.security_monitoring import (
     SecurityEvent,
-    SecurityEventSeverity,
-    SecurityEventType,
     security_logger,
 )
 
@@ -36,29 +35,29 @@ class RuntimeObservationEvent:
 
     # Context
     source: str
-    user_id: Optional[str] = None
-    ip_address: Optional[str] = None
-    session_id: Optional[str] = None
-    request_id: Optional[str] = None
+    user_id: str | None = None
+    ip_address: str | None = None
+    session_id: str | None = None
+    request_id: str | None = None
 
     # Details
     decision: str = "unknown"
-    reason: Optional[str] = None
-    details: Dict[str, Any] = field(default_factory=dict)
+    reason: str | None = None
+    details: dict[str, Any] = field(default_factory=dict)
     risk_score: float = 0.0
 
     # Metrics
     latency_ms: float = 0.0
-    
-    # Metadata
-    metadata: Dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    # Metadata
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+    def to_dict(self) -> dict[str, Any]:
         """Serialize to dictionary."""
         return asdict(self)
 
     @classmethod
-    def from_security_event(cls, event: SecurityEvent, trace_id: str = "unknown") -> "RuntimeObservationEvent":
+    def from_security_event(cls, event: SecurityEvent, trace_id: str = "unknown") -> RuntimeObservationEvent:
         """Convert from legacy SecurityEvent."""
         return cls(
             event_id=event.event_id,
@@ -78,71 +77,161 @@ class RuntimeObservationEvent:
         )
 
 
+_SUBSCRIBER_STALE_SECONDS = 300.0  # 5 minutes
+
+
 class EventBus:
-    """Simple in-memory event bus for streaming."""
+    """In-memory event bus for streaming with subscriber lifecycle management."""
 
     def __init__(self):
-        self._subscribers: List[asyncio.Queue] = []
+        # Each subscriber is (queue, last_active_timestamp)
+        self._subscribers: list[tuple[asyncio.Queue, float]] = []
 
     async def publish(self, event: RuntimeObservationEvent):
-        """Publish event to all subscribers."""
-        for queue in self._subscribers:
+        """Publish event to all subscribers, reaping stale ones."""
+        now = time.monotonic()
+        active: list[tuple[asyncio.Queue, float]] = []
+
+        for queue, last_active in self._subscribers:
+            if now - last_active > _SUBSCRIBER_STALE_SECONDS:
+                logger.info(
+                    "event_bus_subscriber_reaped",
+                    extra={"age_seconds": round(now - last_active, 1)},
+                )
+                continue
             try:
-                # Don't block publisher
                 queue.put_nowait(event)
+                active.append((queue, now))
             except asyncio.QueueFull:
-                pass  # Drop event if subscriber is slow
+                EVENT_BUS_DROPS_TOTAL.labels(stage="subscriber").inc()
+                logger.warning(
+                    "event_bus_subscriber_slow",
+                    extra={
+                        "event_id": event.event_id,
+                        "subscribers": len(self._subscribers),
+                    },
+                )
+                # Keep subscriber but don't refresh its timestamp
+                active.append((queue, last_active))
+
+        self._subscribers = active
 
     async def subscribe(self) -> asyncio.Queue:
-        """Subscribe to events."""
-        queue = asyncio.Queue(maxsize=1000)
-        self._subscribers.append(queue)
+        """Subscribe to events. Returns a bounded queue."""
+        queue: asyncio.Queue = asyncio.Queue(maxsize=1000)
+        self._subscribers.append((queue, time.monotonic()))
         return queue
 
     def unsubscribe(self, queue: asyncio.Queue):
         """Unsubscribe from events."""
-        if queue in self._subscribers:
-            self._subscribers.remove(queue)
+        self._subscribers = [(q, t) for q, t in self._subscribers if q is not queue]
+
+    @property
+    def subscriber_count(self) -> int:
+        return len(self._subscribers)
 
 
 class RuntimeObservationService:
-    """Unified runtime observation for all safety/security modules."""
+    """Unified runtime observation for all safety/security modules.
+
+    Uses a thread-safe stdlib queue to bridge sync security logger callbacks
+    into the async event bus and risk score manager, avoiding the broken
+    asyncio.get_running_loop() + create_task pattern.
+    """
+
+    _PENDING_QUEUE_MAX = 10_000
 
     def __init__(self):
         self.event_bus = EventBus()
+        self._pending_events: stdlib_queue.Queue[SecurityEvent] = stdlib_queue.Queue(
+            maxsize=self._PENDING_QUEUE_MAX
+        )
+        self._drain_task: asyncio.Task | None = None
         # Hook into existing security logger
         security_logger.add_listener(self._on_security_event_sync)
 
     def _on_security_event_sync(self, event: SecurityEvent):
-        """Bridge sync logger to async bus and risk manager."""
-        # This runs in the sync listener loop, so we need to schedule the async tasks
+        """Bridge sync logger to async processing via thread-safe queue.
+
+        This is called from sync code (security_logger listeners).
+        Instead of gambling on asyncio.get_running_loop(), we put the event
+        into a stdlib queue that the async drain loop consumes safely.
+        """
         try:
-            loop = asyncio.get_running_loop()
-            
-            # 1. Publish to stream
-            obs_event = RuntimeObservationEvent.from_security_event(event)
-            loop.create_task(self.event_bus.publish(obs_event))
-            
-            # 2. Update Risk Score (Project GUARDIAN Phase 2)
-            loop.create_task(risk_manager.record_violation(event))
-            
-        except RuntimeError:
-            # No event loop (e.g. testing or shutdown), ignore
-            pass
+            self._pending_events.put_nowait(event)
+        except stdlib_queue.Full:
+            EVENT_BUS_DROPS_TOTAL.labels(stage="bridge").inc()
+            logger.warning(
+                "observation_event_dropped",
+                extra={"event_id": event.event_id, "reason": "queue_full"},
+            )
+
+    async def start(self):
+        """Start the async drain loop. Call from FastAPI lifespan startup."""
+        if self._drain_task is None or self._drain_task.done():
+            self._drain_task = asyncio.create_task(self._drain_loop())
+            logger.info("observation_service_started")
+
+    async def stop(self):
+        """Graceful shutdown. Call from FastAPI lifespan shutdown."""
+        if self._drain_task and not self._drain_task.done():
+            self._drain_task.cancel()
+            try:
+                await self._drain_task
+            except asyncio.CancelledError:
+                pass
+
+        # Count and log remaining undrained events
+        remaining = 0
+        while not self._pending_events.empty():
+            try:
+                self._pending_events.get_nowait()
+                remaining += 1
+            except stdlib_queue.Empty:
+                break
+        if remaining:
+            logger.warning("observation_events_dropped_at_shutdown", extra={"count": remaining})
+        logger.info("observation_service_stopped")
+
+    async def _drain_loop(self):
+        """Async loop that drains the thread-safe queue into the event bus."""
+        loop = asyncio.get_running_loop()
+        while True:
+            try:
+                # Block in executor to avoid busy-spinning
+                event = await loop.run_in_executor(
+                    None, self._pending_events.get, True, 0.5
+                )
+            except stdlib_queue.Empty:
+                # Timeout — no events, update gauge and loop back
+                OBSERVATION_PENDING_DEPTH.set(self._pending_events.qsize())
+                continue
+
+            OBSERVATION_PENDING_DEPTH.set(self._pending_events.qsize())
+            try:
+                obs_event = RuntimeObservationEvent.from_security_event(event)
+                await self.event_bus.publish(obs_event)
+                await risk_manager.record_violation(event)
+            except Exception:
+                logger.exception(
+                    "observation_processing_error",
+                    extra={"event_id": event.event_id},
+                )
 
     async def log_observation(self, event: RuntimeObservationEvent):
         """Log a new observation event."""
-        # Convert back to legacy for persistence if needed, or just publish
         await self.event_bus.publish(event)
-        
-    async def get_system_health(self) -> Dict[str, Any]:
+
+    async def get_system_health(self) -> dict[str, Any]:
         """Get health status."""
         return {
             "status": "healthy",
-            "subscribers": len(self.event_bus._subscribers),
-            "backend": "redis_streams_and_memory"
+            "subscribers": self.event_bus.subscriber_count,
+            "pending_events": self._pending_events.qsize(),
+            "drain_active": self._drain_task is not None and not self._drain_task.done(),
+            "backend": "redis_streams_and_memory",
         }
+
 
 # Global Instance
 observation_service = RuntimeObservationService()
-

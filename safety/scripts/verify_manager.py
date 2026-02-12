@@ -1,8 +1,6 @@
 
-import sys
-import os
-import json
 import logging
+import sys
 
 # Ensure we can import from e:\grid
 sys.path.append("e:\\grid")
@@ -14,7 +12,7 @@ logger = logging.getLogger("verification")
 def test_deep_object_analysis():
     logger.info("Testing Deep Object Analysis...")
     try:
-        from safety.rules.manager import get_rule_manager, TrustTier
+        from safety.rules.manager import TrustTier, get_rule_manager
         manager = get_rule_manager()
     except ImportError as e:
         logger.error(f"Failed to import SafetyRuleManager: {e}")
@@ -29,7 +27,7 @@ def test_deep_object_analysis():
     # Case 2: Nested Code Injection (eval)
     unsafe_code_nested = {
         "meta": {
-            "script": "eval('os.system(\"rm -rf\")')" 
+            "script": "eval('os.system(\"rm -rf\")')"
         }
     }
     is_safe, reasons = manager.evaluate_request("user2", "user", unsafe_code_nested)

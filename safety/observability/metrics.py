@@ -122,6 +122,21 @@ FALSE_POSITIVES_TOTAL = Counter(
 )
 
 
+# ---------------------------------------------------------------------------
+# Event bus observability
+# ---------------------------------------------------------------------------
+EVENT_BUS_DROPS_TOTAL = Counter(
+    "safety_event_bus_drops_total",
+    "Events dropped due to full queues (sync bridge or subscriber)",
+    ["stage"],  # bridge | subscriber
+)
+
+OBSERVATION_PENDING_DEPTH = Gauge(
+    "safety_observation_pending_depth",
+    "Current depth of the sync-to-async observation bridge queue",
+)
+
+
 def record_service_info(version: str, environment: str) -> None:
     """Set service info labels once at startup."""
     SAFETY_SERVICE_INFO.info({"version": version, "environment": environment})

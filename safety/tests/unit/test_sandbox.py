@@ -5,6 +5,7 @@ Unit tests for the model sandbox.
 from __future__ import annotations
 
 import asyncio
+
 import pytest
 
 from safety.model.sandbox import SandboxConfig, SandboxResult, run_safe_call

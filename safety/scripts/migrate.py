@@ -13,6 +13,7 @@ grid_dir = Path(__file__).parent.parent.parent / "Projects" / "GRID"
 sys.path.insert(0, str(grid_dir))
 
 from sqlalchemy.ext.asyncio import create_async_engine
+
 from safety.audit.models import Base
 
 # Database URL - adjust as needed

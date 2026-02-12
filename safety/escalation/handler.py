@@ -14,7 +14,7 @@ from __future__ import annotations
 import os
 import uuid
 from collections import defaultdict
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 import redis.asyncio as aioredis
@@ -25,6 +25,7 @@ from safety.escalation.notifier import notify_pagerduty, notify_slack
 from safety.observability.logging_setup import get_logger
 from safety.observability.metrics import (
     ESCALATIONS_TOTAL,
+    ESCALATION_RESOLUTION_LATENCY,
     FALSE_POSITIVES_TOTAL,
 )
 
@@ -206,9 +207,13 @@ async def approve(
                 return False
 
             record.status = AuditStatus.RESOLVED
-            record.resolved_at = datetime.now(timezone.utc)
+            record.resolved_at = datetime.now(UTC)
             record.reviewer_id = reviewer_id
             record.notes = f"[{decision}] {notes}"
+
+            # 5c. Resolution latency
+            resolution_time = (datetime.now(UTC) - record.created_at).total_seconds()
+            ESCALATION_RESOLUTION_LATENCY.observe(resolution_time)
 
         if decision == "approve":
             # Release the stored model output to response-stream

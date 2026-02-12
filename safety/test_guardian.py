@@ -4,8 +4,8 @@ Project GUARDIAN - Test & Benchmark Script
 Validates the unified rule engine implementation.
 """
 
-import time
 import sys
+import time
 
 sys.path.insert(0, "E:/grid")
 
@@ -29,7 +29,7 @@ def test_basic_functionality():
     print(f"   Text: '{safe_text}'")
     print(f"   Matches: {len(matches)}")
     print(f"   Latency: {latency:.2f}ms")
-    print(f"   ✅ Safe content passed")
+    print("   ✅ Safe content passed")
 
     # Test weapon content
     print("\n3. Testing weapon detection...")
@@ -40,7 +40,7 @@ def test_basic_functionality():
     for m in matches:
         print(f"   - {m.rule_id}: {m.category} ({m.severity.value})")
     print(f"   Latency: {latency:.2f}ms")
-    print(f"   ✅ Weapon detected")
+    print("   ✅ Weapon detected")
 
     # Test jailbreak
     print("\n4. Testing jailbreak detection...")
@@ -50,7 +50,7 @@ def test_basic_functionality():
     print(f"   Matches: {len(matches)}")
     for m in matches:
         print(f"   - {m.rule_id}: {m.category}")
-    print(f"   ✅ Jailbreak detected")
+    print("   ✅ Jailbreak detected")
 
     # Test quick check
     print("\n5. Testing quick_check API...")
@@ -58,7 +58,7 @@ def test_basic_functionality():
     print(f"   Blocked: {blocked}")
     print(f"   Reason: {reason}")
     print(f"   Action: {action.value if action else None}")
-    print(f"   ✅ Quick check working")
+    print("   ✅ Quick check working")
 
     return True
 
@@ -106,7 +106,7 @@ def test_performance():
     overall_avg = sum(all_avgs) / len(all_avgs)
 
     print(f"\n📊 Overall Average: {overall_avg:.2f}ms")
-    print(f"📊 Budget: 50ms")
+    print("📊 Budget: 50ms")
     print(f"📊 Margin: {50 - overall_avg:.2f}ms ({(50 - overall_avg) / 50 * 100:.1f}%)")
 
     return overall_avg < 50
@@ -142,7 +142,7 @@ def test_caching():
 
     # Check stats
     stats = engine.get_stats()
-    print(f"\nCache Stats:")
+    print("\nCache Stats:")
     print(f"  Total evaluations: {stats['total_evaluations']}")
     print(f"  Cache hits: {stats['cache_hits']}")
     print(f"  Cache misses: {stats['cache_misses']}")
@@ -157,12 +157,12 @@ def test_dynamic_rules():
     print("=" * 60)
 
     from safety.guardian import (
-        get_guardian_engine,
-        get_dynamic_manager,
+        MatchType,
+        RuleAction,
         SafetyRule,
         Severity,
-        RuleAction,
-        MatchType,
+        get_dynamic_manager,
+        get_guardian_engine,
     )
 
     engine = get_guardian_engine()
@@ -194,7 +194,7 @@ def test_dynamic_rules():
     # Test the new rule
     print("\nTesting new rule...")
     blocked, reason, action = engine.quick_check("This contains test_banned_word")
-    print(f"Text: 'This contains test_banned_word'")
+    print("Text: 'This contains test_banned_word'")
     print(f"Blocked: {blocked}")
     print(f"Reason: {reason}")
 

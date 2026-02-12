@@ -5,20 +5,14 @@ Exposes safety/security observation data via REST and WebSockets.
 
 from __future__ import annotations
 
-import asyncio
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
 
-from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse
 
-from safety.api.auth import Authorize, TrustTier, require_permission
 from safety.observability.metrics import DETECTOR_HEALTHY
 from safety.observability.runtime_observation import observation_service
-from safety.observability.security_monitoring import (
-    SecurityEventSeverity,
-    SecurityEventType,
-)
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +20,7 @@ router = APIRouter(prefix="/observe", tags=["observation"])
 
 
 @router.get("/health")
-async def get_health() -> Dict[str, Any]:
+async def get_health() -> dict[str, Any]:
     """Get component health status."""
     return await observation_service.get_system_health()
 
@@ -67,19 +61,21 @@ async def stream_events(
 
 
 @router.get("/metrics")
-async def get_metrics() -> Dict[str, Any]:
+async def get_metrics() -> dict[str, Any]:
     """Get observation metrics."""
     return {
-        "active_subscribers": len(observation_service.event_bus._subscribers),
+        "active_subscribers": observation_service.event_bus.subscriber_count,
         "detector_health": DETECTOR_HEALTHY._value.get(),
     }
 
 
 # Phase 2 Endpoints (Placeholders)
 
+import json
+
 from safety.rules.engine import get_rule_engine
 from safety.workers.worker_utils import get_redis
-import json
+
 
 @router.get("/rules")
 async def get_rules():
@@ -100,7 +96,7 @@ async def get_rules():
 
 
 @router.post("/rules/dynamic")
-async def inject_rule(rule: Dict[str, Any]):
+async def inject_rule(rule: dict[str, Any]):
     """
     Inject dynamic rule into Project GUARDIAN.
     Saves to Redis to sync across all instances.

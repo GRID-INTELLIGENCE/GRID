@@ -110,7 +110,7 @@ async def run_safe_call(
             call_fn(prompt, **kwargs),
             timeout=cfg.timeout_seconds,
         )
-    except asyncio.TimeoutError:
+    except TimeoutError:
         elapsed = time.monotonic() - start
         logger.error(
             "sandbox_timeout",

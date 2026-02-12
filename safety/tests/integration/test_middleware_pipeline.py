@@ -7,12 +7,9 @@ with mocked Redis/DB dependencies so no external infrastructure is needed.
 
 from __future__ import annotations
 
-import json
 import os
-import uuid
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
 
 # Set env vars before any safety imports
 os.environ.setdefault("REDIS_URL", "redis://localhost:6379")
@@ -23,6 +20,7 @@ os.environ.setdefault("SAFETY_API_KEYS", "test-key-1:verified,test-key-2:user")
 os.environ["SAFETY_DEGRADED_MODE"] = "true"
 
 from fastapi.testclient import TestClient
+
 from safety.api.main import app
 
 

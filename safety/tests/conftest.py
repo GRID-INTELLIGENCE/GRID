@@ -5,8 +5,8 @@ Shared fixtures for safety enforcement tests.
 from __future__ import annotations
 
 import os
+
 import pytest
-import pytest_asyncio
 
 # Set test environment variables before any imports
 os.environ.setdefault("REDIS_URL", "redis://localhost:6379")

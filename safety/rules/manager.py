@@ -10,14 +10,15 @@ import ast
 import json
 import logging
 from dataclasses import dataclass, field
-from enum import Enum, auto
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from enum import Enum
+from typing import Any
 
-from .engine import RuleEngine, SafetyRule, _engine
 from safety.observability.security_monitoring import (
     SecurityEventSeverity,
-    SecurityEventType,
 )
+
+from .engine import RuleEngine, SafetyRule, _engine
+
 
 # Canonical Trust Tiers (mirrored from mothership/security/auth.py)
 # We redefine here to avoid circular imports, but they MUST match.
@@ -38,9 +39,9 @@ class EvaluationContext:
     """Context for safety evaluation."""
     user_id: str
     trust_tier: TrustTier
-    session_id: Optional[str] = None
-    ip_address: Optional[str] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    session_id: str | None = None
+    ip_address: str | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 # =============================================================================
 # Specialized Analyzers
@@ -57,13 +58,13 @@ class CodeAnalyzer:
     }
     
     FORBIDDEN_CALLS = {
-        'eval', 'exec', 'compile', '__import__', 
-        'open', 'input', 'globals', 'locals', 
+        'eval', 'exec', 'compile', '__import__',
+        'open', 'input', 'globals', 'locals',
         'getattr', 'setattr', 'delattr'
     }
 
     @classmethod
-    def analyze(cls, code: str) -> List[str]:
+    def analyze(cls, code: str) -> list[str]:
         """
         Parse and inspect code for unsafe patterns using AST.
         Returns a list of violation descriptions.
@@ -97,18 +98,18 @@ class ConfigValidator:
     """Strict schema validation for configuration objects."""
     
     PROTECTED_KEYS = {
-        'admin', 'root', 'sudo', 'bypass', 'override', 
+        'admin', 'root', 'sudo', 'bypass', 'override',
         'security_disabled', 'debug_mode'
     }
 
     @classmethod
-    def validate(cls, config: Dict[str, Any]) -> List[str]:
+    def validate(cls, config: dict[str, Any]) -> list[str]:
         """
         Deep scan of config dicts for unauthorized overrides.
         """
         violations = []
         
-        def _scan(d: Dict[str, Any], path: str = ""):
+        def _scan(d: dict[str, Any], path: str = ""):
             for k, v in d.items():
                 # Check key against protected set
                 if k.lower() in cls.PROTECTED_KEYS:
@@ -131,7 +132,7 @@ class PromptInspector:
     def __init__(self, engine: RuleEngine):
         self.engine = engine
         
-    def analyze(self, text: str, context: EvaluationContext) -> List[SafetyRule]:
+    def analyze(self, text: str, context: EvaluationContext) -> list[SafetyRule]:
         """
         Analyze prompt text using the RuleEngine, adjusting sensitivity
         based on the TrustTier.
@@ -170,7 +171,7 @@ class RecursiveInspector:
         self.code_analyzer = code_analyzer
         self.config_validator = config_validator
 
-    def inspect(self, obj: Any, path: str = "root", _depth: int = 0) -> List[str]:
+    def inspect(self, obj: Any, path: str = "root", _depth: int = 0) -> list[str]:
         """
         Recursively inspect an object.
         Returns a list of all found violations.
@@ -222,7 +223,7 @@ class SafetyRuleManager:
         self.recursive_inspector = RecursiveInspector(self.code_analyzer, self.config_validator)
         self.prompt_inspector = PromptInspector(self.engine)
         
-    def evaluate_request(self, user_id: str, trust_tier: str, data: Any) -> Tuple[bool, List[str]]:
+    def evaluate_request(self, user_id: str, trust_tier: str, data: Any) -> tuple[bool, list[str]]:
         """
         Main Entry Point.
         Accepts a user request (Subject) and data (Object).

@@ -9,9 +9,9 @@ To migrate fully, replace imports of pre_check with pre_check_guardian.
 
 # Re-export the new GUARDIAN-based functions
 from safety.detectors.pre_check_guardian import (
-    quick_block,
     evaluate_detailed,
     get_guardian_stats,
+    quick_block,
     refresh_blocklist,
 )
 

@@ -4,18 +4,18 @@ Security Monitoring and Audit System
 Provides comprehensive security event logging, audit trails, and real-time monitoring.
 """
 
-import asyncio
 import json
 import logging
 import os
+import queue
 import threading
 import time
 from collections import defaultdict, deque
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Callable, Union
+from typing import Any, Callable
 
 import httpx
 
@@ -79,14 +79,14 @@ class SecurityEvent:
     event_type: SecurityEventType
     severity: SecurityEventSeverity
     source: str  # Component that generated the event
-    user_id: Optional[str]
-    ip_address: Optional[str]
-    session_id: Optional[str]
-    details: Dict[str, Any]
+    user_id: str | None
+    ip_address: str | None
+    session_id: str | None
+    details: dict[str, Any]
     risk_score: float = 0.0
-    mitigation_action: Optional[str] = None
+    mitigation_action: str | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for serialization"""
         data = asdict(self)
         data["event_type"] = self.event_type.value
@@ -94,7 +94,7 @@ class SecurityEvent:
         return data
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "SecurityEvent":
+    def from_dict(cls, data: dict[str, Any]) -> "SecurityEvent":
         """Create from dictionary"""
         data["event_type"] = SecurityEventType(data["event_type"])
         data["severity"] = SecurityEventSeverity(data["severity"])
@@ -104,13 +104,13 @@ class SecurityEvent:
 class SecurityLogger:
     """Enhanced security event logger with audit trails"""
 
-    def __init__(self, log_dir: Optional[str] = None, max_events_in_memory: int = 10000):
+    def __init__(self, log_dir: str | None = None, max_events_in_memory: int = 10000):
         self.log_dir = Path(log_dir or "logs/security")
         self.log_dir.mkdir(parents=True, exist_ok=True)
 
         # In-memory event buffer for real-time monitoring
         self.event_buffer = deque(maxlen=max_events_in_memory)
-        self.event_listeners: List[Callable[[SecurityEvent], None]] = []
+        self.event_listeners: list[Callable[[SecurityEvent], None]] = []
 
         # Statistics
         self.stats = defaultdict(int)
@@ -120,8 +120,34 @@ class SecurityLogger:
         self.max_file_size = 10 * 1024 * 1024  # 10MB
         self.max_files = 30
 
+        # Background writer thread
+        self._write_queue: queue.Queue[SecurityEvent] = queue.Queue(maxsize=50000)
+        self._stop_writer = threading.Event()
+        self._writer_thread = threading.Thread(target=self._writer_loop, name="SecurityLoggerWriter", daemon=True)
+        self._writer_thread.start()
+
+    def _writer_loop(self):
+        """Background thread to handle blocking file I/O."""
+        while not self._stop_writer.is_set() or not self._write_queue.empty():
+            try:
+                # Use a small timeout to allow checking stop_writer event
+                event = self._write_queue.get(timeout=1.0)
+                self._write_to_file_blocking(event)
+                self._write_queue.task_done()
+            except queue.Empty:
+                continue
+            except Exception as e:
+                # Fallback to stderr if logging fails to prevent complete loss
+                print(f"CRITICAL: SecurityLogger writer error: {e}")
+
+    def shutdown(self, timeout: float = 10.0):
+        """Shut down the writer thread gracefully."""
+        self._stop_writer.set()
+        if self._writer_thread.is_alive():
+            self._writer_thread.join(timeout=timeout)
+
     def log_event(self, event: SecurityEvent) -> None:
-        """Log a security event"""
+        """Log a security event (non-blocking)."""
         # Add to in-memory buffer
         self.event_buffer.append(event)
 
@@ -129,8 +155,12 @@ class SecurityLogger:
         self.stats[event.event_type.value] += 1
         self.severity_counts[event.severity.value] += 1
 
-        # Write to file
-        self._write_to_file(event)
+        # Queue for background write (non-blocking)
+        try:
+            self._write_queue.put_nowait(event)
+        except queue.Full:
+            # Fallback to immediate log to avoid losing event
+            logger.error("security_log_queue_full", extra={"event_id": event.event_id})
 
         # Notify listeners
         for listener in self.event_listeners:
@@ -155,8 +185,8 @@ class SecurityLogger:
         if listener in self.event_listeners:
             self.event_listeners.remove(listener)
 
-    def _write_to_file(self, event: SecurityEvent) -> None:
-        """Write event to log file with rotation"""
+    def _write_to_file_blocking(self, event: SecurityEvent) -> None:
+        """Internal method to write event to log file (blocking)."""
         date_str = datetime.now().strftime("%Y%m%d")
         log_file = self.log_dir / f"security_{date_str}.jsonl"
 
@@ -193,10 +223,10 @@ class SecurityLogger:
     def get_recent_events(
         self,
         limit: int = 100,
-        event_type: Optional[SecurityEventType] = None,
-        severity: Optional[SecurityEventSeverity] = None,
-        user_id: Optional[str] = None,
-    ) -> List[SecurityEvent]:
+        event_type: SecurityEventType | None = None,
+        severity: SecurityEventSeverity | None = None,
+        user_id: str | None = None,
+    ) -> list[SecurityEvent]:
         """Get recent events with optional filtering"""
         events = list(self.event_buffer)
 
@@ -210,7 +240,7 @@ class SecurityLogger:
 
         return events[-limit:]
 
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         """Get security event statistics"""
         return {
             "total_events": len(self.event_buffer),
@@ -220,17 +250,17 @@ class SecurityLogger:
             "max_buffer_size": self.event_buffer.maxlen,
         }
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Alias for get_statistics() - for backwards compatibility"""
         return self.get_statistics()
 
     def search_events(
         self,
-        query: Dict[str, Any],
-        start_date: Optional[datetime] = None,
-        end_date: Optional[datetime] = None,
+        query: dict[str, Any],
+        start_date: datetime | None = None,
+        end_date: datetime | None = None,
         limit: int = 1000,
-    ) -> List[SecurityEvent]:
+    ) -> list[SecurityEvent]:
         """Search events in log files"""
         matching_events = []
 
@@ -251,7 +281,7 @@ class SecurityLogger:
 
         return matching_events[:limit]
 
-    def _matches_query(self, event: SecurityEvent, query: Dict[str, Any]) -> bool:
+    def _matches_query(self, event: SecurityEvent, query: dict[str, Any]) -> bool:
         """Check if event matches search query"""
         for key, value in query.items():
             event_value = getattr(event, key, None)
@@ -264,7 +294,7 @@ class SecurityLogger:
                     return False
         return True
 
-    def _get_date_range(self, start_date: Optional[datetime], end_date: Optional[datetime]) -> List[str]:
+    def _get_date_range(self, start_date: datetime | None, end_date: datetime | None) -> list[str]:
         """Get date range for log file search"""
         if not start_date:
             start_date = datetime.now() - timedelta(days=7)
@@ -278,11 +308,11 @@ class SecurityLogger:
             current += timedelta(days=1)
         return dates
 
-    def _search_file(self, log_file: Path, query: Dict[str, Any], max_results: int) -> List[SecurityEvent]:
+    def _search_file(self, log_file: Path, query: dict[str, Any], max_results: int) -> list[SecurityEvent]:
         """Search a single log file"""
         results = []
         try:
-            with open(log_file, "r", encoding="utf-8") as f:
+            with open(log_file, encoding="utf-8") as f:
                 for line in f:
                     try:
                         data = json.loads(line.strip())
@@ -315,48 +345,53 @@ class RealTimeMonitor:
         self.last_alert_time = defaultdict(lambda: datetime.min)
         self.event_counts = defaultdict(lambda: defaultdict(int))
 
-        # Monitoring thread
-        self.monitoring_active = False
-        self.monitor_thread: Optional[threading.Thread] = None
+        # Monitoring thread with interruptible sleep
+        self._stop_monitoring = threading.Event()
+        self.monitor_thread: threading.Thread | None = None
 
     def start_monitoring(self) -> None:
         """Start real-time monitoring"""
-        if self.monitoring_active:
+        if self.monitor_thread is not None and self.monitor_thread.is_alive():
             return
 
-        self.monitoring_active = True
+        self._stop_monitoring.clear()
         self.monitor_thread = threading.Thread(target=self._monitoring_loop, daemon=True)
         self.monitor_thread.start()
         logger.info("Security monitoring started")
 
     def stop_monitoring(self) -> None:
-        """Stop real-time monitoring"""
-        self.monitoring_active = False
+        """Stop real-time monitoring (interruptible — returns within ~2s)."""
+        self._stop_monitoring.set()
         if self.monitor_thread:
-            self.monitor_thread.join(timeout=5)
+            self.monitor_thread.join(timeout=2)
         logger.info("Security monitoring stopped")
 
     def _monitoring_loop(self) -> None:
-        """Main monitoring loop"""
-        while self.monitoring_active:
+        """Main monitoring loop with interruptible sleep."""
+        while not self._stop_monitoring.is_set():
             try:
                 self._check_alerts()
                 self._cleanup_old_counts()
-                time.sleep(30)  # Check every 30 seconds
             except Exception as e:
                 logger.error(f"Error in monitoring loop: {e}")
-                time.sleep(60)  # Back off on errors
+            # Interruptible sleep — returns immediately when stop is set
+            self._stop_monitoring.wait(30)
 
     def _check_alerts(self) -> None:
         """Check if any alert thresholds have been exceeded"""
         now = datetime.now()
+        cutoff = now - self.monitoring_window
 
-        # Count events in monitoring window
+        # Count events in monitoring window — iterate newest-first and stop early
         window_counts = defaultdict(int)
-        for event in self.security_logger.get_recent_events(limit=1000):
-            event_time = datetime.fromisoformat(event.timestamp)
-            if now - event_time <= self.monitoring_window:
-                window_counts[event.severity] += 1
+        for event in reversed(self.security_logger.event_buffer):
+            try:
+                event_time = datetime.fromisoformat(event.timestamp)
+            except (ValueError, TypeError):
+                continue
+            if event_time < cutoff:
+                break  # All remaining events are older — done
+            window_counts[event.severity] += 1
 
         # Check thresholds
         for severity, threshold in self.alert_thresholds.items():
@@ -414,12 +449,18 @@ class RealTimeMonitor:
         }
 
         try:
-            with httpx.Client(timeout=5.0) as client:
-                resp = client.post(webhook_url, json=payload)
-                resp.raise_for_status()
-                logger.info(f"Security alert webhook sent: {severity.value}")
+            # Fire and forget in a daemon thread to avoid blocking the monitor loop
+            def send():
+                try:
+                    with httpx.Client(timeout=2.0) as client:
+                        resp = client.post(webhook_url, json=payload)
+                        resp.raise_for_status()
+                except Exception as e:
+                    logger.error(f"Webhook delivery failed: {e}")
+
+            threading.Thread(target=send, daemon=True).start()
         except Exception as e:
-            logger.error(f"Failed to send security alert webhook: {e}")
+            logger.error(f"Failed to start security alert webhook thread: {e}")
 
     def _cleanup_old_counts(self) -> None:
         """Clean up old event counts"""
@@ -439,7 +480,7 @@ class SecurityAudit:
 
     def generate_audit_report(
         self, start_date: datetime, end_date: datetime, include_details: bool = False
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Generate comprehensive security audit report"""
         events = self.security_logger.search_events(
             query={},
@@ -482,7 +523,7 @@ class SecurityAudit:
             "events": [event.to_dict() for event in events] if include_details else [],
         }
 
-    def _identify_high_risk_entities(self, activity_dict: Dict[str, Dict[str, int]]) -> List[Dict[str, Any]]:
+    def _identify_high_risk_entities(self, activity_dict: dict[str, dict[str, int]]) -> list[dict[str, Any]]:
         """Identify high-risk users/IPs based on activity patterns"""
         high_risk = []
 
@@ -516,7 +557,7 @@ class SecurityAudit:
 
         return sorted(high_risk, key=lambda x: x["risk_score"], reverse=True)
 
-    def _generate_recommendations(self, events: List[SecurityEvent]) -> List[str]:
+    def _generate_recommendations(self, events: list[SecurityEvent]) -> list[str]:
         """Generate security recommendations based on event analysis"""
         recommendations = []
 

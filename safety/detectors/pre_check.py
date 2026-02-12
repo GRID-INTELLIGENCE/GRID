@@ -12,9 +12,7 @@ from __future__ import annotations
 
 import math
 import os
-import re
 import time
-from typing import ClassVar
 
 import redis
 

@@ -9,7 +9,6 @@ import hmac
 import os
 import secrets
 import time
-from typing import Dict, List, Optional, Set
 
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
@@ -35,7 +34,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     def __init__(
         self,
         app,
-        csp_directives: Optional[Dict[str, str]] = None,
+        csp_directives: dict[str, str] | None = None,
         hsts_max_age: int = 31536000,  # 1 year
         hsts_include_subdomains: bool = True,
         hsts_preload: bool = False,
@@ -43,13 +42,13 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         content_type_options: str = "nosniff",
         xss_protection: str = "1; mode=block",
         referrer_policy: str = "strict-origin-when-cross-origin",
-        permissions_policy: Optional[Dict[str, List[str]]] = None,
+        permissions_policy: dict[str, list[str]] | None = None,
         coep: str = "require-corp",
         coop: str = "same-origin",
         corp: str = "same-origin",
         enable_csrf_protection: bool = True,
-        csrf_secret: Optional[str] = None,
-        allowed_origins: Optional[Set[str]] = None,
+        csrf_secret: str | None = None,
+        allowed_origins: set[str] | None = None,
     ):
         super().__init__(app)
 
@@ -107,9 +106,9 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         self.allowed_origins = allowed_origins or {"http://localhost:3000", "https://localhost:3000"}
 
         # Session storage for CSRF tokens
-        self.csrf_tokens: Dict[str, Dict[str, float]] = {}
+        self.csrf_tokens: dict[str, dict[str, float]] = {}
 
-    def _build_permissions_policy(self, policy: Dict[str, List[str]]) -> str:
+    def _build_permissions_policy(self, policy: dict[str, list[str]]) -> str:
         """Build Permissions-Policy header value"""
         directives = []
         for feature, allowlist in policy.items():
@@ -251,7 +250,7 @@ def create_security_middleware(**kwargs) -> SecurityHeadersMiddleware:
 
 
 # CSRF token generation utility
-def generate_csrf_token(session_id: str, secret: Optional[str] = None) -> str:
+def generate_csrf_token(session_id: str, secret: str | None = None) -> str:
     """Generate a CSRF token for frontend use"""
     secret = secret or os.getenv("CSRF_SECRET", secrets.token_hex(32))
     timestamp = str(int(time.time()))
@@ -262,7 +261,7 @@ def generate_csrf_token(session_id: str, secret: Optional[str] = None) -> str:
 
 
 # Security headers utility
-def get_security_headers(request: Optional[Request] = None) -> Dict[str, str]:
+def get_security_headers(request: Request | None = None) -> dict[str, str]:
     """Get all security headers as a dictionary"""
     middleware = create_security_middleware()
     # Create a mock response to get headers

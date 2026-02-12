@@ -18,8 +18,9 @@ import hashlib
 import hmac
 import ipaddress
 import os
+import threading
 import time
-from typing import Optional, Dict, Any, Tuple
+from typing import Any
 
 import redis.asyncio as aioredis
 
@@ -79,72 +80,82 @@ class IPRateLimiter:
 
     def __init__(self):
         self.blocked_ips: set = set()
-        self.suspicious_ips: Dict[str, float] = {}  # ip -> risk_score
+        self.suspicious_ips: dict[str, float] = {}  # ip -> risk_score
+        self._lock = threading.Lock()
 
     def is_ip_blocked(self, ip: str) -> bool:
         """Check if IP is blocked"""
-        return ip in self.blocked_ips
+        with self._lock:
+            return ip in self.blocked_ips
 
     def block_ip(self, ip: str, reason: str = "manual_block") -> None:
         """Block an IP address"""
-        self.blocked_ips.add(ip)
+        with self._lock:
+            self.blocked_ips.add(ip)
         logger.warning(f"IP blocked: {ip}, reason: {reason}")
 
     def add_suspicious_activity(self, ip: str, risk_increment: float = 1.0) -> float:
         """Add suspicious activity for an IP and return updated risk score"""
-        current_risk = self.suspicious_ips.get(ip, 0.0)
-        new_risk = min(100.0, current_risk + risk_increment)
-        self.suspicious_ips[ip] = new_risk
+        with self._lock:
+            current_risk = self.suspicious_ips.get(ip, 0.0)
+            new_risk = min(100.0, current_risk + risk_increment)
+            self.suspicious_ips[ip] = new_risk
 
-        if new_risk >= 50.0 and ip not in self.blocked_ips:
-            self.block_ip(ip, f"high_risk_score_{new_risk}")
+            if new_risk >= 50.0 and ip not in self.blocked_ips:
+                self.blocked_ips.add(ip)
+                logger.warning(f"IP blocked by risk score: {ip}, score: {new_risk}")
 
-        return new_risk
+            return new_risk
 
-    def is_ip_suspicious(self, ip: str) -> Tuple[bool, float]:
+    def is_ip_suspicious(self, ip: str) -> tuple[bool, float]:
         """Check if IP is suspicious and return risk score"""
-        risk_score = self.suspicious_ips.get(ip, 0.0)
-        return risk_score >= 25.0, risk_score
+        with self._lock:
+            risk_score = self.suspicious_ips.get(ip, 0.0)
+            return risk_score >= 25.0, risk_score
 
 
 class ExponentialBackoff:
     """Exponential backoff for rate limit violations"""
 
     def __init__(self):
-        self.violation_counts: Dict[str, int] = {}
-        self.backoff_until: Dict[str, float] = {}
+        self.violation_counts: dict[str, int] = {}
+        self.backoff_until: dict[str, float] = {}
+        self._lock = threading.Lock()
 
     def record_violation(self, key: str) -> float:
         """Record a violation and return backoff duration"""
-        count = self.violation_counts.get(key, 0) + 1
-        self.violation_counts[key] = count
+        with self._lock:
+            count = self.violation_counts.get(key, 0) + 1
+            self.violation_counts[key] = count
 
-        # Calculate backoff: base * (multiplier ^ violations)
-        backoff_seconds = min(
-            SecurityConfig.MAX_BACKOFF_SECONDS,
-            SecurityConfig.BASE_BACKOFF_SECONDS * (SecurityConfig.BACKOFF_MULTIPLIER ** (count - 1)),
-        )
+            # Calculate backoff: base * (multiplier ^ violations)
+            backoff_seconds = min(
+                SecurityConfig.MAX_BACKOFF_SECONDS,
+                SecurityConfig.BASE_BACKOFF_SECONDS * (SecurityConfig.BACKOFF_MULTIPLIER ** (count - 1)),
+            )
 
-        self.backoff_until[key] = time.time() + backoff_seconds
-        return backoff_seconds
+            self.backoff_until[key] = time.time() + backoff_seconds
+            return backoff_seconds
 
-    def is_in_backoff(self, key: str) -> Tuple[bool, float]:
+    def is_in_backoff(self, key: str) -> tuple[bool, float]:
         """Check if key is in backoff period and return remaining time"""
-        until = self.backoff_until.get(key, 0)
-        remaining = max(0, until - time.time())
+        with self._lock:
+            until = self.backoff_until.get(key, 0)
+            remaining = max(0, until - time.time())
 
-        if remaining <= 0:
-            # Clean up expired backoff
-            self.violation_counts.pop(key, None)
-            self.backoff_until.pop(key, None)
-            return False, 0
+            if remaining <= 0:
+                # Clean up expired backoff
+                self.violation_counts.pop(key, None)
+                self.backoff_until.pop(key, None)
+                return False, 0
 
-        return True, remaining
+            return True, remaining
 
     def reset_violations(self, key: str) -> None:
         """Reset violation count for a key"""
-        self.violation_counts.pop(key, None)
-        self.backoff_until.pop(key, None)
+        with self._lock:
+            self.violation_counts.pop(key, None)
+            self.backoff_until.pop(key, None)
 
 
 class RequestValidator:
@@ -164,7 +175,7 @@ class RequestValidator:
         return hmac.compare_digest(signature, expected_signature)
 
     @staticmethod
-    def check_user_agent_risk(user_agent: Optional[str]) -> float:
+    def check_user_agent_risk(user_agent: str | None) -> float:
         """Check user agent for suspicious patterns"""
         if not user_agent:
             return 10.0  # Missing user agent is suspicious
@@ -239,15 +250,20 @@ return {allowed, math.floor(refilled), reset_seconds}
 # ---------------------------------------------------------------------------
 # Rate limiter class
 # ---------------------------------------------------------------------------
+import asyncio
 _redis_pool: aioredis.Redis | None = None
 _lua_sha: str | None = None
+_redis_lock = asyncio.Lock()
+_lua_lock = asyncio.Lock()
 
 
 async def _get_redis() -> aioredis.Redis:
     global _redis_pool
     if _redis_pool is None:
-        url = os.getenv("REDIS_URL", "redis://localhost:6379")
-        _redis_pool = aioredis.from_url(url, decode_responses=True, max_connections=50)
+        async with _redis_lock:
+            if _redis_pool is None:
+                url = os.getenv("REDIS_URL", "redis://localhost:6379")
+                _redis_pool = aioredis.from_url(url, decode_responses=True, max_connections=50)
     return _redis_pool
 
 
@@ -255,7 +271,9 @@ async def _ensure_lua_script(client: aioredis.Redis) -> str:
     """Load the Lua script into Redis and cache its SHA."""
     global _lua_sha
     if _lua_sha is None:
-        _lua_sha = await client.script_load(TOKEN_BUCKET_LUA)
+        async with _lua_lock:
+            if _lua_sha is None:
+                _lua_sha = await client.script_load(TOKEN_BUCKET_LUA)
     return _lua_sha
 
 
@@ -270,7 +288,7 @@ class EnhancedRateLimitResult:
         remaining: int,
         reset_seconds: float,
         risk_score: float = 0.0,
-        blocked_reason: Optional[str] = None,
+        blocked_reason: str | None = None,
     ):
         self.allowed = allowed
         self.remaining = remaining
@@ -278,7 +296,7 @@ class EnhancedRateLimitResult:
         self.risk_score = risk_score
         self.blocked_reason = blocked_reason
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for API responses"""
         return {
             "allowed": self.allowed,
@@ -288,7 +306,7 @@ class EnhancedRateLimitResult:
             "blocked_reason": self.blocked_reason,
         }
 
-    def get_headers(self) -> Dict[str, str]:
+    def get_headers(self) -> dict[str, str]:
         """Get HTTP headers for rate limiting"""
         headers = {
             "X-RateLimit-Remaining": str(self.remaining),
@@ -306,12 +324,12 @@ async def allow_request(
     user_id: str,
     trust_tier: TrustTier,
     feature: str = "infer",
-    ip_address: Optional[str] = None,
-    user_agent: Optional[str] = None,
-    request_signature: Optional[str] = None,
-    request_data: Optional[str] = None,
-    client_id: Optional[str] = None,
-) -> "EnhancedRateLimitResult":
+    ip_address: str | None = None,
+    user_agent: str | None = None,
+    request_signature: str | None = None,
+    request_data: str | None = None,
+    client_id: str | None = None,
+) -> EnhancedRateLimitResult:
     """
     Enhanced rate limiting with IP-based limits, exponential backoff, and security validation.
 
@@ -374,7 +392,7 @@ async def allow_request(
 
     # Get base rate limits
     capacity = TIER_RATE_LIMITS.get(trust_tier, 20)
-    
+
     # Apply risk-based adjustments (Decimate capacity for high-risk users)
     if risk_score > 75:
         # High Risk: 10% capacity, slow refill
@@ -531,7 +549,7 @@ async def unblock_ip_address(ip_address: str) -> bool:
         return False
 
 
-async def reset_user_backoff(user_id: str, ip_address: Optional[str] = None) -> bool:
+async def reset_user_backoff(user_id: str, ip_address: str | None = None) -> bool:
     """Reset exponential backoff for a user"""
     try:
         backoff_key = f"{user_id}:{ip_address or 'unknown'}"
@@ -543,7 +561,7 @@ async def reset_user_backoff(user_id: str, ip_address: Optional[str] = None) -> 
         return False
 
 
-async def get_security_status() -> Dict[str, Any]:
+async def get_security_status() -> dict[str, Any]:
     """Get comprehensive security status"""
     try:
         # Get Redis connection for stats

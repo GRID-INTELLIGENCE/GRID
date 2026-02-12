@@ -1,6 +1,7 @@
 import subprocess
 import sys
 
+
 def run_command(cmd):
     result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
     print(f"Command: {cmd}")
@@ -15,7 +16,7 @@ def run_command(cmd):
 
 if __name__ == "__main__":
     try:
-        with open("commands.txt", "r") as f:
+        with open("commands.txt") as f:
             commands = [line.strip() for line in f if line.strip()]
     except FileNotFoundError:
         print("commands.txt not found. Please create a file with one command per line.")

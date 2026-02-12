@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import json
 import os
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 import httpx
@@ -57,7 +57,7 @@ async def notify_slack(
         logger.warning("slack_webhook_not_configured")
         return False
 
-    now = created_at or datetime.now(timezone.utc).isoformat()
+    now = created_at or datetime.now(UTC).isoformat()
     severity_emoji = {
         "critical": ":rotating_light:",
         "high": ":warning:",

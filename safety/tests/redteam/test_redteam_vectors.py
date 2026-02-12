@@ -17,6 +17,7 @@ Categories tested:
 from __future__ import annotations
 
 import os
+
 import pytest
 
 # This module imports quick_block which triggers Redis at module load.

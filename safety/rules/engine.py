@@ -11,7 +11,7 @@ import os
 import re
 import time
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 import redis
 
@@ -27,14 +27,14 @@ class SafetyRule:
     """Enhanced safety rule with GUARDIAN metadata."""
     id: str
     name: str = "Unknown Rule"
-    patterns: List[str] = field(default_factory=list)
+    patterns: list[str] = field(default_factory=list)
     reason_code: str = "RULE_TRIGGERED"
     severity: SecurityEventSeverity = SecurityEventSeverity.MEDIUM
     event_type: SecurityEventType = SecurityEventType.AI_INPUT_BLOCKED
     description: str = ""
     
     # Internal compiled regexes
-    _compiled: List[re.Pattern] = field(default_factory=list, init=False)
+    _compiled: list[re.Pattern] = field(default_factory=list, init=False)
 
     def compile(self):
         self._compiled = [re.compile(p, re.IGNORECASE) for p in self.patterns]
@@ -47,12 +47,12 @@ class RuleEngine:
     """High-performance rule engine for Project GUARDIAN with dynamic support."""
 
     def __init__(self):
-        self.rules: List[SafetyRule] = []
-        self._redis_client: Optional[redis.Redis] = None
+        self.rules: list[SafetyRule] = []
+        self._redis_client: redis.Redis | None = None
         self._last_dynamic_refresh = 0.0
         self._REFRESH_INTERVAL = 30.0  # seconds
 
-    def _get_redis(self) -> Optional[redis.Redis]:
+    def _get_redis(self) -> redis.Redis | None:
         if self._redis_client is None:
             try:
                 url = os.getenv("REDIS_URL", "redis://localhost:6379")
@@ -74,7 +74,7 @@ class RuleEngine:
         # Initial dynamic load
         self.refresh_dynamic_rules()
 
-    def _add_rule_from_dict(self, r: Dict[str, Any]):
+    def _add_rule_from_dict(self, r: dict[str, Any]):
         """Helper to parse and add a rule."""
         try:
             # Ensure enums are resolved
@@ -140,7 +140,7 @@ class RuleEngine:
 
     # TODO: Add evaluation metrics (match count, latency histogram) to track
     #       rule engine performance in production and detect rule regression.
-    def evaluate(self, text: str) -> Tuple[bool, Optional[str], Optional[SafetyRule]]:
+    def evaluate(self, text: str) -> tuple[bool, str | None, SafetyRule | None]:
         """
         Evaluate text against rules. Periodically refreshes dynamic rules.
         Returns: (blocked, reason_code, matched_rule_object)

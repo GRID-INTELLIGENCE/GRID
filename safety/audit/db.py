@@ -73,7 +73,7 @@ async def close_db() -> None:
 
 
 @asynccontextmanager
-async def get_session() -> AsyncGenerator[AsyncSession, None]:
+async def get_session() -> AsyncGenerator[AsyncSession]:
     """
     Provide a transactional async session.
 

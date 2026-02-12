@@ -10,8 +10,9 @@ These tests verify that:
 
 from __future__ import annotations
 
-import time
 import os
+import time
+
 import pytest
 
 # This module imports quick_block which triggers Redis at module load.

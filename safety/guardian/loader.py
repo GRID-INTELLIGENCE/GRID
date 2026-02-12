@@ -11,10 +11,9 @@ from __future__ import annotations
 import json
 import logging
 import os
-import time
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
 import threading
+from pathlib import Path
+from typing import Any
 
 from .engine import (
     GuardianEngine,
@@ -50,19 +49,19 @@ class RuleLoader:
     Supports both YAML and JSON formats.
     """
 
-    def __init__(self, rules_dir: Optional[str] = None, auto_reload: bool = False):
+    def __init__(self, rules_dir: str | None = None, auto_reload: bool = False):
         self.rules_dir = Path(rules_dir or os.getenv("GUARDIAN_RULES_DIR", "config/rules"))
         self.rules_dir.mkdir(parents=True, exist_ok=True)
 
         self._auto_reload = auto_reload
         self._reload_interval = int(os.getenv("GUARDIAN_RELOAD_INTERVAL", "60"))
-        self._file_timestamps: Dict[str, float] = {}
-        self._rules_cache: Dict[str, SafetyRule] = {}
+        self._file_timestamps: dict[str, float] = {}
+        self._rules_cache: dict[str, SafetyRule] = {}
 
-        self._reload_thread: Optional[threading.Thread] = None
+        self._reload_thread: threading.Thread | None = None
         self._stop_reload = threading.Event()
 
-    def load_from_file(self, filepath: Union[str, Path]) -> List[SafetyRule]:
+    def load_from_file(self, filepath: str | Path) -> list[SafetyRule]:
         """
         Load rules from a single file.
 
@@ -82,7 +81,7 @@ class RuleLoader:
             return []
 
         try:
-            with open(filepath, "r", encoding="utf-8") as f:
+            with open(filepath, encoding="utf-8") as f:
                 if filepath.suffix.lower() in (".yaml", ".yml"):
                     if not YAML_AVAILABLE:
                         raise RuleValidationError("YAML support not available. Install PyYAML.")
@@ -115,7 +114,7 @@ class RuleLoader:
         logger.info(f"Loaded {len(rules)} rules from {filepath}")
         return rules
 
-    def load_all_rules(self) -> List[SafetyRule]:
+    def load_all_rules(self) -> list[SafetyRule]:
         """
         Load all rules from the rules directory.
 
@@ -142,7 +141,7 @@ class RuleLoader:
         logger.info(f"Total rules loaded: {len(all_rules)}")
         return all_rules
 
-    def _parse_rule(self, data: Dict[str, Any], metadata: Dict[str, Any]) -> SafetyRule:
+    def _parse_rule(self, data: dict[str, Any], metadata: dict[str, Any]) -> SafetyRule:
         """
         Parse a single rule from dictionary data.
 
@@ -213,7 +212,7 @@ class RuleLoader:
             max_matches=int(data.get("max_matches", 10)),
         )
 
-    def _get_default_rules(self) -> List[SafetyRule]:
+    def _get_default_rules(self) -> list[SafetyRule]:
         """Get built-in default rules (copied from pre_check.py)."""
         return [
             # Weapons / explosives
@@ -410,7 +409,7 @@ class RuleLoader:
             return
 
         self._stop_reload.set()
-        self._reload_thread.join(timeout=5)
+        self._reload_thread.join(timeout=self._reload_interval + 2)
         self._reload_thread = None
         logger.info("Stopped auto-reload")
 
@@ -467,10 +466,10 @@ class DynamicRuleManager:
     """
 
     def __init__(self):
-        self._dynamic_rules: Dict[str, SafetyRule] = {}
+        self._dynamic_rules: dict[str, SafetyRule] = {}
         self._lock = threading.RLock()
 
-    def inject_rule(self, rule: SafetyRule, engine: Optional[GuardianEngine] = None) -> bool:
+    def inject_rule(self, rule: SafetyRule, engine: GuardianEngine | None = None) -> bool:
         """
         Inject a rule dynamically at runtime.
 
@@ -500,7 +499,7 @@ class DynamicRuleManager:
             logger.info(f"Dynamically injected rule: {rule.id}")
             return True
 
-    def remove_rule(self, rule_id: str, engine: Optional[GuardianEngine] = None) -> bool:
+    def remove_rule(self, rule_id: str, engine: GuardianEngine | None = None) -> bool:
         """
         Remove a dynamically injected rule.
 
@@ -528,12 +527,12 @@ class DynamicRuleManager:
             logger.info(f"Removed dynamic rule: {rule_id}")
             return True
 
-    def get_dynamic_rules(self) -> List[SafetyRule]:
+    def get_dynamic_rules(self) -> list[SafetyRule]:
         """Get all dynamically injected rules."""
         with self._lock:
             return list(self._dynamic_rules.values())
 
-    def clear_dynamic_rules(self, engine: Optional[GuardianEngine] = None) -> None:
+    def clear_dynamic_rules(self, engine: GuardianEngine | None = None) -> None:
         """Clear all dynamic rules."""
         with self._lock:
             if engine is None:
@@ -553,8 +552,8 @@ class DynamicRuleManager:
 
 
 # Global instances
-_rule_loader: Optional[RuleLoader] = None
-_dynamic_manager: Optional[DynamicRuleManager] = None
+_rule_loader: RuleLoader | None = None
+_dynamic_manager: DynamicRuleManager | None = None
 
 
 def get_rule_loader() -> RuleLoader:
@@ -573,7 +572,7 @@ def get_dynamic_manager() -> DynamicRuleManager:
     return _dynamic_manager
 
 
-def init_guardian_rules(rules_dir: Optional[str] = None, auto_reload: bool = True) -> GuardianEngine:
+def init_guardian_rules(rules_dir: str | None = None, auto_reload: bool = True) -> GuardianEngine:
     """
     Initialize GUARDIAN with rules from directory.
 

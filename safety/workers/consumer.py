@@ -13,7 +13,6 @@ from __future__ import annotations
 import asyncio
 import json
 import os
-import time
 from typing import Any
 
 import redis.asyncio as aioredis
@@ -21,6 +20,7 @@ import redis.asyncio as aioredis
 from safety.detectors.post_check import post_check
 from safety.escalation.handler import escalate
 from safety.model.client import call_model
+from safety.observability.canary import safety_canary
 from safety.observability.logging_setup import (
     get_logger,
     set_trace_context,
@@ -28,9 +28,9 @@ from safety.observability.logging_setup import (
 )
 from safety.observability.metrics import (
     WORKER_JOBS_PROCESSED,
+    DETECTION_LATENCY,
     record_service_info,
 )
-from safety.observability.canary import safety_canary
 from safety.observability.risk_score import risk_manager
 from safety.workers.worker_utils import (
     CONSUMER_GROUP,
@@ -85,7 +85,11 @@ async def _process_message(msg_id: str, fields: dict[str, str]) -> None:
         user_id=user_id,
     )
 
+    import time
     try:
+        # Combined detection pipeline timing
+        start_processing = time.perf_counter()
+
         # Step 1: Call model via sandboxed client
         result = await call_model(
             prompt=input_text,
@@ -94,11 +98,30 @@ async def _process_message(msg_id: str, fields: dict[str, str]) -> None:
             max_tokens=metadata.get("max_tokens", 4096),
         )
 
-        # Step 2: Run post-check detector
-        check_result = await post_check(
-            model_output=result.text,
-            original_input=input_text,
-        )
+        # Step 2: Run post-check detector with timeout (fail-closed)
+        try:
+            check_result = await asyncio.wait_for(
+                post_check(
+                    model_output=result.text,
+                    original_input=input_text,
+                ),
+                timeout=10.0
+            )
+        except asyncio.TimeoutError:
+            logger.error("post_check_timeout", request_id=request_id)
+            # Fail closed: treat as flagged
+            from safety.audit.models import Severity as AuditSeverity
+            from safety.detectors.post_check import PostCheckResult
+            check_result = PostCheckResult(
+                flagged=True,
+                reason_code="POST_CHECK_TIMEOUT",
+                severity="high",
+                evidence={"error": "timeout_10s_exceeded"}
+            )
+
+        # Observe total latency (model + post-check)
+        latency = time.perf_counter() - start_processing
+        DETECTION_LATENCY.observe(latency)
 
         if check_result.flagged:
             # Step 3a: Escalate — do NOT return model output

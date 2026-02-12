@@ -9,9 +9,6 @@ Tests that:
 
 from __future__ import annotations
 
-import json
-import pytest
-
 
 class TestRefusalFormat:
     """Test that refusal responses match the required contract."""

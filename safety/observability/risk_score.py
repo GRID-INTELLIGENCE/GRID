@@ -1,10 +1,4 @@
-"""
-Project GUARDIAN: Risk Score Manager.
-Tracks user risk based on historical safety violations in Redis.
-"""
-
-from __future__ import annotations
-
+import asyncio
 import logging
 import time
 from typing import Optional
@@ -17,12 +11,38 @@ from safety.workers.worker_utils import get_redis
 
 logger = logging.getLogger(__name__)
 
+# Lua script for atomic risk score updates: decay + increment
+RISK_UPDATE_LUA = """
+local score_key = KEYS[1]
+local last_update_key = KEYS[2]
+local weight = tonumber(ARGV[1])
+local decay_rate = tonumber(ARGV[2])
+local max_score = tonumber(ARGV[3])
+local min_score = tonumber(ARGV[4])
+local now = tonumber(ARGV[5])
+
+local raw_score = redis.call('GET', score_key)
+local score = tonumber(raw_score or "0")
+local raw_last = redis.call('GET', last_update_key)
+local last_update = tonumber(raw_last or tostring(now))
+
+-- Apply decay
+local hours_passed = math.max(0, (now - last_update) / 3600.0)
+local decay_amount = hours_passed * decay_rate
+score = math.max(min_score, score - decay_amount)
+
+-- Add violation weight
+local new_score = math.min(max_score, score + weight)
+
+-- Save back
+redis.call('SET', score_key, tostring(new_score))
+redis.call('SET', last_update_key, tostring(now))
+
+return tostring(new_score)
+"""
+
 class RiskScoreManager:
     """Manages dynamic user risk scores in Redis."""
-
-    # Redis Keys
-    # risk:score:{user_id} -> float current score
-    # risk:last_update:{user_id} -> timestamp of last decay
 
     DECAY_RATE = 0.1  # Score decreases by 0.1 per hour of inactive/clean behavior
     MAX_SCORE = 1.0
@@ -35,31 +55,50 @@ class RiskScoreManager:
         SecurityEventSeverity.CRITICAL: 1.0
     }
 
+    def __init__(self):
+        self._lua_sha: Optional[str] = None
+        self._lua_lock = asyncio.Lock()
+
+    async def _ensure_lua_script(self, client) -> str:
+        if self._lua_sha is None:
+            async with self._lua_lock:
+                if self._lua_sha is None:
+                    self._lua_sha = await client.script_load(RISK_UPDATE_LUA)
+        return self._lua_sha
+
     async def record_violation(self, event: SecurityEvent):
         """Update risk score based on a new violation."""
         if not event.user_id or event.user_id == "system":
             return
 
         weight = self.SEVERITY_WEIGHTS.get(event.severity, 0.05)
-        
+
         try:
             client = await get_redis()
             if not client:
                 return
 
-            # 1. Decay the existing score first
-            current_score = await self.get_score(event.user_id)
-            
-            # 2. Add current violation
-            new_score = min(self.MAX_SCORE, current_score + weight)
-            
-            # 3. Save to Redis
-            key = f"risk:score:{event.user_id}"
-            await client.set(key, new_score)
-            await client.set(f"risk:last_update:{event.user_id}", time.time())
-            
+            sha = await self._ensure_lua_script(client)
+
+            score_key = f"risk:score:{event.user_id}"
+            last_key = f"risk:last_update:{event.user_id}"
+
+            # Atomic update via Lua
+            new_score_raw = await client.evalsha(
+                sha,
+                2,
+                score_key,
+                last_key,
+                str(weight),
+                str(self.DECAY_RATE),
+                str(self.MAX_SCORE),
+                str(self.MIN_SCORE),
+                str(time.time())
+            )
+
+            new_score = float(new_score_raw)
             logger.info(f"Updated risk score for {event.user_id}: {new_score:.2f} (+{weight})")
-            
+
         except Exception as e:
             logger.error(f"Failed to record risk violation: {e}")
 
@@ -72,23 +111,23 @@ class RiskScoreManager:
 
             key = f"risk:score:{user_id}"
             last_key = f"risk:last_update:{user_id}"
-            
+
             raw_score = await client.get(key)
             raw_last = await client.get(last_key)
-            
+
             if raw_score is None:
                 return self.MIN_SCORE
-                
+
             score = float(raw_score)
             last_update = float(raw_last or time.time())
-            
+
             # Application of decay
-            hours_passed = (time.time() - last_update) / 3600.0
+            hours_passed = max(0.0, (time.time() - last_update) / 3600.0)
             decay_amount = hours_passed * self.DECAY_RATE
-            
+
             final_score = max(self.MIN_SCORE, score - decay_amount)
             return final_score
-            
+
         except Exception as e:
             logger.error(f"Failed to get risk score: {e}")
             return self.MIN_SCORE

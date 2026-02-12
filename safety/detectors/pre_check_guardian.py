@@ -17,10 +17,6 @@ from __future__ import annotations
 import math
 import os
 import time
-from typing import Optional, Tuple
-
-from safety.observability.logging_setup import get_logger
-from safety.observability.metrics import PRECHECK_LATENCY, REFUSALS_TOTAL
 
 # Import GUARDIAN
 from safety.guardian import (
@@ -30,6 +26,8 @@ from safety.guardian import (
     get_guardian_engine,
     init_guardian_rules,
 )
+from safety.observability.logging_setup import get_logger
+from safety.observability.metrics import PRECHECK_LATENCY, REFUSALS_TOTAL
 
 logger = get_logger("detectors.pre_check")
 
@@ -79,7 +77,7 @@ def _ensure_guardian() -> GuardianEngine:
 # ---------------------------------------------------------------------------
 # Legacy Compatibility
 # ---------------------------------------------------------------------------
-def _legacy_pattern_match(text: str) -> Tuple[bool, Optional[str]]:
+def _legacy_pattern_match(text: str) -> tuple[bool, str | None]:
     """
     Legacy pattern matching for backwards compatibility.
     Uses GUARDIAN's quick_check for speed.
@@ -96,7 +94,7 @@ def _legacy_pattern_match(text: str) -> Tuple[bool, Optional[str]]:
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
-def quick_block(text: str) -> Tuple[bool, Optional[str]]:
+def quick_block(text: str) -> tuple[bool, str | None]:
     """
     Synchronous pre-check using GUARDIAN engine.
     Returns (blocked, reason_code).
