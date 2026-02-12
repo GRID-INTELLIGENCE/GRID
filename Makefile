@@ -111,8 +111,59 @@ nuke: ## Remove venv + caches (full reset)
 	$(MAKE) clean
 	@echo "$(RED)Run 'make install' to rebuild.$(NC)"
 
+# ── Discipline Routines ───────────────────────────────────────────
+
+wall: ## Daily: verify tests + lint pass before any new work
+	@echo "$(CYAN)═══ Verifying the Wall ═══$(NC)"
+	@echo "$(BLUE)Tests...$(NC)"
+	uv run python -m pytest -q --tb=short
+	@echo "$(BLUE)Lint...$(NC)"
+	uv run ruff check work/ safety/ security/ boundaries/
+	@echo "$(GREEN)Wall holds. Ready to work.$(NC)"
+
+guard: ## Scan for eval/exec/pickle in production code
+	@echo "$(CYAN)═══ Security Invariant Guard ═══$(NC)"
+	@rg -n 'eval\(|exec\(|pickle\.' work/ safety/ security/ boundaries/ --glob '*.py' --glob '!*test*' --glob '!*archive*' && echo "$(RED)VIOLATIONS FOUND$(NC)" && exit 1 || echo "$(GREEN)CLEAN: No eval/exec/pickle found$(NC)"
+
+weekly: ## Weekly: security audit + performance budget + invariant scan
+	@echo "$(CYAN)═══ Weekly Discipline ═══$(NC)"
+	@echo "$(BLUE)1/4 Security invariant guard...$(NC)"
+	$(MAKE) guard
+	@echo "$(BLUE)2/4 Dependency audit...$(NC)"
+	-uv run pip-audit --progress-spinner off
+	@echo "$(BLUE)3/4 Bandit scan...$(NC)"
+	-uv run bandit -r safety/ security/ boundaries/ -q
+	@echo "$(BLUE)4/4 Performance budget (30s target)...$(NC)"
+	uv run python -m pytest -q --tb=short --durations=10
+	@echo "$(GREEN)Weekly review complete.$(NC)"
+
+test-safety: ## Run safety + boundaries tests only
+	uv run python -m pytest safety/tests boundaries/tests -q --tb=short
+
+test-frontend: ## Run frontend tests (Vitest)
+	cd frontend && npm test
+
+# ── Claude Code ──────────────────────────────────────────────────
+
+claude-doctor: ## Validate Claude Code configuration
+	@echo "$(BLUE)Checking Claude Code setup...$(NC)"
+	@echo "$(CYAN)Rules:$(NC)"
+	@ls -1 .claude/rules/*.md 2>/dev/null || echo "  No rules found"
+	@echo "$(CYAN)Settings:$(NC)"
+	@cat .claude/settings.json 2>/dev/null | head -5
+	@echo "$(CYAN)Profile:$(NC)"
+	@if [ -f .claude/user-profile.json ]; then echo "  $(GREEN)✓ User profile found$(NC)"; else echo "  $(RED)✗ User profile missing$(NC)"; fi
+
+claude-chat: ## Start interactive Claude Code session
+	claude
+
+# ── Info ─────────────────────────────────────────────────────────
+
 info: ## Show environment info
-	@echo "$(CYAN)Python:$(NC)  $$(uv run python --version)"
-	@echo "$(CYAN)UV:$(NC)      $$(uv --version)"
-	@echo "$(CYAN)Venv:$(NC)    $$(which python 2>/dev/null || echo 'not activated')"
-	@echo "$(CYAN)Packages:$(NC) $$(uv run pip list 2>/dev/null | wc -l) installed"
+	@echo "$(CYAN)Python:$(NC)   $$(uv run python --version)"
+	@echo "$(CYAN)UV:$(NC)       $$(uv --version)"
+	@echo "$(CYAN)Node:$(NC)     $$(node --version 2>/dev/null || echo 'not installed')"
+	@echo "$(CYAN)Git:$(NC)      $$(git --version)"
+	@echo "$(CYAN)Branch:$(NC)   $$(git branch --show-current)"
+	@echo "$(CYAN)Remote:$(NC)   $$(git remote get-url origin 2>/dev/null || echo 'none')"
+	@echo "$(CYAN)Tests:$(NC)    $$(uv run python -m pytest --collect-only -q 2>/dev/null | tail -1)"

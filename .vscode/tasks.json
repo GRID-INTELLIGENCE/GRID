@@ -1,0 +1,108 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Daily: Verify the Wall",
+      "detail": "Run all tests + lint before starting any new work",
+      "type": "shell",
+      "command": "uv run python -m pytest -q --tb=short && uv run ruff check work/ safety/ security/ boundaries/",
+      "group": { "kind": "test", "isDefault": true },
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Test: Safety + Boundaries",
+      "detail": "Fast safety/boundaries test suite",
+      "type": "shell",
+      "command": "uv run python -m pytest safety/tests boundaries/tests -q --tb=short",
+      "group": "test",
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Test: GRID Core",
+      "detail": "Run work/GRID tests only",
+      "type": "shell",
+      "command": "uv run python -m pytest work/GRID/tests -q --tb=short",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Test: Current File",
+      "detail": "Run pytest on the file currently open in the editor",
+      "type": "shell",
+      "command": "uv run python -m pytest ${file} -q --tb=short -v",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Lint: Ruff Check + Fix",
+      "type": "shell",
+      "command": "uv run ruff check work/ safety/ security/ boundaries/ --fix",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Format: Black + Ruff",
+      "type": "shell",
+      "command": "uv run black work/ safety/ security/ boundaries/ scripts/ && uv run ruff check --fix work/ safety/ security/ boundaries/",
+      "problemMatcher": []
+    },
+    {
+      "label": "Typecheck: mypy",
+      "type": "shell",
+      "command": "uv run mypy work/GRID/src/grid --no-error-summary",
+      "problemMatcher": []
+    },
+    {
+      "label": "Weekly: Security Audit",
+      "detail": "Dependency audit + bandit scan + slowest tests",
+      "type": "shell",
+      "command": "echo === Dependency Audit === && uv run pip-audit --progress-spinner off && echo === Bandit Scan === && uv run bandit -r safety/ security/ boundaries/ -q && echo === Slowest Tests === && uv run python -m pytest -q --tb=short --durations=10",
+      "presentation": { "reveal": "always", "panel": "dedicated" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Weekly: Performance Budget",
+      "detail": "Show 10 slowest tests (budget: 30s total)",
+      "type": "shell",
+      "command": "uv run python -m pytest -q --tb=short --durations=10",
+      "problemMatcher": []
+    },
+    {
+      "label": "Guard: Security Invariants",
+      "detail": "Scan for eval/exec/pickle in production code",
+      "type": "shell",
+      "command": "rg -n \"eval\\(|exec\\(|pickle\\.\" work/ safety/ security/ boundaries/ --glob \"*.py\" --glob \"!*test*\" --glob \"!*archive*\" && echo VIOLATIONS FOUND || echo CLEAN: No eval/exec/pickle found",
+      "problemMatcher": []
+    },
+    {
+      "label": "Frontend: Dev Server",
+      "type": "shell",
+      "command": "npm run dev",
+      "options": { "cwd": "${workspaceFolder}/frontend" },
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Frontend: Lint + Typecheck",
+      "type": "shell",
+      "command": "npm run lint",
+      "options": { "cwd": "${workspaceFolder}/frontend" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Frontend: Test (Vitest)",
+      "type": "shell",
+      "command": "npm test",
+      "options": { "cwd": "${workspaceFolder}/frontend" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Git: Status + Diff Summary",
+      "type": "shell",
+      "command": "git status --short && echo --- && git diff --stat",
+      "problemMatcher": []
+    }
+  ]
+}

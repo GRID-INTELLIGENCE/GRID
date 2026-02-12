@@ -97,14 +97,31 @@ make clean         # Remove caches
 - ❌ Use external AI APIs — everything runs locally via Ollama
 - ❌ Hardcode secrets or use realistic-looking dummy keys in tests
 
+## Discipline Routines
+
+```bash
+# Daily — before any new work
+make wall              # Tests + lint must pass
+
+# Weekly — Friday
+make weekly            # Dep audit + bandit + perf budget + invariant scan
+
+# Per-decision
+# Append to docs/decisions/DECISIONS.md (see TEMPLATE.md)
+```
+
 ## Where to Find Things
 
 - Architecture docs → `work/GRID/docs/ARCHITECTURE.md`
+- Decision log → `docs/decisions/DECISIONS.md`
 - Security audit → `work/GRID/SECURITY_AUDIT_REPORT.md`
+- Security review → `safety/SECURITY_REVIEW_2026_02.md`
 - Core principles → `work/GRID/CORE_PRINCIPLES.md`
 - Safety deployment → `safety/DEPLOYMENT_GUIDE.md`
 - Frontend components → `frontend/src/`
 - Config schemas → `config/schemas/`
+- Claude rules → `.claude/rules/` (backend, frontend, safety, discipline)
+- VSCode tasks → `.vscode/tasks.json` (daily/weekly routines as runnable tasks)
 
 ## Developer Context
 

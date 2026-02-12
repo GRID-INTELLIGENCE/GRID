@@ -57,7 +57,10 @@ dmypy.json
 .ruff_cache/
 
 # ── IDE / editor ──────────────────────────────────────────────────
-.vscode/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/extensions.json
 .idea/
 *.swp
 *.swo
