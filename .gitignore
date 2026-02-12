@@ -78,10 +78,29 @@ logs/
 .env
 .env.local
 .env.*.local
-*.local
 *.pem
 *.key
+*.p12
+*.pfx
+*.credential
+*.credentials
 secrets/
+credentials/
+
+# ── Security: dangerous serialization (pickle is banned) ─────────
+*.pkl
+*.pickle
+
+# ── Databases (local dev) ────────────────────────────────────────
+*.sqlite3
+*.db
+
+# ── Ollama / model cache ─────────────────────────────────────────
+.ollama/
+models/
+
+# ── Analysis outputs ─────────────────────────────────────────────
+analysis_outputs/
 
 # ── Misc artifacts ────────────────────────────────────────────────
 reports/

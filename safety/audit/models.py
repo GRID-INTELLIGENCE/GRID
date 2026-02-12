@@ -3,13 +3,17 @@ SQLAlchemy ORM models for the safety audit database.
 
 Table: audits
 Indexes: request_id, user_id, created_at
+
+PII Redaction: User input is automatically redacted before storage
+to prevent PII leakage in audit logs. See `redact_pii()`.
 """
 
 from __future__ import annotations
 
 import enum
+import re
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import (
     JSON,
@@ -18,9 +22,36 @@ from sqlalchemy import (
     Index,
     String,
     Text,
+    event,
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+
+# ---------------------------------------------------------------------------
+# PII Redaction
+# ---------------------------------------------------------------------------
+_PII_PATTERNS: list[tuple[re.Pattern[str], str]] = [
+    # Email addresses
+    (re.compile(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"), "[REDACTED_EMAIL]"),
+    # Phone numbers (international + US formats)
+    (re.compile(r"\+?\d{1,3}[-.\s]?\(?\d{1,4}\)?[-.\s]?\d{1,4}[-.\s]?\d{1,9}"), "[REDACTED_PHONE]"),
+    # SSN (US)
+    (re.compile(r"\b\d{3}-\d{2}-\d{4}\b"), "[REDACTED_SSN]"),
+    # Credit card numbers (basic)
+    (re.compile(r"\b(?:\d[ -]*?){13,19}\b"), "[REDACTED_CARD]"),
+    # IP addresses
+    (re.compile(r"\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b"), "[REDACTED_IP]"),
+]
+
+
+def redact_pii(text: str | None) -> str | None:
+    """Redact common PII patterns from text before audit storage."""
+    if not text:
+        return text
+    result = text
+    for pattern, replacement in _PII_PATTERNS:
+        result = pattern.sub(replacement, result)
+    return result
 
 
 class Base(DeclarativeBase):
@@ -79,7 +110,7 @@ class AuditRecord(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
-        default=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(UTC),
         index=True,
     )
     resolved_at: Mapped[datetime | None] = mapped_column(
@@ -98,3 +129,11 @@ class AuditRecord(Base):
             f"<AuditRecord id={self.id} request_id={self.request_id} "
             f"reason={self.reason_code} status={self.status.value}>"
         )
+
+
+# Auto-redact PII before any AuditRecord is persisted.
+@event.listens_for(AuditRecord, "before_insert")
+def _redact_audit_pii(mapper, connection, target: AuditRecord) -> None:  # noqa: ARG001
+    """Automatically redact PII from input/output fields before DB insert."""
+    target.input = redact_pii(target.input) or ""
+    target.model_output = redact_pii(target.model_output)

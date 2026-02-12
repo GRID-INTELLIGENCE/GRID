@@ -583,11 +583,26 @@ def apply_all_patches():
     logger.info("=" * 80)
 
 
-# Auto-apply patches on import
-if os.environ.get("DISABLE_NETWORK_SECURITY") != "true":
+# Auto-apply patches on import.
+# Network security can only be disabled in explicit development mode
+# (requires BOTH env vars to prevent accidental or malicious bypass).
+_disable_requested = os.environ.get("DISABLE_NETWORK_SECURITY") == "true"
+_is_dev_env = os.environ.get("GRID_ENV", "production").lower() in ("development", "dev", "test")
+
+if _disable_requested and not _is_dev_env:
+    logger.critical(
+        "DISABLE_NETWORK_SECURITY rejected — GRID_ENV is not 'development' or 'test'. "
+        "Network security remains ACTIVE. Set GRID_ENV=development to allow bypass."
+    )
     apply_all_patches()
+elif _disable_requested and _is_dev_env:
+    logger.critical(
+        "NETWORK SECURITY DISABLED — GRID_ENV=%s, DISABLE_NETWORK_SECURITY=true. "
+        "This MUST NOT be used in production.",
+        os.environ.get("GRID_ENV"),
+    )
 else:
-    logger.warning("⚠️  Network security DISABLED via DISABLE_NETWORK_SECURITY=true")
+    apply_all_patches()
 
 
 __all__ = [

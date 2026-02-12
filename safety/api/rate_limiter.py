@@ -54,8 +54,24 @@ class SecurityConfig:
     SUSPICIOUS_USER_AGENTS = {"curl", "wget", "python-requests", "go-http-client", "java/", "bot", "spider", "crawler"}
 
     # Request validation
-    SECRET_KEY = os.getenv("RATE_LIMIT_SECRET", "change_me_in_production")
+    SECRET_KEY = os.getenv("RATE_LIMIT_SECRET", "")
     SIGNATURE_TTL = 300  # 5 minutes
+
+    @classmethod
+    def validate_secrets(cls) -> None:
+        """Fail-fast if critical secrets are not configured."""
+        _is_dev = os.environ.get("GRID_ENV", "production").lower() in ("development", "dev", "test")
+        if not cls.SECRET_KEY or cls.SECRET_KEY == "change_me_in_production":
+            if _is_dev:
+                logger.warning(
+                    "RATE_LIMIT_SECRET not set — using insecure default (dev mode only)"
+                )
+                cls.SECRET_KEY = "insecure-dev-key-do-not-use-in-production"
+            else:
+                raise RuntimeError(
+                    "RATE_LIMIT_SECRET is not configured. "
+                    "Set the RATE_LIMIT_SECRET environment variable before starting in production."
+                )
 
 
 class IPRateLimiter:
@@ -562,6 +578,17 @@ async def get_security_status() -> Dict[str, Any]:
     except Exception as e:
         logger.error(f"Failed to get security status: {e}")
         return {"error": str(e)}
+
+
+class RateLimitResult:
+    """Legacy rate limit result for backward compatibility."""
+
+    __slots__ = ("allowed", "remaining", "reset_seconds")
+
+    def __init__(self, allowed: bool, remaining: int, reset_seconds: float):
+        self.allowed = allowed
+        self.remaining = remaining
+        self.reset_seconds = reset_seconds
 
 
 # Legacy compatibility - keep old function signature

@@ -15,11 +15,10 @@ Fail-closed: if any safety component is unavailable, deny the request.
 from __future__ import annotations
 
 import json
+import os
 import time
 import uuid
-from typing import Any
 
-import redis.asyncio as aioredis
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
@@ -29,12 +28,9 @@ from safety.api.auth import TrustTier, UserIdentity, get_user_from_token
 from safety.api.rate_limiter import allow_request
 from safety.api.security_headers import SecurityHeadersMiddleware
 from safety.escalation.handler import is_user_suspended
-# [PROJECT GUARDIAN] Integration
-from safety.rules.manager import get_rule_manager
 from safety.observability.logging_setup import get_logger, set_trace_context
 from safety.observability.metrics import (
     DETECTOR_HEALTHY,
-    REDIS_HEALTHY,
     REQUESTS_TOTAL,
 )
 from safety.observability.security_monitoring import (
@@ -43,20 +39,27 @@ from safety.observability.security_monitoring import (
     SecurityEventType,
     security_logger,
 )
+
+# [PROJECT GUARDIAN] Integration
+from safety.rules.manager import get_rule_manager
 from safety.workers.worker_utils import check_redis_health, write_audit_event
 
 logger = get_logger("api.middleware")
 
-# Paths that bypass safety middleware (health, metrics, docs)
+# Paths that bypass safety middleware (health, metrics only).
+# API docs are only bypassed in development mode to prevent
+# exposing internal API schema to unauthenticated users in production.
+_is_dev_env = os.getenv("GRID_ENV", "production").lower() in ("development", "dev", "test")
+
 _BYPASS_PATHS: set[str] = {
     "/health",
     "/healthz",
     "/ready",
     "/metrics",
-    "/docs",
-    "/openapi.json",
-    "/redoc",
 }
+
+if _is_dev_env:
+    _BYPASS_PATHS |= {"/docs", "/openapi.json", "/redoc"}
 
 
 def _make_refusal_response(
@@ -218,8 +221,41 @@ class SafetyMiddleware(BaseHTTPMiddleware):
 
         # 4. Pre-check detector (synchronous, <50ms)
         try:
-            # Read body for pre-check (cache for downstream)
-            body_bytes = await request.body()
+            # 4a. Enforce Content-Length limit BEFORE reading the body to prevent
+            # memory exhaustion (OOM) from oversized payloads.
+            _MAX_BODY_SIZE = 50_000  # bytes — matches _MAX_INPUT_LENGTH in pre_check
+            content_length = request.headers.get("content-length")
+            if content_length is not None:
+                try:
+                    if int(content_length) > _MAX_BODY_SIZE:
+                        REQUESTS_TOTAL.labels(outcome="refused").inc()
+                        logger.warning(
+                            "request_body_too_large",
+                            content_length=content_length,
+                            user_id=user.id,
+                            trace_id=trace_id,
+                        )
+                        response = _make_refusal_response("INPUT_TOO_LONG", trace_id)
+                        self.security_headers._add_security_headers(response, request)
+                        return response
+                except ValueError:
+                    pass  # Malformed Content-Length — let body read handle it
+
+            # 4b. Read body with bounded streaming to handle missing/lying Content-Length
+            body_bytes = b""
+            async for chunk in request.stream():
+                body_bytes += chunk
+                if len(body_bytes) > _MAX_BODY_SIZE:
+                    REQUESTS_TOTAL.labels(outcome="refused").inc()
+                    logger.warning(
+                        "request_body_exceeded_stream_limit",
+                        bytes_read=len(body_bytes),
+                        user_id=user.id,
+                        trace_id=trace_id,
+                    )
+                    response = _make_refusal_response("INPUT_TOO_LONG", trace_id)
+                    self.security_headers._add_security_headers(response, request)
+                    return response
             try:
                 body = json.loads(body_bytes)
             except (json.JSONDecodeError, UnicodeDecodeError):

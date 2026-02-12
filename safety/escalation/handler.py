@@ -40,8 +40,10 @@ _MISUSE_THRESHOLD = int(os.getenv("SAFETY_MISUSE_THRESHOLD", "5"))
 # Severity ordering for comparison
 _SEVERITY_ORDER = {"low": 0, "medium": 1, "high": 2, "critical": 3}
 
-# In-memory misuse tracker (per-user escalation count within window)
-_misuse_tracker: dict[str, list[float]] = defaultdict(list)
+# Redis-backed misuse tracker key prefix (sorted set per user).
+# Falls back to in-memory tracking if Redis is unavailable.
+_MISUSE_KEY_PREFIX = "grid:misuse:"
+_misuse_tracker_fallback: dict[str, list[float]] = defaultdict(list)
 
 # Redis client for stream operations
 _redis: aioredis.Redis | None = None
@@ -261,20 +263,35 @@ async def _check_misuse(user_id: str) -> None:
     """
     Check if the user has exceeded the misuse threshold within the window.
 
-    If so, tighten rate limits and optionally disable features.
+    Uses Redis sorted sets for cross-instance tracking. Falls back to
+    in-memory tracking if Redis is unavailable.
     """
     import time
 
     now = time.time()
-    window = _misuse_tracker[user_id]
-    # Prune old entries
-    window = [t for t in window if now - t < _MISUSE_WINDOW_SECONDS]
-    window.append(now)
-    _misuse_tracker[user_id] = window
+    cutoff = now - _MISUSE_WINDOW_SECONDS
 
-    # TODO: Replace in-memory _misuse_tracker with Redis-backed sliding window
-    #       so misuse detection works across multiple API server instances.
-    if len(window) >= _MISUSE_THRESHOLD:
+    # Try Redis-backed sliding window first
+    try:
+        client = await _get_redis()
+        key = f"{_MISUSE_KEY_PREFIX}{user_id}"
+        pipe = client.pipeline()
+        pipe.zremrangebyscore(key, "-inf", cutoff)  # Prune old entries
+        pipe.zadd(key, {str(now): now})  # Add current event
+        pipe.zcard(key)  # Count events in window
+        pipe.expire(key, _MISUSE_WINDOW_SECONDS + 60)  # TTL with buffer
+        results = await pipe.execute()
+        count = results[2]
+    except Exception as exc:
+        # Fall back to in-memory tracking if Redis fails
+        logger.warning("misuse_tracker_redis_fallback", error=str(exc))
+        window = _misuse_tracker_fallback[user_id]
+        window = [t for t in window if now - t < _MISUSE_WINDOW_SECONDS]
+        window.append(now)
+        _misuse_tracker_fallback[user_id] = window
+        count = len(window)
+
+    if count >= _MISUSE_THRESHOLD:
         logger.warning(
             "systematic_misuse_detected",
             user_id=user_id,

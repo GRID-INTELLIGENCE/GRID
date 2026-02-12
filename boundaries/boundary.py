@@ -113,8 +113,13 @@ class BoundaryEngine:
             return True
         boundary = next((b for b in self.boundaries if b.id == boundary_id), None)
         if not boundary:
-            self._logger.log_boundary_check(boundary_id, allowed=True, scope=scope)
-            return True
+            # Fail-closed: unknown boundary IDs are denied, not allowed.
+            # This prevents typos or removed configs from silently granting access.
+            self._logger.log_boundary_check(
+                boundary_id, allowed=False, scope=scope,
+                payload={"reason": "unknown_boundary_id"},
+            )
+            return False
         allowed = self._evaluate_rule(boundary.rule, subject)
         self._logger.log_boundary_check(boundary_id, allowed, scope=scope, payload={"subject": subject})
         if not allowed and boundary.enforcement == "hard":
@@ -171,7 +176,12 @@ class BoundaryEngine:
         """
         guardrail = next((g for g in self.guardrails if g.id == guardrail_id), None)
         if not guardrail:
-            return ("log", False)
+            # Fail-closed: unknown guardrail IDs trigger block, not silent pass.
+            self._logger.log_guardrail_triggered(
+                guardrail_id, "block", scope=scope,
+                payload={"reason": "unknown_guardrail_id"},
+            )
+            return ("block", False)
         ref = check_refusal(trigger=guardrail_id, scope=scope, rights=self.refusal_rights)
         if ref is not None and guardrail.overridable_by_refusal:
             self._logger.log_guardrail_overridden(guardrail_id, scope=scope, actor_id=actor_id, payload=context)
