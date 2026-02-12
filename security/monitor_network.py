@@ -10,7 +10,7 @@ import sys
 import time
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional
 
 try:
     from rich.console import Console
@@ -51,15 +51,15 @@ class NetworkMonitor:
         self.audit_log_path = self.base_path / "logs" / "audit.log"
         self.console = Console() if RICH_AVAILABLE else None
 
-    def load_config(self) -> Dict:
+    def load_config(self) -> dict:
         """Load network access control configuration."""
         if not YAML_AVAILABLE or not self.config_path.exists():
             return {}
 
-        with open(self.config_path, "r") as f:
+        with open(self.config_path) as f:
             return yaml.safe_load(f)
 
-    def save_config(self, config: Dict):
+    def save_config(self, config: dict):
         """Save network access control configuration."""
         if not YAML_AVAILABLE:
             print("❌ pyyaml not installed, cannot save config")
@@ -69,15 +69,15 @@ class NetworkMonitor:
             yaml.dump(config, f, default_flow_style=False)
 
     def get_audit_events(
-        self, limit: int = 100, event_type: Optional[str] = None
-    ) -> List[Dict]:
+        self, limit: int = 100, event_type: str | None = None
+    ) -> list[dict]:
         """Read audit log events."""
         if not self.audit_log_path.exists():
             return []
 
         events = []
         try:
-            with open(self.audit_log_path, "r") as f:
+            with open(self.audit_log_path) as f:
                 for line in f:
                     if line.strip():
                         event = json.loads(line)
@@ -88,19 +88,19 @@ class NetworkMonitor:
 
         return events[-limit:]
 
-    def get_blocked_requests(self, limit: int = 50) -> List[Dict]:
+    def get_blocked_requests(self, limit: int = 50) -> list[dict]:
         """Get recent blocked requests."""
         return self.get_audit_events(limit=limit, event_type="REQUEST_BLOCKED")
 
-    def get_allowed_requests(self, limit: int = 50) -> List[Dict]:
+    def get_allowed_requests(self, limit: int = 50) -> list[dict]:
         """Get recent allowed requests."""
         return self.get_audit_events(limit=limit, event_type="REQUEST_ALLOWED")
 
-    def get_data_leaks(self) -> List[Dict]:
+    def get_data_leaks(self) -> list[dict]:
         """Get detected data leak attempts."""
         return self.get_audit_events(limit=1000, event_type="DATA_LEAK_BLOCKED")
 
-    def get_statistics(self) -> Dict:
+    def get_statistics(self) -> dict:
         """Calculate statistics from audit log."""
         all_events = self.get_audit_events(limit=10000)
 
@@ -400,7 +400,7 @@ class NetworkMonitor:
         self.save_config(config)
         print("🚫 Global network access DISABLED")
 
-    def detect_anomalies(self, hours: int = 24) -> Dict[str, Any]:
+    def detect_anomalies(self, hours: int = 24) -> dict[str, Any]:
         """Detect network access anomalies in the last N hours."""
         from datetime import timedelta
 
@@ -475,7 +475,7 @@ class NetworkMonitor:
 
         return anomalies
 
-    def detect_connection_anomalies(self) -> List[str]:
+    def detect_connection_anomalies(self) -> list[str]:
         """Detect anomalies in active network connections using psutil."""
         if not PSUTIL_AVAILABLE:
             return ["psutil not available for connection monitoring"]
@@ -502,7 +502,7 @@ class NetworkMonitor:
         except Exception as e:
             return [f"Error scanning connections: {str(e)}"]
 
-    def log_alert(self, alert: Dict[str, str]):
+    def log_alert(self, alert: dict[str, str]):
         """Log security alert to alerts.log."""
         alert_path = self.base_path / "logs" / "alerts.log"
         alert_path.parent.mkdir(exist_ok=True)
@@ -740,7 +740,7 @@ def main():
         print("🚨 RECENT ALERTS:")
         print()
         try:
-            with open(alert_path, 'r', encoding='utf-8') as f:
+            with open(alert_path, encoding='utf-8') as f:
                 alerts = [json.loads(line) for line in f if line.strip()]
                 for alert in alerts[-10:]:  # Show last 10
                     print(f"[{alert['timestamp'][:19]}] [{alert['level']}] {alert['message']}")

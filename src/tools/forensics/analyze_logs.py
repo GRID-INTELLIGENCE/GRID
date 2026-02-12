@@ -19,38 +19,43 @@ def main():
 
     # Import the existing forensic analyzer
     try:
+        # If your actual class name in forensic_log_analyzer.py is different, update this import accordingly.
         from forensic_log_analyzer import LogAnalyzer
-
-        analyzer = LogAnalyzer()
-
-        # Analyze network access logs
-        print("📊 Analyzing network access logs...")
-        network_report = analyzer.analyze_network_logs()
-        print("Network Analysis:")
-        print(network_report)
-
-        # Analyze audit logs
-        print("\n📋 Analyzing audit logs...")
-        audit_report = analyzer.analyze_audit_logs()
-        print("Audit Analysis:")
-        print(audit_report)
-
-        # Generate combined report
-        print("\n📄 Generating forensic report...")
-        report = analyzer.generate_report()
-        print("Forensic Report:")
-        print(report)
-
-        # Save report
-        report_path = Path('e:/grid/security/logs/forensic_analysis_report.md')
-        report_path.parent.mkdir(exist_ok=True)
-        with open(report_path, 'w', encoding='utf-8') as f:
-            f.write(report)
-        print(f"\n✅ Report saved to: {report_path}")
-
     except ImportError as e:
         print(f"❌ Error importing forensic_log_analyzer: {e}")
         print("Please ensure forensic_log_analyzer.py is available in security/")
+        sys.exit(1)
+
+    # Validate that LogAnalyzer exists in the module, else raise informative error
+    if not hasattr(sys.modules.get('forensic_log_analyzer'), 'LogAnalyzer'):
+        print("❌ 'LogAnalyzer' class not found in forensic_log_analyzer.py.")
+        print("Check the definition in security/forensic_log_analyzer.py.")
+        sys.exit(1)
+
+    analyzer = LogAnalyzer()
+    print("📊 Analyzing network access logs...")
+    network_report = analyzer.analyze_network_logs()
+    print("Network Analysis:")
+    print(network_report)
+
+    # Analyze audit logs
+    print("\n📋 Analyzing audit logs...")
+    audit_report = analyzer.analyze_audit_logs()
+    print("Audit Analysis:")
+    print(audit_report)
+
+    # Generate combined report
+    print("\n📄 Generating forensic report...")
+    report = analyzer.generate_report()
+    print("Forensic Report:")
+    print(report)
+
+    # Save report
+    report_path = Path('e:/grid/security/logs/forensic_analysis_report.md')
+    report_path.parent.mkdir(exist_ok=True)
+    with open(report_path, 'w', encoding='utf-8') as f:
+        f.write(report)
+    print(f"\n✅ Report saved to: {report_path}")
 
     # Additional MCP-specific analysis
     print("\n🔧 Analyzing MCP server logs...")

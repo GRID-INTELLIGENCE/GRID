@@ -136,7 +136,7 @@ class SecurityIntegrator:
             "$RECYCLE.BIN",
         }
 
-    def scan_codebase(self) -> Dict:
+    def scan_codebase(self) -> dict:
         """Scan entire codebase for network usage."""
         print("🔍 Scanning codebase for network usage...")
         print(f"   Root: {self.root_path}")
@@ -173,7 +173,7 @@ class SecurityIntegrator:
     def _scan_file(self, filepath: Path):
         """Scan a single Python file."""
         try:
-            with open(filepath, "r", encoding="utf-8") as f:
+            with open(filepath, encoding="utf-8") as f:
                 content = f.read()
 
             # Parse AST
@@ -211,10 +211,10 @@ class SecurityIntegrator:
         except SyntaxError:
             # Skip files with syntax errors
             pass
-        except Exception as e:
+        except Exception:
             raise
 
-    def _summarize_results(self) -> Dict:
+    def _summarize_results(self) -> dict:
         """Summarize scan results."""
         summary = {
             "timestamp": datetime.utcnow().isoformat(),
@@ -307,7 +307,7 @@ class SecurityIntegrator:
         print()
         print("=" * 80)
 
-    def suggest_integration_points(self) -> List[str]:
+    def suggest_integration_points(self) -> list[str]:
         """Suggest where to integrate security."""
         suggestions = []
 

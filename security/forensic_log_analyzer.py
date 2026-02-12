@@ -6,9 +6,9 @@ Analyzes security logs to detect unauthorized access attempts and generate repor
 
 import json
 import os
-from pathlib import Path
 from datetime import datetime
-from typing import Dict, List, Any
+from pathlib import Path
+from typing import Any, Dict, List
 
 
 class ForensicLogAnalyzer:
@@ -19,13 +19,13 @@ class ForensicLogAnalyzer:
         self.audit_log = logs_dir / "audit.log"
         self.network_log = logs_dir / "network_access.log"
 
-    def parse_audit_log(self) -> List[Dict[str, Any]]:
+    def parse_audit_log(self) -> list[dict[str, Any]]:
         """Parse audit.log for security events."""
         events = []
         if not self.audit_log.exists():
             return events
 
-        with open(self.audit_log, 'r', encoding='utf-8') as f:
+        with open(self.audit_log, encoding='utf-8') as f:
             for line in f:
                 line = line.strip()
                 if not line:
@@ -37,13 +37,13 @@ class ForensicLogAnalyzer:
                     print(f"Warning: Failed to parse audit log line: {e}")
         return events
 
-    def parse_network_log(self) -> List[Dict[str, Any]]:
+    def parse_network_log(self) -> list[dict[str, Any]]:
         """Parse network_access.log for initialization and events."""
         events = []
         if not self.network_log.exists():
             return events
 
-        with open(self.network_log, 'r', encoding='utf-8') as f:
+        with open(self.network_log, encoding='utf-8') as f:
             for line in f:
                 # Parse log format: timestamp - logger - level - message
                 parts = line.strip().split(' - ', 3)
@@ -63,7 +63,7 @@ class ForensicLogAnalyzer:
                         continue
         return events
 
-    def analyze_events(self, audit_events: List[Dict], network_events: List[Dict]) -> Dict[str, Any]:
+    def analyze_events(self, audit_events: list[dict], network_events: list[dict]) -> dict[str, Any]:
         """Analyze events for security insights."""
         analysis = {
             'summary': {
@@ -108,7 +108,7 @@ class ForensicLogAnalyzer:
 
         return analysis
 
-    def _get_time_range(self, events: List[Dict]) -> Dict[str, str]:
+    def _get_time_range(self, events: list[dict]) -> dict[str, str]:
         """Get time range of events."""
         if not events:
             return {'start': None, 'end': None}
@@ -122,7 +122,7 @@ class ForensicLogAnalyzer:
             'end': max(timestamps).isoformat()
         }
 
-    def generate_report(self, analysis: Dict[str, Any]) -> str:
+    def generate_report(self, analysis: dict[str, Any]) -> str:
         """Generate human-readable report."""
         report = []
         report.append("# Forensic Security Log Analysis Report")

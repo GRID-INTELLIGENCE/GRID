@@ -220,7 +220,7 @@ def whitelist_domain(domain: str, description: str = ""):
     rule = {
         "domain": domain,
         "protocol": "https",
-        "description": description or f"Added programmatically",
+        "description": description or "Added programmatically",
         "added_by": "api",
         "added_date": datetime.utcnow().isoformat(),
     }

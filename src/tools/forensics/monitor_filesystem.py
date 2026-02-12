@@ -12,17 +12,26 @@ import sys
 import time
 from pathlib import Path
 
-# Add src to path for imports
-sys.path.append('e:/grid/work/GRID/src')
+# Calculate path relative to this file's location
+_grid_src_path = Path(__file__).parent.parent.parent.parent / 'work' / 'GRID' / 'src'
+sys.path.insert(0, str(_grid_src_path))
 
 try:
     from watchdog.events import FileSystemEventHandler
     from watchdog.observers import Observer
-    from grid.security.audit_logger import get_audit_logger, AuditEventType, initialize_audit_logger
     WATCHDOG_AVAILABLE = True
 except ImportError:
     print("watchdog not installed. Install with: pip install watchdog")
     WATCHDOG_AVAILABLE = False
+    # Create dummy classes to prevent NameError
+    FileSystemEventHandler = object  # type: ignore[assignment,misc]
+    Observer = None  # type: ignore[assignment,misc]
+
+try:
+    from grid.security.audit_logger import get_audit_logger, AuditEventType, initialize_audit_logger
+except ImportError as e:
+    print(f"Warning: Could not import audit_logger: {e}")
+    raise
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

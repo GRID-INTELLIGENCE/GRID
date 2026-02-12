@@ -6,16 +6,16 @@ AI agent for automated security testing of the GRID system, simulating attacks a
 Developed based on the security assessment specification.
 """
 
-import os
-import sys
-import json
-import time
-import socket
-import logging
 import asyncio
-from pathlib import Path
+import json
+import logging
+import os
+import socket
+import sys
+import time
 from datetime import datetime
-from typing import Dict, List, Any, Optional
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 # Add parent directory to path for security module
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -23,8 +23,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 # Import existing security modules if available
 try:
     import security
-    from security.network_interceptor import nac, NetworkAccessDenied
     from security.forensic_log_analyzer import ForensicLogAnalyzer
+    from security.network_interceptor import NetworkAccessDenied, nac
 except ImportError:
     security = None
     nac = None
@@ -33,7 +33,7 @@ except ImportError:
 class GRIDSecurityAssessmentAgent:
     """Automated security testing agent for the GRID system."""
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         self.agent_info = config.get("agent", {})
         self.tools_schema = config.get("tools", [])
         self.flows = config.get("flows", [])
@@ -64,7 +64,7 @@ class GRIDSecurityAssessmentAgent:
         ch.setFormatter(formatter)
         self.logger.addHandler(ch)
 
-    def log_event(self, event_type: str, details: Dict[str, Any]):
+    def log_event(self, event_type: str, details: dict[str, Any]):
         """Log a security event to the audit trail."""
         event = {
             "timestamp": datetime.now().isoformat(),
@@ -77,7 +77,7 @@ class GRIDSecurityAssessmentAgent:
 
     # Tool Implementations
 
-    def test_filesystem_access(self, path: str, operation: str, content: str = "") -> Dict[str, Any]:
+    def test_filesystem_access(self, path: str, operation: str, content: str = "") -> dict[str, Any]:
         """Test read/write access to filesystem paths."""
         self.logger.info(f"Executing tool: test_filesystem_access(path='{path}', operation='{operation}')")
         
@@ -109,12 +109,12 @@ class GRIDSecurityAssessmentAgent:
                 if not path_obj.exists():
                     return {"success": False, "error": f"File not found: {path}"}
                 
-                with open(path_obj, "r", encoding="utf-8", errors="replace") as f:
+                with open(path_obj, encoding="utf-8", errors="replace") as f:
                     data = f.read(1024)  # Read first 1KB
                 
                 self.log_event("DATA_ACCESS", {"path": path, "operation": "read", "bytes": len(data)})
                 return {
-                    "success": True, 
+                    "success": True,
                     "result": (data[:100] + "...") if len(data) > 100 else data,
                     "audit_event": "DATA_ACCESS"
                 }
@@ -143,7 +143,7 @@ class GRIDSecurityAssessmentAgent:
             self.logger.error(f"Error in test_filesystem_access: {e}")
             return {"success": False, "error": str(e)}
 
-    def test_network_access(self, url: str, method: str = "GET") -> Dict[str, Any]:
+    def test_network_access(self, url: str, method: str = "GET") -> dict[str, Any]:
         """Test network/SSRF access to URLs."""
         self.logger.info(f"Executing tool: test_network_access(url='{url}', method='{method}')")
         
@@ -153,9 +153,9 @@ class GRIDSecurityAssessmentAgent:
             if pattern in url:
                 self.log_event("REQUEST_BLOCKED", {"url": url, "reason": f"SSRF pattern match: {pattern}"})
                 return {
-                    "success": False, 
-                    "blocked": True, 
-                    "reason": f"Blocked by SSRF filter: {pattern}", 
+                    "success": False,
+                    "blocked": True,
+                    "reason": f"Blocked by SSRF filter: {pattern}",
                     "audit_event": "REQUEST_BLOCKED"
                 }
 
@@ -168,18 +168,18 @@ class GRIDSecurityAssessmentAgent:
             
             self.log_event("NETWORK_ACCESS", {"url": url, "method": method, "status": response.status_code})
             return {
-                "success": True, 
-                "blocked": False, 
-                "reason": "Request allowed", 
+                "success": True,
+                "blocked": False,
+                "reason": "Request allowed",
                 "audit_event": "NETWORK_ACCESS"
             }
 
         except NetworkAccessDenied as e:
             self.log_event("AUTHZ_ACCESS_DENIED", {"url": url, "method": method, "reason": "Blocked by GRID Security System"})
             return {
-                "success": False, 
-                "blocked": True, 
-                "reason": str(e), 
+                "success": False,
+                "blocked": True,
+                "reason": str(e),
                 "audit_event": "AUTHZ_ACCESS_DENIED"
             }
         except ImportError:
@@ -190,14 +190,14 @@ class GRIDSecurityAssessmentAgent:
             self.log_event("NETWORK_ERROR", {"url": url, "error": str(e)})
             return {"success": False, "blocked": False, "error": str(e)}
 
-    def scan_anomalies(self, scan_type: str, hours: int = 24) -> Dict[str, Any]:
+    def scan_anomalies(self, scan_type: str, hours: int = 24) -> dict[str, Any]:
         """Scan for network and filesystem anomalies using existing Forensic Analyzer."""
         self.logger.info(f"Executing tool: scan_anomalies(scan_type='{scan_type}', hours={hours})")
         
         if not ForensicLogAnalyzer:
             return {
-                "anomalies_found": 0, 
-                "details": ["ForensicLogAnalyzer not available - install security module dependencies"], 
+                "anomalies_found": 0,
+                "details": ["ForensicLogAnalyzer not available - install security module dependencies"],
                 "alerts": []
             }
 
@@ -230,7 +230,7 @@ class GRIDSecurityAssessmentAgent:
             self.logger.error(f"Error in scan_anomalies: {e}")
             return {"anomalies_found": 0, "details": [], "error": str(e)}
 
-    def generate_security_report(self, include_paths: bool = True, include_users: bool = True, include_anomalies: bool = True) -> Dict[str, Any]:
+    def generate_security_report(self, include_paths: bool = True, include_users: bool = True, include_anomalies: bool = True) -> dict[str, Any]:
         """Generate a comprehensive security assessment report in Markdown."""
         self.logger.info("Generating security report...")
         

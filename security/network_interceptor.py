@@ -57,8 +57,8 @@ class NetworkAccessControl:
 
         self.config_path = Path(__file__).parent / "network_access_control.yaml"
         self.config = self._load_config()
-        self.blocked_requests: List[Dict] = []
-        self.allowed_requests: List[Dict] = []
+        self.blocked_requests: list[dict] = []
+        self.allowed_requests: list[dict] = []
         self.metrics = {
             "total_requests": 0,
             "blocked_requests": 0,
@@ -77,14 +77,14 @@ class NetworkAccessControl:
         self._initialized = True
         logger.info("Network Access Control initialized - ALL ACCESS DENIED BY DEFAULT")
 
-    def _load_config(self) -> Dict:
+    def _load_config(self) -> dict:
         """Load configuration from YAML file."""
         try:
             if not self.config_path.exists():
                 logger.error(f"Config file not found: {self.config_path}")
                 return self._get_default_config()
 
-            with open(self.config_path, "r") as f:
+            with open(self.config_path) as f:
                 config = yaml.safe_load(f)
 
             logger.info(f"Loaded config from {self.config_path}")
@@ -97,7 +97,7 @@ class NetworkAccessControl:
             logger.error(f"Error loading config: {e}")
             return self._get_default_config()
 
-    def _get_default_config(self) -> Dict:
+    def _get_default_config(self) -> dict:
         """Get default deny-all configuration."""
         return {
             "mode": "strict",
@@ -130,7 +130,7 @@ class NetworkAccessControl:
         # Audit log
         self.audit_log = log_dir / "audit.log"
 
-    def _log_audit(self, event_type: str, details: Dict):
+    def _log_audit(self, event_type: str, details: dict):
         """Log audit event to file."""
         audit_entry = {
             "timestamp": datetime.utcnow().isoformat(),
@@ -145,7 +145,7 @@ class NetworkAccessControl:
             logger.error(f"Failed to write audit log: {e}")
 
     def _check_data_leak(
-        self, url: str, data: Any = None, headers: Dict = None
+        self, url: str, data: Any = None, headers: dict = None
     ) -> bool:
         """Check for potential data leaks in request."""
         dlp_config = self.config.get("data_leak_prevention", {})
@@ -194,9 +194,9 @@ class NetworkAccessControl:
         url: str,
         method: str = "GET",
         data: Any = None,
-        headers: Dict = None,
+        headers: dict = None,
         caller: str = "unknown",
-    ) -> Tuple[bool, str]:
+    ) -> tuple[bool, str]:
         """
         Check if a network request should be allowed.
 
@@ -307,7 +307,7 @@ class NetworkAccessControl:
         pattern = pattern.replace("*", ".*")
         return bool(re.match(f"^{pattern}$", domain))
 
-    def _log_blocked_request(self, request_info: Dict, reason: str):
+    def _log_blocked_request(self, request_info: dict, reason: str):
         """Log blocked request."""
         self.metrics["blocked_requests"] += 1
         request_info["reason"] = reason
@@ -325,7 +325,7 @@ class NetworkAccessControl:
                 f"🚨 ALERT: {self.metrics['blocked_requests']} requests blocked!"
             )
 
-    def _log_allowed_request(self, request_info: Dict, reason: str):
+    def _log_allowed_request(self, request_info: dict, reason: str):
         """Log allowed request."""
         self.metrics["allowed_requests"] += 1
         request_info["reason"] = reason
@@ -334,7 +334,7 @@ class NetworkAccessControl:
 
         self._log_audit("REQUEST_ALLOWED", request_info)
 
-    def get_metrics(self) -> Dict:
+    def get_metrics(self) -> dict:
         """Get current metrics."""
         return {
             **self.metrics,
@@ -343,15 +343,15 @@ class NetworkAccessControl:
             ).total_seconds(),
         }
 
-    def get_blocked_requests(self, limit: int = 100) -> List[Dict]:
+    def get_blocked_requests(self, limit: int = 100) -> list[dict]:
         """Get list of blocked requests."""
         return self.blocked_requests[-limit:]
 
-    def get_allowed_requests(self, limit: int = 100) -> List[Dict]:
+    def get_allowed_requests(self, limit: int = 100) -> list[dict]:
         """Get list of allowed requests."""
         return self.allowed_requests[-limit:]
 
-    def save_report(self, filepath: Optional[str] = None):
+    def save_report(self, filepath: str | None = None):
         """Save security report to file."""
         if filepath is None:
             filepath = (
@@ -577,8 +577,8 @@ def apply_all_patches():
 
     logger.info("=" * 80)
     logger.info("✅ Network access control patches applied successfully")
-    logger.info(f"📊 Metrics endpoint available via: nac.get_metrics()")
-    logger.info(f"📋 Blocked requests available via: nac.get_blocked_requests()")
+    logger.info("📊 Metrics endpoint available via: nac.get_metrics()")
+    logger.info("📋 Blocked requests available via: nac.get_blocked_requests()")
     logger.info(f"📁 Audit logs: {nac.audit_log}")
     logger.info("=" * 80)
 
