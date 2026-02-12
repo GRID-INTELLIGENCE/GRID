@@ -1,1 +1,0 @@
-"""Cognitive layer module."""

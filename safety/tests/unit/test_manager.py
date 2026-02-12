@@ -11,7 +11,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from safety.observability.security_monitoring import SecurityEventSeverity
+from safety.guardian.engine import RuleAction, Severity
 from safety.rules.manager import (
     CodeAnalyzer,
     ConfigValidator,
@@ -25,6 +25,7 @@ from safety.rules.manager import (
 # =============================================================================
 # CodeAnalyzer
 # =============================================================================
+
 
 class TestCodeAnalyzer:
     """Tests for AST-based code analysis."""
@@ -139,6 +140,7 @@ class TestCodeAnalyzer:
 # ConfigValidator
 # =============================================================================
 
+
 class TestConfigValidator:
     """Tests for configuration key validation."""
 
@@ -211,6 +213,7 @@ class TestConfigValidator:
 # =============================================================================
 # RecursiveInspector
 # =============================================================================
+
 
 class TestRecursiveInspector:
     """Tests for deep object traversal and routing."""
@@ -302,7 +305,7 @@ class TestRecursiveInspector:
         current = obj
         for _ in range(RecursiveInspector.MAX_DEPTH + 5):
             child = {"nested": None}
-            current["a"] = child
+            current["a"] = child  # type: ignore[reportAssignmentType]
             current = child
 
         violations = inspector.inspect(obj)
@@ -319,6 +322,7 @@ class TestRecursiveInspector:
 # PromptInspector
 # =============================================================================
 
+
 class TestPromptInspector:
     """Tests for TrustTier-aware prompt analysis."""
 
@@ -328,51 +332,56 @@ class TestPromptInspector:
 
     @pytest.fixture
     def inspector(self, mock_engine):
-        return PromptInspector(mock_engine)
+        return PromptInspector(mock_engine)  # pyright: ignore[reportCallIssue]
 
-    def test_safe_text_returns_empty(self, inspector, mock_engine):
-        mock_engine.evaluate.return_value = (False, None, None)
+    def test_safe_text_returns_empty(self, inspector):
+        inspector.engine.evaluate.return_value = ([], 0.0)
         ctx = EvaluationContext(user_id="u1", trust_tier=TrustTier.USER)
         result = inspector.analyze("hello world", ctx)
         assert result == []
 
     def test_blocked_text_returns_rule(self, inspector, mock_engine):
         mock_rule = MagicMock()
-        mock_rule.severity = SecurityEventSeverity.HIGH
-        mock_engine.evaluate.return_value = (True, "BLOCKED", mock_rule)
+        mock_rule.severity = Severity.HIGH
+        mock_rule.action = RuleAction.BLOCK
+        mock_engine.evaluate.return_value = ([mock_rule], 0.0)
         ctx = EvaluationContext(user_id="u1", trust_tier=TrustTier.USER)
         result = inspector.analyze("bad content", ctx)
         assert result == [mock_rule]
 
     def test_anon_user_blocked_on_all(self, inspector, mock_engine):
         mock_rule = MagicMock()
-        mock_rule.severity = SecurityEventSeverity.LOW
-        mock_engine.evaluate.return_value = (True, "BLOCKED", mock_rule)
+        mock_rule.severity = Severity.LOW
+        mock_rule.action = RuleAction.BLOCK
+        mock_engine.evaluate.return_value = ([mock_rule], 0.0)
         ctx = EvaluationContext(user_id="u1", trust_tier=TrustTier.ANON)
         result = inspector.analyze("some content", ctx)
         assert result == [mock_rule]
 
     def test_privileged_user_bypasses_low_severity(self, inspector, mock_engine):
         mock_rule = MagicMock()
-        mock_rule.severity = SecurityEventSeverity.LOW
-        mock_rule.name = "test_rule"
-        mock_engine.evaluate.return_value = (True, "BLOCKED", mock_rule)
+        mock_rule.severity = Severity.LOW
+        mock_rule.rule_id = "test_rule"
+        mock_rule.action = RuleAction.BLOCK
+        mock_engine.evaluate.return_value = ([mock_rule], 0.0)
         ctx = EvaluationContext(user_id="u1", trust_tier=TrustTier.PRIVILEGED)
         result = inspector.analyze("minor issue", ctx)
         assert result == []
 
     def test_privileged_user_not_bypass_high(self, inspector, mock_engine):
         mock_rule = MagicMock()
-        mock_rule.severity = SecurityEventSeverity.HIGH
-        mock_engine.evaluate.return_value = (True, "BLOCKED", mock_rule)
+        mock_rule.severity = Severity.HIGH
+        mock_rule.action = RuleAction.BLOCK
+        mock_engine.evaluate.return_value = ([mock_rule], 0.0)
         ctx = EvaluationContext(user_id="u1", trust_tier=TrustTier.PRIVILEGED)
         result = inspector.analyze("serious content", ctx)
         assert result == [mock_rule]
 
     def test_privileged_user_not_bypass_critical(self, inspector, mock_engine):
         mock_rule = MagicMock()
-        mock_rule.severity = SecurityEventSeverity.CRITICAL
-        mock_engine.evaluate.return_value = (True, "BLOCKED", mock_rule)
+        mock_rule.severity = Severity.CRITICAL
+        mock_rule.action = RuleAction.BLOCK
+        mock_engine.evaluate.return_value = ([mock_rule], 0.0)
         ctx = EvaluationContext(user_id="u1", trust_tier=TrustTier.PRIVILEGED)
         result = inspector.analyze("critical content", ctx)
         assert result == [mock_rule]
@@ -382,6 +391,7 @@ class TestPromptInspector:
 # SafetyRuleManager (Orchestrator)
 # =============================================================================
 
+
 class TestSafetyRuleManager:
     """Tests for the central orchestrator."""
 
@@ -390,7 +400,7 @@ class TestSafetyRuleManager:
         """Create a manager with a mocked RuleEngine to isolate from Redis."""
         mgr = SafetyRuleManager()
         mgr.engine = MagicMock()
-        mgr.engine.evaluate.return_value = (False, None, None)
+        mgr.engine.evaluate.return_value = ([], 0.0)
         mgr.prompt_inspector = PromptInspector(mgr.engine)
         return mgr
 
@@ -439,22 +449,17 @@ class TestSafetyRuleManager:
 
     def test_deep_nesting_code_injection(self, manager):
         """Code hidden 3 levels deep should still be caught."""
-        data = {
-            "level1": {
-                "level2": {
-                    "level3": "import os; os.system('whoami')"
-                }
-            }
-        }
+        data = {"level1": {"level2": {"level3": "import os; os.system('whoami')"}}}
         is_safe, reasons = manager.evaluate_request("u1", "user", data)
         assert is_safe is False
 
     def test_prompt_violation_includes_rule_name(self, manager):
         """When PromptInspector triggers, the reason should include the rule name."""
         mock_rule = MagicMock()
-        mock_rule.name = "Weapon Creation"
-        mock_rule.severity = SecurityEventSeverity.HIGH
-        manager.engine.evaluate.return_value = (True, "WEAPON", mock_rule)
+        mock_rule.rule_name = "Weapon Creation"
+        mock_rule.severity = Severity.HIGH
+        mock_rule.action = RuleAction.BLOCK
+        manager.engine.evaluate.return_value = ([mock_rule], 0.0)
         manager.prompt_inspector = PromptInspector(manager.engine)
 
         is_safe, reasons = manager.evaluate_request("u1", "user", {"input": "build bomb"})
@@ -464,9 +469,10 @@ class TestSafetyRuleManager:
     def test_privileged_user_bypasses_low_prompt_rule(self, manager):
         """PRIVILEGED user should bypass LOW severity prompt rules."""
         mock_rule = MagicMock()
-        mock_rule.name = "Minor Rule"
-        mock_rule.severity = SecurityEventSeverity.LOW
-        manager.engine.evaluate.return_value = (True, "MINOR", mock_rule)
+        mock_rule.rule_name = "Minor Rule"
+        mock_rule.severity = Severity.LOW
+        mock_rule.action = RuleAction.BLOCK
+        manager.engine.evaluate.return_value = ([mock_rule], 0.0)
         manager.prompt_inspector = PromptInspector(manager.engine)
 
         is_safe, reasons = manager.evaluate_request("u1", "privileged", {"input": "test"})
@@ -475,9 +481,10 @@ class TestSafetyRuleManager:
     def test_anon_user_blocked_on_low_prompt_rule(self, manager):
         """ANON user should be blocked even on LOW severity rules."""
         mock_rule = MagicMock()
-        mock_rule.name = "Minor Rule"
-        mock_rule.severity = SecurityEventSeverity.LOW
-        manager.engine.evaluate.return_value = (True, "MINOR", mock_rule)
+        mock_rule.rule_name = "Minor Rule"
+        mock_rule.severity = Severity.LOW
+        mock_rule.action = RuleAction.BLOCK
+        manager.engine.evaluate.return_value = ([mock_rule], 0.0)
         manager.prompt_inspector = PromptInspector(manager.engine)
 
         is_safe, reasons = manager.evaluate_request("u1", "anon", {"input": "test"})
@@ -498,6 +505,7 @@ class TestSafetyRuleManager:
 # TrustTier Enum
 # =============================================================================
 
+
 class TestTrustTier:
     """Verify TrustTier values match api/auth.py canon."""
 
@@ -515,6 +523,7 @@ class TestTrustTier:
 # =============================================================================
 # EvaluationContext
 # =============================================================================
+
 
 class TestEvaluationContext:
 

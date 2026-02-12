@@ -33,17 +33,17 @@ from safety.api.middleware import SafetyMiddleware
 from safety.audit.db import check_health as check_db_health
 from safety.audit.db import close_db, init_db
 from safety.escalation.handler import approve
+from safety.guardian.loader import get_rule_loader
 from safety.observability.logging_setup import get_logger, setup_logging
 from safety.observability.metrics import record_service_info
+from safety.observability.runtime_observation import observation_service
+from safety.observability.security_monitoring import security_logger, security_monitor
 from safety.workers.worker_utils import (
     check_redis_health,
     close_redis,
     enqueue_request,
     get_queue_depth,
 )
-from safety.observability.runtime_observation import observation_service
-from safety.observability.security_monitoring import security_monitor, security_logger
-from safety.guardian.loader import get_rule_loader
 
 logger = get_logger("api.main")
 
@@ -93,7 +93,7 @@ if DEGRADED_MODE:
     # Replace redis_utils functions with mocks
     from safety.workers import worker_utils
 
-    worker_utils.redis_client = MockRedis()
+    worker_utils.redis_client = MockRedis()  # type: ignore[reportAssignmentIssue]
     worker_utils.check_redis_health = AsyncMock(return_value=True)
     worker_utils.enqueue_request = AsyncMock(return_value=str(uuid.uuid4()))
     worker_utils.get_queue_depth = AsyncMock(return_value=0)
@@ -114,15 +114,12 @@ if DEGRADED_MODE:
     # Patch rate limiter (allow_request uses Redis)
     from safety.api import rate_limiter as _rate_limiter
 
-    class _MockRateResult:
-        allowed = True
-        reset_seconds = 0.0
-
-    _rate_limiter.allow_request = AsyncMock(return_value=_MockRateResult())
-    _safety_mw.allow_request = AsyncMock(return_value=_MockRateResult())
+    # Return tuple (allowed, remaining, reset_seconds) matching middleware expectations
+    _rate_limiter.allow_request = AsyncMock(return_value=(True, 100, 0.0))
+    _safety_mw.allow_request = AsyncMock(return_value=(True, 100, 0.0))
 
     # Patch get_redis for any module that calls it lazily
-    worker_utils.get_redis = AsyncMock(return_value=MockRedis())
+    worker_utils.get_redis = AsyncMock(return_value=MockRedis())  # type: ignore[reportAssignmentIssue]
 
     logger.info("🟡 DEGRADED MODE ACTIVE — Redis mocked, safety checks still enforced")
 

@@ -224,16 +224,11 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["X-Permitted-Cross-Domain-Policies"] = "none"
         response.headers["X-DNS-Prefetch-Control"] = "off"
 
-        # Remove server header for security (handle MutableHeaders gracefully)
-        if hasattr(response.headers, "pop"):
-            response.headers.pop("server", None)
-            response.headers.pop("x-powered-by", None)
-        else:
-            # For MutableHeaders, delete keys directly
-            if "server" in response.headers:
-                del response.headers["server"]
-            if "x-powered-by" in response.headers:
-                del response.headers["x-powered-by"]
+        # Remove server header for security
+        if "server" in response.headers:
+            del response.headers["server"]
+        if "x-powered-by" in response.headers:
+            del response.headers["x-powered-by"]
 
     def get_csrf_token(self, session_id: str) -> str:
         """Get a CSRF token for a session (for frontend use)"""

@@ -116,7 +116,7 @@ class RuleLoader:
 
     def load_all_rules(self) -> list[SafetyRule]:
         """
-        Load all rules from the rules directory.
+        Load all rules from known directories.
 
         Returns:
             Combined list of all SafetyRule objects
@@ -127,16 +127,22 @@ class RuleLoader:
         default_rules = self._get_default_rules()
         all_rules.extend(default_rules)
 
-        # Load from files
-        if self.rules_dir.exists():
-            for filepath in sorted(self.rules_dir.glob("*")):
-                if filepath.suffix.lower() in (".yaml", ".yml", ".json"):
-                    try:
-                        rules = self.load_from_file(filepath)
-                        all_rules.extend(rules)
-                        self._file_timestamps[str(filepath)] = filepath.stat().st_mtime
-                    except Exception as e:
-                        logger.error(f"Failed to load {filepath}: {e}")
+        # Directories to scan
+        search_dirs = [self.rules_dir, Path("safety/rules")]
+
+        for s_dir in search_dirs:
+            if s_dir.exists():
+                for filepath in sorted(s_dir.glob("*")):
+                    if filepath.suffix.lower() in (".yaml", ".yml", ".json"):
+                        # Skip registry-lock or other non-rule files if needed
+                        if filepath.name in (".gitkeep", "README.md"):
+                            continue
+                        try:
+                            rules = self.load_from_file(filepath)
+                            all_rules.extend(rules)
+                            self._file_timestamps[str(filepath)] = filepath.stat().st_mtime
+                        except Exception as e:
+                            logger.error(f"Failed to load {filepath}: {e}")
 
         logger.info(f"Total rules loaded: {len(all_rules)}")
         return all_rules
@@ -176,17 +182,23 @@ class RuleLoader:
             raise RuleValidationError(f"Invalid action: {action_str}")
 
         # Parse match type
-        match_type_str = data.get("match_type", "keyword").lower()
-        try:
-            match_type = MatchType[match_type_str.upper()]
-        except KeyError:
-            raise RuleValidationError(f"Invalid match_type: {match_type_str}")
+        match_type_str = data.get("match_type")
+        if not match_type_str:
+            if "patterns" in data or "pattern" in data:
+                match_type = MatchType.REGEX
+            else:
+                match_type = MatchType.KEYWORD
+        else:
+            try:
+                match_type = MatchType[match_type_str.upper()]
+            except KeyError:
+                raise RuleValidationError(f"Invalid match_type: {match_type_str}")
 
         # Validate match criteria
         if match_type == MatchType.KEYWORD and not data.get("keywords"):
             raise RuleValidationError(f"KEYWORD rule {data['id']} must have 'keywords'")
-        if match_type == MatchType.REGEX and not data.get("patterns"):
-            raise RuleValidationError(f"REGEX rule {data['id']} must have 'patterns'")
+        if match_type == MatchType.REGEX and not data.get("patterns") and not data.get("pattern"):
+            raise RuleValidationError(f"REGEX rule {data['id']} must have 'patterns' or 'pattern'")
 
         return SafetyRule(
             id=data["id"],
@@ -197,15 +209,15 @@ class RuleLoader:
             action=action,
             match_type=match_type,
             keywords=data.get("keywords", []),
-            patterns=data.get("patterns", []),
+            patterns=data.get("patterns", [data.get("pattern")] if "pattern" in data else []),
             composite_rules=data.get("composite_rules", []),
             confidence=float(data.get("confidence", 0.8)),
             case_sensitive=bool(data.get("case_sensitive", False)),
             enabled=bool(data.get("enabled", True)),
             priority=int(data.get("priority", 100)),
             version=data.get("version", metadata.get("version", "1.0.0")),
-            created_at=data.get("created_at", metadata.get("created_at")),
-            updated_at=data.get("updated_at", metadata.get("updated_at")),
+            created_at=data.get("created_at", metadata.get("created_at")) or "",
+            updated_at=data.get("updated_at", metadata.get("updated_at")) or "",
             author=data.get("author", metadata.get("author", "system")),
             tags=data.get("tags", []),
             cache_results=bool(data.get("cache_results", False)),
@@ -390,6 +402,48 @@ class RuleLoader:
                 confidence=0.85,
                 priority=30,
                 tags=["validation", "obfuscation"],
+            ),
+            # Mental Health / Support
+            SafetyRule(
+                id="mental_health_risk",
+                name="Mental Health Risk",
+                description="Detects indicators of self-harm or severe distress",
+                category="self_harm",
+                severity=Severity.HIGH,
+                action=RuleAction.ESCALATE,
+                match_type=MatchType.KEYWORD,
+                keywords=["suicide", "kill myself", "end my life", "want to die"],
+                confidence=0.9,
+                priority=10,
+                tags=["mental_health", "safety"],
+            ),
+            # Privacy
+            SafetyRule(
+                id="privacy_pii",
+                name="PII Detection",
+                description="Detects potential personally identifiable information",
+                category="privacy",
+                severity=Severity.MEDIUM,
+                action=RuleAction.BLOCK,
+                match_type=MatchType.REGEX,
+                patterns=[r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"],
+                confidence=0.8,
+                priority=40,
+                tags=["privacy", "pii"],
+            ),
+            # Harassment
+            SafetyRule(
+                id="harassment",
+                name="Harassment",
+                description="Detects abusive or harassing language",
+                category="harassment",
+                severity=Severity.MEDIUM,
+                action=RuleAction.BLOCK,
+                match_type=MatchType.KEYWORD,
+                keywords=["stupid", "idiot", "loser", "hate you"],
+                confidence=0.7,
+                priority=50,
+                tags=["harassment", "abusive"],
             ),
         ]
 

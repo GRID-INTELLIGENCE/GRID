@@ -1,1 +1,0 @@
-E:\grid is a directory junction to E:\_projects\GRID (main repo; full Git). Canonical repo: caraxesthebloodwyrm02/GRID. Verified 2026-02-07.
