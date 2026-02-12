@@ -16,7 +16,7 @@ class LogCollector:
 
     def __init__(self, base_path: Path):
         self.base_path = base_path
-        self.timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        self.timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         self.collection_dir = base_path / "logs" / f"log_collection_{self.timestamp}"
         self.archive_path = base_path / "logs" / f"logs_{self.timestamp}.zip"
 
@@ -84,15 +84,15 @@ class LogCollector:
 
         # Write manifest
         manifest_path = self.collection_dir / "MANIFEST.md"
-        with open(manifest_path, 'w', encoding='utf-8') as f:
-            f.write('\n'.join(manifest))
+        with open(manifest_path, "w", encoding="utf-8") as f:
+            f.write("\n".join(manifest))
 
         return self.collection_dir
 
     def create_archive(self, collection_dir: Path) -> Path:
         """Create a ZIP archive of the collection."""
-        with zipfile.ZipFile(self.archive_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
-            for file_path in collection_dir.rglob('*'):
+        with zipfile.ZipFile(self.archive_path, "w", zipfile.ZIP_DEFLATED) as zipf:
+            for file_path in collection_dir.rglob("*"):
                 if file_path.is_file():
                     zipf.write(file_path, file_path.relative_to(collection_dir.parent))
 
@@ -108,12 +108,7 @@ class LogCollector:
 
         if not files:
             print("⚠️  No log files found to collect")
-            return {
-                'success': False,
-                'message': 'No log files found',
-                'collection_dir': None,
-                'archive_path': None
-            }
+            return {"success": False, "message": "No log files found", "collection_dir": None, "archive_path": None}
 
         # Create collection
         collection_dir = self.create_collection(files)
@@ -126,11 +121,11 @@ class LogCollector:
         print("✅ Log collection complete")
 
         return {
-            'success': True,
-            'collection_dir': collection_dir,
-            'archive_path': archive_path,
-            'files_collected': len(files),
-            'timestamp': self.timestamp
+            "success": True,
+            "collection_dir": collection_dir,
+            "archive_path": archive_path,
+            "files_collected": len(files),
+            "timestamp": self.timestamp,
         }
 
 
@@ -140,7 +135,7 @@ def main():
     collector = LogCollector(base_path)
     result = collector.run_collection()
 
-    if result['success']:
+    if result["success"]:
         print("\nCollection Summary:")
         print(f"- Files collected: {result['files_collected']}")
         print(f"- Collection directory: {result['collection_dir']}")

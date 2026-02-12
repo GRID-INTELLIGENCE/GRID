@@ -46,9 +46,7 @@ class NetworkUsageScanner(ast.NodeVisitor):
                     "websocket",
                 ]
             ):
-                self.imports.append(
-                    {"name": alias.name, "asname": alias.asname, "line": node.lineno}
-                )
+                self.imports.append({"name": alias.name, "asname": alias.asname, "line": node.lineno})
         self.generic_visit(node)
 
     def visit_ImportFrom(self, node):
@@ -109,9 +107,7 @@ class NetworkUsageScanner(ast.NodeVisitor):
         # Detect WebSocket usage
         if isinstance(node.func, ast.Name):
             if "websocket" in node.func.id.lower():
-                self.websocket_usage.append(
-                    {"function": self.current_function, "line": node.lineno}
-                )
+                self.websocket_usage.append({"function": self.current_function, "line": node.lineno})
 
         self.generic_visit(node)
 
@@ -162,9 +158,7 @@ class SecurityIntegrator:
             try:
                 self._scan_file(filepath)
             except Exception as e:
-                self.scan_results["errors"].append(
-                    {"file": str(filepath), "error": str(e)}
-                )
+                self.scan_results["errors"].append({"file": str(filepath), "error": str(e)})
 
         print(f"✅ Scan complete: {total_files} files analyzed")
         print()
@@ -218,15 +212,9 @@ class SecurityIntegrator:
         """Summarize scan results."""
         summary = {
             "timestamp": datetime.utcnow().isoformat(),
-            "total_files_scanned": sum(
-                len(v) for k, v in self.scan_results.items() if k.startswith("files_")
-            ),
-            "files_with_network_imports": len(
-                self.scan_results["files_with_network_imports"]
-            ),
-            "files_with_network_calls": len(
-                self.scan_results["files_with_network_calls"]
-            ),
+            "total_files_scanned": sum(len(v) for k, v in self.scan_results.items() if k.startswith("files_")),
+            "files_with_network_imports": len(self.scan_results["files_with_network_imports"]),
+            "files_with_network_calls": len(self.scan_results["files_with_network_calls"]),
             "files_with_websockets": len(self.scan_results["files_with_websockets"]),
             "entry_points": len(self.scan_results["entry_points"]),
             "errors": len(self.scan_results["errors"]),
@@ -235,13 +223,11 @@ class SecurityIntegrator:
 
         return summary
 
-    def generate_report(self, output_file: str = None) -> str:
+    def generate_report(self, output_file: str | None = None) -> str:
         """Generate integration report."""
         if output_file is None:
-            output_file = (
-                self.security_path
-                / "logs"
-                / f"integration_report_{int(datetime.utcnow().timestamp())}.json"
+            output_file = str(
+                self.security_path / "logs" / f"integration_report_{int(datetime.utcnow().timestamp())}.json"
             )
 
         summary = self._summarize_results()
@@ -436,16 +422,14 @@ def main():
             print("💡 INTEGRATION SUGGESTIONS:")
             print()
             for i, suggestion in enumerate(suggestions[:20], 1):
-                print(f"{i}. {suggestion['file']}")
-                print(f"   Priority: {suggestion['priority']}")
-                print(f"   Action: {suggestion['action']}")
-                print(f"   Reason: {suggestion['reason']}")
+                print(f"{i}. {suggestion.get('file', '') if isinstance(suggestion, dict) else suggestion}")
+                print(f"   Priority: {suggestion.get('priority', '') if isinstance(suggestion, dict) else suggestion}")
+                print(f"   Action: {suggestion.get('action', '') if isinstance(suggestion, dict) else suggestion}")
+                print(f"   Reason: {suggestion.get('reason', '') if isinstance(suggestion, dict) else suggestion}")
                 print()
 
             # Save suggestions
-            suggestions_file = (
-                integrator.security_path / "logs" / "integration_suggestions.json"
-            )
+            suggestions_file = integrator.security_path / "logs" / "integration_suggestions.json"
             with open(suggestions_file, "w") as f:
                 json.dump(suggestions, f, indent=2)
             print(f"💾 Suggestions saved to: {suggestions_file}")

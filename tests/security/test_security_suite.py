@@ -7,45 +7,41 @@ Tests all security components implemented in the GRID system
 import asyncio
 import json
 import os
-import pytest
 import tempfile
-from unittest.mock import Mock, patch, AsyncMock
 from datetime import datetime, timedelta
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 
 # Security components to test
 from safety.api.rate_limiter import (
-    EnhancedRateLimitResult,
-    IPRateLimiter,
     ExponentialBackoff,
+    IPRateLimiter,
     RequestValidator,
     allow_request,
     block_ip_address,
     reset_user_backoff,
 )
-
 from safety.api.security_headers import SecurityHeadersMiddleware, generate_csrf_token, get_security_headers
-
-from work.GRID.workspace.mcp.servers.database.server import (
-    SQLInjectionValidator,
-    ConnectionManager,
-    ProductionDatabaseMCPServer,
+from safety.observability.security_monitoring import (
+    RealTimeMonitor,
+    SecurityAudit,
+    SecurityEvent,
+    SecurityEventSeverity,
+    SecurityEventType,
+    SecurityLogger,
 )
-
 from work.GRID.src.grid.security.ai_security import (
     AISecurityConfig,
+    AISecurityWrapper,
     InputValidator,
     OutputSanitizer,
     PromptInjectionDetector,
-    AISecurityWrapper,
 )
-
-from safety.observability.security_monitoring import (
-    SecurityEvent,
-    SecurityEventType,
-    SecurityEventSeverity,
-    SecurityLogger,
-    RealTimeMonitor,
-    SecurityAudit,
+from work.GRID.workspace.mcp.servers.database.server import (
+    ConnectionManager,
+    ProductionDatabaseMCPServer,
+    SQLInjectionValidator,
 )
 
 
@@ -176,7 +172,6 @@ class TestEnhancedRateLimiter:
 
     def test_request_signature_validation(self):
         """Test request signature validation"""
-        import os
 
         secret = os.getenv("RATE_LIMIT_SECRET", "change_me_in_production")
         data = "test_data"
@@ -184,8 +179,8 @@ class TestEnhancedRateLimiter:
         client_id = "test_client"
 
         # Create valid signature
-        import hmac
         import hashlib
+        import hmac
 
         message = f"{data}:{timestamp}:{client_id}"
         signature = hmac.new(secret.encode(), message.encode(), hashlib.sha256).hexdigest()
@@ -215,9 +210,9 @@ class TestEnhancedRateLimiter:
                 user_agent="Mozilla/5.0 (Test Browser)",
             )
 
-            assert result.allowed
-            assert result.remaining == 99  # min(99, 100) = 99
-            assert "risk_score" in result.to_dict()
+            assert result[0]
+            assert result[1] == 99  # min(99, 100) = 99
+            assert result[3] > 0.0
 
 
 class TestSecurityHeaders:
@@ -246,8 +241,8 @@ class TestSecurityHeaders:
 
     def test_security_headers_dict(self):
         """Test security headers dictionary generation"""
-        from starlette.requests import Request
         from starlette.datastructures import URL
+        from starlette.requests import Request
 
         # Create mock request
         scope = {"type": "http", "scheme": "https", "path": "/test", "headers": []}
@@ -446,7 +441,11 @@ class TestIntegration:
 
         # Test rate limiting
         result = await allow_request("test_user", Mock(value="basic"))
-        assert isinstance(result, EnhancedRateLimitResult)
+        assert result[0]
+        assert result[1] > 0
+        assert result[2] > 0.0
+        assert result[3] > 0.0
+        assert result[4] is None
 
 
 if __name__ == "__main__":

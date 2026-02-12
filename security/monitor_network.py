@@ -68,9 +68,7 @@ class NetworkMonitor:
         with open(self.config_path, "w") as f:
             yaml.dump(config, f, default_flow_style=False)
 
-    def get_audit_events(
-        self, limit: int = 100, event_type: str | None = None
-    ) -> list[dict]:
+    def get_audit_events(self, limit: int = 100, event_type: str | None = None) -> list[dict]:
         """Read audit log events."""
         if not self.audit_log_path.exists():
             return []
@@ -124,14 +122,10 @@ class NetworkMonitor:
                 stats["total_requests"] += 1
                 domain = details.get("domain", "unknown")
                 stats["unique_domains_blocked"].add(domain)
-                stats["top_blocked_domains"][domain] = (
-                    stats["top_blocked_domains"].get(domain, 0) + 1
-                )
+                stats["top_blocked_domains"][domain] = stats["top_blocked_domains"].get(domain, 0) + 1
 
                 caller = details.get("caller", "unknown")
-                stats["top_blocked_callers"][caller] = (
-                    stats["top_blocked_callers"].get(caller, 0) + 1
-                )
+                stats["top_blocked_callers"][caller] = stats["top_blocked_callers"].get(caller, 0) + 1
 
             elif event_type == "REQUEST_ALLOWED":
                 stats["allowed_requests"] += 1
@@ -147,14 +141,10 @@ class NetworkMonitor:
 
         # Sort top domains
         stats["top_blocked_domains"] = dict(
-            sorted(
-                stats["top_blocked_domains"].items(), key=lambda x: x[1], reverse=True
-            )[:10]
+            sorted(stats["top_blocked_domains"].items(), key=lambda x: x[1], reverse=True)[:10]
         )
         stats["top_blocked_callers"] = dict(
-            sorted(
-                stats["top_blocked_callers"].items(), key=lambda x: x[1], reverse=True
-            )[:10]
+            sorted(stats["top_blocked_callers"].items(), key=lambda x: x[1], reverse=True)[:10]
         )
 
         return stats
@@ -168,96 +158,93 @@ class NetworkMonitor:
         stats = self.get_statistics()
         config = self.load_config()
         blocked = self.get_blocked_requests(limit=10)
-        allowed = self.get_allowed_requests(limit=10)
         leaks = self.get_data_leaks()
 
         # Create layout
         console = self.console
-        console.clear()
+        if console is not None:
+            if hasattr(console, "clear"):
+                console.clear()
 
-        # Header
-        console.print(
-            Panel.fit(
-                "[bold red]🔒 NETWORK ACCESS CONTROL MONITOR[/bold red]\n"
-                f"[yellow]Mode: {config.get('mode', 'unknown').upper()} | "
-                f"Policy: {config.get('default_policy', 'unknown').upper()}[/yellow]",
-                border_style="red",
-            )
-        )
-
-        # Statistics
-        stats_table = Table(
-            title="📊 Statistics", show_header=True, header_style="bold magenta"
-        )
-        stats_table.add_column("Metric", style="cyan")
-        stats_table.add_column("Value", style="green", justify="right")
-
-        stats_table.add_row("Total Requests", str(stats["total_requests"]))
-        stats_table.add_row("✅ Allowed", str(stats["allowed_requests"]))
-        stats_table.add_row("🚫 Blocked", str(stats["blocked_requests"]))
-        stats_table.add_row("🚨 Data Leaks", str(stats["data_leaks_detected"]))
-        stats_table.add_row(
-            "Unique Domains (Blocked)", str(stats["unique_domains_blocked"])
-        )
-        stats_table.add_row(
-            "Unique Domains (Allowed)", str(stats["unique_domains_allowed"])
-        )
-
-        console.print(stats_table)
-        console.print()
-
-        # Recent blocked requests
-        if blocked:
-            blocked_table = Table(title="🚫 Recent Blocked Requests", show_header=True)
-            blocked_table.add_column("Time", style="dim")
-            blocked_table.add_column("Method", style="yellow")
-            blocked_table.add_column("Domain", style="red")
-            blocked_table.add_column("Reason", style="cyan")
-
-            for req in blocked[-10:]:
-                details = req.get("details", {})
-                timestamp = req.get("timestamp", "")[:19]
-                method = details.get("method", "?")
-                domain = details.get("domain", "unknown")[:40]
-                reason = details.get("reason", "unknown")[:50]
-                blocked_table.add_row(timestamp, method, domain, reason)
-
-            console.print(blocked_table)
-            console.print()
-
-        # Top blocked domains
-        if stats["top_blocked_domains"]:
-            top_domains_table = Table(title="🎯 Top Blocked Domains", show_header=True)
-            top_domains_table.add_column("Domain", style="red")
-            top_domains_table.add_column("Count", style="yellow", justify="right")
-
-            for domain, count in list(stats["top_blocked_domains"].items())[:10]:
-                top_domains_table.add_row(domain[:50], str(count))
-
-            console.print(top_domains_table)
-            console.print()
-
-        # Top blocked callers
-        if stats["top_blocked_callers"]:
-            callers_table = Table(title="📞 Top Blocked Callers", show_header=True)
-            callers_table.add_column("Caller", style="cyan")
-            callers_table.add_column("Count", style="yellow", justify="right")
-
-            for caller, count in list(stats["top_blocked_callers"].items())[:10]:
-                callers_table.add_row(caller[:60], str(count))
-
-            console.print(callers_table)
-            console.print()
-
-        # Data leaks
-        if leaks:
-            console.print(
-                Panel.fit(
-                    f"[bold red]🚨 {len(leaks)} DATA LEAK ATTEMPTS DETECTED![/bold red]",
-                    border_style="red",
+            # Header
+            if hasattr(console, "print"):
+                console.print(
+                    Panel.fit(
+                        "[bold red]🔒 NETWORK ACCESS CONTROL MONITOR[/bold red]\n"
+                        f"[yellow]Mode: {config.get('mode', 'unknown').upper()} | "
+                        f"Policy: {config.get('default_policy', 'unknown').upper()}[/yellow]",
+                        border_style="red",
+                    )
                 )
-            )
-            console.print()
+
+                # Statistics
+                stats_table = Table(title="📊 Statistics", show_header=True, header_style="bold magenta")
+                stats_table.add_column("Metric", style="cyan")
+                stats_table.add_column("Value", style="green", justify="right")
+
+                stats_table.add_row("Total Requests", str(stats["total_requests"]))
+                stats_table.add_row("✅ Allowed", str(stats["allowed_requests"]))
+                stats_table.add_row("🚫 Blocked", str(stats["blocked_requests"]))
+                stats_table.add_row("🚨 Data Leaks", str(stats["data_leaks_detected"]))
+                stats_table.add_row("Unique Domains (Blocked)", str(stats["unique_domains_blocked"]))
+                stats_table.add_row("Unique Domains (Allowed)", str(stats["unique_domains_allowed"]))
+
+                console.print(stats_table)
+                console.print()
+
+                # Recent blocked requests
+                if blocked:
+                    blocked_table = Table(title="🚫 Recent Blocked Requests", show_header=True)
+                    blocked_table.add_column("Time", style="dim")
+                    blocked_table.add_column("Method", style="yellow")
+                    blocked_table.add_column("Domain", style="red")
+                    blocked_table.add_column("Reason", style="cyan")
+
+                    for req in blocked[-10:]:
+                        details = req.get("details", {})
+                        timestamp = req.get("timestamp", "")[:19]
+                        method = details.get("method", "?")
+                        domain = details.get("domain", "unknown")[:40]
+                        reason = details.get("reason", "unknown")[:50]
+                        blocked_table.add_row(timestamp, method, domain, reason)
+
+                    console.print(blocked_table)
+                    console.print()
+
+                # Top blocked domains
+                if stats["top_blocked_domains"]:
+                    top_domains_table = Table(title="🎯 Top Blocked Domains", show_header=True)
+                    top_domains_table.add_column("Domain", style="red")
+                    top_domains_table.add_column("Count", style="yellow", justify="right")
+
+                    for domain, count in list(stats["top_blocked_domains"].items())[:10]:
+                        top_domains_table.add_row(domain[:50], str(count))
+
+                    console.print(top_domains_table)
+                    console.print()
+
+                # Top blocked callers
+                if stats["top_blocked_callers"]:
+                    callers_table = Table(title="📞 Top Blocked Callers", show_header=True)
+                    callers_table.add_column("Caller", style="cyan")
+                    callers_table.add_column("Count", style="yellow", justify="right")
+
+                    for caller, count in list(stats["top_blocked_callers"].items())[:10]:
+                        callers_table.add_row(caller[:60], str(count))
+
+                    console.print(callers_table)
+                    console.print()
+
+                # Data leaks
+                if leaks:
+                    console.print(
+                        Panel.fit(
+                            f"[bold red]🚨 {len(leaks)} DATA LEAK ATTEMPTS DETECTED![/bold red]",
+                            border_style="red",
+                        )
+                    )
+                    if console is not None:
+                        console.print()
 
         # Config summary
         global_config = config.get("global", {})
@@ -265,15 +252,14 @@ class NetworkMonitor:
 
         config_text = Text()
         config_text.append("⚙️  Configuration:\n", style="bold")
-        config_text.append(
-            f"  Network Enabled: {global_config.get('network_enabled', False)}\n"
-        )
+        config_text.append(f"  Network Enabled: {global_config.get('network_enabled', False)}\n")
         config_text.append(f"  Kill Switch: {emergency.get('kill_switch', False)}\n")
-        config_text.append(
-            f"  Localhost Only: {emergency.get('localhost_only', True)}\n"
-        )
+        config_text.append(f"  Localhost Only: {emergency.get('localhost_only', True)}\n")
 
-        console.print(Panel(config_text, border_style="blue"))
+        if console is not None:
+            console.print(Panel(config_text, border_style="blue"))
+            if console is not None:
+                console.print()
 
     def _print_simple_dashboard(self):
         """Print simple text dashboard without rich."""
@@ -331,8 +317,7 @@ class NetworkMonitor:
         rule = {
             "domain": domain,
             "protocol": "https",
-            "description": description
-            or f"Added via monitor at {datetime.utcnow().isoformat()}",
+            "description": description or f"Added via monitor at {datetime.utcnow().isoformat()}",
             "added_by": "monitor",
             "added_date": datetime.utcnow().isoformat(),
         }
@@ -351,11 +336,7 @@ class NetworkMonitor:
             return
 
         original_count = len(config["whitelist"]["rules"])
-        config["whitelist"]["rules"] = [
-            rule
-            for rule in config["whitelist"]["rules"]
-            if rule.get("domain") != domain
-        ]
+        config["whitelist"]["rules"] = [rule for rule in config["whitelist"]["rules"] if rule.get("domain") != domain]
 
         if len(config["whitelist"]["rules"]) < original_count:
             self.save_config(config)
@@ -408,70 +389,75 @@ class NetworkMonitor:
         all_events = self.get_audit_events(limit=10000)
 
         # Filter events within time window
-        recent_events = [
-            event for event in all_events
-            if datetime.fromisoformat(event['timestamp']) > cutoff
-        ]
+        recent_events = [event for event in all_events if datetime.fromisoformat(event["timestamp"]) > cutoff]
 
         anomalies = {
-            'time_window_hours': hours,
-            'total_events': len(recent_events),
-            'alerts': [],
-            'blocked_rate': 0,
-            'unusual_patterns': []
+            "time_window_hours": hours,
+            "total_events": len(recent_events),
+            "alerts": [],
+            "blocked_rate": 0,
+            "unusual_patterns": [],
         }
 
         if not recent_events:
             return anomalies
 
         # Calculate blocked request rate
-        blocked_events = [e for e in recent_events if e.get('event_type') == 'REQUEST_BLOCKED']
-        anomalies['blocked_rate'] = len(blocked_events) / hours  # per hour
+        blocked_events = [e for e in recent_events if e.get("event_type") == "REQUEST_BLOCKED"]
+        anomalies["blocked_rate"] = len(blocked_events) / hours  # per hour
 
         # Alert thresholds
-        if anomalies['blocked_rate'] > 10:  # More than 10 blocked requests per hour
-            anomalies['alerts'].append({
-                'level': 'HIGH',
-                'message': f'High blocked request rate: {anomalies["blocked_rate"]:.1f} per hour',
-                'recommendation': 'Review network access patterns and potential attack'
-            })
+        if anomalies["blocked_rate"] > 10:  # More than 10 blocked requests per hour
+            anomalies["alerts"].append(
+                {
+                    "level": "HIGH",
+                    "message": f'High blocked request rate: {anomalies["blocked_rate"]:.1f} per hour',
+                    "recommendation": "Review network access patterns and potential attack",
+                }
+            )
 
         # Check for unusual domains
         blocked_domains = {}
         for event in blocked_events:
-            domain = event.get('details', {}).get('domain', 'unknown')
+            domain = event.get("details", {}).get("domain", "unknown")
             blocked_domains[domain] = blocked_domains.get(domain, 0) + 1
 
         for domain, count in blocked_domains.items():
             if count > 5:  # Same domain blocked more than 5 times
-                anomalies['alerts'].append({
-                    'level': 'MEDIUM',
-                    'message': f'Domain {domain} blocked {count} times in {hours} hours',
-                    'recommendation': 'Check if legitimate traffic or persistent attack'
-                })
+                anomalies["alerts"].append(
+                    {
+                        "level": "MEDIUM",
+                        "message": f"Domain {domain} blocked {count} times in {hours} hours",
+                        "recommendation": "Check if legitimate traffic or persistent attack",
+                    }
+                )
 
         # Check for rapid successive blocks
-        timestamps = [datetime.fromisoformat(e['timestamp']) for e in blocked_events]
+        timestamps = [datetime.fromisoformat(e["timestamp"]) for e in blocked_events]
         if len(timestamps) > 1:
-            intervals = [(timestamps[i+1] - timestamps[i]).seconds for i in range(len(timestamps)-1)]
+            intervals = [(timestamps[i + 1] - timestamps[i]).seconds for i in range(len(timestamps) - 1)]
             avg_interval = sum(intervals) / len(intervals) if intervals else 0
             if avg_interval < 60 and len(blocked_events) > 3:  # Less than 1 min between blocks
-                anomalies['alerts'].append({
-                    'level': 'HIGH',
-                    'message': f'Rapid blocking pattern detected: {len(blocked_events)} blocks in short succession',
-                    'recommendation': 'Potential automated attack or misconfiguration'
-                })
+                anomalies["alerts"].append(
+                    {
+                        "level": "HIGH",
+                        "message": f"Rapid blocking pattern detected: {len(blocked_events)} blocks in short succession",
+                        "recommendation": "Potential automated attack or misconfiguration",
+                    }
+                )
 
         # Check for connection anomalies
         connection_anomalies = self.detect_connection_anomalies()
-        anomalies['connection_anomalies'] = connection_anomalies
+        anomalies["connection_anomalies"] = connection_anomalies
         if connection_anomalies:
-            anomalies['alerts'].append({
-                'level': 'MEDIUM',
-                'message': f'Connection anomalies detected: {len(connection_anomalies)} issues',
-                'details': connection_anomalies,
-                'recommendation': 'Review active network connections for unauthorized access'
-            })
+            anomalies["alerts"].append(
+                {
+                    "level": "MEDIUM",
+                    "message": f"Connection anomalies detected: {len(connection_anomalies)} issues",
+                    "details": connection_anomalies,
+                    "recommendation": "Review active network connections for unauthorized access",
+                }
+            )
 
         return anomalies
 
@@ -486,16 +472,16 @@ class NetworkMonitor:
             standard_ports = {21, 22, 25, 53, 80, 110, 143, 443, 465, 587, 993, 995, 8080, 8443}
 
             for conn in connections:
-                if conn.status == 'ESTABLISHED' and conn.raddr:
+                if conn.status == "ESTABLISHED" and conn.raddr:
                     ip, port = conn.raddr
                     # Flag non-standard ports
                     if port not in standard_ports and port > 1024:  # Allow privileged ports but flag high non-standard
                         anomalies.append(f"Non-standard port connection: {ip}:{port}")
                     # Flag connections to private IPs (potential internal scanning)
-                    if ip.startswith(('192.168.', '10.', '172.')):
+                    if ip.startswith(("192.168.", "10.", "172.")):
                         anomalies.append(f"Private network connection: {ip}:{port}")
                     # Flag localhost connections that might indicate SSRF
-                    if ip in ('127.0.0.1', '::1', 'localhost'):
+                    if ip in ("127.0.0.1", "::1", "localhost"):
                         anomalies.append(f"Localhost connection: {ip}:{port}")
 
             return anomalies
@@ -508,21 +494,20 @@ class NetworkMonitor:
         alert_path.parent.mkdir(exist_ok=True)
 
         alert_entry = {
-            'timestamp': datetime.now().isoformat(),
-            'level': alert['level'],
-            'message': alert['message'],
-            'recommendation': alert['recommendation']
+            "timestamp": datetime.now().isoformat(),
+            "level": alert["level"],
+            "message": alert["message"],
+            "recommendation": alert["recommendation"],
         }
 
-        with open(alert_path, 'a', encoding='utf-8') as f:
-            f.write(json.dumps(alert_entry) + '\n')
+        with open(alert_path, "a", encoding="utf-8") as f:
+            f.write(json.dumps(alert_entry) + "\n")
 
     def generate_forensic_report(self, hours: int = 24) -> str:
         """Generate comprehensive forensic report."""
         anomalies = self.detect_anomalies(hours)
         stats = self.get_statistics()
         blocked = self.get_blocked_requests(limit=100)
-        allowed = self.get_allowed_requests(limit=100)
 
         report = []
         report.append("# Network Forensic Analysis Report")
@@ -533,14 +518,16 @@ class NetworkMonitor:
         # Summary
         report.append("## Summary")
         report.append(f"- Total events analyzed: {anomalies['total_events']}")
-        report.append(f"- Blocked requests: {len([e for e in blocked if datetime.fromisoformat(e['timestamp']) > datetime.now() - timedelta(hours=hours)])}")
+        report.append(
+            f"- Blocked requests: {len([e for e in blocked if datetime.fromisoformat(e['timestamp']) > datetime.now() - timedelta(hours=hours)])}"
+        )
         report.append(".1f")
         report.append("")
 
         # Alerts
-        if anomalies['alerts']:
+        if anomalies["alerts"]:
             report.append("## Security Alerts")
-            for alert in anomalies['alerts']:
+            for alert in anomalies["alerts"]:
                 report.append(f"- **{alert['level']}**: {alert['message']}")
                 report.append(f"  *Recommendation:* {alert['recommendation']}")
             report.append("")
@@ -558,9 +545,9 @@ class NetworkMonitor:
         report.append("")
 
         # Top blocked domains
-        if stats['top_blocked_domains']:
+        if stats["top_blocked_domains"]:
             report.append("## Top Blocked Domains")
-            for domain, count in list(stats['top_blocked_domains'].items())[:10]:
+            for domain, count in list(stats["top_blocked_domains"].items())[:10]:
                 report.append(f"- {domain}: {count}")
             report.append("")
 
@@ -568,11 +555,11 @@ class NetworkMonitor:
         if blocked:
             report.append("## Recent Blocked Requests")
             for req in blocked[-10:]:
-                details = req.get('details', {})
-                timestamp = req.get('timestamp', '')[:19]
-                method = details.get('method', '?')
-                domain = details.get('domain', 'unknown')
-                reason = details.get('reason', 'unknown')
+                details = req.get("details", {})
+                timestamp = req.get("timestamp", "")[:19]
+                method = details.get("method", "?")
+                domain = details.get("domain", "unknown")
+                reason = details.get("reason", "unknown")
                 report.append(f"- {timestamp}: {method} {domain} ({reason})")
             report.append("")
 
@@ -587,25 +574,17 @@ def main():
         print("Network Access Control Monitor")
         print()
         print("Usage:")
-        print(
-            "  python monitor_network.py dashboard          - Show monitoring dashboard"
-        )
+        print("  python monitor_network.py dashboard          - Show monitoring dashboard")
         print("  python monitor_network.py blocked            - Show blocked requests")
         print("  python monitor_network.py allowed            - Show allowed requests")
-        print(
-            "  python monitor_network.py leaks              - Show data leak attempts"
-        )
+        print("  python monitor_network.py leaks              - Show data leak attempts")
         print("  python monitor_network.py stats              - Show statistics")
         print("  python monitor_network.py whitelist          - Show whitelist")
-        print(
-            "  python monitor_network.py add <domain>       - Add domain to whitelist"
-        )
+        print("  python monitor_network.py add <domain>       - Add domain to whitelist")
         print("  python monitor_network.py remove <domain>    - Remove from whitelist")
         print("  python monitor_network.py enable             - Enable network access")
         print("  python monitor_network.py disable            - Disable network access")
-        print(
-            "  python monitor_network.py killswitch on/off  - Toggle emergency kill switch"
-        )
+        print("  python monitor_network.py killswitch on/off  - Toggle emergency kill switch")
         print("  python monitor_network.py anomalies [hours]  - Detect anomalies (default 24h)")
         print("  python monitor_network.py alerts             - Show recent alerts")
         print("  python monitor_network.py forensic [hours]   - Generate forensic report (default 24h)")
@@ -711,7 +690,8 @@ def main():
             print("❌ Usage: python monitor_network.py killswitch on/off")
             sys.exit(1)
         enable = sys.argv[2].lower() in ["on", "true", "1", "yes"]
-        monitor.toggle_kill_switch(enable)
+        monitor.toggle_emergency_kill_switch(enable=enable)  # type: ignore[attr-defined]
+        print(f"Emergency kill switch {'enabled' if enable else 'disabled'}")
 
     elif command == "anomalies":
         hours = int(sys.argv[2]) if len(sys.argv) > 2 else 24
@@ -722,9 +702,9 @@ def main():
         print(".1f")
         print()
 
-        if anomalies['alerts']:
+        if anomalies["alerts"]:
             print("🚨 ALERTS DETECTED:")
-            for alert in anomalies['alerts']:
+            for alert in anomalies["alerts"]:
                 print(f"  [{alert['level']}] {alert['message']}")
                 print(f"  💡 {alert['recommendation']}")
                 print()
@@ -740,7 +720,7 @@ def main():
         print("🚨 RECENT ALERTS:")
         print()
         try:
-            with open(alert_path, encoding='utf-8') as f:
+            with open(alert_path, encoding="utf-8") as f:
                 alerts = [json.loads(line) for line in f if line.strip()]
                 for alert in alerts[-10:]:  # Show last 10
                     print(f"[{alert['timestamp'][:19]}] [{alert['level']}] {alert['message']}")
@@ -753,12 +733,12 @@ def main():
         hours = int(sys.argv[2]) if len(sys.argv) > 2 else 24
         report = monitor.generate_forensic_report(hours)
         report_file = monitor.base_path / "logs" / f"forensic_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md"
-        with open(report_file, 'w', encoding='utf-8') as f:
+        with open(report_file, "w", encoding="utf-8") as f:
             f.write(report)
         print(f"📋 Forensic report saved to: {report_file}")
         print()
         print("Report Summary:")
-        lines = report.split('\n')[:20]  # First 20 lines
+        lines = report.split("\n")[:20]  # First 20 lines
         for line in lines:
             print(line)
 

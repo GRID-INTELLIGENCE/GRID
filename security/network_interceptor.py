@@ -16,15 +16,13 @@ import socket
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple
+from typing import Any, Callable, Tuple
 from urllib.parse import urlparse
 
 import yaml
 
 # Setup logging
-logging.basicConfig(
-    level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -88,9 +86,7 @@ class NetworkAccessControl:
                 config = yaml.safe_load(f)
 
             logger.info(f"Loaded config from {self.config_path}")
-            logger.info(
-                f"Mode: {config.get('mode', 'strict')}, Default Policy: {config.get('default_policy', 'deny')}"
-            )
+            logger.info(f"Mode: {config.get('mode', 'strict')}, Default Policy: {config.get('default_policy', 'deny')}")
 
             return config
         except Exception as e:
@@ -121,9 +117,7 @@ class NetworkAccessControl:
         network_log = log_dir / "network_access.log"
         fh = logging.FileHandler(network_log)
         fh.setLevel(logging.DEBUG)
-        formatter = logging.Formatter(
-            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-        )
+        formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
         fh.setFormatter(formatter)
         logger.addHandler(fh)
 
@@ -144,9 +138,7 @@ class NetworkAccessControl:
         except Exception as e:
             logger.error(f"Failed to write audit log: {e}")
 
-    def _check_data_leak(
-        self, url: str, data: Any = None, headers: dict = None
-    ) -> bool:
+    def _check_data_leak(self, url: str, data: Any = None, headers: dict | None = None) -> bool:
         """Check for potential data leaks in request."""
         dlp_config = self.config.get("data_leak_prevention", {})
 
@@ -169,9 +161,7 @@ class NetworkAccessControl:
             for pattern_config in sensitive_patterns:
                 pattern = pattern_config.get("pattern", "")
                 if re.search(pattern, headers_str, re.IGNORECASE):
-                    logger.critical(
-                        f"DATA LEAK DETECTED in headers: Pattern '{pattern}' found"
-                    )
+                    logger.critical(f"DATA LEAK DETECTED in headers: Pattern '{pattern}' found")
                     self.metrics["data_leaks_detected"] += 1
                     return True
 
@@ -181,9 +171,7 @@ class NetworkAccessControl:
             for pattern_config in sensitive_patterns:
                 pattern = pattern_config.get("pattern", "")
                 if re.search(pattern, data_str, re.IGNORECASE):
-                    logger.critical(
-                        f"DATA LEAK DETECTED in body: Pattern '{pattern}' found"
-                    )
+                    logger.critical(f"DATA LEAK DETECTED in body: Pattern '{pattern}' found")
                     self.metrics["data_leaks_detected"] += 1
                     return True
 
@@ -194,7 +182,7 @@ class NetworkAccessControl:
         url: str,
         method: str = "GET",
         data: Any = None,
-        headers: dict = None,
+        headers: dict[str, Any] | None = None,
         caller: str = "unknown",
     ) -> tuple[bool, str]:
         """
@@ -317,13 +305,9 @@ class NetworkAccessControl:
         self._log_audit("REQUEST_BLOCKED", request_info)
 
         # Alert if threshold reached
-        alert_threshold = (
-            self.config.get("global", {}).get("alerts", {}).get("alert_threshold", 10)
-        )
+        alert_threshold = self.config.get("global", {}).get("alerts", {}).get("alert_threshold", 10)
         if self.metrics["blocked_requests"] % alert_threshold == 0:
-            logger.critical(
-                f"🚨 ALERT: {self.metrics['blocked_requests']} requests blocked!"
-            )
+            logger.critical(f"🚨 ALERT: {self.metrics['blocked_requests']} requests blocked!")
 
     def _log_allowed_request(self, request_info: dict, reason: str):
         """Log allowed request."""
@@ -338,9 +322,7 @@ class NetworkAccessControl:
         """Get current metrics."""
         return {
             **self.metrics,
-            "uptime_seconds": (
-                datetime.utcnow() - datetime.fromisoformat(self.metrics["started_at"])
-            ).total_seconds(),
+            "uptime_seconds": (datetime.utcnow() - datetime.fromisoformat(self.metrics["started_at"])).total_seconds(),
         }
 
     def get_blocked_requests(self, limit: int = 100) -> list[dict]:
@@ -354,11 +336,7 @@ class NetworkAccessControl:
     def save_report(self, filepath: str | None = None):
         """Save security report to file."""
         if filepath is None:
-            filepath = (
-                Path(__file__).parent
-                / "logs"
-                / f"security_report_{int(time.time())}.json"
-            )
+            filepath = str(Path(__file__).parent / "logs" / f"security_report_{int(time.time())}.json")
 
         report = {
             "generated_at": datetime.utcnow().isoformat(),
@@ -410,9 +388,7 @@ def enforce_network_policy(func: Callable) -> Callable:
             )
 
             if not allowed:
-                raise NetworkAccessDenied(
-                    f"Network access denied: {reason}\nURL: {url}"
-                )
+                raise NetworkAccessDenied(f"Network access denied: {reason}\nURL: {url}")
 
         return func(*args, **kwargs)
 
@@ -508,14 +484,10 @@ def patch_urllib():
         @functools.wraps(_original_urlopen)
         def patched_urlopen(url, *args, **kwargs):
             url_str = str(url)
-            allowed, reason = nac.check_request(
-                url_str, method="GET", caller="urllib.request.urlopen"
-            )
+            allowed, reason = nac.check_request(url_str, method="GET", caller="urllib.request.urlopen")
 
             if not allowed:
-                raise NetworkAccessDenied(
-                    f"Network access denied: {reason}\nURL: {url_str}"
-                )
+                raise NetworkAccessDenied(f"Network access denied: {reason}\nURL: {url_str}")
 
             return _original_urlopen(url, *args, **kwargs)
 
@@ -534,21 +506,13 @@ def patch_socket():
 
         def patched_connect(self, address):
             host = address[0] if isinstance(address, tuple) else str(address)
-            port = (
-                address[1]
-                if isinstance(address, tuple) and len(address) > 1
-                else "unknown"
-            )
+            port = address[1] if isinstance(address, tuple) and len(address) > 1 else "unknown"
 
             url = f"socket://{host}:{port}"
-            allowed, reason = nac.check_request(
-                url, method="CONNECT", caller="socket.connect"
-            )
+            allowed, reason = nac.check_request(url, method="CONNECT", caller="socket.connect")
 
             if not allowed:
-                raise NetworkAccessDenied(
-                    f"Socket connection denied: {reason}\nAddress: {address}"
-                )
+                raise NetworkAccessDenied(f"Socket connection denied: {reason}\nAddress: {address}")
 
             return _original_socket_connect(self, address)
 

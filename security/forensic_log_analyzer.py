@@ -25,7 +25,7 @@ class ForensicLogAnalyzer:
         if not self.audit_log.exists():
             return events
 
-        with open(self.audit_log, encoding='utf-8') as f:
+        with open(self.audit_log, encoding="utf-8") as f:
             for line in f:
                 line = line.strip()
                 if not line:
@@ -43,20 +43,20 @@ class ForensicLogAnalyzer:
         if not self.network_log.exists():
             return events
 
-        with open(self.network_log, encoding='utf-8') as f:
+        with open(self.network_log, encoding="utf-8") as f:
             for line in f:
                 # Parse log format: timestamp - logger - level - message
-                parts = line.strip().split(' - ', 3)
+                parts = line.strip().split(" - ", 3)
                 if len(parts) >= 4:
                     timestamp_str, logger, level, message = parts
                     try:
                         # Parse timestamp
-                        timestamp = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S,%f')
+                        timestamp = datetime.strptime(timestamp_str, "%Y-%m-%d %H:%M:%S,%f")
                         event = {
-                            'timestamp': timestamp.isoformat(),
-                            'logger': logger,
-                            'level': level,
-                            'message': message
+                            "timestamp": timestamp.isoformat(),
+                            "logger": logger,
+                            "level": level,
+                            "message": message,
                         }
                         events.append(event)
                     except ValueError:
@@ -66,61 +66,57 @@ class ForensicLogAnalyzer:
     def analyze_events(self, audit_events: list[dict], network_events: list[dict]) -> dict[str, Any]:
         """Analyze events for security insights."""
         analysis = {
-            'summary': {
-                'total_audit_events': len(audit_events),
-                'total_network_events': len(network_events),
-                'time_range': self._get_time_range(audit_events + network_events)
+            "summary": {
+                "total_audit_events": len(audit_events),
+                "total_network_events": len(network_events),
+                "time_range": self._get_time_range(audit_events + network_events),
             },
-            'blocked_requests': [],
-            'network_initializations': [],
-            'errors_warnings': [],
-            'anomalies': []
+            "blocked_requests": [],
+            "network_initializations": [],
+            "errors_warnings": [],
+            "anomalies": [],
         }
 
         # Analyze audit events
         for event in audit_events:
-            if event.get('event_type') == 'REQUEST_BLOCKED':
-                analysis['blocked_requests'].append({
-                    'timestamp': event['timestamp'],
-                    'url': event['details'].get('url'),
-                    'method': event['details'].get('method'),
-                    'reason': event['details'].get('reason'),
-                    'caller': event['details'].get('caller')
-                })
+            if event.get("event_type") == "REQUEST_BLOCKED":
+                analysis["blocked_requests"].append(
+                    {
+                        "timestamp": event["timestamp"],
+                        "url": event["details"].get("url"),
+                        "method": event["details"].get("method"),
+                        "reason": event["details"].get("reason"),
+                        "caller": event["details"].get("caller"),
+                    }
+                )
 
         # Analyze network events
         for event in network_events:
-            message = event['message']
-            if 'Network Access Control initialized' in message:
-                analysis['network_initializations'].append({
-                    'timestamp': event['timestamp'],
-                    'message': message
-                })
-            elif event['level'] in ['ERROR', 'WARNING']:
-                analysis['errors_warnings'].append(event)
+            message = event["message"]
+            if "Network Access Control initialized" in message:
+                analysis["network_initializations"].append({"timestamp": event["timestamp"], "message": message})
+            elif event["level"] in ["ERROR", "WARNING"]:
+                analysis["errors_warnings"].append(event)
 
         # Detect anomalies
-        if len(analysis['blocked_requests']) > 0:
-            analysis['anomalies'].append(f"Detected {len(analysis['blocked_requests'])} blocked network requests")
+        if len(analysis["blocked_requests"]) > 0:
+            analysis["anomalies"].append(f"Detected {len(analysis['blocked_requests'])} blocked network requests")
 
-        if not analysis['network_initializations']:
-            analysis['anomalies'].append("No network access control initialization found")
+        if not analysis["network_initializations"]:
+            analysis["anomalies"].append("No network access control initialization found")
 
         return analysis
 
     def _get_time_range(self, events: list[dict]) -> dict[str, str]:
         """Get time range of events."""
         if not events:
-            return {'start': None, 'end': None}
+            return {"start": "", "end": ""}
 
-        timestamps = [datetime.fromisoformat(e['timestamp']) for e in events if 'timestamp' in e]
+        timestamps = [datetime.fromisoformat(e["timestamp"]) for e in events if "timestamp" in e]
         if not timestamps:
-            return {'start': None, 'end': None}
+            return {"start": "", "end": ""}
 
-        return {
-            'start': min(timestamps).isoformat(),
-            'end': max(timestamps).isoformat()
-        }
+        return {"start": min(timestamps).isoformat(), "end": max(timestamps).isoformat()}
 
     def generate_report(self, analysis: dict[str, Any]) -> str:
         """Generate human-readable report."""
@@ -130,16 +126,16 @@ class ForensicLogAnalyzer:
         report.append("")
 
         # Summary
-        summary = analysis['summary']
+        summary = analysis["summary"]
         report.append("## Summary")
         report.append(f"- Total audit events: {summary['total_audit_events']}")
         report.append(f"- Total network events: {summary['total_network_events']}")
-        if summary['time_range']['start']:
+        if summary["time_range"]["start"]:
             report.append(f"- Time range: {summary['time_range']['start']} to {summary['time_range']['end']}")
         report.append("")
 
         # Blocked requests
-        blocked = analysis['blocked_requests']
+        blocked = analysis["blocked_requests"]
         if blocked:
             report.append("## Blocked Requests")
             for req in blocked:
@@ -151,7 +147,7 @@ class ForensicLogAnalyzer:
             report.append("")
 
         # Network initializations
-        inits = analysis['network_initializations']
+        inits = analysis["network_initializations"]
         if inits:
             report.append("## Network Access Control")
             for init in inits:
@@ -163,7 +159,7 @@ class ForensicLogAnalyzer:
             report.append("")
 
         # Errors and warnings
-        errors = analysis['errors_warnings']
+        errors = analysis["errors_warnings"]
         if errors:
             report.append("## Errors and Warnings")
             for err in errors:
@@ -171,7 +167,7 @@ class ForensicLogAnalyzer:
             report.append("")
 
         # Anomalies
-        anomalies = analysis['anomalies']
+        anomalies = analysis["anomalies"]
         if anomalies:
             report.append("## Anomalies Detected")
             for anomaly in anomalies:
@@ -181,7 +177,9 @@ class ForensicLogAnalyzer:
         # Assessment
         report.append("## Security Assessment")
         if blocked:
-            report.append("✅ **Hardening Effective**: Unauthorized network access attempts are being blocked and logged.")
+            report.append(
+                "✅ **Hardening Effective**: Unauthorized network access attempts are being blocked and logged."
+            )
         else:
             report.append("ℹ️ **No Unauthorized Access Detected**: No blocked requests in the analyzed logs.")
 
@@ -211,11 +209,11 @@ def main():
 
     # Save report
     report_file = logs_dir / f"forensic_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md"
-    with open(report_file, 'w', encoding='utf-8') as f:
+    with open(report_file, "w", encoding="utf-8") as f:
         f.write(report)
 
     print(f"Report saved to: {report_file}")
-    print("\n" + "="*50)
+    print("\n" + "=" * 50)
     print(report)
 
 

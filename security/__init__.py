@@ -51,9 +51,7 @@ try:
 
     # Check if security should be disabled
     if os.environ.get("DISABLE_NETWORK_SECURITY") == "true":
-        logger.warning(
-            "⚠️  NETWORK SECURITY DISABLED - Set DISABLE_NETWORK_SECURITY=false to enable"
-        )
+        logger.warning("⚠️  NETWORK SECURITY DISABLED - Set DISABLE_NETWORK_SECURITY=false to enable")
     else:
         logger.info("🔒 Network security system initialized")
         logger.info(f"📁 Config: {SECURITY_DIR / 'network_access_control.yaml'}")
