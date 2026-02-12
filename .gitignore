@@ -111,3 +111,6 @@ artifacts/
 node_modules/
 *.mo
 *.pot
+
+# ── Archive directory (moved to E:\archive) ──────────────────────
+archive/

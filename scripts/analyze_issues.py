@@ -2,7 +2,7 @@ import json
 from collections import defaultdict
 
 # Load issues
-with open("e:\\.github\\issues.json", "r") as f:
+with open("e:\\.github\\issues.json") as f:
     data = json.load(f)
 
 # Group by file
@@ -12,11 +12,7 @@ for issue in data:
     files[resource].append(issue)
 
 # Filter out apps/backend and e:/app
-filtered = {
-    f: v
-    for f, v in files.items()
-    if not f.startswith("/e:/Apps/backend") and not f.startswith("/e:/app/")
-}
+filtered = {f: v for f, v in files.items() if not f.startswith("/e:/Apps/backend") and not f.startswith("/e:/app/")}
 
 # Sort by count
 sorted_files = sorted(filtered.items(), key=lambda x: -len(x[1]))
@@ -37,7 +33,7 @@ for resource, issues in sorted_files[:15]:
     for error_type, count in sorted(error_types.items(), key=lambda x: -x[1]):
         print(f"  - {error_type}: {count}")
 
-    print(f"\nFirst 5 issues:")
+    print("\nFirst 5 issues:")
     for i, issue in enumerate(issues[:5], 1):
         line = issue.get("startLineNumber", "?")
         msg = issue.get("message", "No message")[:100]

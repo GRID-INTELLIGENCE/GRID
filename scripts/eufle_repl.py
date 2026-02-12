@@ -4,11 +4,10 @@ EUFLE REPL (no backend)
 Lightweight discussion loop that collects questions and prints responses.
 """
 
-from dataclasses import dataclass, field
-from typing import List, Optional
-from pathlib import Path
 import code
 import math
+from dataclasses import dataclass, field
+from pathlib import Path
 
 
 @dataclass
@@ -19,9 +18,9 @@ class DialogueTurn:
 
 @dataclass
 class EufleRepl:
-    history: List[DialogueTurn] = field(default_factory=list)
-    run_template: str = "run(\"{question}\") -> {response}"
-    stop_template: str = "stop(\"{question}\") -> {response}"
+    history: list[DialogueTurn] = field(default_factory=list)
+    run_template: str = 'run("{question}") -> {response}'
+    stop_template: str = 'stop("{question}") -> {response}'
     volume: float = 1.0
     eufle_readme_path: Path = Path(r"E:\EUFLE\README.md")
 
@@ -65,7 +64,7 @@ class EufleRepl:
     def run(self, question: str) -> str:
         return self.render(self.run_template, question)
 
-    def stop(self, question: str = ".") -> Optional[str]:
+    def stop(self, question: str = ".") -> str | None:
         if question.strip() == ".":
             code.interact(local={"repl": self})
             return "Python interpreter exited."

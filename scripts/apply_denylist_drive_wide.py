@@ -4,12 +4,10 @@ Drive-Wide Denylist Application
 Apply server denylist rules across entire drive
 """
 
-import os
-import json
-from pathlib import Path
-from typing import List, Dict
 import argparse
+import json
 import sys
+from pathlib import Path
 
 # Add scripts directory to path
 sys.path.insert(0, str(Path(__file__).parent))
@@ -24,7 +22,7 @@ class DriveWideEnforcer:
         self.root_path = Path(root_path)
         self.results = {"processed": [], "errors": [], "summary": {}}
 
-    def find_mcp_configs(self, exclude_patterns: List[str] = None) -> List[Path]:
+    def find_mcp_configs(self, exclude_patterns: list[str] | None = None) -> list[Path]:
         """Find all MCP configuration files"""
         if exclude_patterns is None:
             exclude_patterns = [
@@ -53,18 +51,16 @@ class DriveWideEnforcer:
 
     def backup_config(self, config_path: Path) -> Path:
         """Create backup of original config"""
-        backup_path = (
-            config_path.parent / f"{config_path.stem}.backup{config_path.suffix}"
-        )
+        backup_path = config_path.parent / f"{config_path.stem}.backup{config_path.suffix}"
 
         if not backup_path.exists():
-            with open(config_path, "r") as src:
+            with open(config_path) as src:
                 with open(backup_path, "w") as dst:
                     dst.write(src.read())
 
         return backup_path
 
-    def apply_to_config(self, config_path: Path, dry_run: bool = False) -> Dict:
+    def apply_to_config(self, config_path: Path, dry_run: bool = False) -> dict:
         """Apply denylist to single config"""
         result = {
             "path": str(config_path),
@@ -81,7 +77,7 @@ class DriveWideEnforcer:
                 result["backup"] = str(backup_path)
 
             # Load config
-            with open(config_path, "r") as f:
+            with open(config_path) as f:
                 mcp_config = json.load(f)
 
             # Process servers
@@ -110,7 +106,7 @@ class DriveWideEnforcer:
 
         return result
 
-    def apply_drive_wide(self, dry_run: bool = False, verbose: bool = False) -> Dict:
+    def apply_drive_wide(self, dry_run: bool = False, verbose: bool = False) -> dict:
         """Apply denylist to all configs on drive"""
         print("=" * 80)
         print("DRIVE-WIDE DENYLIST ENFORCEMENT")
@@ -141,7 +137,7 @@ class DriveWideEnforcer:
                 total_denied += result["denied_count"]
                 total_allowed += result["allowed_count"]
 
-                print(f"  [OK] Success")
+                print("  [OK] Success")
                 print(f"    Denied: {result['denied_count']}")
                 print(f"    Allowed: {result['allowed_count']}")
 
@@ -150,7 +146,7 @@ class DriveWideEnforcer:
 
                 self.results["processed"].append(result)
             else:
-                print(f"  [FAIL] Failed")
+                print("  [FAIL] Failed")
                 for error in result["errors"]:
                     print(f"    Error: {error}")
                 self.results["errors"].append(result)
@@ -189,7 +185,7 @@ class DriveWideEnforcer:
                 config_path = Path(result["path"])
 
                 if backup_path.exists():
-                    with open(backup_path, "r") as src:
+                    with open(backup_path) as src:
                         with open(config_path, "w") as dst:
                             dst.write(src.read())
                     print(f"  ✓ Restored: {config_path.name}")
@@ -199,22 +195,12 @@ class DriveWideEnforcer:
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Apply server denylist rules across entire drive"
-    )
-    parser.add_argument(
-        "--config", required=True, help="Path to denylist configuration"
-    )
-    parser.add_argument(
-        "--root", default="E:\\", help="Root path to scan (default: E:\\)"
-    )
-    parser.add_argument(
-        "--dry-run", action="store_true", help="Simulate without making changes"
-    )
+    parser = argparse.ArgumentParser(description="Apply server denylist rules across entire drive")
+    parser.add_argument("--config", required=True, help="Path to denylist configuration")
+    parser.add_argument("--root", default="E:\\", help="Root path to scan (default: E:\\)")
+    parser.add_argument("--dry-run", action="store_true", help="Simulate without making changes")
     parser.add_argument("--verbose", action="store_true", help="Verbose output")
-    parser.add_argument(
-        "--restore", action="store_true", help="Restore backed up configurations"
-    )
+    parser.add_argument("--restore", action="store_true", help="Restore backed up configurations")
 
     args = parser.parse_args()
 

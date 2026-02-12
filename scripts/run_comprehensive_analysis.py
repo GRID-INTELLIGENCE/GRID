@@ -4,14 +4,12 @@ Comprehensive workspace analysis and diagnostics
 Establishes health baselines and best practices across all repos
 """
 
-import ast
 import json
 import re
-import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 # Configuration
 REPOS = {
@@ -39,7 +37,7 @@ class TypeSafetyAnalyzer:
         self.warnings = []
         self.fixed_count = 0
 
-    def check_pydantic_v2_migration(self, repo_path: Path) -> Dict[str, Any]:
+    def check_pydantic_v2_migration(self, repo_path: Path) -> dict[str, Any]:
         """Check for Pydantic v2 compatibility issues"""
         findings = {
             "field_mismatches": [],
@@ -49,7 +47,7 @@ class TypeSafetyAnalyzer:
 
         for py_file in repo_path.rglob("*.py"):
             try:
-                with open(py_file, "r", encoding="utf-8", errors="ignore") as f:
+                with open(py_file, encoding="utf-8", errors="ignore") as f:
                     content = f.read()
 
                 # Check for deprecated Field() patterns
@@ -76,18 +74,18 @@ class TypeSafetyAnalyzer:
                         }
                     )
 
-            except Exception as e:
+            except Exception:
                 pass
 
         return findings
 
-    def check_optional_member_access(self, repo_path: Path) -> Dict[str, Any]:
+    def check_optional_member_access(self, repo_path: Path) -> dict[str, Any]:
         """Identify unguarded optional member access"""
         findings = {"unguarded_access": [], "safe_patterns": []}
 
         for py_file in repo_path.rglob("*.py"):
             try:
-                with open(py_file, "r", encoding="utf-8", errors="ignore") as f:
+                with open(py_file, encoding="utf-8", errors="ignore") as f:
                     content = f.read()
                     lines = content.split("\n")
 
@@ -112,7 +110,7 @@ class TypeSafetyAnalyzer:
 
         return findings
 
-    def analyze_repo(self, repo_name: str, repo_path: Path) -> Dict[str, Any]:
+    def analyze_repo(self, repo_name: str, repo_path: Path) -> dict[str, Any]:
         """Analyze type safety for a single repo"""
         report = {
             "repo": repo_name,
@@ -125,12 +123,8 @@ class TypeSafetyAnalyzer:
         # Count Python files
         py_files = list(repo_path.rglob("*.py"))
         report["summary"]["total_py_files"] = len(py_files)
-        report["summary"]["pydantic_issues"] = len(
-            report["pydantic_migration"]["field_mismatches"]
-        )
-        report["summary"]["deprecated_patterns"] = len(
-            report["pydantic_migration"]["deprecated_patterns"]
-        )
+        report["summary"]["pydantic_issues"] = len(report["pydantic_migration"]["field_mismatches"])
+        report["summary"]["deprecated_patterns"] = len(report["pydantic_migration"]["deprecated_patterns"])
 
         return report
 
@@ -156,13 +150,13 @@ class AISafetyAuditor:
         "phone": r"\b\d{3}[-.]?\d{3}[-.]?\d{4}\b",
     }
 
-    def detect_model_usage(self, repo_path: Path) -> Dict[str, List[str]]:
+    def detect_model_usage(self, repo_path: Path) -> dict[str, list[str]]:
         """Detect AI model usage"""
         detected = {}
 
         for py_file in repo_path.rglob("*.py"):
             try:
-                with open(py_file, "r", encoding="utf-8", errors="ignore") as f:
+                with open(py_file, encoding="utf-8", errors="ignore") as f:
                     content = f.read()
 
                 for model, patterns in self.MODEL_PATTERNS.items():
@@ -177,7 +171,7 @@ class AISafetyAuditor:
 
         return detected
 
-    def check_pii_handling(self, repo_path: Path) -> Dict[str, Any]:
+    def check_pii_handling(self, repo_path: Path) -> dict[str, Any]:
         """Check for PII in code and patterns"""
         findings = {
             "redaction_patterns": [],
@@ -187,31 +181,23 @@ class AISafetyAuditor:
 
         for py_file in repo_path.rglob("*.py"):
             try:
-                with open(py_file, "r", encoding="utf-8", errors="ignore") as f:
+                with open(py_file, encoding="utf-8", errors="ignore") as f:
                     content = f.read()
-                    lines = content.split("\n")
 
                 # Look for redaction/encryption patterns
-                if any(
-                    x in content
-                    for x in ["redact", "encrypt", "hash", "anonymize", "gdpr", "pii"]
-                ):
-                    findings["redaction_patterns"].append(
-                        str(py_file.relative_to(repo_path))
-                    )
+                if any(x in content for x in ["redact", "encrypt", "hash", "anonymize", "gdpr", "pii"]):
+                    findings["redaction_patterns"].append(str(py_file.relative_to(repo_path)))
 
                 # Look for encryption imports
                 if "cryptography" in content or "Fernet" in content:
-                    findings["encryption_patterns"].append(
-                        str(py_file.relative_to(repo_path))
-                    )
+                    findings["encryption_patterns"].append(str(py_file.relative_to(repo_path)))
 
             except Exception:
                 pass
 
         return findings
 
-    def analyze_repo(self, repo_name: str, repo_path: Path) -> Dict[str, Any]:
+    def analyze_repo(self, repo_name: str, repo_path: Path) -> dict[str, Any]:
         """Analyze AI safety for a repo"""
         return {
             "repo": repo_name,
@@ -220,14 +206,8 @@ class AISafetyAuditor:
             "pii_handling": self.check_pii_handling(repo_path),
             "risk_assessment": {
                 "models_detected": len(self.detect_model_usage(repo_path)),
-                "has_encryption": len(
-                    self.check_pii_handling(repo_path).get("encryption_patterns", [])
-                )
-                > 0,
-                "has_redaction": len(
-                    self.check_pii_handling(repo_path).get("redaction_patterns", [])
-                )
-                > 0,
+                "has_encryption": len(self.check_pii_handling(repo_path).get("encryption_patterns", [])) > 0,
+                "has_redaction": len(self.check_pii_handling(repo_path).get("redaction_patterns", [])) > 0,
             },
         }
 
@@ -238,13 +218,13 @@ class AISafetyAuditor:
 class ArchitectureTester:
     """Test architectural components and patterns"""
 
-    def test_async_patterns(self, repo_path: Path) -> Dict[str, Any]:
+    def test_async_patterns(self, repo_path: Path) -> dict[str, Any]:
         """Verify async/await patterns"""
         findings = {"async_functions": 0, "async_issues": [], "sync_blocking_calls": []}
 
         for py_file in repo_path.rglob("*.py"):
             try:
-                with open(py_file, "r", encoding="utf-8", errors="ignore") as f:
+                with open(py_file, encoding="utf-8", errors="ignore") as f:
                     content = f.read()
 
                 # Count async functions
@@ -254,11 +234,7 @@ class ArchitectureTester:
                 if "async def" in content:
                     lines = content.split("\n")
                     for i, line in enumerate(lines, 1):
-                        if (
-                            "time.sleep(" in line
-                            or "open(" in line
-                            or "requests." in line
-                        ):
+                        if "time.sleep(" in line or "open(" in line or "requests." in line:
                             findings["sync_blocking_calls"].append(
                                 {
                                     "file": str(py_file.relative_to(repo_path)),
@@ -272,31 +248,23 @@ class ArchitectureTester:
 
         return findings
 
-    def test_service_layer(self, repo_path: Path) -> Dict[str, Any]:
+    def test_service_layer(self, repo_path: Path) -> dict[str, Any]:
         """Test service layer patterns"""
         findings = {"services": [], "routers": [], "import_issues": []}
 
-        services_dir = (
-            repo_path / "backend" / "services"
-            if (repo_path / "backend" / "services").exists()
-            else None
-        )
+        services_dir = repo_path / "backend" / "services" if (repo_path / "backend" / "services").exists() else None
         if services_dir:
             for service_file in services_dir.glob("*.py"):
                 findings["services"].append(service_file.name)
 
-        routers_dir = (
-            repo_path / "backend" / "routers"
-            if (repo_path / "backend" / "routers").exists()
-            else None
-        )
+        routers_dir = repo_path / "backend" / "routers" if (repo_path / "backend" / "routers").exists() else None
         if routers_dir:
             for router_file in routers_dir.glob("*.py"):
                 findings["routers"].append(router_file.name)
 
         return findings
 
-    def analyze_repo(self, repo_name: str, repo_path: Path) -> Dict[str, Any]:
+    def analyze_repo(self, repo_name: str, repo_path: Path) -> dict[str, Any]:
         """Analyze architecture for a repo"""
         return {
             "repo": repo_name,
@@ -312,7 +280,7 @@ class ArchitectureTester:
 class PerformanceBaseliner:
     """Establish performance baselines"""
 
-    def check_codebase_metrics(self, repo_path: Path) -> Dict[str, Any]:
+    def check_codebase_metrics(self, repo_path: Path) -> dict[str, Any]:
         """Collect codebase metrics"""
         metrics = {
             "total_lines": 0,
@@ -326,9 +294,7 @@ class PerformanceBaseliner:
 
         py_files = list(repo_path.rglob("*.py"))
         ts_files = list(repo_path.rglob("*.ts")) + list(repo_path.rglob("*.tsx"))
-        test_files = list(repo_path.rglob("*test*.py")) + list(
-            repo_path.rglob("*.test.ts")
-        )
+        test_files = list(repo_path.rglob("*test*.py")) + list(repo_path.rglob("*.test.ts"))
 
         metrics["python_files"] = len(py_files)
         metrics["typescript_files"] = len(ts_files)
@@ -339,7 +305,7 @@ class PerformanceBaseliner:
 
         for py_file in py_files:
             try:
-                with open(py_file, "r", encoding="utf-8", errors="ignore") as f:
+                with open(py_file, encoding="utf-8", errors="ignore") as f:
                     lines = len(f.readlines())
                     all_lines += lines
                     file_sizes.append((py_file.name, lines))
@@ -348,13 +314,11 @@ class PerformanceBaseliner:
 
         metrics["total_lines"] = all_lines
         metrics["average_file_size"] = all_lines // len(py_files) if py_files else 0
-        metrics["largest_files"] = sorted(file_sizes, key=lambda x: x[1], reverse=True)[
-            :5
-        ]
+        metrics["largest_files"] = sorted(file_sizes, key=lambda x: x[1], reverse=True)[:5]
 
         return metrics
 
-    def analyze_repo(self, repo_name: str, repo_path: Path) -> Dict[str, Any]:
+    def analyze_repo(self, repo_name: str, repo_path: Path) -> dict[str, Any]:
         """Analyze performance metrics for a repo"""
         return {
             "repo": repo_name,
@@ -399,34 +363,30 @@ def main():
         print(f"\n[Analyzing] {repo_name}...")
 
         # Phase 1: Type Safety
-        print(f"  -> Phase 1: Type Safety")
+        print("  -> Phase 1: Type Safety")
         type_report = type_analyzer.analyze_repo(repo_name, repo_path)
         comprehensive_report["phase1_type_safety"][repo_name] = type_report
         print(f"    [OK] Found {type_report['summary']['total_py_files']} Python files")
 
         # Phase 2: AI Safety
-        print(f"  -> Phase 2: AI Safety & Privacy")
+        print("  -> Phase 2: AI Safety & Privacy")
         safety_report = safety_auditor.analyze_repo(repo_name, repo_path)
         comprehensive_report["phase2_ai_safety"][repo_name] = safety_report
         models = list(safety_report["model_usage"].keys())
         print(f"    [OK] Models detected: {models if models else 'None'}")
 
         # Phase 3: Architecture
-        print(f"  -> Phase 3: Architecture")
+        print("  -> Phase 3: Architecture")
         arch_report = arch_tester.analyze_repo(repo_name, repo_path)
         comprehensive_report["phase3_architecture"][repo_name] = arch_report
-        print(
-            f"    [OK] {arch_report['async_patterns']['async_functions']} async functions"
-        )
+        print(f"    [OK] {arch_report['async_patterns']['async_functions']} async functions")
 
         # Phase 4: Performance
-        print(f"  -> Phase 4: Performance Baseline")
+        print("  -> Phase 4: Performance Baseline")
         perf_report = perf_baseline.analyze_repo(repo_name, repo_path)
         comprehensive_report["phase4_performance"][repo_name] = perf_report
         metrics = perf_report["codebase_metrics"]
-        print(
-            f"    [OK] {metrics['total_lines']} lines of code across {metrics['python_files']} files"
-        )
+        print(f"    [OK] {metrics['total_lines']} lines of code across {metrics['python_files']} files")
 
     # Generate Executive Summary
     print("\n" + "=" * 80)
@@ -457,16 +417,12 @@ def main():
             )
         ),
         "async_function_count": sum(
-            comprehensive_report["phase3_architecture"][r]["async_patterns"][
-                "async_functions"
-            ]
+            comprehensive_report["phase3_architecture"][r]["async_patterns"]["async_functions"]
             for r in comprehensive_report["phase3_architecture"]
             if r
         ),
         "total_lines_of_code": sum(
-            comprehensive_report["phase4_performance"][r]["codebase_metrics"][
-                "total_lines"
-            ]
+            comprehensive_report["phase4_performance"][r]["codebase_metrics"]["total_lines"]
             for r in comprehensive_report["phase4_performance"]
             if r
         ),
@@ -478,20 +434,14 @@ def main():
     with open(report_path, "w", encoding="utf-8") as f:
         json.dump(comprehensive_report, f, indent=2, default=str)
 
-    print(f"\n[OK] Comprehensive analysis complete!")
+    print("\n[OK] Comprehensive analysis complete!")
     print(f"Report saved to: {report_path}")
-    print(f"\nKey Metrics:")
+    print("\nKey Metrics:")
     print(f"  - Total Python Files: {total_py_files}")
     print(f"  - Type Safety Issues: {total_issues}")
-    print(
-        f"  - Models Detected: {comprehensive_report['executive_summary']['models_detected']}"
-    )
-    print(
-        f"  - Async Functions: {comprehensive_report['executive_summary']['async_function_count']}"
-    )
-    print(
-        f"  - Total Lines of Code: {comprehensive_report['executive_summary']['total_lines_of_code']}"
-    )
+    print(f"  - Models Detected: {comprehensive_report['executive_summary']['models_detected']}")
+    print(f"  - Async Functions: {comprehensive_report['executive_summary']['async_function_count']}")
+    print(f"  - Total Lines of Code: {comprehensive_report['executive_summary']['total_lines_of_code']}")
 
     return 0
 

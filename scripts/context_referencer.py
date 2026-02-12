@@ -7,10 +7,10 @@ No external backend required.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Dict, Iterable, List, Optional, Sequence, Tuple
 import math
 import re
+from dataclasses import dataclass, field
+from typing import Iterable, Sequence
 
 WORD_RE = re.compile(r"[A-Za-z0-9_]+")
 
@@ -18,26 +18,26 @@ WORD_RE = re.compile(r"[A-Za-z0-9_]+")
 @dataclass
 class ContextItem:
     text: str
-    source: Optional[str] = None
-    kind: Optional[str] = None
-    tags: List[str] = field(default_factory=list)
-    embedding: List[float] = field(default_factory=list)
+    source: str | None = None
+    kind: str | None = None
+    tags: list[str] = field(default_factory=list)
+    embedding: list[float] = field(default_factory=list)
 
 
 @dataclass
 class QueryItem:
     question: str
     category: str
-    embedding: List[float]
-    top_context: List[Tuple[str, float]]
+    embedding: list[float]
+    top_context: list[tuple[str, float]]
 
 
 @dataclass
 class ContextReferencer:
     embedding_dim: int = 64
-    context_items: List[ContextItem] = field(default_factory=list)
+    context_items: list[ContextItem] = field(default_factory=list)
 
-    category_rules: Dict[str, Sequence[str]] = field(
+    category_rules: dict[str, Sequence[str]] = field(
         default_factory=lambda: {
             "setup": ["install", "setup", "configure", "requirements"],
             "ops": ["deploy", "run", "start", "service", "monitor"],
@@ -58,10 +58,10 @@ class ContextReferencer:
                 return category
         return "general"
 
-    def _tokenize(self, text: str) -> List[str]:
+    def _tokenize(self, text: str) -> list[str]:
         return [m.group(0).lower() for m in WORD_RE.finditer(text)]
 
-    def embed_text(self, text: str) -> List[float]:
+    def embed_text(self, text: str) -> list[float]:
         """Lightweight hashing embedder (no backend)."""
         vector = [0.0] * self.embedding_dim
         tokens = self._tokenize(text)
@@ -78,8 +78,9 @@ class ContextReferencer:
             vector = [v / norm for v in vector]
         return vector
 
-    def add_context(self, text: str, source: Optional[str] = None, kind: Optional[str] = None,
-                    tags: Optional[Iterable[str]] = None) -> ContextItem:
+    def add_context(
+        self, text: str, source: str | None = None, kind: str | None = None, tags: Iterable[str] | None = None
+    ) -> ContextItem:
         category = kind or self.classify_context(text)
         item = ContextItem(
             text=text,
@@ -91,14 +92,14 @@ class ContextReferencer:
         self.context_items.append(item)
         return item
 
-    def _cosine(self, a: List[float], b: List[float]) -> float:
+    def _cosine(self, a: list[float], b: list[float]) -> float:
         if not a or not b:
             return 0.0
-        return sum(x * y for x, y in zip(a, b))
+        return sum(x * y for x, y in zip(a, b, strict=False))
 
     def query(self, question: str, top_k: int = 5) -> QueryItem:
         q_embedding = self.embed_text(question)
-        scored: List[Tuple[str, float]] = []
+        scored: list[tuple[str, float]] = []
         for item in self.context_items:
             score = self._cosine(q_embedding, item.embedding)
             if score > 0:
@@ -107,7 +108,7 @@ class ContextReferencer:
         category = self.classify_context(question)
         return QueryItem(question=question, category=category, embedding=q_embedding, top_context=scored[:top_k])
 
-    def sort_questions(self, questions: Iterable[str], top_k: int = 5) -> List[QueryItem]:
+    def sort_questions(self, questions: Iterable[str], top_k: int = 5) -> list[QueryItem]:
         results = [self.query(q, top_k=top_k) for q in questions]
         # Sort by category then by strongest context match
         results.sort(key=lambda r: (r.category, -(r.top_context[0][1] if r.top_context else 0.0)))

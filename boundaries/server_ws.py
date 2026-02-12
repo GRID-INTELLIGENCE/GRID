@@ -59,7 +59,7 @@ class BoundaryWebSocketServer:
         )
         set_global_logger(self._logger)
         self._server = await websockets.serve(self._handler, self.host, self.port, ping_interval=20, ping_timeout=20)
-        return self._server
+        return self._server  # type: ignore[return-value]
 
     async def stop(self) -> None:
         if self._server:

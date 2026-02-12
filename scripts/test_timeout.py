@@ -1,28 +1,27 @@
-import asyncio
+import os
 import sqlite3
 import time
-import os
-import sys
 
 # Add the directory containing 'mcp' to path so we can verify the server logic if needed,
 # but here we will just test the logic concept since we can't easily import the full server without mcp package potentially.
 # However, we can use the exact logic snippet I wrote to test it in isolation.
 
+
 def test_sqlite_progress_handler():
     print("Testing SQLite progress handler for timeout...")
-    
+
     db_path = "test_timeout.db"
     if os.path.exists(db_path):
         os.remove(db_path)
-        
+
     conn = sqlite3.connect(db_path)
-    
+
     # Create a table with many rows to query
     conn.execute("CREATE TABLE test (id INTEGER PRIMARY KEY, data TEXT)")
     print("Seeding data...")
     conn.executemany("INSERT INTO test (data) VALUES (?)", [("x" * 100,) for _ in range(10000)])
     conn.commit()
-    
+
     # The logic from server.py replacement:
     query_start_time = time.time()
     query_timeout = 0.1  # Set a very short timeout for testing
@@ -33,7 +32,7 @@ def test_sqlite_progress_handler():
         return 0
 
     conn.set_progress_handler(progress_handler, 100)
-    
+
     try:
         print("Running slow query...")
         # A cartesian product to ensure it takes time
@@ -50,6 +49,7 @@ def test_sqlite_progress_handler():
         conn.close()
         if os.path.exists(db_path):
             os.remove(db_path)
+
 
 if __name__ == "__main__":
     test_sqlite_progress_handler()

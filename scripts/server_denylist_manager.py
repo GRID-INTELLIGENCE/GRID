@@ -6,10 +6,10 @@ Machine-readable server categorization and denylist enforcement system
 
 import json
 import re
-from pathlib import Path
-from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
 from enum import Enum
+from pathlib import Path
+from typing import Any
 
 
 class DenylistReason(Enum):
@@ -43,8 +43,8 @@ class ServerAttributes:
     command: str
     requires_network: bool = False
     requires_database: bool = False
-    port: Optional[int] = None
-    dependencies: Optional[List[str]] = None
+    port: int | None = None
+    dependencies: list[str] | None = None
     resource_profile: str = "medium"
     priority: int = 5
 
@@ -58,11 +58,11 @@ class DenylistRule:
     reason: str
     scope: str
     enabled: bool
-    name: Optional[str] = None
-    pattern: Optional[str] = None
-    match_attributes: Optional[Dict[str, Any]] = None
-    expires_at: Optional[str] = None
-    notes: Optional[str] = None
+    name: str | None = None
+    pattern: str | None = None
+    match_attributes: dict[str, Any] | None = None
+    expires_at: str | None = None
+    notes: str | None = None
 
 
 class ServerDenylistManager:
@@ -74,15 +74,15 @@ class ServerDenylistManager:
         self.inventory = self._load_inventory()
         self.rules = self._load_rules()
 
-    def _load_config(self) -> Dict:
+    def _load_config(self) -> dict:
         """Load denylist configuration"""
         if not self.config_path.exists():
             raise FileNotFoundError(f"Config not found: {self.config_path}")
 
-        with open(self.config_path, "r") as f:
+        with open(self.config_path) as f:
             return json.load(f)
 
-    def _load_inventory(self) -> List[ServerAttributes]:
+    def _load_inventory(self) -> list[ServerAttributes]:
         """Load server inventory"""
         inventory = []
         for server_data in self.config.get("serverInventory", []):
@@ -101,7 +101,7 @@ class ServerDenylistManager:
             )
         return inventory
 
-    def _load_rules(self) -> List[DenylistRule]:
+    def _load_rules(self) -> list[DenylistRule]:
         """Load denylist rules"""
         rules = []
         for rule_data in self.config.get("denylistRules", []):
@@ -119,7 +119,7 @@ class ServerDenylistManager:
             )
         return rules
 
-    def _matches_pattern(self, server_name: str, pattern: Optional[str]) -> bool:
+    def _matches_pattern(self, server_name: str, pattern: str | None) -> bool:
         """Check if server name matches pattern"""
         if not pattern:
             return False
@@ -128,7 +128,7 @@ class ServerDenylistManager:
         except re.error:
             return False
 
-    def _normalize_list(self, value: Any) -> List[str]:
+    def _normalize_list(self, value: Any) -> list[str]:
         """Normalize a value to a list of strings"""
         if value is None:
             return []
@@ -136,9 +136,7 @@ class ServerDenylistManager:
             return [str(v) for v in value]
         return [str(value)]
 
-    def _matches_attributes(
-        self, server: ServerAttributes, match_attrs: Optional[Dict]
-    ) -> bool:
+    def _matches_attributes(self, server: ServerAttributes, match_attrs: dict | None) -> bool:
         """Check if server matches attribute criteria"""
         if not match_attrs:
             return False
@@ -159,9 +157,7 @@ class ServerDenylistManager:
         # Check port range
         if "portRange" in match_attrs and server.port:
             port_range = match_attrs["portRange"]
-            if not (
-                port_range.get("min", 0) <= server.port <= port_range.get("max", 65535)
-            ):
+            if not (port_range.get("min", 0) <= server.port <= port_range.get("max", 65535)):
                 return False
 
         # Check network requirement
@@ -177,9 +173,7 @@ class ServerDenylistManager:
 
         return True
 
-    def _evaluate_rules(
-        self, server: ServerAttributes
-    ) -> tuple[bool, Optional[str], Optional[str]]:
+    def _evaluate_rules(self, server: ServerAttributes) -> tuple[bool, str | None, str | None]:
         for rule in self.rules:
             if not rule.enabled:
                 continue
@@ -196,9 +190,7 @@ class ServerDenylistManager:
 
         return False, None, None
 
-    def _build_server_from_entry(
-        self, entry: Dict[str, Any]
-    ) -> Optional[ServerAttributes]:
+    def _build_server_from_entry(self, entry: dict[str, Any]) -> ServerAttributes | None:
         name = entry.get("name")
         if not name:
             return None
@@ -245,7 +237,7 @@ class ServerDenylistManager:
 
         return server
 
-    def is_denied(self, server_name: str) -> tuple[bool, Optional[str]]:
+    def is_denied(self, server_name: str) -> tuple[bool, str | None]:
         """
         Check if a server is denied
         Returns: (is_denied, reason)
@@ -257,20 +249,18 @@ class ServerDenylistManager:
         is_denied, reason, _rule_name = self._evaluate_rules(server)
         return is_denied, reason
 
-    def is_denied_server(
-        self, server: ServerAttributes
-    ) -> tuple[bool, Optional[str], Optional[str]]:
+    def is_denied_server(self, server: ServerAttributes) -> tuple[bool, str | None, str | None]:
         return self._evaluate_rules(server)
 
-    def get_mcp_violations(self, mcp_config_path: str) -> List[Dict[str, str]]:
+    def get_mcp_violations(self, mcp_config_path: str) -> list[dict[str, str]]:
         mcp_path = Path(mcp_config_path)
         if not mcp_path.exists():
             raise FileNotFoundError(f"MCP config not found: {mcp_config_path}")
 
-        with open(mcp_path, "r") as f:
+        with open(mcp_path) as f:
             mcp_config = json.load(f)
 
-        violations: List[Dict[str, str]] = []
+        violations: list[dict[str, str]] = []
 
         for entry in mcp_config.get("servers", []):
             enabled = entry.get("enabled", True)
@@ -296,14 +286,14 @@ class ServerDenylistManager:
 
         return violations
 
-    def get_server(self, name: str) -> Optional[ServerAttributes]:
+    def get_server(self, name: str) -> ServerAttributes | None:
         """Get server from inventory"""
         for server in self.inventory:
             if server.name == name:
                 return server
         return None
 
-    def get_denied_servers(self) -> List[tuple[str, str]]:
+    def get_denied_servers(self) -> list[tuple[str, str]]:
         """Get all denied servers with reasons"""
         denied = []
         for server in self.inventory:
@@ -312,7 +302,7 @@ class ServerDenylistManager:
                 denied.append((server.name, reason))
         return denied
 
-    def get_allowed_servers(self) -> List[str]:
+    def get_allowed_servers(self) -> list[str]:
         """Get all allowed servers"""
         allowed = []
         for server in self.inventory:
@@ -321,15 +311,13 @@ class ServerDenylistManager:
                 allowed.append(server.name)
         return allowed
 
-    def _normalize_mcp_servers(self, mcp_config: Any) -> List[Dict[str, Any]]:
+    def _normalize_mcp_servers(self, mcp_config: Any) -> list[dict[str, Any]]:
         """Normalize MCP server entries from multiple schema variants"""
-        servers: List[Dict[str, Any]] = []
+        servers: list[dict[str, Any]] = []
 
-        def coerce_server_list(raw_servers: Any) -> List[Dict[str, Any]]:
+        def coerce_server_list(raw_servers: Any) -> list[dict[str, Any]]:
             if isinstance(raw_servers, list):
-                return [
-                    dict(server) for server in raw_servers if isinstance(server, dict)
-                ]
+                return [dict(server) for server in raw_servers if isinstance(server, dict)]
             if isinstance(raw_servers, dict):
                 normalized = []
                 for name, server in raw_servers.items():
@@ -352,7 +340,7 @@ class ServerDenylistManager:
 
     def validate_mcp_config(
         self, mcp_config_path: str, total_deny: bool = False
-    ) -> tuple[List[Dict[str, str]], List[str]]:
+    ) -> tuple[list[dict[str, str]], list[str]]:
         """Validate MCP config against denylist rules without modifying files
 
         Args:
@@ -363,11 +351,11 @@ class ServerDenylistManager:
         if not mcp_path.exists():
             raise FileNotFoundError(f"MCP config not found: {mcp_config_path}")
 
-        with open(mcp_path, "r") as f:
+        with open(mcp_path) as f:
             mcp_config = json.load(f)
 
-        violations: List[Dict[str, str]] = []
-        unknown_servers: List[str] = []
+        violations: list[dict[str, str]] = []
+        unknown_servers: list[str] = []
 
         for entry in self._normalize_mcp_servers(mcp_config):
             server_name = entry.get("name")
@@ -401,15 +389,13 @@ class ServerDenylistManager:
 
         return violations, unknown_servers
 
-    def apply_to_mcp_config(
-        self, mcp_config_path: str, output_path: Optional[str] = None
-    ):
+    def apply_to_mcp_config(self, mcp_config_path: str, output_path: str | None = None):
         """Apply denylist to MCP configuration"""
         mcp_path = Path(mcp_config_path)
         if not mcp_path.exists():
             raise FileNotFoundError(f"MCP config not found: {mcp_config_path}")
 
-        with open(mcp_path, "r") as f:
+        with open(mcp_path) as f:
             mcp_config = json.load(f)
 
         # Disable denied servers (evaluate with MCP entry overrides when present)
@@ -487,9 +473,7 @@ def main():
     parser = argparse.ArgumentParser(description="Server Denylist Manager")
     parser.add_argument("--config", required=True, help="Path to denylist config")
     parser.add_argument("--mcp-config", help="Path to MCP config to update")
-    parser.add_argument(
-        "--validate-config", help="Path to MCP config to validate (read-only)"
-    )
+    parser.add_argument("--validate-config", help="Path to MCP config to validate (read-only)")
     parser.add_argument(
         "--total-deny",
         action="store_true",
@@ -515,9 +499,7 @@ def main():
             print(f"âœ“ {args.check} is ALLOWED")
 
     if args.validate_config:
-        violations, unknown_servers = manager.validate_mcp_config(
-            args.validate_config, total_deny=args.total_deny
-        )
+        violations, unknown_servers = manager.validate_mcp_config(args.validate_config, total_deny=args.total_deny)
         if violations:
             mode_label = "TOTAL-DENY" if args.total_deny else "DENYLIST"
             print(f"[X] {mode_label} VIOLATION: Enabled servers in MCP config:")

@@ -200,7 +200,9 @@ def logs(trace_id: str) -> None:
 
     console.print(f"[bold]Found {len(matches)} log events:[/bold]\n")
     for event in matches:
-        console.print(f"[dim]{event.get('timestamp')}[/dim] [{event.get('level', 'info').upper()}] {event.get('event', '')}")
+        console.print(
+            f"[dim]{event.get('timestamp')}[/dim] [{event.get('level', 'info').upper()}] {event.get('event', '')}"
+        )
         console.print(f"  {event}\n")
 
 

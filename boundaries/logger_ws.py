@@ -74,8 +74,8 @@ class BoundaryEventLogger:
             try:
                 self._open_day_file()
                 line = json.dumps(event, default=str) + "\n"
-                self._file_handle.write(line)
-                self._file_handle.flush()
+                self._file_handle.write(line)  # type: ignore[reportUnknownMemberType]
+                self._file_handle.flush()  # type: ignore[reportUnknownMemberType]
             except OSError:
                 pass
         if self._ws_broadcast:

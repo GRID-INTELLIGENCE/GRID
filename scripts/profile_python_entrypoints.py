@@ -8,11 +8,10 @@ from __future__ import annotations
 import argparse
 import json
 import re
-from collections import Counter, defaultdict
-from datetime import datetime, timezone
+from collections import Counter
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Dict, Iterable, List, Tuple
-
+from typing import Iterable
 
 DEFAULT_ROOTS = [
     Path("E:/grid"),
@@ -68,8 +67,8 @@ def iter_files(roots: Iterable[Path], globs: Iterable[str]) -> Iterable[Path]:
                 yield path
 
 
-def scan_file(path: Path) -> List[Dict[str, str]]:
-    matches: List[Dict[str, str]] = []
+def scan_file(path: Path) -> list[dict[str, str]]:
+    matches: list[dict[str, str]] = []
     try:
         text = path.read_text(encoding="utf-8", errors="ignore")
     except Exception:
@@ -97,7 +96,7 @@ def scan_file(path: Path) -> List[Dict[str, str]]:
                 matches.append(
                     {
                         "file": str(path),
-                        "line": idx,
+                        "line": str(idx),
                         "pattern": name,
                         "preview": line.strip()[:240],
                     }
@@ -105,12 +104,12 @@ def scan_file(path: Path) -> List[Dict[str, str]]:
     return matches
 
 
-def summarize(matches: List[Dict[str, str]]) -> Dict[str, Dict[str, int]]:
+def summarize(matches: list[dict[str, str]]) -> dict[str, dict[str, int]]:
     by_pattern = Counter(m["pattern"] for m in matches)
     by_ext = Counter(Path(m["file"]).suffix.lower() for m in matches)
     by_root = Counter(Path(m["file"]).parts[0:2] for m in matches)
 
-    def normalize_root(parts: Tuple[str, ...]) -> str:
+    def normalize_root(parts: tuple[str, ...]) -> str:
         return "\\".join(parts)
 
     return {
@@ -120,7 +119,7 @@ def summarize(matches: List[Dict[str, str]]) -> Dict[str, Dict[str, int]]:
     }
 
 
-def recent_hits(matches: List[Dict[str, str]], limit: int = 25) -> List[Dict[str, str]]:
+def recent_hits(matches: list[dict[str, str]], limit: int = 25) -> list[dict[str, str]]:
     seen = {}
     for match in matches:
         path = Path(match["file"])
@@ -136,10 +135,10 @@ def recent_hits(matches: List[Dict[str, str]], limit: int = 25) -> List[Dict[str
     return [{"file": str(path), "mtime": datetime.fromtimestamp(mtime).isoformat()} for path, mtime in recent]
 
 
-def build_blocklist() -> Dict[str, object]:
+def build_blocklist() -> dict[str, object]:
     return {
         "version": "1.0.0",
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generated_at": datetime.now(UTC).isoformat(),
         "allowed_python": "C:\\Users\\irfan\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
         "blocked_commands": ["py", "py.exe", "pyw", "pyw.exe"],
         "blocked_paths": ["C:\\WINDOWS\\py.exe"],
@@ -150,15 +149,15 @@ def build_blocklist() -> Dict[str, object]:
 
 
 def render_markdown(
-    matches: List[Dict[str, str]],
-    summary: Dict[str, Dict[str, int]],
-    recent: List[Dict[str, str]],
-    blocklist: Dict[str, object],
+    matches: list[dict[str, str]],
+    summary: dict[str, dict[str, int]],
+    recent: list[dict[str, str]],
+    blocklist: dict[str, object],
 ) -> str:
     lines = []
     lines.append("# Python Entrypoint Profile")
     lines.append("")
-    lines.append(f"Generated: {datetime.now(timezone.utc).isoformat()}")
+    lines.append(f"Generated: {datetime.now(UTC).isoformat()}")
     lines.append("")
     lines.append("## Summary")
     lines.append(f"- Total matches: {len(matches)}")
@@ -172,7 +171,7 @@ def render_markdown(
     lines.append("## Tight Coupling Signals")
     lines.append("- File association uses py.exe (Python Launcher).")
     lines.append("- Scripts/configs that call `py` or `python` directly.")
-    lines.append("- JSON configs using `\"command\": \"python\"`.")
+    lines.append('- JSON configs using `"command": "python"`.')
     lines.append("")
     lines.append("## Recommended Blocklist Layer")
     lines.append("```json")
@@ -181,9 +180,7 @@ def render_markdown(
     lines.append("")
     lines.append("## Sample Matches (Top 50)")
     for match in matches[:50]:
-        lines.append(
-            f"- {match['file']}:{match['line']} [{match['pattern']}] {match['preview']}"
-        )
+        lines.append(f"- {match['file']}:{match['line']} [{match['pattern']}] {match['preview']}")
     lines.append("")
     return "\n".join(lines)
 
@@ -197,7 +194,7 @@ def main() -> int:
     args = parser.parse_args()
 
     roots = [Path(r) for r in (args.roots or [])] or DEFAULT_ROOTS
-    matches: List[Dict[str, str]] = []
+    matches: list[dict[str, str]] = []
 
     for path in iter_files(roots, DEFAULT_GLOBS):
         matches.extend(scan_file(path))
@@ -207,7 +204,7 @@ def main() -> int:
     blocklist = build_blocklist()
 
     output = {
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generated_at": datetime.now(UTC).isoformat(),
         "roots": [str(r) for r in roots],
         "summary": summary,
         "recent_files": recent,
@@ -217,9 +214,7 @@ def main() -> int:
 
     Path(args.output_json).write_text(json.dumps(output, indent=2), encoding="utf-8")
     Path(args.blocklist_out).write_text(json.dumps(blocklist, indent=2), encoding="utf-8")
-    Path(args.output_md).write_text(
-        render_markdown(matches, summary, recent, blocklist), encoding="utf-8"
-    )
+    Path(args.output_md).write_text(render_markdown(matches, summary, recent, blocklist), encoding="utf-8")
 
     return 0
 

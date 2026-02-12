@@ -8,6 +8,7 @@ from pathlib import Path
 EUFLE_ROOT = Path(r"E:\EUFLE")
 ACTUAL_CLI = EUFLE_ROOT / "eufle.py"
 
+
 def main():
     if not ACTUAL_CLI.exists():
         print(f"Error: EUFLE implementation not found at {ACTUAL_CLI}")
@@ -24,6 +25,7 @@ def main():
         env["EUFLE_MODEL"] = "mistral-nemo:latest"
 
     subprocess.run(cmd, env=env)
+
 
 if __name__ == "__main__":
     main()

@@ -4,9 +4,8 @@ Generate additional artifacts: database schema, entry points, visualization spec
 """
 
 import json
-from pathlib import Path
-from typing import Dict, List
 import re
+from pathlib import Path
 
 
 def generate_database_schema(output_dir: Path):
@@ -285,132 +284,113 @@ ORDER BY module_count DESC;
 -- LIMIT 20;
 """
 
-    output_file = output_dir / 'db_plan.sql'
-    with open(output_file, 'w') as f:
+    output_file = output_dir / "db_plan.sql"
+    with open(output_file, "w") as f:
         f.write(schema)
 
     print(f"Database schema saved to {output_file}")
 
 
-def identify_entry_points(analysis_dir: Path, repo_root: Path) -> List[Dict]:
+def identify_entry_points(analysis_dir: Path, repo_root: Path) -> list[dict]:
     """Identify entry points and integration hooks."""
     entry_points = []
 
     # Common entry point patterns for Python
     python_entry_patterns = {
-        'main': [
-            r'if __name__\s*==\s*["\']__main__["\']',
-            r'def main\(',
-            r'async def main\('
-        ],
-        'cli': [
-            r'@click\.(command|group)',
-            r'argparse\.ArgumentParser',
-            r'sys\.argv',
-            r'from typer import'
-        ],
-        'web_server': [
-            r'app\s*=\s*FastAPI\(',
-            r'app\s*=\s*Flask\(',
-            r'uvicorn\.run\(',
-            r'@app\.(get|post|put|delete)'
-        ],
-        'setup': [
-            r'setup\(',
-            r'from setuptools import',
-            r'__version__'
-        ]
+        "main": [r'if __name__\s*==\s*["\']__main__["\']', r"def main\(", r"async def main\("],
+        "cli": [r"@click\.(command|group)", r"argparse\.ArgumentParser", r"sys\.argv", r"from typer import"],
+        "web_server": [r"app\s*=\s*FastAPI\(", r"app\s*=\s*Flask\(", r"uvicorn\.run\(", r"@app\.(get|post|put|delete)"],
+        "setup": [r"setup\(", r"from setuptools import", r"__version__"],
     }
 
     # Entry point patterns for TypeScript/TSX
     typescript_entry_patterns = {
-        'react_component': [
-            r'export\s+(?:default\s+)?(?:function|const)\s+\w+\s*[:=]\s*(?:React\.)?(?:FC|FunctionComponent|Component)',
-            r'export\s+(?:default\s+)?(?:function|const)\s+\w+\s*[:=]\s*\([^)]*\)\s*=>\s*\{',
-            r'export\s+default\s+function\s+\w+\s*\(',
-            r'export\s+(?:default\s+)?class\s+\w+\s+extends\s+(?:React\.)?Component'
+        "react_component": [
+            r"export\s+(?:default\s+)?(?:function|const)\s+\w+\s*[:=]\s*(?:React\.)?(?:FC|FunctionComponent|Component)",
+            r"export\s+(?:default\s+)?(?:function|const)\s+\w+\s*[:=]\s*\([^)]*\)\s*=>\s*\{",
+            r"export\s+default\s+function\s+\w+\s*\(",
+            r"export\s+(?:default\s+)?class\s+\w+\s+extends\s+(?:React\.)?Component",
         ],
-        'exported_function': [
-            r'export\s+(?:async\s+)?function\s+\w+\s*\(',
-            r'export\s+const\s+\w+\s*[:=]\s*(?:async\s*)?\([^)]*\)\s*=>',
-            r'export\s+default\s+(?:async\s+)?function'
+        "exported_function": [
+            r"export\s+(?:async\s+)?function\s+\w+\s*\(",
+            r"export\s+const\s+\w+\s*[:=]\s*(?:async\s*)?\([^)]*\)\s*=>",
+            r"export\s+default\s+(?:async\s+)?function",
         ],
-        'typescript_interface': [
-            r'export\s+(?:default\s+)?interface\s+\w+',
-            r'export\s+(?:default\s+)?type\s+\w+\s*=',
-            r'export\s+(?:default\s+)?enum\s+\w+'
+        "typescript_interface": [
+            r"export\s+(?:default\s+)?interface\s+\w+",
+            r"export\s+(?:default\s+)?type\s+\w+\s*=",
+            r"export\s+(?:default\s+)?enum\s+\w+",
         ],
-        'web_entry': [
-            r'ReactDOM\.render\(',
-            r'createRoot\(',
-            r'\.mount\(',
-            r'Vite\.createApp\('
-        ]
+        "web_entry": [r"ReactDOM\.render\(", r"createRoot\(", r"\.mount\(", r"Vite\.createApp\("],
     }
 
-    manifest_file = analysis_dir / 'manifest.json'
+    manifest_file = analysis_dir / "manifest.json"
     if not manifest_file.exists():
         return []
 
-    with open(manifest_file, 'r') as f:
+    with open(manifest_file) as f:
         manifest = json.load(f)
 
     # Search in Python files
-    python_files = [f for f in manifest.get('files', [])
-                   if f.get('language') == 'Python']
+    python_files = [f for f in manifest.get("files", []) if f.get("language") == "Python"]
 
     for file_info in python_files[:500]:  # Limit search
-        file_path = repo_root / file_info['path']
+        file_path = repo_root / file_info["path"]
         if not file_path.exists():
             continue
 
         try:
-            with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+            with open(file_path, encoding="utf-8", errors="ignore") as f:
                 content = f.read()
 
             for entry_type, patterns in python_entry_patterns.items():
                 for pattern in patterns:
                     if re.search(pattern, content):
-                        lines = content.split('\n')
-                        matching_lines = [i+1 for i, line in enumerate(lines)
-                                        if re.search(pattern, line)]
-                        entry_points.append({
-                            'type': entry_type,
-                            'path': file_info['path'],
-                            'line_numbers': matching_lines[:5],
-                            'pattern': pattern,
-                            'safe_integration_points': identify_integration_points(content, file_info['path'], 'Python')
-                        })
+                        lines = content.split("\n")
+                        matching_lines = [i + 1 for i, line in enumerate(lines) if re.search(pattern, line)]
+                        entry_points.append(
+                            {
+                                "type": entry_type,
+                                "path": file_info["path"],
+                                "line_numbers": matching_lines[:5],
+                                "pattern": pattern,
+                                "safe_integration_points": identify_integration_points(
+                                    content, file_info["path"], "Python"
+                                ),
+                            }
+                        )
                         break
         except Exception:
             continue
 
     # Search in TypeScript/TSX files
-    typescript_files = [f for f in manifest.get('files', [])
-                       if f.get('language') == 'TypeScript']
+    typescript_files = [f for f in manifest.get("files", []) if f.get("language") == "TypeScript"]
 
     for file_info in typescript_files[:500]:  # Limit search
-        file_path = repo_root / file_info['path']
+        file_path = repo_root / file_info["path"]
         if not file_path.exists():
             continue
 
         try:
-            with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+            with open(file_path, encoding="utf-8", errors="ignore") as f:
                 content = f.read()
 
             for entry_type, patterns in typescript_entry_patterns.items():
                 for pattern in patterns:
                     if re.search(pattern, content):
-                        lines = content.split('\n')
-                        matching_lines = [i+1 for i, line in enumerate(lines)
-                                        if re.search(pattern, line)]
-                        entry_points.append({
-                            'type': entry_type,
-                            'path': file_info['path'],
-                            'line_numbers': matching_lines[:5],
-                            'pattern': pattern,
-                            'safe_integration_points': identify_integration_points(content, file_info['path'], 'TypeScript')
-                        })
+                        lines = content.split("\n")
+                        matching_lines = [i + 1 for i, line in enumerate(lines) if re.search(pattern, line)]
+                        entry_points.append(
+                            {
+                                "type": entry_type,
+                                "path": file_info["path"],
+                                "line_numbers": matching_lines[:5],
+                                "pattern": pattern,
+                                "safe_integration_points": identify_integration_points(
+                                    content, file_info["path"], "TypeScript"
+                                ),
+                            }
+                        )
                         break
         except Exception:
             continue
@@ -419,7 +399,7 @@ def identify_entry_points(analysis_dir: Path, repo_root: Path) -> List[Dict]:
     seen = set()
     unique_entry_points = []
     for ep in entry_points:
-        key = (ep['path'], ep['type'])
+        key = (ep["path"], ep["type"])
         if key not in seen:
             seen.add(key)
             unique_entry_points.append(ep)
@@ -427,105 +407,119 @@ def identify_entry_points(analysis_dir: Path, repo_root: Path) -> List[Dict]:
     return unique_entry_points
 
 
-def identify_integration_points(content: str, file_path: str, language: str = 'Python') -> List[Dict]:
+def identify_integration_points(content: str, file_path: str, language: str = "Python") -> list[dict]:
     """Identify safe integration points for instrumentation."""
     integration_points = []
 
-    if language == 'Python':
+    if language == "Python":
         # Look for function definitions (potential hook points)
-        function_pattern = r'def\s+(\w+)\s*\('
+        function_pattern = r"def\s+(\w+)\s*\("
         for match in re.finditer(function_pattern, content):
             func_name = match.group(1)
-            line_num = content[:match.start()].count('\n') + 1
+            line_num = content[: match.start()].count("\n") + 1
 
             # Check if it's a public function (not starting with _)
-            if not func_name.startswith('_'):
-                integration_points.append({
-                    'type': 'function',
-                    'name': func_name,
-                    'line_number': line_num,
-                    'wrapper_pattern': f'# Wrapper pattern:\n# def {func_name}(...):\n#     # Log entry\n#     result = original_{func_name}(...)\n#     # Log exit\n#     return result'
-                })
+            if not func_name.startswith("_"):
+                integration_points.append(
+                    {
+                        "type": "function",
+                        "name": func_name,
+                        "line_number": line_num,
+                        "wrapper_pattern": f"# Wrapper pattern:\n# def {func_name}(...):\n#     # Log entry\n#     result = original_{func_name}(...)\n#     # Log exit\n#     return result",
+                    }
+                )
 
         # Look for class definitions
-        class_pattern = r'class\s+(\w+)\s*(?:\(|:)'
+        class_pattern = r"class\s+(\w+)\s*(?:\(|:)"
         for match in re.finditer(class_pattern, content):
             class_name = match.group(1)
-            line_num = content[:match.start()].count('\n') + 1
+            line_num = content[: match.start()].count("\n") + 1
 
-            if not class_name.startswith('_'):
-                integration_points.append({
-                    'type': 'class',
-                    'name': class_name,
-                    'line_number': line_num,
-                    'wrapper_pattern': f'# Wrapper pattern:\n# class {class_name}:\n#     def __init__(self, ...):\n#         # Log initialization\n#         pass'
-                })
+            if not class_name.startswith("_"):
+                integration_points.append(
+                    {
+                        "type": "class",
+                        "name": class_name,
+                        "line_number": line_num,
+                        "wrapper_pattern": f"# Wrapper pattern:\n# class {class_name}:\n#     def __init__(self, ...):\n#         # Log initialization\n#         pass",
+                    }
+                )
 
-    elif language == 'TypeScript':
+    elif language == "TypeScript":
         # Look for exported functions
-        exported_function_pattern = r'export\s+(?:async\s+)?function\s+(\w+)\s*\('
+        exported_function_pattern = r"export\s+(?:async\s+)?function\s+(\w+)\s*\("
         for match in re.finditer(exported_function_pattern, content):
             func_name = match.group(1)
-            line_num = content[:match.start()].count('\n') + 1
-            if not func_name.startswith('_'):
-                integration_points.append({
-                    'type': 'function',
-                    'name': func_name,
-                    'line_number': line_num,
-                    'wrapper_pattern': f'// Wrapper pattern:\n// export function {func_name}(...): ReturnType {{\n//   // Log entry\n//   const result = original_{func_name}(...);\n//   // Log exit\n//   return result;\n// }}'
-                })
+            line_num = content[: match.start()].count("\n") + 1
+            if not func_name.startswith("_"):
+                integration_points.append(
+                    {
+                        "type": "function",
+                        "name": func_name,
+                        "line_number": line_num,
+                        "wrapper_pattern": f"// Wrapper pattern:\n// export function {func_name}(...): ReturnType {{\n//   // Log entry\n//   const result = original_{func_name}(...);\n//   // Log exit\n//   return result;\n// }}",
+                    }
+                )
 
         # Look for React components
-        react_component_pattern = r'export\s+(?:default\s+)?(?:function|const)\s+(\w+)\s*[:=]\s*(?:React\.)?(?:FC|FunctionComponent|Component)'
+        react_component_pattern = r"export\s+(?:default\s+)?(?:function|const)\s+(\w+)\s*[:=]\s*(?:React\.)?(?:FC|FunctionComponent|Component)"
         for match in re.finditer(react_component_pattern, content):
             component_name = match.group(1)
-            line_num = content[:match.start()].count('\n') + 1
-            if not component_name.startswith('_'):
-                integration_points.append({
-                    'type': 'react_component',
-                    'name': component_name,
-                    'line_number': line_num,
-                    'wrapper_pattern': '# DISABLED: f-string syntax error - escaped'
-                })
+            line_num = content[: match.start()].count("\n") + 1
+            if not component_name.startswith("_"):
+                integration_points.append(
+                    {
+                        "type": "react_component",
+                        "name": component_name,
+                        "line_number": line_num,
+                        "wrapper_pattern": "# DISABLED: f-string syntax error - escaped",
+                    }
+                )
 
         # Look for arrow function exports
-        arrow_function_pattern = r'export\s+const\s+(\w+)\s*[:=]\s*(?:async\s*)?\([^)]*\)\s*=>'
+        arrow_function_pattern = r"export\s+const\s+(\w+)\s*[:=]\s*(?:async\s*)?\([^)]*\)\s*=>"
         for match in re.finditer(arrow_function_pattern, content):
             func_name = match.group(1)
-            line_num = content[:match.start()].count('\n') + 1
-            if not func_name.startswith('_'):
-                integration_points.append({
-                    'type': 'function',
-                    'name': func_name,
-                    'line_number': line_num,
-                    'wrapper_pattern': '# DISABLED: f-string syntax error - escaped'
-                })
+            line_num = content[: match.start()].count("\n") + 1
+            if not func_name.startswith("_"):
+                integration_points.append(
+                    {
+                        "type": "function",
+                        "name": func_name,
+                        "line_number": line_num,
+                        "wrapper_pattern": "# DISABLED: f-string syntax error - escaped",
+                    }
+                )
 
         # Look for TypeScript interfaces/types
-        interface_pattern = r'export\s+(?:default\s+)?interface\s+(\w+)'
+        interface_pattern = r"export\s+(?:default\s+)?interface\s+(\w+)"
         for match in re.finditer(interface_pattern, content):
             interface_name = match.group(1)
-            line_num = content[:match.start()].count('\n') + 1
-            if not interface_name.startswith('_'):
-                integration_points.append({
-                    'type': 'interface',
-                    'name': interface_name,
-                    'line_number': line_num,
-                    'wrapper_pattern': f'// Integration point: TypeScript interface\n// export interface {interface_name} {{\n//   // Add monitoring fields here\n// }}'
-                })
+            line_num = content[: match.start()].count("\n") + 1
+            if not interface_name.startswith("_"):
+                integration_points.append(
+                    {
+                        "type": "interface",
+                        "name": interface_name,
+                        "line_number": line_num,
+                        "wrapper_pattern": f"// Integration point: TypeScript interface\n// export interface {interface_name} {{\n//   // Add monitoring fields here\n// }}",
+                    }
+                )
 
         # Look for class definitions
-        class_pattern = r'export\s+(?:default\s+)?class\s+(\w+)'
+        class_pattern = r"export\s+(?:default\s+)?class\s+(\w+)"
         for match in re.finditer(class_pattern, content):
             class_name = match.group(1)
-            line_num = content[:match.start()].count('\n') + 1
-            if not class_name.startswith('_'):
-                integration_points.append({
-                    'type': 'class',
-                    'name': class_name,
-                    'line_number': line_num,
-                    'wrapper_pattern': f'// Wrapper pattern:\n// export class {class_name} {{\n//   // Add logging in constructor or methods\n// }}'
-                })
+            line_num = content[: match.start()].count("\n") + 1
+            if not class_name.startswith("_"):
+                integration_points.append(
+                    {
+                        "type": "class",
+                        "name": class_name,
+                        "line_number": line_num,
+                        "wrapper_pattern": f"// Wrapper pattern:\n// export class {class_name} {{\n//   // Add logging in constructor or methods\n// }}",
+                    }
+                )
 
     return integration_points[:10]  # Limit per file
 
@@ -536,33 +530,33 @@ def generate_entry_points_report(analysis_dir: Path, repo_root: Path, output_dir
 
     # Add integration point details (if not already added)
     for ep in entry_points:
-        if 'safe_integration_points' not in ep or not ep['safe_integration_points']:
-            file_path = repo_root / ep['path']
+        if "safe_integration_points" not in ep or not ep["safe_integration_points"]:
+            file_path = repo_root / ep["path"]
             if file_path.exists():
                 try:
-                    with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                    with open(file_path, encoding="utf-8", errors="ignore") as f:
                         content = f.read()
                     # Determine language from file extension
-                    lang = 'Python' if ep['path'].endswith('.py') else ('TypeScript' if ep['path'].endswith(('.ts', '.tsx')) else 'Python')
-                    ep['safe_integration_points'] = identify_integration_points(content, ep['path'], lang)
+                    lang = (
+                        "Python"
+                        if ep["path"].endswith(".py")
+                        else ("TypeScript" if ep["path"].endswith((".ts", ".tsx")) else "Python")
+                    )
+                    ep["safe_integration_points"] = identify_integration_points(content, ep["path"], lang)
                 except Exception:
-                    ep['safe_integration_points'] = []
+                    ep["safe_integration_points"] = []
 
-    report = {
-        'total_entry_points': len(entry_points),
-        'entry_points_by_type': {},
-        'entry_points': entry_points
-    }
+    report = {"total_entry_points": len(entry_points), "entry_points_by_type": {}, "entry_points": entry_points}
 
     # Group by type
     for ep in entry_points:
-        ep_type = ep['type']
-        if ep_type not in report['entry_points_by_type']:
-            report['entry_points_by_type'][ep_type] = []
-        report['entry_points_by_type'][ep_type].append(ep)
+        ep_type = ep["type"]
+        if ep_type not in report["entry_points_by_type"]:
+            report["entry_points_by_type"][ep_type] = []
+        report["entry_points_by_type"][ep_type].append(ep)
 
-    output_file = output_dir / 'entry_points.json'
-    with open(output_file, 'w') as f:
+    output_file = output_dir / "entry_points.json"
+    with open(output_file, "w") as f:
         json.dump(report, f, indent=2)
 
     print(f"Entry points report saved to {output_file}")
@@ -971,8 +965,8 @@ export function ModuleGraphView() {
 - Data never leaves local filesystem (for static file version)
 """
 
-    output_file = output_dir / 'visualization_spec.md'
-    with output_file.open('w', encoding='utf-8') as f:
+    output_file = output_dir / "visualization_spec.md"
+    with output_file.open("w", encoding="utf-8") as f:
         f.write(spec)
 
     print(f"Visualization spec saved to {output_file}")
@@ -983,10 +977,10 @@ def main():
     import argparse
     from pathlib import Path
 
-    parser = argparse.ArgumentParser(description='Generate additional artifacts')
-    parser.add_argument('--analysis-dir', required=True, help='Analysis output directory')
-    parser.add_argument('--repo-root', required=True, help='Repository root path')
-    parser.add_argument('--output-dir', required=True, help='Output directory for artifacts')
+    parser = argparse.ArgumentParser(description="Generate additional artifacts")
+    parser.add_argument("--analysis-dir", required=True, help="Analysis output directory")
+    parser.add_argument("--repo-root", required=True, help="Repository root path")
+    parser.add_argument("--output-dir", required=True, help="Output directory for artifacts")
 
     args = parser.parse_args()
 
@@ -1008,5 +1002,5 @@ def main():
     print("All artifacts generated successfully!")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
