@@ -1,0 +1,19 @@
+{
+  "path": "application\\mothership\\services\\finance\\scopes.py",
+  "size": 993,
+  "language": "Python",
+  "lines": 29,
+  "non_empty_lines": 20,
+  "functions": 1,
+  "classes": 1,
+  "imports": [
+    "typing"
+  ],
+  "import_lines": [
+    8
+  ],
+  "complexity_estimate": 1.0,
+  "comment_density": 0.034482758620689655,
+  "has_docstrings": true,
+  "side_effects": []
+}

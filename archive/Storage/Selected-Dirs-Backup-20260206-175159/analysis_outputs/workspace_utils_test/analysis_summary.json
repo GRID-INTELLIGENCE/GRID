@@ -1,0 +1,8 @@
+{
+  "command": "analyze",
+  "root_path": "e:\\workspace_utils",
+  "output_dir": "e:\\analysis_outputs\\workspace_utils_test",
+  "files_analyzed": 9,
+  "refactor_candidates": 1,
+  "high_value_components": 0
+}

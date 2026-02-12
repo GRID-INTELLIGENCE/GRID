@@ -1,0 +1,27 @@
+{
+  "path": "application\\resonance\\__init__.py",
+  "size": 1553,
+  "language": "Python",
+  "lines": 46,
+  "non_empty_lines": 38,
+  "functions": 0,
+  "classes": 0,
+  "imports": [
+    "__future__",
+    "activity_resonance",
+    "adsr_envelope",
+    "context_provider",
+    "path_visualizer"
+  ],
+  "import_lines": [
+    8,
+    12,
+    18,
+    24,
+    29
+  ],
+  "complexity_estimate": 8.0,
+  "comment_density": 0.08695652173913043,
+  "has_docstrings": true,
+  "side_effects": []
+}

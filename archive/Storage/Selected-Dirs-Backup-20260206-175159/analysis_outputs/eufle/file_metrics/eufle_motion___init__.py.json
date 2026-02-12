@@ -1,0 +1,19 @@
+{
+  "path": "eufle\\motion\\__init__.py",
+  "size": 399,
+  "language": "Python",
+  "lines": 22,
+  "non_empty_lines": 19,
+  "functions": 0,
+  "classes": 0,
+  "imports": [
+    "flow_diffusion"
+  ],
+  "import_lines": [
+    3
+  ],
+  "complexity_estimate": 0.0,
+  "comment_density": 0.0,
+  "has_docstrings": true,
+  "side_effects": []
+}

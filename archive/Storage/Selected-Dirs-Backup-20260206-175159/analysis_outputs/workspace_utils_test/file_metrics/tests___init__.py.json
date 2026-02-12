@@ -1,0 +1,15 @@
+{
+  "path": "tests\\__init__.py",
+  "size": 38,
+  "language": "Python",
+  "lines": 3,
+  "non_empty_lines": 3,
+  "functions": 0,
+  "classes": 0,
+  "imports": [],
+  "import_lines": [],
+  "complexity_estimate": 0.0,
+  "comment_density": 0.0,
+  "has_docstrings": true,
+  "side_effects": []
+}

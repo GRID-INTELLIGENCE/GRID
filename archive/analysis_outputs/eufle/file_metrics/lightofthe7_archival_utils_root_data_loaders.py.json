@@ -1,0 +1,15 @@
+{
+  "path": "lightofthe7\\archival\\utils_root\\data_loaders.py",
+  "size": 65,
+  "language": "Python",
+  "lines": 6,
+  "non_empty_lines": 3,
+  "functions": 1,
+  "classes": 0,
+  "imports": [],
+  "import_lines": [],
+  "complexity_estimate": 0.0,
+  "comment_density": 0.0,
+  "has_docstrings": false,
+  "side_effects": []
+}

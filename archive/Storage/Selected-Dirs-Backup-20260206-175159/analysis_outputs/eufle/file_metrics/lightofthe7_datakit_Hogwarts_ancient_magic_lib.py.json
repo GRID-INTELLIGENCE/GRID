@@ -1,0 +1,27 @@
+{
+  "path": "lightofthe7\\datakit\\Hogwarts\\ancient_magic_lib.py",
+  "size": 13175,
+  "language": "Python",
+  "lines": 386,
+  "non_empty_lines": 305,
+  "functions": 13,
+  "classes": 4,
+  "imports": [
+    "__future__",
+    "time",
+    "collections.abc",
+    "dataclasses",
+    "enum"
+  ],
+  "import_lines": [
+    16,
+    18,
+    19,
+    20,
+    21
+  ],
+  "complexity_estimate": 21.0,
+  "comment_density": 0.05699481865284974,
+  "has_docstrings": true,
+  "side_effects": []
+}

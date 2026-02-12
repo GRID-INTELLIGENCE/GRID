@@ -1,0 +1,23 @@
+{
+  "path": "application\\mothership\\schemas\\agentic.py",
+  "size": 532,
+  "language": "Python",
+  "lines": 25,
+  "non_empty_lines": 20,
+  "functions": 0,
+  "classes": 0,
+  "imports": [
+    "typing",
+    "pydantic",
+    "grid.agentic.schemas"
+  ],
+  "import_lines": [
+    3,
+    5,
+    8
+  ],
+  "complexity_estimate": 0.0,
+  "comment_density": 0.04,
+  "has_docstrings": true,
+  "side_effects": []
+}

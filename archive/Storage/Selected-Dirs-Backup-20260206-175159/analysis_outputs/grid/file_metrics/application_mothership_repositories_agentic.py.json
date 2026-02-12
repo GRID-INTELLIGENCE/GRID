@@ -1,0 +1,33 @@
+{
+  "path": "application\\mothership\\repositories\\agentic.py",
+  "size": 8948,
+  "language": "Python",
+  "lines": 275,
+  "non_empty_lines": 229,
+  "functions": 1,
+  "classes": 1,
+  "imports": [
+    "__future__",
+    "logging",
+    "datetime",
+    "typing",
+    "sqlalchemy",
+    "sqlalchemy.ext.asyncio",
+    "application.mothership.db.models_agentic"
+  ],
+  "import_lines": [
+    3,
+    5,
+    6,
+    7,
+    9,
+    10,
+    12
+  ],
+  "complexity_estimate": 20.0,
+  "comment_density": 0.025454545454545455,
+  "has_docstrings": true,
+  "side_effects": [
+    "sqlalchemy\\."
+  ]
+}

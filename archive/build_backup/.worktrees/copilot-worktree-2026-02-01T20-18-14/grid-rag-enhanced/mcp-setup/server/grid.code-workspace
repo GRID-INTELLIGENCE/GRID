@@ -1,0 +1,39 @@
+{
+	"folders": [
+		{
+			"path": "../.."
+		},
+		{
+			"path": "../../../.cursor"
+		},
+		{
+			"path": "../../../Apps"
+		},
+		{
+			"path": "../../../cursor"
+		},
+		{
+			"path": "../../../data"
+		},
+		{
+			"path": "../../../echoes"
+		},
+		{
+			"path": "../../../echoes_ai-1.0.0"
+		},
+		{
+			"path": "../../../EUFLE"
+		},
+		{
+			"path": "../../../pipeline"
+		},
+		{
+			"path": "../../../wonderous-structures"
+		}
+	],
+	"settings": {
+		"terminal.integrated.windowsUseConptyDll": true,
+		"git.ignoreWindowsGit27Warning": true,
+		"terminal.integrated.sendKeybindingsToShell": true
+	}
+}

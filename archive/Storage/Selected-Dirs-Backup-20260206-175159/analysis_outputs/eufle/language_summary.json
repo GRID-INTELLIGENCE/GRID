@@ -1,0 +1,52 @@
+{
+  "total_files": 3073,
+  "languages": {
+    "Python": 418,
+    "Markdown": 351,
+    "JSON": 68,
+    "XML": 38,
+    "YAML": 21,
+    "HTML": 11,
+    "TypeScript": 4,
+    "CSS": 2,
+    "PowerShell": 2
+  },
+  "top_languages": [
+    {
+      "name": "Python",
+      "count": 418
+    },
+    {
+      "name": "Markdown",
+      "count": 351
+    },
+    {
+      "name": "JSON",
+      "count": 68
+    },
+    {
+      "name": "XML",
+      "count": 38
+    },
+    {
+      "name": "YAML",
+      "count": 21
+    },
+    {
+      "name": "HTML",
+      "count": 11
+    },
+    {
+      "name": "TypeScript",
+      "count": 4
+    },
+    {
+      "name": "CSS",
+      "count": 2
+    },
+    {
+      "name": "PowerShell",
+      "count": 2
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "path": "application\\mothership\\security\\cors.py",
+  "size": 2840,
+  "language": "Python",
+  "lines": 94,
+  "non_empty_lines": 75,
+  "functions": 2,
+  "classes": 0,
+  "imports": [
+    "__future__",
+    "typing"
+  ],
+  "import_lines": [
+    7,
+    9
+  ],
+  "complexity_estimate": 7.0,
+  "comment_density": 0.06382978723404255,
+  "has_docstrings": true,
+  "side_effects": []
+}

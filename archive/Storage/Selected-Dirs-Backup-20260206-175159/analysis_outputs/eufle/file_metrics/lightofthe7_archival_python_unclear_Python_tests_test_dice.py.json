@@ -1,0 +1,23 @@
+{
+  "path": "lightofthe7\\archival\\python_unclear\\Python\\tests\\test_dice.py",
+  "size": 7955,
+  "language": "Python",
+  "lines": 210,
+  "non_empty_lines": 161,
+  "functions": 26,
+  "classes": 5,
+  "imports": [
+    "pytest",
+    "circuits.dice",
+    "random"
+  ],
+  "import_lines": [
+    3,
+    5,
+    193
+  ],
+  "complexity_estimate": 5.0,
+  "comment_density": 0.023809523809523808,
+  "has_docstrings": true,
+  "side_effects": []
+}

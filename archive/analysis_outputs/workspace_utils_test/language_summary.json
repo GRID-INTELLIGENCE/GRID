@@ -1,0 +1,17 @@
+{
+  "total_files": 9,
+  "languages": {
+    "Python": 8,
+    "Markdown": 1
+  },
+  "top_languages": [
+    {
+      "name": "Python",
+      "count": 8
+    },
+    {
+      "name": "Markdown",
+      "count": 1
+    }
+  ]
+}

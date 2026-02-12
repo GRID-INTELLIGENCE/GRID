@@ -1,0 +1,32 @@
+{
+  "path": "project_comparator.py",
+  "size": 11679,
+  "language": "Python",
+  "lines": 283,
+  "non_empty_lines": 232,
+  "functions": 11,
+  "classes": 1,
+  "imports": [
+    "json",
+    "pathlib",
+    "typing",
+    "collections",
+    "re",
+    "config"
+  ],
+  "import_lines": [
+    8,
+    9,
+    10,
+    11,
+    12,
+    14
+  ],
+  "complexity_estimate": 28.0,
+  "comment_density": 0.0035335689045936395,
+  "has_docstrings": true,
+  "side_effects": [
+    "open\\(",
+    "with open\\("
+  ]
+}

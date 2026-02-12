@@ -1,0 +1,27 @@
+{
+  "path": "application\\mothership\\security\\ai_safety.py",
+  "size": 6239,
+  "language": "Python",
+  "lines": 208,
+  "non_empty_lines": 159,
+  "functions": 7,
+  "classes": 1,
+  "imports": [
+    "__future__",
+    "logging",
+    "os",
+    "typing",
+    "secret_validation"
+  ],
+  "import_lines": [
+    8,
+    10,
+    11,
+    12,
+    14
+  ],
+  "complexity_estimate": 11.0,
+  "comment_density": 0.04807692307692308,
+  "has_docstrings": true,
+  "side_effects": []
+}

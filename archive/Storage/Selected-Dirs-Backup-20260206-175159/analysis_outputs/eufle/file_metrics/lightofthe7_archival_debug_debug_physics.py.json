@@ -1,0 +1,23 @@
+{
+  "path": "lightofthe7\\archival\\debug\\debug_physics.py",
+  "size": 1485,
+  "language": "Python",
+  "lines": 52,
+  "non_empty_lines": 39,
+  "functions": 3,
+  "classes": 1,
+  "imports": [
+    "circuits.kernel.bus",
+    "circuits.plugins.physics",
+    "circuits.kernel.bus"
+  ],
+  "import_lines": [
+    1,
+    7,
+    13
+  ],
+  "complexity_estimate": 0.0,
+  "comment_density": 0.057692307692307696,
+  "has_docstrings": false,
+  "side_effects": []
+}

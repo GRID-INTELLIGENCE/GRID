@@ -1,0 +1,6008 @@
+{
+  "root_path": "E:\\EUFLE",
+  "total_files": 3073,
+  "analyzed_files": 915,
+  "files": [
+    {
+      "path": ".agent\\workflows\\eufle-implementation-task.md",
+      "size": 3956,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": ".agent\\workflows\\python-venv.md",
+      "size": 1250,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": ".code-workscpace",
+      "size": 1429,
+      "language": null,
+      "depth": 1
+    },
+    {
+      "path": ".cursor\\commands\\generate.md",
+      "size": 0,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": ".env.template",
+      "size": 723,
+      "language": null,
+      "depth": 1
+    },
+    {
+      "path": ".github\\workflows\\eufle-ci.yml",
+      "size": 7864,
+      "language": "YAML",
+      "depth": 3
+    },
+    {
+      "path": ".gitignore",
+      "size": 173,
+      "language": null,
+      "depth": 1
+    },
+    {
+      "path": ".windsurf\\rules\\lots.md",
+      "size": 12278,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": ".windsurf\\workflows\\parse.md",
+      "size": 3381,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": ".windsurf\\workflows\\workflow.md",
+      "size": 12300,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "apps\\aesthetic_demo\\index.html",
+      "size": 3518,
+      "language": "HTML",
+      "depth": 3
+    },
+    {
+      "path": "apps\\aesthetic_demo\\style.css",
+      "size": 5097,
+      "language": "CSS",
+      "depth": 3
+    },
+    {
+      "path": "apps\\README.md",
+      "size": 340,
+      "language": "Markdown",
+      "depth": 2
+    },
+    {
+      "path": "configs\\budget_rules.json",
+      "size": 961,
+      "language": "JSON",
+      "depth": 2
+    },
+    {
+      "path": "configs\\budget_rules_refactored.json",
+      "size": 1050,
+      "language": "JSON",
+      "depth": 2
+    },
+    {
+      "path": "configs\\eufle_defaults.json",
+      "size": 407,
+      "language": "JSON",
+      "depth": 2
+    },
+    {
+      "path": "configs\\eufle_fixed.json",
+      "size": 2620,
+      "language": "JSON",
+      "depth": 2
+    },
+    {
+      "path": "configs\\eufle_temp.json",
+      "size": 2617,
+      "language": "JSON",
+      "depth": 2
+    },
+    {
+      "path": "configs\\model_specs.json",
+      "size": 12124,
+      "language": "JSON",
+      "depth": 2
+    },
+    {
+      "path": "configs\\processing_unit.json",
+      "size": 334,
+      "language": "JSON",
+      "depth": 2
+    },
+    {
+      "path": "configs\\quantized.json",
+      "size": 1450,
+      "language": "JSON",
+      "depth": 2
+    },
+    {
+      "path": "configs\\swing_report.json",
+      "size": 2352,
+      "language": "JSON",
+      "depth": 2
+    },
+    {
+      "path": "configs\\times.json",
+      "size": 707,
+      "language": "JSON",
+      "depth": 2
+    },
+    {
+      "path": "datasets\\.gitkeep",
+      "size": 0,
+      "language": null,
+      "depth": 2
+    },
+    {
+      "path": "datasets\\bigcodebench_10.jsonl",
+      "size": 5482,
+      "language": null,
+      "depth": 2
+    },
+    {
+      "path": "datasets\\humaneval_20.jsonl",
+      "size": 15568,
+      "language": null,
+      "depth": 2
+    },
+    {
+      "path": "datasets\\humaneval_slice.jsonl",
+      "size": 560,
+      "language": null,
+      "depth": 2
+    },
+    {
+      "path": "datasets\\humaneval_training.txt",
+      "size": 7831,
+      "language": null,
+      "depth": 2
+    },
+    {
+      "path": "datasets\\mbpp_20.jsonl",
+      "size": 6710,
+      "language": null,
+      "depth": 2
+    },
+    {
+      "path": "datasets\\registry.json",
+      "size": 7919,
+      "language": "JSON",
+      "depth": 2
+    },
+    {
+      "path": "DELIVERABLES_MANIFEST.md",
+      "size": 5644,
+      "language": "Markdown",
+      "depth": 1
+    },
+    {
+      "path": "docker-compose.monitoring.yml",
+      "size": 2008,
+      "language": "YAML",
+      "depth": 1
+    },
+    {
+      "path": "docs\\.gitkeep",
+      "size": 0,
+      "language": null,
+      "depth": 2
+    },
+    {
+      "path": "docs\\ARCHITECTURE.md",
+      "size": 1969,
+      "language": "Markdown",
+      "depth": 2
+    },
+    {
+      "path": "docs\\BUDGET_AUTOMATION_ROOT_CAUSE_ANALYSIS.md",
+      "size": 11465,
+      "language": "Markdown",
+      "depth": 2
+    },
+    {
+      "path": "docs\\BUDGET_REFACTORING_SUMMARY.md",
+      "size": 6054,
+      "language": "Markdown",
+      "depth": 2
+    },
+    {
+      "path": "docs\\CICD_DOCUMENTATION.md",
+      "size": 5584,
+      "language": "Markdown",
+      "depth": 2
+    },
+    {
+      "path": "docs\\CONTRIBUTING.md",
+      "size": 763,
+      "language": "Markdown",
+      "depth": 2
+    },
+    {
+      "path": "docs\\CROSS_MODAL_ABRASIVENESS.md",
+      "size": 2571,
+      "language": "Markdown",
+      "depth": 2
+    },
+    {
+      "path": "docs\\DEEPSEEK_OCR_ARCHITECTURE.md",
+      "size": 2537,
+      "language": "Markdown",
+      "depth": 2
+    },
+    {
+      "path": "docs\\DEEPSEEK_OCR_CV_INSIGHTS.csv",
+      "size": 1220,
+      "language": null,
+      "depth": 2
+    },
+    {
+      "path": "docs\\DEEPSEEK_OCR_SNAPSHOT.md",
+      "size": 1751,
+      "language": "Markdown",
+      "depth": 2
+    },
+    {
+      "path": "docs\\DEPENDENCIES.md",
+      "size": 2995,
+      "language": "Markdown",
+      "depth": 2
+    },
+    {
+      "path": "docs\\DEPENDENCY_AUDIT.md",
+      "size": 5279,
+      "language": "Markdown",
+      "depth": 2
+    },
+    {
+      "path": "docs\\EUFLE_DOCUMENTATION_INDEX.md",
+      "size": 5817,
+      "language": "Markdown",
+      "depth": 2
+    },
+    {
+      "path": "docs\\EUFLE_EXECUTIVE_SUMMARY.md",
+      "size": 4927,
+      "language": "Markdown",
+      "depth": 2
+    },
+    {
+      "path": "docs\\EUFLE_FINAL_REVIEW_2026_01_05.md",
+      "size": 36369,
+      "language": "Markdown",
+      "depth": 2
+    },
+    {
+      "path": "docs\\EUFLE_FINAL_VALIDATION_REPORT.md",
+      "size": 9303,
+      "language": "Markdown",
+      "depth": 2
+    },
+    {
+      "path": "docs\\EUFLE_README.md",
+      "size": 7110,
+      "language": "Markdown",
+      "depth": 2
+    },
+    {
+      "path": "docs\\EUFLE_VERIFICATION_REPORT.md",
+      "size": 4841,
+      "language": "Markdown",
+      "depth": 2
+    },
+    {
+      "path": "docs\\FINETUNING_CANDIDATES.md",
+      "size": 4466,
+      "language": "Markdown",
+      "depth": 2
+    },
+    {
+      "path": "docs\\FINETUNING_PLAN.md",
+      "size": 1959,
+      "language": "Markdown",
+      "depth": 2
+    },
+    {
+      "path": "docs\\GGUF_TRAINING.md",
+      "size": 1282,
+      "language": "Markdown",
+      "depth": 2
+    },
+    {
+      "path": "docs\\INFRASTRUCTURE.md",
+      "size": 3331,
+      "language": "Markdown",
+      "depth": 2
+    },
+    {
+      "path": "docs\\INTEGRATION_DEFENSE.md",
+      "size": 2022,
+      "language": "Markdown",
+      "depth": 2
+    },
+    {
+      "path": "docs\\ITERATIVE_UPDATE_JAN_04.md",
+      "size": 1588,
+      "language": "Markdown",
+      "depth": 2
+    },
+    {
+      "path": "docs\\MONITORING_DOCUMENTATION.md",
+      "size": 8195,
+      "language": "Markdown",
+      "depth": 2
+    },
+    {
+      "path": "docs\\MURMURING_GESTURES_FAQ.md",
+      "size": 5335,
+      "language": "Markdown",
+      "depth": 2
+    },
+    {
+      "path": "docs\\OBJECTS_VS_ENTITIES_ANALOGY.md",
+      "size": 6688,
+      "language": "Markdown",
+      "depth": 2
+    },
+    {
+      "path": "docs\\ONBOARDING_GRIDSTRAL.md",
+      "size": 5521,
+      "language": "Markdown",
+      "depth": 2
+    },
+    {
+      "path": "docs\\OPTIMIZATION_ROUTINE.md",
+      "size": 2667,
+      "language": "Markdown",
+      "depth": 2
+    },
+    {
+      "path": "docs\\PROCESSING_UNIT_ARCHITECTURE.md",
+      "size": 31256,
+      "language": "Markdown",
+      "depth": 2
+    },
+    {
+      "path": "docs\\PROCESSING_UNIT_IMPLEMENTATION.md",
+      "size": 7985,
+      "language": "Markdown",
+      "depth": 2
+    },
+    {
+      "path": "docs\\PROCESSING_UNIT_PARTITIONS.txt",
+      "size": 26731,
+      "language": null,
+      "depth": 2
+    },
+    {
+      "path": "docs\\STRIPE_INTEGRATION_ROADMAP.md",
+      "size": 3926,
+      "language": "Markdown",
+      "depth": 2
+    },
+    {
+      "path": "docs\\STUDIO_FAQ_RESPONSES.md",
+      "size": 3967,
+      "language": "Markdown",
+      "depth": 2
+    },
+    {
+      "path": "docs\\STUDIO_METRICS_REPORT.md",
+      "size": 2416,
+      "language": "Markdown",
+      "depth": 2
+    },
+    {
+      "path": "docs\\STUDIO_QUICKSTART.md",
+      "size": 3737,
+      "language": "Markdown",
+      "depth": 2
+    },
+    {
+      "path": "docs\\SWING_ANALYSIS_QUERIES.md",
+      "size": 6259,
+      "language": "Markdown",
+      "depth": 2
+    },
+    {
+      "path": "docs\\SWING_ANALYSIS_REPORT.md",
+      "size": 8631,
+      "language": "Markdown",
+      "depth": 2
+    },
+    {
+      "path": "docs\\SWING_ANALYSIS_RESPONSES.json",
+      "size": 4432,
+      "language": "JSON",
+      "depth": 2
+    },
+    {
+      "path": "docs\\TRAINING_PLAN.md",
+      "size": 3934,
+      "language": "Markdown",
+      "depth": 2
+    },
+    {
+      "path": "docs\\TRAINING_TECHNIQUES.md",
+      "size": 5897,
+      "language": "Markdown",
+      "depth": 2
+    },
+    {
+      "path": "docs\\TUI_VLM_SYMBIOSIS.md",
+      "size": 2366,
+      "language": "Markdown",
+      "depth": 2
+    },
+    {
+      "path": "docs\\WSL_INTEGRATION.md",
+      "size": 3738,
+      "language": "Markdown",
+      "depth": 2
+    },
+    {
+      "path": "eufle\\config_sync.py",
+      "size": 17248,
+      "language": "Python",
+      "depth": 2
+    },
+    {
+      "path": "eufle\\motion\\.windsurf\\workflows\\eufle-talk.md",
+      "size": 2780,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "eufle\\motion\\config.yaml",
+      "size": 646,
+      "language": "YAML",
+      "depth": 3
+    },
+    {
+      "path": "eufle\\motion\\flow_diffusion.py",
+      "size": 13824,
+      "language": "Python",
+      "depth": 3
+    },
+    {
+      "path": "eufle\\motion\\__init__.py",
+      "size": 420,
+      "language": "Python",
+      "depth": 3
+    },
+    {
+      "path": "eufle\\processing_unit.py",
+      "size": 12469,
+      "language": "Python",
+      "depth": 2
+    },
+    {
+      "path": "eufle\\__init__.py",
+      "size": 764,
+      "language": "Python",
+      "depth": 2
+    },
+    {
+      "path": "eufle.py",
+      "size": 16161,
+      "language": "Python",
+      "depth": 1
+    },
+    {
+      "path": "EUFLE_FINAL_REVIEW_SUMMARY.txt",
+      "size": 14470,
+      "language": null,
+      "depth": 1
+    },
+    {
+      "path": "eufle_pytest_output.txt",
+      "size": 2894,
+      "language": null,
+      "depth": 1
+    },
+    {
+      "path": "evaluations\\reports\\.gitkeep",
+      "size": 0,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "evaluations\\reports\\demo_output.md",
+      "size": 3605,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "evaluations\\results\\.gitkeep",
+      "size": 0,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "evaluations\\results\\comparison.txt",
+      "size": 162,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "evaluations\\results\\comparison_report.html",
+      "size": 1544,
+      "language": "HTML",
+      "depth": 3
+    },
+    {
+      "path": "evaluations\\results\\mistral_nemo_humaneval20.json",
+      "size": 7692,
+      "language": "JSON",
+      "depth": 3
+    },
+    {
+      "path": "evaluations\\results\\out_mistral.json",
+      "size": 731,
+      "language": "JSON",
+      "depth": 3
+    },
+    {
+      "path": "evaluations\\results\\out_ollama.json",
+      "size": 407,
+      "language": "JSON",
+      "depth": 3
+    },
+    {
+      "path": "evaluations\\results\\out_openai.json",
+      "size": 977,
+      "language": "JSON",
+      "depth": 3
+    },
+    {
+      "path": "evaluations\\scripts\\.gitkeep",
+      "size": 0,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "evaluations\\scripts\\pipeline.py",
+      "size": 8236,
+      "language": "Python",
+      "depth": 3
+    },
+    {
+      "path": "examples\\cli_chat\\chat_cli.py",
+      "size": 1013,
+      "language": "Python",
+      "depth": 3
+    },
+    {
+      "path": "examples\\cli_chat\\requirements.txt",
+      "size": 77,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "examples\\cli_inference.py",
+      "size": 11932,
+      "language": "Python",
+      "depth": 2
+    },
+    {
+      "path": "examples\\CLI_INFERENCE_README.md",
+      "size": 4773,
+      "language": "Markdown",
+      "depth": 2
+    },
+    {
+      "path": "examples\\onboarding_gridstral\\onboard.py",
+      "size": 3185,
+      "language": "Python",
+      "depth": 3
+    },
+    {
+      "path": "examples\\onboarding_gridstral\\README.md",
+      "size": 788,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "examples\\onboarding_gridstral\\requirements.txt",
+      "size": 77,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "examples\\processing_unit_example.py",
+      "size": 4536,
+      "language": "Python",
+      "depth": 2
+    },
+    {
+      "path": "examples\\thread_processing.py",
+      "size": 3832,
+      "language": "Python",
+      "depth": 2
+    },
+    {
+      "path": "examples\\web_discussions\\main.py",
+      "size": 2267,
+      "language": "Python",
+      "depth": 3
+    },
+    {
+      "path": "examples\\web_discussions\\README.md",
+      "size": 467,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "examples\\web_discussions\\requirements.txt",
+      "size": 77,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "explainability\\lime_explainer.py",
+      "size": 2221,
+      "language": "Python",
+      "depth": 2
+    },
+    {
+      "path": "hf-models\\hub\\models--mistralai--Ministral-3-14B-Instruct-2512\\refs\\main",
+      "size": 40,
+      "language": null,
+      "depth": 5
+    },
+    {
+      "path": "hf-models\\ministral-14b\\.gitattributes",
+      "size": 202,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "hf-models\\ministral-14b\\chat_template.jinja",
+      "size": 374,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "hf-models\\ministral-14b\\config.json",
+      "size": 1902,
+      "language": "JSON",
+      "depth": 3
+    },
+    {
+      "path": "hf-models\\ministral-14b\\consolidated.safetensors",
+      "size": 15726706472,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "hf-models\\ministral-14b\\generation_config.json",
+      "size": 131,
+      "language": "JSON",
+      "depth": 3
+    },
+    {
+      "path": "hf-models\\ministral-14b\\model-00001-of-00004.safetensors",
+      "size": 4980912374,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "hf-models\\ministral-14b\\model-00002-of-00004.safetensors",
+      "size": 4996851408,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "hf-models\\ministral-14b\\model-00003-of-00004.safetensors",
+      "size": 4993872954,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "hf-models\\ministral-14b\\model-00004-of-00004.safetensors",
+      "size": 755093832,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "hf-models\\ministral-14b\\model.safetensors.index.json",
+      "size": 117404,
+      "language": "JSON",
+      "depth": 3
+    },
+    {
+      "path": "hf-models\\ministral-14b\\params.json",
+      "size": 1188,
+      "language": "JSON",
+      "depth": 3
+    },
+    {
+      "path": "hf-models\\ministral-14b\\processor_config.json",
+      "size": 976,
+      "language": "JSON",
+      "depth": 3
+    },
+    {
+      "path": "hf-models\\ministral-14b\\README.md",
+      "size": 2354,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "hf-models\\ministral-14b\\SYSTEM_PROMPT.txt",
+      "size": 2407,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "hf-models\\ministral-14b\\tekken.json",
+      "size": 16753777,
+      "language": "JSON",
+      "depth": 3
+    },
+    {
+      "path": "hf-models\\ministral-14b\\tokenizer.json",
+      "size": 17077402,
+      "language": "JSON",
+      "depth": 3
+    },
+    {
+      "path": "hf-models\\ministral-14b\\tokenizer_config.json",
+      "size": 21168,
+      "language": "JSON",
+      "depth": 3
+    },
+    {
+      "path": "hf-models\\windsurf-project\\.uv-cache\\.gitignore",
+      "size": 0,
+      "language": null,
+      "depth": 4
+    },
+    {
+      "path": "hf-models\\windsurf-project\\.uv-cache\\CACHEDIR.TAG",
+      "size": 0,
+      "language": null,
+      "depth": 4
+    },
+    {
+      "path": "hf-models\\windsurf-project\\.uvcache2\\.gitignore",
+      "size": 0,
+      "language": null,
+      "depth": 4
+    },
+    {
+      "path": "hf-models\\windsurf-project\\.uvcache2\\CACHEDIR.TAG",
+      "size": 0,
+      "language": null,
+      "depth": 4
+    },
+    {
+      "path": "hf-models\\windsurf-project\\.uvcache3\\.gitignore",
+      "size": 0,
+      "language": null,
+      "depth": 4
+    },
+    {
+      "path": "hf-models\\windsurf-project\\.uvcache3\\CACHEDIR.TAG",
+      "size": 0,
+      "language": null,
+      "depth": 4
+    },
+    {
+      "path": "hf-models\\windsurf-project\\datasets_registry.json",
+      "size": 4573,
+      "language": "JSON",
+      "depth": 3
+    },
+    {
+      "path": "hf-models\\windsurf-project\\docs.md",
+      "size": 5629,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "hf-models\\windsurf-project\\eval.py",
+      "size": 8819,
+      "language": "Python",
+      "depth": 3
+    },
+    {
+      "path": "hf-models\\windsurf-project\\huggingface_guide.md",
+      "size": 4620,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "hf-models\\windsurf-project\\humaneval_slice.jsonl",
+      "size": 560,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "hf-models\\windsurf-project\\IMPLEMENTATION_SUMMARY.md",
+      "size": 15323,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "hf-models\\windsurf-project\\INDEX.md",
+      "size": 10625,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "hf-models\\windsurf-project\\Market Analysis Playground.md",
+      "size": 65530,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "hf-models\\windsurf-project\\models_registry.json",
+      "size": 6625,
+      "language": "JSON",
+      "depth": 3
+    },
+    {
+      "path": "hf-models\\windsurf-project\\open_source_models_guide.md",
+      "size": 15471,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "hf-models\\windsurf-project\\out_mistral.json",
+      "size": 731,
+      "language": "JSON",
+      "depth": 3
+    },
+    {
+      "path": "hf-models\\windsurf-project\\out_ollama.json",
+      "size": 407,
+      "language": "JSON",
+      "depth": 3
+    },
+    {
+      "path": "hf-models\\windsurf-project\\out_openai.json",
+      "size": 977,
+      "language": "JSON",
+      "depth": 3
+    },
+    {
+      "path": "hf-models\\windsurf-project\\pipeline.py",
+      "size": 8236,
+      "language": "Python",
+      "depth": 3
+    },
+    {
+      "path": "hf-models\\windsurf-project\\QUICKSTART.md",
+      "size": 4959,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "hf-models\\windsurf-project\\requirements.txt",
+      "size": 131,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "hf-models\\windsurf-project\\STUDIO_SETUP.md",
+      "size": 9699,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "integration\\.gitkeep",
+      "size": 0,
+      "language": null,
+      "depth": 2
+    },
+    {
+      "path": "integration\\eval.py",
+      "size": 8819,
+      "language": "Python",
+      "depth": 2
+    },
+    {
+      "path": "LICENSE",
+      "size": 306,
+      "language": null,
+      "depth": 1
+    },
+    {
+      "path": "lightofthe7\\ Dockerfile",
+      "size": 2537,
+      "language": null,
+      "depth": 2
+    },
+    {
+      "path": "lightofthe7\\.agent\\workflows\\command-denylist.md",
+      "size": 1241,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\.agent\\workflows\\git-onboarding.md",
+      "size": 1124,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\.coveragerc",
+      "size": 581,
+      "language": null,
+      "depth": 2
+    },
+    {
+      "path": "lightofthe7\\.cursor\\ai_context.json",
+      "size": 3780,
+      "language": "JSON",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\.cursor\\context\\decision_log.md",
+      "size": 4715,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\.cursor\\context\\key_modules.md",
+      "size": 6092,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\.cursor\\context\\project_summary.md",
+      "size": 5457,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\.cursor\\dashboard.md",
+      "size": 1620,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\.cursor\\plans\\extend_python_contracts_for_cognitive_types_b2aaaf0c.plan.md",
+      "size": 15192,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\.cursor\\rules\\ai_behavior.md",
+      "size": 7016,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\.cursor\\rules\\architecture.md",
+      "size": 8709,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\.cursor\\rules\\coding_standards.md",
+      "size": 7377,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\.cursor\\rules\\context_management.md",
+      "size": 5509,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\.cursor\\rules\\project_structure.md",
+      "size": 7278,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\.cursor\\templates\\code_patterns.md",
+      "size": 12507,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\.cursor\\templates\\new_module.md",
+      "size": 3433,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\.cursorignore",
+      "size": 1193,
+      "language": null,
+      "depth": 2
+    },
+    {
+      "path": "lightofthe7\\.cursorrules",
+      "size": 9026,
+      "language": null,
+      "depth": 2
+    },
+    {
+      "path": "lightofthe7\\.editorconfig",
+      "size": 485,
+      "language": null,
+      "depth": 2
+    },
+    {
+      "path": "lightofthe7\\.gitattributes",
+      "size": 1263,
+      "language": null,
+      "depth": 2
+    },
+    {
+      "path": "lightofthe7\\.github\\CODEOWNERS",
+      "size": 1917,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\.github\\dependabot.yml",
+      "size": 1880,
+      "language": "YAML",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\.github\\ISSUE_TEMPLATE\\bug_report.md",
+      "size": 1289,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\.github\\ISSUE_TEMPLATE\\config.yml",
+      "size": 444,
+      "language": "YAML",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\.github\\ISSUE_TEMPLATE\\feature_request.md",
+      "size": 1441,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\.github\\ISSUE_TEMPLATE\\topic_issue.md",
+      "size": 307,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\.github\\PULL_REQUEST_TEMPLATE\\topic_pr.md",
+      "size": 200,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\.github\\PULL_REQUEST_TEMPLATE.md",
+      "size": 1796,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\.github\\workflows\\docs.yml",
+      "size": 747,
+      "language": "YAML",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\.github\\workflows\\lint.yml",
+      "size": 821,
+      "language": "YAML",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\.github\\workflows\\tests.yml",
+      "size": 1280,
+      "language": "YAML",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\.gitignore",
+      "size": 12283,
+      "language": null,
+      "depth": 2
+    },
+    {
+      "path": "lightofthe7\\.pre-commit-config.yaml",
+      "size": 2029,
+      "language": "YAML",
+      "depth": 2
+    },
+    {
+      "path": "lightofthe7\\analysis_report\\Annotator.xml",
+      "size": 563,
+      "language": "XML",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\analysis_report\\coverage.xml",
+      "size": 193697,
+      "language": "XML",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\analysis_report\\CssUnusedSymbol.xml",
+      "size": 1165,
+      "language": "XML",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\analysis_report\\DuplicatedCode.xml",
+      "size": 40914,
+      "language": "XML",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\analysis_report\\DuplicatedCode_aggregate.xml",
+      "size": 12977,
+      "language": "XML",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\analysis_report\\MarkdownIncorrectlyNumberedListItem.xml",
+      "size": 4192,
+      "language": "XML",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\analysis_report\\MarkdownUnresolvedFileReference.xml",
+      "size": 16595,
+      "language": "XML",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\analysis_report\\OutdatedRequirementInspection.xml",
+      "size": 3453,
+      "language": "XML",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\analysis_report\\PyAbstractClassInspection.xml",
+      "size": 652,
+      "language": "XML",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\analysis_report\\PyArgumentListInspection.xml",
+      "size": 18601,
+      "language": "XML",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\analysis_report\\PyBroadExceptionInspection.xml",
+      "size": 35992,
+      "language": "XML",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\analysis_report\\PyCallingNonCallableInspection.xml",
+      "size": 1214,
+      "language": "XML",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\analysis_report\\PyChainedComparisonsInspection.xml",
+      "size": 5558,
+      "language": "XML",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\analysis_report\\PyDataclassInspection.xml",
+      "size": 1940,
+      "language": "XML",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\analysis_report\\PyDecoratorInspection.xml",
+      "size": 649,
+      "language": "XML",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\analysis_report\\PyDeprecationInspection.xml",
+      "size": 5621,
+      "language": "XML",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\analysis_report\\PyInconsistentReturnsInspection.xml",
+      "size": 13566,
+      "language": "XML",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\analysis_report\\PyIncorrectDocstringInspection.xml",
+      "size": 3535,
+      "language": "XML",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\analysis_report\\PyInvalidCastInspection.xml",
+      "size": 4615,
+      "language": "XML",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\analysis_report\\PyMethodFirstArgAssignmentInspection.xml",
+      "size": 617,
+      "language": "XML",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\analysis_report\\PyMethodMayBeStaticInspection.xml",
+      "size": 35928,
+      "language": "XML",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\analysis_report\\PyMethodOverridingInspection.xml",
+      "size": 3661,
+      "language": "XML",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\analysis_report\\PyMethodParametersInspection.xml",
+      "size": 5433,
+      "language": "XML",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\analysis_report\\PyMissingConstructorInspection.xml",
+      "size": 2468,
+      "language": "XML",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\analysis_report\\PyPropertyAccessInspection.xml",
+      "size": 2480,
+      "language": "XML",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\analysis_report\\PyProtectedMemberInspection.xml",
+      "size": 344791,
+      "language": "XML",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\analysis_report\\PyRedundantParenthesesInspection.xml",
+      "size": 56039,
+      "language": "XML",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\analysis_report\\PySetFunctionToLiteralInspection.xml",
+      "size": 1368,
+      "language": "XML",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\analysis_report\\PySimplifyBooleanCheckInspection.xml",
+      "size": 1263,
+      "language": "XML",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\analysis_report\\PyStatementEffectInspection.xml",
+      "size": 591,
+      "language": "XML",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\analysis_report\\PyStringFormatInspection.xml",
+      "size": 607,
+      "language": "XML",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\analysis_report\\PyTupleAssignmentBalanceInspection.xml",
+      "size": 634,
+      "language": "XML",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\analysis_report\\PyTypedDictInspection.xml",
+      "size": 1892,
+      "language": "XML",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\analysis_report\\PyTypeHintsInspection.xml",
+      "size": 234654,
+      "language": "XML",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\analysis_report\\PyUnboundLocalVariableInspection.xml",
+      "size": 44375,
+      "language": "XML",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\analysis_report\\PyUnresolvedReferencesInspection.xml",
+      "size": 577721,
+      "language": "XML",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\analysis_report\\PyUnusedLocalInspection.xml",
+      "size": 301011,
+      "language": "XML",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\analysis_report\\UnsatisfiedRequirementInspection.xml",
+      "size": 12647,
+      "language": "XML",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\application\\mothership\\config.py",
+      "size": 16237,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\application\\mothership\\dependencies.py",
+      "size": 16383,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\application\\mothership\\exceptions.py",
+      "size": 15224,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\application\\mothership\\main.py",
+      "size": 14166,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\application\\mothership\\middleware\\__init__.py",
+      "size": 12559,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\application\\mothership\\models\\cockpit.py",
+      "size": 21752,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\application\\mothership\\models\\__init__.py",
+      "size": 19486,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\application\\mothership\\repositories\\__init__.py",
+      "size": 24314,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\application\\mothership\\routers\\cockpit.py",
+      "size": 23024,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\application\\mothership\\routers\\health.py",
+      "size": 8222,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\application\\mothership\\routers\\__init__.py",
+      "size": 2016,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\application\\mothership\\schemas\\requests.py",
+      "size": 22817,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\application\\mothership\\schemas\\__init__.py",
+      "size": 17343,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\application\\mothership\\services\\__init__.py",
+      "size": 34573,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\application\\mothership\\utils\\__init__.py",
+      "size": 14478,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\application\\mothership\\__init__.py",
+      "size": 3787,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\archival\\atmosphere\\Atmosphere\\.cursor\\environment.json",
+      "size": 38,
+      "language": "JSON",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\archival\\debug\\debug_articulation.py",
+      "size": 834,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\archival\\debug\\debug_articulation2.py",
+      "size": 754,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\archival\\debug\\debug_articulation3.py",
+      "size": 943,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\archival\\debug\\debug_physics.py",
+      "size": 1485,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\.flake8",
+      "size": 256,
+      "language": null,
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\.github\\copilot-instructions.md",
+      "size": 2566,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\.gitignore",
+      "size": 452,
+      "language": null,
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\CODE_OF_CONDUCT.md",
+      "size": 216,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\CONTRIBUTING.md",
+      "size": 8283,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\custom.py",
+      "size": 10852,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\Dockerfile",
+      "size": 814,
+      "language": null,
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\Docs\\00_START_HERE.md",
+      "size": 9315,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\Docs\\00_TESTING_COMPLETE.md",
+      "size": 7310,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\Docs\\AGENT_PROMPT.md",
+      "size": 9080,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\Docs\\COMPLETE_PACKAGE_INDEX.md",
+      "size": 7831,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\Docs\\DELIVERY_SUMMARY.md",
+      "size": 13411,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\Docs\\FINAL_PACKAGING_COMPLETE.txt",
+      "size": 9329,
+      "language": null,
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\Docs\\IDE_RECORDER_DELIVERY.txt",
+      "size": 10560,
+      "language": null,
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\Docs\\IDE_RECORDER_INDEX.md",
+      "size": 11875,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\Docs\\IDE_RECORDER_PROJECT.txt",
+      "size": 8346,
+      "language": null,
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\Docs\\IDE_RECORDER_QUICKSTART.md",
+      "size": 8621,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\Docs\\IDE_RECORDER_README.md",
+      "size": 11938,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\Docs\\INDEX.md",
+      "size": 10642,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\Docs\\OPTIMIZATION_REPORT.md",
+      "size": 5246,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\Docs\\PACKAGING_READINESS_REPORT.md",
+      "size": 8085,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\Docs\\project_plan.md",
+      "size": 8649,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\Docs\\SIMULATION_SCENARIOS_ANALYSIS.md",
+      "size": 6910,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\Docs\\sora_budget_report.txt",
+      "size": 323,
+      "language": null,
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\Docs\\SORA_COMPLETION_SUMMARY.md",
+      "size": 13204,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\Docs\\SORA_FILE_INDEX.md",
+      "size": 11322,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\Docs\\SORA_INTEGRATION_GUIDE.md",
+      "size": 11251,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\Docs\\SORA_PROJECT_INDEX.md",
+      "size": 11885,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\Docs\\SORA_README.md",
+      "size": 9085,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\Docs\\SORA_WORKFLOW.md",
+      "size": 16198,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\Docs\\TRANSFORMATION_SUMMARY.md",
+      "size": 11437,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\Docs\\VARIANT_SIMULATION.md",
+      "size": 8909,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\FINAL_VERIFICATION.py",
+      "size": 3527,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\hello.py",
+      "size": 32,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\ide_recorder_cli.py",
+      "size": 9644,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\LICENSE",
+      "size": 1074,
+      "language": null,
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\mypy.ini",
+      "size": 354,
+      "language": null,
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\prompt_builder.py",
+      "size": 8979,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\pyproject.toml",
+      "size": 1119,
+      "language": null,
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\pytest.ini",
+      "size": 220,
+      "language": null,
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\QUICKSTART.md",
+      "size": 3825,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\requirements.txt",
+      "size": 305,
+      "language": null,
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\run_variant_simulation.py",
+      "size": 13232,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\simulation_results.json",
+      "size": 13584,
+      "language": "JSON",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\sora_client.py",
+      "size": 13362,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\sora_integration.py",
+      "size": 14220,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\sora_prompt.txt",
+      "size": 3115,
+      "language": null,
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\sora_prompt_generator.py",
+      "size": 23591,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\tests\\conftest.py",
+      "size": 628,
+      "language": "Python",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\tests\\test_dice.py",
+      "size": 7955,
+      "language": "Python",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\tests\\__init__.py",
+      "size": 32,
+      "language": "Python",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\test_sora_system.py",
+      "size": 4219,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\youtube_simulation_results.json",
+      "size": 9171,
+      "language": "JSON",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\archival\\python_unclear\\Python\\youtube_video_simulation.py",
+      "size": 17310,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\archival\\redundant_roots\\ml\\model\\register_model.py",
+      "size": 2998,
+      "language": "Python",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\archival\\transformer_root\\transformer\\Dockerfile",
+      "size": 162,
+      "language": null,
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\archival\\transformer_root\\transformer\\main.py",
+      "size": 7118,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\archival\\transformer_root\\transformer\\requirements.txt",
+      "size": 210,
+      "language": null,
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\archival\\transformer_root\\transformer\\tests\\test_main.py",
+      "size": 902,
+      "language": "Python",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\archival\\transformer_root\\transformer\\tests\\__init__.py",
+      "size": 32,
+      "language": "Python",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\archival\\transformer_root\\transformer\\__init__.py",
+      "size": 30,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\archival\\utils_root\\data_loaders.py",
+      "size": 65,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\archival\\workflows\\cd-checkpoints.yml",
+      "size": 1190,
+      "language": "YAML",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\archival\\workflows\\ci.yml",
+      "size": 4911,
+      "language": "YAML",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\archival\\workflows\\core-tests.yml",
+      "size": 801,
+      "language": "YAML",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\archival\\workflows\\fast-feedback.yml",
+      "size": 276,
+      "language": "YAML",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\archival\\workflows\\future_proof.yml",
+      "size": 1234,
+      "language": "YAML",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\archival\\workflows\\linting.yml",
+      "size": 1238,
+      "language": "YAML",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\archival\\workflows\\realtime-tests.yml",
+      "size": 908,
+      "language": "YAML",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\archival\\workflows\\testing.yml",
+      "size": 1378,
+      "language": "YAML",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\archival\\workflows\\translator-assistant-llm-tests.yml",
+      "size": 292,
+      "language": "YAML",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\archival\\workflows\\translator-assistant-release.yml",
+      "size": 1073,
+      "language": "YAML",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\archival\\workflows\\translator-assistant-tests.yml",
+      "size": 284,
+      "language": "YAML",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\archival\\workflows\\workflow-engine-tests.yml",
+      "size": 868,
+      "language": "YAML",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\artifacts\\contribution_summary.json",
+      "size": 271,
+      "language": "JSON",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\artifacts\\contribution_summary.md",
+      "size": 222,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\artifacts\\data_pipeline_audit.md",
+      "size": 20027,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\artifacts\\decision_tasks.json",
+      "size": 8886,
+      "language": "JSON",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\artifacts\\market_analysis.json",
+      "size": 0,
+      "language": "JSON",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\artifacts\\market_analysis_ai_decision_assistant.json",
+      "size": 4125,
+      "language": "JSON",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\artifacts\\processing_routes.json",
+      "size": 6825,
+      "language": "JSON",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\artifacts\\processing_unit.json",
+      "size": 2419,
+      "language": "JSON",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\artifacts\\product.json",
+      "size": 8707,
+      "language": "JSON",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\artifacts\\repo_analysis\\contribution_log.jsonl",
+      "size": 1464,
+      "language": null,
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\artifacts\\repo_analysis\\summary.json",
+      "size": 2868,
+      "language": "JSON",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\artifacts\\schemas\\market_analysis.schema.json",
+      "size": 6623,
+      "language": "JSON",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\artifacts\\schemas\\product.json",
+      "size": 7459,
+      "language": "JSON",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\artifacts\\schemas\\translator_assistant_request.schema.json",
+      "size": 3059,
+      "language": "JSON",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\artifacts\\schemas\\translator_assistant_response.schema.json",
+      "size": 3073,
+      "language": "JSON",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\artifacts\\SESSION_2025_GRID_PHYSICS.md",
+      "size": 1440,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\artifacts\\TICKET_003_ANGULAR_MOMENTUM.md",
+      "size": 2313,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\assets\\hogwarts_magic.png",
+      "size": 851780,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\backend\\server.py",
+      "size": 1027,
+      "language": "Python",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\CHANGELOG.md",
+      "size": 1180,
+      "language": "Markdown",
+      "depth": 2
+    },
+    {
+      "path": "lightofthe7\\CI_CD_IMPLEMENTATION_SUMMARY.md",
+      "size": 9398,
+      "language": "Markdown",
+      "depth": 2
+    },
+    {
+      "path": "lightofthe7\\CODE_OF_CONDUCT.md",
+      "size": 1220,
+      "language": "Markdown",
+      "depth": 2
+    },
+    {
+      "path": "lightofthe7\\cognitive_layer\\cognitive_load\\chunking.py",
+      "size": 5600,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\cognitive_layer\\cognitive_load\\load_estimator.py",
+      "size": 8272,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\cognitive_layer\\cognitive_load\\scaffolding.py",
+      "size": 7744,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\cognitive_layer\\cognitive_load\\__init__.py",
+      "size": 306,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\cognitive_layer\\decision_support\\bounded_rationality.py",
+      "size": 5697,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\cognitive_layer\\decision_support\\choice_architecture.py",
+      "size": 7884,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\cognitive_layer\\decision_support\\decision_matrix.py",
+      "size": 7322,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\cognitive_layer\\decision_support\\dual_process.py",
+      "size": 7329,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\cognitive_layer\\decision_support\\__init__.py",
+      "size": 409,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\cognitive_layer\\integration\\context_enricher.py",
+      "size": 5024,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\cognitive_layer\\integration\\grid_bridge.py",
+      "size": 5064,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\cognitive_layer\\integration\\pipeline_adapter.py",
+      "size": 6329,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\cognitive_layer\\integration\\__init__.py",
+      "size": 277,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\cognitive_layer\\mental_models\\alignment_checker.py",
+      "size": 6760,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\cognitive_layer\\mental_models\\model_builder.py",
+      "size": 8461,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\cognitive_layer\\mental_models\\model_tracker.py",
+      "size": 6759,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\cognitive_layer\\mental_models\\__init__.py",
+      "size": 309,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\cognitive_layer\\README.md",
+      "size": 6903,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\cognitive_layer\\schemas\\cognitive_state.py",
+      "size": 2579,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\cognitive_layer\\schemas\\decision_context.py",
+      "size": 3025,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\cognitive_layer\\schemas\\user_cognitive_profile.py",
+      "size": 4011,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\cognitive_layer\\schemas\\__init__.py",
+      "size": 284,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\cognitive_layer\\__init__.py",
+      "size": 1873,
+      "language": "Python",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\COMMIT_MESSAGE.txt",
+      "size": 2374,
+      "language": null,
+      "depth": 2
+    },
+    {
+      "path": "lightofthe7\\CONTRIBUTING.md",
+      "size": 1882,
+      "language": "Markdown",
+      "depth": 2
+    },
+    {
+      "path": "lightofthe7\\create_grid_structure.py",
+      "size": 3680,
+      "language": "Python",
+      "depth": 2
+    },
+    {
+      "path": "lightofthe7\\data\\analyze_full_output.txt",
+      "size": 0,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\data\\assistant_response.json",
+      "size": 1228,
+      "language": "JSON",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\data\\assistant_segment.json",
+      "size": 618,
+      "language": "JSON",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\data\\build_log.txt",
+      "size": 1185,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\data\\COMPENSATION_DEMAND_SUMMARY.csv",
+      "size": 2527,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\data\\debug_ner_error.txt",
+      "size": 324,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\data\\financial_case_analysis_report.json",
+      "size": 12851,
+      "language": "JSON",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\data\\fixer_report.txt",
+      "size": 326,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\data\\knowledgegraph_structure.txt",
+      "size": 10172,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\data\\natural_entity_recognition.txt",
+      "size": 2139,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\data\\ner_identifications.json",
+      "size": 2449,
+      "language": "JSON",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\data\\nuance_reports.jsonl",
+      "size": 1594,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\data\\OWL_ontology.txt",
+      "size": 7254,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\data\\pytest_collect.txt",
+      "size": 0,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\data\\railway\\chatlog.json",
+      "size": 4446,
+      "language": "JSON",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\data\\railway\\ultraschema.json",
+      "size": 2663,
+      "language": "JSON",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\data\\request_assistant_api.json",
+      "size": 2413,
+      "language": "JSON",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\data\\requirements.codestral.txt",
+      "size": 38,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\data\\requirements.txt",
+      "size": 177,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\data\\schema\\contrib_sessions\\session-GRID-001.json",
+      "size": 123468,
+      "language": "JSON",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\data\\SET2_deserved_baseline_budget.csv",
+      "size": 3881,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\data\\telemetry.json",
+      "size": 946587,
+      "language": "JSON",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\data\\test_collection_output.txt",
+      "size": 0,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\data\\test_collection_raw.txt",
+      "size": 4,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\data\\test_results.txt",
+      "size": 22159,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\data\\tool_recommendations.txt",
+      "size": 6747,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\data\\value_inventory.csv",
+      "size": 221,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\data\\work_session_log.txt",
+      "size": 673,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\datakit\\.gitignore",
+      "size": 790,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\datakit\\config\\.env.example",
+      "size": 2301,
+      "language": null,
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\core\\config.py",
+      "size": 10582,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\core\\control.py",
+      "size": 3839,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\core\\explorer.py",
+      "size": 38351,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\core\\loader.py",
+      "size": 12923,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\core\\pack_schema.py",
+      "size": 11322,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\core\\__init__.py",
+      "size": 464,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\data\\circle_of_fifths.json",
+      "size": 9347,
+      "language": "JSON",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\data\\conversation_schema.json",
+      "size": 16754,
+      "language": "JSON",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\data\\jk_rowling_appreciation.json",
+      "size": 15666,
+      "language": "JSON",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\data\\logic_similarity.json",
+      "size": 398,
+      "language": "JSON",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\datakit.py",
+      "size": 18252,
+      "language": "Python",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\datakit\\documents\\APPRECIATION_TOKEN_GROUNDED_PLAN.md",
+      "size": 21692,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\documents\\APPRECIATION_TOKEN_HYBRID_PLAN.md",
+      "size": 21504,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\documents\\APPRECIATION_TOKEN_PLAN.md",
+      "size": 22630,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\documents\\APPRECIATION_TOKEN_QUICK_START.md",
+      "size": 13038,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\documents\\EXECUTIVE_SUMMARY.md",
+      "size": 9143,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\documents\\GROUNDED_PLAN_INDEX copy.md",
+      "size": 11809,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\documents\\GROUNDED_PLAN_INDEX.md",
+      "size": 11809,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\documents\\GROUNDED_PLAN_SUMMARY copy.md",
+      "size": 10837,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\documents\\GROUNDED_PLAN_SUMMARY.md",
+      "size": 10837,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\documents\\IMPLEMENTATION_ROADMAP copy.md",
+      "size": 11620,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\documents\\IMPLEMENTATION_ROADMAP.md",
+      "size": 11620,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\documents\\PHASE_1_INTEGRATION_GUIDE.md",
+      "size": 21222,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\documents\\PHASE_1_PHOENIX_MVP.md",
+      "size": 24016,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\documents\\PLAN_SUMMARY.md",
+      "size": 10687,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\documents\\project_structure.md",
+      "size": 1523,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\documents\\README_APPRECIATION_TOKEN.md",
+      "size": 13275,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\documents\\REASONING_APPRECIATION_TOKEN.md",
+      "size": 15317,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\examples\\quick_start.py",
+      "size": 8238,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\examples\\story_eq_harry_prompts.md",
+      "size": 19887,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\examples\\story_eq_hermione.ini",
+      "size": 3714,
+      "language": null,
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\examples\\story_eq_hermione_prompts.md",
+      "size": 12804,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\FACE TO FACE\\FACE_TO_FACE.md",
+      "size": 8570,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\FAQ.md",
+      "size": 13658,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\datakit\\FINDINGS.md",
+      "size": 11148,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\datakit\\GRID.md",
+      "size": 11385,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\.gitignore",
+      "size": 477,
+      "language": null,
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\.windsurf\\workflows\\code-review.md",
+      "size": 2227,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\.windsurf\\workflows\\storytime.md",
+      "size": 2698,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\ACKNOWLEDGEMENT.md",
+      "size": 761,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\ancient_magic_lib.py",
+      "size": 13175,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\CANON_POLICY.md",
+      "size": 6664,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\CONTRIBUTING.md",
+      "size": 4323,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\draw_my_life.py",
+      "size": 16346,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\DRAW_MY_LIFE_FRAMEWORK.md",
+      "size": 7300,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\exhibit.json",
+      "size": 9063,
+      "language": "JSON",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\Founders\\Gryffindor\\README.md",
+      "size": 3822,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\Founders\\Hufflepuff\\README.md",
+      "size": 2617,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\Founders\\Ravenclaw\\README.md",
+      "size": 4523,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\Founders\\Slytherin\\README.md",
+      "size": 3323,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\founders_archive.md",
+      "size": 5394,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\great_hall\\API_MERGE_MEETING_SLIP.md",
+      "size": 8361,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\great_hall\\mistral_agent.py",
+      "size": 8031,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\great_hall\\modules\\foundation_discussion.jsonl",
+      "size": 2091,
+      "language": null,
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\great_hall\\modules\\objects_discussion.jsonl",
+      "size": 4327,
+      "language": null,
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\great_hall\\modules\\parliament.toon",
+      "size": 911,
+      "language": null,
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\great_hall\\modules\\README.md",
+      "size": 6142,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\great_hall\\modules\\recommended_stream.jsonl",
+      "size": 4425,
+      "language": null,
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\great_hall\\OPEN_POLICY.md",
+      "size": 12677,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\great_hall\\outputs\\discussion_table.csv",
+      "size": 1540,
+      "language": null,
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\great_hall\\outputs\\discussion_table.json",
+      "size": 6542,
+      "language": "JSON",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\great_hall\\outputs\\receipt.json",
+      "size": 1364,
+      "language": "JSON",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\great_hall\\OUTPUT_ARTIFACT.md",
+      "size": 7855,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\great_hall\\README.md",
+      "size": 4807,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\great_hall\\run_great_hall_cli.ps1",
+      "size": 3969,
+      "language": "PowerShell",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\great_hall\\run_objects_discussion.py",
+      "size": 851,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\great_hall\\run_recommended_stream.py",
+      "size": 6486,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\great_hall\\table\\great_hall_table.py",
+      "size": 11010,
+      "language": "Python",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\great_hall\\table\\README.md",
+      "size": 3850,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\great_hall\\table\\TABLE_BUILDER.md",
+      "size": 7119,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\grid_bridge.py",
+      "size": 36599,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\hogwarts-visualizer\\index.html",
+      "size": 1028,
+      "language": "HTML",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\hogwarts-visualizer\\package-lock.json",
+      "size": 59623,
+      "language": "JSON",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\hogwarts-visualizer\\package.json",
+      "size": 483,
+      "language": "JSON",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\hogwarts-visualizer\\src\\App.tsx",
+      "size": 22564,
+      "language": "TypeScript",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\hogwarts-visualizer\\src\\main.tsx",
+      "size": 1583,
+      "language": "TypeScript",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\hogwarts-visualizer\\src\\vite-env.d.ts",
+      "size": 38,
+      "language": "TypeScript",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\hogwarts-visualizer\\tsconfig.json",
+      "size": 369,
+      "language": "JSON",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\hogwarts-visualizer\\vite.config.ts",
+      "size": 206,
+      "language": "TypeScript",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\HOGWARTS.md",
+      "size": 3886,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\hogwarts_cli.py",
+      "size": 2001,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\hogwarts_lore.json",
+      "size": 3516,
+      "language": "JSON",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\hogwarts_toolkit.py",
+      "size": 10765,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\IMPLEMENTATION_PLAN.md",
+      "size": 9558,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\parseltongue_cli.py",
+      "size": 10275,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\prototypes\\ansi_test.py",
+      "size": 2275,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\README.md",
+      "size": 12327,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\Salazar Slytherin\\salazar_slytherin.md",
+      "size": 4581,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\Salazar Slytherin\\The Chamber Of Secrets\\AI Project and Industry News Summary.docx",
+      "size": 25791,
+      "language": null,
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\Salazar Slytherin\\The Chamber Of Secrets\\AI Project and Industry News Summary.md",
+      "size": 36984,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\Salazar Slytherin\\The Chamber Of Secrets\\Chamber of Secrets Project Analysis.md",
+      "size": 28747,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\Salazar Slytherin\\The Chamber Of Secrets\\Chamber_Archive_Secrets (1).txt",
+      "size": 3241,
+      "language": null,
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\Salazar Slytherin\\The Chamber Of Secrets\\Fine-Tuning -The Chamber of Secrets- with Advanced AI Training Strategies(1).docx",
+      "size": 1007901,
+      "language": null,
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\Salazar Slytherin\\The Chamber Of Secrets\\Fine-Tuning -The Chamber of Secrets- with Advanced AI Training Strategies(1).pdf",
+      "size": 73123,
+      "language": null,
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\Salazar Slytherin\\The Chamber Of Secrets\\Fine-Tuning -The Chamber of Secrets- with Advanced AI Training Strategies.pdf",
+      "size": 73123,
+      "language": null,
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\Salazar Slytherin\\The Chamber Of Secrets\\From the depths of human frequency to the digital....md",
+      "size": 13652,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\Salazar Slytherin\\The Chamber Of Secrets\\Implementation Plan for -The Chamber of Secrets-(1).md",
+      "size": 1009497,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\Salazar Slytherin\\The Chamber Of Secrets\\Implementation Plan for -The Chamber of Secrets-.md",
+      "size": 1009360,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\Salazar Slytherin\\The Chamber Of Secrets\\Implementation Plan for -The Chamber of Secrets-.pdf",
+      "size": 124440,
+      "language": null,
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\Salazar Slytherin\\The Chamber Of Secrets\\The Chamber of Secrets(1).md",
+      "size": 1780902,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\Salazar Slytherin\\The Chamber Of Secrets\\Untitled.md",
+      "size": 6194010,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\salazar_slytherin.md",
+      "size": 4581,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\SOURCES.md",
+      "size": 6938,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\spellbook_api.py",
+      "size": 10718,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\SSSEVERUS SNAPE\\snape_chapter_1.md",
+      "size": 4502,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\SSSEVERUS SNAPE\\snape_chapter_2.md",
+      "size": 9365,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\SSSEVERUS SNAPE\\temporal_patronus_infographic.html",
+      "size": 9577,
+      "language": "HTML",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\SSSEVERUS SNAPE\\the_physics_of_forever.html",
+      "size": 41558,
+      "language": "HTML",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\test_hogwarts_toolkit.py",
+      "size": 17520,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\test_parseltongue_cli.py",
+      "size": 4196,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\MASTER.md",
+      "size": 3479,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\datakit\\open_plan.md",
+      "size": 10661,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\datakit\\overview.md",
+      "size": 16725,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\datakit\\PRODUCTION.md",
+      "size": 7252,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\datakit\\profile.ps1",
+      "size": 1029,
+      "language": "PowerShell",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\datakit\\README.md",
+      "size": 10279,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\datakit\\recent_events.md",
+      "size": 118664,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\datakit\\REPRODUCING_PROD_ALIGNMENT.md",
+      "size": 7290,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\datakit\\requirements-core.txt",
+      "size": 127,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\datakit\\requirements-ml.txt",
+      "size": 57,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\datakit\\requirements-viz.txt",
+      "size": 96,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\datakit\\scripts\\ai_composer.py",
+      "size": 8852,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\scripts\\appreciation_generator.py",
+      "size": 10541,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\scripts\\chord_generator.py",
+      "size": 11240,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\scripts\\doctor.py",
+      "size": 14929,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\scripts\\guided_tour.py",
+      "size": 11206,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\scripts\\openai_smoketest.py",
+      "size": 11498,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\scripts\\send_tribute_twitter.py",
+      "size": 0,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\scripts\\similarity_pie.py",
+      "size": 7355,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\scripts\\validate_pack.py",
+      "size": 2942,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\templates\\index.html",
+      "size": 44523,
+      "language": "HTML",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\templates\\style.css",
+      "size": 5250,
+      "language": "CSS",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\tests\\test_control.py",
+      "size": 1512,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\tests\\test_smartdecisor.py",
+      "size": 3172,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\tests\\test_story_eq.py",
+      "size": 13078,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\tool\\semantic_grep.py",
+      "size": 10051,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\tool\\structure_audit.py",
+      "size": 22497,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\datakit\\visualizations\\animated\\manim_circle.py",
+      "size": 5599,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\datakit\\visualizations\\drive-index-vad\\CANON_POLICY.md",
+      "size": 3052,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\datakit\\visualizations\\drive-index-vad\\docs\\APPLICATIONS.md",
+      "size": 5616,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\datakit\\visualizations\\drive-index-vad\\docs\\CERTAINTY_ENGINE.md",
+      "size": 10312,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\datakit\\visualizations\\drive-index-vad\\docs\\focused_work_dashboard.webp",
+      "size": 300564,
+      "language": null,
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\datakit\\visualizations\\drive-index-vad\\docs\\MESSAGING_FRAMEWORK.md",
+      "size": 10328,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\datakit\\visualizations\\drive-index-vad\\exhibit.json",
+      "size": 2916,
+      "language": "JSON",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\datakit\\visualizations\\drive-index-vad\\NEXT_STEPS.md",
+      "size": 10318,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\datakit\\visualizations\\drive-index-vad\\README.md",
+      "size": 3955,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\datakit\\visualizations\\drive-index-vad\\SOURCES.md",
+      "size": 5142,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\datakit\\visualizations\\drive-index-vad\\tools\\dashboard_visualization.html",
+      "size": 9937,
+      "language": "HTML",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\datakit\\visualizations\\drive-index-vad\\tools\\locus_of_control_demo.py",
+      "size": 9595,
+      "language": "Python",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\datakit\\visualizations\\interactive\\d3_circle.html",
+      "size": 7291,
+      "language": "HTML",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\datakit\\visualizations\\interactive\\interactive_circle.html",
+      "size": 4847745,
+      "language": "HTML",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\datakit\\visualizations\\interactive\\plotly_circle.py",
+      "size": 10447,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\datakit\\visualizations\\interactive\\rowling_tribute.py",
+      "size": 8472,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\datakit\\visualizations\\static\\circle_graph.py",
+      "size": 5604,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\datakit\\visualizations\\static\\smartdecisor.py",
+      "size": 20497,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\datakit\\visualizations\\static\\__init__.py",
+      "size": 0,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\datakit\\visualizations\\__init__.py",
+      "size": 0,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\demos\\dataset_lifecycle.py",
+      "size": 6635,
+      "language": "Python",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\demos\\error_heat_map.html",
+      "size": 17626,
+      "language": "HTML",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\demos\\ubi_heat_credits.html",
+      "size": 18451,
+      "language": "HTML",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\acknowledgement.md",
+      "size": 325,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\ADAPTIVE_INTELLIGENCE_FRAMEWORK.json",
+      "size": 9503,
+      "language": "JSON",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\Animation\\tap.wav",
+      "size": 0,
+      "language": null,
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\docs\\api.md",
+      "size": 17048,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\API_REFERENCE.md",
+      "size": 6656,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\architecture.md",
+      "size": 10321,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\ARCHITECTURE_ENHANCEMENTS.md",
+      "size": 7180,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\architecture_proposal_vision_ui.md",
+      "size": 2292,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\ARCHITECTURE_STRATEGY.md",
+      "size": 2625,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\archive\\cli\\CLI_IMPLEMENTATION.md",
+      "size": 10842,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\docs\\archive\\cli\\CLI_QUICK_REFERENCE.md",
+      "size": 5681,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\docs\\archive\\cli\\CLI_USAGE.md",
+      "size": 8608,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\docs\\benchmark_json.md",
+      "size": 2518,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\BREAKING_CHANGES.md",
+      "size": 8078,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\cd-checkpoints.md",
+      "size": 4705,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\changes\\2025-01-15-path-b-features-integration-completion.md",
+      "size": 9456,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\docs\\changes\\2025-11-29-grid-config-and-sklearn.md",
+      "size": 1677,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\docs\\changes\\2025-11-29-path-a-stability-completion.md",
+      "size": 10392,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\docs\\chatlogs\\Optimize GRID Grep Workflow.md",
+      "size": 169535,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\docs\\chatlogs\\Optimize Grid Performance.md",
+      "size": 10832,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\docs\\chatlogs\\README.md",
+      "size": 2063,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\docs\\CHECKPOINT_SUMMARY.md",
+      "size": 11492,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\CI_CD.md",
+      "size": 1202,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\CI_CD_GUIDE.md",
+      "size": 11395,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\client_report.txt",
+      "size": 2895,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\CLI_REFERENCE.md",
+      "size": 3901,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\CODESTRAL_SETUP_WINDOWS11.md",
+      "size": 2514,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\cognition-grid.md",
+      "size": 5672,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\COLOR_PSYCHOLOGY_THEME.md",
+      "size": 12389,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\COLOR_SYSTEM.md",
+      "size": 9524,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\COMPLETE_DELIVERABLES_SUMMARY.md",
+      "size": 16751,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\COMPONENTS_REFERENCE.md",
+      "size": 9406,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\CONCEPT_INTEGRATION_FRAMEWORK.md",
+      "size": 12756,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\CONFIGURATION.md",
+      "size": 10784,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\consistency_patch_plan.md",
+      "size": 2277,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\CONTAINERIZATION_ALTERNATIVES.md",
+      "size": 2972,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\CONTAINERIZATION_ALTERNATIVES_SUMMARY.md",
+      "size": 5164,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\context_features.md",
+      "size": 6927,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\context_refiner.md",
+      "size": 2318,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\contributing_topic.md",
+      "size": 1100,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\contribution.md",
+      "size": 235,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\contributions\\2025-11-27_contribution_log.md",
+      "size": 3298,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\docs\\contribution_tracker.md",
+      "size": 1625,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\Core_Component_Integration_Guide.md",
+      "size": 14299,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\CREDENTIAL_SETUP_GUIDE.md",
+      "size": 3611,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\CROSS_ENVIRONMENT_TESTING.md",
+      "size": 6083,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\DATABRICKS_INTEGRATION.md",
+      "size": 5839,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\databricks_setup.md",
+      "size": 7295,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\DATASET_MASTERY_GUIDE.md",
+      "size": 4378,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\DECISIONS.md",
+      "size": 3449,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\dependencies\\dep.dot",
+      "size": 0,
+      "language": null,
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\docs\\dependencies\\dependency_data.json",
+      "size": 101928,
+      "language": "JSON",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\docs\\dependencies\\dependency_graph.dot",
+      "size": 458,
+      "language": null,
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\docs\\dependencies\\dependency_graph.md",
+      "size": 685,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\docs\\DEPENDENCY_GUIDE.md",
+      "size": 4042,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\DEPLOYMENT_SUMMARY.md",
+      "size": 5249,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\DEVELOPMENT.md",
+      "size": 4547,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\disable-js-ts-node.md",
+      "size": 1189,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\disable-remote-extensions.md",
+      "size": 3028,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\DISNEY_IMMERSIVE_TIMELINE.md",
+      "size": 4559,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\DOCKER_README.md",
+      "size": 4718,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\DOCUMENTATION_COMPLETE.md",
+      "size": 9281,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\DOCUMENTATION_INDEX.md",
+      "size": 8459,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\DOC_GAP_ANALYSIS.md",
+      "size": 2940,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\ENHANCED_ARCHITECTURE.md",
+      "size": 5087,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\EVALUATION_REPORT.md",
+      "size": 10716,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\events\\2025-11-27_unified_event_snapshot.md",
+      "size": 7930,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\docs\\EXCLUSIVE_MODULES.md",
+      "size": 5191,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\EXECUTION_ROADMAP.md",
+      "size": 12503,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\EXTERNAL_AI_PROVIDERS_GUIDE.md",
+      "size": 6541,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\FAQ.md",
+      "size": 11063,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\final_all_output.txt",
+      "size": 37949,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\FINAL_IMPLEMENTATION_REPORT.md",
+      "size": 7692,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\FINAL_SYSTEM_STATUS.md",
+      "size": 12159,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\final_test_output.txt",
+      "size": 48709,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\FUTURE_ENHANCEMENTS.md",
+      "size": 14189,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\FUTURE_PROOFING_IMPLEMENTATION_SUMMARY.md",
+      "size": 13252,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\FUTURE_PROOFING_PLAN.md",
+      "size": 3914,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\FUTURE_PROOFING_QUICK_REFERENCE.md",
+      "size": 7884,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\FUTURE_PROOFING_ROADMAP.md",
+      "size": 9996,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\geometric_compute.md",
+      "size": 2645,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\getting-started.md",
+      "size": 4551,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\git-topic.md",
+      "size": 1091,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\git_history.txt",
+      "size": 64,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\global_layer.md",
+      "size": 7147,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\GRID Commercialization Outreach.md",
+      "size": 132400,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\grid.log",
+      "size": 6453,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\GRID_BET_DOCUMENTATION.md",
+      "size": 6717,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\GRID_COMMANDS_PERFORMANCE.md",
+      "size": 8139,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\grid_concept.md",
+      "size": 4769,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\GRID_ESSENTIAL_FAQ.md",
+      "size": 3722,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\GRID_INTELLIGENCE_ASSESSMENT.md",
+      "size": 10835,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\GRID_OUTPUT_SCHEMA.md",
+      "size": 15183,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\GRID_QUICK_REFERENCE.md",
+      "size": 1674,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\GRID_SETUP_INDEX.md",
+      "size": 7064,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\GRID_VISION_INTEGRATION_REPORT.md",
+      "size": 8123,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\guides\\DATA_LOADERS_GUIDE.md",
+      "size": 12033,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\docs\\HIGH_SIGNAL_COLLECTION.md",
+      "size": 5286,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\HOLISTIC_VALIDATION_REPORT.md",
+      "size": 1560,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\HONEST_CRITIQUE.json",
+      "size": 21294,
+      "language": "JSON",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\IMPLEMENTATION_COMPLETE.md",
+      "size": 2452,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\IMPLEMENTATION_GUIDE.md",
+      "size": 14515,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\implementation_plan.md",
+      "size": 5925,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\IMPLEMENTATION_PROCESS.md",
+      "size": 13106,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\IMPLEMENTATION_SUMMARY.md",
+      "size": 6439,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\INFERENCING_VS_REFERENCING.md",
+      "size": 6052,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\INSTALLATION.md",
+      "size": 8476,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\INSTALLATION_WORKAROUND.md",
+      "size": 1330,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\INTEGRATION_COMPLETE.md",
+      "size": 8261,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\INTEGRATION_PLAN.md",
+      "size": 3390,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\journal\\2025-12-03_detangling_dependencies.md",
+      "size": 1896,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\docs\\journal\\idea_2025-11-23.md",
+      "size": 300,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\docs\\journal\\work_session_2025-11-29.md",
+      "size": 9010,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\docs\\JUNG_COLLABORATIVE_RESEARCH_PLAN.md",
+      "size": 5214,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\JUNG_INTERVIEW_ANALYSIS.md",
+      "size": 4987,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\JUNG_SUBTLE_CUE_ANALYSIS_TASK.md",
+      "size": 4051,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\keybindings.md",
+      "size": 1238,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\llm_behavior_analysis.md",
+      "size": 4640,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\MAPPER_INTELLIGENCE.md",
+      "size": 8000,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\MCP_CHEATSHEET.md",
+      "size": 2918,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\MCP_DEMO.md",
+      "size": 2093,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\MICRO_UBI_INTEGRATION.md",
+      "size": 19718,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\MODELS.md",
+      "size": 4020,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\ner_output.txt",
+      "size": 34237,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\no_mattter_core_principle.md",
+      "size": 4591,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\Optimizing tool selection...md",
+      "size": 18673,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\P1_DELEGATION.md",
+      "size": 2370,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\pattern_language.md",
+      "size": 3555,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\PERFORMANCE_STATUS.md",
+      "size": 5536,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\perspective_flip_example.md",
+      "size": 2293,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\PHASE1_CLEANUP_LOG.md",
+      "size": 1169,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\PHASE2_CONSOLIDATION_PLAN.md",
+      "size": 3371,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\PROJECT_STATUS.md",
+      "size": 3167,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\pytest_debug.log",
+      "size": 11336,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\pytest_debug.txt",
+      "size": 11337,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\QUICKSTART_DATABRICKS.md",
+      "size": 1647,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\QUICK_FIX_GUIDE.md",
+      "size": 10657,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\QUICK_REFERENCE.md",
+      "size": 7391,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\rag_implementation.md",
+      "size": 0,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\RAG_SHOWCASE.md",
+      "size": 3860,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\RD_CONTRACT_STRUCTURED.json",
+      "size": 25361,
+      "language": "JSON",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\RD_SPONSORSHIP_CONTRACT.md",
+      "size": 19176,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\README_TEST_FIXES.md",
+      "size": 8109,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\realtime_glimpse_journal_2025-11-23.md",
+      "size": 110,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\relationship_analyzer_design.md",
+      "size": 15905,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\relationship_journal.md",
+      "size": 1545,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\relationship_judgment.md",
+      "size": 14657,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\rel_output.txt",
+      "size": 21079,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\requirements.txt",
+      "size": 651,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\research\\clarity.md",
+      "size": 24,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\docs\\research\\competitor_scope.md",
+      "size": 2778,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\docs\\research\\context_grid_throughput.md",
+      "size": 2098,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\docs\\research\\JUNG_INSIGHTS_NOT_KNOWING.md",
+      "size": 3488,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\docs\\research\\k1_cognitive_vectors.md",
+      "size": 11921,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\docs\\research\\research_brief_competitors.md",
+      "size": 3778,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\docs\\RESEARCH_ACCESS_AGREEMENT.md",
+      "size": 10926,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\RESOURCE_EFFICIENT_PLAN.md",
+      "size": 2303,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\RESOURCE_IMPACT_REPORT.md",
+      "size": 2206,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\Restoring Model Consistency.md",
+      "size": 6639,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\RETRY_POLICY_SUMMARY.md",
+      "size": 6085,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\rules_output.txt",
+      "size": 16889,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\SECURITY.md",
+      "size": 1942,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\SECURITY_REMEDIATION.md",
+      "size": 1933,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\SESSION_CHECKPOINT.md",
+      "size": 960,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\SESSION_COMPLETE.md",
+      "size": 8570,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\SESSION_SUMMARY_2025-11-29.md",
+      "size": 8444,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\settings.md",
+      "size": 943,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\STORY_BASED_MODELS_SUMMARY.md",
+      "size": 6397,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\STRATEGIC_PLAN.md",
+      "size": 25773,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\STRATEGY_DOC_CONSOLIDATION.md",
+      "size": 2862,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\structured_ai_implementation\\README.md",
+      "size": 3252,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\docs\\STRUCTURE_GUIDE.md",
+      "size": 5190,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\system.md",
+      "size": 2430,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\SYSTEM_CONTEXT.md",
+      "size": 8587,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\tap_model.md",
+      "size": 589,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\TASKS_ANALYSIS_AND_PLAN.md",
+      "size": 2799,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\TECHNICAL_DEBT_CLEANUP.md",
+      "size": 5991,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\test-coverage.md",
+      "size": 6469,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\TESTING.md",
+      "size": 4650,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\TEST_CI_CD_CONTEXT.md",
+      "size": 33604,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\TEST_FIX_SUMMARY.md",
+      "size": 4449,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\TEST_IMPLEMENTATION_SUMMARY.md",
+      "size": 12190,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\test_output.txt",
+      "size": 36685,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\test_output_2.txt",
+      "size": 16285,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\test_output_phase1.txt",
+      "size": 16925,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\TEST_RESULTS_DATA_LOADERS_2025-11-29.md",
+      "size": 6669,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\TEST_STATUS_AND_FIXES.md",
+      "size": 13416,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\TEXT_vs_IMAGE_ANALYSIS_COMPARISON.md",
+      "size": 7317,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\tool_attributes.md",
+      "size": 1397,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\translator_assistant_behaviors.md",
+      "size": 1043,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\translator_assistant_era_presets.md",
+      "size": 1894,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\translator_assistant_faq.md",
+      "size": 1792,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\translator_assistant_overview.md",
+      "size": 1150,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\translator_assistant_schema.md",
+      "size": 1490,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\TRON_LEGACY_DIGITAL_UNIVERSE.md",
+      "size": 8366,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\unified-environment.md",
+      "size": 6177,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\users_output.txt",
+      "size": 15141,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\use_case_coverage_bus_channel.html",
+      "size": 22771,
+      "language": "HTML",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\use_case_coverage_charts.html",
+      "size": 21523,
+      "language": "HTML",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\use_case_coverage_v2_light.html",
+      "size": 23960,
+      "language": "HTML",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\use_case_coverage_v3_aurora.html",
+      "size": 14776,
+      "language": "HTML",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\VENV_SETUP.md",
+      "size": 3839,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\VERIFICATION_CHECKLIST.md",
+      "size": 10168,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\VERIFICATION_EXECUTION_PLAN.md",
+      "size": 23764,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\VERIFICATION_INSIGHTS_SUMMARY.md",
+      "size": 14182,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\VERSION_ACCURACY_REPORT.md",
+      "size": 6444,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\VISION_LAYER.md",
+      "size": 3685,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\visual_references\\blue_spatial.png",
+      "size": 736164,
+      "language": null,
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\docs\\visual_references\\gold_combination.png",
+      "size": 1107458,
+      "language": null,
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\docs\\visual_references\\green_flow.png",
+      "size": 783119,
+      "language": null,
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\docs\\visual_references\\orange_light.png",
+      "size": 748635,
+      "language": null,
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\docs\\visual_references\\patterns.md",
+      "size": 1948,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\docs\\visual_references\\purple_repetition.png",
+      "size": 748158,
+      "language": null,
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\docs\\visual_references\\red_deviation.png",
+      "size": 771693,
+      "language": null,
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\docs\\visual_references\\silver_temporal.png",
+      "size": 885363,
+      "language": null,
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\docs\\visual_references\\teal_cause.png",
+      "size": 744774,
+      "language": null,
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\docs\\visual_references\\yellow_rhythms.png",
+      "size": 877705,
+      "language": null,
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\docs\\we_definition.md",
+      "size": 2115,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\WINDOWS_INSTALL.md",
+      "size": 1788,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\WORKSPACE_ENHANCEMENT.md",
+      "size": 13246,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\WORK_SESSION_COMPLETE_2025-11-29.md",
+      "size": 11154,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\docs\\YOUR_NEXT_STEPS.md",
+      "size": 908,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\error.svg",
+      "size": 7823,
+      "language": null,
+      "depth": 2
+    },
+    {
+      "path": "lightofthe7\\examples\\grid_workflow_demo.py",
+      "size": 4220,
+      "language": "Python",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\examples\\quantum_optimization_demo.py",
+      "size": 6605,
+      "language": "Python",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\examples\\translator_assistant_demo.py",
+      "size": 4799,
+      "language": "Python",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\examples\\translator_demo.py",
+      "size": 3523,
+      "language": "Python",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\Foundations_of_Computation\\Executive_Report\\concept_mappings.json",
+      "size": 1805,
+      "language": "JSON",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\Foundations_of_Computation\\Executive_Report\\dialogue_flows.json",
+      "size": 836,
+      "language": "JSON",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\Foundations_of_Computation\\Executive_Report\\feedback_loops.json",
+      "size": 618,
+      "language": "JSON",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\Foundations_of_Computation\\Executive_Report\\mathilde_rouselle.py",
+      "size": 3926,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\Foundations_of_Computation\\Executive_Report\\quantum_links.json",
+      "size": 793,
+      "language": "JSON",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\Foundations_of_Computation\\Executive_Report\\user_context_schema.json",
+      "size": 714,
+      "language": "JSON",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\Foundations_of_Computation\\Information_Theory\\Data_Compression\\README.md",
+      "size": 4583,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\Foundations_of_Computation\\Information_Theory\\Entropy_and_Information\\README.md",
+      "size": 5686,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\Foundations_of_Computation\\Information_Theory\\Error_Correction_Codes\\README.md",
+      "size": 6352,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\Foundations_of_Computation\\Information_Theory\\information.md",
+      "size": 4394,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\Foundations_of_Computation\\Information_Theory\\Information_Measures\\README.md",
+      "size": 6968,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\Foundations_of_Computation\\Information_Theory\\Shannons_Theory\\README.md",
+      "size": 8087,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\Foundations_of_Computation\\Law_of_Logic_All_Similar_Law\\Absorption_Law\\README.md",
+      "size": 6139,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\Foundations_of_Computation\\Law_of_Logic_All_Similar_Law\\README.md",
+      "size": 7681,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\Foundations_of_Computation\\Law_of_Logic_Boolean_Algebra\\boolean_algebra.md",
+      "size": 2733,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\Foundations_of_Computation\\Law_of_Logic_Boolean_Algebra\\Boolean_Algebra_Basics\\README.md",
+      "size": 3091,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\Foundations_of_Computation\\Law_of_Logic_Boolean_Algebra\\Boolean_Algebra_Identities\\README.md",
+      "size": 3954,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\Foundations_of_Computation\\Law_of_Logic_Boolean_Algebra\\Boolean_Algebra_Theorems\\README.md",
+      "size": 4423,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\Foundations_of_Computation\\Law_of_Logic_Boolean_Algebra\\Karnaugh_Maps\\README.md",
+      "size": 6091,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\Foundations_of_Computation\\Law_of_Logic_Boolean_Algebra\\Simplification_Techniques\\README.md",
+      "size": 5895,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\Foundations_of_Computation\\Law_of_Logic_The_Fundamental\\AND_OR_NOT_Gates\\README.md",
+      "size": 4779,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\Foundations_of_Computation\\Law_of_Logic_The_Fundamental\\Fundamental_Logic_Gates\\README.md",
+      "size": 4305,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\Foundations_of_Computation\\Law_of_Logic_The_Fundamental\\logic_gates.md",
+      "size": 2397,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\Foundations_of_Computation\\Law_of_Logic_The_Fundamental\\NAND_NOR_Gates\\README.md",
+      "size": 5660,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\Foundations_of_Computation\\Law_of_Logic_The_Fundamental\\Universal_Gates\\README.md",
+      "size": 6505,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\Foundations_of_Computation\\Law_of_Logic_The_Fundamental\\XOR_XNOR_Gates\\README.md",
+      "size": 4972,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\Foundations_of_Computation\\Logic_of_Propositions\\Laws_of_Logic\\README.md",
+      "size": 4781,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\Foundations_of_Computation\\Logic_of_Propositions\\Logical_Equivalence\\README.md",
+      "size": 4545,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\Foundations_of_Computation\\Logic_of_Propositions\\Propositional_Calculus\\README.md",
+      "size": 5454,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\Foundations_of_Computation\\Logic_of_Propositions\\Propositional_Logic\\README.md",
+      "size": 4419,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\Foundations_of_Computation\\Logic_of_Propositions\\propositional_logic.md",
+      "size": 2691,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\Foundations_of_Computation\\Logic_of_Propositions\\Tautologies_and_Contradictions\\README.md",
+      "size": 5053,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\Foundations_of_Computation\\Logic_of_Propositions\\Truth_Tables\\README.md",
+      "size": 5688,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\generated_geometry.svg",
+      "size": 9153,
+      "language": null,
+      "depth": 2
+    },
+    {
+      "path": "lightofthe7\\grid\\entry_points\\api_entry.py",
+      "size": 3136,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\grid\\entry_points\\cli_entry.py",
+      "size": 2782,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\grid\\entry_points\\service_entry.py",
+      "size": 3029,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\grid\\entry_points\\__init__.py",
+      "size": 383,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\grid\\organization\\discipline.py",
+      "size": 12411,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\grid\\organization\\models.py",
+      "size": 7216,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\grid\\organization\\org_manager.py",
+      "size": 6003,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\grid\\organization\\__init__.py",
+      "size": 750,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\grid\\processing\\periodic_processor.py",
+      "size": 4490,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\grid\\processing\\realtime_processor.py",
+      "size": 4112,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\grid\\processing\\__init__.py",
+      "size": 488,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\grid\\prompts\\models.py",
+      "size": 4485,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\grid\\prompts\\prompt_manager.py",
+      "size": 6246,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\grid\\prompts\\prompt_store.py",
+      "size": 5696,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\grid\\prompts\\__init__.py",
+      "size": 469,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\grid\\quantum\\locomotion.py",
+      "size": 7834,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\grid\\quantum\\quantizer.py",
+      "size": 5134,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\grid\\quantum\\quantum_engine.py",
+      "size": 3484,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\grid\\quantum\\__init__.py",
+      "size": 543,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\grid\\senses\\sensory_input.py",
+      "size": 3139,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\grid\\senses\\sensory_processor.py",
+      "size": 5196,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\grid\\senses\\sensory_store.py",
+      "size": 4601,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\grid\\senses\\__init__.py",
+      "size": 403,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\grid\\tracing\\action_trace.py",
+      "size": 6286,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\grid\\tracing\\trace_manager.py",
+      "size": 7482,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\grid\\tracing\\trace_store.py",
+      "size": 6309,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\grid\\tracing\\__init__.py",
+      "size": 482,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\grid\\__init__.py",
+      "size": 3255,
+      "language": "Python",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\grid\\__main__.py",
+      "size": 4446,
+      "language": "Python",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\infra\\cloud\\.env.example",
+      "size": 3534,
+      "language": null,
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\infra\\cloud\\gemini_client.py",
+      "size": 17878,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\infra\\cloud\\gemini_config.py",
+      "size": 9365,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\infra\\cloud\\test_gemini_integration.py",
+      "size": 14954,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\infra\\cloud\\__init__.py",
+      "size": 19021,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\infra\\monitoring\\prometheus.yml",
+      "size": 343,
+      "language": "YAML",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\infra\\terraform\\main.tf",
+      "size": 2083,
+      "language": null,
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\INSTALLATION.md",
+      "size": 4827,
+      "language": "Markdown",
+      "depth": 2
+    },
+    {
+      "path": "lightofthe7\\integrations\\eq_spectrum\\integration.json",
+      "size": 1073,
+      "language": "JSON",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\integrations\\mistral\\integration.json",
+      "size": 1037,
+      "language": "JSON",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\integrations\\windsurf\\integration.json",
+      "size": 1166,
+      "language": "JSON",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\LEARNING_PATH.md",
+      "size": 9592,
+      "language": "Markdown",
+      "depth": 2
+    },
+    {
+      "path": "lightofthe7\\LICENSE",
+      "size": 1068,
+      "language": null,
+      "depth": 2
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\.coveragerc",
+      "size": 581,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\.github\\ISSUE_TEMPLATE\\bug_report.md",
+      "size": 681,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\.github\\ISSUE_TEMPLATE\\feature_request.md",
+      "size": 834,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\.github\\PULL_REQUEST_TEMPLATE.md",
+      "size": 1259,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\.github\\workflows\\docs.yml",
+      "size": 1157,
+      "language": "YAML",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\.github\\workflows\\lint.yml",
+      "size": 1056,
+      "language": "YAML",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\.github\\workflows\\tests.yml",
+      "size": 1338,
+      "language": "YAML",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\.gitignore",
+      "size": 247,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\CHANGELOG.md",
+      "size": 1180,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\CI_CD_IMPLEMENTATION_SUMMARY.md",
+      "size": 9398,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\CODE_OF_CONDUCT.md",
+      "size": 321,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\cognitive_layer\\cognitive_load\\chunking.py",
+      "size": 5600,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\cognitive_layer\\cognitive_load\\load_estimator.py",
+      "size": 8272,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\cognitive_layer\\cognitive_load\\scaffolding.py",
+      "size": 7744,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\cognitive_layer\\cognitive_load\\__init__.py",
+      "size": 306,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\cognitive_layer\\decision_support\\bounded_rationality.py",
+      "size": 5697,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\cognitive_layer\\decision_support\\choice_architecture.py",
+      "size": 7884,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\cognitive_layer\\decision_support\\decision_matrix.py",
+      "size": 7322,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\cognitive_layer\\decision_support\\dual_process.py",
+      "size": 7329,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\cognitive_layer\\decision_support\\__init__.py",
+      "size": 409,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\cognitive_layer\\integration\\context_enricher.py",
+      "size": 5024,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\cognitive_layer\\integration\\grid_bridge.py",
+      "size": 5064,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\cognitive_layer\\integration\\pipeline_adapter.py",
+      "size": 6329,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\cognitive_layer\\integration\\__init__.py",
+      "size": 277,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\cognitive_layer\\mental_models\\alignment_checker.py",
+      "size": 6760,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\cognitive_layer\\mental_models\\model_builder.py",
+      "size": 8461,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\cognitive_layer\\mental_models\\model_tracker.py",
+      "size": 6759,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\cognitive_layer\\mental_models\\__init__.py",
+      "size": 309,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\cognitive_layer\\README.md",
+      "size": 6903,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\cognitive_layer\\schemas\\cognitive_state.py",
+      "size": 2579,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\cognitive_layer\\schemas\\decision_context.py",
+      "size": 3025,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\cognitive_layer\\schemas\\user_cognitive_profile.py",
+      "size": 4011,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\cognitive_layer\\schemas\\__init__.py",
+      "size": 284,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\cognitive_layer\\__init__.py",
+      "size": 1873,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\CONTRIBUTING.md",
+      "size": 453,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\error.svg",
+      "size": 7823,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Foundations_of_Computation\\Executive_Report\\concept_mappings.json",
+      "size": 1805,
+      "language": "JSON",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Foundations_of_Computation\\Executive_Report\\dialogue_flows.json",
+      "size": 836,
+      "language": "JSON",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Foundations_of_Computation\\Executive_Report\\feedback_loops.json",
+      "size": 618,
+      "language": "JSON",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Foundations_of_Computation\\Executive_Report\\mathilde_rouselle.py",
+      "size": 3926,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Foundations_of_Computation\\Executive_Report\\quantum_links.json",
+      "size": 793,
+      "language": "JSON",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Foundations_of_Computation\\Executive_Report\\user_context_schema.json",
+      "size": 714,
+      "language": "JSON",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Foundations_of_Computation\\Information_Theory\\Data_Compression\\README.md",
+      "size": 4583,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Foundations_of_Computation\\Information_Theory\\Entropy_and_Information\\README.md",
+      "size": 5686,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Foundations_of_Computation\\Information_Theory\\Error_Correction_Codes\\README.md",
+      "size": 6352,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Foundations_of_Computation\\Information_Theory\\information.md",
+      "size": 4394,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Foundations_of_Computation\\Information_Theory\\Information_Measures\\README.md",
+      "size": 6968,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Foundations_of_Computation\\Information_Theory\\Shannons_Theory\\README.md",
+      "size": 8087,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Foundations_of_Computation\\Law_of_Logic_All_Similar_Law\\Absorption_Law\\README.md",
+      "size": 6139,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Foundations_of_Computation\\Law_of_Logic_All_Similar_Law\\README.md",
+      "size": 7681,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Foundations_of_Computation\\Law_of_Logic_Boolean_Algebra\\boolean_algebra.md",
+      "size": 2733,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Foundations_of_Computation\\Law_of_Logic_Boolean_Algebra\\Boolean_Algebra_Basics\\README.md",
+      "size": 3091,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Foundations_of_Computation\\Law_of_Logic_Boolean_Algebra\\Boolean_Algebra_Identities\\README.md",
+      "size": 3954,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Foundations_of_Computation\\Law_of_Logic_Boolean_Algebra\\Boolean_Algebra_Theorems\\README.md",
+      "size": 4423,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Foundations_of_Computation\\Law_of_Logic_Boolean_Algebra\\Karnaugh_Maps\\README.md",
+      "size": 6091,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Foundations_of_Computation\\Law_of_Logic_Boolean_Algebra\\Simplification_Techniques\\README.md",
+      "size": 5895,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Foundations_of_Computation\\Law_of_Logic_The_Fundamental\\AND_OR_NOT_Gates\\README.md",
+      "size": 4779,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Foundations_of_Computation\\Law_of_Logic_The_Fundamental\\Fundamental_Logic_Gates\\README.md",
+      "size": 4305,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Foundations_of_Computation\\Law_of_Logic_The_Fundamental\\logic_gates.md",
+      "size": 2397,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Foundations_of_Computation\\Law_of_Logic_The_Fundamental\\NAND_NOR_Gates\\README.md",
+      "size": 5660,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Foundations_of_Computation\\Law_of_Logic_The_Fundamental\\Universal_Gates\\README.md",
+      "size": 6505,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Foundations_of_Computation\\Law_of_Logic_The_Fundamental\\XOR_XNOR_Gates\\README.md",
+      "size": 4972,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Foundations_of_Computation\\Logic_of_Propositions\\Laws_of_Logic\\README.md",
+      "size": 4781,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Foundations_of_Computation\\Logic_of_Propositions\\Logical_Equivalence\\README.md",
+      "size": 4545,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Foundations_of_Computation\\Logic_of_Propositions\\Propositional_Calculus\\README.md",
+      "size": 5454,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Foundations_of_Computation\\Logic_of_Propositions\\Propositional_Logic\\README.md",
+      "size": 4419,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Foundations_of_Computation\\Logic_of_Propositions\\propositional_logic.md",
+      "size": 2691,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Foundations_of_Computation\\Logic_of_Propositions\\Tautologies_and_Contradictions\\README.md",
+      "size": 5053,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Foundations_of_Computation\\Logic_of_Propositions\\Truth_Tables\\README.md",
+      "size": 5688,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\INSTALLATION.md",
+      "size": 4827,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\LEARNING_PATH.md",
+      "size": 9592,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\LICENSE",
+      "size": 1056,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\migration_guide_v2.md",
+      "size": 3711,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\pyproject.toml",
+      "size": 3702,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\pytest.ini",
+      "size": 672,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\README.md",
+      "size": 9688,
+      "language": "Markdown",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\requirements.txt",
+      "size": 1768,
+      "language": null,
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\setup.py",
+      "size": 3569,
+      "language": "Python",
+      "depth": 3
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\src\\light_of_the_seven\\geometry.py",
+      "size": 14403,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\src\\light_of_the_seven\\integration.py",
+      "size": 15024,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\src\\light_of_the_seven\\models.py",
+      "size": 3255,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\src\\light_of_the_seven\\sorting.py",
+      "size": 2788,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\src\\light_of_the_seven\\wyrm_sort.py",
+      "size": 92,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\src\\light_of_the_seven\\__init__.py",
+      "size": 7186,
+      "language": "Python",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Structure_of_Programming_and_Cognitive_Architecture\\cognitive_architecture.md",
+      "size": 2158,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Structure_of_Programming_and_Cognitive_Architecture\\Cognitive_Process\\Cognitive_Load_Theory\\README.md",
+      "size": 5734,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Structure_of_Programming_and_Cognitive_Architecture\\Cognitive_Process\\cognitive_process.md",
+      "size": 1713,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Structure_of_Programming_and_Cognitive_Architecture\\Cognitive_Process\\Decision_Making\\README.md",
+      "size": 5907,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Structure_of_Programming_and_Cognitive_Architecture\\Cognitive_Process\\Human_Computer_Interaction\\README.md",
+      "size": 5633,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Structure_of_Programming_and_Cognitive_Architecture\\Cognitive_Process\\Mental_Models\\README.md",
+      "size": 5282,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Structure_of_Programming_and_Cognitive_Architecture\\Cognitive_Process\\Problem_Solving\\README.md",
+      "size": 5467,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Structure_of_Programming_and_Cognitive_Architecture\\Executive_Report\\concept_mappings.json",
+      "size": 4279,
+      "language": "JSON",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Structure_of_Programming_and_Cognitive_Architecture\\Executive_Report\\dialogue_flows.json",
+      "size": 2562,
+      "language": "JSON",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Structure_of_Programming_and_Cognitive_Architecture\\Executive_Report\\feedback_loops.json",
+      "size": 2491,
+      "language": "JSON",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Structure_of_Programming_and_Cognitive_Architecture\\Executive_Report\\programming_links.json",
+      "size": 2682,
+      "language": "JSON",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Structure_of_Programming_and_Cognitive_Architecture\\Executive_Report\\user_context_schema.json",
+      "size": 1613,
+      "language": "JSON",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Structure_of_Programming_and_Cognitive_Architecture\\Language_Structure\\Compiler_Design\\README.md",
+      "size": 6212,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Structure_of_Programming_and_Cognitive_Architecture\\Language_Structure\\Interpreter_Design\\README.md",
+      "size": 6508,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Structure_of_Programming_and_Cognitive_Architecture\\Language_Structure\\language_structure.md",
+      "size": 1958,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Structure_of_Programming_and_Cognitive_Architecture\\Language_Structure\\Lexical_Analysis\\README.md",
+      "size": 7496,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Structure_of_Programming_and_Cognitive_Architecture\\Language_Structure\\Parsing_Techniques\\README.md",
+      "size": 6241,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\Structure_of_Programming_and_Cognitive_Architecture\\Language_Structure\\Syntax_and_Semantics\\README.md",
+      "size": 5872,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\tests\\test_geometry.py",
+      "size": 3455,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\tests\\test_integration.py",
+      "size": 8396,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\tests\\test_sorting.py",
+      "size": 4383,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\tests\\__init__.py",
+      "size": 34,
+      "language": "Python",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\The_AI_Swift_and_Cognitive_Framework\\ai_cognitive_framework.md",
+      "size": 2127,
+      "language": "Markdown",
+      "depth": 4
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\The_AI_Swift_and_Cognitive_Framework\\Deep_Personalized_Systems_Framework\\Adaptive_Learning_Systems\\README.md",
+      "size": 4925,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\The_AI_Swift_and_Cognitive_Framework\\Deep_Personalized_Systems_Framework\\Context_Aware_Systems\\README.md",
+      "size": 5843,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\The_AI_Swift_and_Cognitive_Framework\\Deep_Personalized_Systems_Framework\\Personalized_Interfaces\\README.md",
+      "size": 6317,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\The_AI_Swift_and_Cognitive_Framework\\Deep_Personalized_Systems_Framework\\Personalized_Recommendations\\README.md",
+      "size": 7487,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\The_AI_Swift_and_Cognitive_Framework\\Deep_Personalized_Systems_Framework\\personalized_systems.md",
+      "size": 1022,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\The_AI_Swift_and_Cognitive_Framework\\Deep_Personalized_Systems_Framework\\User_Modeling\\README.md",
+      "size": 6759,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\The_AI_Swift_and_Cognitive_Framework\\Executive_Report\\ai_links.json",
+      "size": 3152,
+      "language": "JSON",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\The_AI_Swift_and_Cognitive_Framework\\Executive_Report\\concept_mappings.json",
+      "size": 6125,
+      "language": "JSON",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\The_AI_Swift_and_Cognitive_Framework\\Executive_Report\\dialogue_flows.json",
+      "size": 3666,
+      "language": "JSON",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\The_AI_Swift_and_Cognitive_Framework\\Executive_Report\\feedback_loops.json",
+      "size": 3240,
+      "language": "JSON",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\The_AI_Swift_and_Cognitive_Framework\\Executive_Report\\user_context_schema.json",
+      "size": 1599,
+      "language": "JSON",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\The_AI_Swift_and_Cognitive_Framework\\Learning_Process\\Deep_Learning\\README.md",
+      "size": 6574,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\The_AI_Swift_and_Cognitive_Framework\\Learning_Process\\learning_process.md",
+      "size": 945,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\The_AI_Swift_and_Cognitive_Framework\\Learning_Process\\Machine_Learning\\README.md",
+      "size": 5427,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\The_AI_Swift_and_Cognitive_Framework\\Learning_Process\\Reinforcement_Learning\\README.md",
+      "size": 7220,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\The_AI_Swift_and_Cognitive_Framework\\Learning_Process\\Supervised_Learning\\README.md",
+      "size": 5156,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\The_AI_Swift_and_Cognitive_Framework\\Learning_Process\\Unsupervised_Learning\\README.md",
+      "size": 5211,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\The_Logistic_Field_Hardware_Domain\\AI_Knowledge\\ai_knowledge.md",
+      "size": 688,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\The_Logistic_Field_Hardware_Domain\\AI_Knowledge\\Expert_Systems\\README.md",
+      "size": 5726,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\The_Logistic_Field_Hardware_Domain\\AI_Knowledge\\Inference_Engines\\README.md",
+      "size": 5832,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\The_Logistic_Field_Hardware_Domain\\AI_Knowledge\\Knowledge_Acquisition\\README.md",
+      "size": 4955,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\The_Logistic_Field_Hardware_Domain\\AI_Knowledge\\Knowledge_Engineering\\README.md",
+      "size": 4896,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\The_Logistic_Field_Hardware_Domain\\AI_Knowledge\\Knowledge_Representation\\README.md",
+      "size": 4791,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\The_Logistic_Field_Hardware_Domain\\AI_NLP_Process_Dialog\\Machine_Translation\\README.md",
+      "size": 4884,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\The_Logistic_Field_Hardware_Domain\\AI_NLP_Process_Dialog\\Natural_Language_Processing\\README.md",
+      "size": 4080,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\The_Logistic_Field_Hardware_Domain\\AI_NLP_Process_Dialog\\nlp_dialog.md",
+      "size": 637,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\The_Logistic_Field_Hardware_Domain\\AI_NLP_Process_Dialog\\Parsing_Techniques\\README.md",
+      "size": 4944,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\The_Logistic_Field_Hardware_Domain\\AI_NLP_Process_Dialog\\Speech_Recognition\\README.md",
+      "size": 5477,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\The_Logistic_Field_Hardware_Domain\\AI_NLP_Process_Dialog\\Syntax_and_Semantics\\README.md",
+      "size": 4196,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\The_Logistic_Field_Hardware_Domain\\Computing_Theory\\computing_theory.md",
+      "size": 873,
+      "language": "Markdown",
+      "depth": 5
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\The_Logistic_Field_Hardware_Domain\\Computing_Theory\\Context_Free_Grammars\\README.md",
+      "size": 1196,
+      "language": "Markdown",
+      "depth": 6
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\The_Logistic_Field_Hardware_Domain\\Computing_Theory\\Finite_Automata\\README.md",
+      "size": 1309,
+      "language": "Markdown",
+      "depth": 6
+    }
+  ],
+  "timestamp": "2026-01-09T13:18:28.453375"
+}

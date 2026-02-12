@@ -1,0 +1,21 @@
+{
+  "path": "lightofthe7\\archival\\debug\\debug_articulation2.py",
+  "size": 754,
+  "language": "Python",
+  "lines": 27,
+  "non_empty_lines": 21,
+  "functions": 2,
+  "classes": 1,
+  "imports": [
+    "circuits.kernel.bus",
+    "circuits.plugins.articulation"
+  ],
+  "import_lines": [
+    1,
+    7
+  ],
+  "complexity_estimate": 0.0,
+  "comment_density": 0.0,
+  "has_docstrings": false,
+  "side_effects": []
+}

@@ -1,0 +1,19 @@
+{
+  "path": "application\\integration\\__init__.py",
+  "size": 232,
+  "language": "Python",
+  "lines": 10,
+  "non_empty_lines": 6,
+  "functions": 0,
+  "classes": 0,
+  "imports": [
+    "tools_provider"
+  ],
+  "import_lines": [
+    7
+  ],
+  "complexity_estimate": 0.0,
+  "comment_density": 0.0,
+  "has_docstrings": true,
+  "side_effects": []
+}

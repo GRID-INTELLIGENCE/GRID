@@ -1,0 +1,27 @@
+{
+  "path": "explainability\\lime_explainer.py",
+  "size": 2162,
+  "language": "Python",
+  "lines": 60,
+  "non_empty_lines": 52,
+  "functions": 4,
+  "classes": 1,
+  "imports": [
+    "numpy",
+    "torch",
+    "torch.nn.functional",
+    "lime.lime_text",
+    "typing"
+  ],
+  "import_lines": [
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "complexity_estimate": 3.0,
+  "comment_density": 0.1,
+  "has_docstrings": true,
+  "side_effects": []
+}

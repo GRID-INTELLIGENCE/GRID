@@ -1,0 +1,43 @@
+{
+  "protocol": "DNS",
+  "source_file": "dns_queries_20260206.pcapng",
+  "parsed_at": "2026-02-06T16:45:10.204068",
+  "http_requests": [],
+  "dns_queries": [],
+  "tcp_stats": {
+    "total_packets": 0,
+    "total_bytes": 0,
+    "top_source_ips": [],
+    "top_destination_ips": []
+  },
+  "tls_handshakes": [],
+  "alerts": [
+    {
+      "severity": "INFO",
+      "type": "all_clear",
+      "message": "No anomalies detected. All traffic within normal thresholds.",
+      "timestamp": "2026-02-06T16:45:11.060480"
+    }
+  ],
+  "guardrail_thresholds": {
+    "max_packets_per_minute": 5000,
+    "max_unique_dst_ips": 50,
+    "max_unique_dst_ports": 30,
+    "max_dns_queries_per_minute": 200,
+    "max_dns_query_length": 80,
+    "max_failed_tls_handshakes": 10,
+    "max_http_error_rate": 0.5,
+    "suspicious_ports": [
+      4444,
+      5555,
+      6666,
+      6667,
+      1337,
+      31337,
+      12345,
+      65535
+    ],
+    "max_single_ip_packet_pct": 0.8,
+    "max_payload_bytes_per_packet": 65000
+  }
+}

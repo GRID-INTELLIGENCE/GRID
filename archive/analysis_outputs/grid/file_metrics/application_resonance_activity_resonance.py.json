@@ -1,0 +1,41 @@
+{
+  "path": "application\\resonance\\activity_resonance.py",
+  "size": 9134,
+  "language": "Python",
+  "lines": 280,
+  "non_empty_lines": 221,
+  "functions": 10,
+  "classes": 4,
+  "imports": [
+    "__future__",
+    "logging",
+    "threading",
+    "time",
+    "dataclasses",
+    "enum",
+    "typing",
+    "adsr_envelope",
+    "context_provider",
+    "path_visualizer",
+    "pathlib",
+    "uuid"
+  ],
+  "import_lines": [
+    12,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    21,
+    22,
+    23,
+    89,
+    118
+  ],
+  "complexity_estimate": 20.0,
+  "comment_density": 0.06428571428571428,
+  "has_docstrings": true,
+  "side_effects": []
+}

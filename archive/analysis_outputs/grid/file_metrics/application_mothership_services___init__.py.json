@@ -1,0 +1,33 @@
+{
+  "path": "application\\mothership\\services\\__init__.py",
+  "size": 34314,
+  "language": "Python",
+  "lines": 1160,
+  "non_empty_lines": 954,
+  "functions": 47,
+  "classes": 6,
+  "imports": [
+    "__future__",
+    "asyncio",
+    "logging",
+    "dataclasses",
+    "datetime",
+    "typing",
+    "exceptions",
+    "models"
+  ],
+  "import_lines": [
+    8,
+    10,
+    11,
+    12,
+    13,
+    14,
+    16,
+    22
+  ],
+  "complexity_estimate": 52.0,
+  "comment_density": 0.026724137931034484,
+  "has_docstrings": true,
+  "side_effects": []
+}

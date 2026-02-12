@@ -1,0 +1,38 @@
+﻿================================================================================
+  OneDrive Git Repos Report
+================================================================================
+Generated : 2026-02-07 01:19:53
+Roots     : C:\Users\irfan\OneDrive
+Repos     : 1
+
+--------------------------------------------------------------------------------
+Repo Path    : C:\Users\irfan\OneDrive\Documents\GitHub\Python
+Remotes      : origin	https://github.com/irfankabir02/Python.git (fetch)
+Last Commit  : f7d8869fd3c550ff91d323a1989781654a7f2efd
+Commit Date  : 2025-11-14 20:15:17 -0500
+Subject      : update documentation, scene scripts & add license
+GRID-related : YES
+Recent commits (last 5):
+  f7d8869 2025-11-14 20:15:17 -0500 update documentation, scene scripts & add license
+  32cef36 2025-11-14 19:57:55 -0500 create "Docs" directory to store Document files
+  3119f8e 2025-11-14 15:55:25 -0500 organize repo structure
+  a5e6b40 2025-11-14 14:25:50 -0500 first commit
+--------------------------------------------------------------------------------
+
+=== Summary Table ===
+
+Repo Path                                                    GRID?    Commit Date                  Subject
+------------------------------------------------------------------------------------------------------------------------
+C:\Users\irfan\OneDrive\Documents\GitHub\Python              YES      2025-11-14 20:15:17 -0500    update documentation, scene scripts & add license
+
+=== OneDrive Version History Correlation ===
+
+To correlate OneDrive file versions with Git commits:
+  1. Right-click a file in the repo folder -> Version history
+  2. Match OneDrive version dates against 'Commit Date' above
+  3. Or use the Graph API helper: E:\scripts\onedrive_version_history.ps1
+
+OneDrive Recycle Bin:
+  - Check https://onedrive.live.com -> Recycle bin for deleted .git folders
+  - In Explorer: OneDrive icon -> View online -> Recycle bin
+

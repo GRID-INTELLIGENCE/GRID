@@ -1,0 +1,515 @@
+{
+  "analysis_metadata": {
+    "date": "2026-01-23",
+    "total_issues_analyzed": 77559,
+    "files_with_issues": 150,
+    "top_files_count": 10,
+    "filters_applied": ["exclude /e:/Apps/backend", "exclude /e:/app/"],
+    "sorting": "issue_count_descending"
+  },
+  "top_10_files": [
+    {
+      "rank": 1,
+      "file_path": "/e:/grid/EUFLE/lightofthe7/SEGA/simple_calc.py",
+      "issue_count": 141,
+      "location_hint": "echoes/grid area - SEGA module",
+      "primary_error_types": [
+        {
+          "type": "unknown",
+          "count": 58,
+          "description": "Syntax/parsing errors"
+        },
+        {
+          "type": "reportUndefinedVariable",
+          "count": 44,
+          "description": "Undefined variables"
+        },
+        {
+          "type": "reportUnusedExpression",
+          "count": 38,
+          "description": "Unused expressions"
+        },
+        {
+          "type": "reportGeneralTypeIssues",
+          "count": 1,
+          "description": "Type problems"
+        }
+      ],
+      "critical_lines": [
+        {
+          "line": 1,
+          "issue_count": 31,
+          "message": "Expected function name after \"def\""
+        },
+        {
+          "line": 3,
+          "issue_count": 16,
+          "message": "Statements must be separated by newlines or semicolons"
+        },
+        {
+          "line": 5,
+          "issue_count": 16,
+          "message": "Statements must be separated by newlines or semicolons"
+        },
+        {
+          "line": 7,
+          "issue_count": 17,
+          "message": "Statements must be separated by newlines or semicolons"
+        },
+        {
+          "line": 9,
+          "issue_count": 11,
+          "message": "Statements must be separated by newlines or semicolons"
+        },
+        {
+          "line": 2,
+          "issue_count": 5,
+          "message": "\"buttons\" is not defined"
+        },
+        {
+          "line": 4,
+          "issue_count": 7,
+          "message": "\"extensive\" is not defined"
+        },
+        {
+          "line": 8,
+          "issue_count": 15,
+          "message": "\"supports\" is not defined"
+        },
+        {
+          "line": 10,
+          "issue_count": 10,
+          "message": "\"integrated\" is not defined"
+        },
+        {
+          "line": 24,
+          "issue_count": 3,
+          "message": "\"{\" was not closed"
+        }
+      ],
+      "root_cause": "Corrupted/malformed Python syntax - possibly documentation or GUI definition mixed with code",
+      "recommended_action": "CRITICAL - Rewrite file with proper Python syntax"
+    },
+    {
+      "rank": 2,
+      "file_path": "/e:/grid/research/snapshots/research_snapshots/light_of_the_seven_repo_copy_2026-01-01/SEGA/simple_calc.py",
+      "issue_count": 141,
+      "location_hint": "Research snapshot - duplicate of rank 1",
+      "primary_error_types": "Same as rank 1",
+      "critical_lines": "Same as rank 1",
+      "root_cause": "Snapshot copy of the same corrupted file",
+      "recommended_action": "Fix main file (rank 1), then refresh snapshot"
+    },
+    {
+      "rank": 3,
+      "file_path": "/e:/grid/archive/misc/Arena/the_chase/python/src/the_chase/engine/pipeline.py",
+      "issue_count": 83,
+      "location_hint": "echoes/grid area - the_chase game engine",
+      "primary_error_types": [
+        {
+          "type": "reportOptionalMemberAccess",
+          "count": 78,
+          "description": "Accessing members on potentially None types"
+        },
+        {
+          "type": "reportAttributeAccessIssue",
+          "count": 5,
+          "description": "Invalid attribute access"
+        }
+      ],
+      "critical_lines": [
+        {
+          "line": 511,
+          "issue_count": 1,
+          "message": "\"action_type\" is not a known attribute of \"None\""
+        },
+        {
+          "line": 516,
+          "issue_count": 1,
+          "message": "\"player\" is not a known attribute of \"None\""
+        },
+        {
+          "line": 517,
+          "issue_count": 1,
+          "message": "\"to_position\" is not a known attribute of \"None\""
+        },
+        {
+          "line": 519,
+          "issue_count": 2,
+          "message": "\"to_position\" is not a known attribute of \"None\""
+        },
+        {
+          "line": 523,
+          "issue_count": 1,
+          "message": "\"player\" is not a known attribute of \"None\""
+        },
+        {
+          "line": 524,
+          "issue_count": 2,
+          "message": "\"hunter_index\" is not a known attribute of \"None\""
+        }
+      ],
+      "root_cause": "Game event handling logic accessing attributes on potentially None values - missing null checks",
+      "recommended_action": "HIGH - Add None/Optional type guards and null checks in event processing (lines 511-541)"
+    },
+    {
+      "rank": 4,
+      "file_path": "/e:/grid/archive/misc/datakit/visualizations/animated/manim_circle.py",
+      "issue_count": 70,
+      "location_hint": "echoes/grid area - visualization/animation",
+      "primary_error_types": [
+        {
+          "type": "reportUndefinedVariable",
+          "count": 69,
+          "description": "Undefined/missing Manim API objects"
+        },
+        {
+          "type": "reportMissingImports",
+          "count": 1,
+          "description": "Missing manim library"
+        }
+      ],
+      "critical_lines": [
+        {
+          "line": 10,
+          "issue_count": 1,
+          "message": "Import \"manim\" could not be resolved"
+        },
+        {
+          "line": 13,
+          "issue_count": 1,
+          "message": "\"Scene\" is not defined"
+        },
+        {
+          "line": 20,
+          "issue_count": 2,
+          "message": "\"Circle\" is not defined"
+        },
+        {
+          "line": 21,
+          "issue_count": 1,
+          "message": "\"Create\" is not defined"
+        },
+        {
+          "line": 27,
+          "issue_count": 2,
+          "message": "\"PI\" is not defined"
+        }
+      ],
+      "root_cause": "Manim library not installed or not in Python path",
+      "recommended_action": "HIGH - Install manim: pip install manim"
+    },
+    {
+      "rank": 5,
+      "file_path": "/e:/grid/EUFLE/lightofthe7/datakit/visualizations/animated/manim_circle.py",
+      "issue_count": 70,
+      "location_hint": "echoes/EUFLE integration copy",
+      "primary_error_types": "Same as rank 4",
+      "critical_lines": "Same as rank 4",
+      "root_cause": "Same as rank 4 - EUFLE integration copy",
+      "recommended_action": "Fix main file and update integration"
+    },
+    {
+      "rank": 6,
+      "file_path": "/e:/grid/research/snapshots/research_snapshots/light_of_the_seven_repo_copy_2026-01-01/datakit/visualizations/animated/manim_circle.py",
+      "issue_count": 70,
+      "location_hint": "Research snapshot copy",
+      "primary_error_types": "Same as rank 4",
+      "critical_lines": "Same as rank 4",
+      "root_cause": "Snapshot copy of same file",
+      "recommended_action": "Fix main file and refresh snapshot"
+    },
+    {
+      "rank": 7,
+      "file_path": "/e:/EUFLE/studio/transformer_debug.py",
+      "issue_count": 63,
+      "location_hint": "EUFLE studio - transformer debugging",
+      "primary_error_types": [
+        {
+          "type": "reportOptionalMemberAccess",
+          "count": 45,
+          "description": "Accessing members on potentially None types"
+        },
+        {
+          "type": "reportInvalidTypeForm",
+          "count": 11,
+          "description": "Invalid type annotations"
+        },
+        {
+          "type": "reportMissingImports",
+          "count": 4,
+          "description": "Missing PyTorch, matplotlib imports"
+        }
+      ],
+      "critical_lines": [
+        {
+          "line": 28,
+          "issue_count": 1,
+          "message": "Import \"torch\" could not be resolved"
+        },
+        {
+          "line": 29,
+          "issue_count": 1,
+          "message": "Import \"torch.nn\" could not be resolved"
+        },
+        {
+          "line": 30,
+          "issue_count": 1,
+          "message": "Import \"torch.nn.functional\" could not be resolved"
+        },
+        {
+          "line": 56,
+          "issue_count": 1,
+          "message": "Import \"matplotlib.pyplot\" could not be resolved"
+        },
+        {
+          "line": 278,
+          "issue_count": 4,
+          "message": "\"ReLU\" is not a known attribute of \"None\""
+        }
+      ],
+      "root_cause": "Missing PyTorch and matplotlib. Conditional imports with None type guards needed.",
+      "recommended_action": "HIGH - Install PyTorch and matplotlib, add type guards for optional imports"
+    },
+    {
+      "rank": 8,
+      "file_path": "/e:/grid/EUFLE/tests/test_flow_diffusion.py",
+      "issue_count": 63,
+      "location_hint": "EUFLE tests - flow diffusion module",
+      "primary_error_types": [
+        {
+          "type": "reportAttributeAccessIssue",
+          "count": 26,
+          "description": "Invalid attribute access"
+        },
+        {
+          "type": "reportArgumentType",
+          "count": 15,
+          "description": "Wrong argument types"
+        },
+        {
+          "type": "reportCallIssue",
+          "count": 13,
+          "description": "Invalid function calls"
+        },
+        {
+          "type": "reportAbstractUsage",
+          "count": 8,
+          "description": "Instantiating abstract classes"
+        }
+      ],
+      "critical_lines": [
+        {
+          "line": 6,
+          "issue_count": 1,
+          "message": "Import \"pytest\" could not be resolved"
+        },
+        {
+          "line": 17,
+          "issue_count": 1,
+          "message": "\"InteractionState\" is unknown import symbol"
+        },
+        {
+          "line": 18,
+          "issue_count": 1,
+          "message": "\"FlowSequence\" is unknown import symbol"
+        },
+        {
+          "line": 45,
+          "issue_count": 1,
+          "message": "No parameter named \"continuity_weight\""
+        },
+        {
+          "line": 121,
+          "issue_count": 2,
+          "message": "Cannot instantiate abstract class \"FlowPrior\" - load not implemented"
+        }
+      ],
+      "root_cause": "Test uses outdated/non-existent class signatures and methods. Missing pytest library.",
+      "recommended_action": "HIGH - Update test to match current API signatures, install pytest"
+    },
+    {
+      "rank": 9,
+      "file_path": "/e:/grid/tests/test_overwatch_resonance_arena.py",
+      "issue_count": 58,
+      "location_hint": "echoes/grid tests - overwatch module",
+      "primary_error_types": [
+        {
+          "type": "reportAttributeAccessIssue",
+          "count": 30,
+          "description": "Invalid attribute access"
+        },
+        {
+          "type": "reportCallIssue",
+          "count": 23,
+          "description": "Invalid function calls"
+        },
+        {
+          "type": "reportMissingImports",
+          "count": 4,
+          "description": "Missing modules"
+        }
+      ],
+      "critical_lines": [
+        {
+          "line": 9,
+          "issue_count": 1,
+          "message": "Import \"pytest\" could not be resolved"
+        },
+        {
+          "line": 22,
+          "issue_count": 1,
+          "message": "Cannot import \"the_chase.overwatch.core\""
+        },
+        {
+          "line": 49,
+          "issue_count": 1,
+          "message": "Missing attribute \"enable_sustain_decay_compensation\""
+        },
+        {
+          "line": 57,
+          "issue_count": 1,
+          "message": "No parameter named \"attack_energy\""
+        },
+        {
+          "line": 61,
+          "issue_count": 1,
+          "message": "Cannot access \"attack_energy\" on OverwatchConfig"
+        }
+      ],
+      "root_cause": "Test API calls use outdated/renamed parameters and attributes. Configuration class signature changed.",
+      "recommended_action": "HIGH - Update test with correct API signatures and config parameters"
+    },
+    {
+      "rank": 10,
+      "file_path": "/e:/grid/tests/api/test_property_based_auth.py",
+      "issue_count": 53,
+      "location_hint": "echoes/grid tests - property-based authentication testing",
+      "primary_error_types": [
+        {
+          "type": "reportOptionalMemberAccess",
+          "count": 48,
+          "description": "Accessing members on potentially None types"
+        },
+        {
+          "type": "reportMissingImports",
+          "count": 3,
+          "description": "Missing pytest and hypothesis libraries"
+        }
+      ],
+      "critical_lines": [
+        {
+          "line": 14,
+          "issue_count": 1,
+          "message": "Import \"pytest\" could not be resolved"
+        },
+        {
+          "line": 18,
+          "issue_count": 1,
+          "message": "Import \"hypothesis\" could not be resolved"
+        },
+        {
+          "line": 101,
+          "issue_count": 1,
+          "message": "\"text\" is not a known attribute of \"None\""
+        },
+        {
+          "line": 115,
+          "issue_count": 1,
+          "message": "\"one_of\" is not a known attribute of \"None\""
+        },
+        {
+          "line": 125,
+          "issue_count": 1,
+          "message": "\"lists\" is not a known attribute of \"None\""
+        }
+      ],
+      "root_cause": "Missing hypothesis testing library. Hypothesis strategy methods accessed without null checks.",
+      "recommended_action": "MEDIUM - Install hypothesis: pip install hypothesis, add null checks on strategy calls"
+    }
+  ],
+  "issue_summary_by_type": {
+    "syntax_parsing_errors": {
+      "count": 141,
+      "files_affected": ["/e:/grid/EUFLE/lightofthe7/SEGA/simple_calc.py"],
+      "recommendation": "CRITICAL - Fix file structure"
+    },
+    "optional_member_access": {
+      "count": 190,
+      "files_affected": [
+        "/e:/grid/archive/misc/Arena/the_chase/python/src/the_chase/engine/pipeline.py",
+        "/e:/EUFLE/studio/transformer_debug.py",
+        "/e:/grid/tests/api/test_property_based_auth.py"
+      ],
+      "recommendation": "HIGH - Add None/Optional type guards throughout"
+    },
+    "undefined_variables": {
+      "count": 160,
+      "files_affected": [
+        "/e:/grid/EUFLE/lightofthe7/SEGA/simple_calc.py",
+        "/e:/grid/archive/misc/datakit/visualizations/animated/manim_circle.py"
+      ],
+      "recommendation": "HIGH - Install missing dependencies (manim, torch, etc.)"
+    },
+    "missing_imports_modules": {
+      "count": 40,
+      "recommendation": "HIGH - Install: manim, torch, pytorch, pytest, hypothesis, matplotlib, psutil"
+    },
+    "attribute_access_issues": {
+      "count": 60,
+      "files_affected": [
+        "/e:/grid/EUFLE/tests/test_flow_diffusion.py",
+        "/e:/grid/tests/test_overwatch_resonance_arena.py"
+      ],
+      "recommendation": "HIGH - Update test API signatures to match current implementation"
+    }
+  },
+  "recommended_remediation_priority": [
+    {
+      "priority": "CRITICAL",
+      "action": "Fix simple_calc.py syntax corruption",
+      "files": ["/e:/grid/EUFLE/lightofthe7/SEGA/simple_calc.py"],
+      "effort": "High",
+      "impact": "Removes 141 issues immediately"
+    },
+    {
+      "priority": "HIGH",
+      "action": "Install missing Python packages",
+      "packages": ["torch", "torchvision", "manim", "pytest", "hypothesis", "matplotlib", "psutil", "transformers"],
+      "effort": "Low",
+      "impact": "Removes ~100 issues"
+    },
+    {
+      "priority": "HIGH",
+      "action": "Update test API signatures",
+      "files": [
+        "/e:/grid/EUFLE/tests/test_flow_diffusion.py",
+        "/e:/grid/tests/test_overwatch_resonance_arena.py"
+      ],
+      "effort": "Medium",
+      "impact": "Removes ~121 issues"
+    },
+    {
+      "priority": "MEDIUM",
+      "action": "Add None/Optional type guards",
+      "files": [
+        "/e:/grid/archive/misc/Arena/the_chase/python/src/the_chase/engine/pipeline.py",
+        "/e:/EUFLE/studio/transformer_debug.py",
+        "/e:/grid/tests/api/test_property_based_auth.py"
+      ],
+      "effort": "Medium",
+      "impact": "Removes ~190 issues"
+    },
+    {
+      "priority": "LOW",
+      "action": "Refresh/regenerate snapshot files",
+      "files": [
+        "/e:/grid/research/snapshots/research_snapshots/light_of_the_seven_repo_copy_2026-01-01/SEGA/simple_calc.py",
+        "/e:/grid/research/snapshots/research_snapshots/light_of_the_seven_repo_copy_2026-01-01/datakit/visualizations/animated/manim_circle.py",
+        "/e:/grid/EUFLE/lightofthe7/datakit/visualizations/animated/manim_circle.py"
+      ],
+      "effort": "Low",
+      "impact": "Removes ~210 issues (once originals are fixed)"
+    }
+  ]
+}

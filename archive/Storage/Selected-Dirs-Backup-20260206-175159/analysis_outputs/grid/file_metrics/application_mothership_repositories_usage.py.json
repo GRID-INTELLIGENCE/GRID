@@ -1,0 +1,29 @@
+{
+  "path": "application\\mothership\\repositories\\usage.py",
+  "size": 3588,
+  "language": "Python",
+  "lines": 92,
+  "non_empty_lines": 71,
+  "functions": 1,
+  "classes": 1,
+  "imports": [
+    "__future__",
+    "logging",
+    "datetime",
+    "typing",
+    "models.subscription",
+    "__init__"
+  ],
+  "import_lines": [
+    7,
+    9,
+    10,
+    11,
+    13,
+    14
+  ],
+  "complexity_estimate": 5.0,
+  "comment_density": 0.0,
+  "has_docstrings": true,
+  "side_effects": []
+}

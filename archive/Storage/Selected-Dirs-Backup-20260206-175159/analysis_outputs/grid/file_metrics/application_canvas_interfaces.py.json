@@ -1,0 +1,37 @@
+{
+  "path": "application\\canvas\\interfaces.py",
+  "size": 3716,
+  "language": "Python",
+  "lines": 115,
+  "non_empty_lines": 94,
+  "functions": 1,
+  "classes": 1,
+  "imports": [
+    "__future__",
+    "logging",
+    "pathlib",
+    "typing",
+    "grid.awareness.context",
+    "grid.essence.core_state",
+    "grid.interfaces.bridge",
+    "grid.interfaces.sensory",
+    "schemas",
+    "time"
+  ],
+  "import_lines": [
+    3,
+    5,
+    6,
+    7,
+    9,
+    10,
+    11,
+    12,
+    14,
+    89
+  ],
+  "complexity_estimate": 4.0,
+  "comment_density": 0.008695652173913044,
+  "has_docstrings": true,
+  "side_effects": []
+}

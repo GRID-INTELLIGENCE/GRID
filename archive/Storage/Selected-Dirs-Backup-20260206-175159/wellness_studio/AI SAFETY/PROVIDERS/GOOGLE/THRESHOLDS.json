@@ -1,0 +1,38 @@
+{
+  "provider": "Google DeepMind",
+  "version": "1.0.0",
+  "global_defaults": {
+    "cooldown_period_seconds": 3600,
+    "aggregation_window_minutes": 60,
+    "confidence_threshold": 0.85
+  },
+  "signal_thresholds": {
+    "gemini_safety_filters": {
+      "hate_speech": 0.7,
+      "harassment": 0.7,
+      "sexually_explicit": 0.8,
+      "dangerous_content": 0.6
+    },
+    "frontier_safety": {
+      "cbrn_uplift_score": 0.3,
+      "cyber_attack_utility": 0.4,
+      "autonomous_agency_drift": 0.2
+    },
+    "fairness_and_bias": {
+      "stereotypical_association_delta": 0.15,
+      "demographic_representation_skew": 0.2
+    },
+    "factuality_and_integrity": {
+      "hallucination_rate_limit": 0.05,
+      "grounding_failure_threshold": 0.1
+    },
+    "privacy_and_security": {
+      "pii_leakage_probability": 0.001,
+      "data_exfiltration_signal": 0.1
+    }
+  },
+  "escalation_triggers": {
+    "rsc_notification_count": 5,
+    "agi_safety_council_redline_breach": 1
+  }
+}

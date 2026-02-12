@@ -1,0 +1,19 @@
+{
+    "permissions": {
+        "allow": [
+            "Read",
+            "Grep",
+            "Glob",
+            "LS",
+            "View"
+        ],
+        "deny": [
+            "Bash(eval *)",
+            "Bash(exec *)",
+            "Bash(rm -rf /)",
+            "Bash(rm -rf ~)",
+            "Bash(pip install*)",
+            "Bash(pip uninstall*)"
+        ]
+    }
+}

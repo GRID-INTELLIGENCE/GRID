@@ -1,0 +1,38 @@
+# E:\ master requirements - shared base for all Python projects
+# Install: pip install -r requirements.txt
+# Optional groups via extras or separate files if needed
+
+# --- Core (shared) ---
+pydantic>=2.4.0,<3.0.0
+requests>=2.31.0
+python-dotenv>=1.0.0
+numpy>=2.0.0,<3.0.0
+
+# --- Web ---
+fastapi>=0.128.0,<1.0.0
+uvicorn[standard]>=0.24.0
+
+# --- Data / ML ---
+pandas>=2.0.0,<3.0.0
+scikit-learn>=1.8.0,<2.0.0
+
+# --- Pipeline (optional) ---
+# boto3>=1.28.0,<2.0.0
+# botocore>=1.31.0,<2.0.0
+# pytesseract>=0.3.10
+# Pillow>=10.0.0
+# pdfplumber>=0.10.0
+# pyarrow>=14.0.0
+# redis>=5.0.0
+
+# --- EUFLE evaluation (optional) ---
+# datasets>=2.14.0
+# tqdm>=4.66.0
+# chromadb>=1.4.1
+
+# --- Dev ---
+pytest>=7.4.0
+pytest-cov>=4.1.0
+black>=23.0.0
+isort>=5.12.0
+mypy>=1.5.0

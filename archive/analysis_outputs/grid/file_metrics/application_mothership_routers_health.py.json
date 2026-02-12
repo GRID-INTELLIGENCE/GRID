@@ -1,0 +1,33 @@
+{
+  "path": "application\\mothership\\routers\\health.py",
+  "size": 8012,
+  "language": "Python",
+  "lines": 288,
+  "non_empty_lines": 240,
+  "functions": 2,
+  "classes": 0,
+  "imports": [
+    "__future__",
+    "logging",
+    "datetime",
+    "typing",
+    "fastapi",
+    "dependencies",
+    "schemas",
+    "sys"
+  ],
+  "import_lines": [
+    8,
+    10,
+    11,
+    12,
+    14,
+    16,
+    17,
+    242
+  ],
+  "complexity_estimate": 20.0,
+  "comment_density": 0.034722222222222224,
+  "has_docstrings": true,
+  "side_effects": []
+}

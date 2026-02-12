@@ -1,0 +1,23 @@
+{
+  "path": "lightofthe7\\datakit\\Hogwarts\\parseltongue_cli.py",
+  "size": 10275,
+  "language": "Python",
+  "lines": 295,
+  "non_empty_lines": 240,
+  "functions": 14,
+  "classes": 1,
+  "imports": [
+    "argparse",
+    "sys",
+    "typing"
+  ],
+  "import_lines": [
+    25,
+    26,
+    27
+  ],
+  "complexity_estimate": 12.0,
+  "comment_density": 0.04067796610169491,
+  "has_docstrings": true,
+  "side_effects": []
+}

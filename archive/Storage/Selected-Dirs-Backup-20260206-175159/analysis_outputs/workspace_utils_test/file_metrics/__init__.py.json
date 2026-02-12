@@ -1,0 +1,25 @@
+{
+  "path": "__init__.py",
+  "size": 585,
+  "language": "Python",
+  "lines": 25,
+  "non_empty_lines": 22,
+  "functions": 0,
+  "classes": 0,
+  "imports": [
+    "repo_analyzer",
+    "project_comparator",
+    "entity_classifier",
+    "eufle_verifier"
+  ],
+  "import_lines": [
+    11,
+    12,
+    13,
+    14
+  ],
+  "complexity_estimate": 0.0,
+  "comment_density": 0.0,
+  "has_docstrings": true,
+  "side_effects": []
+}

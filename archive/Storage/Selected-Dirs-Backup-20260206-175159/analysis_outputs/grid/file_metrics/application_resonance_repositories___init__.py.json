@@ -1,0 +1,27 @@
+{
+  "path": "application\\resonance\\repositories\\__init__.py",
+  "size": 8637,
+  "language": "Python",
+  "lines": 251,
+  "non_empty_lines": 184,
+  "functions": 8,
+  "classes": 6,
+  "imports": [
+    "__future__",
+    "abc",
+    "contextlib",
+    "typing",
+    "activity_resonance"
+  ],
+  "import_lines": [
+    8,
+    10,
+    11,
+    12,
+    14
+  ],
+  "complexity_estimate": 4.0,
+  "comment_density": 0.099601593625498,
+  "has_docstrings": true,
+  "side_effects": []
+}

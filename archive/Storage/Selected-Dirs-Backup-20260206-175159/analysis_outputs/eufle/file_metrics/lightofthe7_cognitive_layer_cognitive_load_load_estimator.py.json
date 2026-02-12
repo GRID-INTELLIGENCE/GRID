@@ -1,0 +1,25 @@
+{
+  "path": "lightofthe7\\cognitive_layer\\cognitive_load\\load_estimator.py",
+  "size": 8272,
+  "language": "Python",
+  "lines": 241,
+  "non_empty_lines": 195,
+  "functions": 7,
+  "classes": 2,
+  "imports": [
+    "enum",
+    "typing",
+    "schemas.cognitive_state",
+    "schemas.user_cognitive_profile"
+  ],
+  "import_lines": [
+    3,
+    4,
+    6,
+    7
+  ],
+  "complexity_estimate": 12.0,
+  "comment_density": 0.06224066390041494,
+  "has_docstrings": true,
+  "side_effects": []
+}

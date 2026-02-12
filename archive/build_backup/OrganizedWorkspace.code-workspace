@@ -1,0 +1,25 @@
+{
+  "folders": [
+    {
+      "name": "🏗️ GRID (AI/ML Platform)",
+      "path": "E:/grid"
+    },
+    {
+      "name": "💰 Coinbase (Crypto/Finance)",
+      "path": "E:/Coinbase"
+    }
+  ],
+  "settings": {
+    "editor.tabSize": 2,
+    "editor.formatOnSave": true,
+    "files.trimTrailingWhitespace": true,
+    "files.trimFinalNewlines": true,
+    "telemetry.telemetryLevel": "off",
+    "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
+    "python.terminal.activateEnvironment": true
+  },
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": []
+  }
+}

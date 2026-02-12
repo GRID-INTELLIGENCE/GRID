@@ -1,0 +1,57 @@
+{
+  "timestamp": "2026-01-24T10:46:10.360956",
+  "workspace_root": "E:\\",
+  "dry_run": true,
+  "targets": {
+    "__pycache__": {
+      "deleted": [],
+      "archived": [],
+      "errors": [],
+      "bytes_freed": 0
+    },
+    "pyc_files": {
+      "deleted": [],
+      "archived": [],
+      "errors": [],
+      "bytes_freed": 0
+    },
+    "basedpyright": {
+      "deleted": [],
+      "archived": [],
+      "errors": [],
+      "bytes_freed": 0
+    },
+    "eufle_rag_cache": {
+      "deleted": [],
+      "archived": [],
+      "errors": [],
+      "bytes_freed": 0
+    },
+    "build_artifacts": {
+      "deleted": [],
+      "archived": [],
+      "errors": [],
+      "bytes_freed": 0
+    },
+    "analysis_outputs": {
+      "deleted": [],
+      "archived": [],
+      "errors": [],
+      "bytes_freed": 0
+    },
+    "logs": {
+      "deleted": [],
+      "archived": [],
+      "errors": [],
+      "bytes_freed": 0
+    },
+    "temp_files": {
+      "deleted": [],
+      "archived": [],
+      "errors": [],
+      "bytes_freed": 0
+    }
+  },
+  "total_bytes_freed": 0,
+  "total_bytes_freed_mb": 0.0
+}

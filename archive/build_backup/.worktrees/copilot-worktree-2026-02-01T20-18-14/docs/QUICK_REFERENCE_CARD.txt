@@ -1,0 +1,134 @@
+# QUICK REFERENCE CARD
+
+## 🚀 Start Development (2 minutes)
+
+```powershell
+# Terminal 1: Backend Server
+cd E:\Apps\backend
+python main.py
+
+# Terminal 2: Frontend Development  
+cd E:\Apps
+npm run dev
+```
+
+## ✅ Verify Everything Works
+
+```powershell
+# Option 1: Run validation script
+cd E:\
+.\validate_startup.ps1
+
+# Option 2: Check health endpoint
+curl http://localhost:8000/health
+
+# Option 3: Check backend startup logs
+# Look for:
+# ✓ MCP servers: X/4 initialized successfully
+# ✓ Terminal shells: X/3 initialized successfully
+```
+
+## 🐚 Using Shells
+
+```powershell
+# PowerShell (primary - all Windows tasks)
+python main.py
+npm run dev
+git status
+
+# WSL (advanced Unix commands)
+wsl
+grep "pattern" file.txt
+cat /etc/os-release
+exit
+```
+
+## 🔧 Troubleshooting
+
+| Issue | Fix |
+|-------|-----|
+| Language server errors | Reload VS Code: Ctrl+Shift+P → "Developer: Reload Window" |
+| MCP shows "docker_required" | Normal if Docker not running; optional feature |
+| Terminal integration fails | Create new terminal: Ctrl+Shift+` |
+| "Loading already in progress" | Wait ~30s for initialization to complete |
+| Type checking too strict | Review errors in Problems panel; fix critical path first |
+
+## 📊 Health Status Codes
+
+```
+healthy ................... Server initialized and ready
+docker_required ........... Server needs Docker (not an error)
+initializing .............. Server is starting up
+timeout ................... Server exceeded 60s initialization
+error ..................... Server failed to initialize
+unhealthy ................. Server was healthy but no longer responding
+```
+
+## 📝 Key Files
+
+```
+.vscode/settings.json .... VS Code configuration
+  → python.languageServer = "Pylance"
+  → mcpServers = { sqlite, postgresql, github, sonarqube }
+  
+pyrightconfig.json ....... Type checking configuration
+  → typeCheckingMode = "strict"
+  → reportOptionalMemberAccess = "error"
+
+validate_startup.ps1 ..... Diagnostic script
+  → Checks all 4 areas: LSP, MCP, Terminal, Backend
+  → Provides recommendations
+
+Apps/backend/services/
+  → mcp_server_manager.py (thread-safe initialization)
+  → terminal_integration_manager.py (shell retry logic)
+```
+
+## 🎯 Common Commands
+
+```powershell
+# Start development
+python main.py                 # Backend on :8000
+npm run dev                    # Frontend on :3000
+
+# Check status
+curl http://localhost:8000/health
+
+# Validate configuration
+.\validate_startup.ps1
+
+# View logs
+# Look at terminal where backend is running
+
+# Restart services
+# Ctrl+C to stop, then python main.py to restart
+```
+
+## 💡 Tips
+
+1. **PowerShell is Primary** - Use it for most tasks
+2. **WSL for Unix Tools** - Switch to WSL when you need grep, cat, etc.
+3. **Type Errors are Good** - Red squiggles mean Pylance is working
+4. **Docker Optional** - System works even if Docker not running
+5. **Health Endpoint Always Available** - Check `/health` for system status
+
+## 📖 Documentation
+
+- **IMPLEMENTATION_COMPLETE_FIXES.md** - Technical details
+- **QUICK_START_FIXES.md** - Detailed daily workflow
+- **QUICK_REFERENCE_CARD.txt** - This file
+
+## ⚡ At a Glance
+
+✅ Language Server enabled with strict type checking  
+✅ 4 MCP servers configured with Docker detection  
+✅ PowerShell + WSL working with retry logic  
+✅ Thread-safe initialization prevents conflicts  
+✅ Health endpoint monitors everything  
+✅ Validation script diagnoses any issues  
+
+**Start developing immediately!**
+
+---
+
+**Questions?** See QUICK_START_FIXES.md for detailed troubleshooting

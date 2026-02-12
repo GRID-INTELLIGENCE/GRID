@@ -1,0 +1,36 @@
+{
+  "path": "application\\resonance\\api\\performance.py",
+  "size": 5412,
+  "language": "Python",
+  "lines": 181,
+  "non_empty_lines": 160,
+  "functions": 4,
+  "classes": 0,
+  "imports": [
+    "os",
+    "sqlite3",
+    "typing",
+    "fastapi",
+    "sqlalchemy",
+    "sqlalchemy.orm",
+    "src.grid.persistence.database",
+    "sqlalchemy.orm"
+  ],
+  "import_lines": [
+    1,
+    2,
+    3,
+    5,
+    8,
+    9,
+    22,
+    12
+  ],
+  "complexity_estimate": 19.0,
+  "comment_density": 0.016574585635359115,
+  "has_docstrings": false,
+  "side_effects": [
+    "sqlite3\\.",
+    "sqlalchemy\\."
+  ]
+}

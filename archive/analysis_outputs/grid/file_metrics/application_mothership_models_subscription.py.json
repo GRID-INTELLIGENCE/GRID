@@ -1,0 +1,27 @@
+{
+  "path": "application\\mothership\\models\\subscription.py",
+  "size": 1330,
+  "language": "Python",
+  "lines": 50,
+  "non_empty_lines": 38,
+  "functions": 3,
+  "classes": 1,
+  "imports": [
+    "__future__",
+    "dataclasses",
+    "datetime",
+    "typing",
+    "uuid"
+  ],
+  "import_lines": [
+    8,
+    10,
+    11,
+    12,
+    35
+  ],
+  "complexity_estimate": 1.0,
+  "comment_density": 0.0,
+  "has_docstrings": true,
+  "side_effects": []
+}

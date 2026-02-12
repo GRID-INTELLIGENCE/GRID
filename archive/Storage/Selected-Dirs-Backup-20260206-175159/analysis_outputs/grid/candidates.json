@@ -1,0 +1,336 @@
+{
+  "candidates_for_refactor": [
+    {
+      "path": "tools\\test_json_collection.py",
+      "score": 17.970588235294116,
+      "fan_in": 188,
+      "fan_out": 13,
+      "lines": 272,
+      "complexity": 26.0,
+      "comment_density": 0.05514705882352941,
+      "has_docstrings": true,
+      "rationale": "High fan-in (188), low documentation/comments"
+    },
+    {
+      "path": "application\\mothership\\repositories\\agentic.py",
+      "score": 15.2,
+      "fan_in": 209,
+      "fan_out": 7,
+      "lines": 275,
+      "complexity": 20.0,
+      "comment_density": 0.025454545454545455,
+      "has_docstrings": true,
+      "rationale": "High fan-in (209), low documentation/comments"
+    },
+    {
+      "path": "grid\\interfaces\\json_parser.py",
+      "score": 14.979020979020978,
+      "fan_in": 189,
+      "fan_out": 10,
+      "lines": 429,
+      "complexity": 34.0,
+      "comment_density": 0.05827505827505827,
+      "has_docstrings": true,
+      "rationale": "High fan-in (189), low documentation/comments"
+    },
+    {
+      "path": "datakit\\core\\pack_schema.py",
+      "score": 14.74,
+      "fan_in": 66,
+      "fan_out": 7,
+      "lines": 300,
+      "complexity": 67.0,
+      "comment_density": 0.0,
+      "has_docstrings": false,
+      "rationale": "High fan-in (66), low documentation/comments"
+    },
+    {
+      "path": "research_snapshots\\light_of_the_seven_repo_copy_2026-01-01\\datakit\\core\\pack_schema.py",
+      "score": 14.74,
+      "fan_in": 66,
+      "fan_out": 7,
+      "lines": 300,
+      "complexity": 67.0,
+      "comment_density": 0.0,
+      "has_docstrings": false,
+      "rationale": "High fan-in (66), low documentation/comments"
+    },
+    {
+      "path": "research_snapshots\\light_of_the_seven_repo_copy_2026-01-01\\datakit\\scripts\\openai_smoketest.py",
+      "score": 13.72782874617737,
+      "fan_in": 67,
+      "fan_out": 6,
+      "lines": 327,
+      "complexity": 67.0,
+      "comment_density": 0.05504587155963303,
+      "has_docstrings": true,
+      "rationale": "High fan-in (67), low documentation/comments"
+    },
+    {
+      "path": "research_snapshots\\light_of_the_seven_repo_copy_2026-01-01\\datakit\\scripts\\ai_composer.py",
+      "score": 13.298507462686567,
+      "fan_in": 198,
+      "fan_out": 4,
+      "lines": 268,
+      "complexity": 18.0,
+      "comment_density": 0.041044776119402986,
+      "has_docstrings": true,
+      "rationale": "High fan-in (198), low documentation/comments"
+    },
+    {
+      "path": ".windsurf\\grid-master-workflow-instance.json",
+      "score": 12.793846153846154,
+      "fan_in": 189,
+      "fan_out": 0,
+      "lines": 325,
+      "complexity": 22.0,
+      "comment_density": 0.003076923076923077,
+      "has_docstrings": false,
+      "rationale": "High fan-in (189), low documentation/comments"
+    },
+    {
+      "path": "grid\\tracing\\trace_store.py",
+      "score": 11.925742574257427,
+      "fan_in": 73,
+      "fan_out": 5,
+      "lines": 202,
+      "complexity": 33.0,
+      "comment_density": 0.0297029702970297,
+      "has_docstrings": true,
+      "rationale": "High fan-in (73), low documentation/comments"
+    },
+    {
+      "path": "research_snapshots\\light_of_the_seven_repo_copy_2026-01-01\\grid\\tracing\\trace_store.py",
+      "score": 11.925742574257427,
+      "fan_in": 73,
+      "fan_out": 5,
+      "lines": 202,
+      "complexity": 33.0,
+      "comment_density": 0.0297029702970297,
+      "has_docstrings": true,
+      "rationale": "High fan-in (73), low documentation/comments"
+    },
+    {
+      "path": "datakit\\artifacts\\documents\\32e80f66-6bc4-4457-a298-c4dff226710e_atmosphere_insights.md",
+      "score": 11.690036900369003,
+      "fan_in": 198,
+      "fan_out": 0,
+      "lines": 271,
+      "complexity": 16.0,
+      "comment_density": 0.15867158671586715,
+      "has_docstrings": false,
+      "rationale": "High fan-in (198), low documentation/comments"
+    },
+    {
+      "path": "datakit\\core\\explorer.py",
+      "score": 10.738003838771593,
+      "fan_in": 67,
+      "fan_out": 9,
+      "lines": 1042,
+      "complexity": 167.0,
+      "comment_density": 0.014395393474088292,
+      "has_docstrings": true,
+      "rationale": "High fan-in (67), low documentation/comments"
+    },
+    {
+      "path": "research_snapshots\\light_of_the_seven_repo_copy_2026-01-01\\datakit\\core\\explorer.py",
+      "score": 10.738003838771593,
+      "fan_in": 67,
+      "fan_out": 9,
+      "lines": 1042,
+      "complexity": 167.0,
+      "comment_density": 0.014395393474088292,
+      "has_docstrings": true,
+      "rationale": "High fan-in (67), low documentation/comments"
+    },
+    {
+      "path": "research_snapshots\\light_of_the_seven_repo_copy_2026-01-01\\scripts\\git_manager.py",
+      "score": 10.60327198364008,
+      "fan_in": 61,
+      "fan_out": 8,
+      "lines": 489,
+      "complexity": 85.0,
+      "comment_density": 0.03067484662576687,
+      "has_docstrings": true,
+      "rationale": "High fan-in (61), low documentation/comments"
+    },
+    {
+      "path": "archival\\atmosphere\\Atmosphere\\src\\proxy_bypass_client.py",
+      "score": 10.521739130434783,
+      "fan_in": 198,
+      "fan_out": 6,
+      "lines": 207,
+      "complexity": 11.0,
+      "comment_density": 0.05314009661835749,
+      "has_docstrings": true,
+      "rationale": "High fan-in (198), low documentation/comments"
+    },
+    {
+      "path": "datakit\\scripts\\ai_composer.py",
+      "score": 10.14179104477612,
+      "fan_in": 151,
+      "fan_out": 4,
+      "lines": 268,
+      "complexity": 18.0,
+      "comment_density": 0.041044776119402986,
+      "has_docstrings": true,
+      "rationale": "High fan-in (151), low documentation/comments"
+    },
+    {
+      "path": "application\\mothership\\repositories\\__init__.py",
+      "score": 10.045454545454545,
+      "fan_in": 208,
+      "fan_out": 13,
+      "lines": 704,
+      "complexity": 34.0,
+      "comment_density": 0.05539772727272727,
+      "has_docstrings": true,
+      "rationale": "High fan-in (208), low documentation/comments"
+    },
+    {
+      "path": "application\\mothership\\repositories\\payment.py",
+      "score": 9.952380952380953,
+      "fan_in": 209,
+      "fan_out": 5,
+      "lines": 210,
+      "complexity": 10.0,
+      "comment_density": 0.0,
+      "has_docstrings": true,
+      "rationale": "High fan-in (209), low documentation/comments"
+    },
+    {
+      "path": "data\\financial_case_analysis_report.json",
+      "score": 9.786833855799372,
+      "fan_in": 223,
+      "fan_out": 0,
+      "lines": 319,
+      "complexity": 14.0,
+      "comment_density": 0.0,
+      "has_docstrings": false,
+      "rationale": "High fan-in (223), low documentation/comments"
+    },
+    {
+      "path": "research_snapshots\\light_of_the_seven_repo_copy_2026-01-01\\application\\mothership\\repositories\\__init__.py",
+      "score": 9.763869132290186,
+      "fan_in": 208,
+      "fan_out": 10,
+      "lines": 703,
+      "complexity": 33.0,
+      "comment_density": 0.05405405405405406,
+      "has_docstrings": true,
+      "rationale": "High fan-in (208), low documentation/comments"
+    }
+  ],
+  "reference_high_value_components": [
+    {
+      "path": "research_snapshots\\light_of_the_seven_repo_copy_2026-01-01\\tools\\rag\\__init__.py",
+      "score": 72.85000000000001,
+      "fan_in": 62,
+      "fan_out": 6,
+      "lines": 40,
+      "complexity": 0.0,
+      "comment_density": 0.175,
+      "has_docstrings": true,
+      "rationale": "Well-documented, efficient, reused by 62 modules"
+    },
+    {
+      "path": "research_snapshots\\light_of_the_seven_repo_copy_2026-01-01\\application\\mothership\\routers\\__init__.py",
+      "score": 31.82795698924731,
+      "fan_in": 74,
+      "fan_out": 3,
+      "lines": 62,
+      "complexity": 3.0,
+      "comment_density": 0.2903225806451613,
+      "has_docstrings": true,
+      "rationale": "Well-documented, efficient, reused by 74 modules"
+    },
+    {
+      "path": "light_of_the_seven\\create_grid_structure.py",
+      "score": 10.183875530410184,
+      "fan_in": 60,
+      "fan_out": 4,
+      "lines": 101,
+      "complexity": 7.0,
+      "comment_density": 0.18811881188118812,
+      "has_docstrings": true,
+      "rationale": "Well-documented, efficient, reused by 60 modules"
+    },
+    {
+      "path": "scripts\\create_grid_structure.py",
+      "score": 10.183875530410184,
+      "fan_in": 60,
+      "fan_out": 4,
+      "lines": 101,
+      "complexity": 7.0,
+      "comment_density": 0.18811881188118812,
+      "has_docstrings": true,
+      "rationale": "Well-documented, efficient, reused by 60 modules"
+    },
+    {
+      "path": "light_of_the_seven\\light_of_the_seven\\cognitive_layer\\__init__.py",
+      "score": 3.517241379310345,
+      "fan_in": 3,
+      "fan_out": 16,
+      "lines": 58,
+      "complexity": 0.0,
+      "comment_density": 0.1724137931034483,
+      "has_docstrings": true,
+      "rationale": "Well-documented, efficient, reused by 3 modules"
+    },
+    {
+      "path": "tools\\rag\\__init__.py",
+      "score": 1.7666666666666666,
+      "fan_in": 3,
+      "fan_out": 6,
+      "lines": 45,
+      "complexity": 2.0,
+      "comment_density": 0.17777777777777778,
+      "has_docstrings": true,
+      "rationale": "Well-documented, efficient, reused by 3 modules"
+    },
+    {
+      "path": "SEGA\\heat_cooling_manager.py",
+      "score": 1.5,
+      "fan_in": 1,
+      "fan_out": 0,
+      "lines": 4,
+      "complexity": 0.0,
+      "comment_density": 0.5,
+      "has_docstrings": true,
+      "rationale": "Well-documented, efficient, reused by 1 modules"
+    },
+    {
+      "path": "application\\mothership\\routers\\__init__.py",
+      "score": 1.1730769230769231,
+      "fan_in": 14,
+      "fan_out": 11,
+      "lines": 104,
+      "complexity": 14.0,
+      "comment_density": 0.17307692307692307,
+      "has_docstrings": true,
+      "rationale": "Well-documented, efficient, reused by 14 modules"
+    },
+    {
+      "path": "tests\\unit\\test_pattern_engine_dbscan.py",
+      "score": 1.170940170940171,
+      "fan_in": 1,
+      "fan_out": 3,
+      "lines": 117,
+      "complexity": 1.0,
+      "comment_density": 0.17094017094017094,
+      "has_docstrings": true,
+      "rationale": "Well-documented, efficient, reused by 1 modules"
+    },
+    {
+      "path": "tests\\api\\test_websocket.py",
+      "score": 0.6169590643274854,
+      "fan_in": 10,
+      "fan_out": 4,
+      "lines": 180,
+      "complexity": 19.0,
+      "comment_density": 0.17222222222222222,
+      "has_docstrings": true,
+      "rationale": "Well-documented, efficient, reused by 10 modules"
+    }
+  ]
+}

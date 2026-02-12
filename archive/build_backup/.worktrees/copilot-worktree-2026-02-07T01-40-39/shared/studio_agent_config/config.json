@@ -1,0 +1,89 @@
+{
+  "studio_name": "Moody Rainy Coffee Shop",
+  "agent_name": "MistralAIIntegrationAgent",
+  "description": "An agent that integrates Mistral AI models locally through the API in a moody rainy coffee shop ambiance.",
+  "ambiance": {
+    "lighting": {
+      "type": "warm",
+      "intensity": "moderate",
+      "color_temperature": 2700
+    },
+    "weather": {
+      "condition": "rain",
+      "intensity": "moody",
+      "acceleration_pattern": "breathing"
+    },
+    "sound": {
+      "background_music": {
+        "genre": "jazz_and_blues",
+        "playlist": "moody_evening",
+        "current_track": "eric_clapton_wonderful_night"
+      },
+      "ambient_sounds": {
+        "rain": "moderate",
+        "coffee_shop": "moderately_busy"
+      }
+    },
+    "seating": {
+      "location": "balcony/roadside",
+      "reason": "small_indoor_space"
+    }
+  },
+  "api_configuration": {
+    "base_url": "https://api.mistral.ai/v1",
+    "endpoints": {
+      "chat": "/chat/completions",
+      "models": "/models"
+    },
+    "authentication": {
+      "type": "api_key",
+      "env_var": "MISTRAL_API_KEY"
+    }
+  },
+  "models": {
+    "codestral": {
+      "model_id": "codestral",
+      "parameters": {
+        "temperature": 0.7,
+        "max_tokens": 100,
+        "top_p": 1.0,
+        "frequency_penalty": 0.0,
+        "presence_penalty": 0.0
+      }
+    },
+    "pixtral": {
+      "model_id": "pixtral",
+      "parameters": {
+        "temperature": 0.7,
+        "max_tokens": 100,
+        "top_p": 1.0,
+        "frequency_penalty": 0.0,
+        "presence_penalty": 0.0
+      }
+    },
+    "mistral": {
+      "model_id": "mistral",
+      "parameters": {
+        "temperature": 0.7,
+        "max_tokens": 100,
+        "top_p": 1.0,
+        "frequency_penalty": 0.0,
+        "presence_penalty": 0.0
+      }
+    },
+    "ministral": {
+      "model_id": "ministral",
+      "parameters": {
+        "temperature": 0.7,
+        "max_tokens": 100,
+        "top_p": 1.0,
+        "frequency_penalty": 0.0,
+        "presence_penalty": 0.0
+      }
+    }
+  },
+  "environment_variables": {
+    "MISTRAL_API_KEY": "your_api_key_here",
+    "MISTRAL_API_BASE_URL": "https://api.mistral.ai/v1"
+  }
+}

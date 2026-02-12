@@ -1,0 +1,37 @@
+{
+  "path": "application\\mothership\\middleware\\rate_limit_redis.py",
+  "size": 7208,
+  "language": "Python",
+  "lines": 210,
+  "non_empty_lines": 169,
+  "functions": 3,
+  "classes": 1,
+  "imports": [
+    "__future__",
+    "importlib",
+    "logging",
+    "time",
+    "typing",
+    "fastapi",
+    "fastapi.responses",
+    "starlette.middleware.base",
+    "starlette.types"
+  ],
+  "import_lines": [
+    7,
+    9,
+    10,
+    11,
+    12,
+    14,
+    15,
+    16,
+    17
+  ],
+  "complexity_estimate": 22.0,
+  "comment_density": 0.047619047619047616,
+  "has_docstrings": true,
+  "side_effects": [
+    "redis\\."
+  ]
+}

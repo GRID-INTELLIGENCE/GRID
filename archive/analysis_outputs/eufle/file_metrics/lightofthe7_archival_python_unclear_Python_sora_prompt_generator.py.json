@@ -1,0 +1,31 @@
+{
+  "path": "lightofthe7\\archival\\python_unclear\\Python\\sora_prompt_generator.py",
+  "size": 23591,
+  "language": "Python",
+  "lines": 709,
+  "non_empty_lines": 570,
+  "functions": 20,
+  "classes": 8,
+  "imports": [
+    "__future__",
+    "logging",
+    "re",
+    "dataclasses",
+    "enum",
+    "pathlib",
+    "typing"
+  ],
+  "import_lines": [
+    15,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22
+  ],
+  "complexity_estimate": 30.0,
+  "comment_density": 0.02538787023977433,
+  "has_docstrings": true,
+  "side_effects": []
+}

@@ -1,0 +1,27 @@
+{
+  "path": "application\\mothership\\schemas\\requests.py",
+  "size": 22810,
+  "language": "Python",
+  "lines": 876,
+  "non_empty_lines": 760,
+  "functions": 5,
+  "classes": 29,
+  "imports": [
+    "__future__",
+    "datetime",
+    "enum",
+    "typing",
+    "pydantic"
+  ],
+  "import_lines": [
+    8,
+    10,
+    11,
+    12,
+    14
+  ],
+  "complexity_estimate": 9.0,
+  "comment_density": 0.04337899543378995,
+  "has_docstrings": true,
+  "side_effects": []
+}

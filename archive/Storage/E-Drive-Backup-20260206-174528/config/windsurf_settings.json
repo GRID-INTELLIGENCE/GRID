@@ -1,0 +1,85 @@
+{
+  // --- Core & Performance ---
+  "window.commandCenter": true,
+  "cursor.general.disableHttp2": true,
+  "python.languageServer": "Pylance",
+  "workbench.sideBar.location": "right",
+  // --- Visuals (Premium Aesthetics) ---
+  "editor.cursorSmoothCaretAnimation": "on",
+  "editor.cursorBlinking": "smooth",
+  "editor.smoothScrolling": true,
+  "editor.bracketPairColorization.enabled": true,
+  "editor.guides.bracketPairs": "active",
+  "editor.renderWhitespace": "selection",
+  "editor.fontLigatures": true,
+  "editor.minimap.enabled": false,
+  "workbench.list.smoothScrolling": true,
+  // --- Workflow Optimization ---
+  "editor.formatOnSave": true,
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "files.autoSave": "onFocusChange",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.organizeImports": "explicit",
+  },
+  // --- Terminal Profiles ---
+  "terminal.integrated.defaultProfile.windows": "PowerShell",
+  "terminal.integrated.profiles.windows": {
+    "PowerShell": {
+      "source": "PowerShell",
+      "icon": "terminal-powershell",
+    },
+    "Command Prompt": {
+      "path": "C:\\Windows\\System32\\cmd.exe",
+      "icon": "terminal-cmd",
+    },
+    "Git Bash": {
+      "path": "C:\\Program Files\\Git\\bin\\bash.exe",
+      "icon": "terminal-bash",
+    },
+    "Ubuntu (WSL)": {
+      "path": "wsl.exe",
+      "args": ["-d", "Ubuntu"],
+      "icon": "terminal-linux",
+    },
+  },
+  // --- Terminal Behavior ---
+  "terminal.integrated.copyOnSelection": true,
+  "terminal.integrated.cursorBlinking": true,
+  "terminal.integrated.localEchoEnabled": "on",
+  "terminal.integrated.scrollback": 10000,
+  "terminal.integrated.focusAfterRun": "terminal",
+  "terminal.integrated.confirmOnExit": "hasChildProcesses",
+  // --- Extra Utilities ---
+  "accessibility.dimUnfocused.enabled": true,
+  "debug.terminal.clearBeforeReusing": true,
+  "explorer.confirmDelete": false,
+  "explorer.confirmDragAndDrop": false,
+  // --- Tool Specifics (Preserving relevant existing settings) ---
+  "terminal.integrated.sendKeybindingsToShell": true,
+  "python.defaultInterpreterPath": "c:\\Users\\irfan\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+  "workbench.colorTheme": "Monokai",
+  "cSpell.userWords": [
+    "agentic",
+    "asyncio",
+    "cooldown",
+    "cursorpyright",
+    "EUFLE",
+    "hostable",
+    "irfan",
+    "nemo",
+    "Ollama",
+    "OPENCODE",
+    "pycache",
+    "Ryzen",
+    "safetensors",
+    "venv",
+  ],
+  "redhat.telemetry.enabled": true,
+  "diffEditor.useInlineViewWhenSpaceIsLimited": false,
+  "workbench.auxiliaryActivityBar.location": "default",
+  "workbench.editor.editorActionsLocation": "titleBar",
+  "containers.containerClient": "com.microsoft.visualstudio.containers.docker",
+  "containers.orchestratorClient": "com.microsoft.visualstudio.orchestrators.dockercompose",
+}

@@ -1,0 +1,33 @@
+{
+  "path": "application\\mothership\\security\\jwt.py",
+  "size": 14311,
+  "language": "Python",
+  "lines": 418,
+  "non_empty_lines": 354,
+  "functions": 9,
+  "classes": 3,
+  "imports": [
+    "__future__",
+    "logging",
+    "os",
+    "datetime",
+    "typing",
+    "jose",
+    "pydantic",
+    "secret_validation"
+  ],
+  "import_lines": [
+    8,
+    10,
+    11,
+    12,
+    13,
+    15,
+    16,
+    18
+  ],
+  "complexity_estimate": 30.0,
+  "comment_density": 0.03349282296650718,
+  "has_docstrings": true,
+  "side_effects": []
+}

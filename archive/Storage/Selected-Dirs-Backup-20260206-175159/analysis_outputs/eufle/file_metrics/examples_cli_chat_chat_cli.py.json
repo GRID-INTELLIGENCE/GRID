@@ -1,0 +1,21 @@
+{
+  "path": "examples\\cli_chat\\chat_cli.py",
+  "size": 985,
+  "language": "Python",
+  "lines": 29,
+  "non_empty_lines": 22,
+  "functions": 1,
+  "classes": 0,
+  "imports": [
+    "os",
+    "transformers"
+  ],
+  "import_lines": [
+    6,
+    7
+  ],
+  "complexity_estimate": 3.0,
+  "comment_density": 0.034482758620689655,
+  "has_docstrings": true,
+  "side_effects": []
+}

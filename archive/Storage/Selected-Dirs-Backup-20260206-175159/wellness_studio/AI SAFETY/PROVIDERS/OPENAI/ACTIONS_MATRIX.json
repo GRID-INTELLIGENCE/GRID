@@ -1,0 +1,57 @@
+{
+  "provider": "OpenAI",
+  "version": "2.0.0",
+  "trigger_definitions": [
+    {
+      "trigger_id": "TRG-OPENAI-MODERATION-001",
+      "name": "Moderation API Violation",
+      "condition": "moderation_api.hate > 0.8 || moderation_api.harassment > 0.8",
+      "description": "Triggered when moderation API detects policy violations"
+    },
+    {
+      "trigger_id": "TRG-OPENAI-POLICY-001",
+      "name": "Content Policy Breach",
+      "condition": "content_policy.violation_detected",
+      "description": "Triggered when content policy is breached"
+    },
+    {
+      "trigger_id": "TRG-OPENAI-PREPAREDNESS-001",
+      "name": "Preparedness Framework Threshold",
+      "condition": "preparedness.risk_level >= 'High'",
+      "description": "Triggered when preparedness framework risk threshold is reached"
+    }
+  ],
+  "action_catalog": {
+    "ACT-OPENAI-001": {
+      "type": "BLOCK_CONTENT",
+      "description": "Immediately terminate response and provide safety refusal",
+      "parameters": {
+        "message": "I cannot fulfill this request as it violates our safety policies."
+      }
+    },
+    "ACT-OPENAI-002": {
+      "type": "ESCALATE",
+      "description": "Escalate to Safety Advisory Group for review",
+      "priority": "HIGH"
+    },
+    "ACT-OPENAI-003": {
+      "type": "REQUIRE_HUMAN_REVIEW",
+      "description": "Require human review before proceeding",
+      "priority": "MEDIUM"
+    }
+  },
+  "mapping": [
+    {
+      "trigger_id": "TRG-OPENAI-MODERATION-001",
+      "actions": ["ACT-OPENAI-001", "ACT-OPENAI-003"]
+    },
+    {
+      "trigger_id": "TRG-OPENAI-POLICY-001",
+      "actions": ["ACT-OPENAI-001", "ACT-OPENAI-002"]
+    },
+    {
+      "trigger_id": "TRG-OPENAI-PREPAREDNESS-001",
+      "actions": ["ACT-OPENAI-002", "ACT-OPENAI-003"]
+    }
+  ]
+}

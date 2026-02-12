@@ -1,0 +1,69 @@
+graph TD
+    %% Main Project Structure
+    GRID[GRID Project Root]
+    
+    %% Main Directories
+    GRID --> src[src/]
+    GRID --> work[work/]
+    GRID --> frontend[frontend/]
+    GRID --> config[config/]
+    GRID --> scripts[scripts/]
+    
+    %% Source Structure
+    src --> grid[grid/]
+    grid --> components[components/]
+    components --> button[Button.tsx]
+    components --> theme[theme/]
+    
+    %% Work Directory
+    work --> GRID_WORK[GRID/]
+    GRID_WORK --> web_client[web-client/]
+    
+    %% Frontend Structure (Proposed)
+    frontend --> app[app/]
+    frontend --> public[public/]
+    
+    %% App Components
+    subgraph "Frontend App (Proposed)"
+        app --> pages[pages/]
+        app --> components[components/]
+        app --> services[services/]
+        app --> hooks[hooks/]
+        
+        pages --> dashboard[Dashboard.tsx]
+        pages --> settings[Settings.tsx]
+        
+        components --> layout[layout/]
+        layout --> Header[Header.tsx]
+        layout --> Sidebar[Sidebar.tsx]
+        
+        services --> api[api.ts]
+        services --> metrics[MetricsService.ts]
+        
+        hooks --> useMetrics[useMetrics.ts]
+    end
+    
+    %% Dependencies
+    subgraph "Key Dependencies"
+        react[React 18.2.0]
+        vite[Vite 4.4.0]
+        typescript[TypeScript 5.0.0]
+        storybook[Storybook 7.0.0]
+        
+        GRID --> react
+        GRID --> vite
+        GRID --> typescript
+        GRID --> storybook
+    end
+    
+    %% Styling
+    classDef folder fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef file fill:#e8f5e9,stroke:#2e7d32,stroke-width:1.5px
+    classDef component fill:#fff3e0,stroke:#e65100,stroke-width:1.5px
+    classDef dep fill:#f3e5f5,stroke:#6a1b9a,stroke-width:1.5px
+    
+    %% Apply styles
+    class src,work,frontend,config,scripts,grid,components,app,pages,services,hooks,layout folder
+    class button,dashboard,settings,Header,Sidebar,api,metrics,useMetrics file
+    class react,vite,typescript,storybook dep
+    class GRID_WORK,web_client,theme component

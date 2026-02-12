@@ -1,0 +1,6 @@
+# SSL/Wireshark Monitor - Dependencies
+# =====================================
+# Required by: wireshark-monitor/scripts/parse_traffic.py
+
+pyshark>=0.6
+pyyaml>=6.0.1

@@ -1,0 +1,28 @@
+{
+  "driveRoots": {
+    "C:": ["C:\\Users\\irfan"],
+    "E:": ["E:\\"],
+    "F:": ["F:\\"]
+  },
+  "excludeDirNames": [
+    ".git",
+    "node_modules",
+    "__pycache__",
+    ".venv",
+    "venv",
+    ".venv_locked",
+    "dist",
+    "build",
+    ".pytest_cache",
+    "System Volume Information",
+    "$Recycle.Bin",
+    "Recovery"
+  ],
+  "excludePathContains": [
+    "WinSxS",
+    "System Volume Information",
+    "Program Files",
+    "Program Files (x86)"
+  ],
+  "maxFiles": 1000
+}

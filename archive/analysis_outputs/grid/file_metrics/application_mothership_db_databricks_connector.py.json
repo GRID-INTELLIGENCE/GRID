@@ -1,0 +1,42 @@
+{
+  "path": "application\\mothership\\db\\databricks_connector.py",
+  "size": 9396,
+  "language": "Python",
+  "lines": 260,
+  "non_empty_lines": 213,
+  "functions": 9,
+  "classes": 1,
+  "imports": [
+    "__future__",
+    "logging",
+    "os",
+    "re",
+    "socket",
+    "time",
+    "typing",
+    "sqlalchemy",
+    "sqlalchemy.engine",
+    "databricks",
+    "databricks"
+  ],
+  "import_lines": [
+    3,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    12,
+    13,
+    140,
+    189
+  ],
+  "complexity_estimate": 28.0,
+  "comment_density": 0.06538461538461539,
+  "has_docstrings": true,
+  "side_effects": [
+    "sqlalchemy\\.",
+    "aws\\."
+  ]
+}

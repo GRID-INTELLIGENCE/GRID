@@ -1,0 +1,33 @@
+{
+  "path": "application\\mothership\\routers\\billing.py",
+  "size": 2122,
+  "language": "Python",
+  "lines": 75,
+  "non_empty_lines": 58,
+  "functions": 0,
+  "classes": 0,
+  "imports": [
+    "__future__",
+    "logging",
+    "typing",
+    "fastapi",
+    "dependencies",
+    "exceptions",
+    "schemas.payment",
+    "services.billing"
+  ],
+  "import_lines": [
+    7,
+    9,
+    10,
+    12,
+    14,
+    15,
+    16,
+    17
+  ],
+  "complexity_estimate": 2.0,
+  "comment_density": 0.0,
+  "has_docstrings": true,
+  "side_effects": []
+}

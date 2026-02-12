@@ -1,0 +1,1509 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns">
+<key id="fan_in" for="node" attr.name="fan_in" attr.type="int"/>
+<key id="fan_out" for="node" attr.name="fan_out" attr.type="int"/>
+<key id="lines" for="node" attr.name="lines" attr.type="int"/>
+<graph id="dependency_graph" edgedefault="directed">
+<node id="eufle_config_sync.py">
+<data key="fan_in">13</data>
+<data key="fan_out">6</data>
+<data key="lines">447</data>
+</node>
+<node id="eufle_motion_flow_diffusion.py">
+<data key="fan_in">4</data>
+<data key="fan_out">9</data>
+<data key="lines">403</data>
+</node>
+<node id="eufle_motion___init__.py">
+<data key="fan_in">2</data>
+<data key="fan_out">1</data>
+<data key="lines">22</data>
+</node>
+<node id="eufle_processing_unit.py">
+<data key="fan_in">3</data>
+<data key="fan_out">10</data>
+<data key="lines">384</data>
+</node>
+<node id="eufle___init__.py">
+<data key="fan_in">0</data>
+<data key="fan_out">2</data>
+<data key="lines">34</data>
+</node>
+<node id="eufle.py">
+<data key="fan_in">0</data>
+<data key="fan_out">14</data>
+<data key="lines">445</data>
+</node>
+<node id="evaluations_scripts_pipeline.py">
+<data key="fan_in">2</data>
+<data key="fan_out">8</data>
+<data key="lines">269</data>
+</node>
+<node id="examples_cli_chat_chat_cli.py">
+<data key="fan_in">0</data>
+<data key="fan_out">2</data>
+<data key="lines">29</data>
+</node>
+<node id="examples_cli_inference.py">
+<data key="fan_in">37</data>
+<data key="fan_out">8</data>
+<data key="lines">335</data>
+</node>
+<node id="examples_onboarding_gridstral_onboard.py">
+<data key="fan_in">1</data>
+<data key="fan_out">2</data>
+<data key="lines">80</data>
+</node>
+<node id="examples_processing_unit_example.py">
+<data key="fan_in">2</data>
+<data key="fan_out">5</data>
+<data key="lines">149</data>
+</node>
+<node id="examples_thread_processing.py">
+<data key="fan_in">38</data>
+<data key="fan_out">3</data>
+<data key="lines">110</data>
+</node>
+<node id="examples_web_discussions_main.py">
+<data key="fan_in">3</data>
+<data key="fan_out">4</data>
+<data key="lines">63</data>
+</node>
+<node id="explainability_lime_explainer.py">
+<data key="fan_in">1</data>
+<data key="fan_out">5</data>
+<data key="lines">60</data>
+</node>
+<node id="hf-models_windsurf-project_eval.py">
+<data key="fan_in">10</data>
+<data key="fan_out">9</data>
+<data key="lines">241</data>
+</node>
+<node id="hf-models_windsurf-project_pipeline.py">
+<data key="fan_in">10</data>
+<data key="fan_out">8</data>
+<data key="lines">269</data>
+</node>
+<node id="integration_eval.py">
+<data key="fan_in">2</data>
+<data key="fan_out">9</data>
+<data key="lines">241</data>
+</node>
+<node id="lightofthe7_application_mothership_config.py">
+<data key="fan_in">11</data>
+<data key="fan_out">7</data>
+<data key="lines">468</data>
+</node>
+<node id="lightofthe7_application_mothership_dependencies.py">
+<data key="fan_in">5</data>
+<data key="fan_out">14</data>
+<data key="lines">634</data>
+</node>
+<node id="lightofthe7_application_mothership_exceptions.py">
+<data key="fan_in">6</data>
+<data key="fan_out">2</data>
+<data key="lines">532</data>
+</node>
+<node id="lightofthe7_application_mothership_main.py">
+<data key="fan_in">3</data>
+<data key="fan_out">23</data>
+<data key="lines">458</data>
+</node>
+<node id="lightofthe7_application_mothership_middleware___init__.py">
+<data key="fan_in">39</data>
+<data key="fan_out">12</data>
+<data key="lines">402</data>
+</node>
+<node id="lightofthe7_application_mothership_models_cockpit.py">
+<data key="fan_in">12</data>
+<data key="fan_out">6</data>
+<data key="lines">705</data>
+</node>
+<node id="lightofthe7_application_mothership_models___init__.py">
+<data key="fan_in">12</data>
+<data key="fan_out">6</data>
+<data key="lines">624</data>
+</node>
+<node id="lightofthe7_application_mothership_repositories___init__.py">
+<data key="fan_in">137</data>
+<data key="fan_out">10</data>
+<data key="lines">719</data>
+</node>
+<node id="lightofthe7_application_mothership_routers_cockpit.py">
+<data key="fan_in">3</data>
+<data key="fan_out">15</data>
+<data key="lines">800</data>
+</node>
+<node id="lightofthe7_application_mothership_routers_health.py">
+<data key="fan_in">3</data>
+<data key="fan_out">9</data>
+<data key="lines">299</data>
+</node>
+<node id="lightofthe7_application_mothership_routers___init__.py">
+<data key="fan_in">3</data>
+<data key="fan_out">3</data>
+<data key="lines">62</data>
+</node>
+<node id="lightofthe7_application_mothership_schemas_requests.py">
+<data key="fan_in">58</data>
+<data key="fan_out">5</data>
+<data key="lines">876</data>
+</node>
+<node id="lightofthe7_application_mothership_schemas___init__.py">
+<data key="fan_in">4</data>
+<data key="fan_out">5</data>
+<data key="lines">604</data>
+</node>
+<node id="lightofthe7_application_mothership_services___init__.py">
+<data key="fan_in">4</data>
+<data key="fan_out">9</data>
+<data key="lines">1173</data>
+</node>
+<node id="lightofthe7_application_mothership_utils___init__.py">
+<data key="fan_in">22</data>
+<data key="fan_out">9</data>
+<data key="lines">600</data>
+</node>
+<node id="lightofthe7_application_mothership___init__.py">
+<data key="fan_in">2</data>
+<data key="fan_out">5</data>
+<data key="lines">132</data>
+</node>
+<node id="lightofthe7_archival_debug_debug_articulation.py">
+<data key="fan_in">2</data>
+<data key="fan_out">2</data>
+<data key="lines">32</data>
+</node>
+<node id="lightofthe7_archival_debug_debug_articulation2.py">
+<data key="fan_in">2</data>
+<data key="fan_out">2</data>
+<data key="lines">27</data>
+</node>
+<node id="lightofthe7_archival_debug_debug_articulation3.py">
+<data key="fan_in">2</data>
+<data key="fan_out">2</data>
+<data key="lines">34</data>
+</node>
+<node id="lightofthe7_archival_debug_debug_physics.py">
+<data key="fan_in">0</data>
+<data key="fan_out">2</data>
+<data key="lines">52</data>
+</node>
+<node id="lightofthe7_archival_python_unclear_Python_custom.py">
+<data key="fan_in">0</data>
+<data key="fan_out">8</data>
+<data key="lines">336</data>
+</node>
+<node id="lightofthe7_archival_python_unclear_Python_FINAL_VERIFICATION.py">
+<data key="fan_in">0</data>
+<data key="fan_out">2</data>
+<data key="lines">128</data>
+</node>
+<node id="lightofthe7_archival_python_unclear_Python_hello.py">
+<data key="fan_in">0</data>
+<data key="fan_out">0</data>
+<data key="lines">3</data>
+</node>
+<node id="lightofthe7_archival_python_unclear_Python_ide_recorder_cli.py">
+<data key="fan_in">37</data>
+<data key="fan_out">11</data>
+<data key="lines">320</data>
+</node>
+<node id="lightofthe7_archival_python_unclear_Python_prompt_builder.py">
+<data key="fan_in">0</data>
+<data key="fan_out">7</data>
+<data key="lines">305</data>
+</node>
+<node id="lightofthe7_archival_python_unclear_Python_run_variant_simulation.py">
+<data key="fan_in">2</data>
+<data key="fan_out">6</data>
+<data key="lines">349</data>
+</node>
+<node id="lightofthe7_archival_python_unclear_Python_sora_client.py">
+<data key="fan_in">2</data>
+<data key="fan_out">8</data>
+<data key="lines">432</data>
+</node>
+<node id="lightofthe7_archival_python_unclear_Python_sora_integration.py">
+<data key="fan_in">3</data>
+<data key="fan_out">10</data>
+<data key="lines">481</data>
+</node>
+<node id="lightofthe7_archival_python_unclear_Python_sora_prompt_generator.py">
+<data key="fan_in">2</data>
+<data key="fan_out">7</data>
+<data key="lines">709</data>
+</node>
+<node id="lightofthe7_archival_python_unclear_Python_tests_conftest.py">
+<data key="fan_in">0</data>
+<data key="fan_out">3</data>
+<data key="lines">30</data>
+</node>
+<node id="lightofthe7_archival_python_unclear_Python_tests_test_dice.py">
+<data key="fan_in">0</data>
+<data key="fan_out">3</data>
+<data key="lines">210</data>
+</node>
+<node id="lightofthe7_archival_python_unclear_Python_tests___init__.py">
+<data key="fan_in">0</data>
+<data key="fan_out">0</data>
+<data key="lines">2</data>
+</node>
+<node id="lightofthe7_archival_python_unclear_Python_test_sora_system.py">
+<data key="fan_in">127</data>
+<data key="fan_out">7</data>
+<data key="lines">158</data>
+</node>
+<node id="lightofthe7_archival_python_unclear_Python_youtube_video_simulation.py">
+<data key="fan_in">2</data>
+<data key="fan_out">7</data>
+<data key="lines">480</data>
+</node>
+<node id="lightofthe7_archival_redundant_roots_ml_model_register_model.py">
+<data key="fan_in">37</data>
+<data key="fan_out">4</data>
+<data key="lines">94</data>
+</node>
+<node id="lightofthe7_archival_transformer_root_transformer_main.py">
+<data key="fan_in">2</data>
+<data key="fan_out">12</data>
+<data key="lines">243</data>
+</node>
+<node id="lightofthe7_archival_transformer_root_transformer_tests_test_main.py">
+<data key="fan_in">1</data>
+<data key="fan_out">2</data>
+<data key="lines">36</data>
+</node>
+<node id="lightofthe7_archival_transformer_root_transformer_tests___init__.py">
+<data key="fan_in">0</data>
+<data key="fan_out">0</data>
+<data key="lines">2</data>
+</node>
+<node id="lightofthe7_archival_transformer_root_transformer___init__.py">
+<data key="fan_in">0</data>
+<data key="fan_out">0</data>
+<data key="lines">2</data>
+</node>
+<node id="lightofthe7_archival_utils_root_data_loaders.py">
+<data key="fan_in">22</data>
+<data key="fan_out">0</data>
+<data key="lines">6</data>
+</node>
+<node id="lightofthe7_backend_server.py">
+<data key="fan_in">1</data>
+<data key="fan_out">5</data>
+<data key="lines">44</data>
+</node>
+<node id="lightofthe7_cognitive_layer_cognitive_load_chunking.py">
+<data key="fan_in">4</data>
+<data key="fan_out">2</data>
+<data key="lines">180</data>
+</node>
+<node id="lightofthe7_cognitive_layer_cognitive_load_load_estimator.py">
+<data key="fan_in">4</data>
+<data key="fan_out">4</data>
+<data key="lines">241</data>
+</node>
+<node id="lightofthe7_cognitive_layer_cognitive_load_scaffolding.py">
+<data key="fan_in">4</data>
+<data key="fan_out">3</data>
+<data key="lines">231</data>
+</node>
+<node id="lightofthe7_cognitive_layer_cognitive_load___init__.py">
+<data key="fan_in">0</data>
+<data key="fan_out">3</data>
+<data key="lines">13</data>
+</node>
+<node id="lightofthe7_cognitive_layer_decision_support_bounded_rationality.py">
+<data key="fan_in">6</data>
+<data key="fan_out">2</data>
+<data key="lines">177</data>
+</node>
+<node id="lightofthe7_cognitive_layer_decision_support_choice_architecture.py">
+<data key="fan_in">43</data>
+<data key="fan_out">4</data>
+<data key="lines">223</data>
+</node>
+<node id="lightofthe7_cognitive_layer_decision_support_decision_matrix.py">
+<data key="fan_in">6</data>
+<data key="fan_out">3</data>
+<data key="lines">215</data>
+</node>
+<node id="lightofthe7_cognitive_layer_decision_support_dual_process.py">
+<data key="fan_in">6</data>
+<data key="fan_out">5</data>
+<data key="lines">216</data>
+</node>
+<node id="lightofthe7_cognitive_layer_decision_support___init__.py">
+<data key="fan_in">2</data>
+<data key="fan_out">4</data>
+<data key="lines">15</data>
+</node>
+<node id="lightofthe7_cognitive_layer_integration_context_enricher.py">
+<data key="fan_in">6</data>
+<data key="fan_out">4</data>
+<data key="lines">140</data>
+</node>
+<node id="lightofthe7_cognitive_layer_integration_grid_bridge.py">
+<data key="fan_in">8</data>
+<data key="fan_out">3</data>
+<data key="lines">148</data>
+</node>
+<node id="lightofthe7_cognitive_layer_integration_pipeline_adapter.py">
+<data key="fan_in">6</data>
+<data key="fan_out">4</data>
+<data key="lines">172</data>
+</node>
+<node id="lightofthe7_cognitive_layer_integration___init__.py">
+<data key="fan_in">2</data>
+<data key="fan_out">3</data>
+<data key="lines">13</data>
+</node>
+<node id="lightofthe7_cognitive_layer_mental_models_alignment_checker.py">
+<data key="fan_in">14</data>
+<data key="fan_out">3</data>
+<data key="lines">197</data>
+</node>
+<node id="lightofthe7_cognitive_layer_mental_models_model_builder.py">
+<data key="fan_in">14</data>
+<data key="fan_out">2</data>
+<data key="lines">256</data>
+</node>
+<node id="lightofthe7_cognitive_layer_mental_models_model_tracker.py">
+<data key="fan_in">14</data>
+<data key="fan_out">3</data>
+<data key="lines">218</data>
+</node>
+<node id="lightofthe7_cognitive_layer_mental_models___init__.py">
+<data key="fan_in">10</data>
+<data key="fan_out">3</data>
+<data key="lines">13</data>
+</node>
+<node id="lightofthe7_cognitive_layer_schemas_cognitive_state.py">
+<data key="fan_in">18</data>
+<data key="fan_out">4</data>
+<data key="lines">97</data>
+</node>
+<node id="lightofthe7_cognitive_layer_schemas_decision_context.py">
+<data key="fan_in">18</data>
+<data key="fan_out">4</data>
+<data key="lines">113</data>
+</node>
+<node id="lightofthe7_cognitive_layer_schemas_user_cognitive_profile.py">
+<data key="fan_in">30</data>
+<data key="fan_out">4</data>
+<data key="lines">147</data>
+</node>
+<node id="lightofthe7_cognitive_layer_schemas___init__.py">
+<data key="fan_in">2</data>
+<data key="fan_out">3</data>
+<data key="lines">13</data>
+</node>
+<node id="lightofthe7_cognitive_layer___init__.py">
+<data key="fan_in">0</data>
+<data key="fan_out">16</data>
+<data key="lines">59</data>
+</node>
+<node id="lightofthe7_create_grid_structure.py">
+<data key="fan_in">40</data>
+<data key="fan_out">4</data>
+<data key="lines">98</data>
+</node>
+<node id="lightofthe7_datakit_core_config.py">
+<data key="fan_in">48</data>
+<data key="fan_out">5</data>
+<data key="lines">373</data>
+</node>
+<node id="lightofthe7_datakit_core_control.py">
+<data key="fan_in">39</data>
+<data key="fan_out">3</data>
+<data key="lines">113</data>
+</node>
+<node id="lightofthe7_datakit_core_explorer.py">
+<data key="fan_in">40</data>
+<data key="fan_out">9</data>
+<data key="lines">1075</data>
+</node>
+<node id="lightofthe7_datakit_core_loader.py">
+<data key="fan_in">41</data>
+<data key="fan_out">7</data>
+<data key="lines">417</data>
+</node>
+<node id="lightofthe7_datakit_core_pack_schema.py">
+<data key="fan_in">39</data>
+<data key="fan_out">7</data>
+<data key="lines">299</data>
+</node>
+<node id="lightofthe7_datakit_core___init__.py">
+<data key="fan_in">37</data>
+<data key="fan_out">3</data>
+<data key="lines">21</data>
+</node>
+<node id="lightofthe7_datakit_datakit.py">
+<data key="fan_in">0</data>
+<data key="fan_out">8</data>
+<data key="lines">520</data>
+</node>
+<node id="lightofthe7_datakit_examples_quick_start.py">
+<data key="fan_in">0</data>
+<data key="fan_out">5</data>
+<data key="lines">280</data>
+</node>
+<node id="lightofthe7_datakit_Hogwarts_ancient_magic_lib.py">
+<data key="fan_in">1</data>
+<data key="fan_out">5</data>
+<data key="lines">386</data>
+</node>
+<node id="lightofthe7_datakit_Hogwarts_draw_my_life.py">
+<data key="fan_in">0</data>
+<data key="fan_out">9</data>
+<data key="lines">432</data>
+</node>
+<node id="lightofthe7_datakit_Hogwarts_great_hall_mistral_agent.py">
+<data key="fan_in">37</data>
+<data key="fan_out">5</data>
+<data key="lines">238</data>
+</node>
+<node id="lightofthe7_datakit_Hogwarts_great_hall_run_objects_discussion.py">
+<data key="fan_in">39</data>
+<data key="fan_out">3</data>
+<data key="lines">32</data>
+</node>
+<node id="lightofthe7_datakit_Hogwarts_great_hall_run_recommended_stream.py">
+<data key="fan_in">37</data>
+<data key="fan_out">6</data>
+<data key="lines">177</data>
+</node>
+<node id="lightofthe7_datakit_Hogwarts_great_hall_table_great_hall_table.py">
+<data key="fan_in">37</data>
+<data key="fan_out">6</data>
+<data key="lines">299</data>
+</node>
+<node id="lightofthe7_datakit_Hogwarts_grid_bridge.py">
+<data key="fan_in">4</data>
+<data key="fan_out">8</data>
+<data key="lines">1047</data>
+</node>
+<node id="lightofthe7_datakit_Hogwarts_hogwarts_cli.py">
+<data key="fan_in">0</data>
+<data key="fan_out">4</data>
+<data key="lines">76</data>
+</node>
+<node id="lightofthe7_datakit_Hogwarts_hogwarts_toolkit.py">
+<data key="fan_in">3</data>
+<data key="fan_out">3</data>
+<data key="lines">282</data>
+</node>
+<node id="lightofthe7_datakit_Hogwarts_parseltongue_cli.py">
+<data key="fan_in">1</data>
+<data key="fan_out">3</data>
+<data key="lines">295</data>
+</node>
+<node id="lightofthe7_datakit_Hogwarts_prototypes_ansi_test.py">
+<data key="fan_in">6</data>
+<data key="fan_out">1</data>
+<data key="lines">71</data>
+</node>
+<node id="lightofthe7_datakit_Hogwarts_spellbook_api.py">
+<data key="fan_in">0</data>
+<data key="fan_out">8</data>
+<data key="lines">297</data>
+</node>
+<node id="lightofthe7_datakit_Hogwarts_test_hogwarts_toolkit.py">
+<data key="fan_in">3</data>
+<data key="fan_out">3</data>
+<data key="lines">445</data>
+</node>
+<node id="lightofthe7_datakit_Hogwarts_test_parseltongue_cli.py">
+<data key="fan_in">1</data>
+<data key="fan_out">4</data>
+<data key="lines">114</data>
+</node>
+<node id="lightofthe7_datakit_scripts_ai_composer.py">
+<data key="fan_in">115</data>
+<data key="fan_out">5</data>
+<data key="lines">273</data>
+</node>
+<node id="lightofthe7_datakit_scripts_appreciation_generator.py">
+<data key="fan_in">39</data>
+<data key="fan_out">5</data>
+<data key="lines">285</data>
+</node>
+<node id="lightofthe7_datakit_scripts_chord_generator.py">
+<data key="fan_in">0</data>
+<data key="fan_out">7</data>
+<data key="lines">341</data>
+</node>
+<node id="lightofthe7_datakit_scripts_doctor.py">
+<data key="fan_in">0</data>
+<data key="fan_out">11</data>
+<data key="lines">504</data>
+</node>
+<node id="lightofthe7_datakit_scripts_guided_tour.py">
+<data key="fan_in">0</data>
+<data key="fan_out">8</data>
+<data key="lines">310</data>
+</node>
+<node id="lightofthe7_datakit_scripts_openai_smoketest.py">
+<data key="fan_in">11</data>
+<data key="fan_out">6</data>
+<data key="lines">343</data>
+</node>
+<node id="lightofthe7_datakit_scripts_send_tribute_twitter.py">
+<data key="fan_in">0</data>
+<data key="fan_out">0</data>
+<data key="lines">1</data>
+</node>
+<node id="lightofthe7_datakit_scripts_similarity_pie.py">
+<data key="fan_in">0</data>
+<data key="fan_out">6</data>
+<data key="lines">225</data>
+</node>
+<node id="lightofthe7_datakit_scripts_validate_pack.py">
+<data key="fan_in">0</data>
+<data key="fan_out">6</data>
+<data key="lines">106</data>
+</node>
+<node id="lightofthe7_datakit_tests_test_control.py">
+<data key="fan_in">0</data>
+<data key="fan_out">2</data>
+<data key="lines">45</data>
+</node>
+<node id="lightofthe7_datakit_tests_test_smartdecisor.py">
+<data key="fan_in">0</data>
+<data key="fan_out">3</data>
+<data key="lines">81</data>
+</node>
+<node id="lightofthe7_datakit_tests_test_story_eq.py">
+<data key="fan_in">0</data>
+<data key="fan_out">8</data>
+<data key="lines">333</data>
+</node>
+<node id="lightofthe7_datakit_tool_semantic_grep.py">
+<data key="fan_in">37</data>
+<data key="fan_out">13</data>
+<data key="lines">351</data>
+</node>
+<node id="lightofthe7_datakit_tool_structure_audit.py">
+<data key="fan_in">40</data>
+<data key="fan_out">11</data>
+<data key="lines">733</data>
+</node>
+<node id="lightofthe7_datakit_visualizations_animated_manim_circle.py">
+<data key="fan_in">3</data>
+<data key="fan_out">1</data>
+<data key="lines">170</data>
+</node>
+<node id="lightofthe7_datakit_visualizations_drive-index-vad_tools_locus_of_control_demo.py">
+<data key="fan_in">2</data>
+<data key="fan_out">5</data>
+<data key="lines">237</data>
+</node>
+<node id="lightofthe7_datakit_visualizations_interactive_plotly_circle.py">
+<data key="fan_in">2</data>
+<data key="fan_out">8</data>
+<data key="lines">387</data>
+</node>
+<node id="lightofthe7_datakit_visualizations_interactive_rowling_tribute.py">
+<data key="fan_in">2</data>
+<data key="fan_out">3</data>
+<data key="lines">251</data>
+</node>
+<node id="lightofthe7_datakit_visualizations_static_circle_graph.py">
+<data key="fan_in">2</data>
+<data key="fan_out">7</data>
+<data key="lines">209</data>
+</node>
+<node id="lightofthe7_datakit_visualizations_static_smartdecisor.py">
+<data key="fan_in">3</data>
+<data key="fan_out">9</data>
+<data key="lines">669</data>
+</node>
+<node id="lightofthe7_datakit_visualizations_static___init__.py">
+<data key="fan_in">2</data>
+<data key="fan_out">0</data>
+<data key="lines">1</data>
+</node>
+<node id="lightofthe7_datakit_visualizations___init__.py">
+<data key="fan_in">2</data>
+<data key="fan_out">0</data>
+<data key="lines">1</data>
+</node>
+<node id="lightofthe7_demos_dataset_lifecycle.py">
+<data key="fan_in">115</data>
+<data key="fan_out">13</data>
+<data key="lines">217</data>
+</node>
+<node id="lightofthe7_examples_grid_workflow_demo.py">
+<data key="fan_in">0</data>
+<data key="fan_out">7</data>
+<data key="lines">129</data>
+</node>
+<node id="lightofthe7_examples_quantum_optimization_demo.py">
+<data key="fan_in">3</data>
+<data key="fan_out">3</data>
+<data key="lines">196</data>
+</node>
+<node id="lightofthe7_examples_translator_assistant_demo.py">
+<data key="fan_in">0</data>
+<data key="fan_out">3</data>
+<data key="lines">154</data>
+</node>
+<node id="lightofthe7_examples_translator_demo.py">
+<data key="fan_in">0</data>
+<data key="fan_out">4</data>
+<data key="lines">115</data>
+</node>
+<node id="lightofthe7_Foundations_of_Computation_Executive_Report_mathilde_rouselle.py">
+<data key="fan_in">16</data>
+<data key="fan_out">1</data>
+<data key="lines">85</data>
+</node>
+<node id="lightofthe7_grid_entry_points_api_entry.py">
+<data key="fan_in">2</data>
+<data key="fan_out">4</data>
+<data key="lines">98</data>
+</node>
+<node id="lightofthe7_grid_entry_points_cli_entry.py">
+<data key="fan_in">2</data>
+<data key="fan_out">3</data>
+<data key="lines">90</data>
+</node>
+<node id="lightofthe7_grid_entry_points_service_entry.py">
+<data key="fan_in">2</data>
+<data key="fan_out">3</data>
+<data key="lines">96</data>
+</node>
+<node id="lightofthe7_grid_entry_points___init__.py">
+<data key="fan_in">1</data>
+<data key="fan_out">3</data>
+<data key="lines">16</data>
+</node>
+<node id="lightofthe7_grid_organization_discipline.py">
+<data key="fan_in">5</data>
+<data key="fan_out">5</data>
+<data key="lines">330</data>
+</node>
+<node id="lightofthe7_grid_organization_models.py">
+<data key="fan_in">13</data>
+<data key="fan_out">5</data>
+<data key="lines">192</data>
+</node>
+<node id="lightofthe7_grid_organization_org_manager.py">
+<data key="fan_in">7</data>
+<data key="fan_out">3</data>
+<data key="lines">184</data>
+</node>
+<node id="lightofthe7_grid_organization___init__.py">
+<data key="fan_in">3</data>
+<data key="fan_out">3</data>
+<data key="lines">26</data>
+</node>
+<node id="lightofthe7_grid_processing_periodic_processor.py">
+<data key="fan_in">4</data>
+<data key="fan_out">5</data>
+<data key="lines">139</data>
+</node>
+<node id="lightofthe7_grid_processing_realtime_processor.py">
+<data key="fan_in">72</data>
+<data key="fan_out">4</data>
+<data key="lines">128</data>
+</node>
+<node id="lightofthe7_grid_processing___init__.py">
+<data key="fan_in">1</data>
+<data key="fan_out">2</data>
+<data key="lines">17</data>
+</node>
+<node id="lightofthe7_grid_prompts_models.py">
+<data key="fan_in">11</data>
+<data key="fan_out">5</data>
+<data key="lines">121</data>
+</node>
+<node id="lightofthe7_grid_prompts_prompt_manager.py">
+<data key="fan_in">2</data>
+<data key="fan_out">3</data>
+<data key="lines">214</data>
+</node>
+<node id="lightofthe7_grid_prompts_prompt_store.py">
+<data key="fan_in">41</data>
+<data key="fan_out">4</data>
+<data key="lines">196</data>
+</node>
+<node id="lightofthe7_grid_prompts___init__.py">
+<data key="fan_in">1</data>
+<data key="fan_out">3</data>
+<data key="lines">19</data>
+</node>
+<node id="lightofthe7_grid_quantum_locomotion.py">
+<data key="fan_in">6</data>
+<data key="fan_out">4</data>
+<data key="lines">223</data>
+</node>
+<node id="lightofthe7_grid_quantum_quantizer.py">
+<data key="fan_in">5</data>
+<data key="fan_out">3</data>
+<data key="lines">157</data>
+</node>
+<node id="lightofthe7_grid_quantum_quantum_engine.py">
+<data key="fan_in">3</data>
+<data key="fan_out">3</data>
+<data key="lines">116</data>
+</node>
+<node id="lightofthe7_grid_quantum___init__.py">
+<data key="fan_in">2</data>
+<data key="fan_out">3</data>
+<data key="lines">20</data>
+</node>
+<node id="lightofthe7_grid_senses_sensory_input.py">
+<data key="fan_in">4</data>
+<data key="fan_out">5</data>
+<data key="lines">93</data>
+</node>
+<node id="lightofthe7_grid_senses_sensory_processor.py">
+<data key="fan_in">2</data>
+<data key="fan_out">2</data>
+<data key="lines">144</data>
+</node>
+<node id="lightofthe7_grid_senses_sensory_store.py">
+<data key="fan_in">40</data>
+<data key="fan_out">6</data>
+<data key="lines">143</data>
+</node>
+<node id="lightofthe7_grid_senses___init__.py">
+<data key="fan_in">1</data>
+<data key="fan_out">3</data>
+<data key="lines">17</data>
+</node>
+<node id="lightofthe7_grid_tracing_action_trace.py">
+<data key="fan_in">9</data>
+<data key="fan_out">5</data>
+<data key="lines">142</data>
+</node>
+<node id="lightofthe7_grid_tracing_trace_manager.py">
+<data key="fan_in">5</data>
+<data key="fan_out">6</data>
+<data key="lines">241</data>
+</node>
+<node id="lightofthe7_grid_tracing_trace_store.py">
+<data key="fan_in">43</data>
+<data key="fan_out">5</data>
+<data key="lines">202</data>
+</node>
+<node id="lightofthe7_grid_tracing___init__.py">
+<data key="fan_in">4</data>
+<data key="fan_out">3</data>
+<data key="lines">18</data>
+</node>
+<node id="lightofthe7_grid___init__.py">
+<data key="fan_in">0</data>
+<data key="fan_out">12</data>
+<data key="lines">121</data>
+</node>
+<node id="lightofthe7_grid___main__.py">
+<data key="fan_in">1</data>
+<data key="fan_out">9</data>
+<data key="lines">143</data>
+</node>
+<node id="lightofthe7_infra_cloud_gemini_client.py">
+<data key="fan_in">1</data>
+<data key="fan_out">11</data>
+<data key="lines">577</data>
+</node>
+<node id="lightofthe7_infra_cloud_gemini_config.py">
+<data key="fan_in">10</data>
+<data key="fan_out">5</data>
+<data key="lines">277</data>
+</node>
+<node id="lightofthe7_infra_cloud_test_gemini_integration.py">
+<data key="fan_in">2</data>
+<data key="fan_out">8</data>
+<data key="lines">441</data>
+</node>
+<node id="lightofthe7_infra_cloud___init__.py">
+<data key="fan_in">0</data>
+<data key="fan_out">13</data>
+<data key="lines">565</data>
+</node>
+<node id="lightofthe7_light_of_the_seven_cognitive_layer_cognitive_load_chunking.py">
+<data key="fan_in">4</data>
+<data key="fan_out">2</data>
+<data key="lines">180</data>
+</node>
+<node id="lightofthe7_light_of_the_seven_cognitive_layer_cognitive_load_load_estimator.py">
+<data key="fan_in">4</data>
+<data key="fan_out">4</data>
+<data key="lines">241</data>
+</node>
+<node id="lightofthe7_light_of_the_seven_cognitive_layer_cognitive_load_scaffolding.py">
+<data key="fan_in">4</data>
+<data key="fan_out">3</data>
+<data key="lines">231</data>
+</node>
+<node id="lightofthe7_light_of_the_seven_cognitive_layer_cognitive_load___init__.py">
+<data key="fan_in">0</data>
+<data key="fan_out">3</data>
+<data key="lines">13</data>
+</node>
+<node id="lightofthe7_light_of_the_seven_cognitive_layer_decision_support_bounded_rationality.py">
+<data key="fan_in">6</data>
+<data key="fan_out">2</data>
+<data key="lines">177</data>
+</node>
+<node id="lightofthe7_light_of_the_seven_cognitive_layer_decision_support_choice_architecture.py">
+<data key="fan_in">43</data>
+<data key="fan_out">4</data>
+<data key="lines">223</data>
+</node>
+<node id="lightofthe7_light_of_the_seven_cognitive_layer_decision_support_decision_matrix.py">
+<data key="fan_in">6</data>
+<data key="fan_out">3</data>
+<data key="lines">215</data>
+</node>
+<node id="lightofthe7_light_of_the_seven_cognitive_layer_decision_support_dual_process.py">
+<data key="fan_in">6</data>
+<data key="fan_out">5</data>
+<data key="lines">216</data>
+</node>
+<node id="lightofthe7_light_of_the_seven_cognitive_layer_decision_support___init__.py">
+<data key="fan_in">2</data>
+<data key="fan_out">4</data>
+<data key="lines">15</data>
+</node>
+<node id="lightofthe7_light_of_the_seven_cognitive_layer_integration_context_enricher.py">
+<data key="fan_in">6</data>
+<data key="fan_out">4</data>
+<data key="lines">140</data>
+</node>
+<node id="lightofthe7_light_of_the_seven_cognitive_layer_integration_grid_bridge.py">
+<data key="fan_in">8</data>
+<data key="fan_out">3</data>
+<data key="lines">148</data>
+</node>
+<node id="lightofthe7_light_of_the_seven_cognitive_layer_integration_pipeline_adapter.py">
+<data key="fan_in">6</data>
+<data key="fan_out">4</data>
+<data key="lines">172</data>
+</node>
+<node id="lightofthe7_light_of_the_seven_cognitive_layer_integration___init__.py">
+<data key="fan_in">2</data>
+<data key="fan_out">3</data>
+<data key="lines">13</data>
+</node>
+<node id="lightofthe7_light_of_the_seven_cognitive_layer_mental_models_alignment_checker.py">
+<data key="fan_in">14</data>
+<data key="fan_out">3</data>
+<data key="lines">197</data>
+</node>
+<node id="lightofthe7_light_of_the_seven_cognitive_layer_mental_models_model_builder.py">
+<data key="fan_in">14</data>
+<data key="fan_out">2</data>
+<data key="lines">256</data>
+</node>
+<node id="lightofthe7_light_of_the_seven_cognitive_layer_mental_models_model_tracker.py">
+<data key="fan_in">14</data>
+<data key="fan_out">3</data>
+<data key="lines">218</data>
+</node>
+<node id="lightofthe7_light_of_the_seven_cognitive_layer_mental_models___init__.py">
+<data key="fan_in">10</data>
+<data key="fan_out">3</data>
+<data key="lines">13</data>
+</node>
+<node id="lightofthe7_light_of_the_seven_cognitive_layer_schemas_cognitive_state.py">
+<data key="fan_in">19</data>
+<data key="fan_out">4</data>
+<data key="lines">97</data>
+</node>
+<node id="lightofthe7_light_of_the_seven_cognitive_layer_schemas_decision_context.py">
+<data key="fan_in">19</data>
+<data key="fan_out">4</data>
+<data key="lines">113</data>
+</node>
+<node id="lightofthe7_light_of_the_seven_cognitive_layer_schemas_user_cognitive_profile.py">
+<data key="fan_in">31</data>
+<data key="fan_out">4</data>
+<data key="lines">147</data>
+</node>
+<node id="lightofthe7_light_of_the_seven_cognitive_layer_schemas___init__.py">
+<data key="fan_in">3</data>
+<data key="fan_out">3</data>
+<data key="lines">13</data>
+</node>
+<node id="lightofthe7_light_of_the_seven_cognitive_layer___init__.py">
+<data key="fan_in">0</data>
+<data key="fan_out">16</data>
+<data key="lines">59</data>
+</node>
+<node id="lightofthe7_light_of_the_seven_Foundations_of_Computation_Executive_Report_mathilde_rouselle.py">
+<data key="fan_in">16</data>
+<data key="fan_out">1</data>
+<data key="lines">85</data>
+</node>
+<node id="lightofthe7_light_of_the_seven_setup.py">
+<data key="fan_in">0</data>
+<data key="fan_out">2</data>
+<data key="lines">119</data>
+</node>
+<node id="lightofthe7_light_of_the_seven_src_light_of_the_seven_geometry.py">
+<data key="fan_in">4</data>
+<data key="fan_out">3</data>
+<data key="lines">466</data>
+</node>
+<node id="lightofthe7_light_of_the_seven_src_light_of_the_seven_integration.py">
+<data key="fan_in">6</data>
+<data key="fan_out">10</data>
+<data key="lines">423</data>
+</node>
+<node id="lightofthe7_light_of_the_seven_src_light_of_the_seven_models.py">
+<data key="fan_in">12</data>
+<data key="fan_out">5</data>
+<data key="lines">111</data>
+</node>
+<node id="lightofthe7_light_of_the_seven_src_light_of_the_seven_sorting.py">
+<data key="fan_in">6</data>
+<data key="fan_out">2</data>
+<data key="lines">70</data>
+</node>
+<node id="lightofthe7_light_of_the_seven_src_light_of_the_seven_wyrm_sort.py">
+<data key="fan_in">0</data>
+<data key="fan_out">2</data>
+<data key="lines">6</data>
+</node>
+<node id="lightofthe7_light_of_the_seven_src_light_of_the_seven___init__.py">
+<data key="fan_in">0</data>
+<data key="fan_out">8</data>
+<data key="lines">247</data>
+</node>
+<node id="lightofthe7_light_of_the_seven_tests_test_geometry.py">
+<data key="fan_in">0</data>
+<data key="fan_out">7</data>
+<data key="lines">99</data>
+</node>
+<node id="lightofthe7_light_of_the_seven_tests_test_integration.py">
+<data key="fan_in">2</data>
+<data key="fan_out">4</data>
+<data key="lines">229</data>
+</node>
+<node id="lightofthe7_light_of_the_seven_tests_test_sorting.py">
+<data key="fan_in">2</data>
+<data key="fan_out">1</data>
+<data key="lines">108</data>
+</node>
+<node id="lightofthe7_light_of_the_seven_tests___init__.py">
+<data key="fan_in">0</data>
+<data key="fan_out">0</data>
+<data key="lines">2</data>
+</node>
+<node id="lightofthe7_python_application_bridge.py">
+<data key="fan_in">2</data>
+<data key="fan_out">9</data>
+<data key="lines">198</data>
+</node>
+<node id="lightofthe7_python_artifact_generator.py">
+<data key="fan_in">3</data>
+<data key="fan_out">9</data>
+<data key="lines">279</data>
+</node>
+<edge source="eufle_config_sync.py" target="pathlib"/>
+<edge source="eufle_config_sync.py" target="datetime"/>
+<edge source="eufle_config_sync.py" target="typing"/>
+<edge source="eufle_config_sync.py" target="os"/>
+<edge source="eufle_config_sync.py" target="json"/>
+<edge source="eufle_motion_flow_diffusion.py" target="logging"/>
+<edge source="eufle_motion_flow_diffusion.py" target="pathlib"/>
+<edge source="eufle_motion_flow_diffusion.py" target="dataclasses"/>
+<edge source="eufle_motion_flow_diffusion.py" target="__future__"/>
+<edge source="eufle_motion_flow_diffusion.py" target="typing"/>
+<edge source="eufle_motion___init__.py" target="flow_diffusion"/>
+<edge source="eufle_processing_unit.py" target="pathlib"/>
+<edge source="eufle_processing_unit.py" target="asyncio"/>
+<edge source="eufle_processing_unit.py" target="studio.unified_api"/>
+<edge source="eufle_processing_unit.py" target="dataclasses"/>
+<edge source="eufle_processing_unit.py" target="datetime"/>
+<edge source="eufle___init__.py" target="config_sync"/>
+<edge source="eufle___init__.py" target="processing_unit"/>
+<edge source="eufle.py" target="pathlib"/>
+<edge source="eufle.py" target="studio.unified_api"/>
+<edge source="eufle.py" target="datetime"/>
+<edge source="eufle.py" target="typing"/>
+<edge source="eufle.py" target="scripts.faq_navigator"/>
+<edge source="evaluations_scripts_pipeline.py" target="pathlib"/>
+<edge source="evaluations_scripts_pipeline.py" target="statistics"/>
+<edge source="evaluations_scripts_pipeline.py" target="datetime"/>
+<edge source="evaluations_scripts_pipeline.py" target="typing"/>
+<edge source="evaluations_scripts_pipeline.py" target="subprocess"/>
+<edge source="examples_cli_chat_chat_cli.py" target="os"/>
+<edge source="examples_cli_chat_chat_cli.py" target="transformers"/>
+<edge source="examples_cli_inference.py" target="requests"/>
+<edge source="examples_cli_inference.py" target="typing"/>
+<edge source="examples_cli_inference.py" target="os"/>
+<edge source="examples_cli_inference.py" target="sys"/>
+<edge source="examples_cli_inference.py" target="argparse"/>
+<edge source="examples_onboarding_gridstral_onboard.py" target="os"/>
+<edge source="examples_onboarding_gridstral_onboard.py" target="typing"/>
+<edge source="examples_processing_unit_example.py" target="pathlib"/>
+<edge source="examples_processing_unit_example.py" target="asyncio"/>
+<edge source="examples_processing_unit_example.py" target="eufle.config_sync"/>
+<edge source="examples_processing_unit_example.py" target="sys"/>
+<edge source="examples_processing_unit_example.py" target="eufle.processing_unit"/>
+<edge source="examples_thread_processing.py" target="os"/>
+<edge source="examples_thread_processing.py" target="typing"/>
+<edge source="examples_thread_processing.py" target="pandas"/>
+<edge source="examples_web_discussions_main.py" target="pydantic"/>
+<edge source="examples_web_discussions_main.py" target="typing"/>
+<edge source="examples_web_discussions_main.py" target="uuid"/>
+<edge source="examples_web_discussions_main.py" target="fastapi"/>
+<edge source="explainability_lime_explainer.py" target="typing"/>
+<edge source="explainability_lime_explainer.py" target="numpy"/>
+<edge source="explainability_lime_explainer.py" target="torch"/>
+<edge source="explainability_lime_explainer.py" target="lime.lime_text"/>
+<edge source="explainability_lime_explainer.py" target="torch.nn.functional"/>
+<edge source="hf-models_windsurf-project_eval.py" target="textwrap"/>
+<edge source="hf-models_windsurf-project_eval.py" target="torch"/>
+<edge source="hf-models_windsurf-project_eval.py" target="requests"/>
+<edge source="hf-models_windsurf-project_eval.py" target="typing"/>
+<edge source="hf-models_windsurf-project_eval.py" target="os"/>
+<edge source="hf-models_windsurf-project_pipeline.py" target="pathlib"/>
+<edge source="hf-models_windsurf-project_pipeline.py" target="statistics"/>
+<edge source="hf-models_windsurf-project_pipeline.py" target="datetime"/>
+<edge source="hf-models_windsurf-project_pipeline.py" target="typing"/>
+<edge source="hf-models_windsurf-project_pipeline.py" target="subprocess"/>
+<edge source="integration_eval.py" target="textwrap"/>
+<edge source="integration_eval.py" target="torch"/>
+<edge source="integration_eval.py" target="requests"/>
+<edge source="integration_eval.py" target="typing"/>
+<edge source="integration_eval.py" target="os"/>
+<edge source="lightofthe7_application_mothership_config.py" target="pathlib"/>
+<edge source="lightofthe7_application_mothership_config.py" target="functools"/>
+<edge source="lightofthe7_application_mothership_config.py" target="dataclasses"/>
+<edge source="lightofthe7_application_mothership_config.py" target="__future__"/>
+<edge source="lightofthe7_application_mothership_config.py" target="typing"/>
+<edge source="lightofthe7_application_mothership_dependencies.py" target="logging"/>
+<edge source="lightofthe7_application_mothership_dependencies.py" target="functools"/>
+<edge source="lightofthe7_application_mothership_dependencies.py" target="fastapi"/>
+<edge source="lightofthe7_application_mothership_dependencies.py" target="__future__"/>
+<edge source="lightofthe7_application_mothership_dependencies.py" target="typing"/>
+<edge source="lightofthe7_application_mothership_exceptions.py" target="__future__"/>
+<edge source="lightofthe7_application_mothership_exceptions.py" target="typing"/>
+<edge source="lightofthe7_application_mothership_main.py" target="logging"/>
+<edge source="lightofthe7_application_mothership_main.py" target="routers.cockpit"/>
+<edge source="lightofthe7_application_mothership_main.py" target="datetime"/>
+<edge source="lightofthe7_application_mothership_main.py" target="exceptions"/>
+<edge source="lightofthe7_application_mothership_main.py" target="uuid"/>
+<edge source="lightofthe7_application_mothership_middleware___init__.py" target="logging"/>
+<edge source="lightofthe7_application_mothership_middleware___init__.py" target="starlette.types"/>
+<edge source="lightofthe7_application_mothership_middleware___init__.py" target="fastapi"/>
+<edge source="lightofthe7_application_mothership_middleware___init__.py" target="fastapi.responses"/>
+<edge source="lightofthe7_application_mothership_middleware___init__.py" target="__future__"/>
+<edge source="lightofthe7_application_mothership_models_cockpit.py" target="dataclasses"/>
+<edge source="lightofthe7_application_mothership_models_cockpit.py" target="__future__"/>
+<edge source="lightofthe7_application_mothership_models_cockpit.py" target="datetime"/>
+<edge source="lightofthe7_application_mothership_models_cockpit.py" target="typing"/>
+<edge source="lightofthe7_application_mothership_models_cockpit.py" target="uuid"/>
+<edge source="lightofthe7_application_mothership_models___init__.py" target="dataclasses"/>
+<edge source="lightofthe7_application_mothership_models___init__.py" target="__future__"/>
+<edge source="lightofthe7_application_mothership_models___init__.py" target="datetime"/>
+<edge source="lightofthe7_application_mothership_models___init__.py" target="typing"/>
+<edge source="lightofthe7_application_mothership_models___init__.py" target="uuid"/>
+<edge source="lightofthe7_application_mothership_repositories___init__.py" target="logging"/>
+<edge source="lightofthe7_application_mothership_repositories___init__.py" target="abc"/>
+<edge source="lightofthe7_application_mothership_repositories___init__.py" target="asyncio"/>
+<edge source="lightofthe7_application_mothership_repositories___init__.py" target="dataclasses"/>
+<edge source="lightofthe7_application_mothership_repositories___init__.py" target="__future__"/>
+<edge source="lightofthe7_application_mothership_routers_cockpit.py" target="logging"/>
+<edge source="lightofthe7_application_mothership_routers_cockpit.py" target="platform"/>
+<edge source="lightofthe7_application_mothership_routers_cockpit.py" target="dependencies"/>
+<edge source="lightofthe7_application_mothership_routers_cockpit.py" target="schemas"/>
+<edge source="lightofthe7_application_mothership_routers_cockpit.py" target="fastapi"/>
+<edge source="lightofthe7_application_mothership_routers_health.py" target="logging"/>
+<edge source="lightofthe7_application_mothership_routers_health.py" target="dependencies"/>
+<edge source="lightofthe7_application_mothership_routers_health.py" target="schemas"/>
+<edge source="lightofthe7_application_mothership_routers_health.py" target="fastapi"/>
+<edge source="lightofthe7_application_mothership_routers_health.py" target="__future__"/>
+<edge source="lightofthe7_application_mothership_routers___init__.py" target="__future__"/>
+<edge source="lightofthe7_application_mothership_routers___init__.py" target="grid.AGENT.api.router"/>
+<edge source="lightofthe7_application_mothership_routers___init__.py" target="fastapi"/>
+<edge source="lightofthe7_application_mothership_schemas_requests.py" target="pydantic"/>
+<edge source="lightofthe7_application_mothership_schemas_requests.py" target="__future__"/>
+<edge source="lightofthe7_application_mothership_schemas_requests.py" target="typing"/>
+<edge source="lightofthe7_application_mothership_schemas_requests.py" target="datetime"/>
+<edge source="lightofthe7_application_mothership_schemas_requests.py" target="enum"/>
+<edge source="lightofthe7_application_mothership_schemas___init__.py" target="pydantic"/>
+<edge source="lightofthe7_application_mothership_schemas___init__.py" target="__future__"/>
+<edge source="lightofthe7_application_mothership_schemas___init__.py" target="typing"/>
+<edge source="lightofthe7_application_mothership_schemas___init__.py" target="datetime"/>
+<edge source="lightofthe7_application_mothership_schemas___init__.py" target="enum"/>
+<edge source="lightofthe7_application_mothership_services___init__.py" target="logging"/>
+<edge source="lightofthe7_application_mothership_services___init__.py" target="asyncio"/>
+<edge source="lightofthe7_application_mothership_services___init__.py" target="dataclasses"/>
+<edge source="lightofthe7_application_mothership_services___init__.py" target="__future__"/>
+<edge source="lightofthe7_application_mothership_services___init__.py" target="datetime"/>
+<edge source="lightofthe7_application_mothership_utils___init__.py" target="__future__"/>
+<edge source="lightofthe7_application_mothership_utils___init__.py" target="datetime"/>
+<edge source="lightofthe7_application_mothership_utils___init__.py" target="typing"/>
+<edge source="lightofthe7_application_mothership_utils___init__.py" target="hashlib"/>
+<edge source="lightofthe7_application_mothership_utils___init__.py" target="uuid"/>
+<edge source="lightofthe7_application_mothership___init__.py" target="config"/>
+<edge source="lightofthe7_application_mothership___init__.py" target="__future__"/>
+<edge source="lightofthe7_application_mothership___init__.py" target="main"/>
+<edge source="lightofthe7_application_mothership___init__.py" target="services"/>
+<edge source="lightofthe7_application_mothership___init__.py" target="repositories"/>
+<edge source="lightofthe7_archival_debug_debug_articulation.py" target="circuits.kernel.bus"/>
+<edge source="lightofthe7_archival_debug_debug_articulation.py" target="circuits.plugins.articulation"/>
+<edge source="lightofthe7_archival_debug_debug_articulation2.py" target="circuits.kernel.bus"/>
+<edge source="lightofthe7_archival_debug_debug_articulation2.py" target="circuits.plugins.articulation"/>
+<edge source="lightofthe7_archival_debug_debug_articulation3.py" target="circuits.kernel.bus"/>
+<edge source="lightofthe7_archival_debug_debug_articulation3.py" target="circuits.plugins.articulation"/>
+<edge source="lightofthe7_archival_debug_debug_physics.py" target="circuits.kernel.bus"/>
+<edge source="lightofthe7_archival_debug_debug_physics.py" target="circuits.plugins.physics"/>
+<edge source="lightofthe7_archival_python_unclear_Python_custom.py" target="ast"/>
+<edge source="lightofthe7_archival_python_unclear_Python_custom.py" target="__future__"/>
+<edge source="lightofthe7_archival_python_unclear_Python_custom.py" target="typing"/>
+<edge source="lightofthe7_archival_python_unclear_Python_custom.py" target="re"/>
+<edge source="lightofthe7_archival_python_unclear_Python_custom.py" target="os"/>
+<edge source="lightofthe7_archival_python_unclear_Python_FINAL_VERIFICATION.py" target="subprocess"/>
+<edge source="lightofthe7_archival_python_unclear_Python_FINAL_VERIFICATION.py" target="sys"/>
+<edge source="lightofthe7_archival_python_unclear_Python_ide_recorder_cli.py" target="logging"/>
+<edge source="lightofthe7_archival_python_unclear_Python_ide_recorder_cli.py" target="pathlib"/>
+<edge source="lightofthe7_archival_python_unclear_Python_ide_recorder_cli.py" target="circuits.ide_recorder.narrator"/>
+<edge source="lightofthe7_archival_python_unclear_Python_ide_recorder_cli.py" target="__future__"/>
+<edge source="lightofthe7_archival_python_unclear_Python_ide_recorder_cli.py" target="typing"/>
+<edge source="lightofthe7_archival_python_unclear_Python_prompt_builder.py" target="pathlib"/>
+<edge source="lightofthe7_archival_python_unclear_Python_prompt_builder.py" target="dataclasses"/>
+<edge source="lightofthe7_archival_python_unclear_Python_prompt_builder.py" target="__future__"/>
+<edge source="lightofthe7_archival_python_unclear_Python_prompt_builder.py" target="typing"/>
+<edge source="lightofthe7_archival_python_unclear_Python_prompt_builder.py" target="re"/>
+<edge source="lightofthe7_archival_python_unclear_Python_run_variant_simulation.py" target="dataclasses"/>
+<edge source="lightofthe7_archival_python_unclear_Python_run_variant_simulation.py" target="datetime"/>
+<edge source="lightofthe7_archival_python_unclear_Python_run_variant_simulation.py" target="typing"/>
+<edge source="lightofthe7_archival_python_unclear_Python_run_variant_simulation.py" target="random"/>
+<edge source="lightofthe7_archival_python_unclear_Python_run_variant_simulation.py" target="enum"/>
+<edge source="lightofthe7_archival_python_unclear_Python_sora_client.py" target="logging"/>
+<edge source="lightofthe7_archival_python_unclear_Python_sora_client.py" target="pathlib"/>
+<edge source="lightofthe7_archival_python_unclear_Python_sora_client.py" target="dataclasses"/>
+<edge source="lightofthe7_archival_python_unclear_Python_sora_client.py" target="__future__"/>
+<edge source="lightofthe7_archival_python_unclear_Python_sora_client.py" target="typing"/>
+<edge source="lightofthe7_archival_python_unclear_Python_sora_integration.py" target="logging"/>
+<edge source="lightofthe7_archival_python_unclear_Python_sora_integration.py" target="pathlib"/>
+<edge source="lightofthe7_archival_python_unclear_Python_sora_integration.py" target="__future__"/>
+<edge source="lightofthe7_archival_python_unclear_Python_sora_integration.py" target="typing"/>
+<edge source="lightofthe7_archival_python_unclear_Python_sora_integration.py" target="time"/>
+<edge source="lightofthe7_archival_python_unclear_Python_sora_prompt_generator.py" target="logging"/>
+<edge source="lightofthe7_archival_python_unclear_Python_sora_prompt_generator.py" target="pathlib"/>
+<edge source="lightofthe7_archival_python_unclear_Python_sora_prompt_generator.py" target="dataclasses"/>
+<edge source="lightofthe7_archival_python_unclear_Python_sora_prompt_generator.py" target="__future__"/>
+<edge source="lightofthe7_archival_python_unclear_Python_sora_prompt_generator.py" target="typing"/>
+<edge source="lightofthe7_archival_python_unclear_Python_tests_conftest.py" target="typing"/>
+<edge source="lightofthe7_archival_python_unclear_Python_tests_conftest.py" target="circuits.dice"/>
+<edge source="lightofthe7_archival_python_unclear_Python_tests_conftest.py" target="pytest"/>
+<edge source="lightofthe7_archival_python_unclear_Python_tests_test_dice.py" target="random"/>
+<edge source="lightofthe7_archival_python_unclear_Python_tests_test_dice.py" target="circuits.dice"/>
+<edge source="lightofthe7_archival_python_unclear_Python_tests_test_dice.py" target="pytest"/>
+<edge source="lightofthe7_archival_python_unclear_Python_test_sora_system.py" target="pathlib"/>
+<edge source="lightofthe7_archival_python_unclear_Python_test_sora_system.py" target="sora_integration"/>
+<edge source="lightofthe7_archival_python_unclear_Python_test_sora_system.py" target="traceback"/>
+<edge source="lightofthe7_archival_python_unclear_Python_test_sora_system.py" target="typing"/>
+<edge source="lightofthe7_archival_python_unclear_Python_test_sora_system.py" target="sys"/>
+<edge source="lightofthe7_archival_python_unclear_Python_youtube_video_simulation.py" target="dataclasses"/>
+<edge source="lightofthe7_archival_python_unclear_Python_youtube_video_simulation.py" target="datetime"/>
+<edge source="lightofthe7_archival_python_unclear_Python_youtube_video_simulation.py" target="typing"/>
+<edge source="lightofthe7_archival_python_unclear_Python_youtube_video_simulation.py" target="random"/>
+<edge source="lightofthe7_archival_python_unclear_Python_youtube_video_simulation.py" target="numpy"/>
+<edge source="lightofthe7_archival_redundant_roots_ml_model_register_model.py" target="os"/>
+<edge source="lightofthe7_archival_redundant_roots_ml_model_register_model.py" target="typing"/>
+<edge source="lightofthe7_archival_redundant_roots_ml_model_register_model.py" target="requests"/>
+<edge source="lightofthe7_archival_redundant_roots_ml_model_register_model.py" target="json"/>
+<edge source="lightofthe7_archival_transformer_root_transformer_main.py" target="logging"/>
+<edge source="lightofthe7_archival_transformer_root_transformer_main.py" target="asyncio"/>
+<edge source="lightofthe7_archival_transformer_root_transformer_main.py" target="openai"/>
+<edge source="lightofthe7_archival_transformer_root_transformer_main.py" target="fastapi"/>
+<edge source="lightofthe7_archival_transformer_root_transformer_main.py" target="pydantic"/>
+<edge source="lightofthe7_archival_transformer_root_transformer_tests_test_main.py" target="transformer.main"/>
+<edge source="lightofthe7_archival_transformer_root_transformer_tests_test_main.py" target="pytest"/>
+<edge source="lightofthe7_backend_server.py" target="pathlib"/>
+<edge source="lightofthe7_backend_server.py" target="__future__"/>
+<edge source="lightofthe7_backend_server.py" target="os"/>
+<edge source="lightofthe7_backend_server.py" target="sys"/>
+<edge source="lightofthe7_backend_server.py" target="uvicorn"/>
+<edge source="lightofthe7_cognitive_layer_cognitive_load_chunking.py" target="typing"/>
+<edge source="lightofthe7_cognitive_layer_cognitive_load_chunking.py" target="schemas.user_cognitive_profile"/>
+<edge source="lightofthe7_cognitive_layer_cognitive_load_load_estimator.py" target="enum"/>
+<edge source="lightofthe7_cognitive_layer_cognitive_load_load_estimator.py" target="typing"/>
+<edge source="lightofthe7_cognitive_layer_cognitive_load_load_estimator.py" target="schemas.cognitive_state"/>
+<edge source="lightofthe7_cognitive_layer_cognitive_load_load_estimator.py" target="schemas.user_cognitive_profile"/>
+<edge source="lightofthe7_cognitive_layer_cognitive_load_scaffolding.py" target="enum"/>
+<edge source="lightofthe7_cognitive_layer_cognitive_load_scaffolding.py" target="typing"/>
+<edge source="lightofthe7_cognitive_layer_cognitive_load_scaffolding.py" target="schemas.user_cognitive_profile"/>
+<edge source="lightofthe7_cognitive_layer_cognitive_load___init__.py" target="chunking"/>
+<edge source="lightofthe7_cognitive_layer_cognitive_load___init__.py" target="load_estimator"/>
+<edge source="lightofthe7_cognitive_layer_cognitive_load___init__.py" target="scaffolding"/>
+<edge source="lightofthe7_cognitive_layer_decision_support_bounded_rationality.py" target="typing"/>
+<edge source="lightofthe7_cognitive_layer_decision_support_bounded_rationality.py" target="schemas.decision_context"/>
+<edge source="lightofthe7_cognitive_layer_decision_support_choice_architecture.py" target="enum"/>
+<edge source="lightofthe7_cognitive_layer_decision_support_choice_architecture.py" target="typing"/>
+<edge source="lightofthe7_cognitive_layer_decision_support_choice_architecture.py" target="schemas.decision_context"/>
+<edge source="lightofthe7_cognitive_layer_decision_support_choice_architecture.py" target="schemas.user_cognitive_profile"/>
+<edge source="lightofthe7_cognitive_layer_decision_support_decision_matrix.py" target="typing"/>
+<edge source="lightofthe7_cognitive_layer_decision_support_decision_matrix.py" target="schemas.decision_context"/>
+<edge source="lightofthe7_cognitive_layer_decision_support_decision_matrix.py" target="schemas.user_cognitive_profile"/>
+<edge source="lightofthe7_cognitive_layer_decision_support_dual_process.py" target="schemas.cognitive_state"/>
+<edge source="lightofthe7_cognitive_layer_decision_support_dual_process.py" target="typing"/>
+<edge source="lightofthe7_cognitive_layer_decision_support_dual_process.py" target="schemas.decision_context"/>
+<edge source="lightofthe7_cognitive_layer_decision_support_dual_process.py" target="enum"/>
+<edge source="lightofthe7_cognitive_layer_decision_support_dual_process.py" target="schemas.user_cognitive_profile"/>
+<edge source="lightofthe7_cognitive_layer_decision_support___init__.py" target="bounded_rationality"/>
+<edge source="lightofthe7_cognitive_layer_decision_support___init__.py" target="decision_matrix"/>
+<edge source="lightofthe7_cognitive_layer_decision_support___init__.py" target="dual_process"/>
+<edge source="lightofthe7_cognitive_layer_decision_support___init__.py" target="choice_architecture"/>
+<edge source="lightofthe7_cognitive_layer_integration_context_enricher.py" target="schemas.cognitive_state"/>
+<edge source="lightofthe7_cognitive_layer_integration_context_enricher.py" target="typing"/>
+<edge source="lightofthe7_cognitive_layer_integration_context_enricher.py" target="schemas.decision_context"/>
+<edge source="lightofthe7_cognitive_layer_integration_context_enricher.py" target="schemas.user_cognitive_profile"/>
+<edge source="lightofthe7_cognitive_layer_integration_grid_bridge.py" target="schemas.cognitive_state"/>
+<edge source="lightofthe7_cognitive_layer_integration_grid_bridge.py" target="typing"/>
+<edge source="lightofthe7_cognitive_layer_integration_grid_bridge.py" target="schemas.user_cognitive_profile"/>
+<edge source="lightofthe7_cognitive_layer_integration_pipeline_adapter.py" target="schemas.cognitive_state"/>
+<edge source="lightofthe7_cognitive_layer_integration_pipeline_adapter.py" target="grid_bridge"/>
+<edge source="lightofthe7_cognitive_layer_integration_pipeline_adapter.py" target="typing"/>
+<edge source="lightofthe7_cognitive_layer_integration_pipeline_adapter.py" target="schemas.user_cognitive_profile"/>
+<edge source="lightofthe7_cognitive_layer_integration___init__.py" target="grid_bridge"/>
+<edge source="lightofthe7_cognitive_layer_integration___init__.py" target="context_enricher"/>
+<edge source="lightofthe7_cognitive_layer_integration___init__.py" target="pipeline_adapter"/>
+<edge source="lightofthe7_cognitive_layer_mental_models_alignment_checker.py" target="schemas.cognitive_state"/>
+<edge source="lightofthe7_cognitive_layer_mental_models_alignment_checker.py" target="typing"/>
+<edge source="lightofthe7_cognitive_layer_mental_models_alignment_checker.py" target="schemas.user_cognitive_profile"/>
+<edge source="lightofthe7_cognitive_layer_mental_models_model_builder.py" target="typing"/>
+<edge source="lightofthe7_cognitive_layer_mental_models_model_builder.py" target="schemas.user_cognitive_profile"/>
+<edge source="lightofthe7_cognitive_layer_mental_models_model_tracker.py" target="datetime"/>
+<edge source="lightofthe7_cognitive_layer_mental_models_model_tracker.py" target="typing"/>
+<edge source="lightofthe7_cognitive_layer_mental_models_model_tracker.py" target="schemas.user_cognitive_profile"/>
+<edge source="lightofthe7_cognitive_layer_mental_models___init__.py" target="model_builder"/>
+<edge source="lightofthe7_cognitive_layer_mental_models___init__.py" target="alignment_checker"/>
+<edge source="lightofthe7_cognitive_layer_mental_models___init__.py" target="model_tracker"/>
+<edge source="lightofthe7_cognitive_layer_schemas_cognitive_state.py" target="enum"/>
+<edge source="lightofthe7_cognitive_layer_schemas_cognitive_state.py" target="datetime"/>
+<edge source="lightofthe7_cognitive_layer_schemas_cognitive_state.py" target="typing"/>
+<edge source="lightofthe7_cognitive_layer_schemas_cognitive_state.py" target="pydantic"/>
+<edge source="lightofthe7_cognitive_layer_schemas_decision_context.py" target="enum"/>
+<edge source="lightofthe7_cognitive_layer_schemas_decision_context.py" target="datetime"/>
+<edge source="lightofthe7_cognitive_layer_schemas_decision_context.py" target="typing"/>
+<edge source="lightofthe7_cognitive_layer_schemas_decision_context.py" target="pydantic"/>
+<edge source="lightofthe7_cognitive_layer_schemas_user_cognitive_profile.py" target="enum"/>
+<edge source="lightofthe7_cognitive_layer_schemas_user_cognitive_profile.py" target="datetime"/>
+<edge source="lightofthe7_cognitive_layer_schemas_user_cognitive_profile.py" target="typing"/>
+<edge source="lightofthe7_cognitive_layer_schemas_user_cognitive_profile.py" target="pydantic"/>
+<edge source="lightofthe7_cognitive_layer_schemas___init__.py" target="user_cognitive_profile"/>
+<edge source="lightofthe7_cognitive_layer_schemas___init__.py" target="decision_context"/>
+<edge source="lightofthe7_cognitive_layer_schemas___init__.py" target="cognitive_state"/>
+<edge source="lightofthe7_cognitive_layer___init__.py" target="mental_models.alignment_checker"/>
+<edge source="lightofthe7_cognitive_layer___init__.py" target="cognitive_load.scaffolding"/>
+<edge source="lightofthe7_cognitive_layer___init__.py" target="mental_models.model_builder"/>
+<edge source="lightofthe7_cognitive_layer___init__.py" target="decision_support.choice_architecture"/>
+<edge source="lightofthe7_cognitive_layer___init__.py" target="integration.pipeline_adapter"/>
+<edge source="lightofthe7_create_grid_structure.py" target="pathlib"/>
+<edge source="lightofthe7_create_grid_structure.py" target="os"/>
+<edge source="lightofthe7_create_grid_structure.py" target="typing"/>
+<edge source="lightofthe7_create_grid_structure.py" target="sys"/>
+<edge source="lightofthe7_datakit_core_config.py" target="pathlib"/>
+<edge source="lightofthe7_datakit_core_config.py" target="dataclasses"/>
+<edge source="lightofthe7_datakit_core_config.py" target="typing"/>
+<edge source="lightofthe7_datakit_core_config.py" target="os"/>
+<edge source="lightofthe7_datakit_core_config.py" target="json"/>
+<edge source="lightofthe7_datakit_core_control.py" target="logging"/>
+<edge source="lightofthe7_datakit_core_control.py" target="typing"/>
+<edge source="lightofthe7_datakit_core_control.py" target="dataclasses"/>
+<edge source="lightofthe7_datakit_core_explorer.py" target="dataclasses"/>
+<edge source="lightofthe7_datakit_core_explorer.py" target="typing"/>
+<edge source="lightofthe7_datakit_core_explorer.py" target="random"/>
+<edge source="lightofthe7_datakit_core_explorer.py" target="os"/>
+<edge source="lightofthe7_datakit_core_explorer.py" target="time"/>
+<edge source="lightofthe7_datakit_core_loader.py" target="pathlib"/>
+<edge source="lightofthe7_datakit_core_loader.py" target="dataclasses"/>
+<edge source="lightofthe7_datakit_core_loader.py" target="typing"/>
+<edge source="lightofthe7_datakit_core_loader.py" target="random"/>
+<edge source="lightofthe7_datakit_core_loader.py" target="os"/>
+<edge source="lightofthe7_datakit_core_pack_schema.py" target="pathlib"/>
+<edge source="lightofthe7_datakit_core_pack_schema.py" target="dataclasses"/>
+<edge source="lightofthe7_datakit_core_pack_schema.py" target="__future__"/>
+<edge source="lightofthe7_datakit_core_pack_schema.py" target="typing"/>
+<edge source="lightofthe7_datakit_core_pack_schema.py" target="re"/>
+<edge source="lightofthe7_datakit_core___init__.py" target="explorer"/>
+<edge source="lightofthe7_datakit_core___init__.py" target="loader"/>
+<edge source="lightofthe7_datakit_core___init__.py" target="config"/>
+<edge source="lightofthe7_datakit_datakit.py" target="pathlib"/>
+<edge source="lightofthe7_datakit_datakit.py" target="core.loader"/>
+<edge source="lightofthe7_datakit_datakit.py" target="os"/>
+<edge source="lightofthe7_datakit_datakit.py" target="core.control"/>
+<edge source="lightofthe7_datakit_datakit.py" target="core.config"/>
+<edge source="lightofthe7_datakit_examples_quick_start.py" target="pathlib"/>
+<edge source="lightofthe7_datakit_examples_quick_start.py" target="core.loader"/>
+<edge source="lightofthe7_datakit_examples_quick_start.py" target="core.config"/>
+<edge source="lightofthe7_datakit_examples_quick_start.py" target="sys"/>
+<edge source="lightofthe7_datakit_examples_quick_start.py" target="core.explorer"/>
+<edge source="lightofthe7_datakit_Hogwarts_ancient_magic_lib.py" target="collections.abc"/>
+<edge source="lightofthe7_datakit_Hogwarts_ancient_magic_lib.py" target="dataclasses"/>
+<edge source="lightofthe7_datakit_Hogwarts_ancient_magic_lib.py" target="__future__"/>
+<edge source="lightofthe7_datakit_Hogwarts_ancient_magic_lib.py" target="time"/>
+<edge source="lightofthe7_datakit_Hogwarts_ancient_magic_lib.py" target="enum"/>
+<edge source="lightofthe7_datakit_Hogwarts_draw_my_life.py" target="pathlib"/>
+<edge source="lightofthe7_datakit_Hogwarts_draw_my_life.py" target="math"/>
+<edge source="lightofthe7_datakit_Hogwarts_draw_my_life.py" target="dataclasses"/>
+<edge source="lightofthe7_datakit_Hogwarts_draw_my_life.py" target="__future__"/>
+<edge source="lightofthe7_datakit_Hogwarts_draw_my_life.py" target="datetime"/>
+<edge source="lightofthe7_datakit_Hogwarts_great_hall_mistral_agent.py" target="agents.function_definitions"/>
+<edge source="lightofthe7_datakit_Hogwarts_great_hall_mistral_agent.py" target="typing"/>
+<edge source="lightofthe7_datakit_Hogwarts_great_hall_mistral_agent.py" target="mistralai"/>
+<edge source="lightofthe7_datakit_Hogwarts_great_hall_mistral_agent.py" target="os"/>
+<edge source="lightofthe7_datakit_Hogwarts_great_hall_mistral_agent.py" target="json"/>
+<edge source="lightofthe7_datakit_Hogwarts_great_hall_run_objects_discussion.py" target="pathlib"/>
+<edge source="lightofthe7_datakit_Hogwarts_great_hall_run_objects_discussion.py" target="os"/>
+<edge source="lightofthe7_datakit_Hogwarts_great_hall_run_objects_discussion.py" target="subprocess"/>
+<edge source="lightofthe7_datakit_Hogwarts_great_hall_run_recommended_stream.py" target="pathlib"/>
+<edge source="lightofthe7_datakit_Hogwarts_great_hall_run_recommended_stream.py" target="__future__"/>
+<edge source="lightofthe7_datakit_Hogwarts_great_hall_run_recommended_stream.py" target="subprocess"/>
+<edge source="lightofthe7_datakit_Hogwarts_great_hall_run_recommended_stream.py" target="os"/>
+<edge source="lightofthe7_datakit_Hogwarts_great_hall_run_recommended_stream.py" target="sys"/>
+<edge source="lightofthe7_datakit_Hogwarts_great_hall_table_great_hall_table.py" target="pathlib"/>
+<edge source="lightofthe7_datakit_Hogwarts_great_hall_table_great_hall_table.py" target="typing"/>
+<edge source="lightofthe7_datakit_Hogwarts_great_hall_table_great_hall_table.py" target="sys"/>
+<edge source="lightofthe7_datakit_Hogwarts_great_hall_table_great_hall_table.py" target="csv"/>
+<edge source="lightofthe7_datakit_Hogwarts_great_hall_table_great_hall_table.py" target="argparse"/>
+<edge source="lightofthe7_datakit_Hogwarts_grid_bridge.py" target="pathlib"/>
+<edge source="lightofthe7_datakit_Hogwarts_grid_bridge.py" target="math"/>
+<edge source="lightofthe7_datakit_Hogwarts_grid_bridge.py" target="dataclasses"/>
+<edge source="lightofthe7_datakit_Hogwarts_grid_bridge.py" target="__future__"/>
+<edge source="lightofthe7_datakit_Hogwarts_grid_bridge.py" target="typing"/>
+<edge source="lightofthe7_datakit_Hogwarts_hogwarts_cli.py" target="typing"/>
+<edge source="lightofthe7_datakit_Hogwarts_hogwarts_cli.py" target="sys"/>
+<edge source="lightofthe7_datakit_Hogwarts_hogwarts_cli.py" target="hogwarts_toolkit"/>
+<edge source="lightofthe7_datakit_Hogwarts_hogwarts_cli.py" target="argparse"/>
+<edge source="lightofthe7_datakit_Hogwarts_hogwarts_toolkit.py" target="datetime"/>
+<edge source="lightofthe7_datakit_Hogwarts_hogwarts_toolkit.py" target="typing"/>
+<edge source="lightofthe7_datakit_Hogwarts_hogwarts_toolkit.py" target="uuid"/>
+<edge source="lightofthe7_datakit_Hogwarts_parseltongue_cli.py" target="typing"/>
+<edge source="lightofthe7_datakit_Hogwarts_parseltongue_cli.py" target="sys"/>
+<edge source="lightofthe7_datakit_Hogwarts_parseltongue_cli.py" target="argparse"/>
+<edge source="lightofthe7_datakit_Hogwarts_prototypes_ansi_test.py" target="random"/>
+<edge source="lightofthe7_datakit_Hogwarts_spellbook_api.py" target="logging"/>
+<edge source="lightofthe7_datakit_Hogwarts_spellbook_api.py" target="pathlib"/>
+<edge source="lightofthe7_datakit_Hogwarts_spellbook_api.py" target="google_auth_oauthlib.flow"/>
+<edge source="lightofthe7_datakit_Hogwarts_spellbook_api.py" target="__future__"/>
+<edge source="lightofthe7_datakit_Hogwarts_spellbook_api.py" target="typing"/>
+<edge source="lightofthe7_datakit_Hogwarts_test_hogwarts_toolkit.py" target="datetime"/>
+<edge source="lightofthe7_datakit_Hogwarts_test_hogwarts_toolkit.py" target="unittest"/>
+<edge source="lightofthe7_datakit_Hogwarts_test_hogwarts_toolkit.py" target="hogwarts_toolkit"/>
+<edge source="lightofthe7_datakit_Hogwarts_test_parseltongue_cli.py" target="unittest"/>
+<edge source="lightofthe7_datakit_Hogwarts_test_parseltongue_cli.py" target="contextlib"/>
+<edge source="lightofthe7_datakit_Hogwarts_test_parseltongue_cli.py" target="io"/>
+<edge source="lightofthe7_datakit_Hogwarts_test_parseltongue_cli.py" target="parseltongue_cli"/>
+<edge source="lightofthe7_datakit_scripts_ai_composer.py" target="typing"/>
+<edge source="lightofthe7_datakit_scripts_ai_composer.py" target="random"/>
+<edge source="lightofthe7_datakit_scripts_ai_composer.py" target="numpy"/>
+<edge source="lightofthe7_datakit_scripts_ai_composer.py" target="markovify"/>
+<edge source="lightofthe7_datakit_scripts_ai_composer.py" target="json"/>
+<edge source="lightofthe7_datakit_scripts_appreciation_generator.py" target="pathlib"/>
+<edge source="lightofthe7_datakit_scripts_appreciation_generator.py" target="typing"/>
+<edge source="lightofthe7_datakit_scripts_appreciation_generator.py" target="random"/>
+<edge source="lightofthe7_datakit_scripts_appreciation_generator.py" target="argparse"/>
+<edge source="lightofthe7_datakit_scripts_appreciation_generator.py" target="json"/>
+<edge source="lightofthe7_datakit_scripts_chord_generator.py" target="pathlib"/>
+<edge source="lightofthe7_datakit_scripts_chord_generator.py" target="typing"/>
+<edge source="lightofthe7_datakit_scripts_chord_generator.py" target="random"/>
+<edge source="lightofthe7_datakit_scripts_chord_generator.py" target="os"/>
+<edge source="lightofthe7_datakit_scripts_chord_generator.py" target="sys"/>
+<edge source="lightofthe7_datakit_scripts_doctor.py" target="pathlib"/>
+<edge source="lightofthe7_datakit_scripts_doctor.py" target="platform"/>
+<edge source="lightofthe7_datakit_scripts_doctor.py" target="openai"/>
+<edge source="lightofthe7_datakit_scripts_doctor.py" target="__future__"/>
+<edge source="lightofthe7_datakit_scripts_doctor.py" target="typing"/>
+<edge source="lightofthe7_datakit_scripts_guided_tour.py" target="pathlib"/>
+<edge source="lightofthe7_datakit_scripts_guided_tour.py" target="typing"/>
+<edge source="lightofthe7_datakit_scripts_guided_tour.py" target="time"/>
+<edge source="lightofthe7_datakit_scripts_guided_tour.py" target="os"/>
+<edge source="lightofthe7_datakit_scripts_guided_tour.py" target="random"/>
+<edge source="lightofthe7_datakit_scripts_openai_smoketest.py" target="openai"/>
+<edge source="lightofthe7_datakit_scripts_openai_smoketest.py" target="__future__"/>
+<edge source="lightofthe7_datakit_scripts_openai_smoketest.py" target="typing"/>
+<edge source="lightofthe7_datakit_scripts_openai_smoketest.py" target="time"/>
+<edge source="lightofthe7_datakit_scripts_openai_smoketest.py" target="os"/>
+<edge source="lightofthe7_datakit_scripts_similarity_pie.py" target="pathlib"/>
+<edge source="lightofthe7_datakit_scripts_similarity_pie.py" target="__future__"/>
+<edge source="lightofthe7_datakit_scripts_similarity_pie.py" target="typing"/>
+<edge source="lightofthe7_datakit_scripts_similarity_pie.py" target="matplotlib.pyplot"/>
+<edge source="lightofthe7_datakit_scripts_similarity_pie.py" target="argparse"/>
+<edge source="lightofthe7_datakit_scripts_validate_pack.py" target="pathlib"/>
+<edge source="lightofthe7_datakit_scripts_validate_pack.py" target="core.pack_schema"/>
+<edge source="lightofthe7_datakit_scripts_validate_pack.py" target="__future__"/>
+<edge source="lightofthe7_datakit_scripts_validate_pack.py" target="typing"/>
+<edge source="lightofthe7_datakit_scripts_validate_pack.py" target="sys"/>
+<edge source="lightofthe7_datakit_tests_test_control.py" target="unittest"/>
+<edge source="lightofthe7_datakit_tests_test_control.py" target="core.control"/>
+<edge source="lightofthe7_datakit_tests_test_smartdecisor.py" target="pathlib"/>
+<edge source="lightofthe7_datakit_tests_test_smartdecisor.py" target="unittest"/>
+<edge source="lightofthe7_datakit_tests_test_smartdecisor.py" target="visualizations.static.smartdecisor"/>
+<edge source="lightofthe7_datakit_tests_test_story_eq.py" target="pathlib"/>
+<edge source="lightofthe7_datakit_tests_test_story_eq.py" target="unittest"/>
+<edge source="lightofthe7_datakit_tests_test_story_eq.py" target="story_eq.models"/>
+<edge source="lightofthe7_datakit_tests_test_story_eq.py" target="story_eq.parser"/>
+<edge source="lightofthe7_datakit_tests_test_story_eq.py" target="story_eq.ui"/>
+<edge source="lightofthe7_datakit_tool_semantic_grep.py" target="pathlib"/>
+<edge source="lightofthe7_datakit_tool_semantic_grep.py" target="math"/>
+<edge source="lightofthe7_datakit_tool_semantic_grep.py" target="dataclasses"/>
+<edge source="lightofthe7_datakit_tool_semantic_grep.py" target="typing"/>
+<edge source="lightofthe7_datakit_tool_semantic_grep.py" target="hashlib"/>
+<edge source="lightofthe7_datakit_tool_structure_audit.py" target="pathlib"/>
+<edge source="lightofthe7_datakit_tool_structure_audit.py" target="fnmatch"/>
+<edge source="lightofthe7_datakit_tool_structure_audit.py" target="dataclasses"/>
+<edge source="lightofthe7_datakit_tool_structure_audit.py" target="datetime"/>
+<edge source="lightofthe7_datakit_tool_structure_audit.py" target="typing"/>
+<edge source="lightofthe7_datakit_visualizations_animated_manim_circle.py" target="manim"/>
+<edge source="lightofthe7_datakit_visualizations_drive-index-vad_tools_locus_of_control_demo.py" target="pathlib"/>
+<edge source="lightofthe7_datakit_visualizations_drive-index-vad_tools_locus_of_control_demo.py" target="datetime"/>
+<edge source="lightofthe7_datakit_visualizations_drive-index-vad_tools_locus_of_control_demo.py" target="core.models"/>
+<edge source="lightofthe7_datakit_visualizations_drive-index-vad_tools_locus_of_control_demo.py" target="sys"/>
+<edge source="lightofthe7_datakit_visualizations_drive-index-vad_tools_locus_of_control_demo.py" target="workspace.dials_and_knobs"/>
+<edge source="lightofthe7_datakit_visualizations_interactive_plotly_circle.py" target="pathlib"/>
+<edge source="lightofthe7_datakit_visualizations_interactive_plotly_circle.py" target="plotly.graph_objects"/>
+<edge source="lightofthe7_datakit_visualizations_interactive_plotly_circle.py" target="__future__"/>
+<edge source="lightofthe7_datakit_visualizations_interactive_plotly_circle.py" target="typing"/>
+<edge source="lightofthe7_datakit_visualizations_interactive_plotly_circle.py" target="networkx"/>
+<edge source="lightofthe7_datakit_visualizations_interactive_rowling_tribute.py" target="pathlib"/>
+<edge source="lightofthe7_datakit_visualizations_interactive_rowling_tribute.py" target="typing"/>
+<edge source="lightofthe7_datakit_visualizations_interactive_rowling_tribute.py" target="json"/>
+<edge source="lightofthe7_datakit_visualizations_static_circle_graph.py" target="pathlib"/>
+<edge source="lightofthe7_datakit_visualizations_static_circle_graph.py" target="typing"/>
+<edge source="lightofthe7_datakit_visualizations_static_circle_graph.py" target="matplotlib.pyplot"/>
+<edge source="lightofthe7_datakit_visualizations_static_circle_graph.py" target="networkx"/>
+<edge source="lightofthe7_datakit_visualizations_static_circle_graph.py" target="sys"/>
+<edge source="lightofthe7_datakit_visualizations_static_smartdecisor.py" target="pathlib"/>
+<edge source="lightofthe7_datakit_visualizations_static_smartdecisor.py" target="dataclasses"/>
+<edge source="lightofthe7_datakit_visualizations_static_smartdecisor.py" target="__future__"/>
+<edge source="lightofthe7_datakit_visualizations_static_smartdecisor.py" target="datetime"/>
+<edge source="lightofthe7_datakit_visualizations_static_smartdecisor.py" target="typing"/>
+<edge source="lightofthe7_demos_dataset_lifecycle.py" target="logging"/>
+<edge source="lightofthe7_demos_dataset_lifecycle.py" target="pathlib"/>
+<edge source="lightofthe7_demos_dataset_lifecycle.py" target="datetime"/>
+<edge source="lightofthe7_demos_dataset_lifecycle.py" target="typing"/>
+<edge source="lightofthe7_demos_dataset_lifecycle.py" target="uuid"/>
+<edge source="lightofthe7_examples_grid_workflow_demo.py" target="pathlib"/>
+<edge source="lightofthe7_examples_grid_workflow_demo.py" target="circuits.grid.core.fear"/>
+<edge source="lightofthe7_examples_grid_workflow_demo.py" target="circuits.grid.core.temporal"/>
+<edge source="lightofthe7_examples_grid_workflow_demo.py" target="asyncio"/>
+<edge source="lightofthe7_examples_grid_workflow_demo.py" target="circuits.grid.core.engine"/>
+<edge source="lightofthe7_examples_quantum_optimization_demo.py" target="pathlib"/>
+<edge source="lightofthe7_examples_quantum_optimization_demo.py" target="circuits.services.quantum_utils"/>
+<edge source="lightofthe7_examples_quantum_optimization_demo.py" target="sys"/>
+<edge source="lightofthe7_examples_translator_assistant_demo.py" target="pathlib"/>
+<edge source="lightofthe7_examples_translator_assistant_demo.py" target="services.translator_assistant"/>
+<edge source="lightofthe7_examples_translator_assistant_demo.py" target="sys"/>
+<edge source="lightofthe7_examples_translator_demo.py" target="pathlib"/>
+<edge source="lightofthe7_examples_translator_demo.py" target="tempfile"/>
+<edge source="lightofthe7_examples_translator_demo.py" target="grid.services.translator_assistant.service"/>
+<edge source="lightofthe7_examples_translator_demo.py" target="json"/>
+<edge source="lightofthe7_Foundations_of_Computation_Executive_Report_mathilde_rouselle.py" target="json"/>
+<edge source="lightofthe7_grid_entry_points_api_entry.py" target="typing"/>
+<edge source="lightofthe7_grid_entry_points_api_entry.py" target="grid.tracing"/>
+<edge source="lightofthe7_grid_entry_points_api_entry.py" target="grid.organization.org_manager"/>
+<edge source="lightofthe7_grid_entry_points_api_entry.py" target="fastapi"/>
+</graph>
+</graphml>

@@ -1,0 +1,33 @@
+{
+  "path": "application\\mothership\\routers\\auth.py",
+  "size": 10247,
+  "language": "Python",
+  "lines": 308,
+  "non_empty_lines": 240,
+  "functions": 0,
+  "classes": 5,
+  "imports": [
+    "__future__",
+    "logging",
+    "typing",
+    "fastapi",
+    "pydantic",
+    "application.mothership.dependencies",
+    "application.mothership.schemas",
+    "application.mothership.security.jwt"
+  ],
+  "import_lines": [
+    7,
+    9,
+    10,
+    12,
+    13,
+    15,
+    16,
+    17
+  ],
+  "complexity_estimate": 6.0,
+  "comment_density": 0.05519480519480519,
+  "has_docstrings": true,
+  "side_effects": []
+}

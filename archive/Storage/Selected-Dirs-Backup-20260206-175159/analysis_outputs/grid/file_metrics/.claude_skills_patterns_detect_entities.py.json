@@ -1,0 +1,31 @@
+{
+  "path": ".claude\\skills\\patterns_detect_entities.py",
+  "size": 3740,
+  "language": "Python",
+  "lines": 116,
+  "non_empty_lines": 96,
+  "functions": 2,
+  "classes": 0,
+  "imports": [
+    "__future__",
+    "sys",
+    "pathlib",
+    "typing",
+    "grid.skills.base",
+    "re",
+    "application.mothership.ner_service"
+  ],
+  "import_lines": [
+    8,
+    10,
+    11,
+    12,
+    18,
+    23,
+    85
+  ],
+  "complexity_estimate": 13.0,
+  "comment_density": 0.06896551724137931,
+  "has_docstrings": true,
+  "side_effects": []
+}

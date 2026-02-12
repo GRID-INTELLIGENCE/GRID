@@ -1,0 +1,137 @@
+{
+  "version": "1.0.0",
+  "protected_projects": {
+    "grid": {
+      "canonical_path": "E:\\_projects\\grid",
+      "alternate_paths": [
+        "E:/_projects/grid",
+        "e:\\_projects\\grid",
+        "e:/_projects/grid"
+      ],
+      "protection_level": "EXPLICIT",
+      "modification_allowed": false,
+      "tags": [
+        "#file:grid",
+        "grid",
+        "GRID Framework",
+        "RAG System",
+        "Cognitive Framework"
+      ],
+      "description": "Primary GRID intelligence framework with RAG and observability",
+      "key_paths": {
+        "root": "E:\\_projects\\grid",
+        "src": "E:\\_projects\\grid\\src",
+        "config": "E:\\_projects\\grid\\config",
+        "docs": "E:\\_projects\\grid\\docs"
+      }
+    },
+    "coinbase": {
+      "canonical_path": "E:\\_projects\\Coinbase\\coinbase",
+      "alternate_paths": [
+        "E:/_projects/Coinbase/coinbase",
+        "e:\\_projects\\Coinbase\\coinbase",
+        "e:/_projects/Coinbase/coinbase"
+      ],
+      "protection_level": "EXPLICIT",
+      "modification_allowed": false,
+      "tags": [
+        "#file:coinbase",
+        "Coinbase",
+        "Crypto Application",
+        "GRID Integration"
+      ],
+      "description": "Crypto-focused application with GRID integration",
+      "key_paths": {
+        "root": "E:\\_projects\\Coinbase\\coinbase",
+        "src": "E:\\_projects\\Coinbase\\coinbase\\src",
+        "config": "E:\\_projects\\Coinbase\\coinbase\\config"
+      }
+    },
+    "wellness_studio": {
+      "canonical_path": "E:\\_projects\\wellness_studio",
+      "alternate_paths": [
+        "E:/_projects/wellness_studio",
+        "e:\\_projects\\wellness_studio",
+        "e:/_projects/wellness_studio"
+      ],
+      "protection_level": "EXPLICIT",
+      "modification_allowed": false,
+      "tags": [
+        "#file:wellness_studio",
+        "wellness_studio",
+        "AI Safety",
+        "Wellness Framework"
+      ],
+      "description": "Wellness and AI Safety framework",
+      "key_paths": {
+        "root": "E:\\_projects\\wellness_studio",
+        "ai_safety": "E:\\_projects\\wellness_studio\\ai_safety",
+        "config": "E:\\_projects\\wellness_studio\\config"
+      }
+    }
+  },
+  "naming_conventions": {
+    "underscore_prefix": {
+      "rule": "Directories starting with underscore (_) are protected system-level directories",
+      "examples": [
+        "_projects",
+        "_config",
+        "_system"
+      ],
+      "protection": "IMMUTABLE",
+      "scope": "naming_convention_and_typing",
+      "enforcement": "Underscore prefix indicates no modifications allowed"
+    }
+  },
+  "enforcement_rules": {
+    "no_path_changes": true,
+    "no_moves": true,
+    "no_renames": true,
+    "no_copies_to_different_locations": true,
+    "violation_action": "STOP_AND_ALERT",
+    "allowed_operations": [
+      "read",
+      "reference",
+      "integrate_within_structure",
+      "create_content_inside",
+      "modify_content_inside"
+    ],
+    "prohibited_operations": [
+      "move_directory",
+      "rename_directory",
+      "change_parent_path",
+      "relocate_project",
+      "restructure_hierarchy"
+    ]
+  },
+  "integration_guidelines": {
+    "reference_only": "When integrating between projects, reference paths as read-only sources",
+    "no_duplication": "Do not create copies of protected projects in different locations",
+    "use_symlinks": "Prefer symlinks or references over copies",
+    "deploy_artifacts": "Deploy artifacts to appropriate locations within existing structure",
+    "document_dependencies": "Document cross-project dependencies in project-specific config"
+  },
+  "metadata": {
+    "created_by": "User explicit request",
+    "created_at": "2026-02-01T20:28:00Z",
+    "authority": "User directive - EXPLICIT REQUEST",
+    "persistence": "Deep configuration - survives session restarts",
+    "override_allowed": false,
+    "enforcement_level": "CRITICAL",
+    "violation_handling": "Stop operation and alert user immediately"
+  },
+  "ai_agent_instructions": {
+    "always_verify_paths": "Before any file operation, verify you're not modifying protected paths",
+    "use_canonical_paths": "Always reference canonical paths from this configuration",
+    "never_suggest_moves": "Never suggest or execute directory moves for protected projects",
+    "stop_on_violation": "Immediately stop and alert user if operation would violate protections",
+    "work_within_structure": "Work within existing directory structure, never reorganize",
+    "read_only_references": "Treat protected projects as read-only for path operations"
+  },
+  "current_safe_working_directory": {
+    "path": "E:\\.worktrees\\copilot-worktree-2026-02-01T20-18-14",
+    "description": "Temporary worktree - safe for modifications",
+    "relationship_to_protected": "May reference protected projects but must not modify their locations",
+    "allowed_operations": "All operations allowed within this directory"
+  }
+}

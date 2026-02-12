@@ -1,0 +1,23 @@
+{
+  "path": "lightofthe7\\application\\mothership\\routers\\__init__.py",
+  "size": 2016,
+  "language": "Python",
+  "lines": 62,
+  "non_empty_lines": 46,
+  "functions": 1,
+  "classes": 0,
+  "imports": [
+    "__future__",
+    "fastapi",
+    "grid.AGENT.api.router"
+  ],
+  "import_lines": [
+    8,
+    10,
+    23
+  ],
+  "complexity_estimate": 3.0,
+  "comment_density": 0.2903225806451613,
+  "has_docstrings": true,
+  "side_effects": []
+}

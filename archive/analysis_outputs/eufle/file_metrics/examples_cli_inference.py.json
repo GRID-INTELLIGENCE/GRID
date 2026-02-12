@@ -1,0 +1,35 @@
+{
+  "path": "examples\\cli_inference.py",
+  "size": 11598,
+  "language": "Python",
+  "lines": 335,
+  "non_empty_lines": 274,
+  "functions": 16,
+  "classes": 3,
+  "imports": [
+    "argparse",
+    "os",
+    "sys",
+    "typing",
+    "json",
+    "transformers",
+    "torch",
+    "requests"
+  ],
+  "import_lines": [
+    12,
+    13,
+    14,
+    15,
+    16,
+    91,
+    114,
+    153
+  ],
+  "complexity_estimate": 35.0,
+  "comment_density": 0.026865671641791045,
+  "has_docstrings": true,
+  "side_effects": [
+    "requests\\.(get|post|put|delete)"
+  ]
+}

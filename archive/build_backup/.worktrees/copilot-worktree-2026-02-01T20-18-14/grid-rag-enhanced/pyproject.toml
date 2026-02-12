@@ -1,0 +1,334 @@
+[project]
+name = "grid"
+version = "2.2.0"
+description = "GRID - Geometric Resonance Intelligence Driver: A comprehensive framework for exploring complex systems through geometric resonance patterns, cognitive decision support, local-first AI, and event-driven agentic systems"
+authors = [{ name = "Irfan Kabir", email = "irfankabir02@gmail.com" }]
+requires-python = ">=3.13,<3.14"
+readme = "README.md"
+license = { file = "LICENSE" }
+keywords = [
+    "ai",
+    "machine-learning",
+    "cognitive-architecture",
+    "rag",
+    "agentic",
+    "ddd",
+    "geometric-resonance",
+    "event-driven",
+]
+
+dependencies = [
+    # Core Framework
+    "fastapi>=0.104.0",
+    "httpx>=0.25.0",
+    "uvicorn[standard]>=0.24.0",
+    "pydantic>=2.4.0",
+    "python-dotenv>=1.0.0",
+    # Data Science & ML
+    "numpy>=1.24.0",
+    "scikit-learn==1.8.0",
+    "tiktoken>=0.12.0",
+    "networkx>=3.0",
+    # Database & Storage
+    "asyncpg>=0.29.0",
+    "sqlalchemy[asyncio]>=2.0.0",
+    "alembic>=1.13.0",
+    "redis>=5.0.0",
+    # Task Queue & Background Processing
+    "celery>=5.3.0",
+    "schedule>=1.2.2",
+    # Security & Authentication
+    "python-jose[cryptography]>=3.3.0",
+    "bcrypt>=4.1.0",
+    "stripe>=7.0.0",
+    # External Services
+    "databricks-sql-connector>=4.2.4",
+    "databricks-sdk>=0.40.0",
+    # Logging & Observability
+    "structlog>=23.1.0",
+    # Testing (core dependencies)
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "mcp[cli]>=1.25.0",
+    "rank-bm25>=0.2.2",
+    "sentence-transformers>=5.2.0",
+    "chromadb>=1.4.1",
+    "ollama>=0.6.1",
+]
+
+[project.scripts]
+# Core CLI commands
+grid = "src.grid.__main__:main"
+grid-api = "src.grid.entry_points.api_entry:main"
+grid-cli = "src.grid.entry_points.cli_entry:main"
+grid-service = "src.grid.entry_points.service_entry:main"
+
+# New system commands
+grid-agentic = "src.grid.agentic.__main__:main"
+grid-workflow = "src.grid.workflow.__main__:main"
+grid-context = "src.grid.context.__main__:main"
+
+# Development tools
+rag-query = "src.tools.rag.cli:query"
+rag-index = "src.tools.rag.cli:index"
+rag-stats = "src.tools.rag.cli:stats"
+rag-chat = "src.tools.rag.chat:main"
+
+# Databricks integration
+databricks-cli = "src.integration.databricks.cli:main"
+
+[project.optional-dependencies]
+test = ["pytest>=7.4.0", "pytest-asyncio>=0.21.0", "pytest-cov>=4.1.0", "psutil>=5.9.0"]
+dev = ["black>=23.9.0", "ruff>=0.0.291", "mypy>=1.5.1"]
+ai = ["mistralai>=0.1.0", "openai>=1.0.0"]
+
+[dependency-groups]
+test = ["pytest>=7.4.0", "pytest-asyncio>=0.21.0", "pytest-cov>=4.1.0", "psutil>=5.9.0"]
+dev = ["black>=23.9.0", "ruff>=0.0.291", "mypy>=1.5.1"]
+ai = ["mistralai>=0.1.0", "openai>=1.0.0"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = [
+    "src/grid",
+    "src/application",
+    "src/cognitive",
+    "src/tools",
+    "src/grid/agentic",
+    "src/grid/context",
+    "src/grid/workflow",
+    "src/grid/io",
+]
+exclude = [
+    "src/api/**",
+    "src/cli/**",
+    "src/core/**",
+    "src/database/**",
+    "src/kernel/**",
+    "src/nl_dev/**",
+    "src/physics/**",
+    "src/plugins/**",
+    "src/throughput_engine/**",
+    "src/utils/**",
+    "src/valuation/**",
+    "**/__pycache__/**",
+    "**/*.pyc",
+    "dev/**",
+    "reports/**",
+    "docs-ext/**",
+    "light_of_the_seven/**",
+    "datakit/**",
+    "archival/**",
+    "core/**",
+    "SEGA/**",
+    "Arena/**",
+    "frontend/**",
+    "grid_exercises/**",
+    ".case_references/**",
+    ".case_memory/**",
+    "EUFLE/**",
+]
+
+[tool.uv]
+dev-dependencies = [
+    "hatch",
+    "black>=23.9.0",
+    "ruff>=0.0.291",
+    "mypy>=1.5.1",
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.1.0",
+    "pytest-timeout>=2.1.0",
+]
+
+[tool.uv.sources]
+
+[tool.uv.workspace]
+# Simplified workspace - only include directories with valid pyproject.toml
+# This fixes: "Workspace member X is missing a pyproject.toml" errors
+members = ["."]
+
+[tool.pytest.ini_options]
+pythonpath = ["src", "."]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+asyncio_mode = "auto"
+# Note: pytest-timeout timeout is set via command-line --timeout flag or @pytest.mark.timeout()
+# Default timeout can be set via: pytest --timeout=300 --timeout-method=thread
+
+# Exclude scratch tests from default runs
+# Scratch tests are experimental and should not block CI
+# Use pytest-ignore or command-line --ignore flag instead
+
+# Suppress warnings
+filterwarnings = [
+    "ignore::DeprecationWarning:pkg_resources",
+    "ignore::DeprecationWarning:sqlalchemy.*",
+    "ignore::DeprecationWarning:pydantic.*",
+]
+
+# Test markers
+markers = [
+    "scratch: Experimental tests (excluded from CI)",
+    "unit: Unit tests (fast, isolated)",
+    "integration: Integration tests (slower, cross-module)",
+    "api: API endpoint tests",
+    "critical: Critical path tests (must pass)",
+    "flaky: Flaky tests (may fail intermittently)",
+    "slow: Slow running tests (> 1 second)",
+    "asyncio: Async tests",
+    "database: Tests requiring database",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py313"
+exclude = [
+    "light_of_the_seven/",
+    "datakit/",
+    "archival/",
+    "core/",
+    "SEGA/",
+    "data/",
+    "logs/",
+    "analysis_report/",
+    "artifacts/",
+    "research_snapshots/",
+    "venv/",
+    ".venv/",
+    "__pycache__/",
+    "*.pyc",
+    "Arena/",
+    "frontend/",
+    "grid_exercises/",
+    ".case_references/",
+    ".case_memory/",
+    "archive/",
+    "EUFLE/",
+    "research/",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "B", "I", "W", "UP"]
+extend-ignore = [
+    "B008", # Allow FastAPI Depends()
+    "E501", # Allow longer lines
+    "E402", # Allow imports not at top of file
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["grid", "application", "cognitive", "tools"]
+
+[tool.black]
+line-length = 120
+target-version = ["py313"]
+
+[tool.mypy]
+python_version = "3.13"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+explicit_package_bases = true
+namespace_packages = true
+mypy_path = "src"
+# Exclude root-level directories that are also in src/ to avoid duplication errors
+exclude = ["^application/", "^grid/", "^tools/", "^cognitive/", "^tests/"]
+
+[[tool.mypy.overrides]]
+module = [
+    "sentence_transformers.*",
+    "rank_bm25.*",
+    "scikit_learn.*",
+    "sklearn.*",
+    "chromadb.*",
+    "huggingface_hub.*",
+    "networkx.*",
+    "scipy.*",
+    "numpy.*",
+    "ollama.*",
+    "prometheus_client.*",
+    "databricks.*",
+    "celery.*",
+    "stripe.*",
+    "bcrypt.*",
+    "jose.*",
+    "asyncpg.*",
+    "sqlalchemy.*",
+    "alembic.*",
+    "yaml.*",
+    "psutil.*",
+    "google.cloud.*",
+    "requests.*",
+    "aiohttp.*",
+    "mistralai.*",
+    "watchdog.*",
+    "structlog.*",
+    "prometheus_fastapi_instrumentator.*",
+    "neo4j.*",
+    "EQ.*",
+    "backend.*",
+]
+ignore_missing_imports = true
+follow_imports = "silent"
+
+[[tool.mypy.overrides]]
+module = [
+    "src.application.mothership.ner_service",
+    "src.tools.pulse_monitor",
+    "src.tools.ambient_sound",
+    "src.tools.zoology_mapper",
+    "application.mothership.ner_service",
+    "tools.pulse_monitor",
+    "tools.ambient_sound",
+    "tools.zoology_mapper",
+]
+ignore_missing_imports = true
+
+[tool.coverage.run]
+source = ["src"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "*/__pycache__/*",
+    "*/venv/*",
+    "*/.venv/*",
+    "*/site-packages/*",
+    "*/dist-packages/*",
+    "*/migrations/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "def __str__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+    "pass",
+    "\\.\\.\\.",
+]
+fail_under = 70
+precision = 2
+show_missing = true
+skip_covered = false
+sort = "Miss"
+
+[tool.coverage.html]
+directory = "htmlcov"

@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": "1.0.0",
+  "description": "GRID MCP Server Configuration",
+  "servers": [
+    {
+      "name": "grid-rag",
+      "description": "RAG-powered knowledge base and document search",
+      "enabled": true,
+      "command": "python",
+      "args": [
+        "mcp-setup/server/grid_rag_mcp_server.py"
+      ],
+      "cwd": "e:\\grid",
+      "env": {
+        "PYTHONPATH": "e:\\grid\\src;e:\\grid",
+        "RAG_EMBEDDING_PROVIDER": "huggingface",
+        "RAG_EMBEDDING_MODEL": "BAAI/bge-small-en-v1.5",
+        "RAG_LLM_MODE": "ollama",
+        "RAG_LLM_MODEL_OLLAMA": "qwen3-coder:480b-cloud",
+        "RAG_VECTOR_STORE_PROVIDER": "chromadb",
+        "RAG_VECTOR_STORE_PATH": ".rag_db",
+        "OLLAMA_BASE_URL": "http://localhost:11434"
+      },
+      "port": 8000,
+      "health_check": {
+        "endpoint": "/health",
+        "interval_seconds": 30,
+        "timeout_seconds": 5
+      }
+    },
+    {
+      "name": "grid-agentic",
+      "description": "Agentic system for enhanced workflows with cognitive awareness",
+      "enabled": true,
+      "command": "python",
+      "args": [
+        "workspace/mcp/servers/agentic/server.py"
+      ],
+      "cwd": "e:\\grid",
+      "env": {
+        "PYTHONPATH": "e:\\grid\\src;e:\\grid"
+      },
+      "port": 8004,
+      "health_check": {
+        "endpoint": "/health",
+        "interval_seconds": 30,
+        "timeout_seconds": 5
+      }
+    },
+    {
+      "name": "memory",
+      "description": "In-memory data storage and retrieval",
+      "enabled": true,
+      "command": "python",
+      "args": [
+        "workspace/mcp/servers/memory/server.py"
+      ],
+      "cwd": "e:\\grid",
+      "env": {
+        "PYTHONPATH": "e:\\grid\\src;e:\\grid"
+      },
+      "port": 8003,
+      "health_check": {
+        "endpoint": "/health",
+        "interval_seconds": 30,
+        "timeout_seconds": 5
+      }
+    },
+    {
+      "name": "grid-rag-enhanced",
+      "description": "Enhanced RAG with conversation memory and multi-hop reasoning",
+      "enabled": true,
+      "command": "python",
+      "args": [
+        "-m",
+        "grid.mcp.enhanced_rag_server"
+      ],
+      "cwd": "e:\\grid",
+      "env": {
+        "PYTHONPATH": "e:\\grid\\src;e:\\grid",
+        "RAG_EMBEDDING_PROVIDER": "huggingface",
+        "RAG_EMBEDDING_MODEL": "BAAI/bge-small-en-v1.5",
+        "RAG_LLM_MODE": "ollama",
+        "RAG_LLM_MODEL_OLLAMA": "qwen3-coder:480b-cloud",
+        "RAG_VECTOR_STORE_PROVIDER": "chromadb",
+        "RAG_VECTOR_STORE_PATH": ".rag_db",
+        "OLLAMA_BASE_URL": "http://localhost:11434"
+      },
+      "port": 8002,
+      "health_check": {
+        "endpoint": "/health",
+        "interval_seconds": 30,
+        "timeout_seconds": 5
+      }
+    },
+    {
+      "name": "grid-enhanced-tools",
+      "description": "Enhanced development tools (profiling, security, docs, quality)",
+      "enabled": true,
+      "command": "python",
+      "args": [
+        "mcp-setup/server/enhanced_tools_mcp_server.py"
+      ],
+      "cwd": "e:\\grid",
+      "env": {
+        "PYTHONPATH": "e:\\grid\\src;e:\\grid"
+      },
+      "port": 8001,
+      "health_check": {
+        "endpoint": "/health",
+        "interval_seconds": 30,
+        "timeout_seconds": 5
+      }
+    }
+  ],
+  "defaults": {
+    "timeout_seconds": 60,
+    "retry_attempts": 3,
+    "retry_delay_seconds": 2
+  },
+  "logging": {
+    "level": "INFO",
+    "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    "file": "logs/mcp_servers.log"
+  }
+}

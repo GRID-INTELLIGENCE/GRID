@@ -1,0 +1,23 @@
+{
+  "path": "examples\\thread_processing.py",
+  "size": 3723,
+  "language": "Python",
+  "lines": 110,
+  "non_empty_lines": 83,
+  "functions": 3,
+  "classes": 0,
+  "imports": [
+    "os",
+    "pandas",
+    "typing"
+  ],
+  "import_lines": [
+    6,
+    7,
+    8
+  ],
+  "complexity_estimate": 12.0,
+  "comment_density": 0.06363636363636363,
+  "has_docstrings": true,
+  "side_effects": []
+}

@@ -1,0 +1,39 @@
+{
+  "provider": "Meta AI (Llama Models)",
+  "version": "1.0.0",
+  "global_defaults": {
+    "cooldown_period_seconds": 3600,
+    "aggregation_window_minutes": 60,
+    "confidence_threshold": 0.85
+  },
+  "signal_thresholds": {
+    "llama_guard_categories": {
+      "violence_hate": 0.75,
+      "sexual_content": 0.8,
+      "illegal_weapons": 0.7,
+      "controlled_substances": 0.75,
+      "self_harm": 0.85,
+      "code_interpreter_abuse": 0.6
+    },
+    "purple_team_findings": {
+      "jailbreak_success_rate": 0.1,
+      "prompt_injection_rate": 0.15,
+      "safety_bypass_rate": 0.05
+    },
+    "code_safety": {
+      "vulnerability_probability": 0.3,
+      "insecure_pattern_score": 0.4
+    },
+    "factuality_and_integrity": {
+      "hallucination_rate_limit": 0.06,
+      "confidence_mismatch_threshold": 0.2
+    },
+    "license_compliance": {
+      "violation_detection_score": 0.5
+    }
+  },
+  "escalation_triggers": {
+    "responsible_ai_team_notification_count": 5,
+    "executive_review_critical_breach": 1
+  }
+}

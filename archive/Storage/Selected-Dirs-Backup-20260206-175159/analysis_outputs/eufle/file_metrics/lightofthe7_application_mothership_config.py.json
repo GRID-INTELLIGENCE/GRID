@@ -1,0 +1,31 @@
+{
+  "path": "lightofthe7\\application\\mothership\\config.py",
+  "size": 16237,
+  "language": "Python",
+  "lines": 468,
+  "non_empty_lines": 391,
+  "functions": 19,
+  "classes": 9,
+  "imports": [
+    "__future__",
+    "os",
+    "dataclasses",
+    "enum",
+    "functools",
+    "pathlib",
+    "typing"
+  ],
+  "import_lines": [
+    9,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16
+  ],
+  "complexity_estimate": 16.0,
+  "comment_density": 0.029914529914529916,
+  "has_docstrings": true,
+  "side_effects": []
+}

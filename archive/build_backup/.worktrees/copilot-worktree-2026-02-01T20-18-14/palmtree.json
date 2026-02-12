@@ -1,0 +1,416 @@
+{
+  "schema_version": "1.0.0",
+  "schema_type": "dashboard_reference_artifact",
+  "metadata": {
+    "title": "Canvas System Dashboard Artifact Generation Plan",
+    "description": "Comprehensive schema for generating reference artifacts with hooks, animation, cache, and refresh logic",
+    "created_at": "2026-01-21T09:08:00Z",
+    "topics": ["animation", "cache", "refresh_rates", "logic_routine"],
+    "focus": ["design_centric", "ux_focused", "logical_maneuvering"]
+  },
+  "hook_system": {
+    "description": "Extensible hook points for process customization",
+    "hooks": [
+      {
+        "hook_id": "pre_artifact_generation",
+        "phase": "initialization",
+        "trigger": "before_artifact_creation",
+        "handler_signature": "async def pre_artifact_generation(context: Dict[str, Any]) -> Dict[str, Any]",
+        "example_code": {
+          "file_path": "e:/EUFLE/studio/canvas/hooks.py",
+          "lines": "1-50",
+          "code": "async def pre_artifact_generation(context: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Hook called before artifact generation starts.\"\"\"\n    # Validate context\n    if 'canvas_id' not in context:\n        raise ValueError('canvas_id required')\n    \n    # Pre-process context\n    context['timestamp'] = time.time()\n    context['cache_key'] = f\"artifact_{context['canvas_id']}\"\n    \n    return context"
+        }
+      },
+      {
+        "hook_id": "post_transformation",
+        "phase": "fulfillment",
+        "trigger": "after_modality_transformation",
+        "handler_signature": "async def post_transformation(result: TransformationResult, context: Dict[str, Any]) -> TransformationResult",
+        "example_code": {
+          "file_path": "e:/EUFLE/studio/canvas/hooks.py",
+          "lines": "52-100",
+          "code": "async def post_transformation(result: TransformationResult, context: Dict[str, Any]) -> TransformationResult:\n    \"\"\"Hook called after each transformation.\"\"\"\n    # Add animation metadata\n    if result.success:\n        result.metadata['animation'] = {\n            'type': 'fade_in',\n            'duration_ms': 300,\n            'easing': 'ease-out'\n        }\n    \n    # Cache result\n    cache_key = f\"{context['cache_key']}_{result.modality}\"\n    await cache.set(cache_key, result, ttl=3600)\n    \n    return result"
+        }
+      },
+      {
+        "hook_id": "canvas_state_update",
+        "phase": "rendering",
+        "trigger": "on_canvas_state_change",
+        "handler_signature": "async def canvas_state_update(canvas: CanvasArtifact, event: StateChangeEvent) -> None",
+        "example_code": {
+          "file_path": "e:/EUFLE/studio/canvas/hooks.py",
+          "lines": "102-150",
+          "code": "async def canvas_state_update(canvas: CanvasArtifact, event: StateChangeEvent) -> None:\n    \"\"\"Hook called when canvas state changes.\"\"\"\n    # Trigger refresh on artifact changes\n    if event.type == 'artifact_added':\n        await trigger_refresh(canvas.canvas_id, priority='high')\n    \n    # Update cache invalidation\n    await cache.invalidate_pattern(f\"canvas:{canvas.canvas_id}:*\")"
+        }
+      },
+      {
+        "hook_id": "recommendation_generation",
+        "phase": "analysis",
+        "trigger": "on_context_analysis",
+        "handler_signature": "async def recommendation_generation(context: Dict[str, Any]) -> List[Recommendation]",
+        "example_code": {
+          "file_path": "e:/EUFLE/studio/canvas/hooks.py",
+          "lines": "152-200",
+          "code": "async def recommendation_generation(context: Dict[str, Any]) -> List[Recommendation]:\n    \"\"\"Hook for generating UX recommendations.\"\"\"\n    recommendations = []\n    \n    # Analyze artifact density\n    artifact_count = len(context.get('artifacts', []))\n    if artifact_count > 10:\n        recommendations.append(Recommendation(\n            type='layout',\n            priority='high',\n            message='Consider grouping related artifacts',\n            action='suggest_grouping'\n        ))\n    \n    # Check animation performance\n    if context.get('animation_count', 0) > 5:\n        recommendations.append(Recommendation(\n            type='performance',\n            priority='medium',\n            message='Reduce concurrent animations for better performance',\n            action='optimize_animations'\n        ))\n    \n    return recommendations"
+        }
+      }
+    ]
+  },
+  "implementation_plan": {
+    "steps": [
+      {
+        "step_id": "1",
+        "title": "Initialize Dashboard Artifact Generator",
+        "description": "Set up the core generator with hook system integration",
+        "code_context": {
+          "file": "e:/EUFLE/studio/canvas/dashboard_artifact_generator.py",
+          "lines": "1-80",
+          "code": "class DashboardArtifactGenerator:\n    \"\"\"Generates reference artifacts for dashboard display.\"\"\"\n    \n    def __init__(self, hook_manager: HookManager):\n        self.hook_manager = hook_manager\n        self.cache = CacheManager(ttl=3600)\n        self.animation_controller = AnimationController()\n        self.refresh_scheduler = RefreshScheduler()\n        \n    async def generate_artifact(\n        self,\n        canvas_id: str,\n        options: ArtifactOptions = None\n    ) -> DashboardArtifact:\n        \"\"\"Generate dashboard artifact with hooks.\"\"\"\n        context = {'canvas_id': canvas_id, 'options': options}\n        \n        # Pre-generation hook\n        context = await self.hook_manager.execute(\n            'pre_artifact_generation',\n            context=context\n        )\n        \n        # Check cache\n        cache_key = f\"dashboard_artifact_{canvas_id}\"\n        cached = await self.cache.get(cache_key)\n        if cached and not options?.force_refresh:\n            return cached\n        \n        # Generate artifact\n        artifact = await self._build_artifact(context)\n        \n        # Cache result\n        await self.cache.set(cache_key, artifact)\n        \n        return artifact"
+        },
+        "hooks": ["pre_artifact_generation"],
+        "ux_considerations": {
+          "loading_state": "Show skeleton loader while artifact generates",
+          "error_handling": "Graceful degradation with fallback content",
+          "progress_indication": "Show progress for multi-step generation"
+        }
+      },
+      {
+        "step_id": "2",
+        "title": "Implement Animation System",
+        "description": "Create animation controller with performance optimization",
+        "code_context": {
+          "file": "e:/EUFLE/studio/canvas/animation_controller.py",
+          "lines": "1-120",
+          "code": "class AnimationController:\n    \"\"\"Manages canvas animations with performance optimization.\"\"\"\n    \n    def __init__(self):\n        self.active_animations: Dict[str, Animation] = {}\n        self.max_concurrent = 3\n        self.default_easing = 'ease-out'\n        \n    async def animate_artifact(\n        self,\n        artifact_id: str,\n        animation_type: str = 'fade_in',\n        duration_ms: int = 300,\n        options: Dict[str, Any] = None\n    ) -> AnimationResult:\n        \"\"\"Animate artifact with performance checks.\"\"\"\n        # Check concurrent animation limit\n        if len(self.active_animations) >= self.max_concurrent:\n            await self._wait_for_slot()\n        \n        animation = Animation(\n            artifact_id=artifact_id,\n            type=animation_type,\n            duration_ms=duration_ms,\n            easing=options.get('easing', self.default_easing)\n        )\n        \n        self.active_animations[artifact_id] = animation\n        \n        # Execute animation\n        result = await self._execute_animation(animation)\n        \n        del self.active_animations[artifact_id]\n        \n        return result\n    \n    async def _execute_animation(self, animation: Animation) -> AnimationResult:\n        \"\"\"Execute animation with RAF (Request Animation Frame).\"\"\"\n        start_time = time.time()\n        \n        while True:\n            elapsed = (time.time() - start_time) * 1000\n            progress = min(elapsed / animation.duration_ms, 1.0)\n            \n            # Apply easing\n            eased_progress = self._apply_easing(progress, animation.easing)\n            \n            # Update artifact state\n            await self._update_artifact_state(\n                animation.artifact_id,\n                eased_progress\n            )\n            \n            if progress >= 1.0:\n                break\n            \n            # RAF delay (16ms for 60fps)\n            await asyncio.sleep(0.016)\n        \n        return AnimationResult(success=True, duration_ms=elapsed)"
+        },
+        "hooks": ["post_transformation"],
+        "ux_considerations": {
+          "performance": "Limit concurrent animations to prevent junk",
+          "accessibility": "Respect prefers-reduced-motion",
+          "feedback": "Provide visual feedback during animations"
+        }
+      },
+      {
+        "step_id": "3",
+        "title": "Implement Cache Strategy",
+        "description": "Create multi-layer cache with intelligent invalidation",
+        "code_context": {
+          "file": "e:/EUFLE/studio/canvas/cache_strategy.py",
+          "lines": "1-100",
+          "code": "class CacheManager:\n    \"\"\"Multi-layer cache with intelligent invalidation.\"\"\"\n    \n    def __init__(self, ttl: int = 3600):\n        self.memory_cache: Dict[str, CacheEntry] = {}\n        self.ttl = ttl\n        self.hit_count = 0\n        self.miss_count = 0\n        \n    async def get(self, key: str) -> Optional[Any]:\n        \"\"\"Get item from cache.\"\"\"\n        entry = self.memory_cache.get(key)\n        \n        if entry is None:\n            self.miss_count += 1\n            return None\n        \n        # Check expiration\n        if time.time() - entry.timestamp > self.ttl:\n            del self.memory_cache[key]\n            self.miss_count += 1\n            return None\n        \n        self.hit_count += 1\n        return entry.value\n    \n    async def set(self, key: str, value: Any, ttl: Optional[int] = None) -> None:\n        \"\"\"Set item in cache.\"\"\"\n        self.memory_cache[key] = CacheEntry(\n            value=value,\n            timestamp=time.time(),\n            ttl=ttl or self.ttl\n        )\n    \n    async def invalidate_pattern(self, pattern: str) -> int:\n        \"\"\"Invalidate all keys matching pattern.\"\"\"\n        import match\n        keys_to_delete = [\n            k for k in self.memory_cache.keys()\n            if match.snatch(k, pattern)\n        ]\n        \n        for key in keys_to_delete:\n            del self.memory_cache[key]\n        \n        return len(keys_to_delete)\n    \n    @property\n    def hit_rate(self) -> float:\n        \"\"\"Calculate cache hit rate.\"\"\"\n        total = self.hit_count + self.miss_count\n        return self.hit_count / total if total > 0 else 0.0"
+        },
+        "hooks": ["canvas_state_update"],
+        "ux_considerations": {
+          "freshness": "Balance cache hit rate with data freshness",
+          "invalidation": "Smart invalidation on relevant changes",
+          "fallback": "Always have fallback when cache miss occurs"
+        }
+      },
+      {
+        "step_id": "4",
+        "title": "Implement Refresh Scheduler",
+        "description": "Create intelligent refresh system with adaptive rates",
+        "code_context": {
+          "file": "e:/EUFLE/studio/canvas/refresh_scheduler.py",
+          "lines": "1-130",
+          "code": "class RefreshScheduler:\n    \"\"\"Intelligent refresh scheduler with adaptive rates.\"\"\"\n    \n    def __init__(self):\n        self.refresh_tasks: Dict[str, RefreshTask] = {}\n        self.base_interval_ms = 5000  # 5 seconds\n        self.max_interval_ms = 60000  # 60 seconds\n        self.min_interval_ms = 1000  # 1 second\n        \n    async def schedule_refresh(\n        self,\n        canvas_id: str,\n        priority: str = 'normal',\n        adaptive: bool = True\n    ) -> None:\n        \"\"\"Schedule canvas refresh with adaptive timing.\"\"\"\n        interval = self._calculate_interval(priority)\n        \n        task = RefreshTask(\n            canvas_id=canvas_id,\n            interval_ms=interval,\n            adaptive=adaptive,\n            last_refresh=time.time()\n        )\n        \n        self.refresh_tasks[canvas_id] = task\n        \n        # Start refresh loop\n        asyncio.create_task(self._refresh_loop(task))\n    \n    def _calculate_interval(self, priority: str) -> int:\n        \"\"\"Calculate refresh interval based on priority.\"\"\"\n        priority_multipliers = {\n            'high': 0.5,\n            'normal': 1.0,\n            'low': 2.0\n        }\n        \n        multiplier = priority_multipliers.get(priority, 1.0)\n        return int(self.base_interval_ms * multiplier)\n    \n    async def _refresh_loop(self, task: RefreshTask) -> None:\n        \"\"\"Execute refresh loop with adaptive timing.\"\"\"\n        while True:\n            # Wait for interval\n            await asyncio.sleep(task.interval_ms / 1000)\n            \n            # Execute refresh\n            await self._execute_refresh(task)\n            \n            # Adaptive adjustment\n            if task.adaptive:\n                task.interval_ms = self._adjust_interval(task)\n    \n    def _adjust_interval(self, task: RefreshTask) -> int:\n        \"\"\"Adjust interval based on activity.\"\"\"\n        # Increase interval if no changes\n        if task.changes_count == 0:\n            return min(task.interval_ms * 1.2, self.max_interval_ms)\n        \n        # Decrease interval if frequent changes\n        if task.changes_count > 3:\n            return max(task.interval_ms * 0.8, self.min_interval_ms)\n        \n        return task.interval_ms"
+        },
+        "hooks": ["canvas_state_update"],
+        "ux_considerations": {
+          "adaptability": "Adjust refresh rate based on user activity",
+          "efficiency": "Don't refresh when user is inactive",
+          "visibility": "Show refresh indicator to users"
+        }
+      },
+      {
+        "step_id": "5",
+        "title": "Implement Logical Maneuvering System",
+        "description": "Create context comparison and recommendation engine",
+        "code_context": {
+          "file": "e:/EUFLE/studio/canvas/logical_maneuvering.py",
+          "lines": "1-150",
+          "code": "class LogicalManeuveringEngine:\n    \"\"\"Context comparison and recommendation engine.\"\"\"\n    \n    def __init__(self):\n        self.context_history: List[ContextSnapshot] = []\n        self.max_history = 100\n        \n    async def analyze_context(\n        self,\n        current_context: Dict[str, Any]\n    ) -> ContextAnalysis:\n        \"\"\"Analyze current context and generate recommendations.\"\"\"\n        snapshot = ContextSnapshot(\n            timestamp=time.time(),\n            context=current_context\n        )\n        \n        self.context_history.append(snapshot)\n        if len(self.context_history) > self.max_history:\n            self.context_history.pop(0)\n        \n        # Compare with historical contexts\n        similarities = self._find_similar_contexts(current_context)\n        \n        # Generate recommendations\n        recommendations = self._generate_recommendations(\n            current_context,\n            similarities\n        )\n        \n        return ContextAnalysis(\n            similarities=similarities,\n            recommendations=recommendations,\n            confidence=self._calculate_confidence(similarities)\n        )\n    \n    def _find_similar_contexts(\n        self,\n        current: Dict[str, Any]\n    ) -> List[ContextSimilarity]:\n        \"\"\"Find similar historical contexts.\"\"\"\n        similarities = []\n        \n        for snapshot in self.context_history[-10:]:\n            similarity = self._calculate_similarity(\n                current,\n                snapshot.context\n            )\n            \n            if similarity > 0.5:\n                similarities.append(ContextSimilarity(\n                    context=snapshot.context,\n                    similarity=similarity,\n                    timestamp=snapshot.timestamp\n                ))\n        \n        return sorted(similarities, key=lambda x: -x.similarity)\n    \n    def _calculate_similarity(\n        self,\n        ctx1: Dict[str, Any],\n        ctx2: Dict[str, Any]\n    ) -> float:\n        \"\"\"Calculate context similarity score.\"\"\"\n        # Compare artifact types\n        types1 = set(ctx1.get('artifact_types', []))\n        types2 = set(ctx2.get('artifact_types', []))\n        type_overlap = len(types1 & types2) / max(len(types1 | types2), 1)\n        \n        # Compare metrics\n        metrics1 = ctx1.get('metrics', {})\n        metrics2 = ctx2.get('metrics', {})\n        metric_similarity = self._compare_metrics(metrics1, metrics2)\n        \n        # Weighted average\n        return type_overlap * 0.6 + metric_similarity * 0.4"
+        },
+        "hooks": ["recommendation_generation"],
+        "ux_considerations": {
+          "transparency": "Show why recommendations are made",
+          "actionability": "Make recommendations easy to act on",
+          "learning": "Learn from user interactions with recommendations"
+        }
+      },
+      {
+        "step_id": "6",
+        "title": "Integrate with Canvas System",
+        "description": "Connect artifact generator to existing canvas components",
+        "code_context": {
+          "file": "e:/EUFLE/studio/canvas/integration.py",
+          "lines": "1-100",
+          "code": "class CanvasDashboardIntegration:\n    \"\"\"Integration layer for canvas-dashboard communication.\"\"\"\n    \n    def __init__(\n        self,\n        canvas_manager: CanvasManager,\n        discussion_partner: DiscussionPartner\n    ):\n        self.canvas_manager = canvas_manager\n        self.discussion_partner = discussion_partner\n        self.artifact_generator = DashboardArtifactGenerator(\n            hook_manager=HookManager()\n        )\n        \n    async def get_dashboard_artifact(\n        self,\n        canvas_id: str,\n        include_recommendations: bool = True\n    ) -> DashboardArtifact:\n        \"\"\"Get dashboard artifact for canvas.\"\"\"\n        canvas = self.canvas_manager.get_canvas(canvas_id)\n        if not canvas:\n            raise ValueError(f\"Canvas {canvas_id} not found\")\n        \n        # Generate artifact\n        artifact = await self.artifact_generator.generate_artifact(\n            canvas_id=canvas_id,\n            options=ArtifactOptions(\n                include_recommendations=include_recommendations,\n                include_metrics=True,\n                include_history=True\n            )\n        )\n        \n        return artifact\n    \n    async def handle_canvas_update(\n        self,\n        canvas_id: str,\n        update_type: str,\n        data: Dict[str, Any]\n    ) -> None:\n        \"\"\"Handle canvas update events.\"\"\"\n        # Invalidate cache\n        await self.artifact_generator.cache.invalidate_pattern(\n            f\"*{canvas_id}*\"\n        )\n        \n        # Trigger refresh if needed\n        if update_type in ['artifact_added', 'artifact_removed']:\n            await self.artifact_generator.refresh_scheduler.schedule_refresh(\n                canvas_id=canvas_id,\n                priority='high'\n            )"
+        },
+        "hooks": ["pre_artifact_generation", "canvas_state_update"],
+        "ux_considerations": {
+          "realtime": "Provide real-time updates to dashboard",
+          "consistency": "Maintain consistency across components",
+          "error_recovery": "Graceful handling of sync failures"
+        }
+      }
+    ]
+  },
+  "design_patterns": {
+    "animation_patterns": [
+      {
+        "pattern": "fade_in",
+        "description": "Smooth fade-in for new artifacts",
+        "duration_ms": 300,
+        "easing": "ease-out",
+        "use_case": "artifact_appearance"
+      },
+      {
+        "pattern": "slide_in",
+        "description": "Slide animation for panel transitions",
+        "duration_ms": 250,
+        "easing": "cubic-bezier(0.4, 0, 0.2, 1)",
+        "use_case": "panel_navigation"
+      },
+      {
+        "pattern": "scale_up",
+        "description": "Scale animation for focus effects",
+        "duration_ms": 200,
+        "easing": "ease-out-back",
+        "use_case": "artifact_selection"
+      }
+    ],
+    "cache_patterns": [
+      {
+        "pattern": "artifact_cache",
+        "strategy": "write-through",
+        "ttl": 3600,
+        "invalidation": "on_change",
+        "description": "Cache artifact rendering results"
+      },
+      {
+        "pattern": "context_cache",
+        "strategy": "write-back",
+        "ttl": 1800,
+        "invalidation": "periodic",
+        "description": "Cache context analysis results"
+      },
+      {
+        "pattern": "recommendation_cache",
+        "strategy": "lazy",
+        "ttl": 600,
+        "invalidation": "on_interaction",
+        "description": "Cache recommendation results"
+      }
+    ],
+    "refresh_patterns": [
+      {
+        "pattern": "adaptive_refresh",
+        "description": "Adjust refresh rate based on activity",
+        "base_interval_ms": 5000,
+        "adjustment_factor": 1.2,
+        "use_case": "dashboard_updates"
+      },
+      {
+        "pattern": "event_driven_refresh",
+        "description": "Refresh on specific events",
+        "events": ["artifact_added", "artifact_removed", "state_changed"],
+        "use_case": "reactive_updates"
+      },
+      {
+        "pattern": "scheduled_refresh",
+        "description": "Fixed interval refresh",
+        "interval_ms": 30000,
+        "use_case": "periodic_sync"
+      }
+    ]
+  },
+  "ux_guidelines": {
+    "loading_states": {
+      "skeleton_loader": {
+        "description": "Show placeholder while content loads",
+        "implementation": "CSS skeleton screens with shimmer effect",
+        "fallback": "Show loading spinner if skeleton fails"
+      },
+      "progressive_loading": {
+        "description": "Load content progressively",
+        "implementation": "Priority-based artifact loading",
+        "fallback": "Load critical content first"
+      }
+    },
+    "error_handling": {
+      "graceful_degradation": {
+        "description": "Provide fallback when features fail",
+        "implementation": "Show simplified view with error message",
+        "fallback": "Show basic canvas without enhancements"
+      },
+      "retry_mechanism": {
+        "description": "Automatic retry with exponential backoff",
+        "implementation": "3 retries with 1s, 2s, 4s delays",
+        "fallback": "Manual retry button"
+      }
+    },
+    "feedback_mechanisms": {
+      "toast_notifications": {
+        "description": "Non-intrusive status updates",
+        "implementation": "Bottom-right toast with auto-dismiss",
+        "fallback": "Status bar indicator"
+      },
+      "visual_indicators": {
+        "description": "Visual cues for system state",
+        "implementation": "Color-coded badges and icons",
+        "fallback": "Text labels"
+      }
+    },
+    "accessibility": {
+      "reduced_motion": {
+        "description": "Respect user motion preferences",
+        "implementation": "Check prefers-reduced-motion media query",
+        "fallback": "Disable animations when preference set"
+      },
+      "keyboard_navigation": {
+        "description": "Full keyboard support",
+        "implementation": "Tab, Enter, Escape key handlers",
+        "fallback": "Visible focus indicators"
+      }
+    }
+  },
+  "logical_maneuvering": {
+    "context_comparison": {
+      "algorithm": "vector_similarity",
+      "features": [
+        "artifact_type_distribution",
+        "canvas_layout_structure",
+        "interaction_patterns",
+        "performance_metrics"
+      ],
+      "threshold": 0.5,
+      "max_results": 5
+    },
+    "recommendation_engine": {
+      "strategies": [
+        {
+          "strategy": "pattern_based",
+          "description": "Recommend based on historical patterns",
+          "confidence_threshold": 0.7
+        },
+        {
+          "strategy": "collaborative",
+          "description": "Recommend based on similar users",
+          "confidence_threshold": 0.6
+        },
+        {
+          "strategy": "content_based",
+          "description": "Recommend based on content similarity",
+          "confidence_threshold": 0.8
+        }
+      ],
+      "max_recommendations": 5,
+      "explanation_required": true
+    },
+    "decision_tree": {
+      "nodes": [
+        {
+          "id": "check_cache_hit_rate",
+          "condition": "cache_hit_rate < 0.5",
+          "true_action": "increase_cache_ttl",
+          "false_action": "check_artifact_count"
+        },
+        {
+          "id": "check_artifact_count",
+          "condition": "artifact_count > 15",
+          "true_action": "suggest_grouping",
+          "false_action": "check_animation_count"
+        },
+        {
+          "id": "check_animation_count",
+          "condition": "animation_count > 5",
+          "true_action": "optimize_animations",
+          "false_action": "check_refresh_rate"
+        },
+        {
+          "id": "check_refresh_rate",
+          "condition": "refresh_interval < 2000",
+          "true_action": "increase_refresh_interval",
+          "false_action": "no_action"
+        }
+      ]
+    }
+  },
+  "metrics_and_monitoring": {
+    "key_metrics": [
+      {
+        "metric": "cache_hit_rate",
+        "target": "> 0.7",
+        "alert_threshold": "< 0.5",
+        "description": "Percentage of cache hits"
+      },
+      {
+        "metric": "animation_frame_rate",
+        "target": ">= 55 fps",
+        "alert_threshold": "< 30 fps",
+        "description": "Animation performance"
+      },
+      {
+        "metric": "refresh_latency",
+        "target": "< 500ms",
+        "alert_threshold": "> 2000ms",
+        "description": "Time to complete refresh"
+      },
+      {
+        "metric": "artifact_generation_time",
+        "target": "< 1000ms",
+        "alert_threshold": "> 3000ms",
+        "description": "Time to generate artifact"
+      }
+    ],
+    "monitoring_endpoints": [
+      {
+        "endpoint": "/api/dashboard/metrics",
+        "method": "GET",
+        "description": "Get current metrics",
+        "response": "metrics_object"
+      },
+      {
+        "endpoint": "/api/dashboard/health",
+        "method": "GET",
+        "description": "Health check",
+        "response": "health_status"
+      },
+      {
+        "endpoint": "/api/dashboard/recommendations",
+        "method": "GET",
+        "description": "Get recommendations",
+        "response": "recommendations_array"
+      }
+    ]
+  },
+  "example_implementation": {
+    "complete_workflow": {
+      "description": "End-to-end example of generating dashboard artifact",
+      "steps": [
+        {
+          "step": "1. Initialize components",
+          "code": "from studio.canvas import CanvasManager, DiscussionPartner\nfrom studio.canvas.dashboard_artifact_generator import DashboardArtifactGenerator\n\n# Initialize components\ncanvas_manager = CanvasManager()\ndiscussion_partner = DiscussionPartner()\nhook_manager = HookManager()\n\n# Register hooks\nhook_manager.register('pre_artifact_generation', pre_artifact_generation)\nhook_manager.register('post_transformation', post_transformation)\nhook_manager.register('canvas_state_update', canvas_state_update)\nhook_manager.register('recommendation_generation', recommendation_generation)\n\n# Create artifact generator\nartifact_generator = DashboardArtifactGenerator(hook_manager=hook_manager)"
+        },
+        {
+          "step": "2. Create canvas and add artifacts",
+          "code": "# Create canvas\ncanvas = canvas_manager.create_canvas()\n\n# Add artifacts\nartifact_generator.artifact_generator.add_artifact(\n    canvas_id=canvas.canvas_id,\n    artifact_type='emoji',\n    content={'text': '🎉', 'emojis': ['🔥', '💪']},\n    position={'x': 10, 'y': 10}\n)\n\nartifact_generator.artifact_generator.add_artifact(\n    canvas_id=canvas.canvas_id,\n    artifact_type='code',\n    content={'code': 'print(\"Hello World\")', 'language': 'python'},\n    position={'x': 10, 'y': 120}\n)"
+        },
+        {
+          "step": "3. Generate dashboard artifact",
+          "code": "# Generate dashboard artifact\nartifact = await artifact_generator.generate_artifact(\n    canvas_id=canvas.canvas_id,\n    options=ArtifactOptions(\n        include_recommendations=True,\n        include_metrics=True,\n        include_history=True,\n        force_refresh=False\n    )\n)\n\nprint(f\"Artifact ID: {artifact.artifact_id}\")\nprint(f\"Cache Hit Rate: {artifact.metrics.cache_hit_rate:.2f}\")\nprint(f\"Recommendations: {len(recommendations)}\")"
+        },
+        {
+          "step": "4. Handle updates and refreshes",
+          "code": "# Handle canvas updates\nawait artifact_generator.handle_canvas_update(\n    canvas_id=canvas.canvas_id,\n    update_type='artifact_added',\n    data={'artifact_type': 'emoji'}\n)\n\n# Schedule adaptive refresh\nawait artifact_generator.refresh_scheduler.schedule_refresh(\n    canvas_id=canvas.canvas_id,\n    priority='high',\n    adaptive=True\n)"
+        },
+        {
+          "step": "5. Get recommendations",
+          "code": "# Get context-based recommendations\ncontext = {\n    'artifact_types': ['emoji', 'code'],\n    'artifact_count': 2,\n    'animation_count': 1,\n    'metrics': {\n        'cache_hit_rate': 0.85,\n        'refresh_latency': 300\n    }\n}\n\nrecommendations = await artifact_generator.logical_maneuvering.analyze_context(context)\n\nfor rec in recommendations.recommendations:\n    print(f\"[{rec.priority}] {rec.message}\")\n    print(f\"  Action: {rec.action}\")\n    print(f\"  Confidence: {rec.confidence:.2f}\")"
+        }
+      ]
+    }
+  }
+}

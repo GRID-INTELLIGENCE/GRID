@@ -1,0 +1,139 @@
+{
+  "timestamp": 1769315476.0575635,
+  "datetime": "2026-01-25 10:31:16",
+  "instance_id": "cache_1769315476",
+  "metrics": {
+    "timestamp": 1769315476.0572855,
+    "instance_id": "cache_1769315476",
+    "basic_stats": {
+      "hits": 0,
+      "misses": 0,
+      "evictions": 0,
+      "expirations": 0,
+      "hit_rate": 0.0,
+      "size": 20,
+      "max_size": 20,
+      "capacity_utilization": 1.0
+    },
+    "ml_insights": {
+      "ml_enabled": true,
+      "patterns_learned": 20,
+      "avg_frequency": 0.1,
+      "avg_recency": 0.9999999523725787,
+      "avg_success_rate": 0.1,
+      "top_predictions": [
+        {
+          "key_hash": "930d102a4c677698ead69512f5dac283",
+          "probability": 0.1,
+          "recommendation": "ignore"
+        },
+        {
+          "key_hash": "9c898bec11035978e1f8804e67b62e2f",
+          "probability": 0.1,
+          "recommendation": "ignore"
+        },
+        {
+          "key_hash": "8036c1d4dcfe6c642ee70a2ba45aaee9",
+          "probability": 0.1,
+          "recommendation": "ignore"
+        },
+        {
+          "key_hash": "5f236484141bd366014bfaca633e88a1",
+          "probability": 0.1,
+          "recommendation": "ignore"
+        },
+        {
+          "key_hash": "cdd4d8c424b592364a6dff0886bfa1b1",
+          "probability": 0.1,
+          "recommendation": "ignore"
+        },
+        {
+          "key_hash": "1376c050f492ca169ae6013a2560ff77",
+          "probability": 0.1,
+          "recommendation": "ignore"
+        },
+        {
+          "key_hash": "24557a51bc0fc42c180322fce414cf07",
+          "probability": 0.1,
+          "recommendation": "ignore"
+        },
+        {
+          "key_hash": "46217abaf913efa76ef10158eafd6801",
+          "probability": 0.1,
+          "recommendation": "ignore"
+        },
+        {
+          "key_hash": "dd351c86e2320f2cbb211771fc4997cc",
+          "probability": 0.1,
+          "recommendation": "ignore"
+        },
+        {
+          "key_hash": "d477fe226c4c1f30d48334ab548cba49",
+          "probability": 0.1,
+          "recommendation": "ignore"
+        }
+      ]
+    },
+    "compression_stats": {
+      "lzo_enabled": true,
+      "ml_enabled": true,
+      "lzo_compressed": 0,
+      "lzo_failed": 0,
+      "lzo_ratio": 0.0,
+      "overall_compression_rate": 0.0,
+      "lzo_success_rate": 0
+    },
+    "performance_metrics": {
+      "avg_response_time_ms": 0.3403902053833008,
+      "recent_hit_rate": 0.0,
+      "operations_per_second": 0.06666666666666667
+    },
+    "prefetch_stats": {
+      "queue_size": 0,
+      "prefetch_active": false
+    },
+    "persistent_org": {
+      "context_ratio": 0.1,
+      "organization_entries": 2,
+      "total_entries": 20,
+      "meets_minimum_context": false,
+      "minimum_required": 0.15
+    },
+    "maintenance_signals": {
+      "needs_cache_cleanup": true,
+      "needs_prefetch_trim": false,
+      "needs_alert_dedupe": false,
+      "capacity_utilization": 1.0
+    },
+    "recent_alerts": [
+      "[10:31:16] \u26a0\ufe0f Persistent context below 15% (0.100)",
+      "[10:31:16] \u26a0\ufe0f Persistent context below 15% (0.100)",
+      "[10:31:16] \u26a0\ufe0f Persistent context below 15% (0.100)"
+    ]
+  },
+  "events": [
+    {
+      "event_type": "context_allocation_breach",
+      "timestamp": 1769315476.0557623,
+      "key": null,
+      "confidence": 1.0,
+      "metadata": {
+        "context_ratio": 0.1,
+        "organization_entries": 2,
+        "total_entries": 20,
+        "meets_minimum_context": false,
+        "minimum_required": 0.15
+      },
+      "event_id": "cache_1769315476_1_1769315476055",
+      "parent_event_id": null,
+      "hop_count": 0,
+      "source": "cache"
+    }
+  ],
+  "loop_prevention": {
+    "throttle_dict_size": 1,
+    "processed_event_ids": 1,
+    "active_firing_flags": 0,
+    "max_event_hops": 3
+  }
+}

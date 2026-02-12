@@ -1,0 +1,21 @@
+{
+  "path": "lightofthe7\\cognitive_layer\\cognitive_load\\chunking.py",
+  "size": 5600,
+  "language": "Python",
+  "lines": 180,
+  "non_empty_lines": 147,
+  "functions": 5,
+  "classes": 1,
+  "imports": [
+    "typing",
+    "schemas.user_cognitive_profile"
+  ],
+  "import_lines": [
+    3,
+    5
+  ],
+  "complexity_estimate": 13.0,
+  "comment_density": 0.07777777777777778,
+  "has_docstrings": true,
+  "side_effects": []
+}

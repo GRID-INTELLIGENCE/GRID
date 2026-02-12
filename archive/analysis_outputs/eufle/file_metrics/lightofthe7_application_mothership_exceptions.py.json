@@ -1,0 +1,21 @@
+{
+  "path": "lightofthe7\\application\\mothership\\exceptions.py",
+  "size": 15224,
+  "language": "Python",
+  "lines": 532,
+  "non_empty_lines": 428,
+  "functions": 28,
+  "classes": 26,
+  "imports": [
+    "__future__",
+    "typing"
+  ],
+  "import_lines": [
+    8,
+    10
+  ],
+  "complexity_estimate": 9.0,
+  "comment_density": 0.06203007518796992,
+  "has_docstrings": true,
+  "side_effects": []
+}

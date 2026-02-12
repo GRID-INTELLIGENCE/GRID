@@ -1,0 +1,67 @@
+{
+  "path": "research_snapshots\\light_of_the_seven_repo_copy_2026-01-01\\tools\\rag\\__init__.py",
+  "metrics": {
+    "path": "research_snapshots\\light_of_the_seven_repo_copy_2026-01-01\\tools\\rag\\__init__.py",
+    "size": 981,
+    "language": "Python",
+    "lines": 40,
+    "non_empty_lines": 34,
+    "functions": 0,
+    "classes": 0,
+    "imports": [
+      "config",
+      "embeddings",
+      "indexer",
+      "llm",
+      "rag_engine",
+      "vector_store"
+    ],
+    "import_lines": [
+      10,
+      11,
+      14,
+      15,
+      16,
+      17
+    ],
+    "complexity_estimate": 0.0,
+    "comment_density": 0.175,
+    "has_docstrings": true,
+    "side_effects": []
+  },
+  "fan_in": 62,
+  "fan_out": 6,
+  "parameter_routing": [],
+  "call_sites": [],
+  "side_effects": [],
+  "incoming_modules": [
+    "scripts\\fix_pydantic_v2.py",
+    "archival\\experiments\\batch_fixer.py",
+    "application\\mothership\\repositories\\payment.py",
+    "grid\\skills\\youtube_transcript_analyze.py",
+    "datakit\\tool\\structure_audit.py",
+    "tools\\rag\\hybrid_retriever.py",
+    "grid\\skills\\topic_extractor.py",
+    "research_snapshots\\light_of_the_seven_repo_copy_2026-01-01\\datakit\\scripts\\doctor.py",
+    "research_snapshots\\light_of_the_seven_repo_copy_2026-01-01\\scripts\\git_topic_utils.py",
+    ".claude\\skills\\analysis_process_context.py",
+    "datakit\\scripts\\doctor.py",
+    "Python\\type_validator.py",
+    "research_snapshots\\light_of_the_seven_repo_copy_2026-01-01\\application\\mothership\\utils\\__init__.py",
+    "research_snapshots\\light_of_the_seven_repo_copy_2026-01-01\\datakit\\tool\\semantic_grep.py",
+    ".claude\\skills\\patterns_detect_entities.py",
+    "tools\\rag\\embeddings\\simple.py",
+    "scripts\\polish_implementation.py",
+    "grid\\skills\\patterns_detect_entities.py",
+    "datakit\\tool\\semantic_grep.py",
+    "scripts\\gap_analysis.py"
+  ],
+  "outgoing_modules": [
+    "llm",
+    "indexer",
+    "embeddings",
+    "vector_store",
+    "config",
+    "rag_engine"
+  ]
+}

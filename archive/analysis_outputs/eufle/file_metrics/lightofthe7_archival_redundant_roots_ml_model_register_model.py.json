@@ -1,0 +1,29 @@
+{
+  "path": "lightofthe7\\archival\\redundant_roots\\ml\\model\\register_model.py",
+  "size": 2998,
+  "language": "Python",
+  "lines": 94,
+  "non_empty_lines": 73,
+  "functions": 4,
+  "classes": 0,
+  "imports": [
+    "json",
+    "os",
+    "typing",
+    "requests"
+  ],
+  "import_lines": [
+    1,
+    2,
+    3,
+    5
+  ],
+  "complexity_estimate": 4.0,
+  "comment_density": 0.010638297872340425,
+  "has_docstrings": true,
+  "side_effects": [
+    "open\\(",
+    "with open\\(",
+    "requests\\.(get|post|put|delete)"
+  ]
+}

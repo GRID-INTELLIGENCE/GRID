@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/schemas/openai-safety-monitoring-log.json",
+  "title": "OpenAI Safety Monitoring Log Schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "timestamp",
+    "level",
+    "event",
+    "source",
+    "message",
+    "run_id"
+  ],
+  "properties": {
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "level": {
+      "type": "string",
+      "enum": ["DEBUG", "INFO", "WARN", "ERROR"]
+    },
+    "event": {
+      "type": "string",
+      "description": "Event name or category (e.g., fetch_start, fetch_success, diff_detected)."
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "url", "type"],
+      "properties": {
+        "id": { "type": "string" },
+        "url": { "type": "string", "format": "uri" },
+        "type": {
+          "type": "string",
+          "enum": [
+            "research_index",
+            "safety_hub",
+            "safety_page",
+            "preparedness_framework",
+            "system_card",
+            "other_openai_safety"
+          ]
+        }
+      }
+    },
+    "message": {
+      "type": "string"
+    },
+    "run_id": {
+      "type": "string",
+      "description": "Unique ID for a scheduled monitoring run."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["started", "completed", "failed", "skipped"]
+    },
+    "duration_ms": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "http": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "status_code": { "type": "integer", "minimum": 100, "maximum": 599 },
+        "etag": { "type": "string" },
+        "last_modified": { "type": "string" }
+      }
+    },
+    "diff": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "changed": { "type": "boolean" },
+        "snapshot_before": { "type": "string" },
+        "snapshot_after": { "type": "string" },
+        "diff_path": { "type": "string" }
+      }
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["code", "detail"],
+        "properties": {
+          "code": { "type": "string" },
+          "detail": { "type": "string" }
+        }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "items_processed": { "type": "integer", "minimum": 0 },
+        "items_new": { "type": "integer", "minimum": 0 },
+        "items_updated": { "type": "integer", "minimum": 0 },
+        "items_filtered_out": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

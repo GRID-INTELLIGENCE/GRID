@@ -1,0 +1,25 @@
+{
+  "path": "lightofthe7\\datakit\\Hogwarts\\hogwarts_cli.py",
+  "size": 2001,
+  "language": "Python",
+  "lines": 76,
+  "non_empty_lines": 57,
+  "functions": 2,
+  "classes": 0,
+  "imports": [
+    "argparse",
+    "sys",
+    "typing",
+    "hogwarts_toolkit"
+  ],
+  "import_lines": [
+    14,
+    15,
+    16,
+    18
+  ],
+  "complexity_estimate": 5.0,
+  "comment_density": 0.0,
+  "has_docstrings": true,
+  "side_effects": []
+}

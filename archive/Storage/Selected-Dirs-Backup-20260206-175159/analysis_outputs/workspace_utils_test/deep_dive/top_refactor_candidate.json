@@ -1,0 +1,236 @@
+{
+  "path": "repo_analyzer.py",
+  "metrics": {
+    "path": "repo_analyzer.py",
+    "size": 27879,
+    "language": "Python",
+    "lines": 685,
+    "non_empty_lines": 594,
+    "functions": 18,
+    "classes": 3,
+    "imports": [
+      "os",
+      "json",
+      "ast",
+      "re",
+      "pathlib",
+      "collections",
+      "typing",
+      "dataclasses",
+      "datetime",
+      "config"
+    ],
+    "import_lines": [
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      18
+    ],
+    "complexity_estimate": 86.0,
+    "comment_density": 0.013138686131386862,
+    "has_docstrings": true,
+    "side_effects": [
+      "open\\(",
+      "with open\\("
+    ]
+  },
+  "fan_in": 4,
+  "fan_out": 10,
+  "parameter_routing": [
+    {
+      "function": "__init__",
+      "line": 98,
+      "parameters": [
+        "self",
+        "root_path",
+        "output_dir",
+        "max_depth"
+      ],
+      "parameter_count": 4
+    },
+    {
+      "function": "is_sensitive_file",
+      "line": 114,
+      "parameters": [
+        "self",
+        "path"
+      ],
+      "parameter_count": 2
+    },
+    {
+      "function": "should_exclude",
+      "line": 119,
+      "parameters": [
+        "self",
+        "path",
+        "depth"
+      ],
+      "parameter_count": 3
+    },
+    {
+      "function": "get_file_language",
+      "line": 126,
+      "parameters": [
+        "self",
+        "path"
+      ],
+      "parameter_count": 2
+    },
+    {
+      "function": "redact_secrets_in_json",
+      "line": 131,
+      "parameters": [
+        "self",
+        "content"
+      ],
+      "parameter_count": 2
+    },
+    {
+      "function": "read_file_safely",
+      "line": 145,
+      "parameters": [
+        "self",
+        "path"
+      ],
+      "parameter_count": 2
+    },
+    {
+      "function": "parse_python_ast",
+      "line": 188,
+      "parameters": [
+        "self",
+        "content",
+        "path"
+      ],
+      "parameter_count": 3
+    },
+    {
+      "function": "detect_jsdoc",
+      "line": 258,
+      "parameters": [
+        "self",
+        "content"
+      ],
+      "parameter_count": 2
+    },
+    {
+      "function": "parse_generic_file",
+      "line": 267,
+      "parameters": [
+        "self",
+        "content",
+        "path",
+        "language"
+      ],
+      "parameter_count": 4
+    },
+    {
+      "function": "analyze_file",
+      "line": 347,
+      "parameters": [
+        "self",
+        "path"
+      ],
+      "parameter_count": 2
+    },
+    {
+      "function": "normalize_import",
+      "line": 379,
+      "parameters": [
+        "self",
+        "imp",
+        "current_file"
+      ],
+      "parameter_count": 3
+    },
+    {
+      "function": "build_dependency_graph",
+      "line": 390,
+      "parameters": [
+        "self"
+      ],
+      "parameter_count": 1
+    },
+    {
+      "function": "identify_candidates",
+      "line": 421,
+      "parameters": [
+        "self"
+      ],
+      "parameter_count": 1
+    },
+    {
+      "function": "generate_manifest",
+      "line": 481,
+      "parameters": [
+        "self"
+      ],
+      "parameter_count": 1
+    },
+    {
+      "function": "analyze_repository",
+      "line": 509,
+      "parameters": [
+        "self"
+      ],
+      "parameter_count": 1
+    },
+    {
+      "function": "save_outputs",
+      "line": 545,
+      "parameters": [
+        "self",
+        "candidates",
+        "output_json"
+      ],
+      "parameter_count": 3
+    },
+    {
+      "function": "deep_dive_analysis",
+      "line": 633,
+      "parameters": [
+        "self",
+        "file_path"
+      ],
+      "parameter_count": 2
+    },
+    {
+      "function": "walk_directory",
+      "line": 486,
+      "parameters": [
+        "path",
+        "depth"
+      ],
+      "parameter_count": 2
+    }
+  ],
+  "call_sites": [],
+  "side_effects": [
+    "open\\(",
+    "with open\\("
+  ],
+  "incoming_modules": [
+    "repo_analyzer.py",
+    "project_comparator.py",
+    "cli.py",
+    "__init__.py"
+  ],
+  "outgoing_modules": [
+    "ast",
+    "json",
+    "typing",
+    "dataclasses",
+    "pathlib",
+    "os",
+    "re",
+    "config",
+    "datetime",
+    "collections"
+  ]
+}

@@ -1,0 +1,303 @@
+{
+  "candidates_for_refactor": [
+    {
+      "path": "lightofthe7\\datakit\\recent_events.md",
+      "score": 21.50797024442083,
+      "fan_in": 37,
+      "fan_out": 0,
+      "lines": 941,
+      "complexity": 547.0,
+      "comment_density": 0.0021253985122210413,
+      "has_docstrings": false,
+      "rationale": "High fan-in (37), low documentation/comments"
+    },
+    {
+      "path": "llama.cpp\\examples\\json_schema_to_grammar.py",
+      "score": 17.87112171837709,
+      "fan_in": 117,
+      "fan_out": 8,
+      "lines": 838,
+      "complexity": 128.0,
+      "comment_density": 0.011933174224343675,
+      "has_docstrings": true,
+      "rationale": "High fan-in (117), low documentation/comments"
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\Salazar Slytherin\\The Chamber Of Secrets\\AI Project and Industry News Summary.md",
+      "score": 13.76328502415459,
+      "fan_in": 37,
+      "fan_out": 0,
+      "lines": 207,
+      "complexity": 77.0,
+      "comment_density": 0.15458937198067632,
+      "has_docstrings": false,
+      "rationale": "High fan-in (37), low documentation/comments"
+    },
+    {
+      "path": "lightofthe7\\datakit\\core\\pack_schema.py",
+      "score": 8.739130434782608,
+      "fan_in": 39,
+      "fan_out": 7,
+      "lines": 299,
+      "complexity": 67.0,
+      "comment_density": 0.0,
+      "has_docstrings": false,
+      "rationale": "High fan-in (39), low documentation/comments"
+    },
+    {
+      "path": "lightofthe7\\docs\\ADAPTIVE_INTELLIGENCE_FRAMEWORK.json",
+      "score": 8.283185840707965,
+      "fan_in": 117,
+      "fan_out": 0,
+      "lines": 226,
+      "complexity": 16.0,
+      "comment_density": 0.0,
+      "has_docstrings": false,
+      "rationale": "High fan-in (117), low documentation/comments"
+    },
+    {
+      "path": "lightofthe7\\datakit\\scripts\\ai_composer.py",
+      "score": 7.582417582417583,
+      "fan_in": 115,
+      "fan_out": 5,
+      "lines": 273,
+      "complexity": 18.0,
+      "comment_density": 0.040293040293040296,
+      "has_docstrings": true,
+      "rationale": "High fan-in (115), low documentation/comments"
+    },
+    {
+      "path": "lightofthe7\\grid\\tracing\\trace_store.py",
+      "score": 7.024752475247525,
+      "fan_in": 43,
+      "fan_out": 5,
+      "lines": 202,
+      "complexity": 33.0,
+      "comment_density": 0.0297029702970297,
+      "has_docstrings": true,
+      "rationale": "High fan-in (43), low documentation/comments"
+    },
+    {
+      "path": "llama.cpp\\scripts\\compare-llama-bench.py",
+      "score": 6.797989031078611,
+      "fan_in": 37,
+      "fan_out": 16,
+      "lines": 1094,
+      "complexity": 201.0,
+      "comment_density": 0.043875685557586835,
+      "has_docstrings": true,
+      "rationale": "High fan-in (37), low documentation/comments"
+    },
+    {
+      "path": "lightofthe7\\docs\\HONEST_CRITIQUE.json",
+      "score": 6.644444444444445,
+      "fan_in": 117,
+      "fan_out": 0,
+      "lines": 405,
+      "complexity": 23.0,
+      "comment_density": 0.0,
+      "has_docstrings": false,
+      "rationale": "High fan-in (117), low documentation/comments"
+    },
+    {
+      "path": "lightofthe7\\application\\mothership\\repositories\\__init__.py",
+      "score": 6.287899860917942,
+      "fan_in": 137,
+      "fan_out": 10,
+      "lines": 719,
+      "complexity": 33.0,
+      "comment_density": 0.05285118219749652,
+      "has_docstrings": true,
+      "rationale": "High fan-in (137), low documentation/comments"
+    },
+    {
+      "path": "lightofthe7\\datakit\\core\\explorer.py",
+      "score": 6.213953488372093,
+      "fan_in": 40,
+      "fan_out": 9,
+      "lines": 1075,
+      "complexity": 167.0,
+      "comment_density": 0.013953488372093023,
+      "has_docstrings": true,
+      "rationale": "High fan-in (40), low documentation/comments"
+    },
+    {
+      "path": "lightofthe7\\datakit\\Hogwarts\\great_hall\\table\\great_hall_table.py",
+      "score": 5.939799331103679,
+      "fan_in": 37,
+      "fan_out": 6,
+      "lines": 299,
+      "complexity": 48.0,
+      "comment_density": 0.016722408026755852,
+      "has_docstrings": true,
+      "rationale": "High fan-in (37), low documentation/comments"
+    },
+    {
+      "path": "lightofthe7\\data\\financial_case_analysis_report.json",
+      "score": 5.617554858934169,
+      "fan_in": 128,
+      "fan_out": 0,
+      "lines": 319,
+      "complexity": 14.0,
+      "comment_density": 0.0,
+      "has_docstrings": false,
+      "rationale": "High fan-in (128), low documentation/comments"
+    },
+    {
+      "path": "lightofthe7\\demos\\error_heat_map.html",
+      "score": 5.507662835249042,
+      "fan_in": 115,
+      "fan_out": 0,
+      "lines": 522,
+      "complexity": 25.0,
+      "comment_density": 0.07854406130268199,
+      "has_docstrings": false,
+      "rationale": "High fan-in (115), low documentation/comments"
+    },
+    {
+      "path": "llama.cpp\\scripts\\create_ops_docs.py",
+      "score": 4.762376237623762,
+      "fan_in": 37,
+      "fan_out": 5,
+      "lines": 202,
+      "complexity": 26.0,
+      "comment_density": 0.019801980198019802,
+      "has_docstrings": true,
+      "rationale": "High fan-in (37), low documentation/comments"
+    },
+    {
+      "path": "llama.cpp\\gguf-py\\gguf\\metadata.py",
+      "score": 4.508196721311475,
+      "fan_in": 20,
+      "fan_out": 10,
+      "lines": 732,
+      "complexity": 165.0,
+      "comment_density": 0.12568306010928962,
+      "has_docstrings": false,
+      "rationale": "High fan-in (20), low documentation/comments"
+    },
+    {
+      "path": "lightofthe7\\datakit\\tool\\structure_audit.py",
+      "score": 4.3110504774897676,
+      "fan_in": 40,
+      "fan_out": 11,
+      "lines": 733,
+      "complexity": 79.0,
+      "comment_density": 0.001364256480218281,
+      "has_docstrings": false,
+      "rationale": "High fan-in (40), low documentation/comments"
+    },
+    {
+      "path": "llama.cpp\\gguf-py\\gguf\\gguf_reader.py",
+      "score": 4.211956521739131,
+      "fan_in": 50,
+      "fan_out": 11,
+      "lines": 368,
+      "complexity": 31.0,
+      "comment_density": 0.13043478260869565,
+      "has_docstrings": false,
+      "rationale": "High fan-in (50), low documentation/comments"
+    },
+    {
+      "path": "lightofthe7\\docs\\GRID Commercialization Outreach.md",
+      "score": 4.0791788856304985,
+      "fan_in": 39,
+      "fan_out": 0,
+      "lines": 3069,
+      "complexity": 321.0,
+      "comment_density": 0.08536982730531117,
+      "has_docstrings": false,
+      "rationale": "High fan-in (39), low documentation/comments"
+    },
+    {
+      "path": "lightofthe7\\tools\\rag\\store.py",
+      "score": 4.01673640167364,
+      "fan_in": 40,
+      "fan_out": 5,
+      "lines": 239,
+      "complexity": 24.0,
+      "comment_density": 0.05439330543933055,
+      "has_docstrings": true,
+      "rationale": "High fan-in (40), low documentation/comments"
+    }
+  ],
+  "reference_high_value_components": [
+    {
+      "path": "scripts\\latent_render.py",
+      "score": 9.056716417910447,
+      "fan_in": 37,
+      "fan_out": 6,
+      "lines": 67,
+      "complexity": 5.0,
+      "comment_density": 0.22388059701492538,
+      "has_docstrings": true,
+      "rationale": "Well-documented, efficient, reused by 37 modules"
+    },
+    {
+      "path": "lightofthe7\\create_grid_structure.py",
+      "score": 6.822157434402331,
+      "fan_in": 40,
+      "fan_out": 4,
+      "lines": 98,
+      "complexity": 7.0,
+      "comment_density": 0.19387755102040816,
+      "has_docstrings": true,
+      "rationale": "Well-documented, efficient, reused by 40 modules"
+    },
+    {
+      "path": "examples\\web_discussions\\main.py",
+      "score": 1.738095238095238,
+      "fan_in": 3,
+      "fan_out": 4,
+      "lines": 63,
+      "complexity": 2.0,
+      "comment_density": 0.15873015873015872,
+      "has_docstrings": true,
+      "rationale": "Well-documented, efficient, reused by 3 modules"
+    },
+    {
+      "path": "lightofthe7\\application\\mothership\\routers\\__init__.py",
+      "score": 1.2903225806451613,
+      "fan_in": 3,
+      "fan_out": 3,
+      "lines": 62,
+      "complexity": 3.0,
+      "comment_density": 0.2903225806451613,
+      "has_docstrings": true,
+      "rationale": "Well-documented, efficient, reused by 3 modules"
+    },
+    {
+      "path": "lightofthe7\\cognitive_layer\\__init__.py",
+      "score": 0.0,
+      "fan_in": 0,
+      "fan_out": 16,
+      "lines": 59,
+      "complexity": 0.0,
+      "comment_density": 0.1694915254237288,
+      "has_docstrings": true,
+      "rationale": "Well-documented, efficient, reused by 0 modules"
+    },
+    {
+      "path": "lightofthe7\\light_of_the_seven\\cognitive_layer\\__init__.py",
+      "score": 0.0,
+      "fan_in": 0,
+      "fan_out": 16,
+      "lines": 59,
+      "complexity": 0.0,
+      "comment_density": 0.1694915254237288,
+      "has_docstrings": true,
+      "rationale": "Well-documented, efficient, reused by 0 modules"
+    },
+    {
+      "path": "lightofthe7\\tools\\rag\\__init__.py",
+      "score": 0.0,
+      "fan_in": 0,
+      "fan_out": 6,
+      "lines": 40,
+      "complexity": 0.0,
+      "comment_density": 0.175,
+      "has_docstrings": true,
+      "rationale": "Well-documented, efficient, reused by 0 modules"
+    }
+  ]
+}

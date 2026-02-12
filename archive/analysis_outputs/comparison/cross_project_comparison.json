@@ -1,0 +1,1202 @@
+{
+  "summary": {
+    "grid_modules_analyzed": 100,
+    "eufle_modules_analyzed": 100,
+    "similar_modules_found": 50,
+    "high_traffic_comparisons": 1
+  },
+  "similar_modules": [
+    {
+      "grid_module": "light_of_the_seven\\light_of_the_seven\\src\\light_of_the_seven\\integration.py",
+      "eufle_module": "lightofthe7\\light_of_the_seven\\src\\light_of_the_seven\\integration.py",
+      "similarity_score": 1.4900709219858157,
+      "grid_metrics": {
+        "id": "light_of_the_seven\\light_of_the_seven\\src\\light_of_the_seven\\integration.py",
+        "path": "light_of_the_seven\\light_of_the_seven\\src\\light_of_the_seven\\integration.py",
+        "fan_in": 6,
+        "fan_out": 10,
+        "lines": 409,
+        "complexity": 30.0,
+        "language": "Python"
+      },
+      "eufle_metrics": {
+        "id": "lightofthe7\\light_of_the_seven\\src\\light_of_the_seven\\integration.py",
+        "path": "lightofthe7\\light_of_the_seven\\src\\light_of_the_seven\\integration.py",
+        "fan_in": 6,
+        "fan_out": 10,
+        "lines": 423,
+        "complexity": 30.0,
+        "language": "Python"
+      }
+    },
+    {
+      "grid_module": "application\\mothership\\routers\\cockpit.py",
+      "eufle_module": "lightofthe7\\application\\mothership\\models\\cockpit.py",
+      "similarity_score": 1.480132450331126,
+      "grid_metrics": {
+        "id": "application\\mothership\\routers\\cockpit.py",
+        "path": "application\\mothership\\routers\\cockpit.py",
+        "fan_in": 12,
+        "fan_out": 13,
+        "lines": 755,
+        "complexity": 13.0,
+        "language": "Python"
+      },
+      "eufle_metrics": {
+        "id": "lightofthe7\\application\\mothership\\models\\cockpit.py",
+        "path": "lightofthe7\\application\\mothership\\models\\cockpit.py",
+        "fan_in": 12,
+        "fan_out": 6,
+        "lines": 705,
+        "complexity": 13.0,
+        "language": "Python"
+      }
+    },
+    {
+      "grid_module": "light_of_the_seven\\light_of_the_seven\\cognitive_layer\\decision_support\\dual_process.py",
+      "eufle_module": "lightofthe7\\cognitive_layer\\decision_support\\dual_process.py",
+      "similarity_score": 1.4736111111111112,
+      "grid_metrics": {
+        "id": "light_of_the_seven\\light_of_the_seven\\cognitive_layer\\decision_support\\dual_process.py",
+        "path": "light_of_the_seven\\light_of_the_seven\\cognitive_layer\\decision_support\\dual_process.py",
+        "fan_in": 6,
+        "fan_out": 5,
+        "lines": 197,
+        "complexity": 13.0,
+        "language": "Python"
+      },
+      "eufle_metrics": {
+        "id": "lightofthe7\\cognitive_layer\\decision_support\\dual_process.py",
+        "path": "lightofthe7\\cognitive_layer\\decision_support\\dual_process.py",
+        "fan_in": 6,
+        "fan_out": 5,
+        "lines": 216,
+        "complexity": 13.0,
+        "language": "Python"
+      }
+    },
+    {
+      "grid_module": "light_of_the_seven\\light_of_the_seven\\cognitive_layer\\decision_support\\bounded_rationality.py",
+      "eufle_module": "lightofthe7\\cognitive_layer\\decision_support\\bounded_rationality.py",
+      "similarity_score": 1.4694915254237289,
+      "grid_metrics": {
+        "id": "light_of_the_seven\\light_of_the_seven\\cognitive_layer\\decision_support\\bounded_rationality.py",
+        "path": "light_of_the_seven\\light_of_the_seven\\cognitive_layer\\decision_support\\bounded_rationality.py",
+        "fan_in": 6,
+        "fan_out": 2,
+        "lines": 159,
+        "complexity": 7.0,
+        "language": "Python"
+      },
+      "eufle_metrics": {
+        "id": "lightofthe7\\cognitive_layer\\decision_support\\bounded_rationality.py",
+        "path": "lightofthe7\\cognitive_layer\\decision_support\\bounded_rationality.py",
+        "fan_in": 6,
+        "fan_out": 2,
+        "lines": 177,
+        "complexity": 7.0,
+        "language": "Python"
+      }
+    },
+    {
+      "grid_module": "light_of_the_seven\\light_of_the_seven\\Foundations_of_Computation\\Executive_Report\\mathilde_rouselle.py",
+      "eufle_module": "lightofthe7\\Foundations_of_Computation\\Executive_Report\\mathilde_rouselle.py",
+      "similarity_score": 1.4688697951090548,
+      "grid_metrics": {
+        "id": "light_of_the_seven\\light_of_the_seven\\Foundations_of_Computation\\Executive_Report\\mathilde_rouselle.py",
+        "path": "light_of_the_seven\\light_of_the_seven\\Foundations_of_Computation\\Executive_Report\\mathilde_rouselle.py",
+        "fan_in": 17,
+        "fan_out": 1,
+        "lines": 89,
+        "complexity": 14.0,
+        "language": "Python"
+      },
+      "eufle_metrics": {
+        "id": "lightofthe7\\Foundations_of_Computation\\Executive_Report\\mathilde_rouselle.py",
+        "path": "lightofthe7\\Foundations_of_Computation\\Executive_Report\\mathilde_rouselle.py",
+        "fan_in": 16,
+        "fan_out": 1,
+        "lines": 85,
+        "complexity": 14.0,
+        "language": "Python"
+      }
+    },
+    {
+      "grid_module": "light_of_the_seven\\light_of_the_seven\\cognitive_layer\\integration\\grid_bridge.py",
+      "eufle_module": "lightofthe7\\cognitive_layer\\integration\\grid_bridge.py",
+      "similarity_score": 1.4646532438478748,
+      "grid_metrics": {
+        "id": "light_of_the_seven\\light_of_the_seven\\cognitive_layer\\integration\\grid_bridge.py",
+        "path": "light_of_the_seven\\light_of_the_seven\\cognitive_layer\\integration\\grid_bridge.py",
+        "fan_in": 9,
+        "fan_out": 3,
+        "lines": 149,
+        "complexity": 8.0,
+        "language": "Python"
+      },
+      "eufle_metrics": {
+        "id": "lightofthe7\\cognitive_layer\\integration\\grid_bridge.py",
+        "path": "lightofthe7\\cognitive_layer\\integration\\grid_bridge.py",
+        "fan_in": 8,
+        "fan_out": 3,
+        "lines": 148,
+        "complexity": 8.0,
+        "language": "Python"
+      }
+    },
+    {
+      "grid_module": "datakit\\scripts\\openai_smoketest.py",
+      "eufle_module": "lightofthe7\\datakit\\scripts\\openai_smoketest.py",
+      "similarity_score": 1.46100583090379,
+      "grid_metrics": {
+        "id": "datakit\\scripts\\openai_smoketest.py",
+        "path": "datakit\\scripts\\openai_smoketest.py",
+        "fan_in": 12,
+        "fan_out": 6,
+        "lines": 327,
+        "complexity": 67.0,
+        "language": "Python"
+      },
+      "eufle_metrics": {
+        "id": "lightofthe7\\datakit\\scripts\\openai_smoketest.py",
+        "path": "lightofthe7\\datakit\\scripts\\openai_smoketest.py",
+        "fan_in": 11,
+        "fan_out": 6,
+        "lines": 343,
+        "complexity": 67.0,
+        "language": "Python"
+      }
+    },
+    {
+      "grid_module": "light_of_the_seven\\light_of_the_seven\\cognitive_layer\\integration\\pipeline_adapter.py",
+      "eufle_module": "lightofthe7\\cognitive_layer\\integration\\pipeline_adapter.py",
+      "similarity_score": 1.443189368770764,
+      "grid_metrics": {
+        "id": "light_of_the_seven\\light_of_the_seven\\cognitive_layer\\integration\\pipeline_adapter.py",
+        "path": "light_of_the_seven\\light_of_the_seven\\cognitive_layer\\integration\\pipeline_adapter.py",
+        "fan_in": 7,
+        "fan_out": 4,
+        "lines": 164,
+        "complexity": 13.0,
+        "language": "Python"
+      },
+      "eufle_metrics": {
+        "id": "lightofthe7\\cognitive_layer\\integration\\pipeline_adapter.py",
+        "path": "lightofthe7\\cognitive_layer\\integration\\pipeline_adapter.py",
+        "fan_in": 6,
+        "fan_out": 4,
+        "lines": 172,
+        "complexity": 13.0,
+        "language": "Python"
+      }
+    },
+    {
+      "grid_module": "light_of_the_seven\\light_of_the_seven\\cognitive_layer\\decision_support\\decision_matrix.py",
+      "eufle_module": "lightofthe7\\cognitive_layer\\decision_support\\decision_matrix.py",
+      "similarity_score": 1.4417940199335548,
+      "grid_metrics": {
+        "id": "light_of_the_seven\\light_of_the_seven\\cognitive_layer\\decision_support\\decision_matrix.py",
+        "path": "light_of_the_seven\\light_of_the_seven\\cognitive_layer\\decision_support\\decision_matrix.py",
+        "fan_in": 7,
+        "fan_out": 3,
+        "lines": 204,
+        "complexity": 19.0,
+        "language": "Python"
+      },
+      "eufle_metrics": {
+        "id": "lightofthe7\\cognitive_layer\\decision_support\\decision_matrix.py",
+        "path": "lightofthe7\\cognitive_layer\\decision_support\\decision_matrix.py",
+        "fan_in": 6,
+        "fan_out": 3,
+        "lines": 215,
+        "complexity": 19.0,
+        "language": "Python"
+      }
+    },
+    {
+      "grid_module": "datakit\\Hogwarts\\grid_bridge.py",
+      "eufle_module": "lightofthe7\\datakit\\Hogwarts\\grid_bridge.py",
+      "similarity_score": 1.4249999999999998,
+      "grid_metrics": {
+        "id": "datakit\\Hogwarts\\grid_bridge.py",
+        "path": "datakit\\Hogwarts\\grid_bridge.py",
+        "fan_in": 3,
+        "fan_out": 7,
+        "lines": 1047,
+        "complexity": 33.0,
+        "language": "Python"
+      },
+      "eufle_metrics": {
+        "id": "lightofthe7\\datakit\\Hogwarts\\grid_bridge.py",
+        "path": "lightofthe7\\datakit\\Hogwarts\\grid_bridge.py",
+        "fan_in": 4,
+        "fan_out": 8,
+        "lines": 1047,
+        "complexity": 33.0,
+        "language": "Python"
+      }
+    },
+    {
+      "grid_module": "datakit\\scripts\\ai_composer.py",
+      "eufle_module": "lightofthe7\\datakit\\scripts\\ai_composer.py",
+      "similarity_score": 1.4229823156975474,
+      "grid_metrics": {
+        "id": "datakit\\scripts\\ai_composer.py",
+        "path": "datakit\\scripts\\ai_composer.py",
+        "fan_in": 151,
+        "fan_out": 4,
+        "lines": 268,
+        "complexity": 18.0,
+        "language": "Python"
+      },
+      "eufle_metrics": {
+        "id": "lightofthe7\\datakit\\scripts\\ai_composer.py",
+        "path": "lightofthe7\\datakit\\scripts\\ai_composer.py",
+        "fan_in": 115,
+        "fan_out": 5,
+        "lines": 273,
+        "complexity": 18.0,
+        "language": "Python"
+      }
+    },
+    {
+      "grid_module": "demos\\dataset_lifecycle.py",
+      "eufle_module": "lightofthe7\\demos\\dataset_lifecycle.py",
+      "similarity_score": 1.4215643787957395,
+      "grid_metrics": {
+        "id": "demos\\dataset_lifecycle.py",
+        "path": "demos\\dataset_lifecycle.py",
+        "fan_in": 151,
+        "fan_out": 12,
+        "lines": 212,
+        "complexity": 7.0,
+        "language": "Python"
+      },
+      "eufle_metrics": {
+        "id": "lightofthe7\\demos\\dataset_lifecycle.py",
+        "path": "lightofthe7\\demos\\dataset_lifecycle.py",
+        "fan_in": 115,
+        "fan_out": 13,
+        "lines": 217,
+        "complexity": 7.0,
+        "language": "Python"
+      }
+    },
+    {
+      "grid_module": "datakit\\Hogwarts\\test_hogwarts_toolkit.py",
+      "eufle_module": "lightofthe7\\datakit\\Hogwarts\\test_hogwarts_toolkit.py",
+      "similarity_score": 1.4202808988764044,
+      "grid_metrics": {
+        "id": "datakit\\Hogwarts\\test_hogwarts_toolkit.py",
+        "path": "datakit\\Hogwarts\\test_hogwarts_toolkit.py",
+        "fan_in": 4,
+        "fan_out": 2,
+        "lines": 438,
+        "complexity": 4.0,
+        "language": "Python"
+      },
+      "eufle_metrics": {
+        "id": "lightofthe7\\datakit\\Hogwarts\\test_hogwarts_toolkit.py",
+        "path": "lightofthe7\\datakit\\Hogwarts\\test_hogwarts_toolkit.py",
+        "fan_in": 3,
+        "fan_out": 3,
+        "lines": 445,
+        "complexity": 4.0,
+        "language": "Python"
+      }
+    },
+    {
+      "grid_module": "datakit\\Hogwarts\\hogwarts_toolkit.py",
+      "eufle_module": "lightofthe7\\datakit\\Hogwarts\\hogwarts_toolkit.py",
+      "similarity_score": 1.4154255319148936,
+      "grid_metrics": {
+        "id": "datakit\\Hogwarts\\hogwarts_toolkit.py",
+        "path": "datakit\\Hogwarts\\hogwarts_toolkit.py",
+        "fan_in": 4,
+        "fan_out": 3,
+        "lines": 273,
+        "complexity": 4.0,
+        "language": "Python"
+      },
+      "eufle_metrics": {
+        "id": "lightofthe7\\datakit\\Hogwarts\\hogwarts_toolkit.py",
+        "path": "lightofthe7\\datakit\\Hogwarts\\hogwarts_toolkit.py",
+        "fan_in": 3,
+        "fan_out": 3,
+        "lines": 282,
+        "complexity": 4.0,
+        "language": "Python"
+      }
+    },
+    {
+      "grid_module": "grid\\security\\__init__.py",
+      "eufle_module": "lightofthe7\\application\\mothership\\__init__.py",
+      "similarity_score": 1.408916083916084,
+      "grid_metrics": {
+        "id": "grid\\security\\__init__.py",
+        "path": "grid\\security\\__init__.py",
+        "fan_in": 2,
+        "fan_out": 7,
+        "lines": 119,
+        "complexity": 9.0,
+        "language": "Python"
+      },
+      "eufle_metrics": {
+        "id": "lightofthe7\\application\\mothership\\__init__.py",
+        "path": "lightofthe7\\application\\mothership\\__init__.py",
+        "fan_in": 2,
+        "fan_out": 5,
+        "lines": 132,
+        "complexity": 13.0,
+        "language": "Python"
+      }
+    },
+    {
+      "grid_module": "light_of_the_seven\\light_of_the_seven\\cognitive_layer\\cognitive_load\\load_estimator.py",
+      "eufle_module": "lightofthe7\\cognitive_layer\\cognitive_load\\load_estimator.py",
+      "similarity_score": 1.408817427385892,
+      "grid_metrics": {
+        "id": "light_of_the_seven\\light_of_the_seven\\cognitive_layer\\cognitive_load\\load_estimator.py",
+        "path": "light_of_the_seven\\light_of_the_seven\\cognitive_layer\\cognitive_load\\load_estimator.py",
+        "fan_in": 3,
+        "fan_out": 4,
+        "lines": 228,
+        "complexity": 12.0,
+        "language": "Python"
+      },
+      "eufle_metrics": {
+        "id": "lightofthe7\\cognitive_layer\\cognitive_load\\load_estimator.py",
+        "path": "lightofthe7\\cognitive_layer\\cognitive_load\\load_estimator.py",
+        "fan_in": 4,
+        "fan_out": 4,
+        "lines": 241,
+        "complexity": 12.0,
+        "language": "Python"
+      }
+    },
+    {
+      "grid_module": "light_of_the_seven\\light_of_the_seven\\cognitive_layer\\integration\\context_enricher.py",
+      "eufle_module": "lightofthe7\\cognitive_layer\\integration\\context_enricher.py",
+      "similarity_score": 1.4057142857142857,
+      "grid_metrics": {
+        "id": "light_of_the_seven\\light_of_the_seven\\cognitive_layer\\integration\\context_enricher.py",
+        "path": "light_of_the_seven\\light_of_the_seven\\cognitive_layer\\integration\\context_enricher.py",
+        "fan_in": 8,
+        "fan_out": 4,
+        "lines": 131,
+        "complexity": 4.0,
+        "language": "Python"
+      },
+      "eufle_metrics": {
+        "id": "lightofthe7\\cognitive_layer\\integration\\context_enricher.py",
+        "path": "lightofthe7\\cognitive_layer\\integration\\context_enricher.py",
+        "fan_in": 6,
+        "fan_out": 4,
+        "lines": 140,
+        "complexity": 4.0,
+        "language": "Python"
+      }
+    },
+    {
+      "grid_module": "light_of_the_seven\\light_of_the_seven\\cognitive_layer\\cognitive_load\\chunking.py",
+      "eufle_module": "lightofthe7\\cognitive_layer\\cognitive_load\\chunking.py",
+      "similarity_score": 1.4033333333333333,
+      "grid_metrics": {
+        "id": "light_of_the_seven\\light_of_the_seven\\cognitive_layer\\cognitive_load\\chunking.py",
+        "path": "light_of_the_seven\\light_of_the_seven\\cognitive_layer\\cognitive_load\\chunking.py",
+        "fan_in": 3,
+        "fan_out": 2,
+        "lines": 167,
+        "complexity": 13.0,
+        "language": "Python"
+      },
+      "eufle_metrics": {
+        "id": "lightofthe7\\cognitive_layer\\cognitive_load\\chunking.py",
+        "path": "lightofthe7\\cognitive_layer\\cognitive_load\\chunking.py",
+        "fan_in": 4,
+        "fan_out": 2,
+        "lines": 180,
+        "complexity": 13.0,
+        "language": "Python"
+      }
+    },
+    {
+      "grid_module": "light_of_the_seven\\light_of_the_seven\\cognitive_layer\\cognitive_load\\scaffolding.py",
+      "eufle_module": "lightofthe7\\cognitive_layer\\cognitive_load\\scaffolding.py",
+      "similarity_score": 1.4016233766233768,
+      "grid_metrics": {
+        "id": "light_of_the_seven\\light_of_the_seven\\cognitive_layer\\cognitive_load\\scaffolding.py",
+        "path": "light_of_the_seven\\light_of_the_seven\\cognitive_layer\\cognitive_load\\scaffolding.py",
+        "fan_in": 3,
+        "fan_out": 3,
+        "lines": 213,
+        "complexity": 18.0,
+        "language": "Python"
+      },
+      "eufle_metrics": {
+        "id": "lightofthe7\\cognitive_layer\\cognitive_load\\scaffolding.py",
+        "path": "lightofthe7\\cognitive_layer\\cognitive_load\\scaffolding.py",
+        "fan_in": 4,
+        "fan_out": 3,
+        "lines": 231,
+        "complexity": 18.0,
+        "language": "Python"
+      }
+    },
+    {
+      "grid_module": "archival\\debug\\debug_articulation.py",
+      "eufle_module": "lightofthe7\\archival\\debug\\debug_articulation.py",
+      "similarity_score": 1.4,
+      "grid_metrics": {
+        "id": "archival\\debug\\debug_articulation.py",
+        "path": "archival\\debug\\debug_articulation.py",
+        "fan_in": 3,
+        "fan_out": 2,
+        "lines": 32,
+        "complexity": 1.0,
+        "language": "Python"
+      },
+      "eufle_metrics": {
+        "id": "lightofthe7\\archival\\debug\\debug_articulation.py",
+        "path": "lightofthe7\\archival\\debug\\debug_articulation.py",
+        "fan_in": 2,
+        "fan_out": 2,
+        "lines": 32,
+        "complexity": 1.0,
+        "language": "Python"
+      }
+    },
+    {
+      "grid_module": "archival\\debug\\debug_articulation3.py",
+      "eufle_module": "lightofthe7\\archival\\debug\\debug_articulation3.py",
+      "similarity_score": 1.4,
+      "grid_metrics": {
+        "id": "archival\\debug\\debug_articulation3.py",
+        "path": "archival\\debug\\debug_articulation3.py",
+        "fan_in": 3,
+        "fan_out": 2,
+        "lines": 34,
+        "complexity": 2.0,
+        "language": "Python"
+      },
+      "eufle_metrics": {
+        "id": "lightofthe7\\archival\\debug\\debug_articulation3.py",
+        "path": "lightofthe7\\archival\\debug\\debug_articulation3.py",
+        "fan_in": 2,
+        "fan_out": 2,
+        "lines": 34,
+        "complexity": 2.0,
+        "language": "Python"
+      }
+    },
+    {
+      "grid_module": "archival\\python_unclear\\Python\\run_variant_simulation.py",
+      "eufle_module": "lightofthe7\\archival\\python_unclear\\Python\\run_variant_simulation.py",
+      "similarity_score": 1.4,
+      "grid_metrics": {
+        "id": "archival\\python_unclear\\Python\\run_variant_simulation.py",
+        "path": "archival\\python_unclear\\Python\\run_variant_simulation.py",
+        "fan_in": 3,
+        "fan_out": 6,
+        "lines": 349,
+        "complexity": 23.0,
+        "language": "Python"
+      },
+      "eufle_metrics": {
+        "id": "lightofthe7\\archival\\python_unclear\\Python\\run_variant_simulation.py",
+        "path": "lightofthe7\\archival\\python_unclear\\Python\\run_variant_simulation.py",
+        "fan_in": 2,
+        "fan_out": 6,
+        "lines": 349,
+        "complexity": 23.0,
+        "language": "Python"
+      }
+    },
+    {
+      "grid_module": "archival\\python_unclear\\Python\\youtube_video_simulation.py",
+      "eufle_module": "lightofthe7\\archival\\python_unclear\\Python\\youtube_video_simulation.py",
+      "similarity_score": 1.4,
+      "grid_metrics": {
+        "id": "archival\\python_unclear\\Python\\youtube_video_simulation.py",
+        "path": "archival\\python_unclear\\Python\\youtube_video_simulation.py",
+        "fan_in": 3,
+        "fan_out": 7,
+        "lines": 480,
+        "complexity": 30.0,
+        "language": "Python"
+      },
+      "eufle_metrics": {
+        "id": "lightofthe7\\archival\\python_unclear\\Python\\youtube_video_simulation.py",
+        "path": "lightofthe7\\archival\\python_unclear\\Python\\youtube_video_simulation.py",
+        "fan_in": 2,
+        "fan_out": 7,
+        "lines": 480,
+        "complexity": 30.0,
+        "language": "Python"
+      }
+    },
+    {
+      "grid_module": "light_of_the_seven\\archival\\debug\\debug_articulation.py",
+      "eufle_module": "lightofthe7\\archival\\debug\\debug_articulation.py",
+      "similarity_score": 1.4,
+      "grid_metrics": {
+        "id": "light_of_the_seven\\archival\\debug\\debug_articulation.py",
+        "path": "light_of_the_seven\\archival\\debug\\debug_articulation.py",
+        "fan_in": 3,
+        "fan_out": 2,
+        "lines": 32,
+        "complexity": 1.0,
+        "language": "Python"
+      },
+      "eufle_metrics": {
+        "id": "lightofthe7\\archival\\debug\\debug_articulation.py",
+        "path": "lightofthe7\\archival\\debug\\debug_articulation.py",
+        "fan_in": 2,
+        "fan_out": 2,
+        "lines": 32,
+        "complexity": 1.0,
+        "language": "Python"
+      }
+    },
+    {
+      "grid_module": "light_of_the_seven\\archival\\debug\\debug_articulation3.py",
+      "eufle_module": "lightofthe7\\archival\\debug\\debug_articulation3.py",
+      "similarity_score": 1.4,
+      "grid_metrics": {
+        "id": "light_of_the_seven\\archival\\debug\\debug_articulation3.py",
+        "path": "light_of_the_seven\\archival\\debug\\debug_articulation3.py",
+        "fan_in": 3,
+        "fan_out": 2,
+        "lines": 34,
+        "complexity": 2.0,
+        "language": "Python"
+      },
+      "eufle_metrics": {
+        "id": "lightofthe7\\archival\\debug\\debug_articulation3.py",
+        "path": "lightofthe7\\archival\\debug\\debug_articulation3.py",
+        "fan_in": 2,
+        "fan_out": 2,
+        "lines": 34,
+        "complexity": 2.0,
+        "language": "Python"
+      }
+    },
+    {
+      "grid_module": "light_of_the_seven\\archival\\python_unclear\\Python\\run_variant_simulation.py",
+      "eufle_module": "lightofthe7\\archival\\python_unclear\\Python\\run_variant_simulation.py",
+      "similarity_score": 1.4,
+      "grid_metrics": {
+        "id": "light_of_the_seven\\archival\\python_unclear\\Python\\run_variant_simulation.py",
+        "path": "light_of_the_seven\\archival\\python_unclear\\Python\\run_variant_simulation.py",
+        "fan_in": 3,
+        "fan_out": 6,
+        "lines": 349,
+        "complexity": 23.0,
+        "language": "Python"
+      },
+      "eufle_metrics": {
+        "id": "lightofthe7\\archival\\python_unclear\\Python\\run_variant_simulation.py",
+        "path": "lightofthe7\\archival\\python_unclear\\Python\\run_variant_simulation.py",
+        "fan_in": 2,
+        "fan_out": 6,
+        "lines": 349,
+        "complexity": 23.0,
+        "language": "Python"
+      }
+    },
+    {
+      "grid_module": "light_of_the_seven\\archival\\python_unclear\\Python\\youtube_video_simulation.py",
+      "eufle_module": "lightofthe7\\archival\\python_unclear\\Python\\youtube_video_simulation.py",
+      "similarity_score": 1.4,
+      "grid_metrics": {
+        "id": "light_of_the_seven\\archival\\python_unclear\\Python\\youtube_video_simulation.py",
+        "path": "light_of_the_seven\\archival\\python_unclear\\Python\\youtube_video_simulation.py",
+        "fan_in": 3,
+        "fan_out": 7,
+        "lines": 480,
+        "complexity": 30.0,
+        "language": "Python"
+      },
+      "eufle_metrics": {
+        "id": "lightofthe7\\archival\\python_unclear\\Python\\youtube_video_simulation.py",
+        "path": "lightofthe7\\archival\\python_unclear\\Python\\youtube_video_simulation.py",
+        "fan_in": 2,
+        "fan_out": 7,
+        "lines": 480,
+        "complexity": 30.0,
+        "language": "Python"
+      }
+    },
+    {
+      "grid_module": "datakit\\tool\\structure_audit.py",
+      "eufle_module": "lightofthe7\\datakit\\tool\\structure_audit.py",
+      "similarity_score": 1.3991836734693877,
+      "grid_metrics": {
+        "id": "datakit\\tool\\structure_audit.py",
+        "path": "datakit\\tool\\structure_audit.py",
+        "fan_in": 60,
+        "fan_out": 11,
+        "lines": 735,
+        "complexity": 79.0,
+        "language": "Python"
+      },
+      "eufle_metrics": {
+        "id": "lightofthe7\\datakit\\tool\\structure_audit.py",
+        "path": "lightofthe7\\datakit\\tool\\structure_audit.py",
+        "fan_in": 40,
+        "fan_out": 11,
+        "lines": 733,
+        "complexity": 79.0,
+        "language": "Python"
+      }
+    },
+    {
+      "grid_module": "archival\\python_unclear\\Python\\test_sora_system.py",
+      "eufle_module": "lightofthe7\\archival\\python_unclear\\Python\\test_sora_system.py",
+      "similarity_score": 1.3984375,
+      "grid_metrics": {
+        "id": "archival\\python_unclear\\Python\\test_sora_system.py",
+        "path": "archival\\python_unclear\\Python\\test_sora_system.py",
+        "fan_in": 192,
+        "fan_out": 7,
+        "lines": 158,
+        "complexity": 15.0,
+        "language": "Python"
+      },
+      "eufle_metrics": {
+        "id": "lightofthe7\\archival\\python_unclear\\Python\\test_sora_system.py",
+        "path": "lightofthe7\\archival\\python_unclear\\Python\\test_sora_system.py",
+        "fan_in": 127,
+        "fan_out": 7,
+        "lines": 158,
+        "complexity": 15.0,
+        "language": "Python"
+      }
+    },
+    {
+      "grid_module": "light_of_the_seven\\archival\\python_unclear\\Python\\test_sora_system.py",
+      "eufle_module": "lightofthe7\\archival\\python_unclear\\Python\\test_sora_system.py",
+      "similarity_score": 1.3984375,
+      "grid_metrics": {
+        "id": "light_of_the_seven\\archival\\python_unclear\\Python\\test_sora_system.py",
+        "path": "light_of_the_seven\\archival\\python_unclear\\Python\\test_sora_system.py",
+        "fan_in": 192,
+        "fan_out": 7,
+        "lines": 158,
+        "complexity": 15.0,
+        "language": "Python"
+      },
+      "eufle_metrics": {
+        "id": "lightofthe7\\archival\\python_unclear\\Python\\test_sora_system.py",
+        "path": "lightofthe7\\archival\\python_unclear\\Python\\test_sora_system.py",
+        "fan_in": 127,
+        "fan_out": 7,
+        "lines": 158,
+        "complexity": 15.0,
+        "language": "Python"
+      }
+    },
+    {
+      "grid_module": "Python\\discussion.py",
+      "eufle_module": "lightofthe7\\python\\discussion.py",
+      "similarity_score": 1.397841726618705,
+      "grid_metrics": {
+        "id": "Python\\discussion.py",
+        "path": "Python\\discussion.py",
+        "fan_in": 3,
+        "fan_out": 7,
+        "lines": 138,
+        "complexity": 11.0,
+        "language": "Python"
+      },
+      "eufle_metrics": {
+        "id": "lightofthe7\\python\\discussion.py",
+        "path": "lightofthe7\\python\\discussion.py",
+        "fan_in": 2,
+        "fan_out": 7,
+        "lines": 139,
+        "complexity": 11.0,
+        "language": "Python"
+      }
+    },
+    {
+      "grid_module": "datakit\\visualizations\\interactive\\plotly_circle.py",
+      "eufle_module": "lightofthe7\\datakit\\visualizations\\interactive\\plotly_circle.py",
+      "similarity_score": 1.3976744186046512,
+      "grid_metrics": {
+        "id": "datakit\\visualizations\\interactive\\plotly_circle.py",
+        "path": "datakit\\visualizations\\interactive\\plotly_circle.py",
+        "fan_in": 3,
+        "fan_out": 8,
+        "lines": 384,
+        "complexity": 23.0,
+        "language": "Python"
+      },
+      "eufle_metrics": {
+        "id": "lightofthe7\\datakit\\visualizations\\interactive\\plotly_circle.py",
+        "path": "lightofthe7\\datakit\\visualizations\\interactive\\plotly_circle.py",
+        "fan_in": 2,
+        "fan_out": 8,
+        "lines": 387,
+        "complexity": 23.0,
+        "language": "Python"
+      }
+    },
+    {
+      "grid_module": "datakit\\visualizations\\interactive\\rowling_tribute.py",
+      "eufle_module": "lightofthe7\\datakit\\visualizations\\interactive\\rowling_tribute.py",
+      "similarity_score": 1.3964143426294822,
+      "grid_metrics": {
+        "id": "datakit\\visualizations\\interactive\\rowling_tribute.py",
+        "path": "datakit\\visualizations\\interactive\\rowling_tribute.py",
+        "fan_in": 3,
+        "fan_out": 3,
+        "lines": 248,
+        "complexity": 20.0,
+        "language": "Python"
+      },
+      "eufle_metrics": {
+        "id": "lightofthe7\\datakit\\visualizations\\interactive\\rowling_tribute.py",
+        "path": "lightofthe7\\datakit\\visualizations\\interactive\\rowling_tribute.py",
+        "fan_in": 2,
+        "fan_out": 3,
+        "lines": 251,
+        "complexity": 20.0,
+        "language": "Python"
+      }
+    },
+    {
+      "grid_module": "light_of_the_seven\\create_grid_structure.py",
+      "eufle_module": "lightofthe7\\create_grid_structure.py",
+      "similarity_score": 1.391089108910891,
+      "grid_metrics": {
+        "id": "light_of_the_seven\\create_grid_structure.py",
+        "path": "light_of_the_seven\\create_grid_structure.py",
+        "fan_in": 60,
+        "fan_out": 4,
+        "lines": 101,
+        "complexity": 7.0,
+        "language": "Python"
+      },
+      "eufle_metrics": {
+        "id": "lightofthe7\\create_grid_structure.py",
+        "path": "lightofthe7\\create_grid_structure.py",
+        "fan_in": 40,
+        "fan_out": 4,
+        "lines": 98,
+        "complexity": 7.0,
+        "language": "Python"
+      }
+    },
+    {
+      "grid_module": "research_snapshots\\light_of_the_seven_repo_copy_2026-01-01\\application\\mothership\\repositories\\__init__.py",
+      "eufle_module": "lightofthe7\\application\\mothership\\repositories\\__init__.py",
+      "similarity_score": 1.3909202150422595,
+      "grid_metrics": {
+        "id": "research_snapshots\\light_of_the_seven_repo_copy_2026-01-01\\application\\mothership\\repositories\\__init__.py",
+        "path": "research_snapshots\\light_of_the_seven_repo_copy_2026-01-01\\application\\mothership\\repositories\\__init__.py",
+        "fan_in": 208,
+        "fan_out": 10,
+        "lines": 703,
+        "complexity": 33.0,
+        "language": "Python"
+      },
+      "eufle_metrics": {
+        "id": "lightofthe7\\application\\mothership\\repositories\\__init__.py",
+        "path": "lightofthe7\\application\\mothership\\repositories\\__init__.py",
+        "fan_in": 137,
+        "fan_out": 10,
+        "lines": 719,
+        "complexity": 33.0,
+        "language": "Python"
+      }
+    },
+    {
+      "grid_module": "datakit\\visualizations\\static\\circle_graph.py",
+      "eufle_module": "lightofthe7\\datakit\\visualizations\\static\\circle_graph.py",
+      "similarity_score": 1.3885167464114831,
+      "grid_metrics": {
+        "id": "datakit\\visualizations\\static\\circle_graph.py",
+        "path": "datakit\\visualizations\\static\\circle_graph.py",
+        "fan_in": 3,
+        "fan_out": 7,
+        "lines": 201,
+        "complexity": 12.0,
+        "language": "Python"
+      },
+      "eufle_metrics": {
+        "id": "lightofthe7\\datakit\\visualizations\\static\\circle_graph.py",
+        "path": "lightofthe7\\datakit\\visualizations\\static\\circle_graph.py",
+        "fan_in": 2,
+        "fan_out": 7,
+        "lines": 209,
+        "complexity": 12.0,
+        "language": "Python"
+      }
+    },
+    {
+      "grid_module": "application\\mothership\\schemas\\requests.py",
+      "eufle_module": "lightofthe7\\application\\mothership\\schemas\\requests.py",
+      "similarity_score": 1.3870967741935485,
+      "grid_metrics": {
+        "id": "application\\mothership\\schemas\\requests.py",
+        "path": "application\\mothership\\schemas\\requests.py",
+        "fan_in": 93,
+        "fan_out": 5,
+        "lines": 876,
+        "complexity": 9.0,
+        "language": "Python"
+      },
+      "eufle_metrics": {
+        "id": "lightofthe7\\application\\mothership\\schemas\\requests.py",
+        "path": "lightofthe7\\application\\mothership\\schemas\\requests.py",
+        "fan_in": 58,
+        "fan_out": 5,
+        "lines": 876,
+        "complexity": 9.0,
+        "language": "Python"
+      }
+    },
+    {
+      "grid_module": "research_snapshots\\light_of_the_seven_repo_copy_2026-01-01\\application\\mothership\\schemas\\requests.py",
+      "eufle_module": "lightofthe7\\application\\mothership\\schemas\\requests.py",
+      "similarity_score": 1.3870967741935485,
+      "grid_metrics": {
+        "id": "research_snapshots\\light_of_the_seven_repo_copy_2026-01-01\\application\\mothership\\schemas\\requests.py",
+        "path": "research_snapshots\\light_of_the_seven_repo_copy_2026-01-01\\application\\mothership\\schemas\\requests.py",
+        "fan_in": 93,
+        "fan_out": 5,
+        "lines": 876,
+        "complexity": 9.0,
+        "language": "Python"
+      },
+      "eufle_metrics": {
+        "id": "lightofthe7\\application\\mothership\\schemas\\requests.py",
+        "path": "lightofthe7\\application\\mothership\\schemas\\requests.py",
+        "fan_in": 58,
+        "fan_out": 5,
+        "lines": 876,
+        "complexity": 9.0,
+        "language": "Python"
+      }
+    },
+    {
+      "grid_module": "application\\mothership\\repositories\\__init__.py",
+      "eufle_module": "lightofthe7\\application\\mothership\\repositories\\__init__.py",
+      "similarity_score": 1.3854551082763265,
+      "grid_metrics": {
+        "id": "application\\mothership\\repositories\\__init__.py",
+        "path": "application\\mothership\\repositories\\__init__.py",
+        "fan_in": 208,
+        "fan_out": 13,
+        "lines": 704,
+        "complexity": 34.0,
+        "language": "Python"
+      },
+      "eufle_metrics": {
+        "id": "lightofthe7\\application\\mothership\\repositories\\__init__.py",
+        "path": "lightofthe7\\application\\mothership\\repositories\\__init__.py",
+        "fan_in": 137,
+        "fan_out": 10,
+        "lines": 719,
+        "complexity": 33.0,
+        "language": "Python"
+      }
+    },
+    {
+      "grid_module": "archival\\redundant_roots\\ml\\model\\register_model.py",
+      "eufle_module": "lightofthe7\\archival\\redundant_roots\\ml\\model\\register_model.py",
+      "similarity_score": 1.385,
+      "grid_metrics": {
+        "id": "archival\\redundant_roots\\ml\\model\\register_model.py",
+        "path": "archival\\redundant_roots\\ml\\model\\register_model.py",
+        "fan_in": 60,
+        "fan_out": 4,
+        "lines": 94,
+        "complexity": 4.0,
+        "language": "Python"
+      },
+      "eufle_metrics": {
+        "id": "lightofthe7\\archival\\redundant_roots\\ml\\model\\register_model.py",
+        "path": "lightofthe7\\archival\\redundant_roots\\ml\\model\\register_model.py",
+        "fan_in": 37,
+        "fan_out": 4,
+        "lines": 94,
+        "complexity": 4.0,
+        "language": "Python"
+      }
+    },
+    {
+      "grid_module": "light_of_the_seven\\archival\\redundant_roots\\ml\\model\\register_model.py",
+      "eufle_module": "lightofthe7\\archival\\redundant_roots\\ml\\model\\register_model.py",
+      "similarity_score": 1.385,
+      "grid_metrics": {
+        "id": "light_of_the_seven\\archival\\redundant_roots\\ml\\model\\register_model.py",
+        "path": "light_of_the_seven\\archival\\redundant_roots\\ml\\model\\register_model.py",
+        "fan_in": 60,
+        "fan_out": 4,
+        "lines": 94,
+        "complexity": 4.0,
+        "language": "Python"
+      },
+      "eufle_metrics": {
+        "id": "lightofthe7\\archival\\redundant_roots\\ml\\model\\register_model.py",
+        "path": "lightofthe7\\archival\\redundant_roots\\ml\\model\\register_model.py",
+        "fan_in": 37,
+        "fan_out": 4,
+        "lines": 94,
+        "complexity": 4.0,
+        "language": "Python"
+      }
+    },
+    {
+      "grid_module": "datakit\\scripts\\appreciation_generator.py",
+      "eufle_module": "lightofthe7\\datakit\\scripts\\appreciation_generator.py",
+      "similarity_score": 1.383623693379791,
+      "grid_metrics": {
+        "id": "datakit\\scripts\\appreciation_generator.py",
+        "path": "datakit\\scripts\\appreciation_generator.py",
+        "fan_in": 63,
+        "fan_out": 5,
+        "lines": 287,
+        "complexity": 22.0,
+        "language": "Python"
+      },
+      "eufle_metrics": {
+        "id": "lightofthe7\\datakit\\scripts\\appreciation_generator.py",
+        "path": "lightofthe7\\datakit\\scripts\\appreciation_generator.py",
+        "fan_in": 39,
+        "fan_out": 5,
+        "lines": 285,
+        "complexity": 22.0,
+        "language": "Python"
+      }
+    },
+    {
+      "grid_module": "grid\\__init__.py",
+      "eufle_module": "lightofthe7\\application\\mothership\\__init__.py",
+      "similarity_score": 1.3833333333333333,
+      "grid_metrics": {
+        "id": "grid\\__init__.py",
+        "path": "grid\\__init__.py",
+        "fan_in": 2,
+        "fan_out": 12,
+        "lines": 144,
+        "complexity": 24.0,
+        "language": "Python"
+      },
+      "eufle_metrics": {
+        "id": "lightofthe7\\application\\mothership\\__init__.py",
+        "path": "lightofthe7\\application\\mothership\\__init__.py",
+        "fan_in": 2,
+        "fan_out": 5,
+        "lines": 132,
+        "complexity": 13.0,
+        "language": "Python"
+      }
+    },
+    {
+      "grid_module": "datakit\\visualizations\\drive-index-vad\\tools\\locus_of_control_demo.py",
+      "eufle_module": "lightofthe7\\datakit\\visualizations\\drive-index-vad\\tools\\locus_of_control_demo.py",
+      "similarity_score": 1.3821428571428571,
+      "grid_metrics": {
+        "id": "datakit\\visualizations\\drive-index-vad\\tools\\locus_of_control_demo.py",
+        "path": "datakit\\visualizations\\drive-index-vad\\tools\\locus_of_control_demo.py",
+        "fan_in": 3,
+        "fan_out": 4,
+        "lines": 252,
+        "complexity": 9.0,
+        "language": "Python"
+      },
+      "eufle_metrics": {
+        "id": "lightofthe7\\datakit\\visualizations\\drive-index-vad\\tools\\locus_of_control_demo.py",
+        "path": "lightofthe7\\datakit\\visualizations\\drive-index-vad\\tools\\locus_of_control_demo.py",
+        "fan_in": 2,
+        "fan_out": 5,
+        "lines": 237,
+        "complexity": 9.0,
+        "language": "Python"
+      }
+    },
+    {
+      "grid_module": "archival\\python_unclear\\Python\\ide_recorder_cli.py",
+      "eufle_module": "lightofthe7\\archival\\python_unclear\\Python\\ide_recorder_cli.py",
+      "similarity_score": 1.381967213114754,
+      "grid_metrics": {
+        "id": "archival\\python_unclear\\Python\\ide_recorder_cli.py",
+        "path": "archival\\python_unclear\\Python\\ide_recorder_cli.py",
+        "fan_in": 61,
+        "fan_out": 11,
+        "lines": 320,
+        "complexity": 16.0,
+        "language": "Python"
+      },
+      "eufle_metrics": {
+        "id": "lightofthe7\\archival\\python_unclear\\Python\\ide_recorder_cli.py",
+        "path": "lightofthe7\\archival\\python_unclear\\Python\\ide_recorder_cli.py",
+        "fan_in": 37,
+        "fan_out": 11,
+        "lines": 320,
+        "complexity": 16.0,
+        "language": "Python"
+      }
+    },
+    {
+      "grid_module": "light_of_the_seven\\archival\\python_unclear\\Python\\ide_recorder_cli.py",
+      "eufle_module": "lightofthe7\\archival\\python_unclear\\Python\\ide_recorder_cli.py",
+      "similarity_score": 1.381967213114754,
+      "grid_metrics": {
+        "id": "light_of_the_seven\\archival\\python_unclear\\Python\\ide_recorder_cli.py",
+        "path": "light_of_the_seven\\archival\\python_unclear\\Python\\ide_recorder_cli.py",
+        "fan_in": 61,
+        "fan_out": 11,
+        "lines": 320,
+        "complexity": 16.0,
+        "language": "Python"
+      },
+      "eufle_metrics": {
+        "id": "lightofthe7\\archival\\python_unclear\\Python\\ide_recorder_cli.py",
+        "path": "lightofthe7\\archival\\python_unclear\\Python\\ide_recorder_cli.py",
+        "fan_in": 37,
+        "fan_out": 11,
+        "lines": 320,
+        "complexity": 16.0,
+        "language": "Python"
+      }
+    },
+    {
+      "grid_module": "datakit\\Hogwarts\\great_hall\\run_recommended_stream.py",
+      "eufle_module": "lightofthe7\\datakit\\Hogwarts\\great_hall\\run_recommended_stream.py",
+      "similarity_score": 1.3816101694915255,
+      "grid_metrics": {
+        "id": "datakit\\Hogwarts\\great_hall\\run_recommended_stream.py",
+        "path": "datakit\\Hogwarts\\great_hall\\run_recommended_stream.py",
+        "fan_in": 60,
+        "fan_out": 6,
+        "lines": 175,
+        "complexity": 10.0,
+        "language": "Python"
+      },
+      "eufle_metrics": {
+        "id": "lightofthe7\\datakit\\Hogwarts\\great_hall\\run_recommended_stream.py",
+        "path": "lightofthe7\\datakit\\Hogwarts\\great_hall\\run_recommended_stream.py",
+        "fan_in": 37,
+        "fan_out": 6,
+        "lines": 177,
+        "complexity": 10.0,
+        "language": "Python"
+      }
+    },
+    {
+      "grid_module": "grid\\prompts\\prompt_store.py",
+      "eufle_module": "lightofthe7\\grid\\prompts\\prompt_store.py",
+      "similarity_score": 1.3808823529411764,
+      "grid_metrics": {
+        "id": "grid\\prompts\\prompt_store.py",
+        "path": "grid\\prompts\\prompt_store.py",
+        "fan_in": 68,
+        "fan_out": 4,
+        "lines": 196,
+        "complexity": 32.0,
+        "language": "Python"
+      },
+      "eufle_metrics": {
+        "id": "lightofthe7\\grid\\prompts\\prompt_store.py",
+        "path": "lightofthe7\\grid\\prompts\\prompt_store.py",
+        "fan_in": 41,
+        "fan_out": 4,
+        "lines": 196,
+        "complexity": 32.0,
+        "language": "Python"
+      }
+    },
+    {
+      "grid_module": "datakit\\visualizations\\static\\smartdecisor.py",
+      "eufle_module": "lightofthe7\\datakit\\visualizations\\static\\smartdecisor.py",
+      "similarity_score": 1.3791058122205664,
+      "grid_metrics": {
+        "id": "datakit\\visualizations\\static\\smartdecisor.py",
+        "path": "datakit\\visualizations\\static\\smartdecisor.py",
+        "fan_in": 5,
+        "fan_out": 9,
+        "lines": 671,
+        "complexity": 48.0,
+        "language": "Python"
+      },
+      "eufle_metrics": {
+        "id": "lightofthe7\\datakit\\visualizations\\static\\smartdecisor.py",
+        "path": "lightofthe7\\datakit\\visualizations\\static\\smartdecisor.py",
+        "fan_in": 3,
+        "fan_out": 9,
+        "lines": 669,
+        "complexity": 48.0,
+        "language": "Python"
+      }
+    },
+    {
+      "grid_module": "grid\\senses\\sensory_store.py",
+      "eufle_module": "lightofthe7\\grid\\senses\\sensory_store.py",
+      "similarity_score": 1.37910447761194,
+      "grid_metrics": {
+        "id": "grid\\senses\\sensory_store.py",
+        "path": "grid\\senses\\sensory_store.py",
+        "fan_in": 67,
+        "fan_out": 6,
+        "lines": 143,
+        "complexity": 24.0,
+        "language": "Python"
+      },
+      "eufle_metrics": {
+        "id": "lightofthe7\\grid\\senses\\sensory_store.py",
+        "path": "lightofthe7\\grid\\senses\\sensory_store.py",
+        "fan_in": 40,
+        "fan_out": 6,
+        "lines": 143,
+        "complexity": 24.0,
+        "language": "Python"
+      }
+    }
+  ],
+  "high_traffic_comparisons": [
+    {
+      "type": "reference_component",
+      "grid_module": "light_of_the_seven\\create_grid_structure.py",
+      "eufle_module": "lightofthe7\\create_grid_structure.py",
+      "similarity_score": 1.391089108910891,
+      "grid_metrics": {
+        "fan_in": 60,
+        "complexity": 7.0,
+        "comment_density": 0.18811881188118812,
+        "lines": 101
+      },
+      "eufle_metrics": {
+        "fan_in": 0,
+        "complexity": 0,
+        "comment_density": 0.19387755102040816,
+        "lines": 98
+      },
+      "recommendations": [
+        {
+          "action": "mirror_patterns",
+          "reason": "Both are high-value reference components - consider sharing patterns",
+          "source": "both"
+        }
+      ]
+    }
+  ],
+  "recommendations": [
+    {
+      "action": "mirror_patterns",
+      "priority": "medium",
+      "affected_modules": 1,
+      "details": [
+        {
+          "grid_module": "light_of_the_seven\\create_grid_structure.py",
+          "eufle_module": "lightofthe7\\create_grid_structure.py",
+          "reason": "Both are high-value reference components - consider sharing patterns",
+          "source": "both"
+        }
+      ]
+    }
+  ]
+}

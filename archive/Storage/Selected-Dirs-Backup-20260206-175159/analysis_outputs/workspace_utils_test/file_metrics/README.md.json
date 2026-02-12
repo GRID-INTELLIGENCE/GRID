@@ -1,0 +1,15 @@
+{
+  "path": "README.md",
+  "size": 2807,
+  "language": "Markdown",
+  "lines": 98,
+  "non_empty_lines": 68,
+  "functions": 0,
+  "classes": 0,
+  "imports": [],
+  "import_lines": [],
+  "complexity_estimate": 4.0,
+  "comment_density": 0.19387755102040816,
+  "has_docstrings": false,
+  "side_effects": []
+}

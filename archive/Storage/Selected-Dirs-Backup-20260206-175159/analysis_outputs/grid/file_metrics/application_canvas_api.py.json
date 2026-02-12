@@ -1,0 +1,33 @@
+{
+  "path": "application\\canvas\\api.py",
+  "size": 4992,
+  "language": "Python",
+  "lines": 160,
+  "non_empty_lines": 120,
+  "functions": 0,
+  "classes": 3,
+  "imports": [
+    "__future__",
+    "logging",
+    "pathlib",
+    "typing",
+    "fastapi",
+    "pydantic",
+    "canvas",
+    "schemas"
+  ],
+  "import_lines": [
+    3,
+    5,
+    6,
+    7,
+    9,
+    10,
+    12,
+    13
+  ],
+  "complexity_estimate": 8.0,
+  "comment_density": 0.0125,
+  "has_docstrings": true,
+  "side_effects": []
+}

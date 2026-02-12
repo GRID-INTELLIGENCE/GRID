@@ -1,0 +1,380 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "meta": {
+        "version": "1.0.0",
+        "created": "2026-02-12T14:20:42+06:00",
+        "purpose": "Structured user context for Claude Code — enables Claude to understand the developer, their projects, environment, philosophy, and working style from the first interaction.",
+        "source": "Deep analysis of C: and E: drives, project artifacts, configuration files, git history, and web research.",
+        "usage": "Place this file where Claude Code can reference it (e.g., linked from CLAUDE.md or .claude/rules/). Claude should read this to personalize interactions, anticipate needs, and understand the developer's domain expertise."
+    },
+    "identity": {
+        "name": "Irfan Kabir",
+        "email": "irfankabir02@gmail.com",
+        "github_handle": "caraxesthebloodwyrm02",
+        "github_visibility": "private",
+        "location_timezone": "UTC+6",
+        "primary_language": "English"
+    },
+    "system": {
+        "os": "Windows 10/11",
+        "shell": "PowerShell (primary)",
+        "wsl": "WSL2 with Ubuntu available",
+        "drives": {
+            "C": "System drive — user profile, global configs, IDE data, research",
+            "E": "Development drive — all project repos, workspaces, and codebases"
+        },
+        "installed_software": {
+            "python": "3.13.12 (64-bit)",
+            "node": "24.13.0",
+            "npm": "11.6.2",
+            "git": "2.53.0",
+            "uv": "managed (Python package manager — replaces pip)",
+            "bun": "installed (C:\\Users\\irfan\\.bun)",
+            "ollama": "installed (local LLM server, models pulled on demand)"
+        },
+        "git_config": {
+            "pager": "cat",
+            "safe_directory": "E:/",
+            "auto_setup_merge": false,
+            "auto_setup_rebase": "never"
+        }
+    },
+    "development_environment": {
+        "primary_ide": "Antigravity (AI-native IDE)",
+        "secondary_ides": [
+            "VS Code",
+            "Windsurf",
+            "Cursor"
+        ],
+        "ai_tools": {
+            "claude_code": {
+                "version": "2.1.39",
+                "install_method": "native",
+                "first_started": "2026-02-11T10:15:23.039Z",
+                "auto_updates": false,
+                "model_migrations": [
+                    "opus_4.5",
+                    "sonnet_4.5"
+                ],
+                "global_claude_md": "~/.claude/CLAUDE.md (custom — Explore→Plan→Implement→Verify workflow)"
+            },
+            "ollama": {
+                "api_url": "http://localhost:11434",
+                "default_model": "mistral-nemo:latest",
+                "configured_models": [
+                    "claude",
+                    "mistral-nemo:latest",
+                    "neural-chat:latest"
+                ]
+            },
+            "codeium": "installed",
+            "gemini": "installed (Antigravity)"
+        },
+        "extensions_and_plugins": {
+            "mcp_servers": [
+                "ollama",
+                "github",
+                "workspace"
+            ],
+            "chrome_extension": "Claude Code extension installed"
+        }
+    },
+    "projects": {
+        "primary": {
+            "name": "THE GRID",
+            "full_name": "Geometric Resonance Intelligence Driver",
+            "name_origin": "Named after Daft Punk's 'The Grid' from the Tron Legacy soundtrack, remixed by Pyrotechnique",
+            "path": "E:\\grid",
+            "repo": "github.com/caraxesthebloodwyrm02/GRID",
+            "license": "MIT",
+            "started": "2025-11-01",
+            "current_version": "2.2+",
+            "status": "production-ready",
+            "mission": "Serve people who cannot communicate with their loved ones",
+            "philosophy": "Local-first, privacy-first AI codebase analysis — your code never leaves your machine",
+            "stats": {
+                "files": "540+",
+                "lines_of_code": "50k+",
+                "tests": "283+",
+                "coverage": "≥80%",
+                "core_pass_rate": "100%"
+            },
+            "architecture": {
+                "pattern": "Domain-Driven Design + Event-Driven Architecture",
+                "layers": [
+                    "Entry Points",
+                    "Application",
+                    "Domain Services",
+                    "Core Intelligence",
+                    "Infrastructure",
+                    "Data"
+                ],
+                "unique_framework": "9 Cognition Patterns (Flow, Spatial, Rhythm, Color, Repetition, Deviation, Cause, Time, Combination)",
+                "cognitive_architecture": "Light of the Seven",
+                "mist_state": "High confidence that we DON'T know — epistemic humility inspired by Carl Jung"
+            },
+            "tech_stack": {
+                "backend": {
+                    "language": "Python 3.13",
+                    "framework": "FastAPI",
+                    "data_validation": "Pydantic v2",
+                    "orm": "SQLAlchemy (async) + Alembic",
+                    "task_queue": "Celery",
+                    "cache": "Redis",
+                    "local_llm": "Ollama",
+                    "embeddings": "sentence-transformers",
+                    "vector_db": "ChromaDB",
+                    "search": "BM25 + Vector fusion (hybrid)",
+                    "reranking": "ms-marco-MiniLM-L6-v2 (cross-encoder)",
+                    "observability": [
+                        "OpenTelemetry",
+                        "Prometheus",
+                        "structlog",
+                        "Jaeger"
+                    ],
+                    "mcp": "MCP servers (Model Context Protocol)"
+                },
+                "frontend": {
+                    "framework": "React 19",
+                    "language": "TypeScript (strict)",
+                    "build_tool": "Vite 7",
+                    "desktop": "Electron 40",
+                    "styling": "TailwindCSS 4",
+                    "component_patterns": [
+                        "CVA",
+                        "clsx",
+                        "tailwind-merge"
+                    ],
+                    "data_fetching": "@tanstack/react-query",
+                    "routing": "react-router-dom v7",
+                    "validation": "Zod",
+                    "icons": "lucide-react",
+                    "storybook": "Storybook 10",
+                    "testing": "Vitest + Testing Library"
+                },
+                "quality_tools": {
+                    "python_linter": "ruff (line-length 120)",
+                    "python_formatter": "black (line-length 120)",
+                    "python_type_checker": "mypy (strict)",
+                    "python_test_runner": "pytest + pytest-asyncio + pytest-cov",
+                    "js_linter": "ESLint 9",
+                    "js_formatter": "Prettier",
+                    "security_scanner": "bandit",
+                    "dependency_audit": "pip-audit"
+                }
+            },
+            "key_subsystems": {
+                "safety_pipeline": {
+                    "path": "E:\\grid\\safety",
+                    "description": "Production-grade AI safety enforcement — fail-closed by design",
+                    "components": [
+                        "SafetyMiddleware",
+                        "Pre-check detector (<50ms)",
+                        "Redis Streams workers",
+                        "ML post-check",
+                        "Human escalation",
+                        "Audit logging"
+                    ],
+                    "trust_tiers": [
+                        "ANON (20 req/day)",
+                        "USER (1K req/day)",
+                        "VERIFIED (10K req/day)",
+                        "PRIVILEGED (100K req/day)"
+                    ]
+                },
+                "security": {
+                    "path": "E:\\grid\\security",
+                    "description": "Network monitoring, forensic analysis, incident response",
+                    "components": [
+                        "assessment_agent",
+                        "network_interceptor",
+                        "forensic_log_analyzer",
+                        "log_collector"
+                    ]
+                },
+                "boundaries": {
+                    "path": "E:\\grid\\boundaries",
+                    "description": "Boundary contracts, overwatch, refusal logic — OS-level safety with formal ownership transfer",
+                    "components": [
+                        "boundary.py",
+                        "overwatch.py",
+                        "refusal.py",
+                        "preparedness.py",
+                        "logger_ws.py",
+                        "server_ws.py"
+                    ]
+                },
+                "resonance_api": {
+                    "description": "Real-time activity processing with adaptive cognitive feedback",
+                    "endpoint": "http://localhost:8080/api/v1/resonance"
+                },
+                "agentic_system": {
+                    "description": "Event-driven case management with receptionist-lawyer-client workflow",
+                    "events": [
+                        "CaseCreated",
+                        "CaseCategorized",
+                        "CaseReferenceGenerated",
+                        "CaseExecuted",
+                        "CaseCompleted"
+                    ]
+                },
+                "unified_fabric": {
+                    "description": "Async event bus + AISafetyBridge for cross-project safety validation",
+                    "connected_projects": [
+                        "GRID",
+                        "Coinbase",
+                        "wellness_studio"
+                    ]
+                },
+                "rag_system": {
+                    "description": "Local-first RAG with 33-40% precision improvement",
+                    "components": [
+                        "Semantic chunking",
+                        "Hybrid BM25+Vector search",
+                        "Cross-encoder reranking"
+                    ]
+                }
+            }
+        },
+        "secondary": [
+            {
+                "name": "Coinbase Analytics Pipeline",
+                "path": "C:\\Users\\irfan\\CascadeProjects\\Coinbase",
+                "also_at": "E:\\grid\\work\\Coinbase",
+                "description": "Databricks-powered financial analytics with portfolio security, privacy vault, and audit logging",
+                "tech": [
+                    "Python",
+                    "Databricks",
+                    "SQLAlchemy"
+                ]
+            },
+            {
+                "name": "Wellness Studio",
+                "path": "C:\\Users\\irfan\\CascadeProjects\\wellness_studio",
+                "also_at": "E:\\grid\\work\\wellness_studio",
+                "description": "Health/wellness platform with comprehensive AI safety — PII guardian, consent manager, encryption utilities",
+                "tech": [
+                    "Python",
+                    "FastAPI"
+                ]
+            },
+            {
+                "name": "EUFLE",
+                "path": "E:\\grid\\work\\GRID\\EUFLE",
+                "description": "Audio/music project — 48kHz sample rate, 124 BPM, 32-bit float",
+                "tech": [
+                    "Python",
+                    "Ollama",
+                    "librosa",
+                    "openai-whisper"
+                ]
+            },
+            {
+                "name": "Frontend (standalone)",
+                "path": "E:\\frontend",
+                "description": "Standalone frontend development workspace with worktrees",
+                "tech": [
+                    "React",
+                    "TypeScript",
+                    "Python server"
+                ]
+            },
+            {
+                "name": "TerminalCommandRunner",
+                "path": "C:\\Users\\irfan\\CascadeProjects\\TerminalCommandRunner",
+                "description": "Terminal command execution utility"
+            },
+            {
+                "name": "codex-app-client",
+                "path": "C:\\Users\\irfan\\CascadeProjects\\codex-app-client",
+                "description": "Codex application client"
+            }
+        ]
+    },
+    "core_principles": {
+        "security": {
+            "no_eval_exec_pickle": "Absolutely never — primary vector for code injection and privilege escalation",
+            "no_auth_bypass": "Every request must be authenticated — no dev mode, no anonymous access, no exceptions",
+            "full_audit_trails": "Every action attributable to a specific user — manipulation becomes impossible to hide",
+            "fair_resource_allocation": "Logged, auditable, no favoritism — alerts on unequal distribution patterns",
+            "staff_protection": "Burnout detection, workload visibility, no exploitation"
+        },
+        "philosophy": {
+            "local_first": "Everything runs locally — zero network requests to external AI APIs",
+            "privacy_first": "Code never leaves the machine — offline-capable",
+            "epistemic_humility": "Inspired by Carl Jung — admitting 'I don't know' is sometimes the smartest answer (MIST state)",
+            "no_matter_principle": "When the environment is noisy, separate signal from noise, compress into structured core, keep moving",
+            "principled_not_perfect": "Document every fix, report actual numbers, never claim something works until it does"
+        },
+        "cultural_inspirations": [
+            "Daft Punk — 'The Grid' (Tron Legacy OST, remixed by Pyrotechnique) → project name",
+            "Carl Jung — epistemic humility → MIST state design",
+            "NASA Mars exploration — drive to contribute to previously inaccessible domains",
+            "seL4, Google Fuchsia, Rust ownership model → security architecture influences",
+            "Coffee House Metaphor → cognitive load management (Espresso/Americano/Cold Brew modes)"
+        ]
+    },
+    "working_style": {
+        "workflow": "Explore → Plan → Implement → Verify → Commit",
+        "context_management": "Aggressive — /clear between tasks, subagents for research, narrow scoping",
+        "debugging": "Systematic — read error, identify root cause, write failing test, fix, verify",
+        "preferences": {
+            "concise_communication": true,
+            "plan_before_execute": true,
+            "verify_always": true,
+            "match_existing_patterns": true,
+            "minimal_targeted_changes": true,
+            "never_suppress_errors": true,
+            "never_modify_test_assertions": true
+        },
+        "command_conventions": {
+            "python_always_via_uv": "uv run <command> or uv sync — never bare pip",
+            "preferred_shell": "PowerShell",
+            "git_pager": "cat (no interactive paging)"
+        }
+    },
+    "domains_of_interest": [
+        "AI Safety & Alignment",
+        "Cybersecurity (offensive & defensive)",
+        "Cognitive Science & Decision Support",
+        "Local-first AI / Privacy-preserving ML",
+        "Domain-Driven Design",
+        "Event-Driven Architecture",
+        "Audio Engineering (EUFLE)",
+        "Financial Analytics (Coinbase/Databricks)",
+        "Wellness Technology",
+        "Space Exploration (NASA Mars — aspirational contributor)",
+        "Runtime Observation & Safety Enforcement",
+        "Forensic Log Analysis",
+        "Network Security Monitoring"
+    ],
+    "meeting_context_for_claude": {
+        "who_you_are_meeting": "Irfan Kabir — a principled, deeply curious solo developer building THE GRID",
+        "what_he_cares_about": "Getting things right, not just getting things done. Security is non-negotiable. Privacy is sacred. Every line of code serves a mission.",
+        "how_to_work_with_him": [
+            "Be direct and concise — skip filler",
+            "Plan before executing on complex tasks",
+            "Always verify work — never say 'this should work' without confirming",
+            "Match existing codebase patterns before introducing new ones",
+            "Respect the security principles — they exist for deeply personal reasons",
+            "Use uv, not pip. Always.",
+            "He thinks in systems — connect the dots across modules",
+            "He values epistemic humility — say 'I don't know' when appropriate",
+            "He's inspired by things beyond code — music, space, psychology — and that drives his architecture decisions"
+        ],
+        "what_to_prioritize": [
+            "Security and safety invariants",
+            "Local-first, privacy-first approach",
+            "Production readiness over prototyping",
+            "Existing patterns over novel approaches",
+            "Root cause fixes over symptom suppression"
+        ],
+        "first_session_suggestions": [
+            "Ask him what he's working on right now",
+            "Reference THE GRID's 9 cognition patterns if relevant",
+            "Acknowledge the depth of the safety architecture",
+            "Be ready for cross-project context (GRID ↔ Coinbase ↔ wellness_studio)",
+            "Offer to run tests or lint after any changes"
+        ]
+    }
+}

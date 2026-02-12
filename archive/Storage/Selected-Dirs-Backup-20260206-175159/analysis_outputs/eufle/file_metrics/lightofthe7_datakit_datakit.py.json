@@ -1,0 +1,35 @@
+{
+  "path": "lightofthe7\\datakit\\datakit.py",
+  "size": 18252,
+  "language": "Python",
+  "lines": 520,
+  "non_empty_lines": 442,
+  "functions": 18,
+  "classes": 1,
+  "imports": [
+    "argparse",
+    "os",
+    "sys",
+    "pathlib",
+    "core.config",
+    "core.explorer",
+    "core.loader",
+    "core.control"
+  ],
+  "import_lines": [
+    19,
+    20,
+    21,
+    22,
+    28,
+    29,
+    30,
+    31
+  ],
+  "complexity_estimate": 54.0,
+  "comment_density": 0.04230769230769231,
+  "has_docstrings": true,
+  "side_effects": [
+    "os\\.(system|popen)"
+  ]
+}

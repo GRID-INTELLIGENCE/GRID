@@ -1,0 +1,25 @@
+{
+  "path": "lightofthe7\\cognitive_layer\\schemas\\user_cognitive_profile.py",
+  "size": 4011,
+  "language": "Python",
+  "lines": 147,
+  "non_empty_lines": 120,
+  "functions": 1,
+  "classes": 5,
+  "imports": [
+    "datetime",
+    "enum",
+    "typing",
+    "pydantic"
+  ],
+  "import_lines": [
+    3,
+    4,
+    5,
+    7
+  ],
+  "complexity_estimate": 0.0,
+  "comment_density": 0.061224489795918366,
+  "has_docstrings": true,
+  "side_effects": []
+}

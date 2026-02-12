@@ -1,0 +1,25 @@
+{
+  "path": "lightofthe7\\cognitive_layer\\decision_support\\choice_architecture.py",
+  "size": 7884,
+  "language": "Python",
+  "lines": 223,
+  "non_empty_lines": 181,
+  "functions": 6,
+  "classes": 2,
+  "imports": [
+    "enum",
+    "typing",
+    "schemas.decision_context",
+    "schemas.user_cognitive_profile"
+  ],
+  "import_lines": [
+    3,
+    4,
+    6,
+    7
+  ],
+  "complexity_estimate": 22.0,
+  "comment_density": 0.1031390134529148,
+  "has_docstrings": true,
+  "side_effects": []
+}

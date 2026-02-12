@@ -1,0 +1,31 @@
+{
+  "path": "application\\mothership\\db\\models_agentic.py",
+  "size": 4067,
+  "language": "Python",
+  "lines": 102,
+  "non_empty_lines": 81,
+  "functions": 2,
+  "classes": 1,
+  "imports": [
+    "__future__",
+    "datetime",
+    "typing",
+    "sqlalchemy",
+    "sqlalchemy.ext.declarative",
+    "models_base"
+  ],
+  "import_lines": [
+    3,
+    5,
+    6,
+    8,
+    9,
+    11
+  ],
+  "complexity_estimate": 0.0,
+  "comment_density": 0.09803921568627451,
+  "has_docstrings": true,
+  "side_effects": [
+    "sqlalchemy\\."
+  ]
+}

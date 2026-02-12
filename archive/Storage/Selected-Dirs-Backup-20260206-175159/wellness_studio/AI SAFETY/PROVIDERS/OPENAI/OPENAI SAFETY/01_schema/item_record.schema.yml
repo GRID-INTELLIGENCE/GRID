@@ -1,0 +1,15 @@
+version: 1
+item:
+  id: string
+  title: string
+  url: string
+  date: string # ISO-8601 (YYYY-MM-DD)
+  type: enum[Research, Publication, Safety, SystemCard, Policy]
+  safety_themes: array[string] # use taxonomy labels
+  summary: string
+  key_findings: array[string]
+  user_guidance: array[string]
+  user_rights_implications: array[string]
+  scenarios: array[string] # scenario IDs
+  remediation_steps: array[string]
+  evidence_quotes: array[string] # short, precise excerpts

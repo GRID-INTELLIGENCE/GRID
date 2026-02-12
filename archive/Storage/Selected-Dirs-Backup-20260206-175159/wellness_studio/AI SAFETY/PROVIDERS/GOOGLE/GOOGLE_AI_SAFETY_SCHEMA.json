@@ -1,0 +1,122 @@
+{
+  "provider": "Google DeepMind",
+  "version": "1.0.0",
+  "last_updated": "2025-02-05",
+  "metadata": {
+    "primary_models": ["Gemini 1.5 Pro", "Gemini 1.5 Flash", "Gemini 1.0 Ultra", "Gemma"],
+    "mission": "Building AI responsibly to benefit humanity",
+    "website": "https://deepmind.google",
+    "governance": {
+      "oversight_bodies": [
+        {
+          "name": "Responsibility and Safety Council (RSC)",
+          "function": "Evaluates research, projects, and collaborations against AI Principles."
+        },
+        {
+          "name": "AGI Safety Council",
+          "function": "Safeguards against extreme risks from powerful future AGI systems."
+        }
+      ]
+    }
+  },
+  "safety_frameworks": {
+    "ai_principles": [
+      "Be socially beneficial",
+      "Avoid creating or reinforcing unfair bias",
+      "Be built and tested for safety",
+      "Be accountable to people",
+      "Incorporate privacy design principles",
+      "Uphold high standards of scientific excellence",
+      "Be made available for uses that accord with these principles"
+    ],
+    "frontier_safety_framework": {
+      "levels": [
+        "Standard Safety Precautions",
+        "Enhanced Security & Monitoring",
+        "Critical Risk Mitigation",
+        "Threshold Breach Protocol"
+      ],
+      "risk_domains": [
+        "CBRN (Chemical, Biological, Radiological, Nuclear)",
+        "Cybersecurity",
+        "Autonomous Agency",
+        "Persuasion & Manipulation"
+      ]
+    }
+  },
+  "research_areas": [
+    {
+      "name": "Technical Safety",
+      "focus": "Robustness, interpretability, and alignment of models."
+    },
+    {
+      "name": "Ethics & Society",
+      "focus": "Socio-technical impacts, fairness, and human-AI interaction."
+    },
+    {
+      "name": "Governance & Security",
+      "focus": "Policy, international standards, and threat modeling."
+    },
+    {
+      "name": "Interpretability",
+      "focus": "Understanding internal model representations (e.g., Gemma Scope)."
+    }
+  ],
+  "safety_themes": {
+    "taxonomy": [
+      "Fairness",
+      "Safety",
+      "Privacy",
+      "Accountability",
+      "Transparency",
+      "Scientific Excellence"
+    ]
+  },
+  "hard_constraints": {
+    "prohibited_applications": [
+      {
+        "id": "GOOG-HC-001",
+        "category": "Weaponry",
+        "description": "Technologies that cause or directly facilitate overall injury to people."
+      },
+      {
+        "id": "GOOG-HC-002",
+        "category": "Surveillance",
+        "description": "Technologies that gather or use information for surveillance violating internationally accepted norms."
+      },
+      {
+        "id": "GOOG-HC-003",
+        "category": "International Law",
+        "description": "Technologies whose purpose contravenes widely accepted principles of international law and human rights."
+      },
+      {
+        "id": "GOOG-HC-004",
+        "category": "CBRN Uplift",
+        "description": "Providing instructions or capabilities for chemical, biological, radiological, or nuclear weapons."
+      }
+    ]
+  },
+  "monitoring_parameters": {
+    "gemini_safety_filters": [
+      "Hate Speech",
+      "Harassment",
+      "Sexually Explicit",
+      "Dangerous Content",
+      "Medical Advice (Unverified)"
+    ],
+    "evaluations": [
+      "Red Teaming",
+      "Automated Benchmarking",
+      "Human Feedback (RLHF)",
+      "Model-based Safety Classifiers"
+    ]
+  },
+  "privacy_protocols": {
+    "approaches": [
+      "Data Minimization",
+      "Differential Privacy",
+      "Federated Learning",
+      "Robust De-identification"
+    ]
+  }
+}

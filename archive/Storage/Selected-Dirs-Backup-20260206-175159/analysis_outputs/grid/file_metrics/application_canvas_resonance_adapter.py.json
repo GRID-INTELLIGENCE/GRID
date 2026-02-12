@@ -1,0 +1,31 @@
+{
+  "path": "application\\canvas\\resonance_adapter.py",
+  "size": 5218,
+  "language": "Python",
+  "lines": 161,
+  "non_empty_lines": 130,
+  "functions": 4,
+  "classes": 1,
+  "imports": [
+    "__future__",
+    "logging",
+    "typing",
+    "application.resonance.activity_resonance",
+    "application.resonance.adsr_envelope",
+    "application.resonance.path_visualizer",
+    "schemas"
+  ],
+  "import_lines": [
+    3,
+    5,
+    6,
+    8,
+    9,
+    10,
+    12
+  ],
+  "complexity_estimate": 6.0,
+  "comment_density": 0.043478260869565216,
+  "has_docstrings": true,
+  "side_effects": []
+}

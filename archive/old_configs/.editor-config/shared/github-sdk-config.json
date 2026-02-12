@@ -1,0 +1,51 @@
+{
+  "github": {
+    "api_base": "https://api.github.com",
+    "timeout_seconds": 30,
+    "features": {
+      "repo_analysis": {
+        "enabled": true,
+        "description": "Analyze repository structure and dependencies"
+      },
+      "issue_tracking": {
+        "enabled": true,
+        "description": "Track and manage GitHub issues"
+      },
+      "pull_request_management": {
+        "enabled": true,
+        "description": "Create, review, and merge pull requests"
+      },
+      "workflow_automation": {
+        "enabled": true,
+        "description": "Automate GitHub Actions workflows"
+      },
+      "repo_discovery": {
+        "enabled": true,
+        "description": "Discover and index repositories"
+      }
+    },
+    "integration_points": {
+      "harness_service": {
+        "enabled": true,
+        "path": "E:\\Apps\\backend\\services\\harness_service.py",
+        "description": "Deep context harvesting from GitHub repos"
+      },
+      "workspace_utils": {
+        "enabled": true,
+        "path": "E:\\workspace_utils",
+        "description": "Repository analysis utilities"
+      }
+    },
+    "environment_variables": {
+      "GITHUB_TOKEN": {
+        "required": true,
+        "source": ".env.editor",
+        "description": "GitHub API authentication token"
+      },
+      "GITHUB_ORG": {
+        "default": "stratagem-ai",
+        "description": "Default GitHub organization"
+      }
+    }
+  }
+}

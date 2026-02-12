@@ -1,0 +1,27 @@
+{
+  "path": "examples\\processing_unit_example.py",
+  "size": 4388,
+  "language": "Python",
+  "lines": 149,
+  "non_empty_lines": 120,
+  "functions": 0,
+  "classes": 0,
+  "imports": [
+    "asyncio",
+    "sys",
+    "pathlib",
+    "eufle.processing_unit",
+    "eufle.config_sync"
+  ],
+  "import_lines": [
+    13,
+    14,
+    15,
+    21,
+    28
+  ],
+  "complexity_estimate": 5.0,
+  "comment_density": 0.087248322147651,
+  "has_docstrings": true,
+  "side_effects": []
+}

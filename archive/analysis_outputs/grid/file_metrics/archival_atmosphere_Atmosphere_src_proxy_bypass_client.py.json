@@ -1,0 +1,29 @@
+{
+  "path": "archival\\atmosphere\\Atmosphere\\src\\proxy_bypass_client.py",
+  "size": 6061,
+  "language": "Python",
+  "lines": 207,
+  "non_empty_lines": 163,
+  "functions": 5,
+  "classes": 0,
+  "imports": [
+    "typing",
+    "httpx",
+    "requests",
+    "requests.adapters",
+    "urllib3.util.retry",
+    "time"
+  ],
+  "import_lines": [
+    6,
+    8,
+    9,
+    10,
+    11,
+    169
+  ],
+  "complexity_estimate": 11.0,
+  "comment_density": 0.05314009661835749,
+  "has_docstrings": true,
+  "side_effects": []
+}

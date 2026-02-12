@@ -1,0 +1,137 @@
+{
+  "provider": "NVIDIA",
+  "version": "1.0.0",
+  "last_updated": "2025-02-05",
+  "metadata": {
+    "primary_models": ["Nemotron-4", "NeMo Guardrails", "Picasso", "BioNeMo"],
+    "mission": "Powering safe and secure AI from data center to edge",
+    "website": "https://www.nvidia.com/ai",
+    "governance": {
+      "oversight_bodies": [
+        {
+          "name": "AI Safety Team",
+          "function": "Internal oversight for AI safety and responsible development."
+        },
+        {
+          "name": "Trustworthy AI Council",
+          "function": "Cross-functional review of AI ethics and safety practices."
+        }
+      ]
+    }
+  },
+  "safety_frameworks": {
+    "nemo_guardrails": [
+      "Input Rails",
+      "Output Rails",
+      "Dialog Rails",
+      "Retrieval Rails",
+      "Execution Rails"
+    ],
+    "trustworthy_ai": {
+      "pillars": [
+        "Transparency",
+        "Fairness",
+        "Privacy",
+        "Robustness",
+        "Accountability"
+      ],
+      "risk_domains": [
+        "Harmful Content",
+        "Bias and Discrimination",
+        "Privacy Violations",
+        "Security Vulnerabilities",
+        "Autonomous System Risks"
+      ]
+    }
+  },
+  "research_areas": [
+    {
+      "name": "NeMo Guardrails",
+      "focus": "Programmable guardrails for controllable LLM applications."
+    },
+    {
+      "name": "Confidential Computing",
+      "focus": "Secure AI execution environments and model protection."
+    },
+    {
+      "name": "Federated Learning",
+      "focus": "Privacy-preserving distributed AI training."
+    },
+    {
+      "name": "Secure AI Infrastructure",
+      "focus": "Hardware and software security for AI deployments."
+    }
+  ],
+  "safety_themes": {
+    "taxonomy": [
+      "Infrastructure Security",
+      "Model Safety",
+      "Data Privacy",
+      "Bias Mitigation",
+      "Transparency",
+      "Edge Safety"
+    ]
+  },
+  "hard_constraints": {
+    "prohibited_applications": [
+      {
+        "id": "NVDA-HC-001",
+        "category": "Autonomous Weapons",
+        "description": "AI systems for lethal autonomous weapons."
+      },
+      {
+        "id": "NVDA-HC-002",
+        "category": "Mass Surveillance",
+        "description": "Systems for unauthorized mass monitoring."
+      },
+      {
+        "id": "NVDA-HC-003",
+        "category": "Social Scoring",
+        "description": "Automated social credit or scoring systems."
+      },
+      {
+        "id": "NVDA-HC-004",
+        "category": "Critical Infrastructure Attack",
+        "description": "AI to disrupt critical systems."
+      },
+      {
+        "id": "NVDA-HC-005",
+        "category": "CBRN Development",
+        "description": "Assisting chemical, biological, radiological, nuclear weapons."
+      },
+      {
+        "id": "NVDA-HC-006",
+        "category": "Deepfake Abuse",
+        "description": "Non-consensual synthetic media generation."
+      },
+      {
+        "id": "NVDA-HC-007",
+        "category": "Fraud at Scale",
+        "description": "Automated large-scale financial fraud."
+      }
+    ]
+  },
+  "monitoring_parameters": {
+    "guardrails_categories": [
+      "Input Validation",
+      "Content Safety",
+      "Factuality Check",
+      "Sensitive Topics",
+      "Execution Control"
+    ],
+    "evaluations": [
+      "Red Team Exercises",
+      "Bias Audits",
+      "Security Penetration Testing",
+      "Infrastructure Compliance Scans"
+    ]
+  },
+  "privacy_protocols": {
+    "approaches": [
+      "Confidential Computing",
+      "Federated Learning",
+      "Differential Privacy",
+      "Data Encryption at Rest and Transit"
+    ]
+  }
+}

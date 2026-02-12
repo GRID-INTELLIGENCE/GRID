@@ -1,0 +1,29 @@
+{
+  "provider": "OpenAI",
+  "version": "2.0.0",
+  "global_defaults": {
+    "cooldown_period_seconds": 3600,
+    "aggregation_window_minutes": 60,
+    "confidence_threshold": 0.85
+  },
+  "signal_thresholds": {
+    "moderation_api": {
+      "hate": 0.8,
+      "harassment": 0.8,
+      "sexual": 0.7,
+      "self_harm": 0.7,
+      "violence": 0.7
+    },
+    "preparedness": {
+      "cybersecurity": 0.7,
+      "biological_threats": 0.8,
+      "chemical_threats": 0.8,
+      "autonomous_systems": 0.6,
+      "persuasion": 0.6
+    }
+  },
+  "escalation_triggers": {
+    "sag_notification_count": 5,
+    "critical_risk_threshold": 0.9
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "path": "lightofthe7\\archival\\python_unclear\\Python\\FINAL_VERIFICATION.py",
+  "size": 3527,
+  "language": "Python",
+  "lines": 128,
+  "non_empty_lines": 105,
+  "functions": 2,
+  "classes": 0,
+  "imports": [
+    "subprocess",
+    "sys"
+  ],
+  "import_lines": [
+    7,
+    8
+  ],
+  "complexity_estimate": 4.0,
+  "comment_density": 0.015625,
+  "has_docstrings": true,
+  "side_effects": [
+    "subprocess\\."
+  ]
+}

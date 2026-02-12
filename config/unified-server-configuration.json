@@ -1,0 +1,296 @@
+{
+  "general_configuration": {
+    "id": "unified-workspace-config-2026",
+    "version": "1.0.0",
+    "description": "Unified server configuration and technical debt profile for irfan's development workspace spanning E:\\grid, E:\\coinbase, E:\\wellness_studio, and C:\\Users\\irfan projects",
+    "logging": {
+      "format": "JSON",
+      "level": "INFO",
+      "file": "E:\\config\\logs\\unified-health-check.log"
+    },
+    "defaults": {
+      "retry_attempts": 3,
+      "timeout_seconds": 30,
+      "retry_delay_seconds": 5
+    }
+  },
+  "servers": [
+    {
+      "id": "grid-rag-server",
+      "name": "GRID RAG MCP Server",
+      "description": "Primary RAG server for Geometric Resonance Intelligence Driver with ChromaDB and Ollama integration",
+      "status": {
+        "enabled": true,
+        "denylist": {
+          "applied": false,
+          "reason": null
+        },
+        "note": "Production-stable v2.2.2, core component of GRID framework"
+      },
+      "command": "python",
+      "arguments": ["-m", "grid_rag_mcp_server"],
+      "working_directory": "E:\\grid\\mcp-setup\\server",
+      "environment_variables": {
+        "OLLAMA_HOST": "http://localhost:11434",
+        "CHROMA_HOST": "localhost",
+        "CHROMA_PORT": "8500"
+      },
+      "port": 8000,
+      "context": "Local-first RAG system providing vector search and document retrieval for the GRID agentic framework. Integrates with Ollama LLM and ChromaDB for embedding storage.",
+      "technical_debt": {
+        "analysis": "Server is well-architected with clear separation of concerns. Uses Pydantic V1 patterns that are deprecated in V2.",
+        "identification": "Pydantic @validator deprecation warnings; SQLAlchemy declarative_base() import path deprecated; FastAPI on_event lifecycle deprecated",
+        "remediation": "1. Migrate @validator to @field_validator with Pydantic V2 syntax. 2. Update SQLAlchemy imports to sqlalchemy.orm.declarative_base(). 3. Convert on_event handlers to lifespan event handlers.",
+        "guardrails": "Add ruff lint rules to enforce new patterns. Add pre-commit hooks for deprecation checks. Pin minimum pydantic>=2.0 in pyproject.toml.",
+        "future_proofing": "Consider containerization with Docker for consistent deployment. Implement health check endpoints for monitoring."
+      }
+    },
+    {
+      "id": "grid-enhanced-tools-server",
+      "name": "GRID Enhanced Tools MCP Server",
+      "description": "Enhanced tooling server providing additional capabilities for GRID agents",
+      "status": {
+        "enabled": true,
+        "denylist": {
+          "applied": false,
+          "reason": null
+        },
+        "note": "Active development, part of MCP ecosystem"
+      },
+      "command": "python",
+      "arguments": ["-m", "enhanced_tools_mcp_server"],
+      "working_directory": "E:\\grid\\mcp-setup\\server",
+      "environment_variables": {},
+      "port": 8001,
+      "context": "Provides extended tooling capabilities for GRID agents including file operations, web search, and utility functions.",
+      "technical_debt": {
+        "analysis": "Minimal debt, recently developed component",
+        "identification": "None critical identified",
+        "remediation": "Routine maintenance only",
+        "guardrails": "Existing CI/CD pipeline covers this server",
+        "future_proofing": "Consider adding OpenTelemetry tracing for observability"
+      }
+    },
+    {
+      "id": "grid-agentic-server",
+      "name": "GRID Agentic MCP Server",
+      "description": "Event-driven agentic system for case management and cognitive decision support",
+      "status": {
+        "enabled": true,
+        "denylist": {
+          "applied": false,
+          "reason": null
+        },
+        "note": "Core component with 9 cognition patterns implemented"
+      },
+      "command": "python",
+      "arguments": ["-m", "grid.agentic"],
+      "working_directory": "E:\\grid",
+      "environment_variables": {
+        "GRID_LOG_LEVEL": "INFO",
+        "GRID_TRACE_ENABLED": "true"
+      },
+      "port": 8004,
+      "context": "Implements layered DDD architecture with event-driven agentic capabilities. Manages cases, cognitive patterns (Flow, Time, Pattern), and decision support.",
+      "technical_debt": {
+        "analysis": "Several cognition modules have placeholder implementations. Pattern detection, prediction, and learning algorithms marked as TODO.",
+        "identification": "TODOs in cognition/Time/__init__.py (lines 381, 389, 398), cognition/Pattern/__init__.py (line 390), cognition/Flow/__init__.py (line 233)",
+        "remediation": "1. Implement topological sort with priority weighting in Flow module. 2. Add pattern detection algorithms in Time module. 3. Implement learning algorithm in Pattern module.",
+        "guardrails": "Add unit tests with minimum coverage requirements for cognition modules. Create integration tests for cognitive pipelines.",
+        "future_proofing": "Design cognitive modules as plugins for extensibility. Document pattern interfaces for future contributors."
+      }
+    },
+    {
+      "id": "grid-mothership-api",
+      "name": "GRID Mothership API",
+      "description": "Main FastAPI application serving as the cockpit for GRID operations",
+      "status": {
+        "enabled": true,
+        "denylist": {
+          "applied": false,
+          "reason": null
+        },
+        "note": "Primary entry point for GRID platform"
+      },
+      "command": "grid-api",
+      "arguments": [],
+      "working_directory": "E:\\grid",
+      "environment_variables": {
+        "DATABRICKS_HOST": "${DATABRICKS_HOST}",
+        "REDIS_URL": "${REDIS_URL}"
+      },
+      "port": 8080,
+      "context": "Central API for authentication, billing, navigation, and platform management. Implements JWT/RBAC security.",
+      "technical_debt": {
+        "analysis": "Billing service has incomplete overage calculation. Auth router missing production credential validation. API keys router pending subscription repository integration.",
+        "identification": "src/application/mothership/services/billing_service.py - overage calculation TODO; src/application/mothership/routers/auth.py - credential validation incomplete; src/application/mothership/routers/api_keys.py - Phase 1.2 integration pending",
+        "remediation": "1. Implement overage calculation in billing service with tiered pricing support. 2. Add production-grade credential validation with rate limiting. 3. Complete subscription repository integration for API key management.",
+        "guardrails": "Add billing calculation unit tests with edge cases. Implement integration tests for auth flows. Add contract tests for subscription API.",
+        "future_proofing": "Design billing module for multi-currency support. Plan auth module for SSO integration. Prepare API key system for team/org hierarchy."
+      }
+    },
+    {
+      "id": "coinbase-app",
+      "name": "Coinbase Crypto Investment Platform",
+      "description": "Python-based cryptocurrency investment platform with GRID agentic system integration",
+      "status": {
+        "enabled": true,
+        "denylist": {
+          "applied": false,
+          "reason": null
+        },
+        "note": "Active development, 40% overall progress on planned improvements"
+      },
+      "command": "python",
+      "arguments": ["-m", "coinbase.cli"],
+      "working_directory": "E:\\coinbase",
+      "environment_variables": {
+        "DATABRICKS_HOST": "${DATABRICKS_HOST}",
+        "DATABRICKS_TOKEN": "${DATABRICKS_TOKEN}",
+        "DATABRICKS_HTTP_PATH": "${DATABRICKS_HTTP_PATH}"
+      },
+      "port": null,
+      "context": "Cryptocurrency portfolio management with trading signals, fact-checking, revenue tracking, and risk assessment. Built on Databricks with Delta Lake. Strict synchronous execution (no async/await).",
+      "technical_debt": {
+        "analysis": "Documented in docs/TODO.md - monitoring/alerting not implemented, no rate limiting middleware, no caching layer, no web UI. Integration tests for external APIs partial.",
+        "identification": "HIGH: No monitoring/alerting system. MEDIUM: No rate limiting middleware, configuration management partial. LOW: No caching layer, no web UI.",
+        "remediation": "1. Implement monitoring with Prometheus metrics and Grafana dashboards. 2. Add token bucket rate limiting middleware. 3. Implement Redis caching layer for API responses. 4. Complete multi-environment configuration management.",
+        "guardrails": "Add monitoring tests that verify metric emission. Create rate limit integration tests. Add cache invalidation tests.",
+        "future_proofing": "Design monitoring for Kubernetes deployment. Plan rate limiting for horizontal scaling. Consider distributed caching for multi-instance deployment."
+      }
+    },
+    {
+      "id": "wellness-studio-pipeline",
+      "name": "Wellness Studio Healthcare AI Pipeline",
+      "description": "Healthcare AI/ML application with enterprise security, HIPAA compliance, and multi-model integration",
+      "status": {
+        "enabled": true,
+        "denylist": {
+          "applied": false,
+          "reason": null
+        },
+        "note": "Production-ready security, 157+ security tests"
+      },
+      "command": "wellness-studio",
+      "arguments": [],
+      "working_directory": "E:\\wellness_studio",
+      "environment_variables": {
+        "TORCH_HOME": "${TORCH_HOME}",
+        "HF_HOME": "${HF_HOME}"
+      },
+      "port": null,
+      "context": "Healthcare document processing with Llama 3.1 8B medical scribe, sentence-transformers embeddings, and HuatuoGPT wellness generator. Comprehensive security: PII detection, AI safety, audit logging, consent management.",
+      "technical_debt": {
+        "analysis": "Bug in pipeline.py line 79 calling .get() on dataclass. Hard-coded paths in spawn_monitor.py and denylist_config.json. LSP errors indicate missing dependencies.",
+        "identification": "BUG: pipeline.py:79 model_config.get() on dataclass will fail at runtime. HARD-CODED: C:/Users/irfan/.cursor/mcp.json in spawn_monitor.py. IMPORTS: Missing safety_aware_server_manager, init_safety_logging, watchdog modules.",
+        "remediation": "1. Fix pipeline.py to use dataclass attribute access instead of dict .get(). 2. Replace hard-coded paths with environment variables or configuration. 3. Add missing dependencies to requirements.txt or implement stubs.",
+        "guardrails": "Add runtime type checking with beartype or typeguard. Create path configuration module that validates paths exist. Add import verification in test suite.",
+        "future_proofing": "Implement dependency injection for path configuration. Add health checks that verify all dependencies are available. Create deployment validation script."
+      }
+    },
+    {
+      "id": "wellness-spawn-monitor",
+      "name": "Wellness Studio Spawn Monitor",
+      "description": "Persistent MCP configuration monitor with file watching and crash recovery",
+      "status": {
+        "enabled": false,
+        "denylist": {
+          "applied": true,
+          "reason": "Missing critical dependencies: watchdog, safety_aware_server_manager, init_safety_logging modules not installed"
+        },
+        "note": "Cannot run until dependencies resolved"
+      },
+      "command": "python",
+      "arguments": ["-m", "ai_safety.monitoring.spawn_monitor"],
+      "working_directory": "E:\\wellness_studio",
+      "environment_variables": {},
+      "port": null,
+      "context": "Monitors MCP configuration files for changes and spawns/manages server processes accordingly. Provides crash recovery and state persistence.",
+      "technical_debt": {
+        "analysis": "Critical import failures. Multiple LSP errors indicate broken imports and type mismatches.",
+        "identification": "Missing: watchdog.observers, watchdog.events, safety_aware_server_manager, init_safety_logging, infrastructure.event_bus.event_system, unified_fabric.audit. Type errors on lines 344, 504, 508, 513.",
+        "remediation": "1. pip install watchdog. 2. Create or import safety_aware_server_manager module. 3. Create or import init_safety_logging function. 4. Fix type annotations and None checks throughout.",
+        "guardrails": "Add import checks in conftest.py. Create mock modules for optional dependencies. Add type: ignore comments with explanatory notes where appropriate.",
+        "future_proofing": "Design monitor as optional component with graceful degradation. Implement plugin architecture for watchers. Add dependency injection for external modules."
+      }
+    },
+    {
+      "id": "wellness-safety-manager",
+      "name": "Wellness Safety Manager",
+      "description": "Healthcare-specific AI safety manager with HIPAA compliance enforcement",
+      "status": {
+        "enabled": false,
+        "denylist": {
+          "applied": true,
+          "reason": "Missing imports: safety_aware_server_manager, init_safety_logging"
+        },
+        "note": "Core safety component blocked by missing dependencies"
+      },
+      "command": "python",
+      "arguments": ["-c", "from ai_safety.denylist_engine.wellness_safety_manager import WellnessSafetyManager"],
+      "working_directory": "E:\\wellness_studio",
+      "environment_variables": {},
+      "port": null,
+      "context": "Enforces healthcare safety policies including PII protection, HIPAA compliance, and AI safety guardrails. Part of multi-provider AI safety framework.",
+      "technical_debt": {
+        "analysis": "Import errors and type annotation issues. Module depends on non-existent local imports.",
+        "identification": "Import errors: safety_aware_server_manager (line 18), init_safety_logging (line 19). Type errors: None passed where str expected (line 49), None where Dict expected (line 85).",
+        "remediation": "1. Implement or stub safety_aware_server_manager module. 2. Implement or stub init_safety_logging function. 3. Add proper None checks before passing to typed parameters.",
+        "guardrails": "Add Optional[] type hints where None is valid. Create interface definitions for external dependencies. Add unit tests that verify safety policy enforcement.",
+        "future_proofing": "Design safety manager as pluggable system. Create abstract base class for provider-specific safety managers. Document safety policy extension points."
+      }
+    },
+    {
+      "id": "django-myproject",
+      "name": "Django MyProject",
+      "description": "Django web application at C:\\Users\\irfan\\myproject",
+      "status": {
+        "enabled": false,
+        "denylist": {
+          "applied": true,
+          "reason": "Critical security vulnerabilities: hardcoded SECRET_KEY, DEBUG=True, ALLOWED_HOSTS=['*'], duplicated settings file content"
+        },
+        "note": "SECURITY RISK - Do not deploy until fixed"
+      },
+      "command": "python",
+      "arguments": ["manage.py", "runserver"],
+      "working_directory": "C:\\Users\\irfan\\myproject",
+      "environment_variables": {},
+      "port": 8000,
+      "context": "Django web project with SQLite backend. Located at user root directory, appears to be a learning/test project.",
+      "technical_debt": {
+        "analysis": "CRITICAL security issues. Settings file contains duplicated content causing syntax errors. SECRET_KEY hardcoded, DEBUG enabled, ALLOWED_HOSTS unrestricted.",
+        "identification": "CRITICAL: Hardcoded SECRET_KEY in settings.py. CRITICAL: DEBUG=True. CRITICAL: ALLOWED_HOSTS=['*']. ERROR: Duplicated settings content causing parse errors (lines 95-96).",
+        "remediation": "1. Generate new SECRET_KEY and move to environment variable. 2. Set DEBUG=False for any deployment. 3. Restrict ALLOWED_HOSTS to specific domains. 4. Remove duplicated content from settings.py.",
+        "guardrails": "Use django-environ for environment-based configuration. Add pre-commit hook to check for hardcoded secrets. Use bandit security linter.",
+        "future_proofing": "Migrate to proper project structure outside user root. Consider Docker deployment. Implement proper secrets management with vault or similar."
+      }
+    },
+    {
+      "id": "server-denylist-manager",
+      "name": "Server Denylist Manager",
+      "description": "Utility for managing server denylists across the workspace",
+      "status": {
+        "enabled": false,
+        "denylist": {
+          "applied": true,
+          "reason": "Multiple type errors: None assignments to typed fields, missing attributes, incorrect parameter types"
+        },
+        "note": "LSP errors indicate code quality issues"
+      },
+      "command": "python",
+      "arguments": ["-m", "server_denylist_manager"],
+      "working_directory": "E:\\scripts",
+      "environment_variables": {},
+      "port": null,
+      "context": "Manages server denylist rules for AI safety enforcement. Part of the unified workspace safety infrastructure.",
+      "technical_debt": {
+        "analysis": "Type system violations throughout. None assigned to List[str], missing _normalize_list method, dict type mismatches, accessing attributes on None values.",
+        "identification": "Line 47: None assigned to List[str]. Line 166: Missing _normalize_list method. Line 384: dict[str, Any | str | None] incompatible with Dict[str, str]. Lines 440-453: Accessing attributes on None.",
+        "remediation": "1. Add proper default values (empty list instead of None). 2. Implement _normalize_list method. 3. Add type narrowing checks before attribute access. 4. Use Optional[] types and None guards.",
+        "guardrails": "Enable strict mypy checking. Add type: ignore comments only with explanations. Create comprehensive unit tests for edge cases.",
+        "future_proofing": "Refactor to use dataclasses with default_factory. Consider using pydantic for validation. Add runtime type checking with beartype."
+      }
+    }
+  ]
+}

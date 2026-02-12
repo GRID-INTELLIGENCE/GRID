@@ -1,0 +1,39 @@
+{
+  "path": "application\\mothership\\routers\\__init__.py",
+  "size": 2942,
+  "language": "Python",
+  "lines": 104,
+  "non_empty_lines": 77,
+  "functions": 1,
+  "classes": 0,
+  "imports": [
+    "__future__",
+    "fastapi",
+    "grid.AGENT.api.router",
+    "intelligence",
+    "api_keys",
+    "billing",
+    "payment",
+    "auth",
+    "application.resonance.api.router",
+    "application.canvas.api",
+    "navigation_simple"
+  ],
+  "import_lines": [
+    8,
+    10,
+    27,
+    32,
+    50,
+    51,
+    52,
+    67,
+    55,
+    60,
+    73
+  ],
+  "complexity_estimate": 14.0,
+  "comment_density": 0.17307692307692307,
+  "has_docstrings": true,
+  "side_effects": []
+}

@@ -1,0 +1,31 @@
+{
+  "path": "application\\mothership\\db\\models_audit.py",
+  "size": 1255,
+  "language": "Python",
+  "lines": 26,
+  "non_empty_lines": 19,
+  "functions": 0,
+  "classes": 1,
+  "imports": [
+    "__future__",
+    "datetime",
+    "typing",
+    "sqlalchemy",
+    "sqlalchemy.orm",
+    "models_base"
+  ],
+  "import_lines": [
+    1,
+    3,
+    4,
+    6,
+    7,
+    9
+  ],
+  "complexity_estimate": 0.0,
+  "comment_density": 0.0,
+  "has_docstrings": false,
+  "side_effects": [
+    "sqlalchemy\\."
+  ]
+}

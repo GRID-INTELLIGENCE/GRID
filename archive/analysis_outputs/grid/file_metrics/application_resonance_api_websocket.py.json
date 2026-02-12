@@ -1,0 +1,37 @@
+{
+  "path": "application\\resonance\\api\\websocket.py",
+  "size": 8008,
+  "language": "Python",
+  "lines": 240,
+  "non_empty_lines": 194,
+  "functions": 1,
+  "classes": 1,
+  "imports": [
+    "__future__",
+    "asyncio",
+    "json",
+    "logging",
+    "typing",
+    "fastapi",
+    "schemas",
+    "service",
+    "schemas",
+    "schemas"
+  ],
+  "import_lines": [
+    7,
+    9,
+    10,
+    11,
+    12,
+    14,
+    16,
+    17,
+    141,
+    96
+  ],
+  "complexity_estimate": 26.0,
+  "comment_density": 0.05,
+  "has_docstrings": true,
+  "side_effects": []
+}

@@ -1,0 +1,23 @@
+{
+  "path": "application\\__init__.py",
+  "size": 1363,
+  "language": "Python",
+  "lines": 54,
+  "non_empty_lines": 48,
+  "functions": 0,
+  "classes": 0,
+  "imports": [
+    "__future__",
+    "mothership",
+    "resonance"
+  ],
+  "import_lines": [
+    7,
+    11,
+    24
+  ],
+  "complexity_estimate": 4.0,
+  "comment_density": 0.05555555555555555,
+  "has_docstrings": true,
+  "side_effects": []
+}

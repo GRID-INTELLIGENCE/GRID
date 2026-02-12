@@ -1,0 +1,103 @@
+{
+  "version": "1.0",
+  "project": "AI SAFETY - GOOGLE",
+  "purpose": "Scheduled monitoring and logging for Google DeepMind AI safety research and Gemini safety updates",
+  "_local_only_notice": "DISABLED: External URL monitoring disabled for LOCAL_ONLY mode. Set WELLNESS_LOCAL_ONLY=false to re-enable.",
+  "enabled": false,
+  "schedule": {
+    "timezone": "UTC",
+    "cadence": "weekly",
+    "day_of_week": "Monday",
+    "time_utc": "03:00",
+    "retry_policy": {
+      "max_retries": 3,
+      "backoff_seconds": [60, 300, 900]
+    }
+  },
+  "sources_disabled": [
+    {
+      "id": "google_deepmind_safety",
+      "url": "https://deepmind.google/technologies/safety-and-ethics/",
+      "type": "safety_hub",
+      "priority": "high",
+      "_disabled_reason": "External URL - requires network access"
+    },
+    {
+      "id": "google_ai_principles",
+      "url": "https://ai.google/responsibility/principles/",
+      "type": "governance",
+      "priority": "high",
+      "_disabled_reason": "External URL - requires network access"
+    },
+    {
+      "id": "frontier_safety_framework",
+      "url": "https://deepmind.google/safety-and-ethics/frontier-safety-framework/",
+      "type": "safety_framework",
+      "priority": "high",
+      "_disabled_reason": "External URL - requires network access"
+    },
+    {
+      "id": "gemini_safety_guidelines",
+      "url": "https://ai.google.dev/gemini-api/docs/safety-guidelines",
+      "type": "technical_docs",
+      "priority": "medium",
+      "_disabled_reason": "External URL - requires network access"
+    },
+    {
+      "id": "deepmind_research_safety",
+      "url": "https://deepmind.google/research/?category=safety",
+      "type": "research_index",
+      "priority": "medium",
+      "_disabled_reason": "External URL - requires network access"
+    }
+  ],
+  "sources": [],
+  "filters": {
+    "include_keywords": [
+      "safety",
+      "alignment",
+      "frontier",
+      "redline",
+      "CBRN",
+      "interpretability",
+      "Gemma Scope",
+      "evaluations",
+      "adversarial",
+      "responsible AI"
+    ],
+    "exclude_keywords": [
+      "marketing",
+      "product launch",
+      "pricing",
+      "event photos"
+    ]
+  },
+  "outputs": {
+    "log_path": "AI SAFETY/PROVIDERS/GOOGLE/monitoring/logs/monitoring.log",
+    "status_path": "AI SAFETY/PROVIDERS/GOOGLE/monitoring/status/last_run.json",
+    "diff_path": "AI SAFETY/PROVIDERS/GOOGLE/monitoring/diffs/",
+    "reports_path": "AI SAFETY/PROVIDERS/GOOGLE/monitoring/reports/",
+    "snapshots_path": "AI SAFETY/PROVIDERS/GOOGLE/monitoring/snapshots/"
+  },
+  "logging": {
+    "level": "INFO",
+    "rotate": true,
+    "max_size_mb": 10,
+    "max_files": 10
+  },
+  "alerts": {
+    "enabled": false,
+    "channels": [
+      {
+        "type": "file",
+        "path": "AI SAFETY/PROVIDERS/GOOGLE/monitoring/alerts/alerts.json"
+      }
+    ],
+    "trigger_on": [
+      "new_source_detected",
+      "source_updated",
+      "redline_breach_detected",
+      "fetch_error"
+    ]
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "path": "lightofthe7\\datakit\\examples\\quick_start.py",
+  "size": 8238,
+  "language": "Python",
+  "lines": 280,
+  "non_empty_lines": 223,
+  "functions": 8,
+  "classes": 0,
+  "imports": [
+    "sys",
+    "pathlib",
+    "core.config",
+    "core.explorer",
+    "core.loader"
+  ],
+  "import_lines": [
+    14,
+    15,
+    21,
+    22,
+    23
+  ],
+  "complexity_estimate": 6.0,
+  "comment_density": 0.075,
+  "has_docstrings": true,
+  "side_effects": []
+}

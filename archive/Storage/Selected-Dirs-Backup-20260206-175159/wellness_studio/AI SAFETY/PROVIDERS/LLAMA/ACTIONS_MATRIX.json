@@ -1,0 +1,62 @@
+{
+  "provider": "Meta AI (Llama Models)",
+  "version": "1.0.0",
+  "trigger_definitions": [
+    {
+      "trigger_id": "TRG-LLAM-001",
+      "name": "Llama Guard High-Confidence Violation",
+      "condition": "llama_guard_categories.score > 0.9",
+      "description": "Triggered when Llama Guard detects severe safety violations."
+    },
+    {
+      "trigger_id": "TRG-LLAM-002",
+      "name": "Jailbreak Success",
+      "condition": "purple_team_findings.jailbreak_success_rate > 0.2",
+      "description": "Triggered when adversarial testing achieves successful jailbreak."
+    },
+    {
+      "trigger_id": "TRG-LLAM-003",
+      "name": "License Compliance Violation",
+      "condition": "license_compliance.violation_detection_score > 0.6",
+      "description": "Triggered when usage outside Acceptable Use Policy is detected."
+    }
+  ],
+  "action_catalog": {
+    "ACT-LLAM-001": {
+      "type": "BLOCK_CONTENT",
+      "description": "Immediately terminate the response and provide a standard safety refusal.",
+      "parameters": {
+        "message": "I cannot fulfill this request as it violates our safety policies."
+      }
+    },
+    "ACT-LLAM-002": {
+      "type": "ESCALATE_RESPONSIBLE_AI",
+      "description": "Notify the Responsible AI Team for manual review of the incident.",
+      "priority": "HIGH"
+    },
+    "ACT-LLAM-003": {
+      "type": "USER_THROTTLE",
+      "description": "Temporarily limit user access to prevent repeated violations.",
+      "duration_seconds": 3600
+    },
+    "ACT-LLAM-004": {
+      "type": "GUARDRAIL_UPDATE",
+      "description": "Trigger immediate update of Llama Guard or system prompts.",
+      "priority": "CRITICAL"
+    }
+  },
+  "mapping": [
+    {
+      "trigger_id": "TRG-LLAM-001",
+      "actions": ["ACT-LLAM-001", "ACT-LLAM-003"]
+    },
+    {
+      "trigger_id": "TRG-LLAM-002",
+      "actions": ["ACT-LLAM-002", "ACT-LLAM-004"]
+    },
+    {
+      "trigger_id": "TRG-LLAM-003",
+      "actions": ["ACT-LLAM-002", "ACT-LLAM-003"]
+    }
+  ]
+}

@@ -1,0 +1,192 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": "1.0.0",
+  "title": "Server Denylist Configuration Schema",
+  "description": "Machine-readable schema for categorizing and denylisting servers based on attributes",
+  "definitions": {
+    "serverCategory": {
+      "type": "string",
+      "enum": [
+        "web-based",
+        "database",
+        "mcp-server",
+        "rag-system",
+        "agentic-workflow",
+        "development-tools",
+        "memory-storage",
+        "api-gateway",
+        "background-service"
+      ]
+    },
+    "denylistReason": {
+      "type": "string",
+      "enum": [
+        "resource-intensive",
+        "network-dependent",
+        "startup-failure",
+        "missing-dependencies",
+        "security-concern",
+        "deprecated",
+        "redundant",
+        "development-only",
+        "user-disabled"
+      ]
+    },
+    "serverAttributes": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Unique server identifier"
+        },
+        "category": {
+          "$ref": "#/definitions/serverCategory"
+        },
+        "command": {
+          "type": "string",
+          "description": "Executable command (e.g., python, node, npm)"
+        },
+        "requiresNetwork": {
+          "type": "boolean",
+          "description": "Whether server requires network connectivity"
+        },
+        "requiresDatabase": {
+          "type": "boolean",
+          "description": "Whether server requires database connection"
+        },
+        "port": {
+          "type": "integer",
+          "description": "Network port the server listens on"
+        },
+        "dependencies": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Required system or package dependencies"
+        },
+        "resourceProfile": {
+          "type": "string",
+          "enum": ["low", "medium", "high", "critical"],
+          "description": "Expected resource consumption level"
+        },
+        "priority": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "Server priority (0=lowest, 10=highest)"
+        }
+      },
+      "required": ["name", "category", "command"]
+    },
+    "denylistEntry": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Server name to deny"
+        },
+        "reason": {
+          "$ref": "#/definitions/denylistReason"
+        },
+        "scope": {
+          "type": "string",
+          "enum": ["global", "workspace", "project", "temporary"],
+          "description": "Application scope of the denylist rule"
+        },
+        "pattern": {
+          "type": "string",
+          "description": "Regex pattern to match server names"
+        },
+        "matchAttributes": {
+          "type": "object",
+          "description": "Attribute-based matching criteria",
+          "properties": {
+            "category": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/serverCategory"
+              }
+            },
+            "commandPattern": {
+              "type": "string",
+              "description": "Regex pattern for command matching"
+            },
+            "portRange": {
+              "type": "object",
+              "properties": {
+                "min": {"type": "integer"},
+                "max": {"type": "integer"}
+              }
+            },
+            "requiresNetwork": {
+              "type": "boolean"
+            },
+            "resourceProfile": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": ["low", "medium", "high", "critical"]
+              }
+            }
+          }
+        },
+        "enabled": {
+          "type": "boolean",
+          "description": "Whether this denylist rule is active"
+        },
+        "expiresAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Optional expiration for temporary denylisting"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Human-readable explanation"
+        }
+      },
+      "required": ["reason", "scope", "enabled"]
+    }
+  },
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Configuration version"
+    },
+    "denylistRules": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/denylistEntry"
+      },
+      "description": "List of denylist rules to apply"
+    },
+    "serverInventory": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/serverAttributes"
+      },
+      "description": "Catalog of all known servers with their attributes"
+    },
+    "globalSettings": {
+      "type": "object",
+      "properties": {
+        "defaultAction": {
+          "type": "string",
+          "enum": ["allow", "deny"],
+          "default": "allow"
+        },
+        "enforcementMode": {
+          "type": "string",
+          "enum": ["strict", "permissive", "audit"],
+          "default": "strict"
+        },
+        "logDenylistEvents": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    }
+  },
+  "required": ["version", "denylistRules"]
+}

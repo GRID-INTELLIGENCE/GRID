@@ -1,0 +1,193 @@
+{
+  "case_id": "CASE-c29be15ecd9d",
+  "timestamp": "2026-01-09T00:31:40.454056",
+  "raw_input": "Add authentication endpoint",
+  "structured_data": {
+    "timestamp": "2026-01-09T00:31:40.456724",
+    "labels": [
+      "category:security",
+      "priority:medium"
+    ],
+    "category": "security",
+    "priority": "medium",
+    "keywords": [],
+    "entities": [
+      "Add"
+    ],
+    "relationships": [],
+    "user_examples": [
+      "Rate limiting in API gateway",
+      "Token refresh in mobile app"
+    ],
+    "user_scenarios": [
+      "Prevent brute force attacks",
+      "Handle token expiration gracefully"
+    ],
+    "user_phenomena": [],
+    "confidence": 0.125,
+    "logging_iterations": [
+      {
+        "iteration": 1,
+        "keywords": [],
+        "entities": [
+          "Add"
+        ]
+      },
+      {
+        "iteration": 2,
+        "category": "security",
+        "confidence": 0.125,
+        "category_scores": {
+          "SECURITY": 0.125,
+          "FEATURE_REQUEST": 0.125
+        }
+      },
+      {
+        "iteration": 3,
+        "priority": "medium"
+      },
+      {
+        "iteration": 4,
+        "labels": [
+          "category:security",
+          "priority:medium"
+        ]
+      },
+      {
+        "iteration": 5,
+        "relationships": []
+      }
+    ]
+  },
+  "comprehensive_suite_mapping": {
+    "category_mappings": {
+      "roles": [
+        "SafetyOfficer",
+        "Architect"
+      ]
+    },
+    "keyword_mappings": {
+      "tasks": [
+        "/inventory",
+        "/gapanalysis"
+      ]
+    },
+    "priority_mappings": {}
+  },
+  "recommended_roles": [
+    "SafetyOfficer",
+    "Architect"
+  ],
+  "recommended_tasks": [
+    "/inventory",
+    "/gapanalysis",
+    "/execute",
+    "/validate",
+    "/safety review"
+  ],
+  "recommended_workflow": [
+    "1. Run /inventory to discover system state",
+    "2. Run /gapanalysis to identify gaps",
+    "4. Run /execute to generate artifacts",
+    "5. Run /validate to verify changes",
+    "6. Run /safety review for governance"
+  ],
+  "context_for_agent": "Case Category: security\nPriority: medium\nConfidence: 0.12\n\nKeywords: \n\nRecommended Roles: SafetyOfficer, Architect\nRecommended Tasks: /inventory, /gapanalysis, /execute, /validate, /safety review",
+  "user_context": {
+    "examples": [],
+    "scenarios": [],
+    "phenomena": []
+  },
+  "metadata": {
+    "category": "security",
+    "priority": "medium",
+    "confidence": 0.125,
+    "labels": [
+      "category:security",
+      "priority:medium"
+    ]
+  },
+  "advanced_protocols": {
+    "protocol": "advanced",
+    "web_search_performed": true,
+    "memory_searches": [
+      {
+        "case_id": "CASE-3dc954869318",
+        "similarity": 0.5,
+        "category": "security",
+        "solution": null,
+        "type": "category_match"
+      }
+    ],
+    "generated_queries": [
+      {
+        "question": "Is this case primarily about security?",
+        "type": "multiple_choice",
+        "options": [
+          "Yes, it's about security",
+          "No, it's about something else",
+          "Partially, but also involves other aspects"
+        ],
+        "purpose": "Confirm category classification"
+      },
+      {
+        "question": "What is the priority level for this case?",
+        "type": "multiple_choice",
+        "options": [
+          "Critical",
+          "High",
+          "Medium",
+          "Low"
+        ],
+        "purpose": "Confirm priority level"
+      },
+      {
+        "question": "What is the scope of this case?",
+        "type": "multiple_choice",
+        "options": [
+          "Single module/component",
+          "Multiple modules/components",
+          "System-wide change",
+          "Architectural change"
+        ],
+        "purpose": "Clarify scope"
+      }
+    ],
+    "nuances": [
+      "Low category confidence (0.12) - case may require manual review or additional context"
+    ],
+    "insights": [
+      "Found 1 similar cases in memory - review solutions for patterns"
+    ],
+    "web_search_results": {
+      "queries": [
+        "security ",
+        "Add authentication endpoint"
+      ],
+      "results": [
+        {
+          "title": "Example result for security",
+          "snippet": "Relevant information about the case category",
+          "url": "https://example.com"
+        }
+      ],
+      "note": "Web search integration required - use local RAG or external API"
+    }
+  },
+  "requires_contextualization": true,
+  "user_enrichments": [
+    {
+      "timestamp": "2026-01-09T00:31:40.456718",
+      "additional_context": "Need rate limiting and token refresh",
+      "examples": [
+        "Rate limiting in API gateway",
+        "Token refresh in mobile app"
+      ],
+      "scenarios": [
+        "Prevent brute force attacks",
+        "Handle token expiration gracefully"
+      ]
+    }
+  ],
+  "last_updated": "2026-01-09T00:31:40.456822"
+}

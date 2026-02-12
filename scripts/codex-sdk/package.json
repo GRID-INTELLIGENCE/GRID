@@ -1,0 +1,24 @@
+{
+  "name": "grid-codex-sdk",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "diagnose": "tsx src/diagnostics.ts",
+    "fix-plan": "tsx src/diagnostics.ts --mode fix-plan",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/diagnostics.js"
+  },
+  "dependencies": {
+    "@openai/codex-sdk": "^0.98.0",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  }
+}

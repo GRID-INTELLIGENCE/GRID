@@ -1,0 +1,23 @@
+{
+  "path": "application\\mothership\\db\\__init__.py",
+  "size": 203,
+  "language": "Python",
+  "lines": 11,
+  "non_empty_lines": 8,
+  "functions": 0,
+  "classes": 0,
+  "imports": [
+    "__future__",
+    "engine",
+    "models"
+  ],
+  "import_lines": [
+    1,
+    3,
+    4
+  ],
+  "complexity_estimate": 0.0,
+  "comment_density": 0.0,
+  "has_docstrings": false,
+  "side_effects": []
+}

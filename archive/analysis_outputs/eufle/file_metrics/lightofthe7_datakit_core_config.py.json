@@ -1,0 +1,30 @@
+{
+  "path": "lightofthe7\\datakit\\core\\config.py",
+  "size": 10582,
+  "language": "Python",
+  "lines": 373,
+  "non_empty_lines": 298,
+  "functions": 13,
+  "classes": 4,
+  "imports": [
+    "json",
+    "os",
+    "dataclasses",
+    "pathlib",
+    "typing"
+  ],
+  "import_lines": [
+    8,
+    9,
+    10,
+    11,
+    12
+  ],
+  "complexity_estimate": 26.0,
+  "comment_density": 0.045576407506702415,
+  "has_docstrings": true,
+  "side_effects": [
+    "open\\(",
+    "with open\\("
+  ]
+}

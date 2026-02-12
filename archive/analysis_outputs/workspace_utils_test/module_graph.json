@@ -1,0 +1,312 @@
+{
+  "nodes": [
+    {
+      "id": "cli.py",
+      "path": "cli.py",
+      "fan_in": 0,
+      "fan_out": 9,
+      "lines": 166,
+      "complexity": 16.0,
+      "language": "Python"
+    },
+    {
+      "id": "config.py",
+      "path": "config.py",
+      "fan_in": 4,
+      "fan_out": 4,
+      "lines": 117,
+      "complexity": 11.0,
+      "language": "Python"
+    },
+    {
+      "id": "entity_classifier.py",
+      "path": "entity_classifier.py",
+      "fan_in": 1,
+      "fan_out": 3,
+      "lines": 177,
+      "complexity": 7.0,
+      "language": "Python"
+    },
+    {
+      "id": "eufle_verifier.py",
+      "path": "eufle_verifier.py",
+      "fan_in": 2,
+      "fan_out": 9,
+      "lines": 202,
+      "complexity": 22.0,
+      "language": "Python"
+    },
+    {
+      "id": "project_comparator.py",
+      "path": "project_comparator.py",
+      "fan_in": 2,
+      "fan_out": 6,
+      "lines": 283,
+      "complexity": 28.0,
+      "language": "Python"
+    },
+    {
+      "id": "repo_analyzer.py",
+      "path": "repo_analyzer.py",
+      "fan_in": 4,
+      "fan_out": 10,
+      "lines": 685,
+      "complexity": 86.0,
+      "language": "Python"
+    },
+    {
+      "id": "tests\\__init__.py",
+      "path": "tests\\__init__.py",
+      "fan_in": 0,
+      "fan_out": 0,
+      "lines": 3,
+      "complexity": 0.0,
+      "language": "Python"
+    },
+    {
+      "id": "__init__.py",
+      "path": "__init__.py",
+      "fan_in": 0,
+      "fan_out": 4,
+      "lines": 25,
+      "complexity": 0.0,
+      "language": "Python"
+    },
+    {
+      "id": "README.md",
+      "path": "README.md",
+      "fan_in": 0,
+      "fan_out": 0,
+      "lines": 98,
+      "complexity": 4.0,
+      "language": "Markdown"
+    }
+  ],
+  "edges": [
+    {
+      "source": "cli.py",
+      "target": "argparse",
+      "type": "import"
+    },
+    {
+      "source": "cli.py",
+      "target": "project_comparator",
+      "type": "import"
+    },
+    {
+      "source": "cli.py",
+      "target": "typing",
+      "type": "import"
+    },
+    {
+      "source": "cli.py",
+      "target": "json",
+      "type": "import"
+    },
+    {
+      "source": "cli.py",
+      "target": "pathlib",
+      "type": "import"
+    },
+    {
+      "source": "cli.py",
+      "target": "sys",
+      "type": "import"
+    },
+    {
+      "source": "cli.py",
+      "target": "eufle_verifier",
+      "type": "import"
+    },
+    {
+      "source": "cli.py",
+      "target": "config",
+      "type": "import"
+    },
+    {
+      "source": "cli.py",
+      "target": "repo_analyzer",
+      "type": "import"
+    },
+    {
+      "source": "config.py",
+      "target": "pathlib",
+      "type": "import"
+    },
+    {
+      "source": "config.py",
+      "target": "typing",
+      "type": "import"
+    },
+    {
+      "source": "config.py",
+      "target": "json",
+      "type": "import"
+    },
+    {
+      "source": "config.py",
+      "target": "os",
+      "type": "import"
+    },
+    {
+      "source": "entity_classifier.py",
+      "target": "typing",
+      "type": "import"
+    },
+    {
+      "source": "entity_classifier.py",
+      "target": "dataclasses",
+      "type": "import"
+    },
+    {
+      "source": "entity_classifier.py",
+      "target": "enum",
+      "type": "import"
+    },
+    {
+      "source": "eufle_verifier.py",
+      "target": "subprocess",
+      "type": "import"
+    },
+    {
+      "source": "eufle_verifier.py",
+      "target": "typing",
+      "type": "import"
+    },
+    {
+      "source": "eufle_verifier.py",
+      "target": "json",
+      "type": "import"
+    },
+    {
+      "source": "eufle_verifier.py",
+      "target": "pathlib",
+      "type": "import"
+    },
+    {
+      "source": "eufle_verifier.py",
+      "target": "sys",
+      "type": "import"
+    },
+    {
+      "source": "eufle_verifier.py",
+      "target": "os",
+      "type": "import"
+    },
+    {
+      "source": "eufle_verifier.py",
+      "target": "urllib.request",
+      "type": "import"
+    },
+    {
+      "source": "eufle_verifier.py",
+      "target": "config",
+      "type": "import"
+    },
+    {
+      "source": "eufle_verifier.py",
+      "target": "datetime",
+      "type": "import"
+    },
+    {
+      "source": "project_comparator.py",
+      "target": "typing",
+      "type": "import"
+    },
+    {
+      "source": "project_comparator.py",
+      "target": "json",
+      "type": "import"
+    },
+    {
+      "source": "project_comparator.py",
+      "target": "pathlib",
+      "type": "import"
+    },
+    {
+      "source": "project_comparator.py",
+      "target": "re",
+      "type": "import"
+    },
+    {
+      "source": "project_comparator.py",
+      "target": "config",
+      "type": "import"
+    },
+    {
+      "source": "project_comparator.py",
+      "target": "collections",
+      "type": "import"
+    },
+    {
+      "source": "repo_analyzer.py",
+      "target": "ast",
+      "type": "import"
+    },
+    {
+      "source": "repo_analyzer.py",
+      "target": "json",
+      "type": "import"
+    },
+    {
+      "source": "repo_analyzer.py",
+      "target": "typing",
+      "type": "import"
+    },
+    {
+      "source": "repo_analyzer.py",
+      "target": "dataclasses",
+      "type": "import"
+    },
+    {
+      "source": "repo_analyzer.py",
+      "target": "pathlib",
+      "type": "import"
+    },
+    {
+      "source": "repo_analyzer.py",
+      "target": "os",
+      "type": "import"
+    },
+    {
+      "source": "repo_analyzer.py",
+      "target": "re",
+      "type": "import"
+    },
+    {
+      "source": "repo_analyzer.py",
+      "target": "config",
+      "type": "import"
+    },
+    {
+      "source": "repo_analyzer.py",
+      "target": "datetime",
+      "type": "import"
+    },
+    {
+      "source": "repo_analyzer.py",
+      "target": "collections",
+      "type": "import"
+    },
+    {
+      "source": "__init__.py",
+      "target": "eufle_verifier",
+      "type": "import"
+    },
+    {
+      "source": "__init__.py",
+      "target": "project_comparator",
+      "type": "import"
+    },
+    {
+      "source": "__init__.py",
+      "target": "repo_analyzer",
+      "type": "import"
+    },
+    {
+      "source": "__init__.py",
+      "target": "entity_classifier",
+      "type": "import"
+    }
+  ]
+}

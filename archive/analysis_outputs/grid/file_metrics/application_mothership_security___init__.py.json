@@ -1,0 +1,21 @@
+{
+  "path": "application\\mothership\\security\\__init__.py",
+  "size": 841,
+  "language": "Python",
+  "lines": 42,
+  "non_empty_lines": 38,
+  "functions": 0,
+  "classes": 0,
+  "imports": [
+    "jwt",
+    "secret_validation"
+  ],
+  "import_lines": [
+    7,
+    14
+  ],
+  "complexity_estimate": 0.0,
+  "comment_density": 0.047619047619047616,
+  "has_docstrings": true,
+  "side_effects": []
+}

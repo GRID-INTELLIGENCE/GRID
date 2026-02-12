@@ -1,0 +1,33 @@
+{
+  "path": ".claude\\skills\\analysis_process_context.py",
+  "size": 4905,
+  "language": "Python",
+  "lines": 151,
+  "non_empty_lines": 125,
+  "functions": 2,
+  "classes": 0,
+  "imports": [
+    "__future__",
+    "sys",
+    "time",
+    "pathlib",
+    "typing",
+    "grid.skills.base",
+    "grid.skills.patterns_detect_entities",
+    "re"
+  ],
+  "import_lines": [
+    8,
+    10,
+    11,
+    12,
+    13,
+    19,
+    63,
+    68
+  ],
+  "complexity_estimate": 12.0,
+  "comment_density": 0.046357615894039736,
+  "has_docstrings": true,
+  "side_effects": []
+}

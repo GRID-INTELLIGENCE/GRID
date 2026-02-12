@@ -1,0 +1,29 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "boundaries"
+version = "1.0.0"
+description = "Boundary, consent and guardrail schema and module with right to refuse and WebSocket logging"
+readme = "README.md"
+requires-python = ">=3.13,<3.14"
+dependencies = []
+
+[project.optional-dependencies]
+validate = ["jsonschema"]
+ws = ["websockets"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.ruff]
+line-length = 120
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "B", "I", "W", "UP"]
+
+[tool.black]
+line-length = 120
+target-version = ["py313"]

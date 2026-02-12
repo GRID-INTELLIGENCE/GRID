@@ -1,0 +1,27 @@
+{
+  "path": "application\\canvas\\router.py",
+  "size": 11026,
+  "language": "Python",
+  "lines": 340,
+  "non_empty_lines": 272,
+  "functions": 8,
+  "classes": 1,
+  "imports": [
+    "__future__",
+    "logging",
+    "pathlib",
+    "typing",
+    "schemas"
+  ],
+  "import_lines": [
+    3,
+    5,
+    6,
+    7,
+    9
+  ],
+  "complexity_estimate": 19.0,
+  "comment_density": 0.07941176470588235,
+  "has_docstrings": true,
+  "side_effects": []
+}

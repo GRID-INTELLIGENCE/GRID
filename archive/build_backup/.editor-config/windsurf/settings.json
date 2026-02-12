@@ -1,0 +1,92 @@
+{
+  // Synced: 2026-02-07 — Shell integration disabled, Go disabled, trailing commas normalized
+  "window.commandCenter": true,
+  "cursor.general.disableHttp2": true,
+  "python.languageServer": "Pylance",
+  "workbench.sideBar.location": "right",
+  "editor.cursorSmoothCaretAnimation": "on",
+  "editor.cursorBlinking": "smooth",
+  "editor.smoothScrolling": true,
+  "editor.bracketPairColorization.enabled": true,
+  "editor.guides.bracketPairs": "active",
+  "editor.renderWhitespace": "selection",
+  "editor.fontLigatures": true,
+  "editor.minimap.enabled": false,
+  "workbench.list.smoothScrolling": true,
+  "editor.formatOnSave": true,
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "files.autoSave": "onFocusChange",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.organizeImports": "explicit"
+  },
+  "terminal.integrated.defaultProfile.windows": "PowerShell",
+  "terminal.integrated.shellIntegration.enabled": false,
+  "terminal.integrated.shellIntegration.decorationsEnabled": "never",
+  "terminal.integrated.profiles.windows": {
+    "PowerShell": {
+      "source": "PowerShell",
+      "icon": "terminal-powershell"
+    },
+    "Command Prompt": {
+      "path": "C:\\Windows\\System32\\cmd.exe",
+      "icon": "terminal-cmd"
+    },
+    "Git Bash": {
+      "path": "C:\\Program Files\\Git\\bin\\bash.exe",
+      "icon": "terminal-bash"
+    },
+    "Ubuntu (WSL)": {
+      "path": "wsl.exe",
+      "args": [
+        "-d",
+        "Ubuntu"
+      ],
+      "icon": "terminal-linux"
+    }
+  },
+  "terminal.integrated.copyOnSelection": true,
+  "terminal.integrated.cursorBlinking": true,
+  "terminal.integrated.localEchoEnabled": "on",
+  "terminal.integrated.scrollback": 10000,
+  "terminal.integrated.focusAfterRun": "terminal",
+  "terminal.integrated.confirmOnExit": "hasChildProcesses",
+  "accessibility.dimUnfocused.enabled": true,
+  "debug.terminal.clearBeforeReusing": true,
+  "explorer.confirmDelete": false,
+  "explorer.confirmDragAndDrop": false,
+  "terminal.integrated.sendKeybindingsToShell": true,
+  "python.defaultInterpreterPath": "c:\\Users\\irfan\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+  "go.useLanguageServer": false,
+  "go.toolsManagement.autoUpdate": false,
+  "go.buildOnSave": "off",
+  "go.lintOnSave": "off",
+  "go.vetOnSave": "off",
+  "go.testOnSave": "off",
+  "go.survey.prompt": false,
+  "go.welcome.show": false,
+  "workbench.colorTheme": "Monokai",
+  "cSpell.userWords": [
+    "agentic",
+    "asyncio",
+    "cooldown",
+    "cursorpyright",
+    "EUFLE",
+    "hostable",
+    "irfan",
+    "nemo",
+    "Ollama",
+    "OPENCODE",
+    "pycache",
+    "Ryzen",
+    "safetensors",
+    "venv"
+  ],
+  "redhat.telemetry.enabled": true,
+  "diffEditor.useInlineViewWhenSpaceIsLimited": false,
+  "workbench.auxiliaryActivityBar.location": "default",
+  "workbench.editor.editorActionsLocation": "titleBar",
+  "containers.containerClient": "com.microsoft.visualstudio.containers.docker",
+  "containers.orchestratorClient": "com.microsoft.visualstudio.orchestrators.dockercompose"
+}

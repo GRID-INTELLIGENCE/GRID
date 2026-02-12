@@ -1,0 +1,192 @@
+{
+  "protocol": "Wellness",
+  "source_file": "activity_20260206.pcapng",
+  "parsed_at": "2026-02-06T16:45:08.795740",
+  "http_requests": [
+    {
+      "timestamp": "2026-02-06 16:44:49.030694",
+      "method": "GET",
+      "url": "/",
+      "full_uri": "http://example.com/"
+    },
+    {
+      "timestamp": "2026-02-06 16:44:49.044523"
+    },
+    {
+      "timestamp": "2026-02-06 16:44:55.596840",
+      "method": "GET",
+      "url": "/",
+      "full_uri": "http://example.com/"
+    },
+    {
+      "timestamp": "2026-02-06 16:44:55.608052"
+    },
+    {
+      "timestamp": "2026-02-06 16:44:59.765578",
+      "method": "GET",
+      "url": "/",
+      "full_uri": "http://example.com/"
+    },
+    {
+      "timestamp": "2026-02-06 16:44:59.793907"
+    }
+  ],
+  "dns_queries": [],
+  "tcp_stats": {
+    "total_packets": 181,
+    "total_bytes": 48816,
+    "top_source_ips": [
+      {
+        "ip": "172.27.250.38",
+        "count": 101
+      },
+      {
+        "ip": "104.18.26.120",
+        "count": 39
+      },
+      {
+        "ip": "172.64.152.241",
+        "count": 18
+      },
+      {
+        "ip": "104.18.27.120",
+        "count": 12
+      },
+      {
+        "ip": "104.18.35.15",
+        "count": 11
+      }
+    ],
+    "top_destination_ips": [
+      {
+        "ip": "172.27.250.38",
+        "count": 80
+      },
+      {
+        "ip": "104.18.26.120",
+        "count": 46
+      },
+      {
+        "ip": "172.64.152.241",
+        "count": 25
+      },
+      {
+        "ip": "104.18.27.120",
+        "count": 16
+      },
+      {
+        "ip": "104.18.35.15",
+        "count": 14
+      }
+    ]
+  },
+  "tls_handshakes": [
+    {
+      "timestamp": "2026-02-06 16:44:49.059163",
+      "src_ip": "172.27.250.38",
+      "dst_ip": "104.18.26.120",
+      "server_name": "example.com",
+      "tls_version": "0x0303"
+    },
+    {
+      "timestamp": "2026-02-06 16:44:49.064407",
+      "src_ip": "104.18.26.120",
+      "dst_ip": "172.27.250.38",
+      "tls_version": "0x0303"
+    },
+    {
+      "timestamp": "2026-02-06 16:44:49.106779",
+      "src_ip": "172.27.250.38",
+      "dst_ip": "172.64.152.241",
+      "server_name": "api.coinbase.com",
+      "tls_version": "0x0303"
+    },
+    {
+      "timestamp": "2026-02-06 16:44:49.115123",
+      "src_ip": "172.64.152.241",
+      "dst_ip": "172.27.250.38",
+      "tls_version": "0x0303"
+    },
+    {
+      "timestamp": "2026-02-06 16:44:55.622969",
+      "src_ip": "172.27.250.38",
+      "dst_ip": "104.18.26.120",
+      "server_name": "example.com",
+      "tls_version": "0x0303"
+    },
+    {
+      "timestamp": "2026-02-06 16:44:55.633490",
+      "src_ip": "104.18.26.120",
+      "dst_ip": "172.27.250.38",
+      "tls_version": "0x0303"
+    },
+    {
+      "timestamp": "2026-02-06 16:44:55.666952",
+      "src_ip": "172.27.250.38",
+      "dst_ip": "172.64.152.241",
+      "server_name": "api.coinbase.com",
+      "tls_version": "0x0303"
+    },
+    {
+      "timestamp": "2026-02-06 16:44:55.670901",
+      "src_ip": "172.64.152.241",
+      "dst_ip": "172.27.250.38",
+      "tls_version": "0x0303"
+    },
+    {
+      "timestamp": "2026-02-06 16:44:59.808649",
+      "src_ip": "172.27.250.38",
+      "dst_ip": "104.18.26.120",
+      "server_name": "example.com",
+      "tls_version": "0x0303"
+    },
+    {
+      "timestamp": "2026-02-06 16:44:59.816641",
+      "src_ip": "104.18.26.120",
+      "dst_ip": "172.27.250.38",
+      "tls_version": "0x0303"
+    },
+    {
+      "timestamp": "2026-02-06 16:44:59.847104",
+      "src_ip": "172.27.250.38",
+      "dst_ip": "104.18.35.15",
+      "server_name": "api.coinbase.com",
+      "tls_version": "0x0303"
+    },
+    {
+      "timestamp": "2026-02-06 16:44:59.853502",
+      "src_ip": "104.18.35.15",
+      "dst_ip": "172.27.250.38",
+      "tls_version": "0x0303"
+    }
+  ],
+  "alerts": [
+    {
+      "severity": "INFO",
+      "type": "all_clear",
+      "message": "No anomalies detected. All traffic within normal thresholds.",
+      "timestamp": "2026-02-06T16:45:10.019596"
+    }
+  ],
+  "guardrail_thresholds": {
+    "max_packets_per_minute": 5000,
+    "max_unique_dst_ips": 50,
+    "max_unique_dst_ports": 30,
+    "max_dns_queries_per_minute": 200,
+    "max_dns_query_length": 80,
+    "max_failed_tls_handshakes": 10,
+    "max_http_error_rate": 0.5,
+    "suspicious_ports": [
+      4444,
+      5555,
+      6666,
+      6667,
+      1337,
+      31337,
+      12345,
+      65535
+    ],
+    "max_single_ip_packet_pct": 0.8,
+    "max_payload_bytes_per_packet": 65000
+  }
+}

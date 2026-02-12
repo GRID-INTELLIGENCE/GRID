@@ -1,0 +1,70 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Pattern Schema",
+  "type": "object",
+  "properties": {
+    "work_patterns": {
+      "type": "object",
+      "description": "Work pattern data",
+      "properties": {
+        "time_of_day_distribution": {
+          "type": "object",
+          "description": "Distribution of work by time of day"
+        },
+        "day_of_week_distribution": {
+          "type": "object",
+          "description": "Distribution of work by day of week"
+        },
+        "activity_type_distribution": {
+          "type": "object",
+          "description": "Distribution of activity types"
+        }
+      }
+    },
+    "file_access_patterns": {
+      "type": "object",
+      "description": "File access patterns",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "file_path": {
+            "type": "string"
+          },
+          "access_count": {
+            "type": "integer"
+          },
+          "last_accessed": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "project": {
+            "type": "string"
+          },
+          "file_type": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "tool_usage_patterns": {
+      "type": "object",
+      "description": "Tool usage patterns",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "tool_name": {
+            "type": "string"
+          },
+          "usage_count": {
+            "type": "integer"
+          },
+          "success_rate": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        }
+      }
+    }
+  }
+}

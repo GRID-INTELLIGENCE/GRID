@@ -1,0 +1,29 @@
+{
+  "path": "application\\mothership\\models\\payment.py",
+  "size": 8011,
+  "language": "Python",
+  "lines": 228,
+  "non_empty_lines": 190,
+  "functions": 11,
+  "classes": 7,
+  "imports": [
+    "__future__",
+    "uuid",
+    "dataclasses",
+    "datetime",
+    "enum",
+    "typing"
+  ],
+  "import_lines": [
+    7,
+    9,
+    10,
+    11,
+    12,
+    13
+  ],
+  "complexity_estimate": 3.0,
+  "comment_density": 0.0043859649122807015,
+  "has_docstrings": true,
+  "side_effects": []
+}

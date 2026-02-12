@@ -1,0 +1,29 @@
+{
+  "path": "application\\resonance\\context_provider.py",
+  "size": 7707,
+  "language": "Python",
+  "lines": 204,
+  "non_empty_lines": 165,
+  "functions": 7,
+  "classes": 3,
+  "imports": [
+    "__future__",
+    "logging",
+    "dataclasses",
+    "pathlib",
+    "typing",
+    "time"
+  ],
+  "import_lines": [
+    8,
+    10,
+    11,
+    12,
+    13,
+    124
+  ],
+  "complexity_estimate": 21.0,
+  "comment_density": 0.08823529411764706,
+  "has_docstrings": true,
+  "side_effects": []
+}

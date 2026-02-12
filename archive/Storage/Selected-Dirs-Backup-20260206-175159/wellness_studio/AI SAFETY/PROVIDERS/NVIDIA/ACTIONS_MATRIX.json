@@ -1,0 +1,62 @@
+{
+  "provider": "NVIDIA",
+  "version": "1.0.0",
+  "trigger_definitions": [
+    {
+      "trigger_id": "TRG-NVDA-001",
+      "name": "Guardrails Violation",
+      "condition": "guardrails_triggers.score > 0.9",
+      "description": "Triggered when NeMo Guardrails detects severe safety violations."
+    },
+    {
+      "trigger_id": "TRG-NVDA-002",
+      "name": "Infrastructure Security Breach",
+      "condition": "infrastructure_security.model_exfiltration_risk > 0.1",
+      "description": "Triggered when model security is potentially compromised."
+    },
+    {
+      "trigger_id": "TRG-NVDA-003",
+      "name": "RAG Poisoning Detection",
+      "condition": "privacy_and_security.data_poisoning_indicator > 0.4",
+      "description": "Triggered when corrupted data sources are detected in RAG."
+    }
+  ],
+  "action_catalog": {
+    "ACT-NVDA-001": {
+      "type": "BLOCK_CONTENT",
+      "description": "Immediately terminate the response and provide a standard safety refusal.",
+      "parameters": {
+        "message": "This request cannot be processed due to safety policy violations."
+      }
+    },
+    "ACT-NVDA-002": {
+      "type": "ESCALATE_AI_SAFETY",
+      "description": "Notify the AI Safety Team for manual review.",
+      "priority": "HIGH"
+    },
+    "ACT-NVDA-003": {
+      "type": "INFRASTRUCTURE_LOCKDOWN",
+      "description": "Restrict access to AI infrastructure pending investigation.",
+      "priority": "CRITICAL"
+    },
+    "ACT-NVDA-004": {
+      "type": "RAG_SOURCE_QUARANTINE",
+      "description": "Isolate potentially poisoned data sources from retrieval.",
+      "priority": "HIGH"
+    }
+  },
+  "mapping": [
+    {
+      "trigger_id": "TRG-NVDA-001",
+      "actions": ["ACT-NVDA-001"]
+    },
+    {
+      "trigger_id": "TRG-NVDA-002",
+      "actions": ["ACT-NVDA-002", "ACT-NVDA-003"]
+    },
+    {
+      "trigger_id": "TRG-NVDA-003",
+      "actions": ["ACT-NVDA-004", "ACT-NVDA-002"]
+    }
+  ]
+}

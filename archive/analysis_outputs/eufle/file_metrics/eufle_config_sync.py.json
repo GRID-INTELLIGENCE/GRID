@@ -1,0 +1,32 @@
+{
+  "path": "eufle\\config_sync.py",
+  "size": 16802,
+  "language": "Python",
+  "lines": 447,
+  "non_empty_lines": 377,
+  "functions": 19,
+  "classes": 1,
+  "imports": [
+    "json",
+    "pathlib",
+    "typing",
+    "datetime",
+    "os",
+    "yaml"
+  ],
+  "import_lines": [
+    8,
+    9,
+    18,
+    19,
+    20,
+    13
+  ],
+  "complexity_estimate": 73.0,
+  "comment_density": 0.04697986577181208,
+  "has_docstrings": true,
+  "side_effects": [
+    "open\\(",
+    "with open\\("
+  ]
+}

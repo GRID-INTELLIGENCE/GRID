@@ -1,0 +1,29 @@
+{
+  "path": "lightofthe7\\datakit\\Hogwarts\\great_hall\\mistral_agent.py",
+  "size": 8031,
+  "language": "Python",
+  "lines": 238,
+  "non_empty_lines": 196,
+  "functions": 7,
+  "classes": 1,
+  "imports": [
+    "os",
+    "json",
+    "typing",
+    "mistralai",
+    "agents.function_definitions",
+    "agents.function_definitions"
+  ],
+  "import_lines": [
+    24,
+    25,
+    26,
+    28,
+    32,
+    39
+  ],
+  "complexity_estimate": 14.0,
+  "comment_density": 0.01680672268907563,
+  "has_docstrings": true,
+  "side_effects": []
+}

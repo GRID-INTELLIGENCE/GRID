@@ -1,0 +1,172 @@
+# =============================================
+# WSL Network Monitoring → E:\ Directory Routing
+# =============================================
+# CRITICAL: Cleanup is scoped to E:\SSL ONLY.
+# E:\grid, E:\coinbase, E:\wellness_studio, and E:\ root
+# contain development files and must NEVER be cleaned up.
+# =============================================
+
+metadata:
+  description: |
+    Routes Wireshark captures and parsed logs to:
+    - E:\SSL          (network monitoring + cleanup target)
+    - E:\grid         (analysis only, NO cleanup)
+    - E:\coinbase     (analysis only, NO cleanup)
+    - E:\wellness_studio (analysis only, NO cleanup)
+  version: "2.0"
+
+wsl_config:
+  interface: "eth0"
+  subnet: "172.27.240.0/20"
+  capture_duration_default: 30
+  capture_filter: "src net 172.27.240.0/20"
+
+# =============================================
+# Directory Definitions & Capture Filters
+# =============================================
+directories:
+  ssl:
+    path: "E:\\SSL"
+    description: "SSL/TLS and general network traffic"
+    capture_filter: "src net 172.27.240.0/20"
+    display_filter: "tcp.port == 443 || tcp.port == 80 || tls"
+    cleanup_enabled: true
+    cleanup_max_age_days: 7
+    cleanup_extensions:
+      - ".pcapng"
+      - ".json"
+
+  grid:
+    path: "E:\\grid"
+    description: "Grid infrastructure — SSH, databases, orchestration, dev servers"
+    capture_filter: "tcp port 22 or tcp port 3306 or tcp port 5432 or tcp port 6379 or tcp port 27017 or tcp port 2376 or tcp port 6443 or tcp port 8080 or tcp port 8443"
+    display_filter: "tcp.port in {22,3306,5432,6379,27017,2376,6443,8080,8443}"
+    monitored_services:
+      - { name: "SSH",        port: 22 }
+      - { name: "MySQL",      port: 3306 }
+      - { name: "PostgreSQL", port: 5432 }
+      - { name: "Redis",      port: 6379 }
+      - { name: "MongoDB",    port: 27017 }
+      - { name: "Docker",     port: 2376 }
+      - { name: "K8s API",    port: 6443 }
+      - { name: "HTTP Alt",   port: 8080 }
+      - { name: "HTTPS Alt",  port: 8443 }
+    cleanup_enabled: false
+
+  coinbase:
+    path: "E:\\coinbase"
+    description: "Coinbase API, WebSocket, and blockchain P2P traffic"
+    capture_filter: "tcp port 443 or tcp port 8443 or tcp port 8333 or tcp port 30303 or tcp port 8545 or tcp port 8546 or tcp portrange 3000-3010"
+    display_filter: "tcp.port in {443,8443,8333,30303,8545,8546} || tcp.port >= 3000 && tcp.port <= 3010"
+    monitored_services:
+      - { name: "HTTPS/API",       port: 443 }
+      - { name: "HTTPS Alt",       port: 8443 }
+      - { name: "Bitcoin P2P",     port: 8333 }
+      - { name: "Ethereum P2P",    port: 30303 }
+      - { name: "Ethereum RPC",    port: 8545 }
+      - { name: "Ethereum WS",     port: 8546 }
+      - { name: "API Range",       port: "3000-3010" }
+    cleanup_enabled: false
+
+  wellness_studio:
+    path: "E:\\wellness_studio"
+    description: "Wellness Studio web traffic — HTTP, HTTPS, dev servers"
+    capture_filter: "tcp port 80 or tcp port 443 or tcp port 8080"
+    display_filter: "http || tls || tcp.port == 8080"
+    cleanup_enabled: false
+
+  dns:
+    path: "E:\\SSL"
+    description: "DNS query monitoring across all services"
+    capture_filter: "port 53"
+    display_filter: "dns"
+    cleanup_enabled: true
+    cleanup_extensions:
+      - ".pcapng"
+      - ".json"
+
+# =============================================
+# Capture & Parse Outputs
+# =============================================
+capture_outputs:
+  ssl: "E:\\SSL\\network_traffic_{date}.pcapng"
+  grid: "E:\\grid\\traffic_{date}.pcapng"
+  coinbase: "E:\\coinbase\\monitoring_{date}.pcapng"
+  wellness_studio: "E:\\wellness_studio\\activity_{date}.pcapng"
+  dns: "E:\\SSL\\dns_queries_{date}.pcapng"
+
+parse_outputs:
+  ssl: "E:\\SSL\\parsed_ssl_{date}.json"
+  grid: "E:\\grid\\parsed_grid_{date}.json"
+  coinbase: "E:\\coinbase\\parsed_coinbase_{date}.json"
+  wellness_studio: "E:\\wellness_studio\\parsed_wellness_{date}.json"
+  dns: "E:\\SSL\\parsed_dns_{date}.json"
+
+# =============================================
+# Firewall Rules (iptables via WSL)
+# =============================================
+firewall:
+  mode: "whitelist"
+  script: "E:\\SSL\\wireshark-monitor\\scripts\\firewall_rules.sh"
+  allowed_tcp_outbound:
+    - 22    # SSH
+    - 53    # DNS
+    - 80    # HTTP
+    - 443   # HTTPS
+    - 3000  # API range start
+    - 3010  # API range end
+    - 3306  # MySQL
+    - 5432  # PostgreSQL
+    - 6379  # Redis
+    - 6443  # K8s API
+    - 8080  # HTTP Alt
+    - 8333  # Bitcoin P2P
+    - 8443  # HTTPS Alt
+    - 8545  # Ethereum RPC
+    - 8546  # Ethereum WS
+    - 27017 # MongoDB
+    - 30303 # Ethereum P2P
+  allowed_udp_outbound:
+    - 53    # DNS
+    - 123   # NTP
+  blocked_ports:
+    - 4444  # Metasploit default
+    - 5555  # Android debug
+    - 6666  # IRC backdoor
+    - 6667  # IRC
+    - 1337  # Leet backdoor
+    - 12345 # NetBus
+    - 31337 # Back Orifice
+    - 65535 # Common scan target
+  rate_limits:
+    dns: "50/minute"
+    http: "100/minute"
+    https: "200/minute"
+    ssh: "10/minute"
+    icmp: "10/minute"
+  connection_limits:
+    max_per_ip: 100
+    new_conn_rate: "30/second"
+
+# =============================================
+# Guardrails: Anomaly Detection Thresholds
+# =============================================
+guardrails:
+  max_packets_per_minute: 5000
+  max_unique_dst_ips: 50
+  max_unique_dst_ports: 30
+  max_dns_queries_per_minute: 200
+  max_dns_query_length: 80
+  max_failed_tls_handshakes: 10
+  max_http_error_rate: 0.5
+  max_single_ip_packet_pct: 0.80
+  max_payload_bytes_per_packet: 65000
+  suspicious_ports:
+    - 4444
+    - 5555
+    - 6666
+    - 6667
+    - 1337
+    - 12345
+    - 31337
+    - 65535

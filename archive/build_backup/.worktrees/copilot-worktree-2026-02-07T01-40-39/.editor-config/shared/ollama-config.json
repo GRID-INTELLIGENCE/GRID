@@ -1,0 +1,56 @@
+{
+  "ollama": {
+    "endpoint": "http://localhost:11434",
+    "timeout_seconds": 30,
+    "default_model": "mistral-nemo:latest",
+    "models": {
+      "claude": {
+        "full_name": "claude:latest",
+        "provider": "anthropic",
+        "offline": true,
+        "download_url": "ollama pull claude",
+        "capabilities": ["code_analysis", "reasoning", "documentation"],
+        "parameters": {
+          "temperature": 0.7,
+          "top_p": 0.9,
+          "context_length": 8192
+        }
+      },
+      "mistral-nemo": {
+        "full_name": "mistral-nemo:latest",
+        "provider": "mistral",
+        "offline": true,
+        "download_url": "ollama pull mistral-nemo:latest",
+        "capabilities": ["fast_completion", "code_generation", "chat"],
+        "parameters": {
+          "temperature": 0.7,
+          "top_p": 0.9,
+          "context_length": 32768
+        }
+      },
+      "neural-chat": {
+        "full_name": "neural-chat:latest",
+        "provider": "intel",
+        "offline": true,
+        "download_url": "ollama pull neural-chat:latest",
+        "capabilities": ["conversational", "instruction_following"],
+        "parameters": {
+          "temperature": 0.8,
+          "top_p": 0.95,
+          "context_length": 4096
+        }
+      }
+    },
+    "setup_commands": [
+      "ollama serve",
+      "ollama pull claude",
+      "ollama pull mistral-nemo:latest",
+      "ollama pull neural-chat:latest"
+    ],
+    "health_check": {
+      "endpoint": "http://localhost:11434/api/tags",
+      "interval_seconds": 60,
+      "expected_response": "models"
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "path": "application\\canvas\\canvas_wheel_demo.py",
+  "size": 4037,
+  "language": "Python",
+  "lines": 129,
+  "non_empty_lines": 104,
+  "functions": 0,
+  "classes": 0,
+  "imports": [
+    "asyncio",
+    "time",
+    "pathlib",
+    "application.canvas"
+  ],
+  "import_lines": [
+    6,
+    7,
+    8,
+    10
+  ],
+  "complexity_estimate": 8.0,
+  "comment_density": 0.06976744186046512,
+  "has_docstrings": true,
+  "side_effects": []
+}

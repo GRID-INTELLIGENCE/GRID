@@ -1,0 +1,31 @@
+{
+  "path": ".claude\\skills\\rag_query_knowledge.py",
+  "size": 2469,
+  "language": "Python",
+  "lines": 86,
+  "non_empty_lines": 69,
+  "functions": 1,
+  "classes": 0,
+  "imports": [
+    "__future__",
+    "sys",
+    "pathlib",
+    "typing",
+    "grid.skills.base",
+    "tools.rag.rag_engine",
+    "tools.rag.config"
+  ],
+  "import_lines": [
+    8,
+    10,
+    11,
+    12,
+    18,
+    21,
+    22
+  ],
+  "complexity_estimate": 5.0,
+  "comment_density": 0.046511627906976744,
+  "has_docstrings": true,
+  "side_effects": []
+}

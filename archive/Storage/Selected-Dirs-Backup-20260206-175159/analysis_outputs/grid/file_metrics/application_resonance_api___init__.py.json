@@ -1,0 +1,19 @@
+{
+  "path": "application\\resonance\\api\\__init__.py",
+  "size": 163,
+  "language": "Python",
+  "lines": 12,
+  "non_empty_lines": 8,
+  "functions": 0,
+  "classes": 0,
+  "imports": [
+    "router"
+  ],
+  "import_lines": [
+    7
+  ],
+  "complexity_estimate": 0.0,
+  "comment_density": 0.0,
+  "has_docstrings": true,
+  "side_effects": []
+}

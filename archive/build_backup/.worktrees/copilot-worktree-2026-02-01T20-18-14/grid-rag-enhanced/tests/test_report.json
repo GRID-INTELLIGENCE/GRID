@@ -1,0 +1,59 @@
+{
+  "timestamp": "2026-01-08T05:06:07.497799",
+  "duration": 91.3123471736908,
+  "results": [
+    {
+      "category": "unit",
+      "passed": 122,
+      "failed": 0,
+      "skipped": 10,
+      "errors": 0,
+      "duration": 2.7153828144073486,
+      "exit_code": 0
+    },
+    {
+      "category": "integration",
+      "passed": 35,
+      "failed": 21,
+      "skipped": 2,
+      "errors": 0,
+      "duration": 39.518166065216064,
+      "exit_code": 1
+    },
+    {
+      "category": "api",
+      "passed": 140,
+      "failed": 35,
+      "skipped": 3,
+      "errors": 0,
+      "duration": 38.002031326293945,
+      "exit_code": 1
+    },
+    {
+      "category": "security",
+      "passed": 30,
+      "failed": 6,
+      "skipped": 0,
+      "errors": 0,
+      "duration": 5.512089729309082,
+      "exit_code": 1
+    },
+    {
+      "category": "property",
+      "passed": 15,
+      "failed": 2,
+      "skipped": 0,
+      "errors": 0,
+      "duration": 4.808449983596802,
+      "exit_code": 1
+    }
+  ],
+  "coverage": {
+    "percent": 0.0,
+    "statements_total": 0,
+    "statements_covered": 0,
+    "statements_missing": 0,
+    "files_covered": 0,
+    "files_total": 0
+  }
+}

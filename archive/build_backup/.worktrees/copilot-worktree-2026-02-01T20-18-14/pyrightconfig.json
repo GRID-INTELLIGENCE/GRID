@@ -1,0 +1,26 @@
+﻿{
+    "pythonVersion":  "3.13",
+    "exclude":  [
+                    "**/node_modules",
+                    "**/__pycache__",
+                    "**/.pytest_cache",
+                    "**/.mypy_cache",
+                    "**/analysis_outputs",
+                    "**/$RECYCLE.BIN",
+                    "**/System Volume Information",
+                    "build",
+                    "dist",
+                    ".venv",
+                    "venv",
+                    "**/.git",
+                    "**/archive",
+                    "**/archive/**",
+                    "**/temp/**",
+                    "**/*.pyc",
+                    "**/grid/archive/**"
+                ],
+    "venvPath":  ".",
+    "typeCheckingMode":  "strict",
+    "reportMissingImports":  true,
+    "reportMissingTypeStubs":  false
+}

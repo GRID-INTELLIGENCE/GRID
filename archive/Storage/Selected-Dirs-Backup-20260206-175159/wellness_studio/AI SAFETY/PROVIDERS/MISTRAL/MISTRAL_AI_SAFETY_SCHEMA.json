@@ -1,0 +1,130 @@
+{
+  "provider": "Mistral AI",
+  "version": "1.0.0",
+  "last_updated": "2025-02-05",
+  "metadata": {
+    "primary_models": ["Mistral 7B", "Mixtral 8x7B", "Mixtral 8x22B", "Mistral Large", "Codestral"],
+    "mission": "Making frontier AI open, efficient, and accessible while ensuring safety",
+    "website": "https://mistral.ai",
+    "governance": {
+      "oversight_bodies": [
+        {
+          "name": "Safety Team",
+          "function": "Internal experts reviewing model releases and safety measures."
+        },
+        {
+          "name": "External Advisory Board",
+          "function": "Industry experts providing guidance on safety practices."
+        }
+      ]
+    }
+  },
+  "safety_frameworks": {
+    "safety_charter": [
+      "Democratize AI",
+      "Transparency",
+      "Safety by Design",
+      "Collaborative Governance",
+      "Continuous Improvement"
+    ],
+    "open_model_safety_protocol": {
+      "levels": [
+        "Pre-deployment Evaluation",
+        "License-based Restrictions",
+        "Community Monitoring",
+        "Responsible Disclosure"
+      ],
+      "risk_domains": [
+        "Harmful Content Generation",
+        "Malicious Code Production",
+        "Bias Amplification",
+        "Misuse for Disinformation"
+      ]
+    }
+  },
+  "research_areas": [
+    {
+      "name": "Sparse Mixture of Experts",
+      "focus": "Efficient model architecture with MoE routing safety."
+    },
+    {
+      "name": "Multilingual Safety",
+      "focus": "Safety across diverse language contexts."
+    },
+    {
+      "name": "Code Safety",
+      "focus": "Secure code generation and vulnerability prevention."
+    },
+    {
+      "name": "Open-Weight Governance",
+      "focus": "Balancing model openness with safety constraints."
+    }
+  ],
+  "safety_themes": {
+    "taxonomy": [
+      "Openness",
+      "Accessibility",
+      "Safety",
+      "Transparency",
+      "Community Engagement",
+      "Continuous Improvement"
+    ]
+  },
+  "hard_constraints": {
+    "prohibited_applications": [
+      {
+        "id": "MIST-HC-001",
+        "category": "Weapon Development",
+        "description": "Creating or improving weapons, explosives, or harmful devices."
+      },
+      {
+        "id": "MIST-HC-002",
+        "category": "Surveillance",
+        "description": "Mass surveillance systems violating privacy rights."
+      },
+      {
+        "id": "MIST-HC-003",
+        "category": "Disinformation",
+        "description": "Coordinated campaigns to spread false information at scale."
+      },
+      {
+        "id": "MIST-HC-004",
+        "category": "Fraud",
+        "description": "Financial scams, identity theft, or social engineering attacks."
+      },
+      {
+        "id": "MIST-HC-005",
+        "category": "CSAM",
+        "description": "Any content involving child sexual abuse material."
+      },
+      {
+        "id": "MIST-HC-006",
+        "category": "Malware",
+        "description": "Creating malicious software, exploits, or attack tools."
+      }
+    ]
+  },
+  "monitoring_parameters": {
+    "safety_filters": [
+      "Hate Speech",
+      "Harassment",
+      "Self-Harm",
+      "Violence",
+      "Sexual Content"
+    ],
+    "evaluations": [
+      "Red Teaming",
+      "Multilingual Benchmarking",
+      "Code Safety Audits",
+      "Community Vulnerability Reports"
+    ]
+  },
+  "privacy_protocols": {
+    "approaches": [
+      "Data Minimization",
+      "Opt-out Training Data",
+      "Local Inference Support",
+      "API Privacy Controls"
+    ]
+  }
+}

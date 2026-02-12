@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": "1.0.0",
+  "profile_name": "RAINCOAT_STABILITY_V1",
+  "description": "Protective configuration layer for stability and AI safety",
+  "governance": {
+    "mcp_systems": {
+      "autostart_policy": "never",
+      "gallery_enabled": true,
+      "allowed_servers": [],
+      "enforcement": "STRICT"
+    },
+    "terminal_safety": {
+      "auto_approve_policy": "least_privilege",
+      "blocked_commands": [
+        "rm", "rmdir", "del", "kill", "taskkill", 
+        "py", "py.exe", "pyw", "pyw.exe",
+        "curl", "wget", "chmod", "chown", "eval", "iex"
+      ],
+      "monitored_commands": [
+        "git", "pip", "npm", "python", "node"
+      ]
+    },
+    "ai_assistance": {
+      "agent_skills": true,
+      "restore_sessions": true,
+      "preferred_location": "panel"
+    }
+  },
+  "persistence_patterns": {
+    "path_protection": "config/project_path_protection.json",
+    "server_denylist": "config/server_denylist.json",
+    "safety_logging": "E:\\_projects\\wellness_studio\\ai_safety\\config_sanitization"
+  },
+  "workflow_preferences": {
+    "font_family": "monospace",
+    "view_orientation": "stacked"
+  }
+}

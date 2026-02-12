@@ -1,0 +1,21 @@
+{
+  "path": "application\\mothership\\exceptions.py",
+  "size": 15199,
+  "language": "Python",
+  "lines": 530,
+  "non_empty_lines": 426,
+  "functions": 28,
+  "classes": 26,
+  "imports": [
+    "__future__",
+    "typing"
+  ],
+  "import_lines": [
+    8,
+    10
+  ],
+  "complexity_estimate": 9.0,
+  "comment_density": 0.062264150943396226,
+  "has_docstrings": true,
+  "side_effects": []
+}

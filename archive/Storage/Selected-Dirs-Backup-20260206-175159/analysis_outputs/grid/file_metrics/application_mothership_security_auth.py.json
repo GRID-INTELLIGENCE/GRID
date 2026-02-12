@@ -1,0 +1,23 @@
+{
+  "path": "application\\mothership\\security\\auth.py",
+  "size": 4469,
+  "language": "Python",
+  "lines": 158,
+  "non_empty_lines": 124,
+  "functions": 6,
+  "classes": 3,
+  "imports": [
+    "__future__",
+    "typing",
+    "fastapi"
+  ],
+  "import_lines": [
+    7,
+    9,
+    11
+  ],
+  "complexity_estimate": 7.0,
+  "comment_density": 0.056962025316455694,
+  "has_docstrings": true,
+  "side_effects": []
+}

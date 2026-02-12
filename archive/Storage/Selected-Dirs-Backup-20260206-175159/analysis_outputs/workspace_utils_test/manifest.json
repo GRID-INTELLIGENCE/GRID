@@ -1,0 +1,62 @@
+{
+  "root_path": "E:\\workspace_utils",
+  "total_files": 9,
+  "analyzed_files": 9,
+  "files": [
+    {
+      "path": "cli.py",
+      "size": 5901,
+      "language": "Python",
+      "depth": 1
+    },
+    {
+      "path": "config.py",
+      "size": 3982,
+      "language": "Python",
+      "depth": 1
+    },
+    {
+      "path": "entity_classifier.py",
+      "size": 6250,
+      "language": "Python",
+      "depth": 1
+    },
+    {
+      "path": "eufle_verifier.py",
+      "size": 6945,
+      "language": "Python",
+      "depth": 1
+    },
+    {
+      "path": "project_comparator.py",
+      "size": 11679,
+      "language": "Python",
+      "depth": 1
+    },
+    {
+      "path": "README.md",
+      "size": 2807,
+      "language": "Markdown",
+      "depth": 1
+    },
+    {
+      "path": "repo_analyzer.py",
+      "size": 27879,
+      "language": "Python",
+      "depth": 1
+    },
+    {
+      "path": "tests\\__init__.py",
+      "size": 38,
+      "language": "Python",
+      "depth": 2
+    },
+    {
+      "path": "__init__.py",
+      "size": 585,
+      "language": "Python",
+      "depth": 1
+    }
+  ],
+  "timestamp": "2026-01-21T06:41:06.385998"
+}

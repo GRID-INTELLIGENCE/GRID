@@ -1,0 +1,39 @@
+# Caches and build
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.basedpyright/
+node_modules/
+venv/
+.venv/
+build/
+dist/
+out/
+.next/
+
+# Analysis and artifacts
+analysis_outputs/
+archive/
+*.log
+*.tmp
+*.temp
+*.cache
+
+# Config and secrets
+config/.env
+.env.local
+*.db
+data/*.db
+
+# Project repositories (exclude apps and projects only)
+apps/
+projects/
+
+# OS
+.DS_Store
+Thumbs.db
+nul
+user_env.txt

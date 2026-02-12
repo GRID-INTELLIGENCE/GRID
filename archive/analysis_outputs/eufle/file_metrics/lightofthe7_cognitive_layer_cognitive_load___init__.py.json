@@ -1,0 +1,23 @@
+{
+  "path": "lightofthe7\\cognitive_layer\\cognitive_load\\__init__.py",
+  "size": 306,
+  "language": "Python",
+  "lines": 13,
+  "non_empty_lines": 9,
+  "functions": 0,
+  "classes": 0,
+  "imports": [
+    "chunking",
+    "load_estimator",
+    "scaffolding"
+  ],
+  "import_lines": [
+    3,
+    4,
+    5
+  ],
+  "complexity_estimate": 0.0,
+  "comment_density": 0.0,
+  "has_docstrings": true,
+  "side_effects": []
+}

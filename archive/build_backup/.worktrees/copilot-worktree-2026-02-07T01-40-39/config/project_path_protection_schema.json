@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": "1.0.0",
+  "title": "Protected Project Paths Configuration",
+  "description": "Immutable project path definitions with explicit user protection",
+  "type": "object",
+  "properties": {
+    "protected_projects": {
+      "type": "object",
+      "properties": {
+        "grid": {
+          "type": "object",
+          "properties": {
+            "canonical_path": {
+              "type": "string",
+              "const": "E:\\_projects\\grid",
+              "description": "Immutable canonical path for GRID project"
+            },
+            "alternate_paths": {
+              "type": "array",
+              "items": {"type": "string"},
+              "description": "Recognized alternate path formats"
+            },
+            "protection_level": {
+              "type": "string",
+              "enum": ["EXPLICIT"],
+              "description": "Protection enforcement level"
+            },
+            "modification_allowed": {
+              "type": "boolean",
+              "const": false,
+              "description": "Path modification permission"
+            },
+            "tags": {
+              "type": "array",
+              "items": {"type": "string"},
+              "description": "Project identification tags"
+            }
+          },
+          "required": ["canonical_path", "protection_level", "modification_allowed"]
+        },
+        "coinbase": {
+          "type": "object",
+          "properties": {
+            "canonical_path": {
+              "type": "string",
+              "const": "E:\\_projects\\Coinbase\\coinbase",
+              "description": "Immutable canonical path for Coinbase project"
+            },
+            "alternate_paths": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "protection_level": {
+              "type": "string",
+              "enum": ["EXPLICIT"]
+            },
+            "modification_allowed": {
+              "type": "boolean",
+              "const": false
+            },
+            "tags": {
+              "type": "array",
+              "items": {"type": "string"}
+            }
+          },
+          "required": ["canonical_path", "protection_level", "modification_allowed"]
+        },
+        "wellness_studio": {
+          "type": "object",
+          "properties": {
+            "canonical_path": {
+              "type": "string",
+              "const": "E:\\_projects\\wellness_studio",
+              "description": "Immutable canonical path for Wellness Studio project"
+            },
+            "alternate_paths": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "protection_level": {
+              "type": "string",
+              "enum": ["EXPLICIT"]
+            },
+            "modification_allowed": {
+              "type": "boolean",
+              "const": false
+            },
+            "tags": {
+              "type": "array",
+              "items": {"type": "string"}
+            }
+          },
+          "required": ["canonical_path", "protection_level", "modification_allowed"]
+        }
+      },
+      "required": ["grid", "coinbase", "wellness_studio"],
+      "additionalProperties": false
+    },
+    "naming_conventions": {
+      "type": "object",
+      "properties": {
+        "underscore_prefix": {
+          "type": "object",
+          "properties": {
+            "rule": {
+              "type": "string",
+              "description": "Underscore prefix indicates protected/system-level directory"
+            },
+            "examples": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "protection": {
+              "type": "string",
+              "enum": ["IMMUTABLE"]
+            }
+          }
+        }
+      }
+    },
+    "enforcement_rules": {
+      "type": "object",
+      "properties": {
+        "no_path_changes": {
+          "type": "boolean",
+          "const": true,
+          "description": "Explicitly prohibit path changes to protected projects"
+        },
+        "no_moves": {
+          "type": "boolean",
+          "const": true,
+          "description": "Explicitly prohibit moving protected projects"
+        },
+        "no_renames": {
+          "type": "boolean",
+          "const": true,
+          "description": "Explicitly prohibit renaming protected projects"
+        },
+        "violation_action": {
+          "type": "string",
+          "enum": ["STOP_AND_ALERT"],
+          "description": "Action to take on protection violation"
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "created_by": {"type": "string"},
+        "created_at": {"type": "string", "format": "date-time"},
+        "authority": {"type": "string"},
+        "persistence": {"type": "string"},
+        "override_allowed": {"type": "boolean"}
+      }
+    }
+  },
+  "required": ["protected_projects", "enforcement_rules"]
+}
