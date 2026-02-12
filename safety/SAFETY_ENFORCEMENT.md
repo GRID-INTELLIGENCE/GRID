@@ -7,6 +7,8 @@ refuses unsafe inputs**, **detects and blocks systematic misuse**,
 **escalates uncertain/high-risk cases to humans**, and **fails closed**
 if safety infrastructure is degraded.
 
+**See also:** [Safety Layer & Cognitive Privacy Shield — Architecture](../docs/SAFETY_ARCHITECTURE.md) for pipeline details, Privacy Shield integration, and key files.
+
 ---
 
 ## Architecture

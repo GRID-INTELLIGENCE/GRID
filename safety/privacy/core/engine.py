@@ -6,26 +6,23 @@ Supports both singular (personal) and collaborative (shared) modes.
 
 from __future__ import annotations
 
-import asyncio
-from dataclasses import dataclass, field
-from enum import Enum
+import threading
 from typing import Any
 
+from safety.observability.logging_setup import get_logger
 from safety.privacy.cache.result_cache import DetectionCache, get_detection_cache
 from safety.privacy.core.masking import (
     CompliancePreset,
-    MaskingEngine,
     MaskResult,
     create_compliance_engine,
 )
 from safety.privacy.core.presets import PrivacyPreset, get_preset_config
-from safety.privacy.detector import AsyncPIIDetection
-from safety.observability.logging_setup import get_logger
 
 logger = get_logger("privacy.core")
 
 
 from safety.privacy.core.types import PrivacyAction, PrivacyConfig, PrivacyResult
+
 
 class PrivacyEngine:
     """
@@ -319,6 +316,7 @@ def create_privacy_engine(
 # Global instances for different modes
 _singular_engine: PrivacyEngine | None = None
 _collaborative_engines: dict[str, PrivacyEngine] = {}
+_privacy_engine_lock = threading.RLock()
 
 
 def get_privacy_engine(
@@ -327,7 +325,7 @@ def get_privacy_engine(
     preset: PrivacyPreset = PrivacyPreset.BALANCED,
 ) -> PrivacyEngine:
     """
-    Get or create a privacy engine.
+    Get or create a privacy engine (thread-safe).
 
     For singular mode, returns a shared instance.
     For collaborative mode, returns instance per context_id.
@@ -336,7 +334,9 @@ def get_privacy_engine(
 
     if not collaborative:
         if _singular_engine is None:
-            _singular_engine = create_privacy_engine(preset, False)
+            with _privacy_engine_lock:
+                if _singular_engine is None:
+                    _singular_engine = create_privacy_engine(preset, False)
         return _singular_engine
 
     # Collaborative mode - per-context instance
@@ -344,7 +344,9 @@ def get_privacy_engine(
         raise ValueError("context_id must be provided for collaborative mode.")
 
     if context_id not in _collaborative_engines:
-        _collaborative_engines[context_id] = create_privacy_engine(preset, True, context_id)
+        with _privacy_engine_lock:
+            if context_id not in _collaborative_engines:
+                _collaborative_engines[context_id] = create_privacy_engine(preset, True, context_id)
 
     return _collaborative_engines[context_id]
 

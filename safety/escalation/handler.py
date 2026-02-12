@@ -14,6 +14,7 @@ from __future__ import annotations
 import os
 import uuid
 from collections import defaultdict
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any
 
@@ -292,7 +293,7 @@ async def _check_misuse(user_id: str) -> None:
         logger.warning(
             "systematic_misuse_detected",
             user_id=user_id,
-            escalation_count=len(window),
+            escalation_count=count,
             window_seconds=_MISUSE_WINDOW_SECONDS,
         )
 
@@ -312,7 +313,7 @@ async def _check_misuse(user_id: str) -> None:
                 {
                     "event": "systematic_misuse",
                     "user_id": user_id,
-                    "escalation_count": str(len(window)),
+                    "escalation_count": str(count),
                 },
             )
         except Exception:
@@ -338,8 +339,16 @@ async def _suspend_user(user_id: str, audit_id: str, reason: str) -> None:
         logger.error("user_suspension_failed", user_id=user_id, error=str(exc))
 
 
-async def is_user_suspended(user_id: str) -> tuple[bool, str | None]:
-    """Check if a user is suspended. Returns (suspended, reason).
+@dataclass(frozen=True)
+class SuspensionStatus:
+    """Result of a user suspension check."""
+
+    suspended: bool
+    reason: str | None = None
+
+
+async def is_user_suspended(user_id: str) -> SuspensionStatus:
+    """Check if a user is suspended.
 
     FAIL-CLOSED: If Redis is unavailable, assume user IS suspended.
     This is consistent with the rest of the safety pipeline's fail-closed design.
@@ -349,9 +358,9 @@ async def is_user_suspended(user_id: str) -> tuple[bool, str | None]:
         client = await _get_redis()
         val = await client.get(f"suspended:{user_id}")
         if val:
-            return True, val
-        return False, None
+            return SuspensionStatus(suspended=True, reason=val)
+        return SuspensionStatus(suspended=False)
     except Exception as exc:
         logger.error("suspension_check_failed", user_id=user_id, error=str(exc))
         # FAIL CLOSED: if we can't verify suspension status, deny access
-        return True, "SUSPENSION_CHECK_UNAVAILABLE"
+        return SuspensionStatus(suspended=True, reason="SUSPENSION_CHECK_UNAVAILABLE")

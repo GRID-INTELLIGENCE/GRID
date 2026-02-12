@@ -11,11 +11,11 @@ import time
 from dataclasses import dataclass, field
 from typing import Any
 
-from safety.privacy.cache.result_cache import get_detection_cache
-from safety.privacy.core.engine import PrivacyAction, PrivacyEngine, PrivacyResult
-from safety.privacy.core.presets import PrivacyPreset, get_preset_config
 from safety.observability.logging_setup import get_logger
 from safety.observability.metrics import PRIVACY_COLLABORATIVE_CONTEXT_TOTAL
+from safety.privacy.cache.result_cache import get_detection_cache
+from safety.privacy.core.engine import PrivacyEngine, PrivacyResult
+from safety.privacy.core.presets import PrivacyPreset
 
 # Module-level default so type checker treats it as PrivacyPreset, not Literal['collaborative']
 _DEFAULT_COLLABORATIVE_PRESET: PrivacyPreset = PrivacyPreset.COLLABORATIVE

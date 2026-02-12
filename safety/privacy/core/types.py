@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from enum import Enum
-from typing import Any, TYPE_CHECKING
+from enum import StrEnum
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from safety.privacy.core.masking import CompliancePreset, MaskingEngine
 
-class PrivacyAction(str, Enum):
+
+class PrivacyAction(StrEnum):
     """Actions to take when PII is detected."""
 
     MASK = "mask"  # Auto-mask the PII

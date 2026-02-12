@@ -1079,6 +1079,7 @@ dependencies = [
     { name = "databricks-sql-connector" },
     { name = "detect-secrets" },
     { name = "fastapi" },
+    { name = "grid-safety" },
     { name = "hatch" },
     { name = "hatchling" },
     { name = "httpx" },
@@ -1190,6 +1191,7 @@ requires-dist = [
     { name = "databricks-sql-connector", specifier = ">=4.2.4" },
     { name = "detect-secrets", specifier = ">=1.4.0" },
     { name = "fastapi", specifier = ">=0.104.0" },
+    { name = "grid-safety", specifier = ">=1.0.0" },
     { name = "hatch", specifier = ">=1.16.2" },
     { name = "hatchling", specifier = ">=1.28.0" },
     { name = "httpx", specifier = ">=0.25.0" },
@@ -1271,6 +1273,29 @@ test = [
     { name = "pytest-asyncio", specifier = ">=0.21.0" },
     { name = "pytest-cov", specifier = ">=4.1.0" },
     { name = "pytest-timeout", specifier = ">=2.1.0" },
+]
+
+[[package]]
+name = "grid-safety"
+version = "1.0.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "asyncpg" },
+    { name = "fastapi" },
+    { name = "loguru" },
+    { name = "prometheus-client" },
+    { name = "pydantic" },
+    { name = "pyjwt" },
+    { name = "python-jose", extra = ["cryptography"] },
+    { name = "pyyaml" },
+    { name = "redis" },
+    { name = "sqlalchemy", extra = ["asyncio"] },
+    { name = "structlog" },
+    { name = "uvicorn", extra = ["standard"] },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/e4/9a/a073d7a682a6e66c329cbff01616786da01154b6a865b327550dc71c3f88/grid_safety-1.0.0.tar.gz", hash = "sha256:29eba5c787b0a9d875968c7c1781e81e3d2c44b9de11486bd6408a1818ac2072", size = 127211, upload-time = "2026-02-12T20:52:24.868Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a6/fb/e7dd29080f739e76b2333970b70dae1ab6db30a8361aee94a43a0381bdd9/grid_safety-1.0.0-py3-none-any.whl", hash = "sha256:cea2555622197f86cc6104dd7523ca4dbafb89fdb13ba5a531a49dd6620ba554", size = 172654, upload-time = "2026-02-12T20:52:23.356Z" },
 ]
 
 [[package]]

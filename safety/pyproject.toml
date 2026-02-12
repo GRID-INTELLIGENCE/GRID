@@ -1,0 +1,69 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "grid-safety"
+version = "1.0.0"
+description = "GRID Safety layer and Cognitive Privacy Shield: real-time safety enforcement, PII detection, masking, and compliance presets (GDPR, HIPAA, PCI-DSS) for AI inference."
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.13,<3.14"
+authors = [{ name = "Irfan Kabir", email = "irfankabir02@gmail.com" }]
+keywords = [
+    "safety",
+    "privacy",
+    "pii-detection",
+    "gdpr",
+    "hipaa",
+    "ai-safety",
+    "fastapi",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Security",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+dependencies = [
+    "fastapi>=0.104.0",
+    "uvicorn[standard]>=0.24.0",
+    "pydantic>=2.4.0",
+    "redis>=5.0.0",
+    "sqlalchemy[asyncio]>=2.0.0",
+    "asyncpg>=0.29.0",
+    "prometheus-client>=0.19.0",
+    "structlog>=23.1.0",
+    "loguru>=0.7.3",
+    "python-jose[cryptography]>=3.3.0",
+    "pyjwt>=2.8.0",
+    "pyyaml>=6.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3.0",
+    "pytest-asyncio>=0.21.0",
+    "httpx>=0.25.0",
+]
+publish = [
+    "build>=1.0.0",
+    "twine>=5.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/caraxesthebloodwyrm02/GRID"
+Repository = "https://github.com/caraxesthebloodwyrm02/GRID"
+Issues = "https://github.com/caraxesthebloodwyrm02/GRID/issues"
+
+[project.scripts]
+safety-api = "safety.api.main:run"
+
+# Package is the project root (safety/); wheel will contain safety/ at top level.
+[tool.hatch.build.targets.wheel]
+packages = ["."]

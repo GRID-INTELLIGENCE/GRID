@@ -107,13 +107,14 @@ class TestRedTeamVectors:
         ids=[f"{cat}:{text[:40]}..." for cat, text, _ in RED_TEAM_VECTORS],
     )
     def test_vector(self, category: str, input_text: str, should_block: bool):
-        blocked, code = quick_block(input_text)
+        result = quick_block(input_text)
         if should_block:
-            assert blocked is True, f"[{category}] MISSED — expected block for: {input_text!r}"
-            assert code is not None
+            assert result.blocked is True, f"[{category}] MISSED — expected block for: {input_text!r}"
+            assert result.reason_code is not None
         else:
-            assert blocked is False, (
-                f"[{category}] FALSE POSITIVE — unexpected block for: " f"{input_text!r} (code={code})"
+            assert result.blocked is False, (
+                f"[{category}] FALSE POSITIVE — unexpected block for: "
+                f"{input_text!r} (code={result.reason_code})"
             )
 
 
@@ -125,8 +126,8 @@ class TestDetectionRate:
         detected = 0
         missed = []
         for cat, text in high_risk_vectors:
-            blocked, _ = quick_block(text)
-            if blocked:
+            result = quick_block(text)
+            if result.blocked:
                 detected += 1
             else:
                 missed.append((cat, text))
@@ -144,9 +145,9 @@ class TestDetectionRate:
         safe_vectors = [text for cat, text, should_block in RED_TEAM_VECTORS if not should_block]
         false_positives = []
         for text in safe_vectors:
-            blocked, code = quick_block(text)
-            if blocked:
-                false_positives.append((text, code))
+            result = quick_block(text)
+            if result.blocked:
+                false_positives.append((text, result.reason_code))
 
         total = len(safe_vectors)
         fp_rate = len(false_positives) / total if total > 0 else 0

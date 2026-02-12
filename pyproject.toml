@@ -109,15 +109,9 @@ audit = [
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+# Not used for PyPI publish. Publish grid-intelligence from work/GRID/ and grid-safety from safety/.
 [tool.hatch.build.targets.wheel]
-packages = [
-    "work/GRID/src/grid",
-    "work/GRID/src/application",
-    "work/GRID/src/cognitive",
-    "work/GRID/src/tools",
-    "boundaries",
-    "safety",
-]
+packages = []
 
 # ── UV Configuration ────────────────────────────────────────────────
 

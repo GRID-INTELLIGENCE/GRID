@@ -10,7 +10,7 @@ import asyncio
 import time
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
-from typing import Any, Callable, Union
+from typing import Any, Callable
 
 from safety.observability.logging_setup import get_logger
 
@@ -87,7 +87,7 @@ class PrivacyWorkerPool:
                         timeout=self._items_timeout,
                     )
                     return {"index": index, "result": result, "error": None}
-                except asyncio.TimeoutError:
+                except TimeoutError:
                     logger.warning("batch_item_timeout", index=index)
                     return {
                         "index": index,
@@ -160,7 +160,7 @@ class PrivacyWorkerPool:
                         timeout=self._items_timeout,
                     )
                     return {"index": index, "result": result, "error": None}
-                except asyncio.TimeoutError:
+                except TimeoutError:
                     return {
                         "index": index,
                         "result": None,

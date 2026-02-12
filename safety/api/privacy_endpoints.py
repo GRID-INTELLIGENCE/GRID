@@ -14,7 +14,7 @@ from safety.privacy.core.engine import (
     invalidate_context,
 )
 from safety.privacy.core.presets import PrivacyPreset
-from safety.privacy.core.types import PrivacyAction, PrivacyResult
+from safety.privacy.core.types import PrivacyResult
 
 router = APIRouter(prefix="/privacy", tags=["privacy"])
 
@@ -124,7 +124,6 @@ async def mask_pii(
     if result.detections:
         for det in result.detections:
             pii_type = det.get("pii_type", "UNKNOWN")
-            action = result.action_taken
 
             if result.masked:
                 PRIVACY_MASKED_TOTAL.labels(
@@ -132,8 +131,12 @@ async def mask_pii(
                     strategy="mask",
                 ).inc()
 
+    # When masking or blocking was applied, omit the original text from the
+    # response to prevent leaking unmasked PII in logs / API responses.
+    expose_original = not (result.masked or result.blocked)
+
     return PrivacyResponse(
-        original_text=result.original_text,
+        original_text=result.original_text if expose_original else "[REDACTED]",
         processed_text=result.processed_text,
         detections=result.detections,
         action_taken=result.action_taken.value if result.action_taken else None,
@@ -162,8 +165,9 @@ async def batch_process(
 
     async def _process_one(text: str):
         res = await engine.process(text, context_id=request.context_id)
+        expose_original = not (res.masked or res.blocked)
         return PrivacyResponse(
-            original_text=res.original_text,
+            original_text=res.original_text if expose_original else "[REDACTED]",
             processed_text=res.processed_text,
             detections=res.detections,
             action_taken=res.action_taken.value if res.action_taken else None,

@@ -8,11 +8,15 @@ Supports GDPR, HIPAA, and custom configurations.
 from __future__ import annotations
 
 import hashlib
-import re
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Callable
+
+
+def _hash_value(value: str) -> str:
+    """Return a SHA-256 prefix of *value* — never stores plaintext PII."""
+    return hashlib.sha256(value.encode()).hexdigest()[:16]
 
 
 class MaskStrategyType(Enum):
@@ -26,11 +30,20 @@ class MaskStrategyType(Enum):
     NOOP = "noop"  # No masking (for testing)
 
 
+def _hash_value(value: str) -> str:
+    """One-way hash of a PII value. Never store the plaintext."""
+    return hashlib.sha256(value.encode()).hexdigest()[:16]
+
+
 @dataclass
 class MaskResult:
-    """Result of a masking operation."""
+    """Result of a masking operation.
 
-    original: str
+    ``original_hash`` stores a truncated SHA-256 of the original text so that
+    results can be correlated without retaining plaintext PII.
+    """
+
+    original_hash: str
     masked: str
     replacements: list[dict[str, Any]] = field(default_factory=list)
     strategy_used: MaskStrategyType = MaskStrategyType.REDACT
@@ -55,7 +68,7 @@ class RedactStrategy(MaskingStrategy):
 
     def mask(self, value: str, pii_type: str, **kwargs) -> MaskResult:
         return MaskResult(
-            original=value,
+            original_hash=_hash_value(value),
             masked=f"[{pii_type}]",
             replacements=[{"type": pii_type, "replacement": f"[{pii_type}]"}],
             strategy_used=self.get_strategy_type(),
@@ -105,7 +118,7 @@ class PartialMaskStrategy(MaskingStrategy):
                 masked = value[0] + "*" * (value_len - 2) + value[-1]
 
         return MaskResult(
-            original=value,
+            original_hash=_hash_value(value),
             masked=masked,
             replacements=[{"type": pii_type, "replacement": masked}],
             strategy_used=self.get_strategy_type(),
@@ -126,7 +139,7 @@ class HashStrategy(MaskingStrategy):
         hashed = hashlib.sha256(to_hash).hexdigest()[:16]
 
         return MaskResult(
-            original=value,
+            original_hash=_hash_value(value),
             masked=f"[{pii_type}_HASH:{hashed}]",
             replacements=[{"type": pii_type, "hash": hashed}],
             strategy_used=self.get_strategy_type(),
@@ -140,22 +153,25 @@ class TokenizeStrategy(MaskingStrategy):
     """Replace with a consistent token for correlation."""
 
     def __init__(self):
+        # Key by hash of original value to prevent reversibility
         self._token_cache: dict[str, str] = {}
 
     def mask(self, value: str, pii_type: str, **kwargs) -> MaskResult:
-        # Check cache for consistency
-        if value in self._token_cache:
-            token = self._token_cache[value]
+        # Hash the value for cache lookup — never store plaintext
+        value_hash = hashlib.sha256(value.encode()).hexdigest()[:16]
+
+        if value_hash in self._token_cache:
+            token = self._token_cache[value_hash]
         else:
             # Generate new token
             idx = len(self._token_cache) + 1
             token = f"[{pii_type}_TOKEN:{idx:06d}]"
-            self._token_cache[value] = token
+            self._token_cache[value_hash] = token
 
         return MaskResult(
-            original=value,
+            original_hash=_hash_value(value),
             masked=token,
-            replacements=[{"type": pii_type, "token": token, "original": value}],
+            replacements=[{"type": pii_type, "token": token, "original_hash": value_hash}],
             strategy_used=self.get_strategy_type(),
         )
 
@@ -172,11 +188,12 @@ class AuditStrategy(MaskingStrategy):
     def mask(self, value: str, pii_type: str, **kwargs) -> MaskResult:
         self._audit_counter += 1
         audit_id = f"REF-{self._audit_counter:08d}"
+        value_hash = hashlib.sha256(value.encode()).hexdigest()[:16]
 
         return MaskResult(
-            original=value,
+            original_hash=_hash_value(value),
             masked=f"[{pii_type}_AUDIT:{audit_id}]",
-            replacements=[{"type": pii_type, "audit_ref": audit_id, "original": value}],
+            replacements=[{"type": pii_type, "audit_ref": audit_id, "original_hash": value_hash}],
             strategy_used=self.get_strategy_type(),
         )
 
@@ -189,7 +206,7 @@ class NoopStrategy(MaskingStrategy):
 
     def mask(self, value: str, pii_type: str, **kwargs) -> MaskResult:
         return MaskResult(
-            original=value,
+            original_hash=_hash_value(value),
             masked=value,
             replacements=[],
             strategy_used=self.get_strategy_type(),
@@ -265,7 +282,7 @@ class MaskingEngine:
         """
         if not detections:
             return MaskResult(
-                original=text,
+                original_hash=_hash_value(text),
                 masked=text,
                 replacements=[],
             )
@@ -301,7 +318,7 @@ class MaskingEngine:
         all_replacements.sort(key=lambda r: text.find(r.get("replacement", "")))
 
         return MaskResult(
-            original=text,
+            original_hash=_hash_value(text),
             masked=masked_text,
             replacements=all_replacements,
         )

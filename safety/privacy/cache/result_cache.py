@@ -8,10 +8,9 @@ Designed for both singular (personal) and collaborative (shared) contexts.
 from __future__ import annotations
 
 import hashlib
-import json
 import time
 from collections import OrderedDict
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 
 from safety.observability.logging_setup import get_logger

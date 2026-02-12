@@ -1,6 +1,8 @@
 import pytest
 from fastapi.testclient import TestClient
+
 from safety.api.main import app
+
 
 @pytest.fixture
 def client():

@@ -323,14 +323,15 @@ class RateLimitResult:
 
 async def allow_request(
     user_id: str,
-    trust_tier: "TrustTier",
+    trust_tier: TrustTier,
     feature: str = "infer",
+    *,
     ip_address: str | None = None,
     user_agent: str | None = None,
     request_signature: str | None = None,
     request_data: str | None = None,
     client_id: str | None = None,
-) -> tuple[bool, int, float, float, str | None]:
+) -> RateLimitResult:
     """
     Enhanced rate limiting with IP-based limits, exponential backoff, and security validation.
 
@@ -339,18 +340,18 @@ async def allow_request(
     # Security: Validate inputs
     if ip_address and not _request_validator.validate_ip_format(ip_address):
         logger.warning(f"Invalid IP format: {ip_address}")
-        return False, 0, 60.0, 100.0, "invalid_ip"
+        return RateLimitResult(allowed=False, remaining=0, reset_seconds=60.0, risk_score=100.0, blocked_reason="invalid_ip")
 
     # Security: Check if IP is blocked
     if ip_address and _ip_limiter.is_ip_blocked(ip_address):
         logger.warning(f"Blocked IP attempt: {ip_address}")
-        return False, 0, 3600.0, 100.0, "ip_blocked"
+        return RateLimitResult(allowed=False, remaining=0, reset_seconds=3600.0, risk_score=100.0, blocked_reason="ip_blocked")
 
     # Security: Check exponential backoff
     backoff_key = f"{user_id}:{ip_address or 'unknown'}"
     in_backoff, backoff_remaining = _backoff_manager.is_in_backoff(backoff_key)
     if in_backoff:
-        return False, 0, backoff_remaining, 75.0, "exponential_backoff"
+        return RateLimitResult(allowed=False, remaining=0, reset_seconds=backoff_remaining, risk_score=75.0, blocked_reason="exponential_backoff")
 
     # Security: Validate request signature if provided
     if request_signature and request_data and client_id is not None:
@@ -360,7 +361,7 @@ async def allow_request(
             # Record violation for potential backoff
             _backoff_manager.record_violation(backoff_key)
             _ip_limiter.add_suspicious_activity(ip_address or "unknown", 20.0)
-            return False, 0, 300.0, 90.0, "invalid_signature"
+            return RateLimitResult(allowed=False, remaining=0, reset_seconds=300.0, risk_score=90.0, blocked_reason="invalid_signature")
 
     # Calculate immediate request risk score
     immediate_risk = 0.0
@@ -444,12 +445,12 @@ async def allow_request(
         if not final_allowed:
             RATE_LIMITED_TOTAL.labels(trust_tier=trust_tier.value).inc()
 
-            # Record violation for backoff
-            backoff_duration = await _backoff_manager.record_violation(backoff_key)  # type: ignore[reportAwaitableReturnType]
+            # Record violation for backoff (sync methods — no await)
+            backoff_duration = _backoff_manager.record_violation(backoff_key)
 
             # Increase IP risk score
             if ip_address:
-                await _ip_limiter.add_suspicious_activity(ip_address, 5.0)  # type: ignore[reportAwaitableReturnType]    # pyright: ignore[reportAwaitableReturnType]
+                _ip_limiter.add_suspicious_activity(ip_address, 5.0)
 
             logger.info(
                 "rate_limited",
@@ -462,7 +463,7 @@ async def allow_request(
                 backoff_duration=backoff_duration,
             )
 
-        return final_allowed, final_remaining, final_reset, risk_score, None
+        return RateLimitResult(allowed=final_allowed, remaining=final_remaining, reset_seconds=final_reset, risk_score=risk_score)
 
     except Exception as exc:
         # Fail closed: Redis unavailable means deny
@@ -472,7 +473,7 @@ async def allow_request(
         # Record violation even on Redis failure
         _backoff_manager.record_violation(backoff_key)
 
-        return False, 0, 60.0, risk_score + 20.0, "redis_unavailable"  # type: ignore[reportAssignmentIssue]    # pyright: ignore[reportUnknownReturnType]
+        return RateLimitResult(allowed=False, remaining=0, reset_seconds=60.0, risk_score=risk_score + 20.0, blocked_reason="redis_unavailable")
 
 
 async def tighten_limits(user_id: str, factor: float = 0.5) -> None:

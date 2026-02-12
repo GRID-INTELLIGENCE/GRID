@@ -6,10 +6,8 @@ Performs async PII detection/masking and writes results to result-stream or upda
 """
 
 import asyncio
-import json
 import signal
 import time
-from typing import Any
 
 from safety.observability.logging_setup import get_logger, set_trace_context
 from safety.observability.metrics import (
@@ -19,7 +17,6 @@ from safety.observability.metrics import (
 from safety.privacy.core.engine import get_privacy_engine
 from safety.privacy.core.presets import PrivacyPreset
 from safety.workers.worker_utils import (
-    check_redis_health,
     get_redis,
 )
 
@@ -108,20 +105,15 @@ class PrivacyWorker:
             start_time = time.time()
             if action == "mask":
                 result = await engine.process(text, context_id=context_id)
-                output = result.to_dict()
+                _ = result.to_dict()  # reserved for future results-stream
             else:
                 detections = await engine.detect(text, context_id=context_id)
-                output = {"detections": detections}
+                _ = {"detections": detections}  # reserved for future streaming
 
             duration = time.time() - start_time
 
             # Log completion
-            logger.info(
-                "privacy_job_completed",
-                request_id=request_id,
-                duration=duration,
-                action=action
-            )
+            logger.info("privacy_job_completed", request_id=request_id, duration=duration, action=action)
             WORKER_JOBS_PROCESSED.labels(result="success").inc()
 
             # For now, we assume this is just background scanning.

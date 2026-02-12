@@ -1,10 +1,10 @@
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from safety.privacy.core.types import PrivacyAction
 
 
-class PrivacyPreset(str, Enum):
+class PrivacyPreset(StrEnum):
     """Pre-configured privacy settings."""
 
     BALANCED = "balanced"  # Default: Ask user, good coverage

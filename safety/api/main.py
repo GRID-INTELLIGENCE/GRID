@@ -111,16 +111,18 @@ if DEGRADED_MODE:
 
     # Patch escalation handler (is_user_suspended uses Redis)
     from safety.escalation import handler as _esc_handler
+    from safety.escalation.handler import SuspensionStatus
 
-    _esc_handler.is_user_suspended = AsyncMock(return_value=(False, None))
-    _safety_mw.is_user_suspended = AsyncMock(return_value=(False, None))
+    _esc_handler.is_user_suspended = AsyncMock(return_value=SuspensionStatus(suspended=False))
+    _safety_mw.is_user_suspended = AsyncMock(return_value=SuspensionStatus(suspended=False))
 
     # Patch rate limiter (allow_request uses Redis)
     from safety.api import rate_limiter as _rate_limiter
+    from safety.api.rate_limiter import RateLimitResult
 
-    # Return tuple (allowed, remaining, reset_seconds) matching middleware expectations
-    _rate_limiter.allow_request = AsyncMock(return_value=(True, 100, 0.0))
-    _safety_mw.allow_request = AsyncMock(return_value=(True, 100, 0.0))
+    _mock_rate_result = RateLimitResult(allowed=True, remaining=100, reset_seconds=0.0)
+    _rate_limiter.allow_request = AsyncMock(return_value=_mock_rate_result)
+    _safety_mw.allow_request = AsyncMock(return_value=_mock_rate_result)
 
     # Patch get_redis for any module that calls it lazily
     worker_utils.get_redis = AsyncMock(return_value=MockRedis())  # type: ignore[reportAssignmentIssue]
@@ -407,3 +409,33 @@ async def queue_depth():
 
     depth = await get_queue_depth()
     return {"queue_depth": depth}
+
+
+def run(
+    host: str | None = None,
+    port: int | None = None,
+    reload: bool | None = None,
+) -> None:
+    """Run the Safety API server (entry point for safety-api console script).
+
+    Configuration via environment variables (with defaults):
+        SAFETY_API_HOST  — bind host (default: 0.0.0.0)
+        SAFETY_API_PORT  — bind port (default: 8000)
+        SAFETY_API_RELOAD — enable reload (default: false; set to 1/true/yes to enable)
+    """
+    import uvicorn
+
+    _host = host if host is not None else os.getenv("SAFETY_API_HOST", "0.0.0.0")
+    _port = port if port is not None else int(os.getenv("SAFETY_API_PORT", "8000"))
+    _reload = (
+        reload
+        if reload is not None
+        else os.getenv("SAFETY_API_RELOAD", "").lower() in ("1", "true", "yes")
+    )
+
+    uvicorn.run(
+        "safety.api.main:app",
+        host=_host,
+        port=_port,
+        reload=_reload,
+    )

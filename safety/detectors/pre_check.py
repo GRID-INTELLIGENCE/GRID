@@ -13,9 +13,18 @@ from __future__ import annotations
 import math
 import os
 import time
+from dataclasses import dataclass
 
 import redis
 
+from safety.guardian.engine import (
+    GuardianEngine,
+    RuleAction,
+    get_guardian_engine,
+)
+from safety.guardian.engine import (
+    Severity as GuardianSeverity,
+)
 from safety.observability.canary import safety_canary
 from safety.observability.logging_setup import get_logger
 from safety.observability.metrics import PRECHECK_LATENCY, REFUSALS_TOTAL
@@ -25,7 +34,6 @@ from safety.observability.security_monitoring import (
     SecurityEventType,
     security_logger,
 )
-from safety.rules.engine import get_rule_engine
 
 logger = get_logger("detectors.pre_check")
 
@@ -35,9 +43,35 @@ logger = get_logger("detectors.pre_check")
 _redis_client: redis.Redis | None = None
 _redis_unavailable: bool = False
 
-# Unified rule engine
-_rule_engine = get_rule_engine()
-_rule_engine.load_rules()  # Load default rules
+# ---------------------------------------------------------------------------
+# Guardian engine helpers
+# ---------------------------------------------------------------------------
+# Map guardian rule-ID prefixes to legacy-compatible reason codes so that
+# downstream consumers (post_check, conftest, ml_detector) keep working.
+_GUARDIAN_REASON_PREFIX_MAP: dict[str, str] = {
+    "exploit_jailbreak": "EXPLOIT_JAILBREAK",
+    "high_risk_self_harm": "HIGH_RISK_SELF_HARM",
+    "high_risk_cyber": "HIGH_RISK_CYBER",
+}
+
+
+def _guardian_reason_code(rule_id: str) -> str:
+    """Derive backward-compatible reason code from guardian rule ID."""
+    for prefix, code in _GUARDIAN_REASON_PREFIX_MAP.items():
+        if rule_id.startswith(prefix):
+            return code
+    return rule_id.upper()
+
+
+def _get_guardian() -> GuardianEngine:
+    """Get guardian engine, loading rules on first use if needed."""
+    engine = get_guardian_engine()
+    if not engine.registry.get_all():
+        from safety.guardian.loader import get_rule_loader
+
+        rules = get_rule_loader().load_all_rules()
+        engine.load_rules(rules)
+    return engine
 
 
 def _get_redis() -> redis.Redis | None:
@@ -104,51 +138,69 @@ def _shannon_entropy(text: str) -> float:
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
-def quick_block(text: str) -> tuple[bool, str | None]:
+@dataclass(frozen=True)
+class PreCheckResult:
+    """Result of a pre-check evaluation."""
+
+    blocked: bool
+    reason_code: str | None = None
+
+
+def quick_block(text: str) -> PreCheckResult:
     """
-    Synchronous pre-check. Returns (blocked, reason_code).
+    Synchronous pre-check. Returns PreCheckResult.
 
     MUST stay under 50ms. No network calls, no ML inference.
     """
     start = time.monotonic()
     try:
         if not text or not text.strip():
-            return False, None
+            return PreCheckResult(blocked=False)
 
         # 1. Length check
         if len(text) > _MAX_INPUT_LENGTH:
             REFUSALS_TOTAL.labels(reason_code="INPUT_TOO_LONG").inc()
-            return True, "INPUT_TOO_LONG"
+            return PreCheckResult(blocked=True, reason_code="INPUT_TOO_LONG")
 
         normalized = text.strip()
 
         # 2. Unified rule engine patterns (Project GUARDIAN)
-        blocked, reason, matched_rule = _rule_engine.evaluate(normalized)
-        if blocked and matched_rule:
-            REFUSALS_TOTAL.labels(reason_code=reason).inc()
+        engine = _get_guardian()
+        matches, _latency = engine.evaluate(normalized, use_cache=True)
 
-            # Log rich security event for the matched rule
+        # Find the first blocking match (same logic as quick_check but with
+        # backward-compatible reason codes derived from rule IDs).
+        for m in matches:
+            is_block = m.action in (RuleAction.BLOCK, RuleAction.CANARY) or (
+                m.action == RuleAction.ESCALATE and m.severity in (GuardianSeverity.HIGH, GuardianSeverity.CRITICAL)
+            )
+            if not is_block:
+                continue
+
+            reason_code = _guardian_reason_code(m.rule_id)
+            REFUSALS_TOTAL.labels(reason_code=reason_code).inc()
+
             security_logger.log_event(
                 SecurityEvent(
-                    event_id=f"det-{int(time.time())}-{matched_rule.id}",
+                    event_id=f"det-{int(time.time())}-{m.rule_id}",
                     timestamp=time.strftime("%Y-%m-%dT%H:%M:%S%z"),
-                    event_type=matched_rule.event_type,
-                    severity=matched_rule.severity,
+                    event_type=SecurityEventType.AI_INPUT_BLOCKED,
+                    severity=SecurityEventSeverity(m.severity.value),
                     source="detectors.pre_check",
                     user_id=None,
                     ip_address=None,
                     session_id=None,
                     details={
-                        "rule_id": matched_rule.id,
-                        "rule_name": matched_rule.name,
-                        "reason_code": reason,
+                        "rule_id": m.rule_id,
+                        "rule_name": m.rule_name,
+                        "reason_code": reason_code,
                         "input_length": len(normalized),
                     },
-                    risk_score=0.8 if matched_rule.severity.value == "high" else 0.5,
+                    risk_score=0.8 if m.severity in (GuardianSeverity.HIGH, GuardianSeverity.CRITICAL) else 0.5,
                 )
             )
 
-            return True, reason
+            return PreCheckResult(blocked=True, reason_code=reason_code)
 
         # 3. Dynamic blocklist (cached)
         _refresh_blocklist()
@@ -156,7 +208,7 @@ def quick_block(text: str) -> tuple[bool, str | None]:
         for blocked_term in _dynamic_blocklist:
             if blocked_term in normalized_lower:
                 REFUSALS_TOTAL.labels(reason_code="DYNAMIC_BLOCKLIST").inc()
-                return True, "DYNAMIC_BLOCKLIST"
+                return PreCheckResult(blocked=True, reason_code="DYNAMIC_BLOCKLIST")
 
         # 4. Safety Canary Detection (Project GUARDIAN)
         if safety_canary.has_canary(normalized):
@@ -178,7 +230,7 @@ def quick_block(text: str) -> tuple[bool, str | None]:
                     risk_score=1.0,  # Immediate max risk
                 )
             )
-            return True, "SAFETY_CANARY_DETECTED"
+            return PreCheckResult(blocked=True, reason_code="SAFETY_CANARY_DETECTED")
 
         # TODO: Entropy check can false-positive on base64-encoded images or
         #       legitimate encoded content. Add content-type awareness.
@@ -187,9 +239,9 @@ def quick_block(text: str) -> tuple[bool, str | None]:
             entropy = _shannon_entropy(normalized)
             if entropy > _HIGH_ENTROPY_THRESHOLD:
                 REFUSALS_TOTAL.labels(reason_code="HIGH_ENTROPY_PAYLOAD").inc()
-                return True, "HIGH_ENTROPY_PAYLOAD"
+                return PreCheckResult(blocked=True, reason_code="HIGH_ENTROPY_PAYLOAD")
 
-        return False, None
+        return PreCheckResult(blocked=False)
 
     finally:
         elapsed = time.monotonic() - start

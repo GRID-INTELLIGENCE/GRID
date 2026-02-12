@@ -17,8 +17,8 @@ safety/guardian/
 └── loader.py                # Dynamic rule loading & hot-reload
 
 detectors/
-├── pre_check_guardian.py    # Refactored pre-check using GUARDIAN
-└── __init__.py              # Bridge for backwards compatibility
+├── pre_check.py             # Pre-check using GUARDIAN engine (sole engine)
+└── __init__.py              # Package exports
 
 config/rules/
 └── default.yaml             # Unified rule definitions
@@ -129,7 +129,7 @@ rules:
 
 ### Rule Categories
 - **weapons**: Bomb, chemical, biological weapons
-- **cyber**: Malware, exploits, attack instructions  
+- **cyber**: Malware, exploits, attack instructions
 - **jailbreak**: Prompt injection, persona switching
 - **csam**: Child exploitation content
 - **self_harm**: Suicide, self-harm methods
@@ -139,19 +139,16 @@ rules:
 
 ## Migration Path
 
-### Phase 1: Dual Mode (Current)
+### Migration Complete
 ```python
-# Legacy code continues to work
+# Single engine — all paths use GUARDIAN
 from safety.detectors.pre_check import quick_block
-
-# New code uses GUARDIAN
-from safety.detectors.pre_check_guardian import quick_block
+from safety.guardian.engine import get_guardian_engine
 ```
 
-### Phase 2: Full Migration (Next)
-- Update `safety/detectors/pre_check.py` to call GUARDIAN
-- Deprecate legacy pattern definitions
-- Update all imports
+The legacy `safety/rules/engine.py` has been deleted.
+`pre_check.py` calls `GuardianEngine.evaluate()` directly with
+backward-compatible reason codes (HIGH_RISK_WEAPON, etc.).
 
 ---
 
@@ -234,7 +231,7 @@ async def inject_rule(rule: dict):
 async def event_stream(websocket: WebSocket):
     await websocket.accept()
     engine = get_guardian_engine()
-    
+
     async for event in engine.event_bus.subscribe():
         await websocket.send_json({
             "type": "rule_match",
@@ -299,9 +296,8 @@ async def event_stream(websocket: WebSocket):
 1. `safety/guardian/__init__.py` - Package exports
 2. `safety/guardian/engine.py` - Core engine (~600 lines)
 3. `safety/guardian/loader.py` - Rule loader (~500 lines)
-4. `safety/detectors/pre_check_guardian.py` - Refactored detector (~200 lines)
+4. `safety/detectors/pre_check.py` - Pre-check detector using GUARDIAN (~220 lines)
 5. `safety/config/rules/default.yaml` - Rule definitions
-6. `safety/detectors/__init__.py` - Backwards compatibility bridge
 
 ---
 
@@ -338,7 +334,7 @@ stats = engine.get_stats()
 
 ---
 
-**Project GUARDIAN Phase 1 Complete**  
-*Performance: 3x faster than legacy*  
-*Maintainability: Single source of truth*  
+**Project GUARDIAN Phase 1 Complete**
+*Performance: 3x faster than legacy*
+*Maintainability: Single source of truth*
 *Flexibility: Dynamic rules without restarts*

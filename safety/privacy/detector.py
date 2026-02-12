@@ -24,8 +24,6 @@ from typing import Any
 
 from safety.observability.logging_setup import get_logger
 from safety.observability.metrics import (
-    DETECTION_CACHE_HITS,
-    DETECTION_CACHE_MISSES,
     PRIVACY_DETECTION_LATENCY,
 )
 from safety.privacy.cache.result_cache import get_detection_cache

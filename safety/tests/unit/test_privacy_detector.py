@@ -1,5 +1,7 @@
 import pytest
-from safety.privacy.detector import AsyncPIIDetector, AsyncPIIDetection
+
+from safety.privacy.detector import AsyncPIIDetector
+
 
 @pytest.fixture
 def detector():

@@ -12,23 +12,19 @@ from typing import Any, Callable
 
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.responses import JSONResponse
 
+from safety.observability.logging_setup import get_logger
+from safety.observability.metrics import (
+    PRIVACY_BLOCKED_TOTAL,
+    PRIVACY_DETECTION_LATENCY,
+    PRIVACY_DETECTION_REQUESTS_TOTAL,
+    PRIVACY_MASKED_TOTAL,
+)
 from safety.privacy.core.engine import (
-    PrivacyAction,
     PrivacyEngine,
-    PrivacyResult,
     get_privacy_engine,
 )
 from safety.privacy.core.presets import PrivacyPreset
-from safety.observability.logging_setup import get_logger
-from safety.observability.metrics import (
-    PRIVACY_DETECTION_REQUESTS_TOTAL,
-    PRIVACY_DETECTION_LATENCY,
-    PRIVACY_DETECTION_TOTAL,
-    PRIVACY_MASKED_TOTAL,
-    PRIVACY_BLOCKED_TOTAL,
-)
 
 # Module-level default so type checker treats it as PrivacyPreset, not Literal['balanced']
 _DEFAULT_PRIVACY_PRESET: PrivacyPreset = PrivacyPreset.BALANCED
@@ -162,9 +158,9 @@ class PrivacyMiddleware(BaseHTTPMiddleware):
     def _extract_text(self, data: dict[str, Any]) -> str:
         """Extract text from request data."""
         # Common fields to check
-        for field in ["message", "prompt", "input", "text", "content", "query"]:
-            if field in data and isinstance(data[field], str):
-                return data[field]
+        for field_name in ["message", "prompt", "input", "text", "content", "query"]:
+            if field_name in data and isinstance(data[field_name], str):
+                return data[field_name]
 
         # Check nested
         if "messages" in data and isinstance(data["messages"], list):

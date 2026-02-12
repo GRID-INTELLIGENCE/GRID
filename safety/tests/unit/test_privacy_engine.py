@@ -1,7 +1,8 @@
 import pytest
+
 from safety.privacy.core.engine import PrivacyEngine
 from safety.privacy.core.types import PrivacyAction, PrivacyConfig
-from safety.privacy.detector import AsyncPIIDetection
+
 
 @pytest.fixture
 def engine():

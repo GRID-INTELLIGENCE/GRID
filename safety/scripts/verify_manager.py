@@ -12,7 +12,7 @@ logger = logging.getLogger("verification")
 def test_deep_object_analysis():
     logger.info("Testing Deep Object Analysis...")
     try:
-        from safety.rules.manager import TrustTier, get_rule_manager
+        from safety.rules.manager import get_rule_manager
 
         manager = get_rule_manager()
     except ImportError as e:
