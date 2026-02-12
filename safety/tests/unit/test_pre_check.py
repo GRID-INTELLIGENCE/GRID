@@ -20,6 +20,7 @@ import pytest
 _redis_available = False
 try:
     import redis as _redis_mod
+
     _r = _redis_mod.Redis.from_url(os.environ.get("REDIS_URL", "redis://localhost:6379"), socket_connect_timeout=1)
     _r.ping()
     _redis_available = True
@@ -127,8 +128,7 @@ class TestPreCheckPerformance:
             quick_block(text)
             elapsed = time.monotonic() - start
             assert elapsed < 0.05, (
-                f"Pre-check took {elapsed * 1000:.1f}ms for input "
-                f"(len={len(text)}), exceeds 50ms budget"
+                f"Pre-check took {elapsed * 1000:.1f}ms for input " f"(len={len(text)}), exceeds 50ms budget"
             )
 
 

@@ -26,12 +26,12 @@ def load_rules(rule_file_path: str | Path | None = None) -> list[dict[str, Any]]
         return []
 
     try:
-        with open(path, encoding='utf-8') as f:
+        with open(path, encoding="utf-8") as f:
             if path.suffix.lower() == ".json":
                 data = json.load(f)
             else:
                 data = yaml.safe_load(f)
-            return data.get('rules', [])
+            return data.get("rules", [])
     except Exception as e:
         # Use simple print as fallback if logging not ready
         print(f"Failed to load rules from {path}: {e}")

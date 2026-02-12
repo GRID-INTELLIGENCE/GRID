@@ -41,6 +41,7 @@ redis.call('SET', last_update_key, tostring(now))
 return tostring(new_score)
 """
 
+
 class RiskScoreManager:
     """Manages dynamic user risk scores in Redis."""
 
@@ -52,7 +53,7 @@ class RiskScoreManager:
         SecurityEventSeverity.LOW: 0.05,
         SecurityEventSeverity.MEDIUM: 0.15,
         SecurityEventSeverity.HIGH: 0.4,
-        SecurityEventSeverity.CRITICAL: 1.0
+        SecurityEventSeverity.CRITICAL: 1.0,
     }
 
     def __init__(self):
@@ -64,7 +65,7 @@ class RiskScoreManager:
             async with self._lua_lock:
                 if self._lua_sha is None:
                     self._lua_sha = await client.script_load(RISK_UPDATE_LUA)
-        return self._lua_sha
+        return self._lua_sha or ""
 
     async def record_violation(self, event: SecurityEvent):
         """Update risk score based on a new violation."""
@@ -84,8 +85,8 @@ class RiskScoreManager:
             last_key = f"risk:last_update:{event.user_id}"
 
             # Atomic update via Lua
-            new_score_raw = await client.evalsha(
-                sha,
+            new_score_raw = await client.evalsha(  # type: ignore[misc]
+                sha or "",
                 2,
                 score_key,
                 last_key,
@@ -93,7 +94,7 @@ class RiskScoreManager:
                 str(self.DECAY_RATE),
                 str(self.MAX_SCORE),
                 str(self.MIN_SCORE),
-                str(time.time())
+                str(time.time()),
             )
 
             new_score = float(new_score_raw)
@@ -131,6 +132,7 @@ class RiskScoreManager:
         except Exception as e:
             logger.error(f"Failed to get risk score: {e}")
             return self.MIN_SCORE
+
 
 # Global Singleton
 risk_manager = RiskScoreManager()

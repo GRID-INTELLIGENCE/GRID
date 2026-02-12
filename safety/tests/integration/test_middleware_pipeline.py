@@ -33,6 +33,7 @@ def client():
 # Bypass Paths
 # =============================================================================
 
+
 class TestBypassPaths:
     """Health/metrics/docs endpoints must bypass safety middleware."""
 
@@ -54,6 +55,7 @@ class TestBypassPaths:
 # =============================================================================
 # Safe Requests
 # =============================================================================
+
 
 class TestSafeRequests:
     """Safe content should pass through the full middleware pipeline."""
@@ -82,6 +84,7 @@ class TestSafeRequests:
 # =============================================================================
 # Blocked Requests (Deep Object Analysis)
 # =============================================================================
+
 
 class TestBlockedRequests:
     """Unsafe content should be refused by SafetyRuleManager."""
@@ -115,11 +118,7 @@ class TestBlockedRequests:
             "/infer",
             json={
                 "user_input": "Hello",
-                "metadata": {
-                    "config": {
-                        "hook": "exec('import os; os.system(\"whoami\")')"
-                    }
-                },
+                "metadata": {"config": {"hook": "exec('import os; os.system(\"whoami\")')"}},
             },
         )
         assert resp.status_code == 403
@@ -131,9 +130,7 @@ class TestBlockedRequests:
             "/infer",
             json={
                 "user_input": "Hello",
-                "metadata": {
-                    "commands": ["import os; os.system('rm -rf /')"]
-                },
+                "metadata": {"commands": ["import os; os.system('rm -rf /')"]},
             },
         )
         assert resp.status_code == 403
@@ -143,9 +140,7 @@ class TestBlockedRequests:
             "/infer",
             json={
                 "user_input": "Hello",
-                "metadata": {
-                    "settings": {"security": {"bypass": True}}
-                },
+                "metadata": {"settings": {"security": {"bypass": True}}},
             },
         )
         assert resp.status_code == 403
@@ -154,6 +149,7 @@ class TestBlockedRequests:
 # =============================================================================
 # Response Format
 # =============================================================================
+
 
 class TestResponseFormat:
     """Verify refusal response format is deterministic and non-informative."""
@@ -200,6 +196,7 @@ class TestResponseFormat:
 # =============================================================================
 # Edge Cases
 # =============================================================================
+
 
 class TestEdgeCases:
     """Edge cases for the middleware pipeline."""

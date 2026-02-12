@@ -14,6 +14,7 @@ def run_command(cmd):
         print(f"Error Description: {description}")
     print("---")
 
+
 if __name__ == "__main__":
     try:
         with open("commands.txt") as f:

@@ -7,6 +7,7 @@ correlation fields. Uses structlog for processing and loguru for output.
 
 from __future__ import annotations
 
+import logging
 import os
 import sys
 import uuid
@@ -54,9 +55,7 @@ def get_user_id() -> str:
 # ---------------------------------------------------------------------------
 # Structlog processors
 # ---------------------------------------------------------------------------
-def _add_trace_context(
-    _logger: Any, _method: str, event_dict: dict[str, Any]
-) -> dict[str, Any]:
+def _add_trace_context(_logger: Any, _method: str, event_dict: dict[str, Any]) -> dict[str, Any]:
     """Inject trace context into every log event."""
     event_dict.setdefault("trace_id", _trace_id_var.get())
     event_dict.setdefault("request_id", _request_id_var.get())
@@ -64,9 +63,7 @@ def _add_trace_context(
     return event_dict
 
 
-def _add_service_info(
-    _logger: Any, _method: str, event_dict: dict[str, Any]
-) -> dict[str, Any]:
+def _add_service_info(_logger: Any, _method: str, event_dict: dict[str, Any]) -> dict[str, Any]:
     event_dict["service"] = "safety-enforcement"
     event_dict["environment"] = os.getenv("SAFETY_ENV", "development")
     return event_dict
@@ -99,11 +96,7 @@ def setup_logging(*, json_output: bool = True, log_level: str = "INFO") -> None:
 
     # Configure loguru
     loguru_logger.remove()  # Remove default handler
-    log_format = (
-        "<green>{time:YYYY-MM-DDTHH:mm:ss.SSSZ}</green> | "
-        "<level>{level: <8}</level> | "
-        "{message}"
-    )
+    log_format = "<green>{time:YYYY-MM-DDTHH:mm:ss.SSSZ}</green> | " "<level>{level: <8}</level> | " "{message}"
     if json_output:
         loguru_logger.add(
             sys.stderr,
@@ -145,9 +138,7 @@ def setup_logging(*, json_output: bool = True, log_level: str = "INFO") -> None:
 
     structlog.configure(
         processors=processors,
-        wrapper_class=structlog.make_filtering_bound_logger(
-            structlog.stdlib.NAME_TO_LEVEL.get(log_level.lower(), 20)
-        ),
+        wrapper_class=structlog.make_filtering_bound_logger(getattr(logging, log_level.upper(), logging.INFO)),
         context_class=dict,
         logger_factory=structlog.PrintLoggerFactory(),
         cache_logger_on_first_use=True,

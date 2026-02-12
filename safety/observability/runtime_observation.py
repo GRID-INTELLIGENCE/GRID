@@ -73,7 +73,7 @@ class RuntimeObservationEvent:
             request_id=event.details.get("request_id"),
             decision=event.details.get("decision", "unknown"),
             reason=event.details.get("reason"),
-            risk_score=event.risk_score
+            risk_score=event.risk_score,
         )
 
 
@@ -143,9 +143,7 @@ class RuntimeObservationService:
 
     def __init__(self):
         self.event_bus = EventBus()
-        self._pending_events: stdlib_queue.Queue[SecurityEvent] = stdlib_queue.Queue(
-            maxsize=self._PENDING_QUEUE_MAX
-        )
+        self._pending_events: stdlib_queue.Queue[SecurityEvent] = stdlib_queue.Queue(maxsize=self._PENDING_QUEUE_MAX)
         self._drain_task: asyncio.Task | None = None
         # Hook into existing security logger
         security_logger.add_listener(self._on_security_event_sync)
@@ -199,9 +197,7 @@ class RuntimeObservationService:
         while True:
             try:
                 # Block in executor to avoid busy-spinning
-                event = await loop.run_in_executor(
-                    None, self._pending_events.get, True, 0.5
-                )
+                event = await loop.run_in_executor(None, self._pending_events.get, True, 0.5)
             except stdlib_queue.Empty:
                 # Timeout — no events, update gauge and loop back
                 OBSERVATION_PENDING_DEPTH.set(self._pending_events.qsize())

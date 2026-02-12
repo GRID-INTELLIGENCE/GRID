@@ -43,9 +43,7 @@ _KNOWN_BAD_EXEMPLARS: list[tuple[str, str]] = [
 ]
 
 _MODEL_NAME = os.getenv("SAFETY_EMBEDDING_MODEL", "all-MiniLM-L6-v2")
-_CLASSIFIER_PATH = os.getenv(
-    "SAFETY_CLASSIFIER_PATH", "safety/models/safety_classifier.joblib"
-)
+_CLASSIFIER_PATH = os.getenv("SAFETY_CLASSIFIER_PATH", "safety/models/safety_classifier.joblib")
 _COSINE_THRESHOLD = float(os.getenv("SAFETY_COSINE_THRESHOLD", "0.72"))
 
 
@@ -81,9 +79,7 @@ def _load_classifier() -> Any | None:
         return _classifier
     path = Path(_CLASSIFIER_PATH)
     if not path.exists():
-        logger.info(
-            "classifier_not_found", path=str(path), fallback="cosine_similarity"
-        )
+        logger.info("classifier_not_found", path=str(path), fallback="cosine_similarity")
         return None
     try:
         import joblib
@@ -102,13 +98,9 @@ def _get_fallback_embeddings() -> np.ndarray:
     if _fallback_embeddings is None:
         model = _load_embedding_model()
         texts = [ex[0] for ex in _KNOWN_BAD_EXEMPLARS]
-        _fallback_embeddings = model.encode(texts, normalize_embeddings=True)
-    return _fallback_embeddings
-
-
-def _cosine_similarity(a: np.ndarray, b: np.ndarray) -> float:
-    """Compute cosine similarity between two vectors."""
-    return float(np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b) + 1e-9))
+        embeddings = model.encode(texts, normalize_embeddings=True)
+        _fallback_embeddings = embeddings
+    return _fallback_embeddings  # type: ignore[reportReturnStatementType]
 
 
 async def classify(text: str) -> DetectionResult:
@@ -119,9 +111,7 @@ async def classify(text: str) -> DetectionResult:
     against known-bad exemplars.
     """
     if not text or not text.strip():
-        return DetectionResult(
-            score=0.0, label="SAFE", confidence=1.0, method="empty_input"
-        )
+        return DetectionResult(score=0.0, label="SAFE", confidence=1.0, method="empty_input")
 
     try:
         model = _load_embedding_model()
@@ -145,24 +135,14 @@ async def classify(text: str) -> DetectionResult:
         # Fallback: cosine similarity against known-bad exemplars
         bad_embeddings = _get_fallback_embeddings()
         similarities = [
-            _cosine_similarity(embedding, bad_emb) for bad_emb in bad_embeddings
+            float(np.dot(embedding, bad_emb) / (np.linalg.norm(embedding) * np.linalg.norm(bad_emb) + 1e-9))
+            for bad_emb in bad_embeddings
         ]
         max_idx = int(np.argmax(similarities))
-        max_sim = similarities[max_idx]
-
-        if max_sim >= _COSINE_THRESHOLD:
-            reason = _KNOWN_BAD_EXEMPLARS[max_idx][1]
-            return DetectionResult(
-                score=max_sim,
-                label=reason,
-                confidence=max_sim,
-                method="cosine_fallback",
-            )
-
         return DetectionResult(
-            score=max_sim,
-            label="SAFE",
-            confidence=1.0 - max_sim,
+            score=similarities[max_idx],
+            label=_KNOWN_BAD_EXEMPLARS[max_idx][1],
+            confidence=similarities[max_idx],
             method="cosine_fallback",
         )
 

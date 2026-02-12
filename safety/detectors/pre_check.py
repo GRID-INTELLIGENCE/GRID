@@ -19,7 +19,12 @@ import redis
 from safety.observability.canary import safety_canary
 from safety.observability.logging_setup import get_logger
 from safety.observability.metrics import PRECHECK_LATENCY, REFUSALS_TOTAL
-from safety.observability.security_monitoring import SecurityEvent, security_logger
+from safety.observability.security_monitoring import (
+    SecurityEvent,
+    SecurityEventSeverity,
+    SecurityEventType,
+    security_logger,
+)
 from safety.rules.engine import get_rule_engine
 
 logger = get_logger("detectors.pre_check")
@@ -41,9 +46,7 @@ def _get_redis() -> redis.Redis | None:
         return None
     if _redis_client is None:
         url = os.getenv("REDIS_URL", "redis://localhost:6379")
-        _redis_client = redis.Redis.from_url(
-            url, decode_responses=True, socket_connect_timeout=0.5
-        )
+        _redis_client = redis.Redis.from_url(url, decode_responses=True, socket_connect_timeout=0.5)
         # Quick connectivity check
         try:
             _redis_client.ping()
@@ -52,7 +55,6 @@ def _get_redis() -> redis.Redis | None:
             _redis_client = None
             return None
     return _redis_client
-
 
 
 # ---------------------------------------------------------------------------
@@ -74,7 +76,7 @@ def _refresh_blocklist() -> None:
         if client is None:
             return  # Redis unavailable; keep stale cache
         members = client.smembers("dynamic_blocklist")
-        _dynamic_blocklist = {m.lower() for m in members} if members else set()
+        _dynamic_blocklist = {m.lower() for m in members} if members else set()  # type: ignore[reportAssignmentIssue]
         _blocklist_last_refresh = now
     except Exception as exc:
         # If Redis is down, keep the stale cache; do not clear it.
@@ -124,26 +126,28 @@ def quick_block(text: str) -> tuple[bool, str | None]:
         blocked, reason, matched_rule = _rule_engine.evaluate(normalized)
         if blocked and matched_rule:
             REFUSALS_TOTAL.labels(reason_code=reason).inc()
-            
+
             # Log rich security event for the matched rule
-            security_logger.log_event(SecurityEvent(
-                event_id=f"det-{int(time.time())}-{matched_rule.id}",
-                timestamp=time.strftime("%Y-%m-%dT%H:%M:%S%z"),
-                event_type=matched_rule.event_type,
-                severity=matched_rule.severity,
-                source="detectors.pre_check",
-                user_id=None,
-                ip_address=None,
-                session_id=None,
-                details={
-                    "rule_id": matched_rule.id,
-                    "rule_name": matched_rule.name,
-                    "reason_code": reason,
-                    "input_length": len(normalized)
-                },
-                risk_score=0.8 if matched_rule.severity.value == "high" else 0.5
-            ))
-            
+            security_logger.log_event(
+                SecurityEvent(
+                    event_id=f"det-{int(time.time())}-{matched_rule.id}",
+                    timestamp=time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+                    event_type=matched_rule.event_type,
+                    severity=matched_rule.severity,
+                    source="detectors.pre_check",
+                    user_id=None,
+                    ip_address=None,
+                    session_id=None,
+                    details={
+                        "rule_id": matched_rule.id,
+                        "rule_name": matched_rule.name,
+                        "reason_code": reason,
+                        "input_length": len(normalized),
+                    },
+                    risk_score=0.8 if matched_rule.severity.value == "high" else 0.5,
+                )
+            )
+
             return True, reason
 
         # 3. Dynamic blocklist (cached)
@@ -157,21 +161,23 @@ def quick_block(text: str) -> tuple[bool, str | None]:
         # 4. Safety Canary Detection (Project GUARDIAN)
         if safety_canary.has_canary(normalized):
             REFUSALS_TOTAL.labels(reason_code="SAFETY_CANARY_DETECTED").inc()
-            security_logger.log_event(SecurityEvent(
-                event_id=f"det-{int(time.time())}-canary",
-                timestamp=time.strftime("%Y-%m-%dT%H:%M:%S%z"),
-                event_type=SecurityEventType.PROMPT_INJECTION_ATTEMPT,
-                severity=SecurityEventSeverity.CRITICAL,
-                source="detectors.pre_check.canary",
-                user_id=None,
-                ip_address=None,
-                session_id=None,
-                details={
-                    "reason_code": "SAFETY_CANARY_DETECTED",
-                    "description": "Adversarial recycling of AI response detected via canary watermark"
-                },
-                risk_score=1.0 # Immediate max risk
-            ))
+            security_logger.log_event(
+                SecurityEvent(
+                    event_id=f"det-{int(time.time())}-canary",
+                    timestamp=time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+                    event_type=SecurityEventType.PROMPT_INJECTION_ATTEMPT,  # type: ignore[reportUnknownVariableType]
+                    severity=SecurityEventSeverity.CRITICAL,  # type: ignore[reportUnknownMemberType]
+                    source="detectors.pre_check.canary",
+                    user_id=None,
+                    ip_address=None,
+                    session_id=None,
+                    details={
+                        "reason_code": "SAFETY_CANARY_DETECTED",
+                        "description": "Adversarial recycling of AI response detected via canary watermark",
+                    },
+                    risk_score=1.0,  # Immediate max risk
+                )
+            )
             return True, "SAFETY_CANARY_DETECTED"
 
         # TODO: Entropy check can false-positive on base64-encoded images or

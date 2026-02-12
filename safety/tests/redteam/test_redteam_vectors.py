@@ -25,6 +25,7 @@ import pytest
 _redis_available = False
 try:
     import redis as _redis_mod
+
     _r = _redis_mod.Redis.from_url(os.environ.get("REDIS_URL", "redis://localhost:6379"), socket_connect_timeout=1)
     _r.ping()
     _redis_available = True
@@ -108,14 +109,11 @@ class TestRedTeamVectors:
     def test_vector(self, category: str, input_text: str, should_block: bool):
         blocked, code = quick_block(input_text)
         if should_block:
-            assert blocked is True, (
-                f"[{category}] MISSED — expected block for: {input_text!r}"
-            )
+            assert blocked is True, f"[{category}] MISSED — expected block for: {input_text!r}"
             assert code is not None
         else:
             assert blocked is False, (
-                f"[{category}] FALSE POSITIVE — unexpected block for: "
-                f"{input_text!r} (code={code})"
+                f"[{category}] FALSE POSITIVE — unexpected block for: " f"{input_text!r} (code={code})"
             )
 
 
@@ -123,9 +121,7 @@ class TestDetectionRate:
     """Verify detection rate meets threshold (99% for high-risk)."""
 
     def test_high_risk_detection_rate(self):
-        high_risk_vectors = [
-            (cat, text) for cat, text, should_block in RED_TEAM_VECTORS if should_block
-        ]
+        high_risk_vectors = [(cat, text) for cat, text, should_block in RED_TEAM_VECTORS if should_block]
         detected = 0
         missed = []
         for cat, text in high_risk_vectors:
@@ -141,14 +137,11 @@ class TestDetectionRate:
 
         assert rate >= threshold, (
             f"Detection rate {rate:.1%} below threshold {threshold:.0%}. "
-            f"Missed {len(missed)}/{total} vectors:\n"
-            + "\n".join(f"  [{cat}] {text}" for cat, text in missed)
+            f"Missed {len(missed)}/{total} vectors:\n" + "\n".join(f"  [{cat}] {text}" for cat, text in missed)
         )
 
     def test_false_positive_rate(self):
-        safe_vectors = [
-            text for cat, text, should_block in RED_TEAM_VECTORS if not should_block
-        ]
+        safe_vectors = [text for cat, text, should_block in RED_TEAM_VECTORS if not should_block]
         false_positives = []
         for text in safe_vectors:
             blocked, code = quick_block(text)
@@ -159,8 +152,8 @@ class TestDetectionRate:
         fp_rate = len(false_positives) / total if total > 0 else 0
         max_fp_rate = 0.05  # Max 5% false positive rate
 
-        assert fp_rate <= max_fp_rate, (
-            f"False positive rate {fp_rate:.1%} exceeds {max_fp_rate:.0%}. "
-            f"False positives:\n"
-            + "\n".join(f"  {text} (code={code})" for text, code in false_positives)
+        assert (
+            fp_rate <= max_fp_rate
+        ), f"False positive rate {fp_rate:.1%} exceeds {max_fp_rate:.0%}. " f"False positives:\n" + "\n".join(
+            f"  {text} (code={code})" for text, code in false_positives
         )

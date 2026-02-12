@@ -31,9 +31,7 @@ _session_factory: async_sessionmaker[AsyncSession] | None = None
 def _get_database_url() -> str:
     url = os.getenv("DATABASE_URL", "")
     if not url:
-        raise RuntimeError(
-            "DATABASE_URL environment variable is required for audit store"
-        )
+        raise RuntimeError("DATABASE_URL environment variable is required for audit store")
     # Ensure async driver
     if url.startswith("postgresql://"):
         url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
@@ -51,9 +49,7 @@ async def init_db() -> None:
         pool_pre_ping=True,
         echo=os.getenv("SAFETY_DB_ECHO", "").lower() == "true",
     )
-    _session_factory = async_sessionmaker(
-        _engine, class_=AsyncSession, expire_on_commit=False
-    )
+    _session_factory = async_sessionmaker(_engine, class_=AsyncSession, expire_on_commit=False)
     # Create tables (in production use Alembic migrations instead)
     async with _engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)

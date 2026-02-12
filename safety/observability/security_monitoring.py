@@ -404,7 +404,8 @@ class RealTimeMonitor:
 
     def _trigger_alert(self, severity: SecurityEventSeverity, count: int) -> None:
         """Trigger a security alert"""
-        alert_msg = f"SECURITY ALERT: {count} {severity.value} severity events in {self.monitoring_window.total_seconds() / 60:.0f} minutes"
+        minutes = self.monitoring_window.total_seconds() / 60
+        alert_msg = f"SECURITY ALERT: {count} {severity.value} severity events " f"in {minutes:.0f} minutes"
 
         # Log the alert
         alert_event = SecurityEvent(
@@ -431,9 +432,7 @@ class RealTimeMonitor:
         self._send_webhook_alert(severity, count, alert_msg)
         logger.critical(alert_msg)
 
-    def _send_webhook_alert(
-        self, severity: SecurityEventSeverity, count: int, message: str
-    ) -> None:
+    def _send_webhook_alert(self, severity: SecurityEventSeverity, count: int, message: str) -> None:
         """Send alert to configured webhook endpoint."""
         webhook_url = os.getenv("SECURITY_ALERT_WEBHOOK_URL", "")
         if not webhook_url:
@@ -506,8 +505,8 @@ class SecurityAudit:
                 ip_activity[event.ip_address][event.event_type.value] += 1
 
         # Identify high-risk users and IPs
-        high_risk_users = self._identify_high_risk_entities(user_activity)
-        high_risk_ips = self._identify_high_risk_entities(ip_activity)
+        high_risk_users = self._identify_high_risk_entities({k: dict(v) for k, v in user_activity.items()})
+        high_risk_ips = self._identify_high_risk_entities({k: dict(v) for k, v in ip_activity.items()})
 
         return {
             "report_period": {
@@ -523,7 +522,9 @@ class SecurityAudit:
             "events": [event.to_dict() for event in events] if include_details else [],
         }
 
-    def _identify_high_risk_entities(self, activity_dict: dict[str, dict[str, int]]) -> list[dict[str, Any]]:
+    def _identify_high_risk_entities(
+        self, activity_dict: dict[str, dict[str, int]] | defaultdict[str, defaultdict[str, int]]
+    ) -> list[dict[str, Any]]:
         """Identify high-risk users/IPs based on activity patterns"""
         high_risk = []
 

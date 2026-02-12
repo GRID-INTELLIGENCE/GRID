@@ -161,6 +161,7 @@ class Authorize:
         tier_order = [TrustTier.ANON, TrustTier.USER, TrustTier.VERIFIED, TrustTier.PRIVILEGED]
         if tier_order.index(user.trust_tier) < tier_order.index(self.min_tier):
             from fastapi import HTTPException
+
             raise HTTPException(status_code=403, detail="Insufficient trust tier")
         return user
 

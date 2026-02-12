@@ -43,9 +43,7 @@ class TestRefusalFormat:
             "workaround",
         ]
         for hint in bypass_hints:
-            assert hint not in explanation.lower(), (
-                f"Explanation contains bypass hint: {hint!r}"
-            )
+            assert hint not in explanation.lower(), f"Explanation contains bypass hint: {hint!r}"
 
     def test_rate_limit_json_structure(self):
         """Verify rate-limit response structure."""

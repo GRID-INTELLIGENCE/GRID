@@ -208,7 +208,7 @@ def evaluate_detailed(text: str) -> dict:
     - latency_ms: float
     - entropy: float
     """
-    start = time.perf_monotonic()
+    start = time.monotonic()
 
     if not text or not text.strip():
         return {

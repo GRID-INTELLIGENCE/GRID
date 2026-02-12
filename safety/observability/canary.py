@@ -9,13 +9,14 @@ import re
 # These are invisible or rare UTF-8 sequences that won't disrupt UI but are easy to regex
 # Zero-width Joiner + specific sequence
 CANARY_TOKENS = [
-    "\u200D\u2062\u2063\u200D",  # Variant A
-    "\u200D\u2064\u2061\u200D",  # Variant B
-    "\u200D\uFEFF\u200D",        # Variant C (ZWJ + BOM + ZWJ)
+    "\u200d\u2062\u2063\u200d",  # Variant A
+    "\u200d\u2064\u2061\u200d",  # Variant B
+    "\u200d\ufeff\u200d",  # Variant C (ZWJ + BOM + ZWJ)
 ]
 
 # Combined regex for fast detection
 CANARY_REGEX = re.compile("|".join(CANARY_TOKENS))
+
 
 class SafetyCanary:
     """Utility for response watermarking and detection."""
@@ -33,6 +34,7 @@ class SafetyCanary:
         if not text:
             return False
         return bool(CANARY_REGEX.search(text))
+
 
 # Global Instance
 safety_canary = SafetyCanary()

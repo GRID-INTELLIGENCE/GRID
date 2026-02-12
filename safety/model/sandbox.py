@@ -89,9 +89,7 @@ async def run_safe_call(
 
     # 1. RPS check
     if not await _check_rps(user_id, cfg.max_rps):
-        raise RuntimeError(
-            f"Model RPS limit exceeded for user {user_id} (max {cfg.max_rps}/s)"
-        )
+        raise RuntimeError(f"Model RPS limit exceeded for user {user_id} (max {cfg.max_rps}/s)")
 
     # 2. Strip tool invocations if tools are not allowed
     if not cfg.allow_tools:

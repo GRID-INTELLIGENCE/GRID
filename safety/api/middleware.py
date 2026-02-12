@@ -104,12 +104,10 @@ class SafetyMiddleware(BaseHTTPMiddleware):
         self.security_headers = SecurityHeadersMiddleware(
             None,  # app not needed for header addition
             enable_csrf_protection=True,
-            allowed_origins={"http://localhost:3000", "https://localhost:3000"}  # Configure as needed
+            allowed_origins={"http://localhost:3000", "https://localhost:3000"},  # Configure as needed
         )
 
-    async def dispatch(
-        self, request: Request, call_next: RequestResponseEndpoint
-    ) -> Response:
+    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
         # Skip for health/docs endpoints
         if request.url.path in _BYPASS_PATHS:
             response = await call_next(request)
@@ -133,19 +131,21 @@ class SafetyMiddleware(BaseHTTPMiddleware):
         if not redis_ok:
             logger.error("safety_infra_unavailable", component="redis")
             REQUESTS_TOTAL.labels(outcome="refused").inc()
-            
+
             # Log critical infrastructure failure for observation
-            security_logger.log_event(SecurityEvent(
-                event_id=str(uuid.uuid4()),
-                timestamp=time.strftime("%Y-%m-%dT%H:%M:%S%z"),
-                event_type=SecurityEventType.ANOMALOUS_ACTIVITY,
-                severity=SecurityEventSeverity.CRITICAL,
-                source="api.middleware",
-                user_id="system",
-                ip_address=request.client.host if request.client else None,
-                session_id=trace_id,
-                details={"error": "Redis unavailable", "trace_id": trace_id}
-            ))
+            security_logger.log_event(
+                SecurityEvent(
+                    event_id=str(uuid.uuid4()),
+                    timestamp=time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+                    event_type=SecurityEventType.ANOMALOUS_ACTIVITY,
+                    severity=SecurityEventSeverity.CRITICAL,
+                    source="api.middleware",
+                    user_id="system",
+                    ip_address=request.client.host if request.client else None,
+                    session_id=trace_id,
+                    details={"error": "Redis unavailable", "trace_id": trace_id},
+                )
+            )
 
             return _make_refusal_response("SAFETY_UNAVAILABLE", trace_id, 503)
 
@@ -168,19 +168,21 @@ class SafetyMiddleware(BaseHTTPMiddleware):
         if suspended:
             logger.warning("suspended_user_request", user_id=user.id, reason=reason)
             REQUESTS_TOTAL.labels(outcome="refused").inc()
-            
+
             # Log suspension enforcement
-            security_logger.log_event(SecurityEvent(
-                event_id=str(uuid.uuid4()),
-                timestamp=time.strftime("%Y-%m-%dT%H:%M:%S%z"),
-                event_type=SecurityEventType.AUTH_BLOCKED,
-                severity=SecurityEventSeverity.HIGH,
-                source="api.middleware",
-                user_id=user.id,
-                ip_address=request.client.host if request.client else None,
-                session_id=trace_id,
-                details={"reason": reason, "action": "blocked_suspended_user"}
-            ))
+            security_logger.log_event(
+                SecurityEvent(
+                    event_id=str(uuid.uuid4()),
+                    timestamp=time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+                    event_type=SecurityEventType.AUTH_BLOCKED,
+                    severity=SecurityEventSeverity.HIGH,
+                    source="api.middleware",
+                    user_id=user.id,
+                    ip_address=request.client.host if request.client else None,
+                    session_id=trace_id,
+                    details={"reason": reason, "action": "blocked_suspended_user"},
+                )
+            )
 
             response = _make_refusal_response("USER_SUSPENDED", trace_id)
             self.security_headers._add_security_headers(response, request)
@@ -192,30 +194,32 @@ class SafetyMiddleware(BaseHTTPMiddleware):
             trust_tier=user.trust_tier,
             feature="infer",
         )
-        if not rate_result.allowed:
+        if not rate_result[0]:  # type: ignore[reportUnknownMemberType]
             REQUESTS_TOTAL.labels(outcome="rate_limited").inc()
-            
+
             # Log rate limit event
-            security_logger.log_event(SecurityEvent(
-                event_id=str(uuid.uuid4()),
-                timestamp=time.strftime("%Y-%m-%dT%H:%M:%S%z"),
-                event_type=SecurityEventType.RATE_LIMIT_EXCEEDED,
-                severity=SecurityEventSeverity.MEDIUM,
-                source="api.middleware",
-                user_id=user.id,
-                ip_address=request.client.host if request.client else None,
-                session_id=trace_id,
-                details={"reset_seconds": rate_result.reset_seconds}
-            ))
+            security_logger.log_event(
+                SecurityEvent(
+                    event_id=str(uuid.uuid4()),
+                    timestamp=time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+                    event_type=SecurityEventType.RATE_LIMIT_EXCEEDED,
+                    severity=SecurityEventSeverity.MEDIUM,
+                    source="api.middleware",
+                    user_id=user.id,
+                    ip_address=request.client.host if request.client else None,
+                    session_id=trace_id,
+                    details={"reset_seconds": rate_result[2]},  # type: ignore[reportUnknownMemberType]
+                )
+            )
 
             await write_audit_event(
                 event="rate_limited",
                 request_id=request_id,
                 user_id=user.id,
                 reason="RATE_LIMITED",
-                payload={"reset_seconds": rate_result.reset_seconds},
+                payload={"reset_seconds": rate_result[2]},  # type: ignore[reportUnknownMemberType]  # pyright: ignore[reportUnknownMemberType]
             )
-            response = _make_rate_limit_response(rate_result.reset_seconds, trace_id)
+            response = _make_rate_limit_response(rate_result[2], trace_id)  # type: ignore[reportUnknownMemberType]
             self.security_headers._add_security_headers(response, request)
             return response
 
@@ -262,22 +266,14 @@ class SafetyMiddleware(BaseHTTPMiddleware):
                 body = {}
 
             # Extract user_input for downstream endpoints
-            user_input = (
-                body.get("user_input", "")
-                or body.get("prompt", "")
-                or body.get("input", "")
-            )
+            user_input = body.get("user_input", "") or body.get("prompt", "") or body.get("input", "")
 
             # [PROJECT GUARDIAN] Use SafetyRuleManager
             blocked = False
             reason_code = None
 
             manager = get_rule_manager()
-            is_safe, reasons = manager.evaluate_request(
-                user_id=user.id,
-                trust_tier=user.trust_tier.value,
-                data=body
-            )
+            is_safe, reasons = manager.evaluate_request(user_id=user.id, trust_tier=user.trust_tier.value, data=body)
             if not is_safe:
                 blocked = True
                 reason_code = reasons[0] if reasons else "AI_SAFETY_VIOLATION"
@@ -294,19 +290,21 @@ class SafetyMiddleware(BaseHTTPMiddleware):
 
         if blocked:
             REQUESTS_TOTAL.labels(outcome="refused").inc()
-            
+
             # Log content blocking
-            security_logger.log_event(SecurityEvent(
-                event_id=str(uuid.uuid4()),
-                timestamp=time.strftime("%Y-%m-%dT%H:%M:%S%z"),
-                event_type=SecurityEventType.AI_INPUT_BLOCKED,
-                severity=SecurityEventSeverity.HIGH,
-                source="api.middleware.pre_check",
-                user_id=user.id,
-                ip_address=request.client.host if request.client else None,
-                session_id=trace_id,
-                details={"reason_code": reason_code, "input_length": len(user_input)}
-            ))
+            security_logger.log_event(
+                SecurityEvent(
+                    event_id=str(uuid.uuid4()),
+                    timestamp=time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+                    event_type=SecurityEventType.AI_INPUT_BLOCKED,
+                    severity=SecurityEventSeverity.HIGH,
+                    source="api.middleware.pre_check",
+                    user_id=user.id,
+                    ip_address=request.client.host if request.client else None,
+                    session_id=trace_id,
+                    details={"reason_code": reason_code, "input_length": len(user_input)},
+                )
+            )
 
             await write_audit_event(
                 event="refusal",

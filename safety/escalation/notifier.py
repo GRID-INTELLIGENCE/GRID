@@ -161,9 +161,7 @@ async def notify_pagerduty(
 
     try:
         client = _get_client()
-        resp = await client.post(
-            "https://events.pagerduty.com/v2/enqueue", json=payload
-        )
+        resp = await client.post("https://events.pagerduty.com/v2/enqueue", json=payload)
         resp.raise_for_status()
         logger.info("pagerduty_incident_triggered", audit_id=audit_id)
         return True

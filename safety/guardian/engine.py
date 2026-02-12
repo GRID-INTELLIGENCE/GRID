@@ -30,13 +30,15 @@ from typing import Any
 
 # Try to import optional performance libraries
 try:
-    import ahocorasick
+    import ahocorasick  # pyright: ignore[reportMissingImports]
+
     AHO_AVAILABLE = True
 except ImportError:
     AHO_AVAILABLE = False
 
 try:
-    import yaml
+    import yaml  # noqa: F401
+
     YAML_AVAILABLE = True
 except ImportError:
     YAML_AVAILABLE = False
@@ -46,14 +48,16 @@ logger = logging.getLogger(__name__)
 
 class MatchType(Enum):
     """Types of pattern matching supported."""
-    KEYWORD = auto()      # Simple substring matching (Trie)
-    REGEX = auto()        # Regular expression matching
-    SEMANTIC = auto()     # Semantic/context-aware matching
-    COMPOSITE = auto()    # Combination of multiple patterns
+
+    KEYWORD = auto()  # Simple substring matching (Trie)
+    REGEX = auto()  # Regular expression matching
+    SEMANTIC = auto()  # Semantic/context-aware matching
+    COMPOSITE = auto()  # Combination of multiple patterns
 
 
 class Severity(Enum):
     """Severity levels for rule matches."""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -62,6 +66,7 @@ class Severity(Enum):
 
 class RuleAction(Enum):
     """Actions to take when rule matches."""
+
     BLOCK = "block"
     ESCALATE = "escalate"
     LOG = "log"
@@ -72,6 +77,7 @@ class RuleAction(Enum):
 @dataclass(frozen=True)
 class RuleMatch:
     """Result of a rule match."""
+
     rule_id: str
     rule_name: str
     category: str
@@ -100,6 +106,7 @@ class RuleMatch:
 @dataclass
 class SafetyRule:
     """Definition of a safety rule."""
+
     id: str
     name: str
     description: str
@@ -139,9 +146,7 @@ class SafetyRule:
             "patterns": sorted(self.patterns) if self.patterns else [],
             "case_sensitive": self.case_sensitive,
         }
-        return hashlib.sha256(
-            json.dumps(sig_data, sort_keys=True).encode()
-        ).hexdigest()[:16]
+        return hashlib.sha256(json.dumps(sig_data, sort_keys=True).encode()).hexdigest()[:16]
 
 
 class TrieMatcher:
@@ -207,12 +212,14 @@ class TrieMatcher:
         text_lower = text.lower()
 
         if AHO_AVAILABLE and self._automaton:
-            for end_pos, (keyword, _) in self._automaton.iter(text_lower):
+            for end_pos, (keyword, _) in (
+                self._automaton.iter(text_lower) or []  # pyright: ignore[reportAttributeAccessIssue]
+            ):  # pyright: ignore[reportAttributeAccessIssue]
                 start_pos = end_pos - len(keyword) + 1
                 matches.append((keyword, start_pos, end_pos + 1))
         else:
             # Fallback implementation
-            for keyword in self._automaton:
+            for keyword in self._automaton or []:
                 pos = 0
                 while True:
                     pos = text_lower.find(keyword, pos)
@@ -278,12 +285,7 @@ class RegexSetMatcher:
         with self._lock:
             for rule_id, pattern in self._patterns.items():
                 for match in pattern.finditer(text):
-                    matches.append((
-                        rule_id,
-                        match.group(),
-                        match.start(),
-                        match.end()
-                    ))
+                    matches.append((rule_id, match.group(), match.start(), match.end()))
 
         return matches
 
@@ -378,9 +380,7 @@ class RuleRegistry:
                 "total_rules": len(self._rules),
                 "enabled_rules": sum(1 for r in self._rules.values() if r.enabled),
                 "categories": {cat: len(rules) for cat, rules in self._categories.items()},
-                "by_severity": {
-                    sev.value: len(rules) for sev, rules in self._severity_index.items()
-                },
+                "by_severity": {sev.value: len(rules) for sev, rules in self._severity_index.items()},
                 "version": self._version,
                 "last_updated": self._last_updated,
             }
@@ -456,10 +456,7 @@ class GuardianEngine:
         logger.info(f"Loaded {len(rules)} rules in {elapsed_ms:.2f}ms")
 
     def evaluate(
-        self,
-        text: str,
-        context: dict[str, Any] | None = None,
-        use_cache: bool = True
+        self, text: str, context: dict[str, Any] | None = None, use_cache: bool = True
     ) -> tuple[list[RuleMatch], float]:
         """
         Evaluate text against all loaded rules.
@@ -496,46 +493,54 @@ class GuardianEngine:
             for rule_id in rule_ids:
                 rule = self.registry.get(rule_id)
                 if rule and rule.enabled:
-                    matches.append(RuleMatch(
-                        rule_id=rule.id,
-                        rule_name=rule.name,
-                        category=rule.category,
-                        severity=rule.severity,
-                        action=rule.action,
-                        confidence=rule.confidence,
-                        matched_text=text[start:end],
-                        position=(start, end),
-                        metadata={"match_type": "keyword", "keyword": keyword}
-                    ))
+                    matches.append(
+                        RuleMatch(
+                            rule_id=rule.id,
+                            rule_name=rule.name,
+                            category=rule.category,
+                            severity=rule.severity,
+                            action=rule.action,
+                            confidence=rule.confidence,
+                            matched_text=text[start:end],
+                            position=(start, end),
+                            metadata={"match_type": "keyword", "keyword": keyword},
+                        )
+                    )
 
         # Regex matching
         regex_matches = self.regex_set.match(text)
         for rule_id, matched_text, start, end in regex_matches:
             rule = self.registry.get(rule_id)
             if rule and rule.enabled:
-                matches.append(RuleMatch(
-                    rule_id=rule.id,
-                    rule_name=rule.name,
-                    category=rule.category,
-                    severity=rule.severity,
-                    action=rule.action,
-                    confidence=rule.confidence,
-                    matched_text=matched_text,
-                    position=(start, end),
-                    metadata={"match_type": "regex"}
-                ))
+                matches.append(
+                    RuleMatch(
+                        rule_id=rule.id,
+                        rule_name=rule.name,
+                        category=rule.category,
+                        severity=rule.severity,
+                        action=rule.action,
+                        confidence=rule.confidence,
+                        matched_text=matched_text,
+                        position=(start, end),
+                        metadata={"match_type": "regex"},
+                    )
+                )
 
         # Sort by priority and severity
         def _get_priority(rule_id: str) -> int:
             rule = self.registry.get(rule_id)
             return rule.priority if rule else 0
 
-        matches.sort(key=lambda m: (
-            0 if m.severity == Severity.CRITICAL else
-            1 if m.severity == Severity.HIGH else
-            2 if m.severity == Severity.MEDIUM else 3,
-            -_get_priority(m.rule_id)
-        ))
+        matches.sort(
+            key=lambda m: (
+                (
+                    0
+                    if m.severity == Severity.CRITICAL
+                    else 1 if m.severity == Severity.HIGH else 2 if m.severity == Severity.MEDIUM else 3
+                ),
+                -_get_priority(m.rule_id),
+            )
+        )
 
         # Limit matches per rule
         seen_rules = set()
@@ -588,12 +593,7 @@ class GuardianEngine:
                 self._cache.popitem(last=False)
             self._cache[key] = value
 
-    def _update_stats(
-        self,
-        cache_hit: bool = False,
-        latency_ms: float = 0.0,
-        match_count: int = 0
-    ) -> None:
+    def _update_stats(self, cache_hit: bool = False, latency_ms: float = 0.0, match_count: int = 0) -> None:
         """Update engine statistics."""
         with self._stats_lock:
             self._stats["total_evaluations"] += 1
@@ -605,17 +605,13 @@ class GuardianEngine:
 
                 # Update running average
                 n = self._stats["cache_misses"]
-                self._stats["avg_latency_ms"] = (
-                    (self._stats["avg_latency_ms"] * (n - 1)) + latency_ms
-                ) / n
+                self._stats["avg_latency_ms"] = ((self._stats["avg_latency_ms"] * (n - 1)) + latency_ms) / n
 
     def get_stats(self) -> dict[str, Any]:
         """Get engine statistics."""
         with self._stats_lock:
             stats = self._stats.copy()
-            stats["cache_hit_rate"] = (
-                stats["cache_hits"] / max(stats["total_evaluations"], 1)
-            )
+            stats["cache_hit_rate"] = stats["cache_hits"] / max(stats["total_evaluations"], 1)
             stats["registry_stats"] = self.registry.get_stats()
             return stats
 

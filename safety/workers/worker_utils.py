@@ -41,9 +41,7 @@ async def ensure_consumer_group() -> None:
     """Create the consumer group if it doesn't exist."""
     client = await get_redis()
     try:
-        await client.xgroup_create(
-            INFERENCE_STREAM, CONSUMER_GROUP, id="0", mkstream=True
-        )
+        await client.xgroup_create(INFERENCE_STREAM, CONSUMER_GROUP, id="0", mkstream=True)
         logger.info("consumer_group_created", group=CONSUMER_GROUP)
     except aioredis.ResponseError as e:
         if "BUSYGROUP" in str(e):
@@ -92,9 +90,7 @@ async def enqueue_request(
         raise RuntimeError(f"Failed to enqueue request: {exc}") from exc
 
 
-async def publish_response(
-    request_id: str, response: str, status: str = "completed"
-) -> None:
+async def publish_response(request_id: str, response: str, status: str = "completed") -> None:
     """Publish a response to the response stream."""
     try:
         client = await get_redis()
@@ -132,7 +128,7 @@ async def write_audit_event(
             },
         )
     except Exception as exc:
-        logger.error("audit_event_failed", event=event, error=str(exc))
+        logger.error("audit_event_failed", event=event, error=str(exc))  # type: ignore[reportArgumentType]
 
 
 async def get_queue_depth() -> int:
@@ -151,11 +147,11 @@ async def check_redis_health() -> bool:
     """Check if Redis is reachable."""
     try:
         client = await get_redis()
-        await client.ping()
+        await client.ping()  # type: ignore[reportAwaitableReturnType]
         REDIS_HEALTHY.set(1)
         return True
     except Exception as exc:
-        logger.error("redis_health_check_failed", error=str(exc))
+        logger.error("redis_health_check_failed", error=str(exc))  # type: ignore[reportArgumentType]
         REDIS_HEALTHY.set(0)
         return False
 

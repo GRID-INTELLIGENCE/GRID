@@ -102,9 +102,7 @@ async def _raw_model_call(prompt: str, **kwargs: Any) -> dict[str, Any]:
         "tokens_used": tokens_used,
         "metadata": {
             "model": data.get("model", _MODEL_NAME),
-            "finish_reason": data.get("choices", [{}])[0].get("finish_reason")
-            if data.get("choices")
-            else None,
+            "finish_reason": data.get("choices", [{}])[0].get("finish_reason") if data.get("choices") else None,
         },
     }
 

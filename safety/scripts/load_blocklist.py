@@ -19,9 +19,7 @@ import redis
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Load dynamic blocklist entries into Redis"
-    )
+    parser = argparse.ArgumentParser(description="Load dynamic blocklist entries into Redis")
     parser.add_argument(
         "--file",
         "-f",

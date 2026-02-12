@@ -22,9 +22,11 @@ from safety.observability.security_monitoring import (
 
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class SafetyRule:
     """Enhanced safety rule with GUARDIAN metadata."""
+
     id: str
     name: str = "Unknown Rule"
     patterns: list[str] = field(default_factory=list)
@@ -32,7 +34,7 @@ class SafetyRule:
     severity: SecurityEventSeverity = SecurityEventSeverity.MEDIUM
     event_type: SecurityEventType = SecurityEventType.AI_INPUT_BLOCKED
     description: str = ""
-    
+
     # Internal compiled regexes
     _compiled: list[re.Pattern] = field(default_factory=list, init=False)
 
@@ -56,9 +58,7 @@ class RuleEngine:
         if self._redis_client is None:
             try:
                 url = os.getenv("REDIS_URL", "redis://localhost:6379")
-                self._redis_client = redis.Redis.from_url(
-                    url, decode_responses=True, socket_connect_timeout=0.5
-                )
+                self._redis_client = redis.Redis.from_url(url, decode_responses=True, socket_connect_timeout=0.5)
             except Exception:
                 return None
         return self._redis_client
@@ -66,11 +66,12 @@ class RuleEngine:
     def load_rules(self, rule_file_path: str | None = None) -> None:
         """Load and compile base safety rules."""
         from .loader import load_rules
+
         raw_rules = load_rules(rule_file_path)
         self.rules = []
         for r in raw_rules:
             self._add_rule_from_dict(r)
-        
+
         # Initial dynamic load
         self.refresh_dynamic_rules()
 
@@ -80,18 +81,18 @@ class RuleEngine:
             # Ensure enums are resolved
             severity_val = r.get("severity", "medium")
             event_type_val = r.get("event_type", "ai_input_blocked")
-            
+
             # Handle string or Enum
             if isinstance(severity_val, str):
                 sev = SecurityEventSeverity(severity_val.lower())
             else:
                 sev = severity_val
-                
+
             if isinstance(event_type_val, str):
                 etype = SecurityEventType(event_type_val.lower())
             else:
                 etype = event_type_val
-            
+
             rule = SafetyRule(
                 id=r.get("id", "unknown"),
                 name=r.get("name", "Unknown Rule"),
@@ -99,7 +100,7 @@ class RuleEngine:
                 reason_code=r.get("reason_code", r.get("id", "RULE_TRIGGERED")),
                 severity=sev,
                 event_type=etype,
-                description=r.get("description", "")
+                description=r.get("description", ""),
             )
             rule.compile()
             # If a rule with this ID already exists, replace it
@@ -126,14 +127,14 @@ class RuleEngine:
             if not raw_rules:
                 self._last_dynamic_refresh = now
                 return
-            
-            for raw in raw_rules:
+
+            for raw in raw_rules:  # type: ignore[reportIterableType]
                 try:
                     r = json.loads(raw)
                     self._add_rule_from_dict(r)
                 except json.JSONDecodeError:
                     continue
-            
+
             self._last_dynamic_refresh = now
         except Exception as e:
             logger.warning(f"Failed to refresh dynamic rules: {e}")
@@ -146,7 +147,7 @@ class RuleEngine:
         Returns: (blocked, reason_code, matched_rule_object)
         """
         self.refresh_dynamic_rules()
-        
+
         if not text or not text.strip():
             return False, None, None
 
@@ -159,6 +160,7 @@ class RuleEngine:
 
 # Global engine instance
 _engine = RuleEngine()
+
 
 def get_rule_engine() -> RuleEngine:
     """Get the global rule engine instance."""

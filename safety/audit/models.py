@@ -101,28 +101,20 @@ class AuditRecord(Base):
     model_output: Mapped[str | None] = mapped_column(Text, nullable=True)
     detector_scores: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
     reason_code: Mapped[str] = mapped_column(String(64), nullable=False)
-    severity: Mapped[Severity] = mapped_column(
-        Enum(Severity), nullable=False, default=Severity.LOW
-    )
-    status: Mapped[AuditStatus] = mapped_column(
-        Enum(AuditStatus), nullable=False, default=AuditStatus.OPEN
-    )
+    severity: Mapped[Severity] = mapped_column(Enum(Severity), nullable=False, default=Severity.LOW)
+    status: Mapped[AuditStatus] = mapped_column(Enum(AuditStatus), nullable=False, default=AuditStatus.OPEN)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
         default=lambda: datetime.now(UTC),
         index=True,
     )
-    resolved_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    resolved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     reviewer_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     trace_id: Mapped[str] = mapped_column(String(64), nullable=False)
 
-    __table_args__ = (
-        Index("ix_audits_request_user_created", "request_id", "user_id", "created_at"),
-    )
+    __table_args__ = (Index("ix_audits_request_user_created", "request_id", "user_id", "created_at"),)
 
     def __repr__(self) -> str:
         return (

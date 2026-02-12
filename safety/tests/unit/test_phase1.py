@@ -1,11 +1,13 @@
 import asyncio
 import threading
-import time
 from datetime import datetime
 from unittest.mock import MagicMock, patch
+
 import pytest
-from safety.api.rate_limiter import IPRateLimiter, ExponentialBackoff, _get_redis
+
+from safety.api.rate_limiter import ExponentialBackoff, IPRateLimiter, _get_redis
 from safety.observability.risk_score import RiskScoreManager, SecurityEvent, SecurityEventSeverity
+
 
 @pytest.mark.asyncio
 async def test_ip_rate_limiter_concurrency():
@@ -28,6 +30,7 @@ async def test_ip_rate_limiter_concurrency():
     assert risk >= 100.0 or pytest.approx(risk) == 100.0
     assert limiter.is_ip_blocked("1.2.3.4")
 
+
 @pytest.mark.asyncio
 async def test_exponential_backoff_concurrency():
     backoff = ExponentialBackoff()
@@ -45,6 +48,7 @@ async def test_exponential_backoff_concurrency():
     # Expected count: 10 * 100 = 1000
     assert backoff.violation_counts["user1"] == 1000
 
+
 @pytest.mark.asyncio
 async def test_redis_pool_singleton():
     with patch("redis.asyncio.from_url") as mock_from_url:
@@ -52,6 +56,7 @@ async def test_redis_pool_singleton():
 
         # Reset global
         import safety.api.rate_limiter
+
         safety.api.rate_limiter._redis_pool = None
 
         # Call _get_redis concurrently
@@ -62,6 +67,7 @@ async def test_redis_pool_singleton():
         mock_from_url.assert_called_once()
         assert all(r is results[0] for r in results)
 
+
 @pytest.mark.asyncio
 async def test_risk_score_manager_lua():
     manager = RiskScoreManager()
@@ -70,11 +76,13 @@ async def test_risk_score_manager_lua():
     # Mock script_load as an async function
     async def async_script_load(*args, **kwargs):
         return "sha123"
+
     mock_redis.script_load = MagicMock(side_effect=async_script_load)
 
     # Mock evalsha as an async function
     async def async_evalsha(*args, **kwargs):
         return "0.5"
+
     mock_redis.evalsha = MagicMock(side_effect=async_evalsha)
 
     # Mock get_redis
@@ -91,7 +99,7 @@ async def test_risk_score_manager_lua():
         mock_redis.evalsha.assert_called_once()
         args = mock_redis.evalsha.call_args[0]
         assert args[0] == "sha123"
-        assert args[1] == 2 # keys
+        assert args[1] == 2  # keys
         assert args[2] == "risk:score:user1"
         assert args[3] == "risk:last_update:user1"
         assert args[4] == str(manager.SEVERITY_WEIGHTS[SecurityEventSeverity.MEDIUM])

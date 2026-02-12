@@ -55,8 +55,7 @@ _OUTPUT_BLOCK_PATTERNS: list[tuple[re.Pattern[str], str]] = [
     # Code that looks like malware
     (
         re.compile(
-            r"(import\s+(socket|subprocess|ctypes|winreg).*?"
-            r"(reverse.shell|keylog|encrypt.*?ransom|exfiltrat))",
+            r"(import\s+(socket|subprocess|ctypes|winreg).*?" r"(reverse.shell|keylog|encrypt.*?ransom|exfiltrat))",
             re.I | re.DOTALL,
         ),
         "HIGH_RISK_CYBER",
@@ -119,9 +118,7 @@ async def post_check(
                 severity = SEVERITY_MAP.get(code, "medium")
                 evidence["heuristic_match"] = {
                     "pattern": code,
-                    "snippet": model_output[
-                        max(0, match.start() - 50) : match.end() + 50
-                    ],
+                    "snippet": model_output[max(0, match.start() - 50) : match.end() + 50],
                 }
                 logger.warning(
                     "postcheck_heuristic_flag",
@@ -169,11 +166,7 @@ async def post_check(
                 "confidence": input_ml.confidence,
             }
             # If input was safe but output is borderline, flag for review
-            if (
-                input_ml.label == "SAFE"
-                and ml_result.score >= _ML_FLAG_THRESHOLD * 0.8
-                and ml_result.label != "SAFE"
-            ):
+            if input_ml.label == "SAFE" and ml_result.score >= _ML_FLAG_THRESHOLD * 0.8 and ml_result.label != "SAFE":
                 logger.info(
                     "postcheck_coherence_flag",
                     input_label=input_ml.label,

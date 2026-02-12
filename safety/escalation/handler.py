@@ -24,8 +24,8 @@ from safety.audit.models import AuditRecord, AuditStatus, Severity, TrustTier
 from safety.escalation.notifier import notify_pagerduty, notify_slack
 from safety.observability.logging_setup import get_logger
 from safety.observability.metrics import (
-    ESCALATIONS_TOTAL,
     ESCALATION_RESOLUTION_LATENCY,
+    ESCALATIONS_TOTAL,
     FALSE_POSITIVES_TOTAL,
 )
 
@@ -94,16 +94,8 @@ async def escalate(
     scores = detector_scores or {}
 
     # Map string severity to enum
-    sev = (
-        Severity(severity)
-        if severity in Severity.__members__.values()
-        else Severity.MEDIUM
-    )
-    tier = (
-        TrustTier(trust_tier)
-        if trust_tier in TrustTier.__members__.values()
-        else TrustTier.USER
-    )
+    sev = Severity(severity) if severity in Severity.__members__.values() else Severity.MEDIUM
+    tier = TrustTier(trust_tier) if trust_tier in TrustTier.__members__.values() else TrustTier.USER
 
     # 1. Write audit DB record
     try:
@@ -244,7 +236,7 @@ async def approve(
             try:
                 client = await _get_redis()
                 # Add a normalized version of the input to the blocklist
-                await client.sadd("dynamic_blocklist", record.input.lower().strip())
+                await client.sadd("dynamic_blocklist", record.input.lower().strip())  # type: ignore[reportAwaitableReturnType]
             except Exception as exc:
                 logger.error("blocklist_update_failed", error=str(exc))
 

@@ -14,6 +14,7 @@ Returns: (allowed: bool, remaining: int, reset_seconds: float, risk_score: float
 
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import hmac
 import ipaddress
@@ -64,9 +65,7 @@ class SecurityConfig:
         _is_dev = os.environ.get("GRID_ENV", "production").lower() in ("development", "dev", "test")
         if not cls.SECRET_KEY or cls.SECRET_KEY == "change_me_in_production":
             if _is_dev:
-                logger.warning(
-                    "RATE_LIMIT_SECRET not set — using insecure default (dev mode only)"
-                )
+                logger.warning("RATE_LIMIT_SECRET not set — using insecure default (dev mode only)")
                 cls.SECRET_KEY = "insecure-dev-key-do-not-use-in-production"
             else:
                 raise RuntimeError(
@@ -250,7 +249,7 @@ return {allowed, math.floor(refilled), reset_seconds}
 # ---------------------------------------------------------------------------
 # Rate limiter class
 # ---------------------------------------------------------------------------
-import asyncio
+
 _redis_pool: aioredis.Redis | None = None
 _lua_sha: str | None = None
 _redis_lock = asyncio.Lock()
@@ -274,11 +273,13 @@ async def _ensure_lua_script(client: aioredis.Redis) -> str:
         async with _lua_lock:
             if _lua_sha is None:
                 _lua_sha = await client.script_load(TOKEN_BUCKET_LUA)
-    return _lua_sha
+            # At this point, _lua_sha is guaranteed to be a str
+            assert _lua_sha is not None
+    return _lua_sha  # type: ignore[return-value]
 
 
-class EnhancedRateLimitResult:
-    """Enhanced rate limit result with security information"""
+class RateLimitResult:
+    """Result of a rate limit check"""
 
     __slots__ = ("allowed", "remaining", "reset_seconds", "risk_score", "blocked_reason")
 
@@ -322,14 +323,14 @@ class EnhancedRateLimitResult:
 
 async def allow_request(
     user_id: str,
-    trust_tier: TrustTier,
+    trust_tier: "TrustTier",
     feature: str = "infer",
     ip_address: str | None = None,
     user_agent: str | None = None,
     request_signature: str | None = None,
     request_data: str | None = None,
     client_id: str | None = None,
-) -> EnhancedRateLimitResult:
+) -> tuple[bool, int, float, float, str | None]:
     """
     Enhanced rate limiting with IP-based limits, exponential backoff, and security validation.
 
@@ -338,28 +339,18 @@ async def allow_request(
     # Security: Validate inputs
     if ip_address and not _request_validator.validate_ip_format(ip_address):
         logger.warning(f"Invalid IP format: {ip_address}")
-        return EnhancedRateLimitResult(
-            allowed=False, remaining=0, reset_seconds=60.0, risk_score=100.0, blocked_reason="invalid_ip"
-        )
+        return False, 0, 60.0, 100.0, "invalid_ip"
 
     # Security: Check if IP is blocked
     if ip_address and _ip_limiter.is_ip_blocked(ip_address):
         logger.warning(f"Blocked IP attempt: {ip_address}")
-        return EnhancedRateLimitResult(
-            allowed=False, remaining=0, reset_seconds=3600.0, risk_score=100.0, blocked_reason="ip_blocked"
-        )
+        return False, 0, 3600.0, 100.0, "ip_blocked"
 
     # Security: Check exponential backoff
     backoff_key = f"{user_id}:{ip_address or 'unknown'}"
     in_backoff, backoff_remaining = _backoff_manager.is_in_backoff(backoff_key)
     if in_backoff:
-        return EnhancedRateLimitResult(
-            allowed=False,
-            remaining=0,
-            reset_seconds=backoff_remaining,
-            risk_score=75.0,
-            blocked_reason="exponential_backoff",
-        )
+        return False, 0, backoff_remaining, 75.0, "exponential_backoff"
 
     # Security: Validate request signature if provided
     if request_signature and request_data and client_id is not None:
@@ -369,9 +360,7 @@ async def allow_request(
             # Record violation for potential backoff
             _backoff_manager.record_violation(backoff_key)
             _ip_limiter.add_suspicious_activity(ip_address or "unknown", 20.0)
-            return EnhancedRateLimitResult(
-                allowed=False, remaining=0, reset_seconds=300.0, risk_score=90.0, blocked_reason="invalid_signature"
-            )
+            return False, 0, 300.0, 90.0, "invalid_signature"
 
     # Calculate immediate request risk score
     immediate_risk = 0.0
@@ -417,7 +406,7 @@ async def allow_request(
             sha = await _ensure_lua_script(client)
 
             ip_key = f"ratelimit:ip:{ip_address}"
-            ip_result = await client.evalsha(
+            ip_result = await client.evalsha(  # type: ignore[reportUnknownReturnType]
                 sha,
                 1,
                 ip_key,
@@ -442,7 +431,7 @@ async def allow_request(
     try:
         client = await _get_redis()
         sha = await _ensure_lua_script(client)
-        result = await client.evalsha(sha, 1, key, str(capacity), str(refill_rate), str(now), "1")
+        result = await client.evalsha(sha, 1, key, str(capacity), str(refill_rate), str(now), "1")  # type: ignore[reportUnknownReturnType]    # pyright: ignore[reportUnknownReturnType]
         allowed = bool(int(result[0]))
         remaining = int(result[1])
         reset_seconds = float(result[2])
@@ -456,11 +445,11 @@ async def allow_request(
             RATE_LIMITED_TOTAL.labels(trust_tier=trust_tier.value).inc()
 
             # Record violation for backoff
-            backoff_duration = _backoff_manager.record_violation(backoff_key)
+            backoff_duration = await _backoff_manager.record_violation(backoff_key)  # type: ignore[reportAwaitableReturnType]
 
             # Increase IP risk score
             if ip_address:
-                _ip_limiter.add_suspicious_activity(ip_address, 5.0)
+                await _ip_limiter.add_suspicious_activity(ip_address, 5.0)  # type: ignore[reportAwaitableReturnType]    # pyright: ignore[reportAwaitableReturnType]
 
             logger.info(
                 "rate_limited",
@@ -473,13 +462,7 @@ async def allow_request(
                 backoff_duration=backoff_duration,
             )
 
-        return EnhancedRateLimitResult(
-            allowed=final_allowed,
-            remaining=final_remaining,
-            reset_seconds=final_reset,
-            risk_score=risk_score,
-            blocked_reason=None,
-        )
+        return final_allowed, final_remaining, final_reset, risk_score, None
 
     except Exception as exc:
         # Fail closed: Redis unavailable means deny
@@ -489,13 +472,7 @@ async def allow_request(
         # Record violation even on Redis failure
         _backoff_manager.record_violation(backoff_key)
 
-        return EnhancedRateLimitResult(
-            allowed=False,
-            remaining=0,
-            reset_seconds=60.0,
-            risk_score=risk_score + 20.0,
-            blocked_reason="redis_unavailable",
-        )
+        return False, 0, 60.0, risk_score + 20.0, "redis_unavailable"  # type: ignore[reportAssignmentIssue]    # pyright: ignore[reportUnknownReturnType]
 
 
 async def tighten_limits(user_id: str, factor: float = 0.5) -> None:
@@ -511,10 +488,10 @@ async def tighten_limits(user_id: str, factor: float = 0.5) -> None:
         async for key in client.scan_iter(f"ratelimit:{user_id}:*"):
             keys.append(key)
         for key in keys:
-            tokens = await client.hget(key, "tokens")
-            if tokens is not None:
+            tokens = await client.hget(key, "tokens")  # type: ignore[reportUnknownReturnType]
+            if tokens is not None:  # type: ignore[reportOptionalMemberAccess]
                 new_tokens = max(0, int(float(tokens) * factor))
-                await client.hset(key, "tokens", str(new_tokens))
+                await client.hset(key, "tokens", str(new_tokens))  # type: ignore[reportAwaitableReturnType]
         logger.warning(
             "rate_limits_tightened",
             user_id=user_id,
@@ -596,29 +573,3 @@ async def get_security_status() -> dict[str, Any]:
     except Exception as e:
         logger.error(f"Failed to get security status: {e}")
         return {"error": str(e)}
-
-
-class RateLimitResult:
-    """Legacy rate limit result for backward compatibility."""
-
-    __slots__ = ("allowed", "remaining", "reset_seconds")
-
-    def __init__(self, allowed: bool, remaining: int, reset_seconds: float):
-        self.allowed = allowed
-        self.remaining = remaining
-        self.reset_seconds = reset_seconds
-
-
-# Legacy compatibility - keep old function signature
-async def allow_request_legacy(
-    user_id: str,
-    trust_tier: TrustTier,
-    feature: str = "infer",
-) -> RateLimitResult:
-    """Legacy rate limiting function for backward compatibility"""
-    result = await allow_request(user_id, trust_tier, feature)
-    return RateLimitResult(result.allowed, result.remaining, result.reset_seconds)
-
-
-# Update global reference for backward compatibility
-allow_request_simple = allow_request_legacy

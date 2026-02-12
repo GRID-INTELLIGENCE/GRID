@@ -27,8 +27,8 @@ from safety.observability.logging_setup import (
     setup_logging,
 )
 from safety.observability.metrics import (
-    WORKER_JOBS_PROCESSED,
     DETECTION_LATENCY,
+    WORKER_JOBS_PROCESSED,
     record_service_info,
 )
 from safety.observability.risk_score import risk_manager
@@ -86,6 +86,7 @@ async def _process_message(msg_id: str, fields: dict[str, str]) -> None:
     )
 
     import time
+
     try:
         # Combined detection pipeline timing
         start_processing = time.perf_counter()
@@ -105,18 +106,18 @@ async def _process_message(msg_id: str, fields: dict[str, str]) -> None:
                     model_output=result.text,
                     original_input=input_text,
                 ),
-                timeout=10.0
+                timeout=10.0,
             )
         except asyncio.TimeoutError:
             logger.error("post_check_timeout", request_id=request_id)
             # Fail closed: treat as flagged
-            from safety.audit.models import Severity as AuditSeverity
             from safety.detectors.post_check import PostCheckResult
+
             check_result = PostCheckResult(
                 flagged=True,
                 reason_code="POST_CHECK_TIMEOUT",
                 severity="high",
-                evidence={"error": "timeout_10s_exceeded"}
+                evidence={"error": "timeout_10s_exceeded"},
             )
 
         # Observe total latency (model + post-check)
@@ -169,7 +170,7 @@ async def _process_message(msg_id: str, fields: dict[str, str]) -> None:
                 "output_released",
                 request_id=request_id,
                 tokens_used=result.tokens_used,
-                canary_injected=(risk_score > 0.2)
+                canary_injected=(risk_score > 0.2),
             )
 
     except Exception as exc:
@@ -199,9 +200,7 @@ async def consume() -> None:
     Uses Redis consumer groups with manual xack for at-least-once delivery.
     """
     setup_logging()
-    record_service_info(
-        version="1.0.0", environment=os.getenv("SAFETY_ENV", "development")
-    )
+    record_service_info(version="1.0.0", environment=os.getenv("SAFETY_ENV", "development"))
 
     client = await get_redis()
     await ensure_consumer_group()

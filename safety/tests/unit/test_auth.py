@@ -15,9 +15,7 @@ from safety.api.auth import (
 )
 
 
-def _make_request(
-    *, bearer: str = "", api_key: str = "", client_ip: str = "127.0.0.1"
-) -> MagicMock:
+def _make_request(*, bearer: str = "", api_key: str = "", client_ip: str = "127.0.0.1") -> MagicMock:
     """Create a mock FastAPI Request object."""
     request = MagicMock()
     headers = {}
