@@ -7,12 +7,16 @@ Endpoints:
 - GET  /health        — Health check (bypasses middleware).
 - GET  /metrics       — Prometheus metrics (bypasses middleware).
 - GET  /status/{id}   — Check status of a queued request.
+- POST /privacy/detect — Detect PII in text (Cognitive Privacy Shield).
+- POST /privacy/mask   — Mask or block PII in text.
+- POST /privacy/batch  — Batch PII detection/masking (up to 100 texts).
 
 The API layer NEVER calls the model directly. All requests are enqueued
 to Redis Streams for worker processing.
 
 Supports DEGRADED_MODE (env: SAFETY_DEGRADED_MODE=true) for running
 without Redis — safety checks remain active but queuing is mocked.
+Use for integration tests (e.g. test_privacy_api) when Redis is unavailable.
 """
 
 from __future__ import annotations
@@ -28,7 +32,7 @@ from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 from pydantic import BaseModel, Field
 from starlette.responses import Response
 
-from safety.api import observation_endpoints
+from safety.api import observation_endpoints, privacy_endpoints
 from safety.api.middleware import SafetyMiddleware
 from safety.audit.db import check_health as check_db_health
 from safety.audit.db import close_db, init_db
@@ -127,6 +131,7 @@ if DEGRADED_MODE:
 # ---------------------------------------------------------------------------
 # Lifespan (startup / shutdown)
 # ---------------------------------------------------------------------------
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan: initialize and tear down resources."""
@@ -158,6 +163,8 @@ async def lifespan(app: FastAPI):
     yield
 
     # Shutdown
+
+    # Shutdown
     logger.info("safety_api_shutting_down")
 
     # Stop background services
@@ -182,6 +189,7 @@ app = FastAPI(
 )
 
 app.include_router(observation_endpoints.router)
+app.include_router(privacy_endpoints.router)
 
 # Mount safety middleware (non-bypassable)
 app.add_middleware(SafetyMiddleware)

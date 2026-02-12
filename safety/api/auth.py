@@ -169,3 +169,24 @@ class Authorize:
 def require_permission(min_tier: TrustTier = TrustTier.VERIFIED) -> Authorize:
     """Factory for Authorize dependency with a minimum trust tier."""
     return Authorize(min_tier=min_tier)
+
+
+async def get_current_user(request: Request) -> UserIdentity:
+    """
+    FastAPI dependency to get the authenticated user.
+    Prefers user from request state (set by middleware),
+    otherwise tries to resolve from token.
+    """
+    # 1. Check if middleware already resolved it
+    if hasattr(request.state, "user"):
+        return request.state.user
+
+    # 2. Fallback: try to resolve from token directly
+    try:
+        return get_user_from_token(request)
+    except Exception:
+        from fastapi import HTTPException
+        raise HTTPException(
+            status_code=401,
+            detail="Valid authentication credentials were not provided",
+        )

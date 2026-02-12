@@ -140,3 +140,68 @@ OBSERVATION_PENDING_DEPTH = Gauge(
 def record_service_info(version: str, environment: str) -> None:
     """Set service info labels once at startup."""
     SAFETY_SERVICE_INFO.info({"version": version, "environment": environment})
+
+
+# =============================================================================
+# Privacy Shield Metrics
+# =============================================================================
+
+# =============================================================================
+# Privacy Shield Metrics
+# =============================================================================
+
+PRIVACY_DETECTION_REQUESTS_TOTAL = Counter(
+    "privacy_detection_requests_total",
+    "Total requests processed by the privacy detector",
+    ["direction"],  # input | output
+)
+
+PRIVACY_DETECTION_TOTAL = Counter(
+    "privacy_detection_total",
+    "Total PII detections by type",
+    ["pii_type", "action"],  # EMAIL, PHONE, etc. # mask, flag, block
+)
+
+PRIVACY_DETECTION_LATENCY = Histogram(
+    "privacy_detection_latency_seconds",
+    "Latency of privacy detection",
+    buckets=(0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25),
+)
+
+PRIVACY_CACHE_HITS = Counter(
+    "privacy_cache_hits_total",
+    "Total cache hits in privacy detection",
+)
+
+PRIVACY_CACHE_MISSES = Counter(
+    "privacy_cache_misses_total",
+    "Total cache misses in privacy detection",
+)
+
+# Aliases for detector compatibility
+DETECTION_CACHE_HITS = PRIVACY_CACHE_HITS
+DETECTION_CACHE_MISSES = PRIVACY_CACHE_MISSES
+
+PRIVACY_MASKED_TOTAL = Counter(
+    "privacy_masked_total",
+    "Total PII occurrences masked",
+    ["pii_type", "strategy"],  # EMAIL, PHONE # redact, partial, hash
+)
+
+PRIVACY_BLOCKED_TOTAL = Counter(
+    "privacy_blocked_total",
+    "Total requests blocked due to PII",
+    ["pii_type"],  # The PII type that caused block
+)
+
+PRIVACY_USER_CHOICES = Counter(
+    "privacy_user_choices_total",
+    "User choices in interactive mode",
+    ["choice"],  # mask, allow, block
+)
+
+PRIVACY_COLLABORATIVE_CONTEXT_TOTAL = Counter(
+    "privacy_collaborative_contexts_total",
+    "Total collaborative contexts (workspaces) tracked",
+    ["operation"],  # created, invalidated
+)
