@@ -98,6 +98,8 @@ test = [
     "pytest-asyncio>=0.21.0",
     "pytest-cov>=7.0.0",
     "pytest-timeout>=2.1.0",
+    "selenium>=4.15.0",
+    "pytest-selenium>=4.1.0",
 ]
 audit = [
     "pip-audit>=2.7.0",
@@ -251,6 +253,7 @@ follow_imports = "skip"
 pythonpath = [
     ".",
     "work/GRID/src",
+    "src",
 ]
 testpaths = [
     "tests",
