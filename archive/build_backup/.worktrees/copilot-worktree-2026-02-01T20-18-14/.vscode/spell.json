@@ -1,0 +1,11 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "words": [
+    "asyncpg", "setuptools", "numpy", "faiss", "pydantic",
+    "fastapi", "uvicorn", "openpyxl", "dateutil", "ollama",
+    "pytest", "asyncio", "structlog", "mypy", "isort",
+    "matplotlib", "seaborn", "plotly", "testpaths", "addopts",
+    "pycodestyle", "pyflakes", "pyupgrade"
+  ]
+}

@@ -15,7 +15,7 @@ from .repo_analyzer import RepositoryAnalyzer
 from .project_comparator import ProjectComparator
 from .eufle_verifier import EUFLEVerifier
 from .config import config
-from .exceptions import ValidationError, AnalysisError, OutputError
+from .exceptions import ValidationError, AnalysisError, OutputError, ComparisonError
 from .validators import (
     validate_root_path,
     validate_output_dir,
@@ -33,7 +33,7 @@ from .logging_config import (
 def analyze_command(args):
     """Run repository analysis."""
     logger = get_logger("cli", command="analyze")
-    
+
     try:
         log_command_start("analyze", {
             "root": args.root,
@@ -41,14 +41,14 @@ def analyze_command(args):
             "max_depth": args.max_depth,
             "exclude": args.exclude
         })
-        
+
         # Validate inputs
         root_path = validate_root_path(args.root)
         output_dir = validate_output_dir(args.out, create=True)
         max_depth = validate_max_depth(args.max_depth)
-        
+
         logger.info(f"Starting repository analysis: {root_path}")
-        
+
         analyzer = RepositoryAnalyzer(
             root_path=str(root_path),
             output_dir=str(output_dir),
@@ -82,7 +82,7 @@ def analyze_command(args):
         print("  - Check that output directory is writable")
         print("  - Ensure sufficient disk space is available")
         raise
-    
+
     # Output summary JSON for Cascade
     if config.should_output_json():
         summary = {
@@ -96,8 +96,8 @@ def analyze_command(args):
         summary_file = analyzer.output_dir / 'analysis_summary.json'
         with open(summary_file, 'w') as f:
             json.dump(summary, f, indent=2)
-        
-        log_command_end("analyze", True, 
+
+        log_command_end("analyze", True,
                        files_analyzed=len(analyzer.file_metrics),
                        refactor_candidates=len(candidates['candidates_for_refactor']))
         logger.info(f"Analysis complete: {len(analyzer.file_metrics)} files analyzed")
@@ -106,30 +106,29 @@ def analyze_command(args):
 def compare_command(args):
     """Compare two analyzed projects."""
     logger = get_logger("cli", command="compare")
-    
+
     try:
         from .validators import validate_analysis_dir
-        from .exceptions import ComparisonError
-        
+
         log_command_start("compare", {
             "project1": args.project1,
             "project2": args.project2,
             "output": args.out
         })
-        
+
         # Validate inputs
         project1_dir = validate_analysis_dir(args.project1)
         project2_dir = validate_analysis_dir(args.project2)
         output_dir = validate_output_dir(args.out, create=True)
-        
+
         logger.info(f"Starting project comparison: {project1_dir} vs {project2_dir}")
-        
+
         comparator = ProjectComparator(
             project1_analysis_dir=str(project1_dir),
             project2_analysis_dir=str(project2_dir),
             output_dir=str(output_dir)
         )
-        
+
         report = comparator.save_comparison_report()
     except ValidationError as e:
         print(f"Validation Error: {e}", file=sys.stderr)
@@ -144,7 +143,7 @@ def compare_command(args):
         print("  - Ensure analysis outputs are valid JSON files")
         print("  - Check file permissions on analysis directories")
         raise
-    
+
     # Output summary JSON for Cascade
     if config.should_output_json():
         summary = {
@@ -159,7 +158,7 @@ def compare_command(args):
         summary_file = comparator.output_dir / 'comparison_summary.json'
         with open(summary_file, 'w') as f:
             json.dump(summary, f, indent=2)
-        
+
         log_command_end("compare", True,
                        similar_modules=report['summary']['similar_modules_found'],
                        recommendations=len(report['recommendations']))
@@ -169,24 +168,24 @@ def compare_command(args):
 def verify_command(args):
     """Verify EUFLE setup."""
     logger = get_logger("cli", command="verify")
-    
+
     log_command_start("verify", {})
     logger.info("Starting EUFLE verification")
-    
+
     verifier = EUFLEVerifier()
     result = verifier.run_all_checks()
-    
+
     log_command_end("verify", result["all_checks_passed"],
                    results=result["results"])
     logger.info(f"Verification {'passed' if result['all_checks_passed'] else 'failed'}")
-    
+
     # Always output JSON for Cascade
     if config.should_output_json():
         output_file = config.get_output_dir() / "eufle_verification.json"
         with open(output_file, 'w') as f:
             json.dump(result, f, indent=2)
         print(f"\nJSON report saved to: {output_file}")
-    
+
     return 0 if result["all_checks_passed"] else 1
 
 
@@ -217,9 +216,9 @@ Examples:
   workspace-utils config --show
         """
     )
-    
+
     subparsers = parser.add_subparsers(dest='command', help='Available commands')
-    
+
     # Analyze command
     analyze_parser = subparsers.add_parser('analyze', help='Analyze repository')
     analyze_parser.add_argument('--root', required=True, help='Root path of repository to analyze')
@@ -227,18 +226,18 @@ Examples:
     analyze_parser.add_argument('--max-depth', type=int, default=6, help='Maximum recursion depth')
     analyze_parser.add_argument('--exclude', help='Comma-separated list of directories to exclude')
     analyze_parser.set_defaults(func=analyze_command)
-    
+
     # Compare command
     compare_parser = subparsers.add_parser('compare', help='Compare two analyzed projects')
     compare_parser.add_argument('--project1', required=True, help='Path to first project analysis output')
     compare_parser.add_argument('--project2', required=True, help='Path to second project analysis output')
     compare_parser.add_argument('--out', required=True, help='Output directory for comparison report')
     compare_parser.set_defaults(func=compare_command)
-    
+
     # Verify command
     verify_parser = subparsers.add_parser('verify', help='Verify EUFLE setup')
     verify_parser.set_defaults(func=verify_command)
-    
+
     # Config command
     config_parser = subparsers.add_parser('config', help='Manage workspace configuration')
     config_group = config_parser.add_mutually_exclusive_group(required=True)
@@ -246,13 +245,13 @@ Examples:
     config_group.add_argument('--get', help='Get configuration value')
     config_group.add_argument('--set', help='Set configuration value (key=value)')
     config_parser.set_defaults(func=config_command)
-    
+
     args = parser.parse_args()
-    
+
     if not args.command:
         parser.print_help()
         sys.exit(1)
-    
+
     try:
         result = args.func(args)
         if result is not None:

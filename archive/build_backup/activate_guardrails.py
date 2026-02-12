@@ -22,7 +22,7 @@ from typing import Dict, Any, List
 
 # Add the guardrails source to path
 GUARDRAILS_ROOT = Path(__file__).parent / "src" / "guardrails"
-sys.path.insert(0, str(Path(__file__).parent / "src"))
+sys.path.insert(0, str(GUARDRAILS_ROOT))
 
 from guardrails import (
     GuardrailSystem,

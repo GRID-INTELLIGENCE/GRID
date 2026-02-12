@@ -11,6 +11,31 @@
       "problemMatcher": []
     },
     {
+      "label": "Debug: Verify Wall + Health Checks",
+      "detail": "Run The Wall + integration health checks",
+      "type": "shell",
+      "command": "uv run python -m pytest -q --tb=short && uv run ruff check work/ safety/ security/ boundaries/ && uv run python scripts/debug_health_check.py",
+      "group": "test",
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Debug: Async Task Inventory",
+      "detail": "List all running async tasks and event loops",
+      "type": "shell",
+      "command": "uv run python scripts/debug_async_tasks.py",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Debug: Connection Pool Status",
+      "detail": "Check PostgreSQL, Redis, Databricks connection pools",
+      "type": "shell",
+      "command": "uv run python scripts/debug_pools.py",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
       "label": "Test: Safety + Boundaries",
       "detail": "Fast safety/boundaries test suite",
       "type": "shell",
@@ -43,9 +68,9 @@
       "problemMatcher": []
     },
     {
-      "label": "Format: Black + Ruff",
+      "label": "Format: Ruff",
       "type": "shell",
-      "command": "uv run black work/ safety/ security/ boundaries/ scripts/ && uv run ruff check --fix work/ safety/ security/ boundaries/",
+      "command": "uv run ruff format work/ safety/ security/ boundaries/ scripts/ && uv run ruff check --fix work/ safety/ security/ boundaries/",
       "problemMatcher": []
     },
     {

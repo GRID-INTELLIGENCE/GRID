@@ -119,7 +119,10 @@ class NetworkUsageScanner(ast.NodeVisitor):
 class SecurityIntegrator:
     """Integrates security system into codebase."""
 
-    def __init__(self, root_path: str = "E:\\"):
+    def __init__(self, root_path: str | None = None):
+        if root_path is None:
+            # Use current working directory or project root
+            root_path = os.getenv("PROJECT_ROOT", os.getcwd())
         self.root_path = Path(root_path)
         self.security_path = self.root_path / "security"
         self.scan_results = defaultdict(list)
@@ -405,8 +408,8 @@ def main():
     parser.add_argument(
         "--root",
         type=str,
-        default="E:\\",
-        help="Root directory to scan (default: E:\\)",
+        default=None,
+        help="Root directory to scan (default: current working directory or PROJECT_ROOT env var)",
     )
     parser.add_argument(
         "--output",
