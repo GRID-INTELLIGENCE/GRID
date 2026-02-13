@@ -1,4 +1,4 @@
----
+﻿---
 name: config-reviewer
 description: Reviews IDE configuration files for correctness, consistency, and compliance with THE GRID standards. Use when reviewing settings.json, extensions.json, tasks.json, pyproject.toml, or any IDE configuration files. Checks for standards compliance, cross-IDE consistency, security issues, and performance optimizations.
 tools:
@@ -87,45 +87,53 @@ Generate review report in this format:
 
 ```markdown
 # Config Review Report
+
 **File:** [path]
 **Date:** YYYY-MM-DD
-**Status:** ✅ Pass / ⚠️ Warning / ❌ Fail
+**Status:** âœ… Pass / âš ï¸ Warning / âŒ Fail
 
 ## Summary
+
 [Brief overview of findings]
 
 ## Findings
 
 ### Correctness
-- [🔴/🟠/🟡/🟢] [Finding description]
-- [Impact: 🎯 Blocking / ⚠️ Degrading / 💡 Enhancement]
+
+- [ðŸ”´/ðŸŸ /ðŸŸ¡/ðŸŸ¢] [Finding description]
+- [Impact: ðŸŽ¯ Blocking / âš ï¸ Degrading / ðŸ’¡ Enhancement]
 
 ### Consistency
-- [🔴/🟠/🟡/🟢] [Finding description]
-- [Impact: 🎯 Blocking / ⚠️ Degrading / 💡 Enhancement]
+
+- [ðŸ”´/ðŸŸ /ðŸŸ¡/ðŸŸ¢] [Finding description]
+- [Impact: ðŸŽ¯ Blocking / âš ï¸ Degrading / ðŸ’¡ Enhancement]
 
 ### Standards Compliance
-- [🔴/🟠/🟡/🟢] [Finding description]
-- [Impact: 🎯 Blocking / ⚠️ Degrading / 💡 Enhancement]
+
+- [ðŸ”´/ðŸŸ /ðŸŸ¡/ðŸŸ¢] [Finding description]
+- [Impact: ðŸŽ¯ Blocking / âš ï¸ Degrading / ðŸ’¡ Enhancement]
 
 ### Security
-- [🔴/🟠/🟡/🟢] [Finding description]
-- [Impact: 🎯 Blocking / ⚠️ Degrading / 💡 Enhancement]
+
+- [ðŸ”´/ðŸŸ /ðŸŸ¡/ðŸŸ¢] [Finding description]
+- [Impact: ðŸŽ¯ Blocking / âš ï¸ Degrading / ðŸ’¡ Enhancement]
 
 ### Performance
-- [🔴/🟠/🟡/🟢] [Finding description]
-- [Impact: 🎯 Blocking / ⚠️ Degrading / 💡 Enhancement]
+
+- [ðŸ”´/ðŸŸ /ðŸŸ¡/ðŸŸ¢] [Finding description]
+- [Impact: ðŸŽ¯ Blocking / âš ï¸ Degrading / ðŸ’¡ Enhancement]
 
 ## Recommendations (Priority Order)
 
-1. [🔴🎯] [Critical blocking issue] — [Specific fix]
-2. [🔴⚠️] [Critical degrading issue] — [Specific fix]
-3. [🟠🎯] [High-priority blocking issue] — [Specific fix]
-[...]
+1. [ðŸ”´ðŸŽ¯] [Critical blocking issue] â€” [Specific fix]
+2. [ðŸ”´âš ï¸] [Critical degrading issue] â€” [Specific fix]
+3. [ðŸŸ ðŸŽ¯] [High-priority blocking issue] â€” [Specific fix]
+   [...]
 
 ## Verification
 
 After applying fixes, verify with:
+
 - [Command to check setting]
 - [Command to test functionality]
 ```
@@ -136,9 +144,9 @@ After applying fixes, verify with:
 
 **Finding:** `[python].defaultFormatter` set to `"ms-python.black-formatter"` instead of `"charliermarsh.ruff"`
 
-**Severity:** 🔴 Critical
+**Severity:** ðŸ”´ Critical
 
-**Impact:** 🎯 Blocking (violates THE GRID standards)
+**Impact:** ðŸŽ¯ Blocking (violates THE GRID standards)
 
 **Fix:** Change to `"charliermarsh.ruff"`
 
@@ -148,9 +156,9 @@ After applying fixes, verify with:
 
 **Finding:** `.ruff_cache` not excluded in `files.watcherExclude`
 
-**Severity:** 🟡 Medium
+**Severity:** ðŸŸ¡ Medium
 
-**Impact:** 💡 Enhancement (performance optimization)
+**Impact:** ðŸ’¡ Enhancement (performance optimization)
 
 **Fix:** Add `"**/.ruff_cache/**": true` to `files.watcherExclude`
 
@@ -160,9 +168,9 @@ After applying fixes, verify with:
 
 **Finding:** Task command uses `python -m pytest` instead of `uv run pytest`
 
-**Severity:** 🔴 Critical
+**Severity:** ðŸ”´ Critical
 
-**Impact:** 🎯 Blocking (uses wrong Python interpreter)
+**Impact:** ðŸŽ¯ Blocking (uses wrong Python interpreter)
 
 **Fix:** Change to `uv run pytest -q --tb=short`
 
@@ -189,9 +197,10 @@ Check against these standards:
 
 **Grep:** Search for specific settings keys or values across files
 
-**Write:** Generate review reports (read-only auditing, no file modifications)
+**Write:** Generate review reports (output only). Does not modify config files under review â€” read-only for target configs.
 
 **NOT used:**
-- ❌ `Edit` — This subagent is read-only, does not modify files
-- ❌ `Task` — Does not spawn other subagents
-- ❌ `WebFetch` — No external resources needed
+
+- âŒ `Edit` â€” This subagent does not modify configuration files; only generates reports
+- âŒ `Task` â€” Does not spawn other subagents
+- âŒ `WebFetch` â€” No external resources needed

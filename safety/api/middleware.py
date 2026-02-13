@@ -55,7 +55,7 @@ from safety.config import SecureConfig
 
 logger = get_logger("api.middleware")
 
-# Maximum request body size (bytes) — matches _MAX_INPUT_LENGTH in pre_check
+# Maximum request body size (bytes) â€” matches _MAX_INPUT_LENGTH in pre_check
 _MAX_BODY_SIZE = 50_000
 
 # Paths that bypass safety middleware (health, metrics only).
@@ -327,84 +327,83 @@ class SafetyMiddleware(BaseHTTPMiddleware):
             request.state.body = body
             request.state.user_input = user_input
 
-                user_age = getattr(user, "age", None)
+            user_age = getattr(user, "age", None)
 
-                # 4.5 Content Safety Check (Input)
-                # Content safety must run BEFORE AI workflow safety to feed into "Heat" (Rule 2)
-                content_assessment = self.content_checker.check_content(user_input, user_age)
-                if not content_assessment["is_safe"]:
-                    logger.warning("content_safety_violation", user_id=user.id, issues=content_assessment["issues"])
+            # 4.5 Content Safety Check (Input)
+            # Content safety must run BEFORE AI workflow safety to feed into "Heat" (Rule 2)
+            content_assessment = self.content_checker.check_content(user_input, user_age)
+            if not content_assessment["is_safe"]:
+                logger.warning("content_safety_violation", user_id=user.id, issues=content_assessment["issues"])
+                self.safety_monitor.record_event(SafetyEvent(
+                    event_type="content_violation",
+                    severity="high",
+                    user_id=user.id,
+                    session_id=trace_id,
+                    metadata={"issues": content_assessment["issues"], "input_length": len(user_input)}
+                ))
+                response = _make_refusal_response("CONTENT_SAFETY_VIOLATION", trace_id, 400)
+                self.security_headers._add_security_headers(response, request)
+                _add_safety_pact_headers(response)
+                return response
+
+            # 4.6 AI Workflow Safety Evaluation (Governed by Safety Pact)
+            # Evaluate interaction patterns for cognitive safety, hook detection, and Fair Play rules
+            try:
+                # Get or create AI workflow safety engine for this user
+                safety_engine = await get_ai_workflow_safety_engine(
+                    user_id=user.id,
+                    config=TemporalSafetyConfig(
+                        enable_hook_detection=True,
+                        enable_wellbeing_tracking=True,
+                        developmental_safety_mode=user_age is not None and user_age < 18
+                    ),
+                    user_age=user_age
+                )
+
+                # Rules 1-3 are evaluated here
+                safety_assessment = await safety_engine.evaluate_request(
+                    user_input=user_input,
+                    current_time=time.time(),
+                    sensitive_detections=len(content_assessment["issues"])
+                )
+
+                # Record status in request state
+                request.state.ai_workflow_safety = safety_assessment
+
+                if not safety_assessment['safety_allowed']:
+                    reason = safety_assessment.get('blocked_reason') or (
+                        "STAMINA_EXHAUSTED" if not safety_assessment.get("stamina_allowed") else "SAFETY_VIOLATION"
+                    )
+                    logger.warning("AI workflow safety violation", user_id=user.id, reason=reason)
+
                     self.safety_monitor.record_event(SafetyEvent(
-                        event_type="content_violation",
+                        event_type="safety_violation",
                         severity="high",
                         user_id=user.id,
                         session_id=trace_id,
-                        metadata={"issues": content_assessment["issues"], "input_length": len(user_input)}
+                        metadata={"reason": reason, "assessment": safety_assessment}
                     ))
-                    response = _make_refusal_response("CONTENT_SAFETY_VIOLATION", trace_id, 400)
+
+                    response = _make_refusal_response(reason, trace_id, 429 if "STAMINA" in reason or "COOLDOWN" in reason else 403)
                     self.security_headers._add_security_headers(response, request)
                     _add_safety_pact_headers(response)
                     return response
 
-                # 4.6 AI Workflow Safety Evaluation (Governed by Safety Pact)
-                # Evaluate interaction patterns for cognitive safety, hook detection, and Fair Play rules
-                try:
-                    # Get or create AI workflow safety engine for this user
-                    safety_engine = get_ai_workflow_safety_engine(
-                        user_id=user.id,
-                        config=TemporalSafetyConfig(
-                            enable_hook_detection=True,
-                            enable_wellbeing_tracking=True,
-                            developmental_safety_mode=user_age is not None and user_age < 18
-                        ),
-                        user_age=user_age
-                    )
+                # Add safety context to request metadata for worker processing
+                if 'metadata' not in body:
+                    body['metadata'] = {}
 
-                    # Rules 1-3 are evaluated here
-                    safety_assessment = await safety_engine.evaluate_interaction(
-                        user_input=user_input,
-                        ai_response="",  # Response check occurs in post-processing
-                        response_time=1.0,
-                        current_time=time.time(),
-                        sensitive_detections=len(content_assessment["issues"])
-                    )
+                body['metadata']['safety_pact'] = {
+                    'stamina_remaining': safety_assessment.get('remaining_stamina'),
+                    'current_heat': safety_assessment.get('current_heat'),
+                    'flow_bonus': safety_assessment.get('flow_bonus', 1.0)
+                }
 
-                    # Record status in request state
-                    request.state.ai_workflow_safety = safety_assessment
+            except Exception as exc:
+                logger.error("ai_workflow_safety_error", error=str(exc), user_id=user.id)
+                # Continue processing - safety is still enforced by other layers
 
-                    if not safety_assessment['safety_allowed']:
-                        reason = safety_assessment.get('blocked_reason') or (
-                            "STAMINA_EXHAUSTED" if not safety_assessment.get("stamina_allowed") else "SAFETY_VIOLATION"
-                        )
-                        logger.warning("AI workflow safety violation", user_id=user.id, reason=reason)
-
-                        self.safety_monitor.record_event(SafetyEvent(
-                            event_type="safety_violation",
-                            severity="high",
-                            user_id=user.id,
-                            session_id=trace_id,
-                            metadata={"reason": reason, "assessment": safety_assessment}
-                        ))
-
-                        response = _make_refusal_response(reason, trace_id, 429 if "STAMINA" in reason or "COOLDOWN" in reason else 403)
-                        self.security_headers._add_security_headers(response, request)
-                        _add_safety_pact_headers(response)
-                        return response
-
-                    # Add safety context to request metadata for worker processing
-                    if 'metadata' not in body:
-                        body['metadata'] = {}
-
-                    body['metadata']['safety_pact'] = {
-                        'stamina_remaining': safety_assessment.get('remaining_stamina'),
-                        'current_heat': safety_assessment.get('current_heat'),
-                        'flow_bonus': safety_assessment.get('flow_bonus', 1.0)
-                    }
-
-                except Exception as exc:
-                    logger.error("ai_workflow_safety_error", error=str(exc), user_id=user.id)
-                    # Continue processing - safety is still enforced by other layers
-
+        try:
             # 4a. Enforce Content-Length limit
             content_length = request.headers.get("content-length")
             if content_length is not None:
@@ -422,7 +421,7 @@ class SafetyMiddleware(BaseHTTPMiddleware):
                         _add_safety_pact_headers(response)
                         return response
                 except ValueError:
-                    pass  # Malformed Content-Length — let body read handle it
+                    pass  # Malformed Content-Length â€” let body read handle it
 
             # 4b. Read body with bounded streaming to handle missing/lying Content-Length
 
@@ -516,7 +515,7 @@ class SafetyMiddleware(BaseHTTPMiddleware):
             _add_safety_pact_headers(response)
             return response
 
-        # 5. Pre-check passed — continue to the endpoint handler
+        # 5. Pre-check passed â€” continue to the endpoint handler
         #    (which MUST enqueue to Redis Streams, not call model directly)
         REQUESTS_TOTAL.labels(outcome="queued").inc()
         request.state.body = body

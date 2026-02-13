@@ -19,17 +19,11 @@ This guide provides comprehensive information for developers working on the GRID
 git clone <repository-url>
 cd grid
 
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-# or
-venv\Scripts\activate     # Windows
+# Create workspace venv
+uv venv --python 3.13
 
-# Install in development mode
-pip install -e .
-
-# Install development dependencies
-pip install -e ".[dev,test]"
+# Install dependencies
+uv sync --group dev --group test
 ```
 
 ### Environment Configuration
@@ -63,24 +57,11 @@ OLLAMA_BASE_URL=http://localhost:11434
 
 ### Backend Structure
 ```
-src/grid/
-├── api/
-│   ├── main.py              # FastAPI application
-│   └── routers/
-│       ├── auth.py          # Authentication endpoints
-│       ├── inference.py     # Inference endpoints
-│       └── privacy.py        # Privacy endpoints
-├── core/
-│   ├── config.py            # Application configuration
-│   └── security.py          # Authentication utilities
-├── models/
-│   ├── user.py              # User models
-│   └── inference.py         # Inference models
-├── services/
-│   └── inference.py         # Business logic
-└── security/
-    ├── __init__.py          # Security module init
-    └── environment.py       # Environment settings
+work/GRID/src/
+├── application/             # Mothership FastAPI application
+├── grid/                    # Core grid package
+├── cognitive/               # Cognitive layer
+└── tools/                   # Tooling (RAG, utilities)
 ```
 
 ### Test Structure
@@ -192,7 +173,7 @@ class TestInferenceService:
 **Integration Tests**:
 ```python
 from fastapi.testclient import TestClient
-from grid.api.main import app
+from application.mothership.main import app
 
 def test_inference_endpoint():
     """Test inference API endpoint."""
@@ -216,40 +197,35 @@ The test suite uses `conftest.py` for configuration:
 
 ```bash
 # Quick development test
-python -m pytest tests/unit/ -v
+uv run python -m pytest tests/unit/ -v
 
 # Full test suite
-python -m pytest tests/ -v
+uv run python -m pytest tests/ -v
 
 # With coverage
-python -m pytest tests/ --cov=grid --cov-report=html
+uv run python -m pytest tests/ --cov=work/GRID/src --cov-report=html
 
 # Specific test file
-python -m pytest tests/security/test_security_suite.py -v
+uv run python -m pytest tests/security/test_security_suite.py -v
 
 # Skip slow tests
-python -m pytest tests/ -v -m "not slow"
+uv run python -m pytest tests/ -v -m "not slow"
 ```
 
 ## Code Standards
 
 ### Python Standards
 - Follow PEP 8
-- Use Black for code formatting
-- Use isort for import sorting
+- Use ruff for linting and formatting
 - Use mypy for type checking
 
 ### Configuration Files
 
 **pyproject.toml** (relevant sections):
 ```toml
-[tool.black]
-line-length = 88
-target-version = ['py313']
-
-[tool.isort]
-profile = "black"
-multi_line_output = 3
+[tool.ruff]
+line-length = 120
+target-version = "py313"
 
 [tool.mypy]
 python_version = "3.13"
@@ -268,18 +244,12 @@ pre-commit install
 **.pre-commit-config.yaml**:
 ```yaml
 repos:
-  - repo: https://github.com/psf/black
-    rev: 23.1.0
-    hooks:
-      - id: black
-  - repo: https://github.com/pycqa/isort
-    rev: 5.12.0
-    hooks:
-      - id: isort
-  - repo: https://github.com/pycqa/flake8
-    rev: 6.0.0
-    hooks:
-      - id: flake8
+    - repo: https://github.com/astral-sh/ruff-pre-commit
+        rev: v0.8.0
+        hooks:
+            - id: ruff
+                args: [--fix]
+            - id: ruff-format
 ```
 
 ## Debugging
@@ -308,7 +278,7 @@ python -c "import redis; r=redis.Redis(); r.ping()"
 #### Database Issues
 ```bash
 # Test database connection
-python -c "from grid.core.config import settings; print(settings.DATABASE_URI)"
+python -c "from application.mothership.config import DatabaseSettings; print(DatabaseSettings.from_env().url)"
 ```
 
 ### Debugging Tools
@@ -386,10 +356,10 @@ npm run test:e2e
 ### Development Deployment
 ```bash
 # Build for development
-uvicorn grid.api.main:app --reload --host 0.0.0.0 --port 8000
+uvicorn application.mothership.main:app --reload --host 0.0.0.0 --port 8080
 
 # With environment file
-uvicorn grid.api.main:app --reload --env-file .env.development
+uvicorn application.mothership.main:app --reload --env-file .env.development
 ```
 
 ### Production Considerations
@@ -423,10 +393,10 @@ uvicorn grid.api.main:app --reload --env-file .env.development
 #### Module Import Errors
 ```bash
 # Verify package installation
-pip list | grep grid
+uv pip list | findstr grid
 
 # Reinstall if needed
-pip install -e .
+uv sync --group dev --group test
 ```
 
 #### Test Failures

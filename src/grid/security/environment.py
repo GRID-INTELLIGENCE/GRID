@@ -16,15 +16,18 @@ class EnvironmentSettings(BaseSettings):
     GOOGLE_CLOUD_PROJECT: str | None = None
 
     # Logging Configuration
-    LOG_LEVEL: str = "INFO"
+    LOG_LEVEL: str | None = "INFO"
 
     @field_validator('LOG_LEVEL')
     @classmethod
     def validate_log_level(cls, v):
+        if v is None:
+            return "INFO"  # Default value
+        v_upper = v.upper()
         valid_levels = ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
-        if v.upper() not in valid_levels:
+        if v_upper not in valid_levels:
             raise ValueError(f'LOG_LEVEL must be one of {valid_levels}')
-        return v.upper()
+        return v_upper
 
     @field_validator('GOOGLE_CLOUD_PROJECT')
     @classmethod

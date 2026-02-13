@@ -21,13 +21,11 @@
 ### Backend Setup
 ```bash
 cd grid
-python -m venv .venv
-source .venv/bin/activate  # Linux/Mac
-.venv\Scripts\activate    # Windows
+uv venv --python 3.13
 
-pip install -r requirements/dev.txt
+uv sync --group dev --group test
 alembic upgrade head
-uvicorn src.grid.api.main:app --reload
+uvicorn application.mothership.main:app --reload
 ```
 
 ### Frontend Setup

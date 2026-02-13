@@ -1,6 +1,5 @@
 from pydantic import PostgresDsn
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from typing import List, Optional
 
 
 class Settings(BaseSettings):
@@ -15,7 +14,7 @@ class Settings(BaseSettings):
     DEBUG: bool = False
 
     # CORS
-    BACKEND_CORS_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:8080"]
+    BACKEND_CORS_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:8080"]
 
     # Database
     POSTGRES_SERVER: str = "localhost"
@@ -28,11 +27,11 @@ class Settings(BaseSettings):
     def DATABASE_URI(self) -> str:
         return str(
             PostgresDsn.build(
-                scheme="postgresql+asyncpg",
-                user=self.POSTGRES_USER,
+                scheme="postgresql",
+                username=self.POSTGRES_USER,
                 password=self.POSTGRES_PASSWORD,
                 host=self.POSTGRES_SERVER,
-                port=str(self.POSTGRES_PORT),
+                port=self.POSTGRES_PORT,
                 path=f"/{self.POSTGRES_DB}",
             )
         )
@@ -41,7 +40,7 @@ class Settings(BaseSettings):
     REDIS_HOST: str = "localhost"
     REDIS_PORT: int = 6379
     REDIS_DB: int = 0
-    REDIS_PASSWORD: Optional[str] = None
+    REDIS_PASSWORD: str | None = None
 
     @property
     def REDIS_URI(self) -> str:
@@ -50,10 +49,13 @@ class Settings(BaseSettings):
 
     # Security
     SECRET_KEY: str = "your-secret-key-here-change-in-production"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8  # 8 days
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30  # Reduced from 8 days (60*24*8) to 30 minutes
     ALGORITHM: str = "HS256"
+    PASSWORD_MIN_LENGTH: int = 12
+    PASSWORD_COMPLEXITY_SCORE: int = 3
 
     # Rate Limiting
+
     RATE_LIMIT_REQUESTS: int = 100
     RATE_LIMIT_WINDOW: int = 60  # seconds
 
@@ -62,7 +64,7 @@ class Settings(BaseSettings):
 
     # External Services
     OLLAMA_BASE_URL: str = "http://localhost:11434"
-    HUGGINGFACE_API_KEY: Optional[str] = None
+    HUGGINGFACE_API_KEY: str | None = None
 
     model_config = SettingsConfigDict(case_sensitive=True, env_file=".env", env_file_encoding="utf-8")
 

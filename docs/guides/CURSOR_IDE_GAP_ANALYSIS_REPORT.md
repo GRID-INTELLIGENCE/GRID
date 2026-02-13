@@ -1,350 +1,246 @@
-# Cursor IDE Gap Analysis Report
-**Date:** 2026-02-12
-**IDE:** Cursor
-**Reference:** VS Code (Primary)
+﻿# Cursor IDE Gap Analysis Report
+
+**Date:** 2026-02-13
+**Target IDE:** Cursor
+**Reference:** VS Code (multi-IDE standards)
+**Executed via:** IDE Verification Skill
 
 ---
 
 ## Executive Summary
 
-- **Total gaps found:** 4
-- **Critical:** 0 | **High:** 1 | **Medium:** 2 | **Low:** 1
-- **Blocking issues:** 0 | **Degrading:** 1 | **Enhancements:** 3
+- **Total gaps found:** 14
+- **Critical:** 2 | **High:** 4 | **Medium:** 5 | **Low:** 3
+- **Blocking issues:** 2 | **Degrading:** 4 | **Enhancements:** 8
 
-**Overall Status:** ⚠️ Warning (1 high-priority issue, 2 medium enhancements)
+**Primary concerns:** Daily wall check is not bound to Ctrl+Shift+B (build hotkey), Cursor/Windsurf user settings lack Python formatter fallback, Makefile still uses black instead of ruff format, and extension coverage is incomplete.
 
 ---
 
 ## Gaps by Category
 
-### 1. Extension Coverage Gap Analysis
+### 1. Extension Coverage
 
-**Status:** 🟡 Medium gaps found
+**Gap:** 10 of 18 recommended extensions not installed; Cursor/VS Code `code --list-extensions` shows 8 extensions. Ruff is installed âœ“.
 
-#### Missing Extensions (11 of 18 recommended)
+**Installed:** `charliermarsh.ruff`, `ms-python.python`, `ms-python.vscode-pylance`, `ms-python.debugpy`, `ms-python.vscode-python-envs`, `anthropic.claude-code`, `github.copilot-chat`, `bierner.markdown-mermaid`
 
-**Missing:**
-- `njpwerner.autodocstring` — Python docstring generator
-- `esbenp.prettier-vscode` — Frontend formatter (TypeScript/React/JSON)
-- `dbaeumer.vscode-eslint` — JavaScript/TypeScript linter
-- `bradlc.vscode-tailwindcss` — TailwindCSS IntelliSense
-- `eamodio.gitlens` — Git blame/history integration
-- `mhutchie.git-graph` — Visual git branch graph
-- `tamasfe.even-better-toml` — TOML syntax support
-- `redhat.vscode-yaml` — YAML syntax support
-- `mechatroner.rainbow-csv` — CSV column colorization
-- `streetsidesoftware.code-spell-checker` — Spell checker
-- `gruntfuggly.todo-tree` — TODO/FIXME highlighter
-- `christian-kohler.path-intellisense` — Path autocomplete
-- `ms-vscode-remote.remote-wsl` — WSL integration
-- `ms-azuretools.vscode-docker` — Docker support
+**Missing (recommended):** `njpwerner.autodocstring`, `ms-vscode.vscode-typescript-next`, `esbenp.prettier-vscode`, `dbaeumer.vscode-eslint`, `bradlc.vscode-tailwindcss`, `eamodio.gitlens`, `mhutchie.git-graph`, `tamasfe.even-better-toml`, `redhat.vscode-yaml`, `mechatroner.rainbow-csv`, `streetsidesoftware.code-spell-checker`, `gruntfuggly.todo-tree`, `christian-kohler.path-intellisense`, `ms-vscode-remote.remote-wsl`, `ms-azuretools.vscode-docker`
 
-**Installed (7 of 18):**
-- ✅ `charliermarsh.ruff` — Python formatter/linter
-- ✅ `ms-python.python` — Python language support
-- ✅ `ms-python.vscode-pylance` — Python type checking & IntelliSense
-- ✅ `ms-python.debugpy` — Python debugger
-- ✅ `ms-python.vscode-python-envs` — Python environment management
+**Severity:** ðŸŸ¡ Medium
+**Impact:** ðŸ’¡ Enhancement
 
-**Conflicting Extensions:** None found ✅
+**Fix:** Install high-value extensions first:
 
-**Severity:** 🟡 Medium
-**Impact:** 💡 Enhancement
-
-**Fix:** Install missing extensions based on workflow needs:
 ```bash
-code --install-extension njpwerner.autodocstring
 code --install-extension esbenp.prettier-vscode
-code --install-extension dbaeumer.vscode-eslint
 code --install-extension eamodio.gitlens
-# ... (install others as needed)
+code --install-extension tamasfe.even-better-toml
+code --install-extension streetsidesoftware.code-spell-checker
 ```
 
-**Verification:** Run `code --list-extensions` and compare against `.vscode/extensions.json`
+**Verification:** `code --list-extensions | Select-String "prettier|gitlens|even-better|spell-checker"`
 
 ---
 
-### 2. Settings Inheritance Chain Verification
+### 2. Settings Inheritance Chain
 
-**Status:** ✅ No conflicts detected
+**Gap:** Cursor User settings (`C:\Users\irfan\AppData\Roaming\Cursor\User\settings.json`) lack `[python].defaultFormatter`. Workspace settings provide it, but opening a non-workspace Python file would not use ruff.
 
-**Checked:**
-- ✅ Cursor user settings: `[python].defaultFormatter = "charliermarsh.ruff"` ✅
-- ✅ Workspace settings: `[python].editor.defaultFormatter = "charliermarsh.ruff"` ✅
-- ✅ Cache exclusions present in Cursor settings ✅
+**Severity:** ðŸŸ  High
+**Impact:** âš ï¸ Degrading
 
-**Note:** Unable to verify VS Code User/Profile settings directly (would require VS Code installation check), but Cursor settings are correctly configured.
+**Fix:** Add to Cursor User settings:
 
-**Severity:** ✅ Pass
-**Impact:** ✅ No issues
+```json
+"[python]": {
+  "editor.defaultFormatter": "charliermarsh.ruff",
+  "editor.formatOnSave": true
+}
+```
+
+**Verification:** Open a standalone `.py` file outside workspace â†’ save â†’ verify ruff formatting applied.
 
 ---
 
 ### 3. Cross-IDE Consistency Check
 
-**Status:** ⚠️ Partial verification (Cursor settings verified, VS Code/Windsurf comparison needed)
+**Gap 3a:** Cursor and Windsurf User settings both lack `[python].defaultFormatter`. VS Code user settings also lack it (relies on workspace). For consistency, all three should have ruff as fallback at user level.
 
-**Cursor Settings Verified:**
-- ✅ `[python].defaultFormatter = "charliermarsh.ruff"` ✅
-- ✅ Cache exclusions configured (`.ruff_cache`, `.pytest_cache`, `.mypy_cache`) ✅
+**Gap 3b:** Windsurf has `chat.agent.maxRequests = 35` âœ“. Cursor has it âœ“. Both match.
 
-**Comparison Needed:**
-- VS Code user settings (not accessible from Cursor)
-- Windsurf settings (not accessible from Cursor)
+**Gap 3c:** `files.exclude` is consistent (`.venv`, `__pycache__`, `.pytest_cache`, `.mypy_cache`, `.ruff_cache`, `*.pyc`, `.DS_Store`) across Cursor, Windsurf, and VS Code.
 
-**Severity:** 🟡 Medium
-**Impact:** ⚠️ Degrading (cannot verify full cross-IDE consistency)
+**Severity:** ðŸŸ  High (3a), ðŸŸ¢ Low (3b/3c)
+**Impact:** âš ï¸ Degrading
 
-**Fix:** Manually compare settings across IDEs:
-1. Open VS Code → Check `C:\Users\irfan\AppData\Roaming\Code\User\settings.json`
-2. Open Windsurf → Check `C:\Users\irfan\AppData\Roaming\Windsurf\User\settings.json`
-3. Verify all have `[python].defaultFormatter = "charliermarsh.ruff"`
-
-**Verification:** Open Python file in each IDE, format, verify no changes when switching between IDEs
+**Fix:** Add `[python].defaultFormatter` to Cursor and Windsurf User settings as in section 2.
 
 ---
 
 ### 4. Workspace Configuration Completeness
 
-**Status:** ✅ Mostly complete, 1 minor issue
+**Gap 4a:** Default build task (Ctrl+Shift+B) is NOT "Daily: Verify the Wall". The task has `"group": {"kind": "test", "isDefault": true}`. Build hotkey runs `group.kind: "build"` tasks. Only "Lint: Ruff Check + Fix" has `group: "build"`.
 
-#### ✅ Extensions.json
-- ✅ 18 recommendations present
-- ✅ `unwantedRecommendations` includes black/isort/pylint ✅
+**Severity:** ðŸ”´ Critical
+**Impact:** ðŸŽ¯ Blocking
 
-#### ✅ Settings.json
-- ✅ Python paths correct: `./work/GRID/src`, `./safety`, `./security`, `./boundaries` ✅
-- ✅ `PYTHONPATH` terminal env var set correctly (Windows: semicolon-separated) ✅
-- ✅ Ruff formatter configured ✅
-- ✅ Frontend formatters configured (Prettier for TypeScript/React/JSON) ✅
-- ✅ 120-char ruler configured ✅
+**Fix:** Change "Daily: Verify the Wall" task in `.vscode/tasks.json`:
 
-#### ⚠️ Tasks.json — Minor Issue
-
-**Issue:** "Daily: Verify the Wall" task has `"group": { "kind": "test", "isDefault": true }` but rule example shows `"kind": "build"`.
-
-**Current:**
 ```json
-"group": { "kind": "test", "isDefault": true }
+"group": {"kind": "build", "isDefault": true}
 ```
 
-**Rule Example:**
-```json
-"group": { "kind": "build", "isDefault": true }
-```
+And ensure "Lint: Ruff Check + Fix" is not default build, or add a dedicated build task that runs the wall check.
 
-**Impact:** Affects keyboard shortcut (Ctrl+Shift+T for test vs Ctrl+Shift+B for build)
+**Verification:** Ctrl+Shift+B â†’ must run `uv run pytest -q --tb=short && uv run ruff check ...`
 
-**Severity:** 🟡 Medium
-**Impact:** 💡 Enhancement
+**Gap 4b:** `python.languageServer` = `"None"` in workspace. Cursor uses `cursorpyright`; workspace has `cursorpyright.analysis.*` settings. This is correct for Cursor.
 
-**Fix:** Change to `"kind": "build"` if you want Ctrl+Shift+B to trigger it:
-```json
-"group": { "kind": "build", "isDefault": true }
-```
-
-**Verification:** Test keyboard shortcut triggers the task correctly
-
-#### ✅ Task Commands
-- ✅ All tasks use `uv run` prefix ✅
-- ✅ "Daily: Verify the Wall" command matches discipline.md ✅
-- ✅ 14 tasks present ✅
-
-**Severity:** 🟡 Medium (minor task group issue)
-**Impact:** 💡 Enhancement
+**Gap 4c:** Tasks use `uv run` prefix âœ“. Python paths, PYTHONPATH, PROJECT_ROOT, GRID_ENV are configured âœ“.
 
 ---
 
-### 5. Ruff Integration Functional Test
+### 5. Ruff Integration
 
-**Status:** ✅ Fully functional
+**Gap:** Ruff config in `pyproject.toml` is present with `line-length = 120`, `target-version = "py313"`, excludes. E501 (line length) is in `extend-ignore` â€” line length enforced by `ruff format` only, not `ruff check`.
 
-**Verified:**
-- ✅ Ruff CLI installed: `ruff 0.15.0` ✅
-- ✅ Ruff configuration present in `pyproject.toml` ✅
-  - Line length: 120 ✅
-  - Target version: py313 ✅
-  - Exclude patterns: `.venv/`, `__pycache__/`, `archive/` ✅
-- ✅ Ruff formatter configured in IDE settings ✅
-- ✅ Ruff extension installed: `charliermarsh.ruff` ✅
+**Severity:** ðŸŸ¢ Low
+**Impact:** ðŸ’¡ Enhancement
 
-**Configuration Details:**
-```toml
-[tool.ruff]
-line-length = 120
-target-version = "py313"
-exclude = [".venv/", "__pycache__/", "*.pyc", "archive/", ...]
+**Fix:** Optional â€” if you want E501 enforced by check, remove it from `extend-ignore`. Ruff format already enforces 120 chars.
 
-[tool.ruff.lint]
-select = ["E", "F", "B", "I", "W", "UP"]
-```
-
-**Note:** `pyproject.toml` also contains `[tool.black]` configuration (lines 181-194), but this is acceptable as black is in dev dependencies for legacy compatibility. The IDE correctly uses ruff only.
-
-**Severity:** ✅ Pass
-**Impact:** ✅ No issues
+**Verification:** `uv run ruff check work/ safety/ security/ boundaries/` and `uv run ruff format --check work/ safety/ security/ boundaries/`
 
 ---
 
-### 6. Development Discipline Automation Test
+### 6. Development Discipline Automation
 
-**Status:** ✅ Working correctly
+**Gap 6a:** "Daily: Verify the Wall" is default _test_ task, not default _build_ task â€” see Gap 4a.
 
-**Verified:**
-- ✅ "Daily: Verify the Wall" task exists ✅
-- ✅ Task command matches discipline.md: `uv run pytest -q --tb=short && uv run ruff check work/ safety/ security/ boundaries/` ✅
-- ✅ Task is set as default ✅
-- ✅ All task commands use `uv run` prefix ✅
+**Gap 6b:** Makefile `format` target uses `uv run black` + `uv run ruff check --fix`. Project standard is Ruff for formatting (NOT black). Makefile contradicts `.claude/rules/backend.md` and IDE config.
 
-**Minor Note:** Task group is `"test"` instead of `"build"` (see Category 4)
+**Severity:** ðŸ”´ Critical (6a), ðŸŸ  High (6b)
+**Impact:** ðŸŽ¯ Blocking (6a), âš ï¸ Degrading (6b)
 
-**Severity:** ✅ Pass
-**Impact:** ✅ No issues
+**Fix (6b):** Update root `Makefile` format target:
+
+```makefile
+format: ## Auto-format code (ruff format + ruff check fix)
+	@echo "$(BLUE)Formatting...$(NC)"
+	uv run ruff format work/ boundaries/ safety/ scripts/
+	uv run ruff check --fix work/ boundaries/ safety/ scripts/
+	@echo "$(GREEN)Formatted.$(NC)"
+```
+
+**Verification:** `make format` â†’ no black; only ruff format + ruff check --fix.
+
+**Gap 6c:** Pre-commit hooks in `work/GRID/.pre-commit-config.yaml` use ruff âœ“. Root workspace has no `.pre-commit-config.yaml` at repo root.
 
 ---
 
 ### 7. Terminal & Environment Integration
 
-**Status:** ✅ Correctly configured
+**Gap:** None found. Workspace settings have:
 
-**Verified:**
-- ✅ `PYTHONPATH` terminal env var set correctly (Windows: semicolon-separated) ✅
-  - Format: `${workspaceFolder}/work/GRID/src;${workspaceFolder}/safety;...` ✅
-- ✅ `PROJECT_ROOT` set to `${workspaceFolder}` ✅
-- ✅ `GRID_ENV` set to `"development"` ✅
-- ✅ Terminal profiles configured (PowerShell default, WSL optional) ✅
-- ✅ Shell integration disabled (as configured) ✅
+- `PYTHONPATH` (semicolon-separated for Windows) âœ“
+- `PROJECT_ROOT`, `GRID_ENV` âœ“
+- PowerShell default âœ“
 
-**Severity:** ✅ Pass
-**Impact:** ✅ No issues
+**Verification:** New terminal â†’ `echo $env:PYTHONPATH` (PowerShell)
 
 ---
 
 ### 8. File Watching & Performance Optimization
 
-**Status:** ✅ Well optimized
+**Gap:** `search.exclude`, `files.watcherExclude`, `files.exclude` are comprehensive. Archive, `.venv`, caches, `node_modules` excluded âœ“. `.uv-cache` in search/watcher exclude âœ“.
 
-**Verified:**
-- ✅ `files.watcherExclude` excludes all cache/build folders ✅
-  - `.venv/**`, `__pycache__/**`, `.pytest_cache/**`, `.mypy_cache/**`, `.ruff_cache/**` ✅
-  - `archive/**` excluded ✅
-- ✅ `search.exclude` matches cache folders ✅
-- ✅ `files.exclude` hides cache folders from explorer ✅
+**Severity:** ðŸŸ¢ Low (no critical gaps)
+**Impact:** ðŸ’¡ Enhancement
 
-**Exclusion Patterns:**
-- ✅ Archive folder excluded (`**/archive/**`) ✅
-- ✅ All cache folders excluded ✅
-- ✅ `.uv-cache` excluded ✅
-
-**Severity:** ✅ Pass
-**Impact:** ✅ No issues
+**Fix:** Optional â€” add `**/artifacts/**` and `**/logs/**` to `files.watcherExclude` if those dirs are large (they are in search.exclude).
 
 ---
 
 ### 9. Type Checking & Language Server Configuration
 
-**Status:** ✅ Correctly configured
+**Gap 9a:** Workspace sets `python.languageServer = "None"`. Cursor uses CursorPyright; workspace has `cursorpyright.analysis.typeCheckingMode = "basic"` and `cursorpyright.analysis.extraPaths` configured âœ“.
 
-**Verified:**
-- ✅ `python.analysis.typeCheckingMode = "basic"` ✅
-- ✅ `python.languageServer = "Pylance"` ✅
-- ✅ `python.analysis.diagnosticMode = "workspace"` (for monorepo) ✅
-- ✅ `python.analysis.extraPaths` configured for monorepo ✅
-- ✅ mypy configuration present in `pyproject.toml` ✅
-  - `disallow_untyped_defs = true` ✅
-  - `python_version = "3.13"` ✅
+**Gap 9b:** `pyproject.toml` mypy config has `disallow_untyped_defs = true` âœ“.
 
-**Severity:** ✅ Pass
-**Impact:** ✅ No issues
+**Severity:** ðŸŸ¢ Low
+**Impact:** ðŸ’¡ Enhancement
+
+**Fix:** Ensure Pylance/CursorPyright is selected in Cursor if type checking is desired. Workspace explicitly sets language server to None â€” verify Cursor overrides with cursorpyright for Python.
 
 ---
 
 ### 10. Documentation & Onboarding Gaps
 
-**Status:** ✅ Documentation complete
+**Gap 10a:** `IDE_SETUP_VERIFICATION.md` references "Format: Black + Ruff" task; actual task label is "Format: Ruff". Doc is slightly stale.
 
-**Verified:**
-- ✅ `docs/guides/IDE_SETUP_VERIFICATION.md` exists and covers verification steps ✅
-- ✅ `docs/guides/MULTI_IDE_VERIFICATION_INDEX.md` provides master hub ✅
-- ✅ `docs/guides/CURSOR_AGENT_VERIFICATION_PROMPT.md` provides Cursor-specific verification ✅
-- ✅ Troubleshooting sections present ✅
-- ✅ All referenced files/paths valid ✅
+**Gap 10b:** `bierner.markdown-mermaid` is checked in IDE_SETUP_VERIFICATION but not in `.vscode/extensions.json` recommendations.
 
-**New Documentation Created:**
-- ✅ `docs/guides/CURSOR_SKILL_IMPLEMENTATION_SUMMARY.md` — Implementation guide
-- ✅ `docs/guides/CONFIG_REVIEW_TEST_REPORT.md` — Config review test results
-- ✅ `docs/guides/CURSOR_IDE_GAP_ANALYSIS_REPORT.md` — This report
+**Gap 10c:** Checklist says "default build task (Ctrl+Shift+B) triggers daily wall check" but current config does not â€” see Gap 4a.
 
-**Severity:** ✅ Pass
-**Impact:** ✅ No issues
+**Severity:** ðŸŸ¡ Medium
+**Impact:** âš ï¸ Degrading
+
+**Fix:** Update `IDE_SETUP_VERIFICATION.md` to reflect actual task labels and fix default build task (Gap 4a). Add `bierner.markdown-mermaid` to `extensions.json` if desired.
 
 ---
 
 ## Recommended Actions (Priority Order)
 
-1. **[🟠⚠️] Verify cross-IDE consistency** — High-priority degrading issue
-   - Manually compare VS Code, Cursor, and Windsurf settings
-   - Ensure all have `[python].defaultFormatter = "charliermarsh.ruff"`
-   - Test format-on-save consistency across IDEs
-
-2. **[🟡💡] Install missing extensions** — Medium enhancement
-   - Install extensions based on workflow needs (GitLens, Prettier, ESLint recommended)
-   - Focus on extensions that improve productivity
-
-3. **[🟡💡] Consider task group type** — Medium enhancement
-   - Decide if "Daily: Verify the Wall" should be triggered by Ctrl+Shift+B (build) or Ctrl+Shift+T (test)
-   - Update `group.kind` in `.vscode/tasks.json` if needed
-
-4. **[🟢💡] Install optional extensions** — Low enhancement
-   - Install remaining recommended extensions as needed (spell checker, CSV viewer, etc.)
+1. **[ðŸ”´ðŸŽ¯]** Fix default build task: Set "Daily: Verify the Wall" to `group: {"kind": "build", "isDefault": true}` in `.vscode/tasks.json`
+2. **[ðŸ”´âš ï¸]** Fix Makefile format target: Replace black with `ruff format` in root `Makefile`
+3. **[ðŸŸ ðŸŽ¯]** Add `[python].defaultFormatter` to Cursor User settings for non-workspace Python files
+4. **[ðŸŸ âš ï¸]** Add `[python].defaultFormatter` to Windsurf User settings
+5. **[ðŸŸ âš ï¸]** Update `IDE_SETUP_VERIFICATION.md`: correct task labels and default build behavior
+6. **[ðŸŸ¡ðŸ’¡]** Install high-value extensions: Prettier, GitLens, Even Better TOML, Spell Checker
+7. **[ðŸŸ¢ðŸ’¡]** Add `bierner.markdown-mermaid` to `extensions.json` if using Mermaid
+8. **[ðŸŸ¢ðŸ’¡]** Optional: add root `.pre-commit-config.yaml` for workspace-level pre-commit
 
 ---
 
 ## Verification Commands
 
-After applying fixes, verify with:
+```powershell
+# Run from workspace root (E:\grid)
 
-```bash
-# Verify ruff extension installed
-code --list-extensions | Select-String "charliermarsh.ruff"
-# Expected: charliermarsh.ruff
-
-# Verify ruff CLI working
+# 1. Verify Ruff
 uv run ruff --version
-# Expected: ruff 0.15.0
+uv run ruff check work/ safety/ security/ boundaries/ --quiet
 
-# Test ruff formatting
-uv run ruff format --check work/GRID/src/grid
-# Expected: No formatting changes needed (or shows what would change)
+# 2. Verify extensions
+code --list-extensions | Select-String "ruff|prettier|gitlens"
 
-# Verify task works
-# Run: "Daily: Verify the Wall" task from VS Code command palette
-# Expected: Tests run, then lint check runs
+# 3. Verify default build task
+# Manual: Ctrl+Shift+B â†’ must run pytest + ruff check
 
-# Verify Python paths
-# Open Python file in work/GRID/src, verify imports resolve correctly
-# Expected: No import errors for GRID modules
+# 4. Verify Makefile format (after fix)
+make format
+# Expected: ruff format + ruff check --fix only, no black
+
+# 5. Verify Cursor settings
+Get-Content "$env:APPDATA\Cursor\User\settings.json" | Select-String "defaultFormatter"
 ```
 
 ---
 
 ## Notes
 
-- **Cross-reference with:** `docs/guides/IDE_SETUP_VERIFICATION.md`
-- **Align with:** `.claude/rules/backend.md`, `.claude/rules/discipline.md`
-- **Test across:** VS Code, Cursor, Windsurf (when available)
-
-**Key Findings:**
-- ✅ Ruff integration is fully functional
-- ✅ Workspace configuration is comprehensive and correct
-- ✅ Development discipline automation is working
-- ⚠️ Cross-IDE consistency needs manual verification
-- 🟡 Some recommended extensions are missing (optional)
-
-**Overall Assessment:** Cursor IDE is well-configured for THE GRID development workflow. The main gaps are optional extensions and cross-IDE consistency verification, which require manual checks across multiple IDE installations.
+- Cross-reference: `docs/guides/IDE_SETUP_VERIFICATION.md`
+- Align with: `.claude/rules/backend.md`, `.claude/rules/discipline.md`
+- Multi-IDE index: `docs/guides/MULTI_IDE_VERIFICATION_INDEX.md`
 
 ---
 
-**Report Generated:** 2026-02-12
-**Verification Method:** Automated + Manual Review
-**Next Review:** After IDE updates or when switching between IDEs
+## Final Recommendation
+
+**âœ… Configure** â€” Cursor is usable with the workspace; fix the default build task and Makefile to align with development discipline. Add user-level Python formatter in Cursor/Windsurf for consistency across all Python files.
+
+---
+
+**Last Updated:** 2026-02-13
+**Report Generated By:** IDE Verification Skill (config-reviewer)

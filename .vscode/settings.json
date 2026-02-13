@@ -1,5 +1,5 @@
 {
-  // ── Python (monorepo paths) ──────────────────────────────────────
+  // â”€â”€ Python (monorepo paths) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   "python.analysis.extraPaths": [
     "./work/GRID/src",
     "./safety",
@@ -27,7 +27,7 @@
     "editor.rulers": [120]
   },
 
-  // ── TypeScript / React / Frontend ────────────────────────────────
+  // â”€â”€ TypeScript / React / Frontend â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": true
@@ -52,7 +52,7 @@
   },
   "eslint.workingDirectories": ["./frontend"],
 
-  // ── Terminal ─────────────────────────────────────────────────────
+  // â”€â”€ Terminal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   "terminal.integrated.cwd": "${workspaceFolder}",
   "terminal.integrated.shellIntegration.enabled": false,
   "terminal.integrated.shellIntegration.decorationsEnabled": "never",
@@ -75,7 +75,7 @@
   },
   "terminal.integrated.defaultProfile.windows": "PowerShell",
 
-  // ── Search / File Exclusions ─────────────────────────────────────
+  // â”€â”€ Search / File Exclusions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   "search.exclude": {
     "**/node_modules": true,
     "**/__pycache__": true,
@@ -113,16 +113,25 @@
     "**/.uv-cache/**": true,
     "**/archive/**": true
   },
+  "files.eol": "\n",
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "files.autoSave": "onFocusChange",
   "files.exclude": {
     "**/__pycache__": true,
     "**/.pytest_cache": true,
     "**/.mypy_cache": true,
     "**/.ruff_cache": true,
     "**/*.pyc": true,
-    "**/.DS_Store": true
+    "**/.DS_Store": true,
+    "**/.venv": true,
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/build": true,
+    "**/archive": true
   },
 
-  // ── Editor ───────────────────────────────────────────────────────
+  // â”€â”€ Editor â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   "editor.defaultFormatter": null,
   "editor.minimap.enabled": false,
   "editor.bracketPairColorization.enabled": true,
@@ -130,7 +139,7 @@
   "editor.stickyScroll.enabled": true,
   "workbench.editor.closeOnFileDelete": true,
 
-  // ── Spelling ─────────────────────────────────────────────────────
+  // â”€â”€ Spelling â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   "cSpell.words": [
     "fastapi",
     "pydantic",

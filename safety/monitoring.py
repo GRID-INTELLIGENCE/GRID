@@ -155,7 +155,7 @@ async def monitor_user_session(user_id: str, monitor: EnhancedSafetyMonitor):
     """
     from safety.ai_workflow_safety import get_ai_workflow_safety_engine
 
-    engine = get_ai_workflow_safety_engine(user_id)
+    engine = await get_ai_workflow_safety_engine(user_id)
     logger.info(f"Background monitor started for user {user_id}")
 
     try:

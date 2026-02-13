@@ -6,7 +6,7 @@
 
 .DEFAULT_GOAL := help
 
-# ── Colors ─────────────────────────────────────────────────────────
+# â”€â”€ Colors â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 BLUE  := \033[0;34m
 GREEN := \033[0;32m
 RED   := \033[0;31m
@@ -15,10 +15,10 @@ NC    := \033[0m
 
 help: ## Show available commands
 	@echo "$(CYAN)Workspace Commands$(NC)"
-	@echo "$(CYAN)──────────────────$(NC)"
+	@echo "$(CYAN)â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€$(NC)"
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  $(GREEN)%-18s$(NC) %s\n", $$1, $$2}'
 
-# ── Environment ────────────────────────────────────────────────────
+# â”€â”€ Environment â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 install: ## Full install: create venv + sync all deps
 	@echo "$(BLUE)Creating virtual environment...$(NC)"
@@ -31,7 +31,7 @@ sync: ## Sync dependencies (fast, uses lockfile)
 	@echo "$(BLUE)Syncing...$(NC)"
 	uv sync --all-groups
 
-# ── Quality ────────────────────────────────────────────────────────
+# â”€â”€ Quality â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 lint: ## Run linters (ruff + mypy)
 	@echo "$(BLUE)Ruff check...$(NC)"
@@ -39,10 +39,10 @@ lint: ## Run linters (ruff + mypy)
 	@echo "$(BLUE)Type check...$(NC)"
 	-uv run mypy work/GRID/src/grid work/Coinbase/src/coinbase work/wellness_studio/src/wellness_studio
 
-format: ## Auto-format code (black + ruff fix)
+format: ## Auto-format code (ruff format + ruff check fix)
 	@echo "$(BLUE)Formatting...$(NC)"
-	uv run black work/ boundaries/ safety/ scripts/
-	uv run ruff check --fix work/ boundaries/ safety/ scripts/
+	uv run ruff format work/ boundaries/ safety/ security/ scripts/
+	uv run ruff check --fix work/ boundaries/ safety/ security/ scripts/
 	@echo "$(GREEN)Formatted.$(NC)"
 
 test: ## Run all tests
@@ -58,7 +58,7 @@ test-coinbase: ## Run Coinbase tests only
 test-wellness: ## Run wellness_studio tests only
 	uv run pytest work/wellness_studio/tests -q --tb=short
 
-# ── Security & Audit ──────────────────────────────────────────────
+# â”€â”€ Security & Audit â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 audit: ## Run dependency audit (vulnerabilities + outdated)
 	@echo "$(BLUE)Checking for vulnerabilities...$(NC)"
@@ -69,7 +69,7 @@ audit: ## Run dependency audit (vulnerabilities + outdated)
 audit-quick: ## Quick vulnerability check only
 	uv run pip-audit --progress-spinner off
 
-# ── Lock & Export ─────────────────────────────────────────────────
+# â”€â”€ Lock & Export â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 lock: ## Generate uv.lock
 	@echo "$(BLUE)Locking dependencies...$(NC)"
@@ -83,7 +83,7 @@ export-deps: ## Export requirements.txt with hashes
 
 lock-all: lock export-deps ## Generate both uv.lock and requirements.txt
 
-# ── Project Commands ──────────────────────────────────────────────
+# â”€â”€ Project Commands â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 run-grid: ## Start GRID Mothership API
 	uv run python -m application.mothership.main
@@ -94,7 +94,7 @@ run-coinbase: ## Start Coinbase CLI
 run-wellness: ## Start Wellness Studio
 	uv run wellness-studio
 
-# ── Maintenance ───────────────────────────────────────────────────
+# â”€â”€ Maintenance â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 clean: ## Remove build artifacts and caches
 	@echo "$(RED)Cleaning...$(NC)"
@@ -111,10 +111,10 @@ nuke: ## Remove venv + caches (full reset)
 	$(MAKE) clean
 	@echo "$(RED)Run 'make install' to rebuild.$(NC)"
 
-# ── Discipline Routines ───────────────────────────────────────────
+# â”€â”€ Discipline Routines â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 wall: ## Daily: verify tests + lint pass before any new work
-	@echo "$(CYAN)═══ Verifying the Wall ═══$(NC)"
+	@echo "$(CYAN)â•â•â• Verifying the Wall â•â•â•$(NC)"
 	@echo "$(BLUE)Tests...$(NC)"
 	uv run python -m pytest -q --tb=short
 	@echo "$(BLUE)Lint...$(NC)"
@@ -122,11 +122,11 @@ wall: ## Daily: verify tests + lint pass before any new work
 	@echo "$(GREEN)Wall holds. Ready to work.$(NC)"
 
 guard: ## Scan for eval/exec/pickle in production code
-	@echo "$(CYAN)═══ Security Invariant Guard ═══$(NC)"
+	@echo "$(CYAN)â•â•â• Security Invariant Guard â•â•â•$(NC)"
 	@rg -n 'eval\(|exec\(|pickle\.' work/ safety/ security/ boundaries/ --glob '*.py' --glob '!*test*' --glob '!*archive*' && echo "$(RED)VIOLATIONS FOUND$(NC)" && exit 1 || echo "$(GREEN)CLEAN: No eval/exec/pickle found$(NC)"
 
 weekly: ## Weekly: security audit + performance budget + invariant scan
-	@echo "$(CYAN)═══ Weekly Discipline ═══$(NC)"
+	@echo "$(CYAN)â•â•â• Weekly Discipline â•â•â•$(NC)"
 	@echo "$(BLUE)1/4 Security invariant guard...$(NC)"
 	$(MAKE) guard
 	@echo "$(BLUE)2/4 Dependency audit...$(NC)"
@@ -143,7 +143,7 @@ test-safety: ## Run safety + boundaries tests only
 test-frontend: ## Run frontend tests (Vitest)
 	cd frontend && npm test
 
-# ── Claude Code ──────────────────────────────────────────────────
+# â”€â”€ Claude Code â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 claude-doctor: ## Validate Claude Code configuration
 	@echo "$(BLUE)Checking Claude Code setup...$(NC)"
@@ -152,12 +152,12 @@ claude-doctor: ## Validate Claude Code configuration
 	@echo "$(CYAN)Settings:$(NC)"
 	@cat .claude/settings.json 2>/dev/null | head -5
 	@echo "$(CYAN)Profile:$(NC)"
-	@if [ -f .claude/user-profile.json ]; then echo "  $(GREEN)✓ User profile found$(NC)"; else echo "  $(RED)✗ User profile missing$(NC)"; fi
+	@if [ -f .claude/user-profile.json ]; then echo "  $(GREEN)âœ“ User profile found$(NC)"; else echo "  $(RED)âœ— User profile missing$(NC)"; fi
 
 claude-chat: ## Start interactive Claude Code session
 	claude
 
-# ── Info ─────────────────────────────────────────────────────────
+# â”€â”€ Info â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 info: ## Show environment info
 	@echo "$(CYAN)Python:$(NC)   $$(uv run python --version)"

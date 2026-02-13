@@ -17,7 +17,8 @@
     "gruntfuggly.todo-tree",
     "christian-kohler.path-intellisense",
     "ms-vscode-remote.remote-wsl",
-    "ms-azuretools.vscode-docker"
+    "ms-azuretools.vscode-docker",
+    "bierner.markdown-mermaid"
   ],
   "unwantedRecommendations": [
     "ms-python.black-formatter",

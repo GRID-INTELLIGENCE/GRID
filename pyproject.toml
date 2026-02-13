@@ -7,12 +7,13 @@ requires-python = ">=3.13,<3.14"
 readme = "docs/guides/workspace-readme.md"
 
 dependencies = [
-    # ── Core Framework ──────────────────────────────────────────────
+    # â”€â”€ Core Framework â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     "fastapi>=0.104.0",
     "httpx>=0.25.0",
     "uvicorn[standard]>=0.24.0",
     "pydantic>=2.4.0",
     "pydantic-core>=2.14.0",
+    "pydantic-settings>=2.0.0",
     "annotated-types>=0.6.0",
     "annotated-doc>=0.0.2",
     "python-dotenv>=1.0.0",
@@ -25,7 +26,7 @@ dependencies = [
     "typing-extensions>=4.5.0",
     "anyio>=4.0.0",
     "pyyaml>=6.0.0",
-    # ── Data Science & ML ───────────────────────────────────────────
+    # â”€â”€ Data Science & ML â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     "numpy>=1.24.0",
     "scikit-learn==1.8.0",
     "tiktoken>=0.12.0",
@@ -35,33 +36,38 @@ dependencies = [
     "ollama>=0.6.1",
     "huggingface-hub>=1.0",
     "rank-bm25>=0.2.2",
-    # ── Database & Storage ──────────────────────────────────────────
+    # â”€â”€ Database & Storage â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     "asyncpg>=0.29.0",
     "sqlalchemy[asyncio]>=2.0.0",
     "alembic>=1.13.0",
     "redis>=5.0.0",
     "aiosqlite>=0.19.0",
-    # ── Task Queue & Background Processing ──────────────────────────
+    # â”€â”€ Task Queue & Background Processing â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     "celery>=5.3.0",
     "schedule>=1.2.2",
-    # ── Security & Authentication ───────────────────────────────────
+    # â”€â”€ Security & Authentication â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     "python-jose[cryptography]>=3.3.0",
+    "passlib[bcrypt]>=1.7.4",
     "bcrypt>=4.1.0",
     "pyjwt>=2.8.0",
+    "email-validator>=2.1.0.post1",
     "detect-secrets>=1.4.0",
-    # ── External Services ───────────────────────────────────────────
+    "slowapi>=0.1.9",
+    "zxcvbn-python>=4.4.24",
+    # â”€â”€ External Services â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     "databricks-sql-connector>=4.2.4",
     "databricks-sdk>=0.40.0",
-    "stripe>=7.0.0",
+    "stripe>=14.0.1",
     "mcp[cli]>=1.25.0",
-    # ── Document Ingestion ──────────────────────────────────────────
+    # â”€â”€ Document Ingestion â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     "nbformat>=5.9.0",
     "pypdf2>=3.0.0",
     "python-docx>=0.8.11",
     "beautifulsoup4>=4.12.0",
-    # ── Logging & Observability ─────────────────────────────────────
+    # â”€â”€ Logging & Observability â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     "structlog>=23.1.0",
     "prometheus-client>=0.19.0",
+    "prometheus-fastapi-instrumentator>=7.0.0",
     "opentelemetry-api>=1.21.0",
     "opentelemetry-sdk>=1.21.0",
     "opentelemetry-exporter-jaeger>=1.21.0",
@@ -87,7 +93,6 @@ boundaries = ["jsonschema", "websockets"]
 dev = [
     "hatch>=1.16.2",
     "hatchling>=1.28.0",
-    "black>=25.12.0",
     "ruff>=0.14.14",
     "mypy>=1.19.1",
     "pre-commit>=4.5.1",
@@ -107,15 +112,16 @@ audit = [
     "safety>=3.0.0",
 ]
 
+# Workspace root â€” minimal package for UV workspace build.
+# Publish grid-intelligence from work/GRID/ and grid-safety from safety/.
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
-# Not used for PyPI publish. Publish grid-intelligence from work/GRID/ and grid-safety from safety/.
 [tool.hatch.build.targets.wheel]
-packages = []
+packages = ["workspace"]
 
-# ── UV Configuration ────────────────────────────────────────────────
+# â”€â”€ UV Configuration â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 [tool.uv]
 # Single workspace venv at root
@@ -135,7 +141,7 @@ members = [
     "work/GRID",
 ]
 
-# ── Ruff (Linter) ──────────────────────────────────────────────────
+# â”€â”€ Ruff (Linter) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 [tool.ruff]
 line-length = 120
@@ -174,22 +180,7 @@ extend-ignore = [
 [tool.ruff.lint.isort]
 known-first-party = ["grid", "application", "cognitive", "tools", "boundaries", "safety", "security"]
 
-# ── Black (Formatter) ──────────────────────────────────────────────
-
-[tool.black]
-line-length = 120
-target-version = ["py313"]
-exclude = '''
-/(
-    \.venv
-  | __pycache__
-  | archive
-  | tmp
-  | \.git
-)/
-'''
-
-# ── MyPy (Type Checker) ────────────────────────────────────────────
+# â”€â”€ MyPy (Type Checker) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 [tool.mypy]
 python_version = "3.13"
@@ -243,11 +234,13 @@ module = [
     "openai.*",
     "redis.*",
     "mcp.*",
+    "tests.*",
 ]
 ignore_missing_imports = true
 follow_imports = "skip"
+ignore_errors = true
 
-# ── Pytest ──────────────────────────────────────────────────────────
+# â”€â”€ Pytest â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 [tool.pytest.ini_options]
 pythonpath = [
@@ -261,9 +254,16 @@ testpaths = [
     "safety/tests",
 ]
 python_files = ["test_*.py"]
+python_classes = ["Test*"]
 python_functions = ["test_*"]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
+addopts = [
+    "--verbose",
+    "--tb=short",
+    "--strict-markers",
+    "--disable-warnings",
+]
 filterwarnings = [
     "ignore::DeprecationWarning:pkg_resources",
     "ignore::DeprecationWarning:sqlalchemy.*",
@@ -280,9 +280,10 @@ markers = [
     "asyncio: Async tests",
     "safety: Safety enforcement tests",
     "redis: Tests requiring live Redis (skipped by default)",
+    "e2e: End-to-end tests",
 ]
 
-# ── Coverage ────────────────────────────────────────────────────────
+# â”€â”€ Coverage â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 [tool.coverage.run]
 source = [
@@ -313,7 +314,7 @@ exclude_lines = [
     "\\.\\.\\.",
 ]
 
-# ── Bandit (Security Linter) ───────────────────────────────────────
+# â”€â”€ Bandit (Security Linter) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 [tool.bandit]
 exclude_dirs = [".venv", "archive", "tmp", "tests"]

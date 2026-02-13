@@ -38,11 +38,9 @@ GRID is a comprehensive AI security and privacy platform that provides advanced 
 git clone <repository-url>
 cd grid
 
-# Install dependencies
-pip install -e .
-
-# Install test dependencies
-pip install -e ".[test]"
+# Create the workspace venv and install dependencies
+uv venv --python 3.13
+uv sync --group dev --group test
 ```
 
 ### Environment Setup
@@ -71,7 +69,7 @@ OLLAMA_BASE_URL=http://localhost:11434
 
 ```bash
 # Start the backend server
-uvicorn grid.api.main:app --reload
+uvicorn application.mothership.main:app --reload
 
 # Start the frontend (development)
 cd frontend
@@ -84,16 +82,16 @@ npm run dev
 
 ```bash
 # Run core functionality tests
-python -m pytest tests/unit/ tests/integration/ tests/security/ -v
+uv run python -m pytest tests/unit/ tests/integration/ tests/security/ -v
 
 # Run all tests (requires running servers)
-python -m pytest tests/ -v
+uv run python -m pytest tests/ -v
 
 # Individual test categories
-python -m pytest tests/unit/ -v          # Unit tests
-python -m pytest tests/integration/ -v    # Integration tests
-python -m pytest tests/security/ -v       # Security tests
-python -m pytest tests/e2e/ -v           # E2E tests
+uv run python -m pytest tests/unit/ -v          # Unit tests
+uv run python -m pytest tests/integration/ -v    # Integration tests
+uv run python -m pytest tests/security/ -v       # Security tests
+uv run python -m pytest tests/e2e/ -v           # E2E tests
 ```
 
 ### Test Coverage
@@ -166,16 +164,15 @@ See `.env.example` for complete configuration options.
 ### Directory Structure
 ```
 grid/
-├── src/
-│   └── grid/
-│       ├── api/           # FastAPI endpoints
-│       ├── core/          # Core configuration
-│       ├── models/        # Pydantic models
-│       ├── services/      # Business logic
-│       └── security/      # Security components
-├── tests/                 # Test suite
-├── docs/                  # Documentation
-└── frontend/              # Web interface
+├── work/GRID/src/          # Primary backend source
+│   ├── application/        # Mothership FastAPI app
+│   ├── grid/               # Core grid package
+│   ├── cognitive/          # Cognitive layer
+│   └── tools/              # Tooling (RAG, utilities)
+├── src/                    # Legacy/secondary package root
+├── tests/                  # Test suite
+├── docs/                   # Documentation
+└── frontend/               # Web interface
 ```
 
 ## Development

@@ -397,11 +397,12 @@ class TestAIWorkflowSafetyEngine:
         engine = AIWorkflowSafetyEngine("test_violation_detection", config)
 
         # First interaction - should pass
+        now = time.time()
         assessment1 = await engine.evaluate_interaction(
             user_input="Test input",
             ai_response="Test response",
             response_time=1.0,
-            current_time=1000.0
+            current_time=now
         )
         assert assessment1['safety_allowed'] is True
 
@@ -410,7 +411,7 @@ class TestAIWorkflowSafetyEngine:
             user_input="Another test",
             ai_response="Another response",
             response_time=1.0,
-            current_time=1000.5  # Too soon
+            current_time=now + 0.5  # Too soon
         )
 
         assert assessment2['safety_allowed'] is False
