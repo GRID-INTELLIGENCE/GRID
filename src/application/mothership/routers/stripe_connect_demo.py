@@ -901,7 +901,8 @@ async def checkout_direct_charge(
             detail=f"Invalid STRIPE_CONNECT_APPLICATION_FEE_AMOUNT: {e}",
         )
 
-    session = stripe_client.v1.checkout.sessions.create(
+    session = await asyncio.to_thread(
+        stripe_client.v1.checkout.sessions.create,
         {
             "line_items": [
                 {
@@ -974,7 +975,8 @@ async def connected_account_subscription_checkout(
             detail="Invalid subscription price ID format. Must start with 'price_'",
         )
 
-    session = stripe_client.v1.checkout.sessions.create(
+    session = await asyncio.to_thread(
+        stripe_client.v1.checkout.sessions.create,
         {
             "customer_account": account_id,
             "mode": "subscription",
@@ -1010,7 +1012,8 @@ async def connected_account_billing_portal(
     account_id = mapping["stripe_account_id"]
     base = _base_url(request)
 
-    portal_session = stripe_client.v1.billing_portal.sessions.create(
+    portal_session = await asyncio.to_thread(
+        stripe_client.v1.billing_portal.sessions.create,
         {
             "customer_account": account_id,
             "return_url": f"{base}/api/v1/connect-demo/dashboard",
@@ -1215,7 +1218,7 @@ async def webhook_thin_v2(request: Request, settings: Settings):
             }
         )
 
-    full_event = stripe_client.v2.core.events.retrieve(thin_event_id)
+    full_event = await asyncio.to_thread(stripe_client.v2.core.events.retrieve, thin_event_id)
     event_type = _event_type(full_event)
 
     # Record event as received
@@ -1347,7 +1350,11 @@ async def webhook_billing_snapshot(request: Request, settings: Settings):
     )
 
     # Retrieve canonical event payload for deterministic handling.
-    event = stripe_client.v1.events.retrieve(event_id) if event_id else json.loads(payload.decode("utf-8"))
+    event = (
+        await asyncio.to_thread(stripe_client.v1.events.retrieve, event_id)
+        if event_id
+        else json.loads(payload.decode("utf-8"))
+    )
     event_type = _event_type(event)
 
     # Check idempotency before processing
@@ -1424,7 +1431,8 @@ async def list_recent_connect_events(auth: RequiredAuth):
 async def get_connect_account_status(account_id: str, auth: RequiredAuth, settings: Settings):
     """JSON helper to fetch current account status directly from Stripe API."""
     stripe_client = _require_stripe_client(settings)
-    account = stripe_client.v2.core.accounts.retrieve(
+    account = await asyncio.to_thread(
+        stripe_client.v2.core.accounts.retrieve,
         account_id,
         {"include": ["configuration.merchant", "requirements"]},
     )
