@@ -37,7 +37,7 @@ from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from sqlalchemy import select
 
 from ..db.engine import get_async_sessionmaker
-from ..db.models_billing import ConnectAccountMappingRow
+from ..db.models_billing import ConnectAccountMappingRow, PaymentWebhookEventRow
 from ..dependencies import RequiredAuth, Settings
 from ..models.payment import PaymentGateway as PaymentGatewayEnum
 from ..models.payment import PaymentWebhookEvent, WebhookEventStatus
@@ -65,9 +65,24 @@ _PROCESSED_WEBHOOK_EVENTS: set[str] = set()
 _PROCESSED_EVENTS_LOCK = asyncio.Lock()
 
 
+def _check_persistence_mode() -> str:
+    """Validate persistence mode configuration and prevent memory mode in production."""
+    mode = os.getenv("MOTHERSHIP_PERSISTENCE_MODE", "memory").strip().lower()
+    environment = os.getenv("ENVIRONMENT", os.getenv("ENV", "")).lower()
+    
+    if mode != "db" and environment in ("production", "prod"):
+        raise RuntimeError(
+            "Memory persistence mode is not allowed in production. "
+            "Set MOTHERSHIP_PERSISTENCE_MODE=db for production use. "
+            "Memory mode causes data loss on restart and lacks audit trails."
+        )
+    
+    return mode
+
+
 async def _is_event_processed(event_id: str, gateway: str = "stripe") -> bool:
     """Check if a webhook event has already been processed."""
-    mode = os.getenv("MOTHERSHIP_PERSISTENCE_MODE", "memory").strip().lower()
+    mode = _check_persistence_mode()
 
     if mode != "db":
         async with _PROCESSED_EVENTS_LOCK:
@@ -84,7 +99,7 @@ async def _record_webhook_event(
     event_id: str, event_type: str, gateway: str = "stripe", status: WebhookEventStatus = WebhookEventStatus.RECEIVED
 ) -> PaymentWebhookEvent:
     """Record a webhook event for idempotency tracking."""
-    mode = os.getenv("MOTHERSHIP_PERSISTENCE_MODE", "memory").strip().lower()
+    mode = _check_persistence_mode()
 
     if mode != "db":
         async with _PROCESSED_EVENTS_LOCK:
@@ -198,7 +213,7 @@ def _base_url(request: Request) -> str:
 
 async def _get_mapping_by_user(user_id: str) -> dict[str, Any] | None:
     """Load local user -> connected account mapping from DB (if enabled) or memory fallback."""
-    mode = os.getenv("MOTHERSHIP_PERSISTENCE_MODE", "memory").strip().lower()
+    mode = _check_persistence_mode()
 
     if mode != "db":
         async with _CONNECT_MAP_LOCK:
@@ -226,7 +241,7 @@ async def _get_mapping_by_user(user_id: str) -> dict[str, Any] | None:
 
 async def _save_mapping(user_id: str, stripe_account_id: str, meta: dict[str, Any] | None = None) -> dict[str, Any]:
     """Upsert user -> connected account mapping."""
-    mode = os.getenv("MOTHERSHIP_PERSISTENCE_MODE", "memory").strip().lower()
+    mode = _check_persistence_mode()
     payload = {
         "user_id": user_id,
         "stripe_account_id": stripe_account_id,
@@ -279,7 +294,7 @@ async def _save_subscription_state(
     subscription_price_id: str | None,
 ) -> None:
     """Persist connected-account subscription state when DB is enabled; use TODO fallback in memory mode."""
-    mode = os.getenv("MOTHERSHIP_PERSISTENCE_MODE", "memory").strip().lower()
+    mode = _check_persistence_mode()
 
     if mode != "db":
         # TODO(you): if you disable DB persistence, replace this with your durable storage (Redis/Postgres/etc.).
@@ -322,7 +337,7 @@ async def _update_mapping_by_account(
     meta_updates: dict[str, Any] | None = None,
 ) -> bool:
     """Update a mapping row by connected account ID; returns False when mapping does not exist."""
-    mode = os.getenv("MOTHERSHIP_PERSISTENCE_MODE", "memory").strip().lower()
+    mode = _check_persistence_mode()
 
     if mode != "db":
         async with _CONNECT_MAP_LOCK:
@@ -380,7 +395,7 @@ async def _update_mapping_by_account(
 
 async def _append_account_event(account_id: str, event_type: str, payload: dict[str, Any]) -> bool:
     """Append a compact event record to mapping metadata for audit/operational visibility."""
-    mode = os.getenv("MOTHERSHIP_PERSISTENCE_MODE", "memory").strip().lower()
+    mode = _check_persistence_mode()
     event_record = {
         "at": datetime.now(UTC).isoformat(),
         "event_type": event_type,
@@ -447,9 +462,30 @@ def _onboarding_flags(account: Any) -> tuple[bool, str | None, bool]:
     return ready_to_process, requirements_status, onboarding_complete
 
 
+def _get_csrf_secret() -> str:
+    """Get CSRF secret from environment, fail-fast if missing in production."""
+    secret = os.getenv("CSRF_SECRET")
+    if not secret:
+        # In production, fail-fast to prevent silent security failures
+        environment = os.getenv("ENVIRONMENT", os.getenv("ENV", "")).lower()
+        if environment in ("production", "prod"):
+            raise RuntimeError(
+                "CSRF_SECRET must be configured in production. "
+                "Set CSRF_SECRET environment variable with a secure random value."
+            )
+        # Development fallback: generate per-instance (tokens invalidate on restart)
+        logger.warning(
+            "CSRF_SECRET not configured. Using per-instance secret. "
+            "CSRF tokens will be invalidated on server restart. "
+            "Set CSRF_SECRET for production use."
+        )
+        secret = secrets.token_hex(32)
+    return secret
+
+
 def _generate_csrf_token() -> str:
     """Generate a CSRF token for form protection."""
-    secret = os.getenv("CSRF_SECRET", secrets.token_hex(32))
+    secret = _get_csrf_secret()
     timestamp = str(int(time.time()))
     message = f"stripe_connect_demo:{timestamp}"
     signature = hmac.new(secret.encode(), message.encode(), hashlib.sha256).hexdigest()
@@ -467,11 +503,11 @@ def _validate_csrf_token(token: str) -> bool:
         # Token expires after 1 hour
         if time.time() - timestamp > 3600:
             return False
-        secret = os.getenv("CSRF_SECRET", secrets.token_hex(32))
+        secret = _get_csrf_secret()
         message = f"stripe_connect_demo:{timestamp_str}"
         expected_signature = hmac.new(secret.encode(), message.encode(), hashlib.sha256).hexdigest()
         return hmac.compare_digest(signature, expected_signature)
-    except (ValueError, AttributeError):
+    except (ValueError, AttributeError, RuntimeError):
         return False
 
 
@@ -517,7 +553,8 @@ async def connect_dashboard(request: Request, auth: RequiredAuth, settings: Sett
 
     if account_id:
         # Requirement: status must be fetched directly from Stripe API each time (not cached DB status).
-        account = stripe_client.v2.core.accounts.retrieve(
+        account = await asyncio.to_thread(
+            stripe_client.v2.core.accounts.retrieve,
             account_id,
             {"include": ["configuration.merchant", "requirements"]},
         )
@@ -893,8 +930,8 @@ async def checkout_direct_charge(
         )
     try:
         fee_amount = int(fee_amount_str)
-        if fee_amount < 0:
-            raise ValueError("Fee amount must be non-negative")
+        if fee_amount < 0 or fee_amount > 100000:
+            raise ValueError("Fee amount must be between 0 and 100000 cents (0-$1000)")
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -1201,7 +1238,8 @@ async def webhook_thin_v2(request: Request, settings: Settings):
         )
 
     # parse_thin_event is the Python equivalent for JS parseThinEvent in Stripe docs.
-    thin_event = stripe_client.parse_thin_event(payload, signature, webhook_secret)
+    # Wrap in asyncio.to_thread to prevent blocking event loop (CPU-bound cryptographic operation)
+    thin_event = await asyncio.to_thread(stripe_client.parse_thin_event, payload, signature, webhook_secret)
     thin_event_id = thin_event.get("id") if isinstance(thin_event, dict) else getattr(thin_event, "id", None)
     if not thin_event_id:
         raise HTTPException(
@@ -1342,7 +1380,8 @@ async def webhook_billing_snapshot(request: Request, settings: Settings):
             detail="Current Stripe SDK does not expose parse_event_notification. Upgrade Stripe SDK.",
         )
 
-    event_notification = stripe_client.parse_event_notification(payload, signature, webhook_secret)
+    # Wrap in asyncio.to_thread to prevent blocking event loop (CPU-bound cryptographic operation)
+    event_notification = await asyncio.to_thread(stripe_client.parse_event_notification, payload, signature, webhook_secret)
     event_id = (
         event_notification.get("id")
         if isinstance(event_notification, dict)
