@@ -17,12 +17,20 @@ IMPORTANT:
 
 from __future__ import annotations
 
+import asyncio
+import hashlib
+import hmac
 import json
+import logging
 import os
+import secrets
+import time
 import uuid
 from datetime import UTC, datetime
 from html import escape
 from typing import Any
+
+logger = logging.getLogger(__name__)
 
 from fastapi import APIRouter, Form, HTTPException, Request, status
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
@@ -31,11 +39,18 @@ from sqlalchemy import select
 from ..db.engine import get_async_sessionmaker
 from ..db.models_billing import ConnectAccountMappingRow
 from ..dependencies import RequiredAuth, Settings
+from ..models.payment import PaymentGateway as PaymentGatewayEnum
+from ..models.payment import PaymentWebhookEvent, WebhookEventStatus
+from ..repositories.db import DbUnitOfWork
 
 try:
     from stripe import StripeClient
+    from stripe.error import APIConnectionError, AuthenticationError, InvalidRequestError
 except ImportError:  # pragma: no cover - dependency availability is environment specific
     StripeClient = None  # type: ignore[assignment]
+    InvalidRequestError = Exception  # type: ignore[misc]
+    AuthenticationError = Exception  # type: ignore[misc]
+    APIConnectionError = Exception  # type: ignore[misc]
 
 router = APIRouter(prefix="/connect-demo", tags=["stripe-connect-demo"])
 
@@ -43,6 +58,110 @@ router = APIRouter(prefix="/connect-demo", tags=["stripe-connect-demo"])
 # In-memory fallback when DB persistence is disabled.
 # Keyed by user_id, values contain at least stripe_account_id.
 _CONNECT_MAP_MEMORY: dict[str, dict[str, Any]] = {}
+_CONNECT_MAP_LOCK = asyncio.Lock()
+
+# Processed webhook event tracking for idempotency (memory fallback)
+_PROCESSED_WEBHOOK_EVENTS: set[str] = set()
+_PROCESSED_EVENTS_LOCK = asyncio.Lock()
+
+
+async def _is_event_processed(event_id: str, gateway: str = "stripe") -> bool:
+    """Check if a webhook event has already been processed."""
+    mode = os.getenv("MOTHERSHIP_PERSISTENCE_MODE", "memory").strip().lower()
+
+    if mode != "db":
+        async with _PROCESSED_EVENTS_LOCK:
+            return event_id in _PROCESSED_WEBHOOK_EVENTS
+
+    # Use database for idempotency check
+    uow = DbUnitOfWork()
+    async with uow.transaction():
+        existing = await uow.webhook_events.get_by_gateway_event_id(event_id, gateway=gateway)
+        return existing is not None and existing.status in {WebhookEventStatus.PROCESSED, WebhookEventStatus.IGNORED}
+
+
+async def _record_webhook_event(
+    event_id: str, event_type: str, gateway: str = "stripe", status: WebhookEventStatus = WebhookEventStatus.RECEIVED
+) -> PaymentWebhookEvent:
+    """Record a webhook event for idempotency tracking."""
+    mode = os.getenv("MOTHERSHIP_PERSISTENCE_MODE", "memory").strip().lower()
+
+    if mode != "db":
+        async with _PROCESSED_EVENTS_LOCK:
+            _PROCESSED_WEBHOOK_EVENTS.add(event_id)
+            # Limit memory growth - keep only last 10000 events
+            if len(_PROCESSED_WEBHOOK_EVENTS) > 10000:
+                # Remove oldest entries (arbitrary removal since set is unordered)
+                _PROCESSED_WEBHOOK_EVENTS.pop()
+        # Return a mock event for memory mode
+        return PaymentWebhookEvent(
+            gateway=PaymentGatewayEnum(gateway),
+            gateway_event_id=event_id,
+            event_type=event_type,
+            status=status,
+        )
+
+    # Use database for event tracking
+    uow = DbUnitOfWork()
+    async with uow.transaction():
+        existing = await uow.webhook_events.get_by_gateway_event_id(event_id, gateway=gateway)
+        if existing:
+            # Update existing event
+            existing.status = status
+            existing.event_type = event_type
+            await uow.webhook_events.update(existing)
+            return existing
+
+        # Create new event record
+        webhook_event = PaymentWebhookEvent(
+            gateway=PaymentGatewayEnum(gateway),
+            gateway_event_id=event_id,
+            event_type=event_type,
+            status=status,
+        )
+        await uow.webhook_events.add(webhook_event)
+        return webhook_event
+
+
+from pydantic import BaseModel, EmailStr, Field, field_validator
+
+
+class AccountCreateForm(BaseModel):
+    """Validation schema for account creation form."""
+
+    display_name: str = Field(..., min_length=1, max_length=256)
+    contact_email: EmailStr
+
+    @field_validator("display_name")
+    @classmethod
+    def validate_display_name(cls, v: str) -> str:
+        """Validate display name is not empty after stripping."""
+        if not v.strip():
+            raise ValueError("Display name cannot be empty")
+        return v.strip()
+
+
+class ProductCreateForm(BaseModel):
+    """Validation schema for product creation form."""
+
+    name: str = Field(..., min_length=1, max_length=256)
+    description: str = Field(default="", max_length=1000)
+    price_in_cents: int = Field(..., gt=0, le=1000000)
+    currency: str = Field(default="usd", pattern=r"^[a-zA-Z]{3}$")
+
+    @field_validator("currency")
+    @classmethod
+    def validate_currency(cls, v: str) -> str:
+        """Normalize currency to lowercase."""
+        return v.lower()
+
+    @field_validator("name")
+    @classmethod
+    def validate_name(cls, v: str) -> str:
+        """Validate name is not empty after stripping."""
+        if not v.strip():
+            raise ValueError("Product name cannot be empty")
+        return v.strip()
 
 
 def _require_stripe_client(settings: Settings):
@@ -82,7 +201,8 @@ async def _get_mapping_by_user(user_id: str) -> dict[str, Any] | None:
     mode = os.getenv("MOTHERSHIP_PERSISTENCE_MODE", "memory").strip().lower()
 
     if mode != "db":
-        return _CONNECT_MAP_MEMORY.get(user_id)
+        async with _CONNECT_MAP_LOCK:
+            return _CONNECT_MAP_MEMORY.get(user_id)
 
     sessionmaker = get_async_sessionmaker()
     async with sessionmaker() as session:
@@ -117,7 +237,8 @@ async def _save_mapping(user_id: str, stripe_account_id: str, meta: dict[str, An
     }
 
     if mode != "db":
-        _CONNECT_MAP_MEMORY[user_id] = payload
+        async with _CONNECT_MAP_LOCK:
+            _CONNECT_MAP_MEMORY[user_id] = payload
         return payload
 
     sessionmaker = get_async_sessionmaker()
@@ -142,7 +263,11 @@ async def _save_mapping(user_id: str, stripe_account_id: str, meta: dict[str, An
             row.meta = meta or {}
             row.updated_at = datetime.now(UTC)
 
-        await session.commit()
+        try:
+            await session.commit()
+        except Exception:
+            await session.rollback()
+            raise
 
     return payload
 
@@ -158,36 +283,37 @@ async def _save_subscription_state(
 
     if mode != "db":
         # TODO(you): if you disable DB persistence, replace this with your durable storage (Redis/Postgres/etc.).
-        for key, value in _CONNECT_MAP_MEMORY.items():
-            if value.get("stripe_account_id") == account_id:
-                _CONNECT_MAP_MEMORY[key] = {
-                    **value,
-                    "subscription_id": subscription_id,
-                    "subscription_status": subscription_status,
-                    "subscription_price_id": subscription_price_id,
-                }
+        async with _CONNECT_MAP_LOCK:
+            for key, value in _CONNECT_MAP_MEMORY.items():
+                if value.get("stripe_account_id") == account_id:
+                    _CONNECT_MAP_MEMORY[key] = {
+                        **value,
+                        "subscription_id": subscription_id,
+                        "subscription_status": subscription_status,
+                        "subscription_price_id": subscription_price_id,
+                    }
         return
 
     sessionmaker = get_async_sessionmaker()
     async with sessionmaker() as session:
-        row = (
-            (
-                await session.execute(
-                    select(ConnectAccountMappingRow).where(ConnectAccountMappingRow.stripe_account_id == account_id)
+        async with session.begin():
+            row = (
+                (
+                    await session.execute(
+                        select(ConnectAccountMappingRow).where(ConnectAccountMappingRow.stripe_account_id == account_id)
+                    )
                 )
+                .scalars()
+                .first()
             )
-            .scalars()
-            .first()
-        )
-        if not row:
-            # TODO(you): create an onboarding-first policy if webhook arrives before local mapping exists.
-            return
+            if not row:
+                # TODO(you): create an onboarding-first policy if webhook arrives before local mapping exists.
+                return
 
-        row.subscription_id = subscription_id
-        row.subscription_status = subscription_status
-        row.subscription_price_id = subscription_price_id
-        row.updated_at = datetime.now(UTC)
-        await session.commit()
+            row.subscription_id = subscription_id
+            row.subscription_status = subscription_status
+            row.subscription_price_id = subscription_price_id
+            row.updated_at = datetime.now(UTC)
 
 
 async def _update_mapping_by_account(
@@ -199,21 +325,22 @@ async def _update_mapping_by_account(
     mode = os.getenv("MOTHERSHIP_PERSISTENCE_MODE", "memory").strip().lower()
 
     if mode != "db":
-        for key, value in _CONNECT_MAP_MEMORY.items():
-            if value.get("stripe_account_id") != account_id:
-                continue
+        async with _CONNECT_MAP_LOCK:
+            for key, value in _CONNECT_MAP_MEMORY.items():
+                if value.get("stripe_account_id") != account_id:
+                    continue
 
-            merged = dict(value)
-            if field_updates:
-                merged.update(field_updates)
+                merged = dict(value)
+                if field_updates:
+                    merged.update(field_updates)
 
-            merged_meta = dict(merged.get("meta") or {})
-            if meta_updates:
-                merged_meta.update(meta_updates)
-            merged["meta"] = merged_meta
+                merged_meta = dict(merged.get("meta") or {})
+                if meta_updates:
+                    merged_meta.update(meta_updates)
+                merged["meta"] = merged_meta
 
-            _CONNECT_MAP_MEMORY[key] = merged
-            return True
+                _CONNECT_MAP_MEMORY[key] = merged
+                return True
         return False
 
     sessionmaker = get_async_sessionmaker()
@@ -243,7 +370,11 @@ async def _update_mapping_by_account(
             merged_meta.update(meta_updates)
         row.meta = merged_meta
         row.updated_at = datetime.now(UTC)
-        await session.commit()
+        try:
+            await session.commit()
+        except Exception:
+            await session.rollback()
+            raise
         return True
 
 
@@ -257,18 +388,19 @@ async def _append_account_event(account_id: str, event_type: str, payload: dict[
     }
 
     if mode != "db":
-        for key, value in _CONNECT_MAP_MEMORY.items():
-            if value.get("stripe_account_id") != account_id:
-                continue
+        async with _CONNECT_MAP_LOCK:
+            for key, value in _CONNECT_MAP_MEMORY.items():
+                if value.get("stripe_account_id") != account_id:
+                    continue
 
-            merged = dict(value)
-            meta = dict(merged.get("meta") or {})
-            history = list(meta.get("events") or [])
-            history.append(event_record)
-            meta["events"] = history[-100:]
-            merged["meta"] = meta
-            _CONNECT_MAP_MEMORY[key] = merged
-            return True
+                merged = dict(value)
+                meta = dict(merged.get("meta") or {})
+                history = list(meta.get("events") or [])
+                history.append(event_record)
+                meta["events"] = history[-100:]
+                merged["meta"] = meta
+                _CONNECT_MAP_MEMORY[key] = merged
+                return True
         return False
 
     sessionmaker = get_async_sessionmaker()
@@ -291,7 +423,11 @@ async def _append_account_event(account_id: str, event_type: str, payload: dict[
         meta["events"] = history[-100:]
         row.meta = meta
         row.updated_at = datetime.now(UTC)
-        await session.commit()
+        try:
+            await session.commit()
+        except Exception:
+            await session.rollback()
+            raise
         return True
 
 
@@ -309,6 +445,34 @@ def _onboarding_flags(account: Any) -> tuple[bool, str | None, bool]:
     requirements_status = account.get("requirements", {}).get("summary", {}).get("minimum_deadline", {}).get("status")
     onboarding_complete = requirements_status not in {"currently_due", "past_due"}
     return ready_to_process, requirements_status, onboarding_complete
+
+
+def _generate_csrf_token() -> str:
+    """Generate a CSRF token for form protection."""
+    secret = os.getenv("CSRF_SECRET", secrets.token_hex(32))
+    timestamp = str(int(time.time()))
+    message = f"stripe_connect_demo:{timestamp}"
+    signature = hmac.new(secret.encode(), message.encode(), hashlib.sha256).hexdigest()
+    return f"{timestamp}:{signature}"
+
+
+def _validate_csrf_token(token: str) -> bool:
+    """Validate a CSRF token."""
+    try:
+        parts = token.split(":")
+        if len(parts) != 2:
+            return False
+        timestamp_str, signature = parts
+        timestamp = int(timestamp_str)
+        # Token expires after 1 hour
+        if time.time() - timestamp > 3600:
+            return False
+        secret = os.getenv("CSRF_SECRET", secrets.token_hex(32))
+        message = f"stripe_connect_demo:{timestamp_str}"
+        expected_signature = hmac.new(secret.encode(), message.encode(), hashlib.sha256).hexdigest()
+        return hmac.compare_digest(signature, expected_signature)
+    except (ValueError, AttributeError):
+        return False
 
 
 def _html_page(title: str, body: str) -> str:
@@ -367,6 +531,7 @@ async def connect_dashboard(request: Request, auth: RequiredAuth, settings: Sett
         storefront_url_html = f"<p><a href='/api/v1/connect-demo/storefront/{escape(account_id)}' target='_blank'>Open storefront page</a></p>"
 
     base = _base_url(request)
+    csrf_token = _generate_csrf_token()
 
     body = f"""
     <h1>Stripe Connect Demo Dashboard</h1>
@@ -381,6 +546,7 @@ async def connect_dashboard(request: Request, auth: RequiredAuth, settings: Sett
     <div class='card'>
       <h2>Create connected account</h2>
       <form method='post' action='/api/v1/connect-demo/accounts/create'>
+        <input type='hidden' name='csrf_token' value='{escape(csrf_token)}' />
         <label>Display name</label>
         <input name='display_name' placeholder='Acme Merchant LLC' required />
         <label>Contact email</label>
@@ -392,6 +558,7 @@ async def connect_dashboard(request: Request, auth: RequiredAuth, settings: Sett
     <div class='card'>
       <h2>Onboard to collect payments</h2>
       <form method='post' action='/api/v1/connect-demo/accounts/onboarding-link'>
+        <input type='hidden' name='csrf_token' value='{escape(csrf_token)}' />
         <button type='submit'>Onboard to collect payments</button>
       </form>
       <p class='muted'>Creates a V2 account link and redirects to Stripe onboarding.</p>
@@ -400,6 +567,7 @@ async def connect_dashboard(request: Request, auth: RequiredAuth, settings: Sett
     <div class='card'>
       <h2>Create product on connected account</h2>
       <form method='post' action='/api/v1/connect-demo/products/create'>
+        <input type='hidden' name='csrf_token' value='{escape(csrf_token)}' />
         <label>Name</label>
         <input name='name' placeholder='Demo Product' required />
         <label>Description</label>
@@ -415,9 +583,11 @@ async def connect_dashboard(request: Request, auth: RequiredAuth, settings: Sett
     <div class='card'>
       <h2>Connected account subscription (platform billing)</h2>
       <form method='post' action='/api/v1/connect-demo/subscriptions/checkout'>
+        <input type='hidden' name='csrf_token' value='{escape(csrf_token)}' />
         <button type='submit'>Start subscription checkout</button>
       </form>
       <form method='post' action='/api/v1/connect-demo/subscriptions/portal'>
+        <input type='hidden' name='csrf_token' value='{escape(csrf_token)}' />
         <button type='submit'>Open billing portal</button>
       </form>
       <p class='muted'>Uses <code>customer_account = acct_...</code> per V2 account billing model.</p>
@@ -440,6 +610,7 @@ async def create_connected_account(
     settings: Settings,
     display_name: str = Form(...),
     contact_email: str = Form(...),
+    csrf_token: str = Form(...),
 ):
     """Create a Stripe Connected Account using V2 API with the required property set.
 
@@ -449,6 +620,15 @@ async def create_connected_account(
     - If mapping exists but account retrieval fails, we create a fresh account and remap.
     """
     _ = request
+    # Validate CSRF token
+    if not _validate_csrf_token(csrf_token):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid or expired CSRF token")
+    # Validate form inputs
+    try:
+        form_data = AccountCreateForm(display_name=display_name, contact_email=contact_email)
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=f"Invalid form data: {e}")
+
     stripe_client = _require_stripe_client(settings)
     user_id = str(auth.get("user_id") or "")
     if not user_id:
@@ -458,26 +638,29 @@ async def create_connected_account(
     if existing and isinstance(existing.get("stripe_account_id"), str):
         existing_account_id = existing["stripe_account_id"]
         try:
-            _ = stripe_client.v2.core.accounts.retrieve(existing_account_id)
+            # Run blocking Stripe call in thread
+            _ = await asyncio.to_thread(stripe_client.v2.core.accounts.retrieve, existing_account_id)
             await _update_mapping_by_account(
                 existing_account_id,
                 meta_updates={
-                    "display_name": display_name,
-                    "contact_email": contact_email,
+                    "display_name": form_data.display_name,
+                    "contact_email": form_data.contact_email,
                     "last_account_create_attempt_at": datetime.now(UTC).isoformat(),
                     "idempotent_reuse": True,
                 },
             )
             return RedirectResponse(url="/api/v1/connect-demo/dashboard", status_code=status.HTTP_303_SEE_OTHER)
-        except Exception:
+        except (InvalidRequestError, AuthenticationError, APIConnectionError) as e:
             # Mapping is stale or account inaccessible; continue to create a new account.
-            pass
+            logger.warning(f"Stripe account retrieval failed for {existing_account_id}: {e}")
 
     # Required shape per user request: do not pass top-level type.
-    account = stripe_client.v2.core.accounts.create(
+    # Run blocking Stripe call in thread
+    account = await asyncio.to_thread(
+        stripe_client.v2.core.accounts.create,
         {
-            "display_name": display_name,
-            "contact_email": contact_email,
+            "display_name": form_data.display_name,
+            "contact_email": form_data.contact_email,
             "identity": {"country": "us"},
             "dashboard": "full",
             "defaults": {
@@ -510,8 +693,8 @@ async def create_connected_account(
         user_id=user_id,
         stripe_account_id=account_id,
         meta={
-            "display_name": display_name,
-            "contact_email": contact_email,
+            "display_name": form_data.display_name,
+            "contact_email": form_data.contact_email,
             "created_account_at": datetime.now(UTC).isoformat(),
             "idempotent_reuse": False,
         },
@@ -521,8 +704,13 @@ async def create_connected_account(
 
 
 @router.post("/accounts/onboarding-link")
-async def create_onboarding_link(request: Request, auth: RequiredAuth, settings: Settings):
+async def create_onboarding_link(
+    request: Request, auth: RequiredAuth, settings: Settings, csrf_token: str = Form(...)
+):
     """Create V2 Account Link for onboarding and redirect merchant to Stripe-hosted flow."""
+    # Validate CSRF token
+    if not _validate_csrf_token(csrf_token):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid or expired CSRF token")
     stripe_client = _require_stripe_client(settings)
     user_id = str(auth.get("user_id") or "")
     mapping = await _get_mapping_by_user(user_id)
@@ -532,7 +720,8 @@ async def create_onboarding_link(request: Request, auth: RequiredAuth, settings:
     account_id = mapping["stripe_account_id"]
     base = _base_url(request)
 
-    account_link = stripe_client.v2.core.account_links.create(
+    account_link = await asyncio.to_thread(
+        stripe_client.v2.core.account_links.create,
         {
             "account": account_id,
             "use_case": {
@@ -563,8 +752,20 @@ async def create_product(
     description: str = Form(""),
     price_in_cents: int = Form(...),
     currency: str = Form("usd"),
+    csrf_token: str = Form(...),
 ):
     """Create product + default price on connected account via Stripe-Account header."""
+    # Validate CSRF token
+    if not _validate_csrf_token(csrf_token):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid or expired CSRF token")
+    # Validate form inputs
+    try:
+        form_data = ProductCreateForm(
+            name=name, description=description, price_in_cents=price_in_cents, currency=currency
+        )
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=f"Invalid form data: {e}")
+
     stripe_client = _require_stripe_client(settings)
     user_id = str(auth.get("user_id") or "")
     mapping = await _get_mapping_by_user(user_id)
@@ -573,13 +774,14 @@ async def create_product(
 
     account_id = mapping["stripe_account_id"]
 
-    _ = stripe_client.v1.products.create(
+    _ = await asyncio.to_thread(
+        stripe_client.v1.products.create,
         {
-            "name": name,
-            "description": description,
+            "name": form_data.name,
+            "description": form_data.description,
             "default_price_data": {
-                "unit_amount": int(price_in_cents),
-                "currency": currency.lower(),
+                "unit_amount": form_data.price_in_cents,
+                "currency": form_data.currency,
             },
         },
         {"stripe_account": account_id},
@@ -592,15 +794,25 @@ async def create_product(
 
 
 @router.get("/storefront/{account_id}", response_class=HTMLResponse)
-async def storefront_page(account_id: str, settings: Settings):
+async def storefront_page(account_id: str, auth: RequiredAuth, settings: Settings):
     """Public storefront page for a single connected account.
 
     NOTE: This demo uses account_id in URL directly for simplicity.
     In production, replace with merchant slug/opaque ID and resolve internally.
     """
+    # Verify ownership - prevent IDOR attacks
+    user_id = str(auth.get("user_id") or "")
+    if not user_id:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing authenticated user_id")
+
+    mapping = await _get_mapping_by_user(user_id)
+    if not mapping or mapping.get("stripe_account_id") != account_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied to this storefront")
+
     stripe_client = _require_stripe_client(settings)
 
-    products = stripe_client.v1.products.list(
+    products = await asyncio.to_thread(
+        stripe_client.v1.products.list,
         {
             "limit": 20,
             "active": True,
@@ -618,6 +830,7 @@ async def storefront_page(account_id: str, settings: Settings):
         if unit_amount is None:
             continue
 
+        csrf_token = _generate_csrf_token()
         rows.append(
             f"""
             <div class='card'>
@@ -625,9 +838,8 @@ async def storefront_page(account_id: str, settings: Settings):
               <p class='muted'>{escape(product.get("description") or "")}</p>
               <p><strong>Price:</strong> {unit_amount / 100:.2f} {escape(currency)}</p>
               <form method='post' action='/api/v1/connect-demo/storefront/{escape(account_id)}/checkout'>
+                <input type='hidden' name='csrf_token' value='{escape(csrf_token)}' />
                 <input type='hidden' name='product_id' value='{escape(product.get("id") or "")}' />
-                <input type='hidden' name='unit_amount' value='{escape(str(unit_amount))}' />
-                <input type='hidden' name='currency' value='{escape(price.get("currency") or "usd")}' />
                 <button type='submit'>Buy now</button>
               </form>
             </div>
@@ -651,24 +863,52 @@ async def checkout_direct_charge(
     account_id: str,
     settings: Settings,
     product_id: str = Form(...),
-    unit_amount: int = Form(...),
-    currency: str = Form("usd"),
+    csrf_token: str = Form(...),
 ):
     """Create direct-charge Checkout Session on connected account with application fee."""
+    # Validate CSRF token
+    if not _validate_csrf_token(csrf_token):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid or expired CSRF token")
     stripe_client = _require_stripe_client(settings)
     base = _base_url(request)
 
-    # TODO(you): set STRIPE_CONNECT_APPLICATION_FEE_AMOUNT in env if you want non-default fee.
-    fee_amount = int(os.getenv("STRIPE_CONNECT_APPLICATION_FEE_AMOUNT", "123"))
+    # Server-side price resolution: never trust client-supplied prices.
+    prices = await asyncio.to_thread(
+        stripe_client.v1.prices.list,
+        {"product": product_id, "active": True, "limit": 1},
+        {"stripe_account": account_id},
+    )
+    if not prices.get("data"):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No active price for product")
+    price = prices["data"][0]
+    unit_amount = price["unit_amount"]
+    currency = price["currency"]
+
+    # Application fee configuration - must be explicitly set
+    fee_amount_str = os.getenv("STRIPE_CONNECT_APPLICATION_FEE_AMOUNT")
+    if not fee_amount_str:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Missing STRIPE_CONNECT_APPLICATION_FEE_AMOUNT. Set an application fee amount (in cents) before checkout.",
+        )
+    try:
+        fee_amount = int(fee_amount_str)
+        if fee_amount < 0:
+            raise ValueError("Fee amount must be non-negative")
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Invalid STRIPE_CONNECT_APPLICATION_FEE_AMOUNT: {e}",
+        )
 
     session = stripe_client.v1.checkout.sessions.create(
         {
             "line_items": [
                 {
                     "price_data": {
-                        "currency": currency.lower(),
+                        "currency": currency,
                         "product": product_id,
-                        "unit_amount": int(unit_amount),
+                        "unit_amount": unit_amount,
                     },
                     "quantity": 1,
                 }
@@ -705,8 +945,13 @@ async def checkout_success(session_id: str | None = None):
 
 
 @router.post("/subscriptions/checkout")
-async def connected_account_subscription_checkout(request: Request, auth: RequiredAuth, settings: Settings):
+async def connected_account_subscription_checkout(
+    request: Request, auth: RequiredAuth, settings: Settings, csrf_token: str = Form(...)
+):
     """Create platform-level hosted subscription checkout using connected account ID as customer_account."""
+    # Validate CSRF token
+    if not _validate_csrf_token(csrf_token):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid or expired CSRF token")
     stripe_client = _require_stripe_client(settings)
     user_id = str(auth.get("user_id") or "")
     mapping = await _get_mapping_by_user(user_id)
@@ -722,6 +967,11 @@ async def connected_account_subscription_checkout(request: Request, auth: Requir
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Missing STRIPE_CONNECT_SUBSCRIPTION_PRICE_ID. Set a recurring price ID before subscription checkout.",
+        )
+    if not price_id.startswith("price_"):
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Invalid subscription price ID format. Must start with 'price_'",
         )
 
     session = stripe_client.v1.checkout.sessions.create(
@@ -744,8 +994,13 @@ async def connected_account_subscription_checkout(request: Request, auth: Requir
 
 
 @router.post("/subscriptions/portal")
-async def connected_account_billing_portal(request: Request, auth: RequiredAuth, settings: Settings):
+async def connected_account_billing_portal(
+    request: Request, auth: RequiredAuth, settings: Settings, csrf_token: str = Form(...)
+):
     """Create billing portal session for connected account billing management."""
+    # Validate CSRF token
+    if not _validate_csrf_token(csrf_token):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid or expired CSRF token")
     stripe_client = _require_stripe_client(settings)
     user_id = str(auth.get("user_id") or "")
     mapping = await _get_mapping_by_user(user_id)
@@ -793,7 +1048,7 @@ def _event_data_object(event: Any) -> dict[str, Any]:
 
     data = getattr(event, "data", None)
     obj = getattr(data, "object", None) if data is not None else None
-    if hasattr(obj, "to_dict"):
+    if obj is not None and hasattr(obj, "to_dict"):
         return obj.to_dict()
     if isinstance(obj, dict):
         return obj
@@ -816,7 +1071,9 @@ async def _handle_v2_requirements_updated(event: Any) -> dict[str, Any]:
     persisted = False
     if account_id:
         requirements_summary = (obj.get("requirements") or {}).get("summary") if isinstance(obj, dict) else None
-        minimum_deadline = (requirements_summary or {}).get("minimum_deadline") if isinstance(requirements_summary, dict) else None
+        minimum_deadline = (
+            (requirements_summary or {}).get("minimum_deadline") if isinstance(requirements_summary, dict) else None
+        )
         persisted = await _update_mapping_by_account(
             account_id,
             meta_updates={
@@ -948,19 +1205,46 @@ async def webhook_thin_v2(request: Request, settings: Settings):
             status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid thin event envelope: {thin_event}"
         )
 
+    # Check idempotency before processing
+    if await _is_event_processed(thin_event_id, gateway="stripe"):
+        return JSONResponse(
+            {
+                "ok": True,
+                "event_type": None,
+                "result": {"handled": False, "reason": "already_processed", "event_id": thin_event_id},
+            }
+        )
+
     full_event = stripe_client.v2.core.events.retrieve(thin_event_id)
     event_type = _event_type(full_event)
 
-    if event_type == "v2.core.account[requirements].updated":
-        result = await _handle_v2_requirements_updated(full_event)
-    elif event_type == "v2.core.account[.recipient].capability_status_updated":
-        result = await _handle_v2_recipient_capability_status_updated(full_event)
-    elif event_type == "v2.core.account[configuration.merchant].capability_status_updated":
-        result = await _handle_v2_merchant_capability_status_updated(full_event)
-    elif event_type == "v2.core.account[configuration.customer].capability_status_updated":
-        result = await _handle_v2_customer_capability_status_updated(full_event)
-    else:
-        result = {"handled": False, "reason": "unmapped_event_type", "event_type": event_type}
+    # Record event as received
+    await _record_webhook_event(thin_event_id, "v2.thin_event", gateway="stripe", status=WebhookEventStatus.RECEIVED)
+
+    try:
+        if event_type == "v2.core.account[requirements].updated":
+            result = await _handle_v2_requirements_updated(full_event)
+        elif event_type == "v2.core.account[.recipient].capability_status_updated":
+            result = await _handle_v2_recipient_capability_status_updated(full_event)
+        elif event_type == "v2.core.account[configuration.merchant].capability_status_updated":
+            result = await _handle_v2_merchant_capability_status_updated(full_event)
+        elif event_type == "v2.core.account[configuration.customer].capability_status_updated":
+            result = await _handle_v2_customer_capability_status_updated(full_event)
+        else:
+            result = {"handled": False, "reason": "unmapped_event_type", "event_type": event_type}
+
+        # Mark event as processed if handling succeeded
+        if result.get("handled"):
+            await _record_webhook_event(
+                thin_event_id, event_type, gateway="stripe", status=WebhookEventStatus.PROCESSED
+            )
+        else:
+            await _record_webhook_event(thin_event_id, event_type, gateway="stripe", status=WebhookEventStatus.IGNORED)
+
+    except Exception as e:
+        logger.error(f"Error processing webhook event {thin_event_id}: {e}")
+        await _record_webhook_event(thin_event_id, event_type, gateway="stripe", status=WebhookEventStatus.FAILED)
+        raise
 
     return JSONResponse({"ok": True, "event_type": event_type, "result": result})
 
@@ -977,11 +1261,18 @@ async def _handle_subscription_event(event: Any) -> dict[str, Any]:
     subscription_status = obj.get("status") if isinstance(obj.get("status"), str) else None
     subscription_price_id = None
 
-    items = obj.get("items", {}).get("data", []) if isinstance(obj.get("items"), dict) else []
-    if items and isinstance(items[0], dict):
-        price = items[0].get("price")
-        if isinstance(price, dict) and isinstance(price.get("id"), str):
-            subscription_price_id = price["id"]
+    # Defensive null checking for nested dictionary access
+    items_obj = obj.get("items", {})
+    if isinstance(items_obj, dict):
+        items_data = items_obj.get("data", [])
+        if isinstance(items_data, list) and len(items_data) > 0:
+            first_item = items_data[0]
+            if isinstance(first_item, dict):
+                price = first_item.get("price")
+                if isinstance(price, dict):
+                    price_id = price.get("id")
+                    if isinstance(price_id, str):
+                        subscription_price_id = price_id
 
     await _save_subscription_state(account_id, subscription_id, subscription_status, subscription_price_id)
     await _append_account_event(
@@ -1059,22 +1350,50 @@ async def webhook_billing_snapshot(request: Request, settings: Settings):
     event = stripe_client.v1.events.retrieve(event_id) if event_id else json.loads(payload.decode("utf-8"))
     event_type = _event_type(event)
 
-    if event_type in {"customer.subscription.updated", "customer.subscription.deleted"}:
-        result = await _handle_subscription_event(event)
-    elif event_type in {"payment_method.attached", "payment_method.detached"}:
-        result = await _handle_payment_method_event(event)
-    elif event_type == "customer.updated":
-        result = await _handle_customer_updated_event(event)
-    elif event_type in {"customer.tax_id.created", "customer.tax_id.deleted", "customer.tax_id.updated"}:
-        result = await _handle_tax_id_event(event)
-    elif event_type in {
-        "billing_portal.configuration.created",
-        "billing_portal.configuration.updated",
-        "billing_portal.session.created",
-    }:
-        result = {"handled": True, "event_type": event_type}
-    else:
-        result = {"handled": False, "reason": "unmapped_event_type", "event_type": event_type}
+    # Check idempotency before processing
+    if event_id and await _is_event_processed(event_id, gateway="stripe"):
+        return JSONResponse(
+            {
+                "ok": True,
+                "event_type": None,
+                "result": {"handled": False, "reason": "already_processed", "event_id": event_id},
+            }
+        )
+
+    # Record event as received
+    if event_id:
+        await _record_webhook_event(event_id, event_type, gateway="stripe", status=WebhookEventStatus.RECEIVED)
+
+    try:
+        if event_type in {"customer.subscription.updated", "customer.subscription.deleted"}:
+            result = await _handle_subscription_event(event)
+        elif event_type in {"payment_method.attached", "payment_method.detached"}:
+            result = await _handle_payment_method_event(event)
+        elif event_type == "customer.updated":
+            result = await _handle_customer_updated_event(event)
+        elif event_type in {"customer.tax_id.created", "customer.tax_id.deleted", "customer.tax_id.updated"}:
+            result = await _handle_tax_id_event(event)
+        elif event_type in {
+            "billing_portal.configuration.created",
+            "billing_portal.configuration.updated",
+            "billing_portal.session.created",
+        }:
+            result = {"handled": True, "event_type": event_type}
+        else:
+            result = {"handled": False, "reason": "unmapped_event_type", "event_type": event_type}
+
+        # Mark event as processed if handling succeeded
+        if event_id:
+            if result.get("handled"):
+                await _record_webhook_event(event_id, event_type, gateway="stripe", status=WebhookEventStatus.PROCESSED)
+            else:
+                await _record_webhook_event(event_id, event_type, gateway="stripe", status=WebhookEventStatus.IGNORED)
+
+    except Exception as e:
+        logger.error(f"Error processing webhook event {event_id}: {e}")
+        if event_id:
+            await _record_webhook_event(event_id, event_type, gateway="stripe", status=WebhookEventStatus.FAILED)
+        raise
 
     return JSONResponse({"ok": True, "event_type": event_type, "result": result})
 
@@ -1102,7 +1421,7 @@ async def list_recent_connect_events(auth: RequiredAuth):
 
 
 @router.get("/account/{account_id}")
-async def get_connect_account_status(account_id: str, settings: Settings):
+async def get_connect_account_status(account_id: str, auth: RequiredAuth, settings: Settings):
     """JSON helper to fetch current account status directly from Stripe API."""
     stripe_client = _require_stripe_client(settings)
     account = stripe_client.v2.core.accounts.retrieve(
