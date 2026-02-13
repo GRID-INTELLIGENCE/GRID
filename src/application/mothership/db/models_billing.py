@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from .models_base import Base, utcnow
@@ -97,6 +97,61 @@ class InvoiceRow(Base):
         String(64), ForeignKey("mothership_payment_transactions.id"), nullable=True
     )
     line_items: Mapped[list[dict[str, Any]]] = mapped_column(JSON, default=list)
+    meta: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class PaymentWebhookEventRow(Base):
+    __tablename__ = "mothership_payment_webhook_events"
+
+    __table_args__ = (UniqueConstraint("gateway", "gateway_event_id", name="uq_payment_webhook_gateway_event"),)
+
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    gateway: Mapped[str] = mapped_column(String(32), default="stripe", index=True)
+    gateway_event_id: Mapped[str] = mapped_column(String(128), index=True)
+    event_type: Mapped[str] = mapped_column(String(128), default="", index=True)
+    status: Mapped[str] = mapped_column(String(32), default="received", index=True)
+    signature_hash: Mapped[str] = mapped_column(String(128), default="")
+    payload_hash: Mapped[str] = mapped_column(String(128), default="")
+    payment_transaction_id: Mapped[str | None] = mapped_column(
+        String(64), ForeignKey("mothership_payment_transactions.id"), nullable=True
+    )
+    gateway_transaction_id: Mapped[str | None] = mapped_column(String(128), nullable=True, index=True)
+    meta: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+    received_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
+    processed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class PaymentReconciliationRunRow(Base):
+    __tablename__ = "mothership_payment_reconciliation_runs"
+
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    gateway: Mapped[str] = mapped_column(String(32), default="stripe", index=True)
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    scanned_transactions: Mapped[int] = mapped_column(Integer, default=0)
+    mismatched_transactions: Mapped[int] = mapped_column(Integer, default=0)
+    auto_reconciled_transactions: Mapped[int] = mapped_column(Integer, default=0)
+    issues: Mapped[list[dict[str, Any]]] = mapped_column(JSON, default=list)
+    meta: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class ConnectAccountMappingRow(Base):
+    """Maps local users to Stripe Connect account IDs for demo flows."""
+
+    __tablename__ = "mothership_connect_account_mappings"
+
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    user_id: Mapped[str] = mapped_column(String(128), unique=True, index=True)
+    stripe_account_id: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+    subscription_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    subscription_status: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    subscription_price_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
     meta: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)

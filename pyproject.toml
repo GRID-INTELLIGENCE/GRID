@@ -52,10 +52,13 @@ dependencies = [
     # Task Queue & Background Processing
     "celery>=5.3.0",
     "schedule>=1.2.2",
+    "aio-pika>=9.0.0",
+    # Safety (Cognitive Privacy Shield)
+    "grid-safety>=1.0.0",
     # Security & Authentication
     "python-jose[cryptography]>=3.3.0",
     "bcrypt>=4.1.0",
-    "stripe>=7.0.0",
+    "stripe>=14.0.1",
     # External Services
     "databricks-sql-connector>=4.2.4",
     "databricks-sdk>=0.40.0",
@@ -205,16 +208,7 @@ exclude = [
     "EUFLE/**",
 ]
 
-[tool.uv]
-# Note: dev-dependencies moved to [dependency-groups] section (lines 109-112)
-# See PEP 735 for dependency groups specification
-
-[tool.uv.sources]
-
-[tool.uv.workspace]
-# Simplified workspace - only include directories with valid pyproject.toml
-# This fixes: "Workspace member X is missing a pyproject.toml" errors
-members = ["."]
+# UV config is managed at workspace root (../../../pyproject.toml)
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
@@ -253,6 +247,7 @@ markers = [
 [tool.ruff]
 line-length = 120
 target-version = "py313"
+# Inherit workspace rules; project-specific excludes below
 exclude = [
     "light_of_the_seven/",
     "datakit/",

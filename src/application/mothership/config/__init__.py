@@ -19,7 +19,7 @@ from dataclasses import dataclass, field
 
 # Check for quiet mode early to suppress warnings in CLI tools
 _quiet_mode = os.environ.get("GRID_QUIET", "").lower() in ("1", "true", "yes")
-from enum import Enum
+from enum import Enum, StrEnum
 from functools import lru_cache
 from pathlib import Path
 from typing import Any, Optional
@@ -40,7 +40,7 @@ except ImportError:
         return "acceptable"
 
 
-class Environment(str, Enum):
+class Environment(StrEnum):
     """Deployment environment types."""
 
     DEVELOPMENT = "development"
@@ -49,7 +49,7 @@ class Environment(str, Enum):
     TESTING = "testing"
 
 
-class LogLevel(str, Enum):
+class LogLevel(StrEnum):
     """Logging levels."""
 
     DEBUG = "DEBUG"
@@ -310,7 +310,9 @@ class SecuritySettings:
             # Accountability Contract Enforcement
             accountability_enabled=_parse_bool(env.get("MOTHERSHIP_ACCOUNTABILITY_ENABLED"), True),
             accountability_enforcement_mode=env.get("MOTHERSHIP_ACCOUNTABILITY_MODE", "monitor"),
-            accountability_contract_path=env.get("MOTHERSHIP_ACCOUNTABILITY_CONTRACT_PATH", "config/accountability/contracts.yaml"),
+            accountability_contract_path=env.get(
+                "MOTHERSHIP_ACCOUNTABILITY_CONTRACT_PATH", "config/accountability/contracts.yaml"
+            ),
             accountability_audit_logging=_parse_bool(env.get("MOTHERSHIP_ACCOUNTABILITY_AUDIT_LOGGING"), True),
         )
 
@@ -556,11 +558,21 @@ class PaymentSettings:
     stripe_webhook_secret: str = ""
     stripe_publishable_key: str = ""
     stripe_enabled: bool = False
+    stripe_price_starter: str = ""
+    stripe_price_professional: str = ""
+    stripe_price_enterprise: str = ""
+    stripe_customer_creation_enabled: bool = True
+    stripe_livemode_enforcement: str = "auto"  # auto|live|test|off
 
     # Payment defaults
     default_gateway: str = "stripe"  # "bkash" or "stripe"
     currency: str = "USD"
     default_timeout_seconds: int = 30
+
+    # Reconciliation scheduler
+    reconciliation_enabled: bool = True
+    reconciliation_interval_seconds: int = 900
+    reconciliation_lookback_hours: int = 168
 
     @classmethod
     def from_env(cls) -> PaymentSettings:
@@ -568,10 +580,11 @@ class PaymentSettings:
         env = os.environ
         default_gateway = env.get("MOTHERSHIP_PAYMENT_DEFAULT_GATEWAY", "stripe")
         if default_gateway == "bkash":
-            from .utils import ghost_config_trap  # type: ignore[import-not-found]
+            from ..utils import ghost_config_trap  # type: ignore[import-not-found]
 
             ghost_config_trap("config", "default_gateway=bkash")
             default_gateway = "stripe"  # Force to stripe after trapping
+
         bkash_force_disable = _parse_bool(env.get("MOTHERSHIP_BKASH_FORCE_DISABLE"), False)
         bkash_enabled = _parse_bool(env.get("BKASH_ENABLED")) if not bkash_force_disable else False
 
@@ -586,9 +599,17 @@ class PaymentSettings:
             stripe_webhook_secret=env.get("STRIPE_WEBHOOK_SECRET", ""),
             stripe_publishable_key=env.get("STRIPE_PUBLISHABLE_KEY", ""),
             stripe_enabled=_parse_bool(env.get("STRIPE_ENABLED")),
+            stripe_price_starter=env.get("STRIPE_PRICE_STARTER", ""),
+            stripe_price_professional=env.get("STRIPE_PRICE_PROFESSIONAL", ""),
+            stripe_price_enterprise=env.get("STRIPE_PRICE_ENTERPRISE", ""),
+            stripe_customer_creation_enabled=_parse_bool(env.get("STRIPE_CUSTOMER_CREATION_ENABLED"), True),
+            stripe_livemode_enforcement=env.get("STRIPE_LIVEMODE_ENFORCEMENT", "auto").strip().lower(),
             default_gateway=default_gateway,
             currency=env.get("MOTHERSHIP_PAYMENT_CURRENCY", "USD"),
             default_timeout_seconds=int(env.get("MOTHERSHIP_PAYMENT_TIMEOUT", "30")),
+            reconciliation_enabled=_parse_bool(env.get("MOTHERSHIP_PAYMENT_RECONCILIATION_ENABLED"), True),
+            reconciliation_interval_seconds=int(env.get("MOTHERSHIP_PAYMENT_RECONCILIATION_INTERVAL", "900")),
+            reconciliation_lookback_hours=int(env.get("MOTHERSHIP_PAYMENT_RECONCILIATION_LOOKBACK_HOURS", "168")),
         )
 
     def validate(self) -> list[str]:
@@ -598,6 +619,22 @@ class PaymentSettings:
             issues.append("bKash is set as default gateway but not enabled")
         if self.default_gateway == "stripe" and not self.stripe_enabled:
             issues.append("Stripe is set as default gateway but not enabled")
+        if self.stripe_enabled and not self.stripe_webhook_secret:
+            issues.append("Stripe is enabled but STRIPE_WEBHOOK_SECRET is not configured")
+        if self.stripe_enabled and not self.stripe_secret_key:
+            issues.append("Stripe is enabled but STRIPE_SECRET_KEY is not configured")
+        if self.stripe_enabled and not self.stripe_price_starter:
+            issues.append("Stripe is enabled but STRIPE_PRICE_STARTER is not configured")
+        if self.stripe_enabled and not self.stripe_price_professional:
+            issues.append("Stripe is enabled but STRIPE_PRICE_PROFESSIONAL is not configured")
+        if self.stripe_enabled and not self.stripe_price_enterprise:
+            issues.append("Stripe is enabled but STRIPE_PRICE_ENTERPRISE is not configured")
+        if self.stripe_livemode_enforcement not in {"auto", "live", "test", "off"}:
+            issues.append("STRIPE_LIVEMODE_ENFORCEMENT must be one of: auto, live, test, off")
+        if self.reconciliation_interval_seconds < 60:
+            issues.append("MOTHERSHIP_PAYMENT_RECONCILIATION_INTERVAL must be >= 60 seconds")
+        if self.reconciliation_lookback_hours < 1:
+            issues.append("MOTHERSHIP_PAYMENT_RECONCILIATION_LOOKBACK_HOURS must be >= 1")
         return issues
 
 
@@ -1025,3 +1062,6 @@ __all__ = [
     *(["InferenceAbrasivenessLevel"] if InferenceAbrasivenessLevel is not None else []),
     *(["InferenceCleanupSettings"] if InferenceCleanupSettings is not None else []),
 ]
+
+
+

@@ -19,6 +19,7 @@ Usage:
 
 from __future__ import annotations
 
+import asyncio
 import importlib
 import logging
 import os
@@ -54,17 +55,21 @@ from infrastructure.parasite_guard import add_parasite_guard
 
 from .config import MothershipSettings, get_settings
 from .db.engine import dispose_async_engine, get_async_engine
-from .dependencies import get_cockpit_service, reset_cockpit_service
+from .dependencies import get_cockpit_service, get_uow, reset_cockpit_service
 from .exceptions import MothershipError
 from .middleware.data_corruption import DataCorruptionDetectionMiddleware
-from .routers.corruption_monitoring import router as corruption_router
+from .middleware.stream_monitor import StreamMonitorMiddleware
 from .routers import create_api_router
 from .routers.agentic import router as agentic_router
 from .routers.cockpit import router as cockpit_router
+from .routers.corruption_monitoring import router as corruption_router
 from .routers.health import router as health_router
+from .routers.payment import get_payment_gateway
+from .routers.safety import router as safety_router
 
 # Security Infrastructure
 from .security.api_sentinels import API_DEFAULTS, apply_defaults
+from .services.payment import reconciliation_loop
 
 # =============================================================================
 # Logging Configuration
@@ -200,6 +205,20 @@ async def generic_exception_handler(request: Request, exc: Exception) -> JSONRes
 
 
 # =============================================================================
+# Payment Helpers
+# =============================================================================
+
+
+def _build_payment_gateway_for_scheduler(settings: MothershipSettings):
+    """Build payment gateway for scheduled reconciliation loop."""
+    try:
+        return get_payment_gateway(settings)
+    except HTTPException as exc:
+        logger.warning("Payment reconciliation scheduler disabled due to gateway configuration: %s", exc.detail)
+        return None
+
+
+# =============================================================================
 # Middleware
 # =============================================================================
 
@@ -315,6 +334,16 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
     # Startup
     try:
+        # Enable async task tracking when DEBUG_ASYNC=true (non-invasive)
+        if os.getenv("DEBUG_ASYNC", "").lower() == "true":
+            try:
+                from grid.debug.async_tracker import enable_async_tracking
+
+                enable_async_tracking()
+                logger.info("Async task tracking enabled (DEBUG_ASYNC=true)")
+            except ImportError as e:
+                logger.debug("Async tracking unavailable: %s", e)
+
         # Initialize database engine explicitly to catch connection errors early
         get_async_engine()
         logger.info("Database engine initialized")
@@ -328,6 +357,27 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         # Initialize cockpit service
         cockpit = get_cockpit_service()
         logger.info("Cockpit service initialized")
+
+        # Start payment reconciliation scheduler
+        app.state.payment_reconciliation_stop = asyncio.Event()  # type: ignore[reportAttributeAccessIssue]
+        app.state.payment_reconciliation_task = None  # type: ignore[reportAttributeAccessIssue]
+        if settings.payment.reconciliation_enabled:
+            app.state.payment_reconciliation_task = asyncio.create_task(  # type: ignore[reportAttributeAccessIssue]
+                reconciliation_loop(
+                    settings=settings,
+                    uow_factory=get_uow,
+                    gateway_factory=_build_payment_gateway_for_scheduler,
+                    stop_event=app.state.payment_reconciliation_stop,  # type: ignore[reportAttributeAccessIssue]
+                ),
+                name="payment_reconciliation_loop",
+            )
+            logger.info(
+                "Payment reconciliation scheduler started interval=%ss lookback=%sh",
+                settings.payment.reconciliation_interval_seconds,
+                settings.payment.reconciliation_lookback_hours,
+            )
+        else:
+            logger.info("Payment reconciliation scheduler disabled by configuration")
 
         # Register default components
         if settings.is_development:
@@ -377,6 +427,44 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
             if settings.is_production:
                 raise RuntimeError("Security infrastructure must initialize in production") from e
 
+        # Initialize Safety Enforcement Infrastructure
+        try:
+            import sys
+            from pathlib import Path
+
+            # Add safety directory to path
+            safety_dir = Path(__file__).parent.parent.parent.parent / "safety"
+            if str(safety_dir) not in sys.path:
+                sys.path.insert(0, str(safety_dir))
+
+            from safety.audit.db import check_health as check_safety_db
+            from safety.audit.db import init_db as init_safety_db
+            from safety.workers.worker_utils import check_redis_health, ensure_consumer_group
+
+            # Initialize audit database
+            await init_safety_db()
+            db_healthy = await check_safety_db()
+            if not db_healthy:
+                logger.warning("Safety audit database connection failed - will fail closed on requests")
+            else:
+                logger.info("Safety audit database initialized")
+
+            # Check Redis connectivity
+            redis_healthy = await check_redis_health()
+            if not redis_healthy:
+                logger.warning("Safety Redis connection failed - will fail closed on requests")
+            else:
+                await ensure_consumer_group()
+                logger.info("Safety Redis streams initialized")
+
+            logger.info("Safety enforcement infrastructure initialized")
+
+        except Exception as e:
+            logger.error(f"Safety enforcement initialization failed: {e}")
+            if settings.is_production:
+                raise RuntimeError("Safety enforcement must initialize in production") from e
+            logger.warning("Continuing startup in development mode (safety will fail closed)")
+
         if hasattr(app.state, "parasite_guard"):
             try:
                 from infrastructure.event_bus.event_system import get_eventbus
@@ -387,7 +475,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
                 event_bus = await get_eventbus()
 
                 # Wire it up
-                wire_parasite_guard_to_eventbus(app.state.parasite_guard, event_bus)
+                wire_parasite_guard_to_eventbus(app.state.parasite_guard, event_bus)  # type: ignore[reportAttributeAccessIssue]
                 logger.info("ParasiteGuard wired to EventBus for security event emission")
             except Exception as e:
                 logger.warning(f"Could not wire ParasiteGuard to EventBus: {e}")
@@ -404,6 +492,19 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     logger.info("Shutting down Mothership Cockpit...")
 
     try:
+        # Stop payment reconciliation scheduler
+        reconciliation_stop = getattr(app.state, "payment_reconciliation_stop", None)
+        reconciliation_task = getattr(app.state, "payment_reconciliation_task", None)
+        if reconciliation_stop is not None:
+            reconciliation_stop.set()
+        if reconciliation_task is not None:
+            reconciliation_task.cancel()
+            try:
+                await reconciliation_task
+            except asyncio.CancelledError:
+                pass
+            logger.info("Payment reconciliation scheduler stopped")
+
         # Graceful shutdown of cockpit service
         cockpit = get_cockpit_service()
         cockpit.shutdown()
@@ -431,7 +532,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         # Shutdown DRT middleware
         if hasattr(app.state, "drt_middleware"):
             try:
-                await app.state.drt_middleware.shutdown()
+                await app.state.drt_middleware.shutdown()  # type: ignore[reportAttributeAccessIssue]
                 logger.info("DRT middleware shut down")
             except Exception as e:
                 logger.warning(f"Error shutting down DRT middleware: {e}")
@@ -440,6 +541,27 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         from .utils.cpu_executor import shutdown_executor
 
         shutdown_executor()
+
+        # Shutdown safety enforcement infrastructure
+        try:
+            import sys
+            from pathlib import Path
+
+            # Add safety directory to path
+            safety_dir = Path(__file__).parent.parent.parent.parent / "safety"
+            if str(safety_dir) not in sys.path:
+                sys.path.insert(0, str(safety_dir))
+
+            from safety.api.rate_limiter import close_pool as close_rate_limiter_pool
+            from safety.audit.db import close_db as close_safety_db
+            from safety.workers.worker_utils import close_redis
+
+            await close_safety_db()
+            await close_redis()
+            await close_rate_limiter_pool()
+            logger.info("Safety enforcement infrastructure shut down")
+        except Exception as e:
+            logger.warning(f"Error shutting down safety enforcement: {e}")
 
     except Exception as e:
         logger.error(f"Error during shutdown: {e}")
@@ -488,7 +610,7 @@ The API supports multiple authentication methods:
 - API Key (X-API-Key header)
 - JWT Bearer Token (Authorization header)
 
-Development mode allows unauthenticated access.
+**NO BYPASS PERMITTED** - All requests require authentication.
         """,
         version=settings.app_version,
         docs_url="/docs" if settings.is_development else None,
@@ -565,8 +687,8 @@ Development mode allows unauthenticated access.
 
     # 2. Mothership custom middlewares (Centralized Setup)
     from .middleware import setup_middleware
-    from .middleware.drt_middleware_unified import UnifiedDRTMiddleware, set_unified_drt_middleware
     from .middleware.accountability_contract import AccountabilityContractMiddleware
+    from .middleware.drt_middleware_unified import UnifiedDRTMiddleware, set_unified_drt_middleware
     from .routers.drt_monitoring_unified import router as drt_router
 
     # This sets up:
@@ -652,7 +774,7 @@ Development mode allows unauthenticated access.
             penalty_points_enabled=settings.security.drt_penalty_points_enabled,
         )
         # Store middleware instance for shutdown handling and router access
-        app.state.drt_middleware = drt_middleware
+        app.state.drt_middleware = drt_middleware  # type: ignore[reportAttributeAccessIssue]
         set_unified_drt_middleware(drt_middleware)
         logger.info("Unified DRT behavioral monitoring middleware enabled")
     except Exception as e:
@@ -674,21 +796,42 @@ Development mode allows unauthenticated access.
                 contract_path=settings.security.accountability_contract_path,
                 skip_paths=["/health", "/metrics", "/docs", "/redoc", "/openapi.json"],
             )
-            app.state.accountability_middleware = accountability_middleware
+            app.state.accountability_middleware = accountability_middleware  # type: ignore[reportAttributeAccessIssue]
             logger.info(
                 f"Accountability contract enforcement middleware enabled: mode={settings.security.accountability_enforcement_mode}"
             )
         except Exception as e:
             logger.warning(f"Accountability contract middleware not available: {e}")
 
-    # 7. Parasite Guard (Total Rickall Defense)
+    # 7. Safety Enforcement Middleware (MANDATORY)
+    # This middleware MUST run before model inference endpoints
+    # Enforces: auth → suspension → rate limit → pre-check → enqueue
+    try:
+        import sys
+        from pathlib import Path
+
+        # Add safety directory to path
+        safety_dir = Path(__file__).parent.parent.parent.parent / "safety"
+        if str(safety_dir) not in sys.path:
+            sys.path.insert(0, str(safety_dir))
+
+        from safety.api.middleware import SafetyMiddleware
+
+        app.add_middleware(SafetyMiddleware)
+        logger.info("Safety enforcement middleware enabled (MANDATORY)")
+    except Exception as e:
+        logger.error(f"Safety enforcement middleware failed to load: {e}")
+        if settings.is_production:
+            raise RuntimeError("Safety middleware is mandatory in production") from e
+
+    # 8. Parasite Guard (Total Rickall Defense)
     # Phase 3: Enable Sanitization (Production Enabled)
     if settings.security.parasite_guard_enabled:
         # Add parasite guard with appropriate mode based on pruning flag
         mode = "full" if settings.security.parasite_guard_pruning_enabled else "detect"
         middleware = add_parasite_guard(app, mode=mode)
         # Store for wiring in lifespan
-        app.state.parasite_guard = middleware
+        app.state.parasite_guard = middleware  # type: ignore[reportAttributeAccessIssue]
         logger.info("Parasite Guard integrated (mode=%s)", mode)
 
     # ==========================================================================
@@ -770,6 +913,10 @@ Development mode allows unauthenticated access.
 
     app.include_router(drt_router)
     logger.info("DRT monitoring API endpoints registered")
+
+    # Safety enforcement endpoints (protected by SafetyMiddleware)
+    app.include_router(safety_router)
+    logger.info("Safety enforcement API endpoints registered")
 
     app.include_router(api_router)
 

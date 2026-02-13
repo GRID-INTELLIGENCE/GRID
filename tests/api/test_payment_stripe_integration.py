@@ -1,208 +1,355 @@
-"""Tests for Payment Stripe integration business logic.
-
-Phase 3 Sprint 3: Payment tests (8 tests)
-Tests payment logic, webhook verification, refunds, and subscriptions.
-"""
+"""Tests for Stripe payment router and gateway behavior."""
 
 from __future__ import annotations
 
-import hashlib
-import hmac
-import json
+from contextlib import asynccontextmanager
+from datetime import UTC, datetime, timedelta
+from types import SimpleNamespace
+
+import pytest
+from fastapi import HTTPException
+from starlette.requests import Request
+
+from application.mothership.config import PaymentSettings
+from application.mothership.exceptions import IntegrationError
+from application.mothership.models.payment import (
+    PaymentReconciliationRun,
+    PaymentStatus,
+    PaymentTransaction,
+    PaymentWebhookEvent,
+    Subscription,
+    SubscriptionTier,
+    WebhookEventStatus,
+)
+from application.mothership.routers.payment import (
+    cancel_subscription,
+    get_payment_gateway,
+    list_stuck_pending_payments,
+    payment_webhook,
+)
+from application.mothership.schemas.payment import CancelSubscriptionRequest
+from application.mothership.services.payment import PaymentReconciliationService
+from application.mothership.services.payment import stripe_gateway as stripe_gateway_module
 
 
-class TestPaymentCreation:
-    """Test payment creation workflows."""
+class _StubPaymentRepo:
+    def __init__(self):
+        self._tx = {}
 
-    def test_payment_request_validation(self):
-        """Test payment request validation."""
-        # Payment amounts must be positive integers in cents
-        valid_amounts = [100, 5000, 999999]
-        invalid_amounts = [-1000, 0, -1]
+    async def get_all(self):
+        return list(self._tx.values())
 
-        for amount in valid_amounts:
-            assert amount > 0
-
-        for amount in invalid_amounts:
-            assert amount <= 0
-
-    def test_idempotency_key_generation(self):
-        """Test idempotency key prevents duplicate charges."""
-        import uuid
-
-        # Generate unique keys
-        key1 = str(uuid.uuid4())
-        key2 = str(uuid.uuid4())
-        assert key1 != key2
-        assert len(key1) == 36  # UUID format
+    async def update(self, transaction):
+        self._tx[transaction.id] = transaction
 
 
-class TestWebhookSignatureVerification:
-    """Test webhook signature verification (CRITICAL)."""
+class _StubWebhookRepo:
+    def __init__(self):
+        self._events = {}
 
-    def test_stripe_signature_generation(self):
-        """Test Stripe webhook signature HMAC generation."""
-        secret = "whsec_test_secret"
-        payload = json.dumps({"type": "payment_intent.succeeded"})
+    async def get_by_gateway_event_id(self, gateway_event_id: str, gateway: str | None = None):
+        for event in self._events.values():
+            if event.gateway_event_id != gateway_event_id:
+                continue
+            if gateway and event.gateway.value != gateway:
+                continue
+            return event
+        return None
 
-        # Generate HMAC as Stripe does
-        signature = hmac.new(
-            secret.encode(),
-            msg=payload.encode(),
-            digestmod=hashlib.sha256,
-        ).hexdigest()
+    async def add(self, event: PaymentWebhookEvent):
+        self._events[event.id] = event
 
-        assert isinstance(signature, str)
-        assert len(signature) == 64  # SHA256 hex is 64 chars
-
-    def test_signature_verification_success(self):
-        """Test successful signature verification."""
-        secret = "whsec_test_secret"
-        payload = json.dumps({"type": "payment_intent.succeeded"})
-
-        # Generate correct signature
-        expected_sig = hmac.new(
-            secret.encode(),
-            msg=payload.encode(),
-            digestmod=hashlib.sha256,
-        ).hexdigest()
-
-        # Generate same signature again
-        actual_sig = hmac.new(
-            secret.encode(),
-            msg=payload.encode(),
-            digestmod=hashlib.sha256,
-        ).hexdigest()
-
-        assert expected_sig == actual_sig
-
-    def test_signature_verification_failure(self):
-        """Test signature mismatch detection."""
-        secret = "whsec_test_secret"
-        payload = json.dumps({"type": "payment_intent.succeeded"})
-
-        # Generate correct signature
-        correct_sig = hmac.new(
-            secret.encode(),
-            msg=payload.encode(),
-            digestmod=hashlib.sha256,
-        ).hexdigest()
-
-        # Wrong signature
-        wrong_sig = "0" * 64
-
-        assert correct_sig != wrong_sig
+    async def update(self, event: PaymentWebhookEvent):
+        self._events[event.id] = event
 
 
-class TestRefundProcessing:
-    """Test refund processing workflows."""
+class _StubReconciliationRepo:
+    def __init__(self):
+        self._runs = {}
 
-    def test_refund_amount_validation(self):
-        """Test refund amount validation."""
-        transaction_amount = 10000
+    async def add(self, run: PaymentReconciliationRun):
+        self._runs[run.id] = run
 
-        # Valid refund amounts
-        valid_refunds = [1, 5000, 10000]
-        for amount in valid_refunds:
-            assert 0 < amount <= transaction_amount
+    async def get_all(self):
+        return list(self._runs.values())
 
-        # Invalid refund amounts
-        invalid_refunds = [-1, 0, 15000]
-        for amount in invalid_refunds:
-            assert not (0 < amount <= transaction_amount)
-
-    def test_partial_refund_accumulation(self):
-        """Test that multiple partial refunds don't exceed transaction."""
-        transaction_amount = 10000
-        refund1 = 3000
-        refund2 = 4000
-        refund3 = 3000
-
-        total_refunded = refund1 + refund2 + refund3
-        assert total_refunded == transaction_amount
-        assert total_refunded <= transaction_amount
-
-    def test_refund_prevents_overrefund(self):
-        """Test that refunds cannot exceed original transaction."""
-        transaction_amount = 10000
-        already_refunded = 5000
-        remaining_refundable = transaction_amount - already_refunded
-
-        # Request refund of $6000 (exceeds $5000 remaining)
-        request_refund = 6000
-
-        assert request_refund > remaining_refundable
+    async def get_recent(self, limit: int = 20):
+        runs = list(self._runs.values())
+        runs.sort(key=lambda run: run.started_at, reverse=True)
+        return runs[:limit]
 
 
-class TestSubscriptionManagement:
-    """Test subscription workflows."""
+class _StubSubscriptionRepo:
+    def __init__(self, subscription: Subscription):
+        self._subscription = subscription
+        self.updated = False
 
-    def test_subscription_period_duration(self):
-        """Test subscription period calculation."""
-        from datetime import timedelta
+    async def get(self, _id: str):
+        return self._subscription
 
-        billing_cycle_days = 30
-
-        period_duration = timedelta(days=billing_cycle_days)
-        assert period_duration.days == billing_cycle_days
-
-    def test_subscription_status_lifecycle(self):
-        """Test subscription status transitions."""
-        # Valid status sequence
-        statuses = ["pending", "active", "past_due", "canceled"]
-
-        assert "active" in statuses
-        assert "canceled" in statuses
-        assert "pending" in statuses
-
-    def test_subscription_tier_levels(self):
-        """Test subscription tier validation."""
-        valid_tiers = ["free", "pro", "enterprise"]
-
-        for tier in valid_tiers:
-            assert isinstance(tier, str)
-            assert len(tier) > 0
+    async def update(self, subscription: Subscription):
+        self._subscription = subscription
+        self.updated = True
 
 
-class TestPaymentAuthEnforcement:
-    """Test authentication and authorization."""
+class _StubUoW:
+    def __init__(self, subscriptions: _StubSubscriptionRepo | None = None):
+        self.payment_transactions = _StubPaymentRepo()
+        self.webhook_events = _StubWebhookRepo()
+        self.reconciliation_runs = _StubReconciliationRepo()
+        self.subscriptions = subscriptions
 
-    def test_user_payment_isolation(self):
-        """Test that users can only access their own payments."""
-        transaction_owner = "user_1"
-        requesting_user = "user_2"
-
-        is_authorized = transaction_owner == requesting_user
-        assert not is_authorized
-
-    def test_auth_token_required(self):
-        """Test that missing auth token is rejected."""
-        token = None
-        assert token is None
+    @asynccontextmanager
+    async def transaction(self):
+        yield self
 
 
-class TestPaymentAmountValidation:
-    """Test payment amount validation."""
+class _StubGateway:
+    def __init__(self, event: dict, cancel_result: bool = True):
+        self._event = event
+        self._cancel_result = cancel_result
 
-    def test_amount_positive_validation(self):
-        """Test that amounts must be positive."""
-        amounts = [1, 100, 10000]
-        for amount in amounts:
-            assert amount > 0
+    async def verify_webhook(self, signature: str, payload: bytes):
+        assert signature
+        assert payload
+        return self._event
 
-    def test_amount_currency_code(self):
-        """Test currency code validation."""
-        valid_currencies = {"usd", "eur", "gbp", "jpy"}
+    async def cancel_subscription(self, gateway_subscription_id: str, immediately: bool = False) -> bool:
+        assert gateway_subscription_id
+        return self._cancel_result
 
-        test_currency = "usd"
-        assert test_currency in valid_currencies
+    def get_name(self) -> str:
+        return "stripe"
 
-        invalid_currency = "xxxx"
-        assert invalid_currency not in valid_currencies
 
-    def test_amount_in_cents_precision(self):
-        """Test amount precision is in cents."""
-        # $99.99 = 9999 cents
-        usd_cents = 9999
-        assert isinstance(usd_cents, int)
-        assert usd_cents > 0
+class _StubStatusGateway(_StubGateway):
+    def __init__(self, status: PaymentStatus):
+        super().__init__(event={})
+        self._status = status
+
+    async def get_transaction_status(self, gateway_transaction_id: str) -> PaymentStatus:
+        assert gateway_transaction_id
+        return self._status
+
+    def get_name(self) -> str:
+        return "stripe"
+
+
+def _request_with_signature(body: bytes) -> Request:
+    scope = {
+        "type": "http",
+        "method": "POST",
+        "headers": [(b"stripe-signature", b"sig")],
+    }
+    sent = False
+
+    async def receive():
+        nonlocal sent
+        if sent:
+            return {"type": "http.request", "body": b"", "more_body": False}
+        sent = True
+        return {"type": "http.request", "body": body, "more_body": False}
+
+    return Request(scope, receive)
+
+
+class TestPaymentSettingsValidation:
+    def test_requires_stripe_prices_when_enabled(self):
+        settings = PaymentSettings(
+            stripe_enabled=True,
+            stripe_secret_key="sk_test_123",
+            stripe_webhook_secret="whsec_123",
+            stripe_price_starter="",
+            stripe_price_professional="",
+            stripe_price_enterprise="",
+            default_gateway="stripe",
+        )
+        issues = settings.validate()
+        assert any("STRIPE_PRICE_STARTER" in issue for issue in issues)
+        assert any("STRIPE_PRICE_PROFESSIONAL" in issue for issue in issues)
+        assert any("STRIPE_PRICE_ENTERPRISE" in issue for issue in issues)
+
+
+class TestGatewaySelection:
+    def test_bkash_gateway_is_rejected(self):
+        payment = SimpleNamespace(
+            default_gateway="bkash",
+            stripe_enabled=False,
+            stripe_secret_key="",
+            stripe_webhook_secret="",
+            stripe_publishable_key="",
+            stripe_price_starter="",
+            stripe_price_professional="",
+            stripe_price_enterprise="",
+            stripe_customer_creation_enabled=True,
+        )
+        settings = SimpleNamespace(payment=payment)
+
+        with pytest.raises(HTTPException) as exc:
+            get_payment_gateway(settings)
+
+        assert exc.value.status_code == 410
+
+
+class TestWebhookProcessing:
+    @pytest.mark.asyncio
+    async def test_non_terminal_event_is_ignored(self):
+        request = _request_with_signature(b'{"id":"evt_1"}')
+        uow = _StubUoW()
+        gateway = _StubGateway(event={"id": "evt_1", "type": "payment_intent.processing", "data": {"id": "pi_123"}})
+
+        result = await payment_webhook(request=request, settings=SimpleNamespace(), uow=uow, gateway=gateway)
+
+        assert result["processed"] is False
+        assert result["reason"] == "ignored_non_terminal_event"
+
+    @pytest.mark.asyncio
+    async def test_duplicate_event_is_short_circuited(self):
+        request = _request_with_signature(b'{"id":"evt_dup"}')
+        uow = _StubUoW()
+        existing = PaymentWebhookEvent(
+            gateway_event_id="evt_dup",
+            event_type="payment_intent.succeeded",
+            status=WebhookEventStatus.PROCESSED,
+        )
+        await uow.webhook_events.add(existing)
+        gateway = _StubGateway(event={"id": "evt_dup", "type": "payment_intent.succeeded", "data": {"id": "pi_123"}})
+
+        result = await payment_webhook(request=request, settings=SimpleNamespace(), uow=uow, gateway=gateway)
+
+        assert result["processed"] is True
+        assert result["duplicate"] is True
+
+
+
+
+    @pytest.mark.asyncio
+    async def test_livemode_mismatch_is_rejected(self):
+        request = _request_with_signature(b'{"id":"evt_live"}')
+        uow = _StubUoW()
+        gateway = _StubGateway(
+            event={"id": "evt_live", "type": "payment_intent.processing", "livemode": False, "data": {"id": "pi_123"}}
+        )
+        settings = SimpleNamespace(
+            is_production=True,
+            payment=SimpleNamespace(stripe_livemode_enforcement="auto"),
+        )
+
+        with pytest.raises(HTTPException) as exc:
+            await payment_webhook(request=request, settings=settings, uow=uow, gateway=gateway)
+
+        assert exc.value.status_code == 400
+        assert "livemode mismatch" in str(exc.value.detail).lower()
+
+
+class TestCancelSubscription:
+    @pytest.mark.asyncio
+    async def test_gateway_cancel_failure_returns_502(self):
+        subscription = Subscription(
+            user_id="user_1",
+            tier=SubscriptionTier.STARTER,
+            gateway_subscription_id="sub_123",
+        )
+        sub_repo = _StubSubscriptionRepo(subscription)
+        uow = _StubUoW(subscriptions=sub_repo)
+
+        with pytest.raises(HTTPException) as exc:
+            await cancel_subscription(
+                request=CancelSubscriptionRequest(subscription_id=subscription.id, immediately=True),
+                auth={"user_id": "user_1"},
+                uow=uow,
+                gateway=_StubGateway(event={}, cancel_result=False),
+            )
+
+        assert exc.value.status_code == 502
+        assert sub_repo.updated is False
+
+
+class TestReconciliation:
+    @pytest.mark.asyncio
+    async def test_auto_reconcile_pending_transaction(self):
+        tx = PaymentTransaction(
+            user_id="user_1",
+            amount_cents=1000,
+            status=PaymentStatus.PENDING,
+            gateway_transaction_id="pi_123",
+        )
+        uow = _StubUoW()
+        uow.payment_transactions._tx[tx.id] = tx
+        gateway = _StubStatusGateway(status=PaymentStatus.COMPLETED)
+
+        service = PaymentReconciliationService(uow=uow, gateway=gateway)
+        result = await service.run_once(lookback_hours=24)
+
+        assert result["mismatched_transactions"] == 1
+        assert result["auto_reconciled_transactions"] == 1
+        assert uow.payment_transactions._tx[tx.id].status == PaymentStatus.COMPLETED
+        assert len(uow.reconciliation_runs._runs) == 1
+
+
+class TestStripeGateway:
+    @pytest.mark.asyncio
+    async def test_create_subscription_missing_price_id_raises_integration_error(self, monkeypatch):
+        class _FakeStripe:
+            class error:
+                class StripeError(Exception):
+                    pass
+
+                class SignatureVerificationError(Exception):
+                    pass
+
+        monkeypatch.setattr(stripe_gateway_module, "stripe", _FakeStripe())
+        gateway = stripe_gateway_module.StripeGateway(
+            secret_key="sk_test_123",
+            webhook_secret="whsec_123",
+            price_starter="",
+            price_professional="",
+            price_enterprise="",
+        )
+
+        with pytest.raises(IntegrationError):
+            await gateway.create_subscription(user_id="u1", tier="starter")
+
+
+class TestStuckPendingReport:
+    @pytest.mark.asyncio
+    async def test_reports_only_old_pending_transactions(self):
+        old_pending = PaymentTransaction(
+            user_id="user_1",
+            amount_cents=1000,
+            status=PaymentStatus.PENDING,
+            gateway_transaction_id="pi_old",
+            created_at=datetime.now(UTC) - timedelta(minutes=90),
+            updated_at=datetime.now(UTC) - timedelta(minutes=90),
+        )
+        new_pending = PaymentTransaction(
+            user_id="user_1",
+            amount_cents=2000,
+            status=PaymentStatus.PENDING,
+            gateway_transaction_id="pi_new",
+            created_at=datetime.now(UTC) - timedelta(minutes=5),
+            updated_at=datetime.now(UTC) - timedelta(minutes=5),
+        )
+        completed = PaymentTransaction(
+            user_id="user_1",
+            amount_cents=3000,
+            status=PaymentStatus.COMPLETED,
+            gateway_transaction_id="pi_done",
+            created_at=datetime.now(UTC) - timedelta(minutes=180),
+            updated_at=datetime.now(UTC) - timedelta(minutes=180),
+        )
+
+        uow = _StubUoW()
+        uow.payment_transactions._tx[old_pending.id] = old_pending
+        uow.payment_transactions._tx[new_pending.id] = new_pending
+        uow.payment_transactions._tx[completed.id] = completed
+
+        result = await list_stuck_pending_payments(
+            auth={"user_id": "user_1"},
+            uow=uow,
+            older_than_minutes=30,
+            limit=100,
+        )
+
+        assert result["count"] == 1
+        assert result["transactions"][0]["transaction_id"] == old_pending.id

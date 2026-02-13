@@ -2,7 +2,16 @@ from __future__ import annotations
 
 from .models_audit import AuditLogRow
 from .models_base import Base
-from .models_billing import APIKeyRow, InvoiceRow, PaymentTransactionRow, SubscriptionRow, UsageRecordRow
+from .models_billing import (
+    APIKeyRow,
+    ConnectAccountMappingRow,
+    InvoiceRow,
+    PaymentReconciliationRunRow,
+    PaymentTransactionRow,
+    PaymentWebhookEventRow,
+    SubscriptionRow,
+    UsageRecordRow,
+)
 from .models_cockpit import (
     CockpitAlertRow,
     CockpitComponentRow,
@@ -11,13 +20,13 @@ from .models_cockpit import (
     CockpitStateRow,
 )
 from .models_drt import (
-    DRTBehavioralSignatureRow,
     DRTAttackVectorRow,
-    DRTViolationRow,
-    DRTEscalatedEndpointRow,
+    DRTBehavioralSignatureRow,
     DRTConfigurationRow,
-    DRTFalsePositiveRow,
+    DRTEscalatedEndpointRow,
     DRTFalsePositivePatternRow,
+    DRTFalsePositiveRow,
+    DRTViolationRow,
 )
 
 __all__ = [
@@ -27,6 +36,9 @@ __all__ = [
     "PaymentTransactionRow",
     "SubscriptionRow",
     "InvoiceRow",
+    "ConnectAccountMappingRow",
+    "PaymentWebhookEventRow",
+    "PaymentReconciliationRunRow",
     "CockpitStateRow",
     "CockpitSessionRow",
     "CockpitOperationRow",

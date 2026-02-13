@@ -113,6 +113,7 @@ def create_api_router(prefix: str = "/api/v1") -> APIRouter:
             {"module": "application.mothership.routers.auth:router", "enabled": True},
             {"module": "application.mothership.routers.navigation_simple:router", "enabled": True},
             {"module": "application.mothership.routers.payment:router", "enabled": True},
+            {"module": "application.mothership.routers.stripe_connect_demo:router", "enabled": True},
             {"module": "application.mothership.routers.api_keys:router", "enabled": True},
             {"module": "application.mothership.routers.billing:router", "enabled": True},
             {
