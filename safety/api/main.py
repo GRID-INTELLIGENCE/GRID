@@ -42,6 +42,7 @@ from safety.observability.logging_setup import get_logger, setup_logging
 from safety.observability.metrics import record_service_info
 from safety.observability.runtime_observation import observation_service
 from safety.observability.security_monitoring import security_logger, security_monitor
+from safety.monitoring import get_safety_monitor
 from safety.workers.worker_utils import (
     check_redis_health,
     close_redis,
@@ -161,6 +162,7 @@ async def lifespan(app: FastAPI):
     await observation_service.start()
     security_monitor.start_monitoring()
     get_rule_loader().start_auto_reload()
+    await get_safety_monitor().start()
 
     yield
 
