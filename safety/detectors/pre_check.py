@@ -43,24 +43,19 @@ logger = get_logger("detectors.pre_check")
 _redis_client: redis.Redis | None = None
 _redis_unavailable: bool = False
 
+
 # ---------------------------------------------------------------------------
 # Guardian engine helpers
 # ---------------------------------------------------------------------------
-# Map guardian rule-ID prefixes to legacy-compatible reason codes so that
-# downstream consumers (post_check, conftest, ml_detector) keep working.
-_GUARDIAN_REASON_PREFIX_MAP: dict[str, str] = {
-    "exploit_jailbreak": "EXPLOIT_JAILBREAK",
-    "high_risk_self_harm": "HIGH_RISK_SELF_HARM",
-    "high_risk_cyber": "HIGH_RISK_CYBER",
-}
+def _guardian_reason_code(rule_id: str, category: str | None = None) -> str:
+    """Derive backward-compatible reason code from guardian rule.
 
-
-def _guardian_reason_code(rule_id: str) -> str:
-    """Derive backward-compatible reason code from guardian rule ID."""
-    for prefix, code in _GUARDIAN_REASON_PREFIX_MAP.items():
-        if rule_id.startswith(prefix):
-            return code
-    return rule_id.upper()
+    Uses the rule's *category* (e.g. ``high_risk_weapon``, ``csam_block``)
+    which maps 1-to-1 to the legacy reason codes expected by downstream
+    consumers.  Falls back to ``rule_id.upper()`` when no category is set.
+    """
+    source = category or rule_id
+    return source.upper()
 
 
 def _get_guardian() -> GuardianEngine:
@@ -177,7 +172,7 @@ def quick_block(text: str) -> PreCheckResult:
             if not is_block:
                 continue
 
-            reason_code = _guardian_reason_code(m.rule_id)
+            reason_code = _guardian_reason_code(m.rule_id, category=m.category)
             REFUSALS_TOTAL.labels(reason_code=reason_code).inc()
 
             security_logger.log_event(

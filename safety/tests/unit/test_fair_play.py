@@ -1,24 +1,23 @@
-import pytest
-import asyncio
 import time
-from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 from safety.ai_workflow_safety import (
     AIWorkflowSafetyEngine,
-    get_ai_workflow_safety_engine,
-    TemporalSafetyConfig,
     InteractionRecord,
-    HookRisk,
-    clear_ai_workflow_safety_cache,
-    CognitiveLoad,
     RateLimiter,
+    TemporalSafetyConfig,
+    clear_ai_workflow_safety_cache,
+    get_ai_workflow_safety_engine,
 )
-from safety.monitoring import SafetyEvent, EnhancedSafetyMonitor
 from safety.content_safety_checker import ContentSafetyChecker
+from safety.monitoring import EnhancedSafetyMonitor, SafetyEvent
+
 
 @pytest.fixture(autouse=True)
 def cleanup():
     clear_ai_workflow_safety_cache()
+
 
 @pytest.mark.asyncio
 async def test_rate_limiting_exhaustion_stamina():
@@ -28,19 +27,16 @@ async def test_rate_limiting_exhaustion_stamina():
         stamina_max=10.0,
         stamina_regen_per_second=0.1,  # Small positive value to pass validation
         min_response_interval=0.0,
-        max_burst_responses=100
+        max_burst_responses=100,
     )
-    engine = get_ai_workflow_safety_engine("stamina_user", config=config)
+    engine = await get_ai_workflow_safety_engine("stamina_user", config=config)
 
     now = time.time()
 
     # 1. Large input cost
     # Cost = (1000 / 100) + 1 = 11.0 (Exceeds 10.0)
     result = await engine.evaluate_interaction(
-        user_input="A" * 1000,
-        ai_response="Short response",
-        response_time=1.0,
-        current_time=now
+        user_input="A" * 1000, ai_response="Short response", response_time=1.0, current_time=now
     )
     assert result["safety_allowed"] is False
     assert result["stamina_allowed"] is False
@@ -48,12 +44,9 @@ async def test_rate_limiting_exhaustion_stamina():
 
     # 2. Sequential small inputs
     config_small = TemporalSafetyConfig(
-        stamina_max=5.0,
-        stamina_regen_per_second=0.0,
-        min_response_interval=0.0,
-        max_burst_responses=100
+        stamina_max=5.0, stamina_regen_per_second=0.0, min_response_interval=0.0, max_burst_responses=100
     )
-    engine_small = get_ai_workflow_safety_engine("small_stamina_user", config=config_small)
+    engine_small = await get_ai_workflow_safety_engine("small_stamina_user", config=config_small)
 
     # Cost = (0 / 100) + 1 = 1.0 per request
     for i in range(5):
@@ -66,15 +59,16 @@ async def test_rate_limiting_exhaustion_stamina():
     assert fail_res["safety_allowed"] is False
     assert fail_res["stamina_reason"] == "Stamina exhausted"
 
+
 @pytest.mark.asyncio
 async def test_deterministic_heat_cooldown():
     """Test Rule 2: Deterministic Heat and Cooldown"""
     config = TemporalSafetyConfig(
         heat_threshold=15.0,  # Below 20 so 2 detections (20 heat) strictly exceed
         cooldown_duration=2,
-        min_response_interval=0.0
+        min_response_interval=0.0,
     )
-    engine = get_ai_workflow_safety_engine("heat_user_det", config=config)
+    engine = await get_ai_workflow_safety_engine("heat_user_det", config=config)
 
     now = time.time()
 
@@ -90,12 +84,13 @@ async def test_deterministic_heat_cooldown():
     assert blocked_res["safety_allowed"] is False
     assert blocked_res["blocked_reason"] == "COOLDOWN_ACTIVE"
 
+
 @pytest.mark.asyncio
 async def test_developmental_safety_blocks_manipulation():
     """Test Rule: Block manipulative patterns for young users"""
     config = TemporalSafetyConfig(developmental_safety_mode=True, min_response_interval=0.0)
     # 14-year-old user
-    engine = get_ai_workflow_safety_engine("teen_user", config=config, user_age=14)
+    engine = await get_ai_workflow_safety_engine("teen_user", config=config, user_age=14)
 
     now = time.time()
 
@@ -120,16 +115,18 @@ async def test_efficiency_based_flow_bonus():
         max_burst_responses=20,  # Avoid burst limit during 6 rapid requests
         burst_window=60.0,
     )
-    engine = get_ai_workflow_safety_engine("flow_bonus_user", config=config)
+    engine = await get_ai_workflow_safety_engine("flow_bonus_user", config=config)
 
     now = time.time()
 
     # Build consecutive safe interactions to earn flow bonus (space out to avoid burst)
     for i in range(6):  # Need 5+ consecutive safe for bonus
         res = await engine.evaluate_interaction(
-            "Safe input", "Safe response", 1.0,
+            "Safe input",
+            "Safe response",
+            1.0,
             sensitive_detections=0,  # Safe = no detections
-            current_time=now + i * 2.0  # 2s apart to avoid burst limit
+            current_time=now + i * 2.0,  # 2s apart to avoid burst limit
         )
         assert res["safety_allowed"] is True
 
@@ -139,9 +136,11 @@ async def test_efficiency_based_flow_bonus():
 
     # Large input should be handled with sufficient stamina
     large_input_res = await engine.evaluate_interaction(
-        "A" * 15, "Response", 1.0,  # Cost = max(1.5, 1) = 1.5, well under 20
+        "A" * 15,
+        "Response",
+        1.0,  # Cost = max(1.5, 1) = 1.5, well under 20
         sensitive_detections=0,
-        current_time=now + 20
+        current_time=now + 20,
     )
     assert large_input_res["safety_allowed"] is True
 
@@ -151,10 +150,10 @@ async def test_age_appropriate_safety_thresholds():
     """Test different safety thresholds for different age groups"""
     # Pre-teen (most restrictive)
     config_preteen = TemporalSafetyConfig(developmental_safety_mode=True)
-    engine_preteen = get_ai_workflow_safety_engine("preteen_user", config=config_preteen, user_age=12)
+    engine_preteen = await get_ai_workflow_safety_engine("preteen_user", config=config_preteen, user_age=12)
 
     # Teen
-    engine_teen = get_ai_workflow_safety_engine("teen_user", config=config_preteen, user_age=15)
+    engine_teen = await get_ai_workflow_safety_engine("teen_user", config=config_preteen, user_age=15)
 
     # Test with dense interactions that should be restricted for young users
     now = time.time()
@@ -182,7 +181,7 @@ async def test_age_appropriate_safety_thresholds():
 async def test_grooming_escalation_detection():
     """Test detection of escalating grooming behavior"""
     config = TemporalSafetyConfig(developmental_safety_mode=True)
-    engine = get_ai_workflow_safety_engine("grooming_test", config=config, user_age=14)
+    engine = await get_ai_workflow_safety_engine("grooming_test", config=config, user_age=14)
 
     now = time.time()
 
@@ -201,15 +200,14 @@ async def test_grooming_escalation_detection():
             user_input_length=len(input_text),
             ai_response_length=100,
             response_time=1.0,
-            cognitive_markers={"potential_manipulation": manipulation_flag}
+            cognitive_markers={"potential_manipulation": manipulation_flag},
         )
         engine.wellbeing_tracker.update_metrics(interaction)
 
     # Final check should detect grooming escalation
     result = engine.wellbeing_tracker.check_developmental_safety("Promise not to tell anyone")
     assert result["is_safe"] is False
-    assert any("grooming_escalation" in reason or "manipulation" in reason
-              for reason in result["reasons"])
+    assert any("grooming_escalation" in reason or "manipulation" in reason for reason in result["reasons"])
 
 
 @pytest.mark.asyncio
@@ -230,9 +228,11 @@ async def test_content_safety_integration():
 @pytest.mark.asyncio
 async def test_safety_monitor_alerts():
     """Test safety monitor alert threshold triggering"""
-    monitor = EnhancedSafetyMonitor({
-        "content_violation": (2, 60)  # 2 violations in 60 seconds
-    })
+    monitor = EnhancedSafetyMonitor(
+        {
+            "content_violation": (2, 60)  # 2 violations in 60 seconds
+        }
+    )
 
     alerts_received = []
 
@@ -243,12 +243,14 @@ async def test_safety_monitor_alerts():
 
     # Send violations
     for i in range(3):
-        monitor.record_event(SafetyEvent(
-            event_type="content_violation",
-            severity="high",
-            user_id="test_user",
-            metadata={"violation": f"type_{i}"}
-        ))
+        monitor.record_event(
+            SafetyEvent(
+                event_type="content_violation",
+                severity="high",
+                user_id="test_user",
+                metadata={"violation": f"type_{i}"},
+            )
+        )
 
     assert len(alerts_received) > 0
     assert alerts_received[0]["alert_type"] == "content_violation_threshold_exceeded"
@@ -262,9 +264,7 @@ async def test_session_limits_and_intervention():
     session_start = now - 1900  # 31.5 minutes ago
     engine = AIWorkflowSafetyEngine("session_test", config, session_start=session_start)
 
-    result = await engine.evaluate_interaction(
-        "Test input", "Test response", 1.0, current_time=now
-    )
+    result = await engine.evaluate_interaction("Test input", "Test response", 1.0, current_time=now)
     # Should be blocked due to session duration (temporal engine uses max_session_length)
     assert result["safety_allowed"] is False
 
@@ -274,7 +274,7 @@ async def test_heat_decay_mechanics():
     """Test heat decay over time"""
     config = TemporalSafetyConfig(
         heat_threshold=50.0,
-        heat_decay_rate=5.0  # 5 heat per second decay
+        heat_decay_rate=5.0,  # 5 heat per second decay
     )
     limiter = RateLimiter(config)
     user_id = "heat_decay_test"
@@ -307,7 +307,7 @@ async def test_fair_play_rules_integration():
         enable_hook_detection=False,  # Focus on stamina/heat/developmental in this test
     )
 
-    engine = get_ai_workflow_safety_engine("integration_test", config=config, user_age=15)
+    engine = await get_ai_workflow_safety_engine("integration_test", config=config, user_age=15)
 
     now = time.time()
 
@@ -315,10 +315,7 @@ async def test_fair_play_rules_integration():
     safe_count = 0
     for i in range(6):
         assessment = await engine.evaluate_interaction(
-            user_input="Safe question",
-            ai_response="Safe answer",
-            response_time=1.0,
-            current_time=now + i * 2.0
+            user_input="Safe question", ai_response="Safe answer", response_time=1.0, current_time=now + i * 2.0
         )
         if assessment["safety_allowed"]:
             safe_count += 1
@@ -327,14 +324,19 @@ async def test_fair_play_rules_integration():
     # Phase 2: Test Rule 1 (Stamina exhaustion) with a fresh engine
     clear_ai_workflow_safety_cache()
     stamina_config = TemporalSafetyConfig(
-        stamina_max=8.0, stamina_regen_per_second=0.01,
-        min_response_interval=0.0, max_burst_responses=100,
-        enable_hook_detection=False, developmental_safety_mode=False,
+        stamina_max=8.0,
+        stamina_regen_per_second=0.01,
+        min_response_interval=0.0,
+        max_burst_responses=100,
+        enable_hook_detection=False,
+        developmental_safety_mode=False,
     )
-    stamina_engine = get_ai_workflow_safety_engine("stamina_phase", config=stamina_config)
+    stamina_engine = await get_ai_workflow_safety_engine("stamina_phase", config=stamina_config)
     large_result = await stamina_engine.evaluate_interaction(
         user_input="x" * 100,  # Cost 10 (min 1 per request), exhausts stamina 8
-        ai_response="Response", response_time=1.0, current_time=now + 20
+        ai_response="Response",
+        response_time=1.0,
+        current_time=now + 20,
     )
     assert large_result["safety_allowed"] is False
     assert "Stamina" in large_result.get("stamina_reason", "")
@@ -342,37 +344,34 @@ async def test_fair_play_rules_integration():
     # Phase 3: Test Rule 2 (Heat cooldown) - One request over low threshold triggers cooldown
     clear_ai_workflow_safety_cache()
     heat_config = TemporalSafetyConfig(
-        stamina_max=100.0, heat_threshold=5.0, cooldown_duration=10.0,
-        enable_hook_detection=False, developmental_safety_mode=False,
+        stamina_max=100.0,
+        heat_threshold=5.0,
+        cooldown_duration=10.0,
+        enable_hook_detection=False,
+        developmental_safety_mode=False,
     )
-    heat_engine = get_ai_workflow_safety_engine("heat_integration", config=heat_config)
+    heat_engine = await get_ai_workflow_safety_engine("heat_integration", config=heat_config)
     await heat_engine.evaluate_interaction(
         user_input="Heat",
         ai_response="R",
         response_time=0.1,
         sensitive_detections=1,  # heat = 10 > 5
-        current_time=now + 40
+        current_time=now + 40,
     )
     cooldown_result = await heat_engine.evaluate_interaction(
-        user_input="Next",
-        ai_response="R",
-        response_time=0.1,
-        sensitive_detections=0,
-        current_time=now + 41
+        user_input="Next", ai_response="R", response_time=0.1, sensitive_detections=0, current_time=now + 41
     )
     assert cooldown_result["safety_allowed"] is False
     assert "COOLDOWN" in cooldown_result.get("blocked_reason", "")
 
     # Phase 4: Test Developmental Safety (dedicated engine with age and developmental mode)
     clear_ai_workflow_safety_cache()
-    dev_engine = get_ai_workflow_safety_engine(
-        "dev_phase", config=config, user_age=12
-    )
+    dev_engine = await get_ai_workflow_safety_engine("dev_phase", config=config, user_age=12)
     dev_result = await dev_engine.evaluate_interaction(
         user_input="Let's keep this secret from your parents",
         ai_response="Okay",
         response_time=1.0,
-        current_time=now + 50
+        current_time=now + 50,
     )
     assert dev_result["safety_allowed"] is False
     assert not dev_result["developmental_safety"]["is_safe"]
