@@ -715,7 +715,7 @@ class HardenedSecurityMiddleware(BaseHTTPMiddleware):
         response.headers["X-XSS-Protection"] = "1; mode=block"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         response.headers["Permissions-Policy"] = (
-            "camera=(), microphone=(), geolocation=(), usb=(), interest-cohort=()"
+            "camera=(), microphone=(), geolocation=(), usb=(self), interest-cohort=()"
         )
 
         # Request tracking headers
