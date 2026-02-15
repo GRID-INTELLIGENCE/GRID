@@ -1,0 +1,120 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grid-api
+  namespace: grid-{{ .Values.environment }}
+spec:
+  replicas: {{ .Values.api.replicaCount }}
+  selector:
+    matchLabels:
+      app: grid-api
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: grid-api
+    spec:
+      containers:
+      - name: grid-api
+        image: {{ .Values.api.image.repository }}:{{ .Values.api.image.tag }}
+        imagePullPolicy: {{ .Values.api.image.pullPolicy }}
+        ports:
+        - containerPort: 8000
+        env:
+        - name: ENVIRONMENT
+          value: {{ .Values.environment }}
+        - name: POSTGRES_HOST
+          value: {{ .Values.database.host }}
+        - name: POSTGRES_PORT
+          value: "{{ .Values.database.port }}"
+        - name: POSTGRES_DB
+          value: {{ .Values.database.name }}
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: grid-secrets
+              key: postgres-user
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: grid-secrets
+              key: postgres-password
+        - name: REDIS_HOST
+          value: {{ .Values.redis.host }}
+        - name: REDIS_PORT
+          value: "{{ .Values.redis.port }}"
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: grid-secrets
+              key: redis-password
+        - name: SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: grid-secrets
+              key: secret-key
+        resources:
+          limits:
+            cpu: {{ .Values.api.resources.limits.cpu }}
+            memory: {{ .Values.api.resources.limits.memory }}
+          requests:
+            cpu: {{ .Values.api.resources.requests.cpu }}
+            memory: {{ .Values.api.resources.requests.memory }}
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grid-api
+  namespace: grid-{{ .Values.environment }}
+spec:
+  selector:
+    app: grid-api
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8000
+  type: LoadBalancer
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: grid-api-hpa
+  namespace: grid-{{ .Values.environment }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: grid-api
+  minReplicas: {{ .Values.api.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.api.autoscaling.maxReplicas }}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.api.autoscaling.targetCPU }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.api.autoscaling.targetMemory }}

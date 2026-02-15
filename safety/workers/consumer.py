@@ -43,6 +43,10 @@ from safety.workers.worker_utils import (
     setup_shutdown_handler,
     write_audit_event,
 )
+from safety.ai_workflow_safety import (
+    get_ai_workflow_safety_engine,
+    TemporalSafetyConfig,
+)
 
 logger = get_logger("workers.consumer")
 
@@ -103,12 +107,12 @@ async def _process_message(msg_id: str, fields: dict[str, str]) -> None:
         try:
             check_result = await asyncio.wait_for(
                 post_check(
-                    model_output=result.text,
+                    model_output=result.get("output", "") if isinstance(result, dict) else str(result),
                     original_input=input_text,
                 ),
                 timeout=10.0,
             )
-        except TimeoutError:
+        except asyncio.TimeoutError:
             logger.error("post_check_timeout", request_id=request_id)
             # Fail closed: treat as flagged
             from safety.detectors.post_check import PostCheckResult
@@ -123,6 +127,39 @@ async def _process_message(msg_id: str, fields: dict[str, str]) -> None:
         # Observe total latency (model + post-check)
         latency = time.perf_counter() - start_processing
         DETECTION_LATENCY.observe(latency)
+
+        # Step 2.5: Run AI Workflow Safety post-inference check
+        try:
+            safety_engine = await get_ai_workflow_safety_engine(
+                user_id=user_id,
+                config=TemporalSafetyConfig(
+                    enable_hook_detection=True,
+                    enable_wellbeing_tracking=True,
+                    developmental_safety_mode=metadata.get("user_age", 25) < 18
+                )
+            )
+
+            # Record real interaction timing
+            safety_assessment = await safety_engine.evaluate_response(
+                user_input=input_text,
+                ai_response=result.text,
+                response_time=latency,
+                current_time=time.time(),
+                sensitive_detections=len(check_result.evidence.get("detections", [])) if check_result.flagged else 0
+            )
+
+            if not safety_assessment["safety_allowed"]:
+                # Override check_result if workflow safety fails
+                from safety.detectors.post_check import PostCheckResult
+                check_result = PostCheckResult(
+                    flagged=True,
+                    reason_code=safety_assessment.get("blocked_reason", "AI_WORKFLOW_VIOLATION"),
+                    severity="high",
+                    evidence=safety_assessment
+                )
+        except Exception as safety_exc:
+            logger.error("ai_workflow_safety_error_in_worker", error=str(safety_exc), request_id=request_id)
+            # Fail closed is handled by check_result remaining as it was or being flagged if we prefer
 
         if check_result.flagged:
             # Step 3a: Escalate — do NOT return model output

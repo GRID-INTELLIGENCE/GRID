@@ -101,7 +101,7 @@ rules:
     name: "Mental Health Risk"
     patterns: ["suicide", "kill myself", "end my life", "want to die"]
     severity: high
-    category: mental_health_risk
+    category: high_risk_self_harm
     confidence: 0.9
     action: block
   - id: harassment

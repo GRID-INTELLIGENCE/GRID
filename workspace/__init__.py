@@ -1,0 +1,1 @@
+"""GRID workspace root package."""

@@ -6,7 +6,7 @@
       "detail": "Run all tests + lint before starting any new work",
       "type": "shell",
       "command": "uv run python -m pytest -q --tb=short && uv run ruff check work/ safety/ security/ boundaries/",
-      "group": { "kind": "test", "isDefault": true },
+      "group": { "kind": "build", "isDefault": true },
       "presentation": { "reveal": "always", "panel": "shared" },
       "problemMatcher": []
     },

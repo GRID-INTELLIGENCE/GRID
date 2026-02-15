@@ -1,8 +1,8 @@
-# Multi-IDE Verification Index
+﻿# Multi-IDE Verification Index
 
 > **Purpose:** Central hub for IDE-specific gap analysis prompts
 > **Created:** 2026-02-12
-> **Context:** THE GRID supports multiple IDEs (VS Code, Cursor, Windsurf, OpenCode, Antigravity) — this index organizes verification workflows
+> **Context:** THE GRID supports multiple IDEs (VS Code, Cursor, Windsurf, OpenCode, Antigravity) â€” this index organizes verification workflows
 
 ---
 
@@ -16,17 +16,18 @@ THE GRID's development discipline depends on **automated enforcement** of core p
 
 ## Verification Prompt Files
 
-### 1. VS Code (Reference Implementation) ✅ PRIMARY
+### 1. VS Code (Reference Implementation) âœ… PRIMARY
 
 **File:** [`VSCODE_AGENT_VERIFICATION_PROMPT.md`](./VSCODE_AGENT_VERIFICATION_PROMPT.md)
 
 **Agent:** GitHub Copilot Chat (or Claude Code)
 
-**Purpose:** Comprehensive audit of VS Code configuration — this is the **master reference** that all other IDEs should match.
+**Purpose:** Comprehensive audit of VS Code configuration â€” this is the **master reference** that all other IDEs should match.
 
 **Scope:**
+
 - 18 workspace-recommended extensions (7/18 installed, 11 missing)
-- 15 core settings across User → Profile → Workspace inheritance
+- 15 core settings across User â†’ Profile â†’ Workspace inheritance
 - 14 runnable tasks (pytest, ruff, mypy, frontend dev, etc.)
 - Python ecosystem (Pylance, pytest, mypy, ruff)
 - Frontend ecosystem (TypeScript, ESLint, Prettier)
@@ -35,9 +36,10 @@ THE GRID's development discipline depends on **automated enforcement** of core p
 - Development discipline automation (daily wall check)
 - Git integration
 
-**Status:** ✅ Ruff extension installed (v2026.36.0), settings configured, CLI working
+**Status:** âœ… Ruff extension installed (v2026.36.0), settings configured, CLI working
 
 **Use this prompt when:**
+
 - Setting up VS Code for THE GRID for the first time
 - Auditing current VS Code setup for gaps
 - VS Code has been updated and behavior changed
@@ -45,7 +47,7 @@ THE GRID's development discipline depends on **automated enforcement** of core p
 
 ---
 
-### 2. Cursor ⚠️ VERIFICATION NEEDED
+### 2. Cursor âš ï¸ VERIFICATION NEEDED
 
 **File:** [`CURSOR_AGENT_VERIFICATION_PROMPT.md`](./CURSOR_AGENT_VERIFICATION_PROMPT.md)
 
@@ -54,6 +56,7 @@ THE GRID's development discipline depends on **automated enforcement** of core p
 **Purpose:** Systematic audit of Cursor IDE to identify gaps vs. VS Code reference.
 
 **Scope:**
+
 - Extension coverage (18 recommendations)
 - Settings inheritance (User vs. Profile vs. Workspace)
 - Cross-IDE consistency (Cursor vs. VS Code)
@@ -65,9 +68,10 @@ THE GRID's development discipline depends on **automated enforcement** of core p
 - Type checking & language server
 - Documentation completeness
 
-**Status:** ⚠️ Settings documented in `CONFIGURATION_OPTIMIZATION_SUMMARY.md` but not verified
+**Status:** âš ï¸ Settings documented in `CONFIGURATION_OPTIMIZATION_SUMMARY.md` but not verified
 
 **Use this prompt when:**
+
 - Verifying Cursor matches VS Code settings
 - Cursor updated and behavior changed
 - Switching between VS Code and Cursor causes format conflicts
@@ -75,7 +79,7 @@ THE GRID's development discipline depends on **automated enforcement** of core p
 
 ---
 
-### 3. Windsurf ⚠️ VERIFICATION NEEDED
+### 3. Windsurf âš ï¸ VERIFICATION NEEDED
 
 **File:** [`WINDSURF_AGENT_VERIFICATION_PROMPT.md`](./WINDSURF_AGENT_VERIFICATION_PROMPT.md)
 
@@ -84,6 +88,7 @@ THE GRID's development discipline depends on **automated enforcement** of core p
 **Purpose:** Verify Windsurf IDE configuration matches THE GRID standards.
 
 **Scope:**
+
 - 15 core settings alignment (autoSave, formatOnSave, ruff formatter, etc.)
 - Windsurf-specific settings (`chat.agent.maxRequests = 35`, terminal optimization)
 - Python ecosystem configuration
@@ -95,9 +100,10 @@ THE GRID's development discipline depends on **automated enforcement** of core p
 - Git integration
 - Cascade AI agent configuration
 
-**Status:** ⚠️ Recent sync added `chat.agent.maxRequests = 35` but full verification pending
+**Status:** âš ï¸ Recent sync added `chat.agent.maxRequests = 35` but full verification pending
 
 **Use this prompt when:**
+
 - Verifying Windsurf after initial setup
 - Cascade AI suggestions violate THE GRID standards
 - Windsurf terminal doesn't load PYTHONPATH
@@ -105,7 +111,7 @@ THE GRID's development discipline depends on **automated enforcement** of core p
 
 ---
 
-### 4. OpenCode ❓ STATUS UNKNOWN
+### 4. OpenCode â“ STATUS UNKNOWN
 
 **File:** [`OPENCODE_AGENT_VERIFICATION_PROMPT.md`](./OPENCODE_AGENT_VERIFICATION_PROMPT.md)
 
@@ -114,6 +120,7 @@ THE GRID's development discipline depends on **automated enforcement** of core p
 **Purpose:** Determine OpenCode's architecture (standalone/extension/fork) and assess compatibility with THE GRID workflow.
 
 **Scope:**
+
 - Installation & version check (`opencode-ai@1.1.53` installed globally)
 - Configuration file location (separate from VS Code or inherited?)
 - Settings inheritance model (standalone/extension/fork/hybrid)
@@ -125,16 +132,17 @@ THE GRID's development discipline depends on **automated enforcement** of core p
 - Cross-IDE consistency
 - Recommendation: **Use**, **Configure**, or **Avoid**?
 
-**Status:** ❓ Installed (`npm list -g` shows `opencode-ai@1.1.53`) but config location unknown
+**Status:** â“ Installed (`npm list -g` shows `opencode-ai@1.1.53`) but config location unknown
 
 **Use this prompt when:**
+
 - Deciding whether to use OpenCode for THE GRID
 - OpenCode is generating code that violates standards
 - Determining if OpenCode should be part of multi-IDE workflow
 
 ---
 
-### 5. Antigravity ❓ STATUS UNKNOWN
+### 5. Antigravity â“ STATUS UNKNOWN
 
 **File:** [`ANTIGRAVITY_AGENT_VERIFICATION_PROMPT.md`](./ANTIGRAVITY_AGENT_VERIFICATION_PROMPT.md)
 
@@ -143,6 +151,7 @@ THE GRID's development discipline depends on **automated enforcement** of core p
 **Purpose:** Locate Antigravity installation, verify 17 settings sync, and assess viability for THE GRID.
 
 **Scope:**
+
 - Installation & configuration discovery (where is Antigravity?)
 - Settings file location & structure
 - Settings content verification (17 expected: 15 core + 2 unknown)
@@ -154,9 +163,10 @@ THE GRID's development discipline depends on **automated enforcement** of core p
 - Performance & usability
 - Recommendation: **Use**, **Configure**, or **Avoid**?
 
-**Status:** ❓ Sync notes mention "3 settings → 17" but no config file found during exploration
+**Status:** â“ Sync notes mention "3 settings â†’ 17" but no config file found during exploration
 
 **Use this prompt when:**
+
 - Determining if Antigravity is actually installed
 - Verifying the "17 settings" claim from sync notes
 - Deciding whether Antigravity should be included in multi-IDE docs
@@ -185,9 +195,9 @@ THE GRID's development discipline depends on **automated enforcement** of core p
    - Sync settings to match VS Code
 
 3. Test cross-IDE workflow:
-   - Open Python file in VS Code → format → save
-   - Open same file in Cursor → verify no format changes
-   - Open same file in Windsurf → verify no format changes
+   - Open Python file in VS Code â†’ format â†’ save
+   - Open same file in Cursor â†’ verify no format changes
+   - Open same file in Windsurf â†’ verify no format changes
 
 ### Phase 3: Status Determination (OpenCode, Antigravity)
 
@@ -209,7 +219,7 @@ THE GRID's development discipline depends on **automated enforcement** of core p
 2. Update `CLAUDE.md` with supported IDEs list
 3. Create decision log entry in `docs/decisions/DECISIONS.md`:
    ```
-   ## 2026-02-12 — Multi-IDE Verification
+   ## 2026-02-12 â€” Multi-IDE Verification
    **Decision**: [Which IDEs are officially supported for THE GRID]
    **Why**: [Based on gap analysis findings]
    **Alternatives considered**: [IDEs tested but not recommended]
@@ -221,15 +231,19 @@ THE GRID's development discipline depends on **automated enforcement** of core p
 
 Each IDE verification prompt produces a structured report:
 
-```markdown
+````markdown
 # [IDE Name] Gap Analysis Report
+
 Date: 2026-02-12
 
 ## Executive Summary
+
 - [Key metrics: settings synced, extensions installed, etc.]
 
 ## Detailed Findings
+
 ### 1. [Category Name]
+
 **Status:** [status]
 **Gaps:** [list]
 **Fix:** [specific actions]
@@ -237,18 +251,23 @@ Date: 2026-02-12
 [Repeat for all categories...]
 
 ## Recommended Actions (Priority Order)
-1. [🔴🎯] [Critical blocking action]
-2. [🟠⚠️] [High-priority degrading action]
-[...]
+
+1. [ðŸ”´ðŸŽ¯] [Critical blocking action]
+2. [ðŸŸ âš ï¸] [High-priority degrading action]
+   [...]
 
 ## Verification Commands
+
 ```bash
 [Commands to run after fixes]
 ```
+````
 
 ## Final Recommendation
-[✅ Use / ⚠️ Configure / ❌ Avoid]
-```
+
+[âœ… Use / âš ï¸ Configure / âŒ Avoid]
+
+````
 
 ---
 
@@ -256,47 +275,47 @@ Date: 2026-02-12
 
 ### Required for All Supported IDEs
 
-✅ **Settings Consistency:**
+âœ… **Settings Consistency:**
 - All 15 core settings present and identical
 - Python formatter set to `charliermarsh.ruff`
 - Cache exclusions complete (`.venv`, `__pycache__`, `.pytest_cache`, `.mypy_cache`, `.ruff_cache`)
 
-✅ **Format-on-Save Consistency:**
-- Python file formatted in IDE A → open in IDE B → no changes
+âœ… **Format-on-Save Consistency:**
+- Python file formatted in IDE A â†’ open in IDE B â†’ no changes
 - No cross-IDE format conflicts
 
-✅ **Workspace Integration:**
+âœ… **Workspace Integration:**
 - `.vscode/settings.json` respected
 - Tasks runnable (or equivalent)
 - Terminal env vars loaded (PYTHONPATH, PROJECT_ROOT)
 
-✅ **Development Discipline:**
+âœ… **Development Discipline:**
 - Daily wall check runnable (tests + lint)
 - Ruff CLI integration working (`uv run ruff check`)
 
 ### IDE-Specific Criteria
 
 **VS Code (Primary):**
-- ✅ All 18 recommended extensions reviewed (critical ones installed)
-- ✅ 14 tasks runnable
-- ✅ Ctrl+Shift+B triggers daily wall check
+- âœ… All 18 recommended extensions reviewed (critical ones installed)
+- âœ… 14 tasks runnable
+- âœ… Ctrl+Shift+B triggers daily wall check
 
 **Cursor:**
-- ✅ Settings match VS Code user settings
-- ✅ Performance optimizations documented
+- âœ… Settings match VS Code user settings
+- âœ… Performance optimizations documented
 
 **Windsurf:**
-- ✅ `chat.agent.maxRequests = 35` configured
-- ✅ Cascade AI respects THE GRID standards
+- âœ… `chat.agent.maxRequests = 35` configured
+- âœ… Cascade AI respects THE GRID standards
 
 **OpenCode:**
-- ✅ Architecture documented (standalone/extension/fork)
-- ✅ Clear recommendation (Use/Configure/Avoid)
+- âœ… Architecture documented (standalone/extension/fork)
+- âœ… Clear recommendation (Use/Configure/Avoid)
 
 **Antigravity:**
-- ✅ Installation status confirmed
-- ✅ If installed: 17 settings verified
-- ✅ Clear recommendation (Use/Configure/Avoid)
+- âœ… Installation status confirmed
+- âœ… If installed: 17 settings verified
+- âœ… Clear recommendation (Use/Configure/Avoid)
 
 ---
 
@@ -304,11 +323,11 @@ Date: 2026-02-12
 
 | IDE | Priority | Status | Action |
 |-----|----------|--------|--------|
-| **VS Code** | 🔴 **Critical** | ✅ Configured | Run comprehensive audit (reference implementation) |
-| **Cursor** | 🟠 **High** | ⚠️ Partial | Verify settings match VS Code, test cross-IDE consistency |
-| **Windsurf** | 🟠 **High** | ⚠️ Partial | Verify Cascade settings, test workspace integration |
-| **OpenCode** | 🟡 **Medium** | ❓ Unknown | Determine viability, recommend Use/Configure/Avoid |
-| **Antigravity** | 🟢 **Low** | ❓ Unknown | Determine if installed, recommend Use/Configure/Avoid |
+| **VS Code** | ðŸ”´ **Critical** | âœ… Configured | Run comprehensive audit (reference implementation) |
+| **Cursor** | ðŸŸ  **High** | âš ï¸ Partial | Verify settings match VS Code, test cross-IDE consistency |
+| **Windsurf** | ðŸŸ  **High** | âš ï¸ Partial | Verify Cascade settings, test workspace integration |
+| **OpenCode** | ðŸŸ¡ **Medium** | â“ Unknown | Determine viability, recommend Use/Configure/Avoid |
+| **Antigravity** | ðŸŸ¢ **Low** | â“ Unknown | Determine if installed, recommend Use/Configure/Avoid |
 
 ---
 
@@ -322,9 +341,10 @@ Date: 2026-02-12
    # Paste into GitHub Copilot Chat or Claude Code
    # Wait for comprehensive audit report
    # Fix gaps in priority order
-   ```
+````
 
 2. **Cursor** (20 minutes):
+
    ```bash
    # Copy CURSOR_AGENT_VERIFICATION_PROMPT.md prompt
    # Paste into Cursor's Composer
@@ -333,6 +353,7 @@ Date: 2026-02-12
    ```
 
 3. **Windsurf** (20 minutes):
+
    ```bash
    # Copy WINDSURF_AGENT_VERIFICATION_PROMPT.md prompt
    # Paste into Windsurf's Cascade AI
@@ -341,6 +362,7 @@ Date: 2026-02-12
    ```
 
 4. **OpenCode** (15 minutes):
+
    ```bash
    # Copy OPENCODE_AGENT_VERIFICATION_PROMPT.md prompt
    # Run manual audit (or paste into OpenCode AI if available)
@@ -360,30 +382,73 @@ Date: 2026-02-12
 
 ---
 
-## Related Documentation
+### 6. Plan-to-Reference Tool
 
-- [`IDE_SETUP_VERIFICATION.md`](./IDE_SETUP_VERIFICATION.md) — Post-setup verification checklist
-- [`CONFIGURATION_OPTIMIZATION_SUMMARY.md`](./CONFIGURATION_OPTIMIZATION_SUMMARY.md) — Cursor optimization notes
-- [`CROSS_DRIVE_CONFIG_INTEGRATION_FINDINGS.md`](./CROSS_DRIVE_CONFIG_INTEGRATION_FINDINGS.md) — Windsurf integration
-- `E:\grid\CLAUDE.md` — Project standards and tech stack
-- `E:\grid\.claude\rules\backend.md` — Python standards (ruff, mypy, line length)
-- `E:\grid\.claude\rules\discipline.md` — Development discipline workflow
-- `C:\Users\irfan\.claude\plans\prancy-jumping-torvalds.md` — Recent IDE setup plan
+**File:** [`.cursor/skills/plan-to-reference/SKILL.md`](../../.cursor/skills/plan-to-reference/SKILL.md)
+**Implementation Guide:** [`PLAN_TO_REFERENCE_IMPLEMENTATION_GUIDE.md`](./PLAN_TO_REFERENCE_IMPLEMENTATION_GUIDE.md) â€” Code examples for resolution
+
+**Agent:** Any AI assistant (Claude, Cursor, Windsurf)
+
+**Purpose:** Transform text-based plan outlines into direct reference analogies; use conversation context as grounding; drive generative tasks (flow trace, format pivot, verification chain).
+
+**Scope:**
+
+- Parse plan outlines, checklists, and board items
+- Resolve items to `path:symbol` or `path` references
+- Ground with conversation context
+- Generate Reference Maps, Flow Traces (Mermaid), Format Pivots (CSV/MD), Verification Chains
+- Integration with IDE verification and config review workflows
+
+**Output Modes:**
+
+- **Reference Map**: Structured mapping with severity/impact classification
+- **Flow Trace**: Mermaid diagrams for documentation
+- **Format Pivot**: CSV/MD conversion for board import
+- **Verification Chain**: Multi-stage workflow mapping
+
+**Use this tool when:**
+
+- User provides plans, checklists, or outlines that need resolution to concrete references
+- User requests "resolve this plan", "create reference map", or "generate flow trace"
+- Converting board content to importable formats
+- Mapping verification workflows to concrete artifacts
+- Plans need to be grounded in actual codebase structure
+
+**Integration:**
+
+- Chains to IDE Verification for referenced files
+- Works with Config Reviewer for referenced configurations
+- Follows THE GRID's severity/impact classification model
+- Uses conversation thread for context grounding
+
+---
+
+## Executive Strategy Integration
+
+- [`IDE_SETUP_VERIFICATION.md`](./IDE_SETUP_VERIFICATION.md) â€” Post-setup verification checklist
+- [`CONFIGURATION_OPTIMIZATION_SUMMARY.md`](./CONFIGURATION_OPTIMIZATION_SUMMARY.md) â€” Cursor optimization notes
+- [`CROSS_DRIVE_CONFIG_INTEGRATION_FINDINGS.md`](./CROSS_DRIVE_CONFIG_INTEGRATION_FINDINGS.md) â€” Windsurf integration
+- `E:\grid\CLAUDE.md` â€” Project standards and tech stack
+- `E:\grid\.claude\rules\backend.md` â€” Python standards (ruff, mypy, line length)
+- `E:\grid\.claude\rules\discipline.md` â€” Development discipline workflow
+- `C:\Users\irfan\.claude\plans\prancy-jumping-torvalds.md` â€” Recent IDE setup plan
 
 ---
 
 ## Maintenance
 
 **When to re-verify:**
+
 - After IDE updates (major version bumps)
 - After Windows/OS updates (settings might reset)
 - When adding new developers (ensure consistent setup)
 - When format conflicts appear (cross-IDE drift)
-- Monthly (first Monday — per discipline.md)
+- Monthly (first Monday â€” per discipline.md)
 
 **How to maintain:**
+
 - VS Code remains reference implementation
-- Changes to VS Code settings → propagate to other IDEs
+- Changes to VS Code settings â†’ propagate to other IDEs
 - Document all cross-IDE settings in this index
 - Run quick verification script monthly
 

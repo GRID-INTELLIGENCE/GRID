@@ -1,8 +1,8 @@
-/**
+﻿/**
  * Fix-plan generator: maps CI failure indicators to structured
  * remediation steps with concrete repo commands.
  *
- * This module is pure logic — no Codex SDK dependency — so it can
+ * This module is pure logic â€” no Codex SDK dependency â€” so it can
  * run independently of the thread-based diagnostics flow.
  */
 
@@ -65,7 +65,8 @@ const CATALOGUE: Record<string, Omit<RemediationStep, "triggers">[]> = {
     {
       title: "Type-check codebase",
       command: "cd E:\\grid && uv run mypy src/",
-      rationale: "Static analysis catches type errors that cause runtime exceptions.",
+      rationale:
+        "Static analysis catches type errors that cause runtime exceptions.",
       priority: 20,
     },
   ],
@@ -73,13 +74,16 @@ const CATALOGUE: Record<string, Omit<RemediationStep, "triggers">[]> = {
     {
       title: "Lint codebase",
       command: "cd E:\\grid && uv run ruff check .",
-      rationale: "GitHub Actions error annotations often originate from lint violations.",
+      rationale:
+        "GitHub Actions error annotations often originate from lint violations.",
       priority: 5,
     },
     {
       title: "Auto-fix lint issues",
-      command: "cd E:\\grid && uv run ruff check . --fix && uv run black .",
-      rationale: "Auto-fixable lint and formatting issues are the cheapest to resolve.",
+      command:
+        "cd E:\\grid && uv run ruff format . && uv run ruff check . --fix",
+      rationale:
+        "Auto-fixable lint and formatting issues are the cheapest to resolve.",
       priority: 6,
     },
   ],
@@ -101,7 +105,8 @@ const CATALOGUE: Record<string, Omit<RemediationStep, "triggers">[]> = {
     {
       title: "Run full test suite",
       command: "cd E:\\grid && uv run pytest tests/ -v",
-      rationale: "Generic test failure — re-run everything to locate the break.",
+      rationale:
+        "Generic test failure â€” re-run everything to locate the break.",
       priority: 10,
     },
   ],
@@ -119,7 +124,8 @@ const CATALOGUE: Record<string, Omit<RemediationStep, "triggers">[]> = {
 const FALLBACK_STEPS: Omit<RemediationStep, "triggers">[] = [
   {
     title: "Run lint + format checks",
-    command: "cd E:\\grid && uv run ruff check . && uv run black --check .",
+    command:
+      "cd E:\\grid && uv run ruff format --check . && uv run ruff check .",
     rationale: "Baseline code-quality gate.",
     priority: 1,
   },
@@ -175,7 +181,9 @@ export const buildFixPlan = (
   for (const step of steps) {
     const existing = merged.get(step.command);
     if (existing) {
-      existing.triggers = [...new Set([...existing.triggers, ...step.triggers])];
+      existing.triggers = [
+        ...new Set([...existing.triggers, ...step.triggers]),
+      ];
     } else {
       merged.set(step.command, step);
     }
@@ -205,11 +213,11 @@ export const buildFixPlan = (
 
 export const formatFixPlan = (plan: FixPlan): string => {
   const lines: string[] = [
-    "═══════════════════════════════════════════",
+    "â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•",
     "  AUTO-FIX PLAN",
     `  Correlation: ${plan.correlationId}`,
     `  Generated:   ${plan.timestamp}`,
-    "═══════════════════════════════════════════",
+    "â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•",
     "",
     `CI Summary: ${plan.ciSummary}`,
     "",
@@ -225,7 +233,9 @@ export const formatFixPlan = (plan: FixPlan): string => {
 
   if (plan.unmappedIndicators.length > 0) {
     lines.push(`Unmapped indicators: ${plan.unmappedIndicators.join(", ")}`);
-    lines.push("  → These require manual investigation or Codex thread analysis.");
+    lines.push(
+      "  â†’ These require manual investigation or Codex thread analysis.",
+    );
     lines.push("");
   }
 
@@ -236,7 +246,10 @@ export const formatFixPlan = (plan: FixPlan): string => {
  * Build the Codex prompt that asks for a structured fix plan
  * based on CI failure data. Used when --mode fix-plan is set.
  */
-export const buildFixPlanPrompt = (ci: CiParseResult, plan: FixPlan): string => {
+export const buildFixPlanPrompt = (
+  ci: CiParseResult,
+  plan: FixPlan,
+): string => {
   const parts = [
     "You are a CI/CD diagnostics expert for a Python/FastAPI monorepo.",
     "Below is the parsed CI failure summary and a preliminary auto-generated fix plan.",

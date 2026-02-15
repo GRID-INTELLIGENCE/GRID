@@ -43,6 +43,14 @@ class TestBypassPaths:
         data = resp.json()
         assert "status" in data
 
+    def test_safety_pact_headers_on_responses(self, client):
+        """All responses must include Safety Pact headers."""
+        resp = client.get("/health")
+        assert resp.status_code == 200
+        assert resp.headers.get("X-Safety-Pact-Awaiting") == "AWAITED"
+        assert resp.headers.get("X-Safety-Pact-Concurrency") == "STAMINA_YIELDED"
+        assert resp.headers.get("X-Safety-Pact-Sovereignty") == "DETERMINISTIC"
+
     def test_metrics_bypasses_middleware(self, client):
         resp = client.get("/metrics")
         assert resp.status_code == 200
