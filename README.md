@@ -767,8 +767,58 @@ Optimized pre-push hook ensures:
 ### Development Guides
 
 - [`docs/structure/README.md`](docs/structure/README.md) - Repository structure guide
+- [`BRANCH_ORGANIZATION.md`](BRANCH_ORGANIZATION.md) - Branch organization strategy and merge history
 - [`docs/CLEANUP_SUMMARY.md`](docs/CLEANUP_SUMMARY.md) - Recent cleanup and reorganization
 - [`SAFE_MERGES_COMPLETED.md`](SAFE_MERGES_COMPLETED.md) - Merge strategy and completion report
+
+## Branch Organization
+
+This repository follows a structured branching strategy for feature development and consolidation.
+
+### Current Branch Structure
+
+- **main** - Production-ready stable release
+- **claude/organize-branch-structure-LM7e9** - Active consolidation branch (this branch)
+  - Merges: `chore/coldstart-baseline-guardrails`, `feature/test-suite-overhaul`, `authors-notes`, `Application`, and Claude-generated feature branches
+  - Purpose: Consolidate security hardening, test improvements, and Cognitive Privacy Shield features
+  - Status: ✅ Active development
+
+### Branch Naming Conventions
+
+- `feature/` - New features and capabilities
+- `fix/` - Bug fixes and patches
+- `chore/` - Maintenance and housekeeping tasks
+- `docs/` - Documentation updates
+- `security/` - Security improvements and hardening
+- `claude/` - Claude AI-generated branches (includes session ID suffix)
+
+### Development Workflow
+
+```bash
+# Feature development
+git checkout -b feature/your-feature-name
+
+# Run tests before committing
+uv run pytest tests/unit/ -v
+uv run ruff check .
+
+# Commit with conventional commits
+git commit -m "feat(module): add new capability"
+
+# Push to remote
+git push -u origin feature/your-feature-name
+```
+
+### Quality Gates
+
+Before merging to main:
+- ✅ All tests passing (283+ tests)
+- ✅ Code coverage ≥80%
+- ✅ No linting errors (`ruff check`)
+- ✅ No type errors (`mypy src/`)
+- ✅ Security scan passing
+
+See [`BRANCH_ORGANIZATION.md`](BRANCH_ORGANIZATION.md) for complete branch organization strategy and detailed merge history.
 
 ## License
 
