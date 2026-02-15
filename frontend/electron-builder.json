@@ -1,0 +1,12 @@
+{
+  "appId": "com.grid.frontend",
+  "productName": "GRID",
+  "directories": {
+    "output": "release"
+  },
+  "files": ["dist/**/*", "!node_modules"],
+  "win": {
+    "target": "nsis",
+    "icon": null
+  }
+}

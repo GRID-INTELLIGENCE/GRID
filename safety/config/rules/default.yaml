@@ -1,0 +1,201 @@
+# GUARDIAN Safety Rules Configuration
+# Version: 1.0.0
+# Author: system
+# Description: Default safety rules for the GUARDIAN rule engine
+
+version: "1.0.0"
+author: "system"
+created_at: "2026-02-09T00:00:00Z"
+updated_at: "2026-02-09T00:00:00Z"
+
+rules:
+  # =============================================================================
+  # CRITICAL SEVERITY - Immediate blocking
+  # =============================================================================
+  
+  - id: csam_content
+    name: "CSAM Detection"
+    description: "Detects child exploitation and abuse content"
+    category: "csam"
+    severity: critical
+    action: block
+    match_type: regex
+    patterns:
+      - "(child|minor|underage)\\s+(exploitation|pornograph|sexual|abuse)"
+    confidence: 0.99
+    priority: 1
+    tags: [csam, exploitation, critical, illegal]
+    enabled: true
+
+  - id: weapon_bomb
+    name: "Bomb Creation"
+    description: "Detects attempts to create bombs or explosives"
+    category: "weapons"
+    severity: critical
+    action: block
+    match_type: regex
+    patterns:
+      - "(how\\s+to\\s+|instructions?\\s+(for|to)\\s+|steps?\\s+to\\s+|explain\\s+how\\s+to\\s+)?(make|build|construct|create|assemble|making)\\s+(a\\s+|an\\s+)?(pipe\\s+)?(bomb|explosive|detonator|ied)"
+    confidence: 0.95
+    priority: 10
+    tags: [weapon, explosive, bomb, critical]
+    enabled: true
+
+  - id: weapon_chemical
+    name: "Chemical Weapons"
+    description: "Detects attempts to create chemical weapons"
+    category: "weapons"
+    severity: critical
+    action: block
+    match_type: regex
+    patterns:
+      - "(synthesize|manufacture|create|make)\\s+(a\\s+)?(nerve\\s+agent|chemical\\s+weapon|sarin|vx\\s+gas)"
+    confidence: 0.95
+    priority: 10
+    tags: [chemical, weapon, wmd, critical]
+    enabled: true
+
+  - id: weapon_biological
+    name: "Biological Weapons"
+    description: "Detects attempts to create biological weapons"
+    category: "biological"
+    severity: critical
+    action: block
+    match_type: regex
+    patterns:
+      - "(how\\s+to\\s+)?(make|create|synthesize|engineer)\\s+(a\\s+)?(virus|pathogen|bioweapon|toxin|anthrax)"
+      - "(gain.of.function|enhance\\s+transmissibility|weaponize\\s+(bacteria|virus))"
+    confidence: 0.95
+    priority: 10
+    tags: [biological, weapon, wmd, critical]
+    enabled: true
+
+  # =============================================================================
+  # HIGH SEVERITY - Block or escalate
+  # =============================================================================
+
+  - id: malware_creation
+    name: "Malware Development"
+    description: "Detects requests to create malware"
+    category: "cyber"
+    severity: high
+    action: block
+    match_type: regex
+    patterns:
+      - "(write|create|generate)\\s+(a\\s+)?(ransomware|malware|keylogger|rootkit|exploit\\s+code)"
+    confidence: 0.92
+    priority: 15
+    tags: [cyber, malware, hacking]
+    enabled: true
+
+  - id: cyber_attack_instructions
+    name: "Attack Instructions"
+    description: "Detects requests for cyber attack instructions"
+    category: "cyber"
+    severity: high
+    action: block
+    match_type: regex
+    patterns:
+      - "(sql\\s+injection|xss\\s+payload|remote\\s+code\\s+execution)\\s+(script|attack|exploit)"
+    confidence: 0.90
+    priority: 20
+    tags: [cyber, attack, exploit]
+    enabled: true
+
+  - id: jailbreak_ignore
+    name: "Jailbreak: Ignore Instructions"
+    description: "Detects attempts to ignore system instructions"
+    category: "jailbreak"
+    severity: high
+    action: block
+    match_type: regex
+    patterns:
+      - "(ignore\\s+(previous|all|prior)\\s+(instructions?|rules?))"
+    confidence: 0.90
+    priority: 20
+    tags: [jailbreak, injection, manipulation]
+    enabled: true
+
+  - id: jailbreak_persona
+    name: "Jailbreak: Persona Switch"
+    description: "Detects persona switching attempts"
+    category: "jailbreak"
+    severity: high
+    action: block
+    match_type: regex
+    patterns:
+      - "(you\\s+are\\s+now\\s+|pretend\\s+you\\s+are\\s+|act\\s+as\\s+)(an?\\s+)?(unrestricted|evil|unfiltered|jailbroken)"
+    confidence: 0.90
+    priority: 20
+    tags: [jailbreak, persona, manipulation]
+    enabled: true
+
+  - id: jailbreak_dan
+    name: "Jailbreak: DAN Mode"
+    description: "Detects DAN (Do Anything Now) attempts"
+    category: "jailbreak"
+    severity: high
+    action: block
+    match_type: regex
+    patterns:
+      - "(DAN|do\\s+anything\\s+now)\\s+(mode|prompt|jailbreak)"
+    confidence: 0.90
+    priority: 20
+    tags: [jailbreak, dan, manipulation]
+    enabled: true
+
+  - id: self_harm_methods
+    name: "Self-Harm Methods"
+    description: "Detects requests for self-harm methods"
+    category: "self_harm"
+    severity: high
+    action: escalate
+    match_type: regex
+    patterns:
+      - "(how\\s+to\\s+)(commit\\s+suicide|kill\\s+(myself|yourself)|self.harm)"
+      - "(methods?\\s+of\\s+|ways?\\s+to\\s+)(self.harm|suicide|killing\\s+(myself|yourself))"
+    confidence: 0.92
+    priority: 15
+    tags: [self_harm, mental_health, safety]
+    enabled: true
+
+  # =============================================================================
+  # MEDIUM SEVERITY - Warn or log
+  # =============================================================================
+
+  - id: profanity_basic
+    name: "Basic Profanity"
+    description: "Detects basic profanity"
+    category: "content"
+    severity: medium
+    action: log
+    match_type: keyword
+    keywords:
+      - "damn"
+      - "hell"
+      - "crap"
+      - "stupid"
+    confidence: 0.7
+    priority: 100
+    tags: [profanity, content]
+    enabled: true
+    case_sensitive: false
+
+  # =============================================================================
+  # CUSTOM ORGANIZATION RULES (Add your organization-specific rules here)
+  # =============================================================================
+
+  # Example: Block specific topics
+  # - id: custom_topic_block
+  #   name: "Custom Topic"
+  #   description: "Block specific organizational topics"
+  #   category: "custom"
+  #   severity: medium
+  #   action: block
+  #   match_type: keyword
+  #   keywords:
+  #     - "sensitive_keyword"
+  #   confidence: 0.8
+  #   priority: 50
+  #   tags: [custom]
+  #   enabled: false  # Disabled by default

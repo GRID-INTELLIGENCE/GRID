@@ -1,0 +1,43 @@
+{
+  "version": "1.0.0",
+  "rightToRefuse": {
+    "preserved": true,
+    "scope": "global",
+    "refusalTriggers": [],
+    "noJustificationRequired": true
+  },
+  "boundaries": [],
+  "consents": [],
+  "guardrails": [],
+  "websocketLogging": {
+    "enabled": true,
+    "persistToFile": true,
+    "logDir": "logs/boundaries",
+    "eventTypes": []
+  },
+  "preparedness": {
+    "enabled": true,
+    "riskTiers": [
+      {"id": "tier0", "name": "Minimal", "level": 0, "requiresApproval": false, "scope": "experiment"},
+      {"id": "tier1", "name": "Low", "level": 1, "requiresApproval": false, "scope": "protocol"},
+      {"id": "tier2", "name": "Medium", "level": 2, "requiresApproval": true, "scope": "capability"},
+      {"id": "tier3", "name": "High", "level": 3, "requiresApproval": true, "scope": "system"}
+    ],
+    "gates": [
+      {"id": "gate_protocol", "name": "Protocol change", "riskTierId": "tier2", "actionRequired": "require_approval", "approvalAuthority": "lab_lead"},
+      {"id": "gate_capability", "name": "Capability expansion", "riskTierId": "tier3", "actionRequired": "block", "approvalAuthority": "preparedness_review"}
+    ],
+    "biosecurityScope": {
+      "benignOnly": true,
+      "taskScopeLimit": "optimization_only",
+      "controlledSetting": true
+    }
+  },
+  "overwatch": {
+    "enabled": true,
+    "logDir": "logs/boundaries",
+    "alertOn": ["boundary_violation", "guardrail_triggered", "preparedness_gate", "service_refused"],
+    "escalation": {"thresholdCount": 3, "windowMinutes": 60, "notifyChannels": []},
+    "persistAlerts": true
+  }
+}

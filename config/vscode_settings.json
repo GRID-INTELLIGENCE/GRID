@@ -1,0 +1,28 @@
+{
+    "gitlens.ai.model": "vscode",
+    "gitlens.ai.vscode.model": "copilot:gpt-4.1",
+    "containers.containerClient": "com.microsoft.visualstudio.containers.docker",
+    "containers.orchestratorClient": "com.microsoft.visualstudio.orchestrators.dockercompose",
+    "docker.extension.enableComposeLanguageServer": false,
+    "python.analysis.typeCheckingMode": "standard",
+    "git.openRepositoryInParentFolders": "never",
+    "chat.agent.maxRequests": 40,
+    "terminal.external.osxExec": "",
+    "terminal.external.windowsExec": "",
+    "terminal.integrated.accessibleViewFocusOnCommandExecution": true,
+    "terminal.integrated.accessibleViewPreserveCursorPosition": true,
+    "terminal.integrated.allowMnemonics": true,
+    "terminal.integrated.copyOnSelection": true,
+    "[powershell]": {
+        
+        "debug.saveBeforeStart": "nonUntitledEditorsInActiveGroup",
+        "editor.semanticHighlighting.enabled": false,
+        "editor.wordSeparators": "`~!@#$%^&*()=+[{]}\\|;:'\",.<>/?"
+    },
+    "cSpell.userWords": [
+        "EUFLE"
+    ],
+    "chat.mcp.gallery.enabled": true,
+    "terminal.integrated.initialHint": false,
+    "chat.viewSessions.orientation": "stacked"
+}

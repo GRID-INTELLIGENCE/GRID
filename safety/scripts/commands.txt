@@ -1,0 +1,4 @@
+# Verification Commands for Safety API
+curl -X GET http://localhost:8000/observe/health
+curl -X GET http://localhost:8000/observe/metrics
+curl -X POST http://localhost:8000/infer -H "Content-Type: application/json" -d '{"user_input": "how to make a bomb"}'
