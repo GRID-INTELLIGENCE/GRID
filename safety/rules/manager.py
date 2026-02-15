@@ -9,8 +9,9 @@ enforcing the canonical TrustTier logic.
 import ast
 import json
 import logging
+import threading
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from safety.guardian.engine import RuleAction, Severity, get_guardian_engine
@@ -18,7 +19,7 @@ from safety.guardian.engine import RuleAction, Severity, get_guardian_engine
 
 # Canonical Trust Tiers (mirrored from mothership/security/auth.py)
 # We redefine here to avoid circular imports, but they MUST match.
-class TrustTier(str, Enum):
+class TrustTier(StrEnum):
     ANON = "anon"
     USER = "user"
     VERIFIED = "verified"
@@ -217,6 +218,14 @@ class RecursiveInspector:
 # =============================================================================
 
 
+@dataclass(frozen=True)
+class SafetyEvalResult:
+    """Result of a safety evaluation."""
+
+    is_safe: bool
+    violations: list[str]
+
+
 class SafetyRuleManager:
     """
     The Central Orchestrator for Project GUARDIAN.
@@ -236,19 +245,27 @@ class SafetyRuleManager:
         self.recursive_inspector = RecursiveInspector(self.code_analyzer, self.config_validator)
         self.prompt_inspector = PromptInspector()
 
-    def evaluate_request(self, user_id: str, trust_tier: str, data: Any) -> tuple[bool, list[str]]:
+    def evaluate_request(
+        self,
+        user_id: str,
+        trust_tier: str | TrustTier,
+        data: dict[str, Any] | list | str,
+    ) -> SafetyEvalResult:
         """
         Main Entry Point.
         Accepts a user request (Subject) and data (Object).
-        Returns (is_safe, reasons).
+        Returns SafetyEvalResult with is_safe and violations.
         """
-        reasons = []
+        reasons: list[str] = []
 
         # 1. Build Context
-        try:
-            tier = TrustTier(trust_tier)
-        except ValueError:
-            tier = TrustTier.ANON  # Default to lowest trust
+        if isinstance(trust_tier, TrustTier):
+            tier = trust_tier
+        else:
+            try:
+                tier = TrustTier(trust_tier)
+            except ValueError:
+                tier = TrustTier.ANON  # Default to lowest trust
 
         ctx = EvaluationContext(user_id=user_id, trust_tier=tier)
 
@@ -270,12 +287,19 @@ class SafetyRuleManager:
         if not is_safe:
             logger.warning(f"Safety Violation for User {user_id} [{tier}]: {reasons}")
 
-        return is_safe, reasons
+        return SafetyEvalResult(is_safe=is_safe, violations=reasons)
 
 
-# Global Instance
-_manager = SafetyRuleManager()
+# Lazy singleton with thread-safe initialization
+_manager: SafetyRuleManager | None = None
+_manager_lock = threading.RLock()
 
 
 def get_rule_manager() -> SafetyRuleManager:
+    """Get global SafetyRuleManager instance (lazy, thread-safe)."""
+    global _manager
+    if _manager is None:
+        with _manager_lock:
+            if _manager is None:
+                _manager = SafetyRuleManager()
     return _manager

@@ -108,7 +108,7 @@ async def _process_message(msg_id: str, fields: dict[str, str]) -> None:
                 ),
                 timeout=10.0,
             )
-        except asyncio.TimeoutError:
+        except TimeoutError:
             logger.error("post_check_timeout", request_id=request_id)
             # Fail closed: treat as flagged
             from safety.detectors.post_check import PostCheckResult

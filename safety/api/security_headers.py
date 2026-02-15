@@ -105,9 +105,6 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         self.csrf_secret = csrf_secret or os.getenv("CSRF_SECRET", secrets.token_hex(32))
         self.allowed_origins = allowed_origins or {"http://localhost:3000", "https://localhost:3000"}
 
-        # Session storage for CSRF tokens
-        self.csrf_tokens: dict[str, dict[str, float]] = {}
-
     def _build_permissions_policy(self, policy: dict[str, list[str]]) -> str:
         """Build Permissions-Policy header value"""
         directives = []
@@ -163,19 +160,35 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 
         return origin in self.allowed_origins
 
+    # API paths exempt from CSRF (programmatic clients, not browsers)
+    _CSRF_EXEMPT_PREFIXES: tuple[str, ...] = (
+        "/infer",
+        "/privacy/",
+        "/health",
+        "/metrics",
+        "/observe/",
+        "/review/",
+        "/v1/",
+    )
+
     async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
         # CSRF Protection for state-changing requests
         if self.enable_csrf_protection and request.method in {"POST", "PUT", "PATCH", "DELETE"}:
-            # Check CORS
-            if not self._check_cors(request):
-                return Response(content="CORS policy violation", status_code=403, media_type="text/plain")
+            # Skip CSRF for API-only paths (no browser session)
+            path = request.url.path
+            csrf_exempt = any(path.startswith(prefix) for prefix in self._CSRF_EXEMPT_PREFIXES)
 
-            # Validate CSRF token
-            csrf_token = request.headers.get("X-CSRF-Token")
-            session_id = request.cookies.get("session_id", "anonymous")
+            if not csrf_exempt:
+                # Check CORS
+                if not self._check_cors(request):
+                    return Response(content="CORS policy violation", status_code=403, media_type="text/plain")
 
-            if not csrf_token or not self._validate_csrf_token(csrf_token, session_id):
-                return Response(content="CSRF token validation failed", status_code=403, media_type="text/plain")
+                # Validate CSRF token
+                csrf_token = request.headers.get("X-CSRF-Token")
+                session_id = request.cookies.get("session_id", "anonymous")
+
+                if not csrf_token or not self._validate_csrf_token(csrf_token, session_id):
+                    return Response(content="CSRF token validation failed", status_code=403, media_type="text/plain")
 
         # Process the request
         response = await call_next(request)

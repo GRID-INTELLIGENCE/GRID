@@ -24,7 +24,7 @@ import threading
 import time
 from collections import OrderedDict, defaultdict
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import UTC, datetime
 from enum import Enum, auto
 from typing import Any
 
@@ -128,8 +128,8 @@ class SafetyRule:
     version: str = "1.0.0"
 
     # Metadata
-    created_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
-    updated_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+    created_at: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
+    updated_at: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
     author: str = "system"
     tags: list[str] = field(default_factory=list)
 
@@ -311,7 +311,7 @@ class RuleRegistry:
         self._action_index: dict[RuleAction, set[str]] = defaultdict(set)
         self._lock = threading.RLock()
         self._version = "0.0.0"
-        self._last_updated = datetime.utcnow().isoformat()
+        self._last_updated = datetime.now(UTC).isoformat()
 
     def register(self, rule: SafetyRule) -> bool:
         """Register a new rule."""
@@ -371,7 +371,7 @@ class RuleRegistry:
         """Update registry version."""
         with self._lock:
             self._version = version
-            self._last_updated = datetime.utcnow().isoformat()
+            self._last_updated = datetime.now(UTC).isoformat()
 
     def get_stats(self) -> dict[str, Any]:
         """Get registry statistics."""
@@ -624,13 +624,16 @@ class GuardianEngine:
 
 # Singleton instance for global use
 _guardian_engine: GuardianEngine | None = None
+_guardian_engine_lock = threading.RLock()
 
 
 def get_guardian_engine() -> GuardianEngine:
-    """Get global GUARDIAN engine instance."""
+    """Get global GUARDIAN engine instance (thread-safe)."""
     global _guardian_engine
     if _guardian_engine is None:
-        _guardian_engine = GuardianEngine()
+        with _guardian_engine_lock:
+            if _guardian_engine is None:
+                _guardian_engine = GuardianEngine()
     return _guardian_engine
 
 

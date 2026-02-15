@@ -12,9 +12,9 @@ from typing import Any
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse
 
+from safety.guardian.engine import get_guardian_engine
 from safety.observability.metrics import DETECTOR_HEALTHY
 from safety.observability.runtime_observation import observation_service
-from safety.rules.engine import get_rule_engine
 from safety.workers.worker_utils import get_redis
 
 logger = logging.getLogger(__name__)
@@ -75,19 +75,22 @@ async def get_metrics() -> dict[str, Any]:
 @router.get("/rules")
 async def get_rules():
     """Get active safety rules (Project GUARDIAN)."""
-    engine = get_rule_engine()
+    engine = get_guardian_engine()
+    stats = engine.get_stats()
+    rules = engine.registry.get_all()
     return {
-        "count": len(engine.rules),
+        "count": len(rules),
         "rules": [
             {
                 "id": r.id,
                 "name": r.name,
-                "reason_code": r.reason_code,
                 "severity": r.severity.value,
-                "event_type": r.event_type.value,
+                "action": r.action.value if r.action else None,
+                "enabled": r.enabled,
             }
-            for r in engine.rules
+            for r in rules
         ],
+        "stats": stats,
     }
 
 
@@ -114,8 +117,8 @@ async def inject_rule(rule: dict[str, Any]):
         # Save to Redis for global sync
         await client.sadd("guardian:dynamic_rules", json.dumps(rule))  # type: ignore[reportAwaitableReturnType]
 
-        # Trigger local refresh
-        get_rule_engine().refresh_dynamic_rules()
+        # Trigger local cache clear so new rules take effect
+        get_guardian_engine().clear_cache()
 
         return {"status": "success", "rule_id": rule["id"]}
     except Exception as e:

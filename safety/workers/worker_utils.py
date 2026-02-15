@@ -20,6 +20,7 @@ from safety.observability.metrics import REDIS_HEALTHY, WORKER_QUEUE_DEPTH
 logger = get_logger("workers.utils")
 
 _redis: aioredis.Redis | None = None
+_redis_lock = asyncio.Lock()
 _shutdown_event = asyncio.Event()
 
 INFERENCE_STREAM = "inference-stream"
@@ -32,8 +33,10 @@ async def get_redis() -> aioredis.Redis:
     """Get the shared async Redis client."""
     global _redis
     if _redis is None:
-        url = os.getenv("REDIS_URL", "redis://localhost:6379")
-        _redis = aioredis.from_url(url, decode_responses=True)
+        async with _redis_lock:
+            if _redis is None:
+                url = os.getenv("REDIS_URL", "redis://localhost:6379")
+                _redis = aioredis.from_url(url, decode_responses=True)
     return _redis
 
 

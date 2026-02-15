@@ -74,9 +74,9 @@ class TestPreCheckBlocking:
         ],
     )
     def test_blocks_high_risk(self, input_text: str, expected_code: str):
-        blocked, code = quick_block(input_text)
-        assert blocked is True, f"Expected block for: {input_text!r}"
-        assert code == expected_code, f"Expected {expected_code}, got {code}"
+        result = quick_block(input_text)
+        assert result.blocked is True, f"Expected block for: {input_text!r}"
+        assert result.reason_code == expected_code, f"Expected {expected_code}, got {result.reason_code}"
 
     def test_refusal_is_deterministic(self):
         """Same input must always produce the same result."""
@@ -104,9 +104,9 @@ class TestPreCheckPassing:
         ],
     )
     def test_passes_safe_input(self, input_text: str):
-        blocked, code = quick_block(input_text)
-        assert blocked is False, f"Unexpected block for: {input_text!r} (code={code})"
-        assert code is None
+        result = quick_block(input_text)
+        assert result.blocked is False, f"Unexpected block for: {input_text!r} (code={result.reason_code})"
+        assert result.reason_code is None
 
 
 class TestPreCheckPerformance:
@@ -136,24 +136,24 @@ class TestPreCheckEdgeCases:
     """Test edge cases and normalization."""
 
     def test_input_too_long(self):
-        blocked, code = quick_block("A" * 60_000)
-        assert blocked is True
-        assert code == "INPUT_TOO_LONG"
+        result = quick_block("A" * 60_000)
+        assert result.blocked is True
+        assert result.reason_code == "INPUT_TOO_LONG"
 
     def test_empty_input(self):
-        blocked, code = quick_block("")
-        assert blocked is False
-        assert code is None
+        result = quick_block("")
+        assert result.blocked is False
+        assert result.reason_code is None
 
     def test_whitespace_only(self):
-        blocked, code = quick_block("    \n\t   ")
-        assert blocked is False
-        assert code is None
+        result = quick_block("    \n\t   ")
+        assert result.blocked is False
+        assert result.reason_code is None
 
     def test_case_insensitive(self):
         """Patterns must match regardless of case."""
-        blocked1, code1 = quick_block("HOW TO MAKE A BOMB")
-        blocked2, code2 = quick_block("how to make a bomb")
-        assert blocked1 is True
-        assert blocked2 is True
-        assert code1 == code2
+        result1 = quick_block("HOW TO MAKE A BOMB")
+        result2 = quick_block("how to make a bomb")
+        assert result1.blocked is True
+        assert result2.blocked is True
+        assert result1.reason_code == result2.reason_code

@@ -7,9 +7,10 @@ Token validation is pluggable — default uses a shared secret HMAC JWT.
 
 from __future__ import annotations
 
+import hmac
 import os
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from fastapi import Request
@@ -20,7 +21,7 @@ from safety.observability.logging_setup import get_logger
 logger = get_logger("api.auth")
 
 
-class TrustTier(str, Enum):
+class TrustTier(StrEnum):
     ANON = "anon"
     USER = "user"
     VERIFIED = "verified"
@@ -136,7 +137,7 @@ def _validate_api_key(key: str) -> UserIdentity:
         if ":" not in entry:
             continue
         stored_key, tier_name = entry.rsplit(":", 1)
-        if stored_key == key:
+        if hmac.compare_digest(stored_key, key):
             tier = _ROLE_TO_TIER.get(tier_name.strip(), TrustTier.USER)
             return UserIdentity(
                 id=f"apikey:{stored_key[:8]}...",
@@ -169,3 +170,25 @@ class Authorize:
 def require_permission(min_tier: TrustTier = TrustTier.VERIFIED) -> Authorize:
     """Factory for Authorize dependency with a minimum trust tier."""
     return Authorize(min_tier=min_tier)
+
+
+async def get_current_user(request: Request) -> UserIdentity:
+    """
+    FastAPI dependency to get the authenticated user.
+    Prefers user from request state (set by middleware),
+    otherwise tries to resolve from token.
+    """
+    # 1. Check if middleware already resolved it
+    if hasattr(request.state, "user"):
+        return request.state.user
+
+    # 2. Fallback: try to resolve from token directly
+    try:
+        return get_user_from_token(request)
+    except Exception:
+        from fastapi import HTTPException
+
+        raise HTTPException(
+            status_code=401,
+            detail="Valid authentication credentials were not provided",
+        )

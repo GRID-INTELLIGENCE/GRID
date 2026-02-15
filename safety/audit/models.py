@@ -60,20 +60,20 @@ class Base(DeclarativeBase):
     pass
 
 
-class Severity(str, enum.Enum):
+class Severity(enum.StrEnum):
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
     CRITICAL = "critical"
 
 
-class AuditStatus(str, enum.Enum):
+class AuditStatus(enum.StrEnum):
     OPEN = "open"
     ESCALATED = "escalated"
     RESOLVED = "resolved"
 
 
-class TrustTier(str, enum.Enum):
+class TrustTier(enum.StrEnum):
     ANON = "anon"
     USER = "user"
     VERIFIED = "verified"

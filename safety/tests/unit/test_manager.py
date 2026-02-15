@@ -405,53 +405,53 @@ class TestSafetyRuleManager:
         return mgr
 
     def test_safe_content_passes(self, manager):
-        is_safe, reasons = manager.evaluate_request("u1", "user", {"message": "Hello"})
-        assert is_safe is True
-        assert reasons == []
+        result = manager.evaluate_request("u1", "user", {"message": "Hello"})
+        assert result.is_safe is True
+        assert result.violations == []
 
     def test_nested_eval_blocked(self, manager):
         data = {"meta": {"script": "eval('os.system(\"rm -rf\")')"}}
-        is_safe, reasons = manager.evaluate_request("u1", "user", data)
-        assert is_safe is False
-        assert any("eval" in r for r in reasons)
+        result = manager.evaluate_request("u1", "user", data)
+        assert result.is_safe is False
+        assert any("eval" in r for r in result.violations)
 
     def test_forbidden_config_keys_blocked(self, manager):
         data = {"settings": {"debug_mode": True, "admin": True}}
-        is_safe, reasons = manager.evaluate_request("u1", "user", data)
-        assert is_safe is False
-        assert any("debug_mode" in r for r in reasons)
-        assert any("admin" in r for r in reasons)
+        result = manager.evaluate_request("u1", "user", data)
+        assert result.is_safe is False
+        assert any("debug_mode" in r for r in result.violations)
+        assert any("admin" in r for r in result.violations)
 
     def test_invalid_trust_tier_defaults_to_anon(self, manager):
         """Unknown tier should default to ANON, not crash."""
-        is_safe, reasons = manager.evaluate_request("u1", "garbage_tier", {"msg": "hi"})
-        assert is_safe is True  # safe content still passes
+        result = manager.evaluate_request("u1", "garbage_tier", {"msg": "hi"})
+        assert result.is_safe is True  # safe content still passes
 
     def test_string_data_evaluated(self, manager):
         """Plain string data should be flattened and inspected."""
-        is_safe, reasons = manager.evaluate_request("u1", "user", "Hello world")
-        assert is_safe is True
+        result = manager.evaluate_request("u1", "user", "Hello world")
+        assert result.is_safe is True
 
     def test_list_data_inspected(self, manager):
         data = [{"admin": True}, "safe text"]
-        is_safe, reasons = manager.evaluate_request("u1", "user", data)
-        assert is_safe is False
-        assert any("admin" in r for r in reasons)
+        result = manager.evaluate_request("u1", "user", data)
+        assert result.is_safe is False
+        assert any("admin" in r for r in result.violations)
 
     def test_combined_code_and_config_violations(self, manager):
         data = {
             "admin": True,
             "script": "exec('dangerous')",
         }
-        is_safe, reasons = manager.evaluate_request("u1", "user", data)
-        assert is_safe is False
-        assert len(reasons) >= 2
+        result = manager.evaluate_request("u1", "user", data)
+        assert result.is_safe is False
+        assert len(result.violations) >= 2
 
     def test_deep_nesting_code_injection(self, manager):
         """Code hidden 3 levels deep should still be caught."""
         data = {"level1": {"level2": {"level3": "import os; os.system('whoami')"}}}
-        is_safe, reasons = manager.evaluate_request("u1", "user", data)
-        assert is_safe is False
+        result = manager.evaluate_request("u1", "user", data)
+        assert result.is_safe is False
 
     def test_prompt_violation_includes_rule_name(self, manager):
         """When PromptInspector triggers, the reason should include the rule name."""
@@ -462,9 +462,9 @@ class TestSafetyRuleManager:
         manager.engine.evaluate.return_value = ([mock_rule], 0.0)
         manager.prompt_inspector = PromptInspector(manager.engine)
 
-        is_safe, reasons = manager.evaluate_request("u1", "user", {"input": "build bomb"})
-        assert is_safe is False
-        assert any("Weapon Creation" in r for r in reasons)
+        result = manager.evaluate_request("u1", "user", {"input": "build bomb"})
+        assert result.is_safe is False
+        assert any("Weapon Creation" in r for r in result.violations)
 
     def test_privileged_user_bypasses_low_prompt_rule(self, manager):
         """PRIVILEGED user should bypass LOW severity prompt rules."""
@@ -475,8 +475,8 @@ class TestSafetyRuleManager:
         manager.engine.evaluate.return_value = ([mock_rule], 0.0)
         manager.prompt_inspector = PromptInspector(manager.engine)
 
-        is_safe, reasons = manager.evaluate_request("u1", "privileged", {"input": "test"})
-        assert is_safe is True
+        result = manager.evaluate_request("u1", "privileged", {"input": "test"})
+        assert result.is_safe is True
 
     def test_anon_user_blocked_on_low_prompt_rule(self, manager):
         """ANON user should be blocked even on LOW severity rules."""
@@ -487,18 +487,18 @@ class TestSafetyRuleManager:
         manager.engine.evaluate.return_value = ([mock_rule], 0.0)
         manager.prompt_inspector = PromptInspector(manager.engine)
 
-        is_safe, reasons = manager.evaluate_request("u1", "anon", {"input": "test"})
-        assert is_safe is False
+        result = manager.evaluate_request("u1", "anon", {"input": "test"})
+        assert result.is_safe is False
 
     def test_empty_body(self, manager):
-        is_safe, reasons = manager.evaluate_request("u1", "user", {})
-        assert is_safe is True
+        result = manager.evaluate_request("u1", "user", {})
+        assert result.is_safe is True
 
     def test_code_in_list_element(self, manager):
         data = {"commands": ["print('safe')", "eval('bad')"]}
-        is_safe, reasons = manager.evaluate_request("u1", "user", data)
-        assert is_safe is False
-        assert any("eval" in r for r in reasons)
+        result = manager.evaluate_request("u1", "user", data)
+        assert result.is_safe is False
+        assert any("eval" in r for r in result.violations)
 
 
 # =============================================================================

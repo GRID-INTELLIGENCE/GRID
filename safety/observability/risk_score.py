@@ -1,7 +1,6 @@
 import asyncio
 import logging
 import time
-from typing import Optional
 
 from safety.observability.security_monitoring import (
     SecurityEvent,
@@ -57,7 +56,7 @@ class RiskScoreManager:
     }
 
     def __init__(self):
-        self._lua_sha: Optional[str] = None
+        self._lua_sha: str | None = None
         self._lua_lock = asyncio.Lock()
 
     async def _ensure_lua_script(self, client) -> str:
