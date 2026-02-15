@@ -237,7 +237,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
 
         # Privacy: Minimal permissions by default
-        response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=(), usb=(), interest-cohort=()"
+        response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=(), usb=(self), interest-cohort=()"
 
         # Content Security Policy
         response.headers["Content-Security-Policy"] = self.csp
