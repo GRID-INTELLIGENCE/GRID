@@ -166,6 +166,15 @@ class ArenaAPIGateway:
                     "health_url": "http://localhost:8001/health",
                     "metadata": {"version": "1.0.0", "capabilities": ["text_generation", "safety_checks"]},
                 },
+                {
+                    "service_name": "discussion_service",
+                    "url": "http://localhost:8003",
+                    "health_url": "http://localhost:8003/health",
+                    "metadata": {
+                        "version": "1.0.0",
+                        "capabilities": ["current_events", "topic_extraction", "recursive_reasoning", "wall_board"],
+                    },
+                },
             ]
             for service_data in arena_services:
                 await self.service_discovery.register_service(service_data)
