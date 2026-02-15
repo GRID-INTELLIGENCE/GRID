@@ -577,6 +577,7 @@ pip.conf
 *.md
 !README.md
 !ACKNOWLEDGEMENT.md
+!CLAUDE.md
 !PROJECT_CHECKPOINT.md
 !.windsurf/rules/README.md
 
@@ -605,6 +606,7 @@ docs/*.md
 # ==========================
 
 scripts/*.py
+!scripts/track_commit.py
 *.ps1
 !scripts/__init__.py
 !scripts/setup.py

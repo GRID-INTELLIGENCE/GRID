@@ -1,0 +1,53 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: grid-ingress
+  namespace: grid-{{ .Values.environment }}
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - {{ .Values.domain }}
+      secretName: grid-tls
+  rules:
+    - host: {{ .Values.domain }}
+      http:
+        paths:
+          - path: /api(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: grid-api
+                port:
+                  number: 80
+          - path: /privacy(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: grid-api
+                port:
+                  number: 80
+          - path: /auth(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: grid-api
+                port:
+                  number: 80
+          - path: /health
+            pathType: Prefix
+            backend:
+              service:
+                name: grid-api
+                port:
+                  number: 80
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: grid-frontend
+                port:
+                  number: 80

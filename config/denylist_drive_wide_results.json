@@ -1,0 +1,28 @@
+{
+  "processed": [
+    {
+      "path": "E:\\grid\\mcp-setup\\mcp_config.json",
+      "success": true,
+      "denied_count": 5,
+      "allowed_count": 1,
+      "errors": [],
+      "backup": "E:\\grid\\mcp-setup\\mcp_config.backup.json"
+    },
+    {
+      "path": "E:\\.worktrees\\copilot-worktree-2026-02-01T20-18-14\\grid-rag-enhanced\\mcp-setup\\mcp_config.json",
+      "success": true,
+      "denied_count": 5,
+      "allowed_count": 0,
+      "errors": [],
+      "backup": "E:\\.worktrees\\copilot-worktree-2026-02-01T20-18-14\\grid-rag-enhanced\\mcp-setup\\mcp_config.backup.json"
+    }
+  ],
+  "errors": [],
+  "summary": {
+    "total_configs": 2,
+    "processed": 2,
+    "errors": 0,
+    "total_denied": 10,
+    "total_allowed": 1
+  }
+}

@@ -9,7 +9,7 @@ from __future__ import annotations
 import uuid
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 
@@ -24,7 +24,7 @@ def utc_now() -> datetime:
     return datetime.now(UTC)
 
 
-class PaymentStatus(str, Enum):
+class PaymentStatus(StrEnum):
     """Payment transaction status."""
 
     PENDING = "pending"
@@ -36,14 +36,14 @@ class PaymentStatus(str, Enum):
     PARTIALLY_REFUNDED = "partially_refunded"
 
 
-class PaymentGateway(str, Enum):
+class PaymentGateway(StrEnum):
     """Supported payment gateways."""
 
     STRIPE = "stripe"
     # BKASH = "bkash"  # Decommissioned
 
 
-class SubscriptionTier(str, Enum):
+class SubscriptionTier(StrEnum):
     """Subscription tier levels."""
 
     FREE = "free"
@@ -52,7 +52,7 @@ class SubscriptionTier(str, Enum):
     ENTERPRISE = "enterprise"
 
 
-class SubscriptionStatus(str, Enum):
+class SubscriptionStatus(StrEnum):
     """Subscription status."""
 
     ACTIVE = "active"
@@ -178,6 +178,112 @@ class Subscription:
             "cancelled_at": self.cancelled_at.isoformat() if self.cancelled_at else None,
             "gateway": self.gateway.value,
             "gateway_subscription_id": self.gateway_subscription_id,
+            "metadata": self.metadata,
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat(),
+        }
+
+
+class WebhookEventStatus(StrEnum):
+    """Webhook processing status."""
+
+    RECEIVED = "received"
+    PROCESSED = "processed"
+    IGNORED = "ignored"
+    FAILED = "failed"
+
+
+@dataclass
+class PaymentWebhookEvent:
+    """Durable webhook event record for idempotency and auditability."""
+
+    id: str = field(default_factory=lambda: generate_id("wev"))
+    gateway: PaymentGateway = PaymentGateway.STRIPE
+    gateway_event_id: str = ""
+    event_type: str = ""
+    status: WebhookEventStatus = WebhookEventStatus.RECEIVED
+    signature_hash: str = ""
+    payload_hash: str = ""
+    payment_transaction_id: str | None = None
+    gateway_transaction_id: str | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
+    received_at: datetime = field(default_factory=utc_now)
+    processed_at: datetime | None = None
+    created_at: datetime = field(default_factory=utc_now)
+    updated_at: datetime = field(default_factory=utc_now)
+
+    def mark_processed(self, payment_transaction_id: str | None = None) -> None:
+        """Mark event processed successfully."""
+        self.status = WebhookEventStatus.PROCESSED
+        self.payment_transaction_id = payment_transaction_id
+        self.processed_at = utc_now()
+        self.updated_at = utc_now()
+
+    def mark_ignored(self) -> None:
+        """Mark event as intentionally ignored."""
+        self.status = WebhookEventStatus.IGNORED
+        self.processed_at = utc_now()
+        self.updated_at = utc_now()
+
+    def mark_failed(self, reason: str) -> None:
+        """Mark event processing failed."""
+        self.status = WebhookEventStatus.FAILED
+        self.metadata = {**self.metadata, "failure_reason": reason}
+        self.processed_at = utc_now()
+        self.updated_at = utc_now()
+
+    def to_dict(self) -> dict[str, Any]:
+        """Serialize to dictionary."""
+        return {
+            "id": self.id,
+            "gateway": self.gateway.value,
+            "gateway_event_id": self.gateway_event_id,
+            "event_type": self.event_type,
+            "status": self.status.value,
+            "signature_hash": self.signature_hash,
+            "payload_hash": self.payload_hash,
+            "payment_transaction_id": self.payment_transaction_id,
+            "gateway_transaction_id": self.gateway_transaction_id,
+            "metadata": self.metadata,
+            "received_at": self.received_at.isoformat(),
+            "processed_at": self.processed_at.isoformat() if self.processed_at else None,
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat(),
+        }
+
+
+@dataclass
+class PaymentReconciliationRun:
+    """Durable reconciliation run summary for accounting diagnostics."""
+
+    id: str = field(default_factory=lambda: generate_id("rec"))
+    gateway: PaymentGateway = PaymentGateway.STRIPE
+    started_at: datetime = field(default_factory=utc_now)
+    completed_at: datetime | None = None
+    scanned_transactions: int = 0
+    mismatched_transactions: int = 0
+    auto_reconciled_transactions: int = 0
+    issues: list[dict[str, Any]] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
+    created_at: datetime = field(default_factory=utc_now)
+    updated_at: datetime = field(default_factory=utc_now)
+
+    def finish(self) -> None:
+        """Finalize run timestamps."""
+        self.completed_at = utc_now()
+        self.updated_at = utc_now()
+
+    def to_dict(self) -> dict[str, Any]:
+        """Serialize to dictionary."""
+        return {
+            "id": self.id,
+            "gateway": self.gateway.value,
+            "started_at": self.started_at.isoformat(),
+            "completed_at": self.completed_at.isoformat() if self.completed_at else None,
+            "scanned_transactions": self.scanned_transactions,
+            "mismatched_transactions": self.mismatched_transactions,
+            "auto_reconciled_transactions": self.auto_reconciled_transactions,
+            "issues": self.issues,
             "metadata": self.metadata,
             "created_at": self.created_at.isoformat(),
             "updated_at": self.updated_at.isoformat(),

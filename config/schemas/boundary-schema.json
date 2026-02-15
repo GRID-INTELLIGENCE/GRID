@@ -1,0 +1,242 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/boundary-v1.json",
+  "version": "1.0.0",
+  "title": "Boundary, Consent & Guardrail Schema",
+  "description": "Schema preserving right to refuse service at any instance; boundaries, consent and guardrails with WebSocket-logged events",
+  "type": "object",
+  "definitions": {
+    "rightToRefuse": {
+      "type": "object",
+      "description": "Explicit preservation of the right to say no or refuse service at any instance",
+      "properties": {
+        "preserved": {
+          "type": "boolean",
+          "const": true,
+          "description": "Right to refuse is always preserved when true"
+        },
+        "scope": {
+          "type": "string",
+          "enum": ["request", "session", "feature", "service", "global"],
+          "description": "Granularity at which refusal can be exercised"
+        },
+        "refusalTriggers": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Optional list of trigger identifiers (e.g. action_id) that can be refused"
+        },
+        "noJustificationRequired": {
+          "type": "boolean",
+          "default": true,
+          "description": "User may refuse without providing a reason"
+        }
+      },
+      "required": ["preserved", "scope"]
+    },
+    "boundary": {
+      "type": "object",
+      "description": "A boundary that defines what is in/out of scope or allowed",
+      "properties": {
+        "id": { "type": "string", "description": "Unique boundary identifier" },
+        "name": { "type": "string", "description": "Human-readable name" },
+        "type": {
+          "type": "string",
+          "enum": ["data", "action", "scope", "temporal", "actor", "custom"],
+          "description": "Kind of boundary"
+        },
+        "rule": {
+          "type": "object",
+          "properties": {
+            "allow": { "type": "array", "items": { "type": "string" } },
+            "deny": { "type": "array", "items": { "type": "string" } },
+            "condition": { "type": "string", "description": "Optional expression for when boundary applies" }
+          }
+        },
+        "enforcement": {
+          "type": "string",
+          "enum": ["hard", "soft", "audit"],
+          "default": "hard",
+          "description": "hard=block, soft=warn, audit=log only"
+        },
+        "refusable": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether this boundary can be explicitly refused (right to say no)"
+        }
+      },
+      "required": ["id", "name", "type", "enforcement"]
+    },
+    "consent": {
+      "type": "object",
+      "description": "Consent requirement; service may be refused by withholding or revoking consent",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "scope": {
+          "type": "string",
+          "enum": ["data_processing", "analytics", "marketing", "feature", "service", "custom"]
+        },
+        "required": {
+          "type": "boolean",
+          "default": false,
+          "description": "If true, service may be refused when consent not granted"
+        },
+        "revocableAtAnyTime": {
+          "type": "boolean",
+          "const": true,
+          "description": "Consent can be revoked at any time (right to say no)"
+        },
+        "defaultState": {
+          "type": "string",
+          "enum": ["pending", "granted", "denied"],
+          "default": "pending"
+        }
+      },
+      "required": ["id", "name", "scope", "revocableAtAnyTime"]
+    },
+    "guardrail": {
+      "type": "object",
+      "description": "Guardrail rule for safety or policy (can be overridden by explicit refusal in allowed cases)",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "kind": {
+          "type": "string",
+          "enum": ["safety", "policy", "rate_limit", "content", "access", "custom"]
+        },
+        "condition": { "type": "string", "description": "When this guardrail applies" },
+        "action": {
+          "type": "string",
+          "enum": ["block", "warn", "redact", "log", "require_consent"],
+          "description": "Action when guardrail triggers"
+        },
+        "overridableByRefusal": {
+          "type": "boolean",
+          "default": false,
+          "description": "If true, user refusal (right to say no) can override this guardrail where policy allows"
+        }
+      },
+      "required": ["id", "name", "kind", "action"]
+    },
+    "boundaryLogEvent": {
+      "type": "object",
+      "description": "Event shape for WebSocket persistent logging",
+      "properties": {
+        "eventId": { "type": "string", "format": "uuid" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "eventType": {
+          "type": "string",
+          "enum": ["boundary_check", "boundary_violation", "consent_granted", "consent_denied", "consent_revoked", "refusal", "guardrail_triggered", "guardrail_overridden", "service_refused", "preparedness_gate", "overwatch_alert"]
+        },
+        "scope": { "type": "string" },
+        "actorId": { "type": "string" },
+        "payload": { "type": "object" },
+        "severity": { "type": "string", "enum": ["info", "warn", "error", "audit"] }
+      },
+      "required": ["eventId", "timestamp", "eventType", "severity"]
+    }
+  },
+  "properties": {
+    "version": { "type": "string" },
+    "rightToRefuse": { "$ref": "#/definitions/rightToRefuse" },
+    "boundaries": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/boundary" },
+      "description": "List of boundaries"
+    },
+    "consents": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/consent" },
+      "description": "Consent definitions (revocable at any time)"
+    },
+    "guardrails": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/guardrail" },
+      "description": "Guardrail rules"
+    },
+    "websocketLogging": {
+      "type": "object",
+      "description": "Configuration for persistent WebSocket logging of boundary/consent/guardrail events",
+      "properties": {
+        "enabled": { "type": "boolean", "default": true },
+        "endpoint": { "type": "string", "description": "WebSocket server URL or path" },
+        "persistToFile": { "type": "boolean", "default": true },
+        "logDir": { "type": "string", "default": "logs/boundaries" },
+        "eventTypes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Event types to log (default: all)"
+        }
+      },
+      "required": ["enabled"]
+    },
+    "preparedness": {
+      "type": "object",
+      "description": "Preparedness framework: risk tiers, approval gates, and model/system-level safeguards (e.g. biosecurity)",
+      "properties": {
+        "enabled": { "type": "boolean", "default": true },
+        "riskTiers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "level": { "type": "integer", "minimum": 0 },
+              "requiresApproval": { "type": "boolean" },
+              "scope": { "type": "string", "enum": ["experiment", "protocol", "capability", "system"] }
+            },
+            "required": ["id", "name", "level"]
+          }
+        },
+        "gates": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "riskTierId": { "type": "string" },
+              "actionRequired": { "type": "string", "enum": ["block", "require_approval", "log_and_allow", "audit"] },
+              "approvalAuthority": { "type": "string" }
+            },
+            "required": ["id", "name", "actionRequired"]
+          }
+        },
+        "biosecurityScope": {
+          "type": "object",
+          "properties": {
+            "benignOnly": { "type": "boolean" },
+            "taskScopeLimit": { "type": "string" },
+            "controlledSetting": { "type": "boolean" }
+          }
+        }
+      },
+      "required": ["enabled"]
+    },
+    "overwatch": {
+      "type": "object",
+      "description": "Overwatch: continuous monitoring and alerting on boundary/consent/guardrail/preparedness events",
+      "properties": {
+        "enabled": { "type": "boolean", "default": true },
+        "logDir": { "type": "string", "default": "logs/boundaries" },
+        "alertOn": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Event types that trigger overwatch alerts (e.g. boundary_violation, guardrail_triggered, preparedness_gate)"
+        },
+        "escalation": {
+          "type": "object",
+          "properties": {
+            "thresholdCount": { "type": "integer", "description": "Alert after N events of same type in window" },
+            "windowMinutes": { "type": "integer" },
+            "notifyChannels": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "persistAlerts": { "type": "boolean", "default": true }
+      },
+      "required": ["enabled"]
+    }
+  },
+  "required": ["version", "rightToRefuse"]
+}

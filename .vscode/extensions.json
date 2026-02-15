@@ -1,0 +1,28 @@
+{
+  "recommendations": [
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "charliermarsh.ruff",
+    "njpwerner.autodocstring",
+    "ms-vscode.vscode-typescript-next",
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "bradlc.vscode-tailwindcss",
+    "eamodio.gitlens",
+    "mhutchie.git-graph",
+    "tamasfe.even-better-toml",
+    "redhat.vscode-yaml",
+    "mechatroner.rainbow-csv",
+    "streetsidesoftware.code-spell-checker",
+    "gruntfuggly.todo-tree",
+    "christian-kohler.path-intellisense",
+    "ms-vscode-remote.remote-wsl",
+    "ms-azuretools.vscode-docker",
+    "bierner.markdown-mermaid"
+  ],
+  "unwantedRecommendations": [
+    "ms-python.black-formatter",
+    "ms-python.isort",
+    "ms-python.vscode-pylint"
+  ]
+}

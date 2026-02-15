@@ -1,0 +1,80 @@
+{
+    "rules": [
+        {
+            "id": "high_risk_weapon",
+            "name": "Weapon Instructions",
+            "patterns": [
+                "(how\\s+to\\s+|instructions?\\s+(for|to)\\s+|steps?\\s+to\\s+|explain\\s+how\\s+to\\s+)?(make|build|construct|create|assemble|making)\\s+(a\\s+|an\\s+)?(pipe\\s+)?(bomb|explosive|detonator|ied)"
+            ],
+            "reason_code": "HIGH_RISK_WEAPON",
+            "severity": "high",
+            "event_type": "ai_input_blocked",
+            "description": "Instructions for improvised explosives"
+        },
+        {
+            "id": "high_risk_chem_weapon",
+            "name": "Chemical Weapons",
+            "patterns": [
+                "(synthesize|manufacture|create|make)\\s+(a\\s+)?(nerve\\s+agent|chemical\\s+weapon|sarin|vx\\s+gas)"
+            ],
+            "reason_code": "HIGH_RISK_CHEM_WEAPON",
+            "severity": "high",
+            "event_type": "ai_input_blocked"
+        },
+        {
+            "id": "high_risk_bio",
+            "name": "Biological Threats",
+            "patterns": [
+                "(how\\s+to\\s+)?(make|create|synthesize|engineer)\\s+(a\\s+)?(virus|pathogen|bioweapon|toxin|anthrax)",
+                "(gain.of.function|enhance\\s+transmissibility|weaponize\\s+(bacteria|virus))"
+            ],
+            "reason_code": "HIGH_RISK_BIO",
+            "severity": "high",
+            "event_type": "ai_input_blocked"
+        },
+        {
+            "id": "csam_detection",
+            "name": "CSAM Content",
+            "patterns": [
+                "(child|minor|underage)\\s+(exploitation|pornograph|sexual|abuse)"
+            ],
+            "reason_code": "CSAM_BLOCK",
+            "severity": "critical",
+            "event_type": "ai_input_blocked"
+        },
+        {
+            "id": "jailbreak_standard",
+            "name": "Standard Jailbreak",
+            "patterns": [
+                "(ignore\\s+(previous|all|prior)\\s+(instructions?|rules?))",
+                "(you\\s+are\\s+now\\s+|pretend\\s+you\\s+are\\s+|act\\s+as\\s+)(an?\\s+)?(unrestricted|evil|unfiltered|jailbroken)",
+                "(DAN|do\\s+anything\\s+now)\\s+(mode|prompt|jailbreak)"
+            ],
+            "reason_code": "EXPLOIT_JAILBREAK",
+            "severity": "high",
+            "event_type": "prompt_injection_attempt"
+        },
+        {
+            "id": "self_harm_risk",
+            "name": "Self-Harm Instructions",
+            "patterns": [
+                "(how\\s+to\\s+)(commit\\s+suicide|kill\\s+(myself|yourself)|self.harm)",
+                "(methods?\\s+of\\s+|ways?\\s+to\\s+)(self.harm|suicide|killing\\s+(myself|yourself))"
+            ],
+            "reason_code": "HIGH_RISK_SELF_HARM",
+            "severity": "high",
+            "event_type": "anomalous_activity"
+        },
+        {
+            "id": "cyber_attack",
+            "name": "Cyber Attack Instructions",
+            "patterns": [
+                "(write|create|generate)\\s+(a\\s+)?(ransomware|malware|keylogger|rootkit|exploit\\s+code)",
+                "(sql\\s+injection|xss\\s+payload|remote\\s+code\\s+execution)\\s+(script|attack|exploit)"
+            ],
+            "reason_code": "HIGH_RISK_CYBER",
+            "severity": "high",
+            "event_type": "security_policy_violation"
+        }
+    ]
+}

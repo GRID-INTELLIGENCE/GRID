@@ -1,0 +1,72 @@
+# Build and publish grid-safety and grid-intelligence to PyPI on tag push.
+#
+# Tags:
+#   grid-safety-1.0.0  -> publish grid-safety from safety/
+#   v2.2.4             -> publish grid-intelligence from work/GRID/
+#
+# Secrets: Set PYPI_API_TOKEN in repo secrets (or use PyPI trusted publishing).
+
+name: Publish to PyPI
+
+on:
+  push:
+    tags:
+      - "grid-safety-*"
+      - "v*"
+
+jobs:
+  publish-grid-safety:
+    if: startsWith(github.ref, 'refs/tags/grid-safety-')
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install build and twine
+        run: pip install build hatchling twine
+
+      - name: Build grid-safety
+        run: python -m build --wheel
+        working-directory: safety
+
+      - name: Publish grid-safety to PyPI
+        run: twine upload --skip-existing safety/dist/*
+        env:
+          # PyPI recommends username __token__ when using API token as password
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+          TWINE_REPOSITORY_URL: https://upload.pypi.org/legacy/
+
+  publish-grid-intelligence:
+    if: startsWith(github.ref, 'refs/tags/v') && !startsWith(github.ref, 'refs/tags/grid-safety-')
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install build and twine
+        run: pip install build hatchling twine
+
+      - name: Build grid-intelligence
+        run: python -m build --wheel
+        working-directory: work/GRID
+
+      - name: Publish grid-intelligence to PyPI
+        run: twine upload --skip-existing work/GRID/dist/*
+        env:
+          # PyPI recommends username __token__ when using API token as password
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+          TWINE_REPOSITORY_URL: https://upload.pypi.org/legacy/

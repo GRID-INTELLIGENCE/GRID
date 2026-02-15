@@ -1,0 +1,153 @@
+{
+  "total": {
+    "lines": { "total": 668, "covered": 309, "skipped": 0, "pct": 46.25 },
+    "statements": { "total": 706, "covered": 327, "skipped": 0, "pct": 46.31 },
+    "functions": { "total": 205, "covered": 109, "skipped": 0, "pct": 53.17 },
+    "branches": { "total": 618, "covered": 320, "skipped": 0, "pct": 51.77 },
+    "branchesTrue": { "total": 0, "covered": 0, "skipped": 0, "pct": 100 }
+  },
+  "E:\\grid\\frontend\\src\\App.tsx": {
+    "lines": { "total": 3, "covered": 0, "skipped": 0, "pct": 0 },
+    "functions": { "total": 2, "covered": 0, "skipped": 0, "pct": 0 },
+    "statements": { "total": 3, "covered": 0, "skipped": 0, "pct": 0 },
+    "branches": { "total": 0, "covered": 0, "skipped": 0, "pct": 100 }
+  },
+  "E:\\grid\\frontend\\src\\components\\layout\\AppShell.tsx": {
+    "lines": { "total": 1, "covered": 0, "skipped": 0, "pct": 0 },
+    "functions": { "total": 1, "covered": 0, "skipped": 0, "pct": 0 },
+    "statements": { "total": 1, "covered": 0, "skipped": 0, "pct": 0 },
+    "branches": { "total": 0, "covered": 0, "skipped": 0, "pct": 100 }
+  },
+  "E:\\grid\\frontend\\src\\components\\layout\\Sidebar.tsx": {
+    "lines": { "total": 5, "covered": 0, "skipped": 0, "pct": 0 },
+    "functions": { "total": 4, "covered": 0, "skipped": 0, "pct": 0 },
+    "statements": { "total": 5, "covered": 0, "skipped": 0, "pct": 0 },
+    "branches": { "total": 2, "covered": 0, "skipped": 0, "pct": 0 }
+  },
+  "E:\\grid\\frontend\\src\\components\\layout\\TitleBar.tsx": {
+    "lines": { "total": 10, "covered": 0, "skipped": 0, "pct": 0 },
+    "functions": { "total": 6, "covered": 0, "skipped": 0, "pct": 0 },
+    "statements": { "total": 10, "covered": 0, "skipped": 0, "pct": 0 },
+    "branches": { "total": 6, "covered": 0, "skipped": 0, "pct": 0 }
+  },
+  "E:\\grid\\frontend\\src\\components\\ui\\badge.tsx": {
+    "lines": { "total": 4, "covered": 4, "skipped": 0, "pct": 100 },
+    "functions": { "total": 1, "covered": 1, "skipped": 0, "pct": 100 },
+    "statements": { "total": 4, "covered": 4, "skipped": 0, "pct": 100 },
+    "branches": { "total": 1, "covered": 1, "skipped": 0, "pct": 100 }
+  },
+  "E:\\grid\\frontend\\src\\components\\ui\\button.tsx": {
+    "lines": { "total": 4, "covered": 4, "skipped": 0, "pct": 100 },
+    "functions": { "total": 1, "covered": 1, "skipped": 0, "pct": 100 },
+    "statements": { "total": 4, "covered": 4, "skipped": 0, "pct": 100 },
+    "branches": { "total": 0, "covered": 0, "skipped": 0, "pct": 100 }
+  },
+  "E:\\grid\\frontend\\src\\components\\ui\\card.tsx": {
+    "lines": { "total": 15, "covered": 14, "skipped": 0, "pct": 93.33 },
+    "functions": { "total": 5, "covered": 4, "skipped": 0, "pct": 80 },
+    "statements": { "total": 15, "covered": 14, "skipped": 0, "pct": 93.33 },
+    "branches": { "total": 0, "covered": 0, "skipped": 0, "pct": 100 }
+  },
+  "E:\\grid\\frontend\\src\\components\\ui\\input.tsx": {
+    "lines": { "total": 3, "covered": 3, "skipped": 0, "pct": 100 },
+    "functions": { "total": 1, "covered": 1, "skipped": 0, "pct": 100 },
+    "statements": { "total": 3, "covered": 3, "skipped": 0, "pct": 100 },
+    "branches": { "total": 0, "covered": 0, "skipped": 0, "pct": 100 }
+  },
+  "E:\\grid\\frontend\\src\\lib\\grid-client.ts": {
+    "lines": { "total": 181, "covered": 79, "skipped": 0, "pct": 43.64 },
+    "functions": { "total": 55, "covered": 32, "skipped": 0, "pct": 58.18 },
+    "statements": { "total": 194, "covered": 85, "skipped": 0, "pct": 43.81 },
+    "branches": { "total": 84, "covered": 26, "skipped": 0, "pct": 30.95 }
+  },
+  "E:\\grid\\frontend\\src\\lib\\state-persistence.ts": {
+    "lines": { "total": 96, "covered": 0, "skipped": 0, "pct": 0 },
+    "functions": { "total": 22, "covered": 0, "skipped": 0, "pct": 0 },
+    "statements": { "total": 102, "covered": 0, "skipped": 0, "pct": 0 },
+    "branches": { "total": 37, "covered": 0, "skipped": 0, "pct": 0 }
+  },
+  "E:\\grid\\frontend\\src\\lib\\utils.ts": {
+    "lines": { "total": 1, "covered": 1, "skipped": 0, "pct": 100 },
+    "functions": { "total": 1, "covered": 1, "skipped": 0, "pct": 100 },
+    "statements": { "total": 1, "covered": 1, "skipped": 0, "pct": 100 },
+    "branches": { "total": 0, "covered": 0, "skipped": 0, "pct": 100 }
+  },
+  "E:\\grid\\frontend\\src\\pages\\ChatPage.tsx": {
+    "lines": { "total": 80, "covered": 30, "skipped": 0, "pct": 37.5 },
+    "functions": { "total": 20, "covered": 10, "skipped": 0, "pct": 50 },
+    "statements": { "total": 85, "covered": 33, "skipped": 0, "pct": 38.82 },
+    "branches": { "total": 65, "covered": 19, "skipped": 0, "pct": 29.23 }
+  },
+  "E:\\grid\\frontend\\src\\pages\\Cognitive.tsx": {
+    "lines": { "total": 26, "covered": 23, "skipped": 0, "pct": 88.46 },
+    "functions": { "total": 8, "covered": 7, "skipped": 0, "pct": 87.5 },
+    "statements": { "total": 28, "covered": 24, "skipped": 0, "pct": 85.71 },
+    "branches": { "total": 56, "covered": 45, "skipped": 0, "pct": 80.35 }
+  },
+  "E:\\grid\\frontend\\src\\pages\\Dashboard.tsx": {
+    "lines": { "total": 12, "covered": 0, "skipped": 0, "pct": 0 },
+    "functions": { "total": 5, "covered": 0, "skipped": 0, "pct": 0 },
+    "statements": { "total": 12, "covered": 0, "skipped": 0, "pct": 0 },
+    "branches": { "total": 29, "covered": 0, "skipped": 0, "pct": 0 }
+  },
+  "E:\\grid\\frontend\\src\\pages\\IntelligencePage.tsx": {
+    "lines": { "total": 34, "covered": 31, "skipped": 0, "pct": 91.17 },
+    "functions": { "total": 17, "covered": 16, "skipped": 0, "pct": 94.11 },
+    "statements": { "total": 37, "covered": 34, "skipped": 0, "pct": 91.89 },
+    "branches": { "total": 48, "covered": 37, "skipped": 0, "pct": 77.08 }
+  },
+  "E:\\grid\\frontend\\src\\pages\\Knowledge.tsx": {
+    "lines": { "total": 38, "covered": 27, "skipped": 0, "pct": 71.05 },
+    "functions": { "total": 13, "covered": 8, "skipped": 0, "pct": 61.53 },
+    "statements": { "total": 39, "covered": 27, "skipped": 0, "pct": 69.23 },
+    "branches": { "total": 51, "covered": 42, "skipped": 0, "pct": 82.35 }
+  },
+  "E:\\grid\\frontend\\src\\pages\\Observability.tsx": {
+    "lines": { "total": 30, "covered": 25, "skipped": 0, "pct": 83.33 },
+    "functions": { "total": 12, "covered": 10, "skipped": 0, "pct": 83.33 },
+    "statements": { "total": 31, "covered": 26, "skipped": 0, "pct": 83.87 },
+    "branches": { "total": 70, "covered": 55, "skipped": 0, "pct": 78.57 }
+  },
+  "E:\\grid\\frontend\\src\\pages\\RagQuery.tsx": {
+    "lines": { "total": 86, "covered": 38, "skipped": 0, "pct": 44.18 },
+    "functions": { "total": 14, "covered": 7, "skipped": 0, "pct": 50 },
+    "statements": { "total": 90, "covered": 39, "skipped": 0, "pct": 43.33 },
+    "branches": { "total": 95, "covered": 33, "skipped": 0, "pct": 34.73 }
+  },
+  "E:\\grid\\frontend\\src\\pages\\Security.tsx": {
+    "lines": { "total": 20, "covered": 16, "skipped": 0, "pct": 80 },
+    "functions": { "total": 8, "covered": 7, "skipped": 0, "pct": 87.5 },
+    "statements": { "total": 20, "covered": 16, "skipped": 0, "pct": 80 },
+    "branches": { "total": 64, "covered": 54, "skipped": 0, "pct": 84.37 }
+  },
+  "E:\\grid\\frontend\\src\\pages\\SettingsPage.tsx": {
+    "lines": { "total": 3, "covered": 0, "skipped": 0, "pct": 0 },
+    "functions": { "total": 3, "covered": 0, "skipped": 0, "pct": 0 },
+    "statements": { "total": 3, "covered": 0, "skipped": 0, "pct": 0 },
+    "branches": { "total": 2, "covered": 0, "skipped": 0, "pct": 0 }
+  },
+  "E:\\grid\\frontend\\src\\pages\\TerminalPage.tsx": {
+    "lines": { "total": 1, "covered": 0, "skipped": 0, "pct": 0 },
+    "functions": { "total": 1, "covered": 0, "skipped": 0, "pct": 0 },
+    "statements": { "total": 1, "covered": 0, "skipped": 0, "pct": 0 },
+    "branches": { "total": 0, "covered": 0, "skipped": 0, "pct": 100 }
+  },
+  "E:\\grid\\frontend\\src\\schema\\app-schema.ts": {
+    "lines": { "total": 0, "covered": 0, "skipped": 0, "pct": 0 },
+    "functions": { "total": 0, "covered": 0, "skipped": 0, "pct": 0 },
+    "statements": { "total": 0, "covered": 0, "skipped": 0, "pct": 0 },
+    "branches": { "total": 0, "covered": 0, "skipped": 0, "pct": 0 }
+  },
+  "E:\\grid\\frontend\\src\\schema\\index.ts": {
+    "lines": { "total": 14, "covered": 14, "skipped": 0, "pct": 100 },
+    "functions": { "total": 4, "covered": 4, "skipped": 0, "pct": 100 },
+    "statements": { "total": 17, "covered": 17, "skipped": 0, "pct": 100 },
+    "branches": { "total": 8, "covered": 8, "skipped": 0, "pct": 100 }
+  },
+  "E:\\grid\\frontend\\src\\schema\\routes.ts": {
+    "lines": { "total": 1, "covered": 0, "skipped": 0, "pct": 0 },
+    "functions": { "total": 1, "covered": 0, "skipped": 0, "pct": 0 },
+    "statements": { "total": 1, "covered": 0, "skipped": 0, "pct": 0 },
+    "branches": { "total": 0, "covered": 0, "skipped": 0, "pct": 100 }
+  }
+}

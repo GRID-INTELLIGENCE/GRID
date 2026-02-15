@@ -1,0 +1,73 @@
+﻿{
+    "generatedUtc":  "2026-02-07T10:10:46.4941816Z",
+    "totalFilesCollected":  8425,
+    "topFiles":  [
+                     {
+                         "path":  "E:\\.worktrees\\copilot-worktree-2026-02-07T01-40-39\\.vscode\\extensions.json",
+                         "lastWriteTimeLocal":  "2026-02-07T07:42:18.0000000-08:00",
+                         "lastWriteTimeUtc":  "2026-02-07T15:42:18.0000000Z",
+                         "length":  975
+                     },
+                     {
+                         "path":  "E:\\.worktrees\\copilot-worktree-2026-02-07T01-40-39\\docs\\dxdiag_output.txt",
+                         "lastWriteTimeLocal":  "2026-02-07T07:40:38.0000000-08:00",
+                         "lastWriteTimeUtc":  "2026-02-07T15:40:38.0000000Z",
+                         "length":  85318
+                     },
+                     {
+                         "path":  "E:\\.worktrees\\copilot-worktree-2026-02-07T01-40-39\\docs\\EUFLE_ANALYSIS.md",
+                         "lastWriteTimeLocal":  "2026-02-07T07:40:38.0000000-08:00",
+                         "lastWriteTimeUtc":  "2026-02-07T15:40:38.0000000Z",
+                         "length":  4084
+                     },
+                     {
+                         "path":  "E:\\.worktrees\\copilot-worktree-2026-02-07T01-40-39\\docs\\CONFIGURATION_OPTIMIZATION_SUMMARY.md",
+                         "lastWriteTimeLocal":  "2026-02-07T07:40:38.0000000-08:00",
+                         "lastWriteTimeUtc":  "2026-02-07T15:40:38.0000000Z",
+                         "length":  6711
+                     },
+                     {
+                         "path":  "E:\\.worktrees\\copilot-worktree-2026-02-07T01-40-39\\docs\\CONFIG_LINKING_STRATEGY.md",
+                         "lastWriteTimeLocal":  "2026-02-07T07:40:38.0000000-08:00",
+                         "lastWriteTimeUtc":  "2026-02-07T15:40:38.0000000Z",
+                         "length":  2866
+                     },
+                     {
+                         "path":  "E:\\.worktrees\\copilot-worktree-2026-02-07T01-40-39\\docs\\CROSS_DRIVE_CONFIG_INTEGRATION_FINDINGS.md",
+                         "lastWriteTimeLocal":  "2026-02-07T07:40:38.0000000-08:00",
+                         "lastWriteTimeUtc":  "2026-02-07T15:40:38.0000000Z",
+                         "length":  12441
+                     },
+                     {
+                         "path":  "E:\\.worktrees\\copilot-worktree-2026-02-07T01-40-39\\docs\\DENYLIST_QUICK_REFERENCE.md",
+                         "lastWriteTimeLocal":  "2026-02-07T07:40:38.0000000-08:00",
+                         "lastWriteTimeUtc":  "2026-02-07T15:40:38.0000000Z",
+                         "length":  6790
+                     },
+                     {
+                         "path":  "E:\\.worktrees\\copilot-worktree-2026-02-07T01-40-39\\docs\\IMPLEMENTATION_STATUS.txt",
+                         "lastWriteTimeLocal":  "2026-02-07T07:40:38.0000000-08:00",
+                         "lastWriteTimeUtc":  "2026-02-07T15:40:38.0000000Z",
+                         "length":  14938
+                     },
+                     {
+                         "path":  "E:\\.worktrees\\copilot-worktree-2026-02-07T01-40-39\\docs\\IMPLEMENTATION_SUMMARY.md",
+                         "lastWriteTimeLocal":  "2026-02-07T07:40:38.0000000-08:00",
+                         "lastWriteTimeUtc":  "2026-02-07T15:40:38.0000000Z",
+                         "length":  3996
+                     },
+                     {
+                         "path":  "E:\\.worktrees\\copilot-worktree-2026-02-07T01-40-39\\docs\\INSTALLATION_COMPLETE.md",
+                         "lastWriteTimeLocal":  "2026-02-07T07:40:38.0000000-08:00",
+                         "lastWriteTimeUtc":  "2026-02-07T15:40:38.0000000Z",
+                         "length":  4590
+                     }
+                 ],
+    "drivesScanned":  [
+                          "E:"
+                      ],
+    "topN":  10,
+    "rootsScanned":  [
+                         "E:\\"
+                     ]
+}

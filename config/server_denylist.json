@@ -1,0 +1,302 @@
+{
+    "version": "1.0.0",
+    "globalSettings": {
+        "defaultAction": "allow",
+        "enforcementMode": "strict",
+        "logDenylistEvents": true,
+        "phiRedaction": true,
+        "hipaaCompliance": true
+    },
+    "denylistRules": [
+        {
+            "name": "disable-web-servers",
+            "reason": "network-dependent",
+            "scope": "global",
+            "enabled": false,
+            "matchAttributes": {
+                "category": [
+                    "web-based",
+                    "api-gateway"
+                ],
+                "requiresNetwork": true
+            },
+            "notes": "Disable all web-based servers and API gateways to reduce network dependency"
+        },
+        {
+            "name": "disable-high-resource-servers",
+            "reason": "resource-intensive",
+            "scope": "temporary",
+            "enabled": false,
+            "matchAttributes": {
+                "resourceProfile": [
+                    "high",
+                    "critical"
+                ]
+            },
+            "notes": "Temporarily disable resource-intensive servers during development"
+        },
+        {
+            "name": "disable-mcp-servers",
+            "reason": "user-disabled",
+            "scope": "workspace",
+            "enabled": false,
+            "matchAttributes": {
+                "category": [
+                    "mcp-server"
+                ]
+            },
+            "notes": "User requested to disable MCP servers temporarily"
+        },
+        {
+            "name": "disable-failed-python-spawns",
+            "reason": "startup-failure",
+            "scope": "global",
+            "enabled": false,
+            "pattern": ".*",
+            "matchAttributes": {
+                "commandPattern": "(?i)^(python|py)$"
+            },
+            "notes": "Disable servers with python spawn errors (ENOENT)"
+        },
+        {
+            "matchAttributes": {
+                "name": "grid-rag"
+            },
+            "reason": "mcp-server-denial",
+            "deniedScopes": [
+                "filesystem",
+                "network",
+                "database",
+                "memory",
+                "system"
+            ],
+            "enabled": false,
+            "notes": "Total deny scope for grid-rag MCP server across all editors",
+            "name": "deny-grid-rag",
+            "scope": "global",
+            "targetServer": "grid-rag"
+        },
+        {
+            "matchAttributes": {
+                "name": "grid-agentic"
+            },
+            "reason": "mcp-server-denial",
+            "deniedScopes": [
+                "filesystem",
+                "network",
+                "database",
+                "memory",
+                "system"
+            ],
+            "enabled": false,
+            "notes": "Total deny scope for grid-agentic MCP server",
+            "name": "deny-grid-agentic",
+            "scope": "global",
+            "targetServer": "grid-agentic"
+        },
+        {
+            "matchAttributes": {
+                "name": "grid-dev-tools"
+            },
+            "reason": "mcp-server-denial",
+            "deniedScopes": [
+                "filesystem",
+                "network",
+                "database",
+                "memory",
+                "system"
+            ],
+            "enabled": false,
+            "notes": "Total deny scope for grid-dev-tools MCP server",
+            "name": "deny-grid-dev-tools",
+            "scope": "global",
+            "targetServer": "grid-dev-tools"
+        },
+        {
+            "pattern": "portfolio-.*",
+            "matchAttributes": {
+                "category": "portfolio"
+            },
+            "reason": "mcp-server-denial",
+            "deniedScopes": [
+                "filesystem",
+                "network",
+                "database",
+                "memory",
+                "system"
+            ],
+            "enabled": false,
+            "notes": "Total deny scope for all portfolio-* MCP servers",
+            "name": "deny-portfolio-servers",
+            "scope": "global"
+        },
+        {
+            "matchAttributes": {
+                "commandPattern": "(?i).*python(?:\\.exe)?.*mcp"
+            },
+            "deniedScopes": [
+                "subprocess",
+                "spawn",
+                "execution"
+            ],
+            "reason": "spawn-prevention",
+            "notes": "Prevent Python-based MCP server spawning",
+            "name": "deny-python-mcp-spawns",
+            "scope": "global",
+            "enabled": false
+        },
+        {
+            "name": "deny-grid-rag",
+            "reason": "mcp-server-denial",
+            "scope": "global",
+            "enabled": false,
+            "targetServer": "grid-rag",
+            "notes": "Total deny for grid-rag"
+        },
+        {
+            "name": "deny-grid-agentic",
+            "reason": "mcp-server-denial",
+            "scope": "global",
+            "enabled": false,
+            "targetServer": "grid-agentic",
+            "notes": "Total deny for grid-agentic"
+        },
+        {
+            "name": "deny-grid-dev-tools",
+            "reason": "mcp-server-denial",
+            "scope": "global",
+            "enabled": false,
+            "targetServer": "grid-dev-tools",
+            "notes": "Total deny for grid-dev-tools"
+        },
+        {
+            "name": "deny-portfolio-servers",
+            "reason": "mcp-server-denial",
+            "scope": "global",
+            "enabled": false,
+            "pattern": "portfolio-.*",
+            "notes": "Total deny for portfolio servers"
+        },
+        {
+            "name": "deny-python-mcp-spawns",
+            "reason": "spawn-prevention",
+            "scope": "global",
+            "enabled": false,
+            "notes": "Prevent Python MCP spawning"
+        }
+    ],
+    "serverInventory": [
+        {
+            "name": "grid-rag",
+            "category": "rag-system",
+            "command": "python",
+            "requiresNetwork": true,
+            "requiresDatabase": true,
+            "port": 8000,
+            "dependencies": [
+                "python",
+                "chromadb",
+                "huggingface",
+                "ollama"
+            ],
+            "resourceProfile": "high",
+            "priority": 8
+        },
+        {
+            "name": "grid-agentic",
+            "category": "agentic-workflow",
+            "command": "python",
+            "requiresNetwork": true,
+            "requiresDatabase": false,
+            "port": 8004,
+            "dependencies": [
+                "python"
+            ],
+            "resourceProfile": "medium",
+            "priority": 7
+        },
+        {
+            "name": "memory",
+            "category": "memory-storage",
+            "command": "python",
+            "requiresNetwork": false,
+            "requiresDatabase": false,
+            "port": 8003,
+            "dependencies": [
+                "python"
+            ],
+            "resourceProfile": "low",
+            "priority": 6
+        },
+        {
+            "name": "grid-rag-enhanced",
+            "category": "rag-system",
+            "command": "python",
+            "requiresNetwork": true,
+            "requiresDatabase": true,
+            "port": 8002,
+            "dependencies": [
+                "python",
+                "chromadb",
+                "huggingface",
+                "ollama"
+            ],
+            "resourceProfile": "high",
+            "priority": 9
+        },
+        {
+            "name": "grid-enhanced-tools",
+            "category": "development-tools",
+            "command": "python",
+            "requiresNetwork": false,
+            "requiresDatabase": false,
+            "port": 8001,
+            "dependencies": [
+                "python"
+            ],
+            "resourceProfile": "medium",
+            "priority": 5
+        },
+        {
+            "name": "portfolio-safety-lens",
+            "category": "background-service",
+            "command": "python",
+            "requiresNetwork": false,
+            "requiresDatabase": false,
+            "port": 8005,
+            "dependencies": [
+                "python"
+            ],
+            "resourceProfile": "medium",
+            "priority": 7
+        },
+        {
+            "name": "patient-analyzer",
+            "category": "patient-data-processor",
+            "command": "python",
+            "requiresNetwork": false,
+            "requiresDatabase": true,
+            "port": null,
+            "dependencies": [
+                "python",
+                "pandas",
+                "scikit-learn"
+            ],
+            "resourceProfile": "medium",
+            "priority": 9
+        },
+        {
+            "name": "wellness-recommender",
+            "category": "clinical-decision-support",
+            "command": "python",
+            "requiresNetwork": false,
+            "requiresDatabase": false,
+            "port": null,
+            "dependencies": [
+                "python"
+            ],
+            "resourceProfile": "low",
+            "priority": 8
+        }
+    ]
+}

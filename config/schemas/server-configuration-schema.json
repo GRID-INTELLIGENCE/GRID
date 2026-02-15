@@ -1,0 +1,163 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Server Configuration Schema",
+  "description": "A schema for server configuration with comprehensive context and related components to profile technical debt and structure gaps",
+  "type": "object",
+  "properties": {
+    "general_configuration": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the general configuration"
+        },
+        "version": {
+          "type": "string",
+          "description": "Version of the configuration"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the configuration"
+        },
+        "logging": {
+          "type": "object",
+          "properties": {
+            "format": {
+              "type": "string",
+              "description": "Log format"
+            },
+            "level": {
+              "type": "string",
+              "description": "Log level"
+            },
+            "file": {
+              "type": "string",
+              "description": "Log file path"
+            }
+          }
+        },
+        "defaults": {
+          "type": "object",
+          "properties": {
+            "retry_attempts": {
+              "type": "integer",
+              "description": "Number of retry attempts"
+            },
+            "timeout_seconds": {
+              "type": "integer",
+              "description": "Timeout in seconds"
+            },
+            "retry_delay_seconds": {
+              "type": "integer",
+              "description": "Delay between retries in seconds"
+            }
+          }
+        }
+      },
+      "required": ["id", "version", "description", "logging", "defaults"]
+    },
+    "servers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the server"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the server"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the server"
+          },
+          "status": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "description": "Whether the server is enabled"
+              },
+              "denylist": {
+                "type": "object",
+                "properties": {
+                  "applied": {
+                    "type": "boolean",
+                    "description": "Whether the denylist is applied"
+                  },
+                  "reason": {
+                    "type": "string",
+                    "description": "Reason for the denylist"
+                  }
+                }
+              },
+              "note": {
+                "type": "string",
+                "description": "Additional notes about the status"
+              }
+            }
+          },
+          "command": {
+            "type": "string",
+            "description": "Command to run the server"
+          },
+          "arguments": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Arguments for the command"
+          },
+          "working_directory": {
+            "type": "string",
+            "description": "Working directory for the server"
+          },
+          "environment_variables": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Environment variables for the server"
+          },
+          "port": {
+            "type": "integer",
+            "description": "Port number for the server"
+          },
+          "context": {
+            "type": "string",
+            "description": "Contextual description of the server"
+          },
+          "technical_debt": {
+            "type": "object",
+            "properties": {
+              "analysis": {
+                "type": "string",
+                "description": "Analysis of technical debt"
+              },
+              "identification": {
+                "type": "string",
+                "description": "Identification of technical debt"
+              },
+              "remediation": {
+                "type": "string",
+                "description": "Remediation plan for technical debt"
+              },
+              "guardrails": {
+                "type": "string",
+                "description": "Guardrails to prevent future technical debt"
+              },
+              "future_proofing": {
+                "type": "string",
+                "description": "Future-proofing measures"
+              }
+            }
+          }
+        },
+        "required": ["id", "name", "description", "status", "command", "arguments", "context", "technical_debt"]
+      }
+    }
+  },
+  "required": ["general_configuration", "servers"]
+}

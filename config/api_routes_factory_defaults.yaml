@@ -147,7 +147,7 @@ security:
     X-Frame-Options: "DENY"
     X-XSS-Protection: "1; mode=block"
     Referrer-Policy: "strict-origin-when-cross-origin"
-    Permissions-Policy: "camera=(), microphone=(), geolocation=(), usb=(), interest-cohort=()"
+    Permissions-Policy: "camera=(), microphone=(), geolocation=(), usb=(self), interest-cohort=()"
     Content-Security-Policy: "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'; object-src 'none'; frame-src 'none'"
 
   # HTTPS/TLS Configuration

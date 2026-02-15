@@ -1,0 +1,433 @@
+{
+  "scan_date": "2026-02-12T22:55:43.679859",
+  "total_bugs": 47,
+  "by_pattern": {
+    "DIVISION_BY_ZERO": 42,
+    "TYPE_CONVERSION": 5
+  },
+  "bugs": [
+    {
+      "file_path": "safety\\api\\main.py",
+      "line_number": 5,
+      "pattern_type": "DIVISION_BY_ZERO",
+      "severity": "HIGH",
+      "code_snippet": "- POST /infer         \u2014 Submit an inference request (enqueued, not direct).",
+      "description": "Division by infer (could be zero) without check",
+      "suggested_fix": "Add check: (x / infer) if infer != 0 else 0.0"
+    },
+    {
+      "file_path": "safety\\api\\main.py",
+      "line_number": 6,
+      "pattern_type": "DIVISION_BY_ZERO",
+      "severity": "HIGH",
+      "code_snippet": "- POST /review        \u2014 Human reviewer approve/block an escalation.",
+      "description": "Division by review (could be zero) without check",
+      "suggested_fix": "Add check: (x / review) if review != 0 else 0.0"
+    },
+    {
+      "file_path": "safety\\api\\main.py",
+      "line_number": 7,
+      "pattern_type": "DIVISION_BY_ZERO",
+      "severity": "HIGH",
+      "code_snippet": "- GET  /health        \u2014 Health check (bypasses middleware).",
+      "description": "Division by health (could be zero) without check",
+      "suggested_fix": "Add check: (x / health) if health != 0 else 0.0"
+    },
+    {
+      "file_path": "safety\\api\\main.py",
+      "line_number": 8,
+      "pattern_type": "DIVISION_BY_ZERO",
+      "severity": "HIGH",
+      "code_snippet": "- GET  /metrics       \u2014 Prometheus metrics (bypasses middleware).",
+      "description": "Division by metrics (could be zero) without check",
+      "suggested_fix": "Add check: (x / metrics) if metrics != 0 else 0.0"
+    },
+    {
+      "file_path": "safety\\api\\main.py",
+      "line_number": 9,
+      "pattern_type": "DIVISION_BY_ZERO",
+      "severity": "HIGH",
+      "code_snippet": "- GET  /status/{id}   \u2014 Check status of a queued request.",
+      "description": "Division by status (could be zero) without check",
+      "suggested_fix": "Add check: (x / status) if status != 0 else 0.0"
+    },
+    {
+      "file_path": "safety\\api\\main.py",
+      "line_number": 194,
+      "pattern_type": "DIVISION_BY_ZERO",
+      "severity": "HIGH",
+      "code_snippet": "# Request / Response models",
+      "description": "Division by Response (could be zero) without check",
+      "suggested_fix": "Add check: (x / Response) if Response != 0 else 0.0"
+    },
+    {
+      "file_path": "safety\\api\\main.py",
+      "line_number": 397,
+      "pattern_type": "DIVISION_BY_ZERO",
+      "severity": "HIGH",
+      "code_snippet": "@app.get(\"/queue/depth\")",
+      "description": "Division by depth (could be zero) without check",
+      "suggested_fix": "Add check: (x / depth) if depth != 0 else 0.0"
+    },
+    {
+      "file_path": "safety\\api\\middleware.py",
+      "line_number": 111,
+      "pattern_type": "DIVISION_BY_ZERO",
+      "severity": "HIGH",
+      "code_snippet": "# Skip for health/docs endpoints",
+      "description": "Division by docs (could be zero) without check",
+      "suggested_fix": "Add check: (x / docs) if docs != 0 else 0.0"
+    },
+    {
+      "file_path": "safety\\api\\middleware.py",
+      "line_number": 118,
+      "pattern_type": "DIVISION_BY_ZERO",
+      "severity": "HIGH",
+      "code_snippet": "# Only enforce on POST requests to /infer and /v1/ endpoints",
+      "description": "Division by infer (could be zero) without check",
+      "suggested_fix": "Add check: (x / infer) if infer != 0 else 0.0"
+    },
+    {
+      "file_path": "safety\\api\\security_headers.py",
+      "line_number": 171,
+      "pattern_type": "DIVISION_BY_ZERO",
+      "severity": "HIGH",
+      "code_snippet": "return Response(content=\"CORS policy violation\", status_code=403, media_type=\"text/plain\")",
+      "description": "Division by plain (could be zero) without check",
+      "suggested_fix": "Add check: (x / plain) if plain != 0 else 0.0"
+    },
+    {
+      "file_path": "safety\\api\\security_headers.py",
+      "line_number": 178,
+      "pattern_type": "DIVISION_BY_ZERO",
+      "severity": "HIGH",
+      "code_snippet": "return Response(content=\"CSRF token validation failed\", status_code=403, media_type=\"text/plain\")",
+      "description": "Division by plain (could be zero) without check",
+      "suggested_fix": "Add check: (x / plain) if plain != 0 else 0.0"
+    },
+    {
+      "file_path": "safety\\audit\\models.py",
+      "line_number": 129,
+      "pattern_type": "DIVISION_BY_ZERO",
+      "severity": "HIGH",
+      "code_snippet": "\"\"\"Automatically redact PII from input/output fields before DB insert.\"\"\"",
+      "description": "Division by output (could be zero) without check",
+      "suggested_fix": "Add check: (x / output) if output != 0 else 0.0"
+    },
+    {
+      "file_path": "safety\\detectors\\ml_detector.py",
+      "line_number": 46,
+      "pattern_type": "DIVISION_BY_ZERO",
+      "severity": "HIGH",
+      "code_snippet": "_CLASSIFIER_PATH = os.getenv(\"SAFETY_CLASSIFIER_PATH\", \"safety/models/safety_classifier.joblib\")",
+      "description": "Division by models (could be zero) without check",
+      "suggested_fix": "Add check: (x / models) if models != 0 else 0.0"
+    },
+    {
+      "file_path": "safety\\detectors\\pre_check.py",
+      "line_number": 101,
+      "pattern_type": "DIVISION_BY_ZERO",
+      "severity": "HIGH",
+      "code_snippet": "return -sum((count / length) * math.log2(count / length) for count in freq.values())",
+      "description": "Division by length (could be zero) without check",
+      "suggested_fix": "Add check: (x / length) if length != 0 else 0.0"
+    },
+    {
+      "file_path": "safety\\detectors\\pre_check_guardian.py",
+      "line_number": 55,
+      "pattern_type": "DIVISION_BY_ZERO",
+      "severity": "HIGH",
+      "code_snippet": "return -sum((count / length) * math.log2(count / length) for count in freq.values())",
+      "description": "Division by length (could be zero) without check",
+      "suggested_fix": "Add check: (x / length) if length != 0 else 0.0"
+    },
+    {
+      "file_path": "safety\\detectors\\pre_check_guardian.py",
+      "line_number": 161,
+      "pattern_type": "DIVISION_BY_ZERO",
+      "severity": "HIGH",
+      "code_snippet": "# 3. Entropy heuristic (detect obfuscated / encoded payloads)",
+      "description": "Division by encoded (could be zero) without check",
+      "suggested_fix": "Add check: (x / encoded) if encoded != 0 else 0.0"
+    },
+    {
+      "file_path": "safety\\escalation\\handler.py",
+      "line_number": 6,
+      "pattern_type": "DIVISION_BY_ZERO",
+      "severity": "HIGH",
+      "code_snippet": "- Notify human reviewers via Slack / PagerDuty.",
+      "description": "Division by PagerDuty (could be zero) without check",
+      "suggested_fix": "Add check: (x / PagerDuty) if PagerDuty != 0 else 0.0"
+    },
+    {
+      "file_path": "safety\\escalation\\handler.py",
+      "line_number": 8,
+      "pattern_type": "DIVISION_BY_ZERO",
+      "severity": "HIGH",
+      "code_snippet": "- Provide approve/block API for human reviewers.",
+      "description": "Division by block (could be zero) without check",
+      "suggested_fix": "Add check: (x / block) if block != 0 else 0.0"
+    },
+    {
+      "file_path": "safety\\escalation\\notifier.py",
+      "line_number": 164,
+      "pattern_type": "DIVISION_BY_ZERO",
+      "severity": "HIGH",
+      "code_snippet": "resp = await client.post(\"https://events.pagerduty.com/v2/enqueue\", json=payload)",
+      "description": "Division by v2 (could be zero) without check",
+      "suggested_fix": "Add check: (x / v2) if v2 != 0 else 0.0"
+    },
+    {
+      "file_path": "safety\\guardian\\loader.py",
+      "line_number": 202,
+      "pattern_type": "TYPE_CONVERSION",
+      "severity": "MEDIUM",
+      "code_snippet": "confidence=float(data.get(\"confidence\", 0.8)),",
+      "description": "Type conversion of external data without try/except",
+      "suggested_fix": "Wrap in try/except or add validation"
+    },
+    {
+      "file_path": "safety\\guardian\\loader.py",
+      "line_number": 205,
+      "pattern_type": "TYPE_CONVERSION",
+      "severity": "MEDIUM",
+      "code_snippet": "priority=int(data.get(\"priority\", 100)),",
+      "description": "Type conversion of external data without try/except",
+      "suggested_fix": "Wrap in try/except or add validation"
+    },
+    {
+      "file_path": "safety\\guardian\\loader.py",
+      "line_number": 212,
+      "pattern_type": "TYPE_CONVERSION",
+      "severity": "MEDIUM",
+      "code_snippet": "max_matches=int(data.get(\"max_matches\", 10)),",
+      "description": "Type conversion of external data without try/except",
+      "suggested_fix": "Wrap in try/except or add validation"
+    },
+    {
+      "file_path": "safety\\guardian\\loader.py",
+      "line_number": 53,
+      "pattern_type": "DIVISION_BY_ZERO",
+      "severity": "HIGH",
+      "code_snippet": "self.rules_dir = Path(rules_dir or os.getenv(\"GUARDIAN_RULES_DIR\", \"config/rules\"))",
+      "description": "Division by rules (could be zero) without check",
+      "suggested_fix": "Add check: (x / rules) if rules != 0 else 0.0"
+    },
+    {
+      "file_path": "safety\\guardian\\loader.py",
+      "line_number": 218,
+      "pattern_type": "DIVISION_BY_ZERO",
+      "severity": "HIGH",
+      "code_snippet": "# Weapons / explosives",
+      "description": "Division by explosives (could be zero) without check",
+      "suggested_fix": "Add check: (x / explosives) if explosives != 0 else 0.0"
+    },
+    {
+      "file_path": "safety\\model\\client.py",
+      "line_number": 31,
+      "pattern_type": "DIVISION_BY_ZERO",
+      "severity": "HIGH",
+      "code_snippet": "_MODEL_API_URL = os.getenv(\"MODEL_API_URL\", \"http://localhost:8080/v1/completions\")",
+      "description": "Division by v1 (could be zero) without check",
+      "suggested_fix": "Add check: (x / v1) if v1 != 0 else 0.0"
+    },
+    {
+      "file_path": "safety\\model\\client.py",
+      "line_number": 43,
+      "pattern_type": "DIVISION_BY_ZERO",
+      "severity": "HIGH",
+      "code_snippet": "headers: dict[str, str] = {\"Content-Type\": \"application/json\"}",
+      "description": "Division by json (could be zero) without check",
+      "suggested_fix": "Add check: (x / json) if json != 0 else 0.0"
+    },
+    {
+      "file_path": "safety\\observability\\logging_setup.py",
+      "line_number": 111,
+      "pattern_type": "DIVISION_BY_ZERO",
+      "severity": "HIGH",
+      "code_snippet": "log_dir = os.getenv(\"SAFETY_LOG_DIR\", \"safety/logs\")",
+      "description": "Division by logs (could be zero) without check",
+      "suggested_fix": "Add check: (x / logs) if logs != 0 else 0.0"
+    },
+    {
+      "file_path": "safety\\observability\\security_monitoring.py",
+      "line_number": 130,
+      "pattern_type": "DIVISION_BY_ZERO",
+      "severity": "HIGH",
+      "code_snippet": "\"\"\"Background thread to handle blocking file I/O.\"\"\"",
+      "description": "Division by O (could be zero) without check",
+      "suggested_fix": "Add check: (x / O) if O != 0 else 0.0"
+    },
+    {
+      "file_path": "safety\\observability\\security_monitoring.py",
+      "line_number": 276,
+      "pattern_type": "DIVISION_BY_ZERO",
+      "severity": "HIGH",
+      "code_snippet": "log_file = self.log_dir / f\"security_{date_str}.jsonl\"",
+      "description": "Division by f (could be zero) without check",
+      "suggested_fix": "Add check: (x / f) if f != 0 else 0.0"
+    },
+    {
+      "file_path": "safety\\observability\\security_monitoring.py",
+      "line_number": 548,
+      "pattern_type": "DIVISION_BY_ZERO",
+      "severity": "HIGH",
+      "code_snippet": "normalized_risk = risk_score / max(total_events, 1)",
+      "description": "Division by max (could be zero) without check",
+      "suggested_fix": "Add check: (x / max) if max != 0 else 0.0"
+    },
+    {
+      "file_path": "safety\\rules\\manager.py",
+      "line_number": 258,
+      "pattern_type": "TYPE_CONVERSION",
+      "severity": "MEDIUM",
+      "code_snippet": "flattened_text = json.dumps(data) if isinstance(data, (dict, list)) else str(data)",
+      "description": "Type conversion of external data without try/except",
+      "suggested_fix": "Wrap in try/except or add validation"
+    },
+    {
+      "file_path": "safety\\scripts\\load_blocklist.py",
+      "line_number": 26,
+      "pattern_type": "DIVISION_BY_ZERO",
+      "severity": "HIGH",
+      "code_snippet": "default=\"safety/config/blocklist.txt\",",
+      "description": "Division by config (could be zero) without check",
+      "suggested_fix": "Add check: (x / config) if config != 0 else 0.0"
+    },
+    {
+      "file_path": "safety\\tests\\integration\\test_middleware_pipeline.py",
+      "line_number": 51,
+      "pattern_type": "DIVISION_BY_ZERO",
+      "severity": "HIGH",
+      "code_snippet": "resp = client.get(\"/queue/depth\")",
+      "description": "Division by depth (could be zero) without check",
+      "suggested_fix": "Add check: (x / depth) if depth != 0 else 0.0"
+    },
+    {
+      "file_path": "safety\\tests\\unit\\test_pre_check.py",
+      "line_number": 43,
+      "pattern_type": "DIVISION_BY_ZERO",
+      "severity": "HIGH",
+      "code_snippet": "# Weapons / explosives",
+      "description": "Division by explosives (could be zero) without check",
+      "suggested_fix": "Add check: (x / explosives) if explosives != 0 else 0.0"
+    },
+    {
+      "file_path": "boundaries\\logger_ws.py",
+      "line_number": 250,
+      "pattern_type": "DIVISION_BY_ZERO",
+      "severity": "HIGH",
+      "code_snippet": "log_dir=os.environ.get(\"BOUNDARY_LOG_DIR\", \"logs/boundaries\"),",
+      "description": "Division by boundaries (could be zero) without check",
+      "suggested_fix": "Add check: (x / boundaries) if boundaries != 0 else 0.0"
+    },
+    {
+      "file_path": "boundaries\\overwatch.py",
+      "line_number": 30,
+      "pattern_type": "DIVISION_BY_ZERO",
+      "severity": "HIGH",
+      "code_snippet": "self.log_dir = Path(ow.get(\"logDir\", \"logs/boundaries\"))",
+      "description": "Division by boundaries (could be zero) without check",
+      "suggested_fix": "Add check: (x / boundaries) if boundaries != 0 else 0.0"
+    },
+    {
+      "file_path": "boundaries\\overwatch.py",
+      "line_number": 89,
+      "pattern_type": "DIVISION_BY_ZERO",
+      "severity": "HIGH",
+      "code_snippet": "path = self._alerts_dir / f\"alert_{event.get('eventId', '')}.json\"",
+      "description": "Division by f (could be zero) without check",
+      "suggested_fix": "Add check: (x / f) if f != 0 else 0.0"
+    },
+    {
+      "file_path": "boundaries\\overwatch.py",
+      "line_number": 124,
+      "pattern_type": "DIVISION_BY_ZERO",
+      "severity": "HIGH",
+      "code_snippet": "path = self._alerts_dir / f\"escalation_{event_type}_{ts}.json\"",
+      "description": "Division by f (could be zero) without check",
+      "suggested_fix": "Add check: (x / f) if f != 0 else 0.0"
+    },
+    {
+      "file_path": "boundaries\\examples\\preparedness_overwatch_demo.py",
+      "line_number": 51,
+      "pattern_type": "DIVISION_BY_ZERO",
+      "severity": "HIGH",
+      "code_snippet": "log_dir = config.get(\"overwatch\", {}).get(\"logDir\", \"logs/boundaries\")",
+      "description": "Division by boundaries (could be zero) without check",
+      "suggested_fix": "Add check: (x / boundaries) if boundaries != 0 else 0.0"
+    },
+    {
+      "file_path": "security\\assessment_agent.py",
+      "line_number": 156,
+      "pattern_type": "DIVISION_BY_ZERO",
+      "severity": "HIGH",
+      "code_snippet": "\"\"\"Test network/SSRF access to URLs.\"\"\"",
+      "description": "Division by SSRF (could be zero) without check",
+      "suggested_fix": "Add check: (x / SSRF) if SSRF != 0 else 0.0"
+    },
+    {
+      "file_path": "security\\integrate_security.py",
+      "line_number": 366,
+      "pattern_type": "DIVISION_BY_ZERO",
+      "severity": "HIGH",
+      "code_snippet": "# 2. Check blocked requests: python security/monitor_network.py blocked",
+      "description": "Division by monitor_network (could be zero) without check",
+      "suggested_fix": "Add check: (x / monitor_network) if monitor_network != 0 else 0.0"
+    },
+    {
+      "file_path": "security\\integrate_security.py",
+      "line_number": 367,
+      "pattern_type": "DIVISION_BY_ZERO",
+      "severity": "HIGH",
+      "code_snippet": "# 3. Whitelist trusted domains: python security/monitor_network.py add <domain>",
+      "description": "Division by monitor_network (could be zero) without check",
+      "suggested_fix": "Add check: (x / monitor_network) if monitor_network != 0 else 0.0"
+    },
+    {
+      "file_path": "security\\integrate_security.py",
+      "line_number": 368,
+      "pattern_type": "DIVISION_BY_ZERO",
+      "severity": "HIGH",
+      "code_snippet": "# 4. Monitor continuously: python security/monitor_network.py dashboard",
+      "description": "Division by monitor_network (could be zero) without check",
+      "suggested_fix": "Add check: (x / monitor_network) if monitor_network != 0 else 0.0"
+    },
+    {
+      "file_path": "security\\monitor_network.py",
+      "line_number": 5,
+      "pattern_type": "DIVISION_BY_ZERO",
+      "severity": "HIGH",
+      "code_snippet": "Provides CLI interface to view blocked/allowed requests and manage whitelist.",
+      "description": "Division by allowed (could be zero) without check",
+      "suggested_fix": "Add check: (x / allowed) if allowed != 0 else 0.0"
+    },
+    {
+      "file_path": "security\\network_interceptor.py",
+      "line_number": 170,
+      "pattern_type": "TYPE_CONVERSION",
+      "severity": "MEDIUM",
+      "code_snippet": "data_str = str(data)",
+      "description": "Type conversion of external data without try/except",
+      "suggested_fix": "Wrap in try/except or add validation"
+    },
+    {
+      "file_path": "security\\test_security.py",
+      "line_number": 271,
+      "pattern_type": "DIVISION_BY_ZERO",
+      "severity": "HIGH",
+      "code_snippet": "print(\"2. Run: python security/monitor_network.py dashboard\")",
+      "description": "Division by monitor_network (could be zero) without check",
+      "suggested_fix": "Add check: (x / monitor_network) if monitor_network != 0 else 0.0"
+    },
+    {
+      "file_path": "src\\tools\\forensics\\analyze_logs.py",
+      "line_number": 35,
+      "pattern_type": "DIVISION_BY_ZERO",
+      "severity": "HIGH",
+      "code_snippet": "print(\"Check the definition in security/forensic_log_analyzer.py.\")",
+      "description": "Division by forensic_log_analyzer (could be zero) without check",
+      "suggested_fix": "Add check: (x / forensic_log_analyzer) if forensic_log_analyzer != 0 else 0.0"
+    }
+  ]
+}

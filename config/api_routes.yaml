@@ -11,6 +11,8 @@ routers:
       pre_import: "validate_streaming_capability"
   - module: "application.mothership.routers.payment:router"
     enabled: true
+  - module: "application.mothership.routers.stripe_connect_demo:router"
+    enabled: true
   - module: "application.mothership.routers.api_keys:router"
     enabled: true
   - module: "application.mothership.routers.billing:router"
