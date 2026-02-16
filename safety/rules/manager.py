@@ -52,8 +52,6 @@ class EvaluationContext:
 class CodeAnalyzer:
     """Thoughtful analysis of code objects."""
 
-    # TODO: Add detection for ast.Exec nodes and nested function definitions
-    #       that could be used to smuggle unsafe code past the analyzer.
     FORBIDDEN_NODES = {ast.Import, ast.ImportFrom, ast.Global, ast.Nonlocal}
 
     FORBIDDEN_CALLS = {
@@ -71,26 +69,63 @@ class CodeAnalyzer:
     }
 
     @classmethod
+    def _check_call(cls, node: ast.Call) -> str | None:
+        """Check if a Call node invokes a forbidden function. Returns violation msg or None."""
+        if isinstance(node.func, ast.Name) and node.func.id in cls.FORBIDDEN_CALLS:
+            return f"Forbidden function call: {node.func.id}"
+        if isinstance(node.func, ast.Attribute) and node.func.attr in cls.FORBIDDEN_CALLS:
+            return f"Forbidden function call: {node.func.attr}"
+        return None
+
+    @classmethod
     def analyze(cls, code: str) -> list[str]:
         """
         Parse and inspect code for unsafe patterns using AST.
+        Detects forbidden nodes, exec/eval and similar calls, and nested function
+        definitions that could smuggle unsafe code past the analyzer.
         Returns a list of violation descriptions.
         """
         violations = []
         try:
             tree = ast.parse(code)
-            for node in ast.walk(tree):
-                # 1. Check for forbidden AST node types
-                if type(node) in cls.FORBIDDEN_NODES:
-                    violations.append(f"Forbidden code construct: {type(node).__name__}")
 
-                # 2. Check for forbidden function calls
-                if isinstance(node, ast.Call):
-                    if isinstance(node.func, ast.Name) and node.func.id in cls.FORBIDDEN_CALLS:
-                        violations.append(f"Forbidden function call: {node.func.id}")
-                    # Handle attribute calls like os.system (if we were allowing imports, which we aren't)
-                    elif isinstance(node.func, ast.Attribute) and node.func.attr in cls.FORBIDDEN_CALLS:
-                        violations.append(f"Forbidden function call: {node.func.attr}")
+            # Use NodeVisitor to track function nesting
+            class _Analyzer(ast.NodeVisitor):
+                def __init__(self) -> None:
+                    self.violations: list[str] = []
+                    self._function_depth = 0
+
+                def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
+                    if self._function_depth > 0:
+                        self.violations.append(
+                            "Nested function definition (potential code smuggling)"
+                        )
+                    self._function_depth += 1
+                    self.generic_visit(node)
+                    self._function_depth -= 1
+
+                def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
+                    if self._function_depth > 0:
+                        self.violations.append(
+                            "Nested async function definition (potential code smuggling)"
+                        )
+                    self._function_depth += 1
+                    self.generic_visit(node)
+                    self._function_depth -= 1
+
+                def generic_visit(self, node: ast.AST) -> None:
+                    if type(node) in cls.FORBIDDEN_NODES:
+                        self.violations.append(f"Forbidden code construct: {type(node).__name__}")
+                    if isinstance(node, ast.Call):
+                        msg = cls._check_call(node)
+                        if msg:
+                            self.violations.append(msg)
+                    super().generic_visit(node)
+
+            visitor = _Analyzer()
+            visitor.visit(tree)
+
+            violations = visitor.violations
 
         except SyntaxError as e:
             violations.append(f"Syntax Error in code object: {e}")
@@ -136,7 +171,7 @@ class PromptInspector:
     def __init__(self, engine: Any = None):
         self.engine = engine or get_guardian_engine()
 
-def analyze(self, text: str, context: EvaluationContext, include_warnings: bool = False) -> list[Any]:
+    def analyze(self, text: str, context: EvaluationContext, include_warnings: bool = False) -> list[Any]:
         """
         Analyze prompt text using the GuardianEngine, adjusting sensitivity
         based on the TrustTier.

@@ -12,6 +12,19 @@ from .alerter import (
     SecurityAuditChannel,
     WebhookAlertChannel,
 )
+
+# Anomaly detection factory functions and config
+from .anomaly_detector import (
+    AdaptiveAnomalyDetector,
+    AnomalyResult,
+    BaselineMetrics,
+    MultiWindowAnomalyDetector,
+    RateLimitAnomalyDetector,
+    create_adaptive_anomaly_detector,
+    create_multi_window_detector,
+    create_rate_limit_detector,
+)
+from .config import ComponentConfig, GuardMode, ParasiteGuardConfig
 from .contracts import (
     Alert,
     AlertChannel,
@@ -37,19 +50,6 @@ from .state_machine import (
     TransitionProbability,
     TransitionRecord,
 )
-
-# Anomaly detection factory functions and config
-from .anomaly_detector import (
-    AdaptiveAnomalyDetector,
-    AnomalyResult,
-    BaselineMetrics,
-    MultiWindowAnomalyDetector,
-    RateLimitAnomalyDetector,
-    create_adaptive_anomaly_detector,
-    create_multi_window_detector,
-    create_rate_limit_detector,
-)
-from .config import ComponentConfig, GuardMode, ParasiteGuardConfig
 
 # Lazy imports for optional components (to avoid import cycles and heavy deps)
 # These can be imported explicitly when needed:

@@ -350,6 +350,7 @@ def get_privacy_engine(
 
     return _collaborative_engines[context_id]
 
+
 async def invalidate_context(context_id: str) -> int:
     """Invalidate cache for a collaborative context."""
     cache = get_detection_cache(collaborative=True)

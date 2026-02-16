@@ -400,7 +400,7 @@ class AdvancedTimeManager(TimeManager):
         # Detect fixed interval pattern (periodicity)
         avg_interval = sum(intervals) / len(intervals)
         variance = sum((i - avg_interval) ** 2 for i in intervals) / len(intervals)
-        std_dev = variance ** 0.5
+        std_dev = variance**0.5
 
         # Check if intervals are consistent (low coefficient of variation)
         if avg_interval > 0 and std_dev / avg_interval < 0.2:
@@ -530,7 +530,7 @@ class AdvancedTimeManager(TimeManager):
 
         # Variance and standard deviation
         variance = sum((i - avg_interval) ** 2 for i in intervals) / len(intervals)
-        std_dev = variance ** 0.5
+        std_dev = variance**0.5
 
         # Hourly distribution
         hours: dict[int, int] = {}

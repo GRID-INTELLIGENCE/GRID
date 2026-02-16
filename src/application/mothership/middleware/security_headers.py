@@ -63,6 +63,8 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
 
         # Permissions Policy (formerly Feature-Policy)
-        response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=(), usb=(self), interest-cohort=()"
+        response.headers["Permissions-Policy"] = (
+            "camera=(), microphone=(), geolocation=(), usb=(self), interest-cohort=()"
+        )
 
         return response

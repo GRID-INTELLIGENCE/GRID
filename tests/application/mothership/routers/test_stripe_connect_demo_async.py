@@ -35,9 +35,7 @@ class TestAsyncPatterns:
             next_def = content.find("\n    def ", start_pos)
             next_class = content.find("\nclass ", start_pos)
             next_async = content.find("\nasync def ", start_pos + 1)
-            end_pos = min(
-                pos for pos in [next_def, next_class, next_async, len(content)] if pos > 0
-            )
+            end_pos = min(pos for pos in [next_def, next_class, next_async, len(content)] if pos > 0)
 
             func_body = content[start_pos:end_pos]
 
@@ -62,7 +60,7 @@ class TestAsyncPatterns:
                     if "asyncio.to_thread" not in func_body[: func_body.find(pattern)]:
                         violations.append(f"{func_name}: Unwrapped Stripe call: {pattern}")
 
-        assert not violations, f"Found blocking Stripe calls:\n" + "\n".join(violations)
+        assert not violations, "Found blocking Stripe calls:\n" + "\n".join(violations)
 
     def test_csrf_secret_fail_fast(self):
         """Verify CSRF secret validation fails fast in production."""
@@ -168,4 +166,4 @@ class TestAsyncPatterns:
 
         # Note: This is a basic check. Full AST analysis would catch more cases.
         # For now, we rely on type checking (mypy) to catch missing awaits.
-        assert not violations, f"Found missing await:\n" + "\n".join(violations)
+        assert not violations, "Found missing await:\n" + "\n".join(violations)

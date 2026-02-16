@@ -241,10 +241,24 @@ class ActiveDefenseValidator:
             # But we don't want to actually write to cloud/file in test if we can avoid it.
             # However, the bug is in the method name.
             # Subprocess calls 'log_event', AuditLogger has '_log_event' (and public typed methods)
-            if hasattr(AuditLogger, 'log_event'):
-                 checks.append({"category": "defenses", "name": "SubprocessWrapper: Audit API Check", "status": "pass", "message": "AuditLogger has log_event"})
+            if hasattr(AuditLogger, "log_event"):
+                checks.append(
+                    {
+                        "category": "defenses",
+                        "name": "SubprocessWrapper: Audit API Check",
+                        "status": "pass",
+                        "message": "AuditLogger has log_event",
+                    }
+                )
             else:
-                 checks.append({"category": "defenses", "name": "SubprocessWrapper: Audit API Check", "status": "fail", "message": "AuditLogger missing log_event (Potential SubprocessWrapper regression)"})
+                checks.append(
+                    {
+                        "category": "defenses",
+                        "name": "SubprocessWrapper: Audit API Check",
+                        "status": "fail",
+                        "message": "AuditLogger missing log_event (Potential SubprocessWrapper regression)",
+                    }
+                )
         except Exception:
             pass
 

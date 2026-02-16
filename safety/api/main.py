@@ -38,11 +38,11 @@ from safety.audit.db import check_health as check_db_health
 from safety.audit.db import close_db, init_db
 from safety.escalation.handler import approve
 from safety.guardian.loader import get_rule_loader
+from safety.monitoring import get_safety_monitor
 from safety.observability.logging_setup import get_logger, setup_logging
 from safety.observability.metrics import record_service_info
 from safety.observability.runtime_observation import observation_service
 from safety.observability.security_monitoring import security_logger, security_monitor
-from safety.monitoring import get_safety_monitor
 from safety.workers.worker_utils import (
     check_redis_health,
     close_redis,
@@ -134,6 +134,7 @@ if DEGRADED_MODE:
 # ---------------------------------------------------------------------------
 # Lifespan (startup / shutdown)
 # ---------------------------------------------------------------------------
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -429,11 +430,7 @@ def run(
 
     _host = host if host is not None else os.getenv("SAFETY_API_HOST", "0.0.0.0")
     _port = port if port is not None else int(os.getenv("SAFETY_API_PORT", "8000"))
-    _reload = (
-        reload
-        if reload is not None
-        else os.getenv("SAFETY_API_RELOAD", "").lower() in ("1", "true", "yes")
-    )
+    _reload = reload if reload is not None else os.getenv("SAFETY_API_RELOAD", "").lower() in ("1", "true", "yes")
 
     uvicorn.run(
         "safety.api.main:app",

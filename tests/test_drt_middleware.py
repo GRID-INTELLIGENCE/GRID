@@ -23,6 +23,7 @@ try:
         record_drt_escalation,
         record_drt_violation,
     )
+
     METRICS_AVAILABLE = True
 except ImportError:
     METRICS_AVAILABLE = False
@@ -219,7 +220,7 @@ class TestDRTMetricsCollector:
             request_path="/api/sensitive",
             request_method="POST",
             was_blocked=False,
-            processing_time=0.05
+            processing_time=0.05,
         )
 
         # Check metrics
@@ -234,11 +235,7 @@ class TestDRTMetricsCollector:
     def test_record_escalation(self, metrics_collector):
         """Test recording escalations."""
         # Record escalation
-        metrics_collector.record_escalation(
-            path="/api/sensitive",
-            similarity_score=0.90,
-            duration_minutes=30
-        )
+        metrics_collector.record_escalation(path="/api/sensitive", similarity_score=0.90, duration_minutes=30)
 
         # Check metrics
         assert metrics_collector.metrics.escalations_total == 1
@@ -296,10 +293,7 @@ class TestDRTMetricsCollector:
 
         for score in scores:
             metrics_collector.record_violation(
-                similarity_score=score,
-                attack_vector_severity="medium",
-                request_path="/api/test",
-                request_method="GET"
+                similarity_score=score, attack_vector_severity="medium", request_path="/api/test", request_method="GET"
             )
 
         # Check that all scores are tracked
@@ -309,10 +303,7 @@ class TestDRTMetricsCollector:
         # Test that we don't exceed the limit
         for i in range(1000):  # Add many more scores
             metrics_collector.record_violation(
-                similarity_score=0.6,
-                attack_vector_severity="low",
-                request_path="/api/test",
-                request_method="GET"
+                similarity_score=0.6, attack_vector_severity="low", request_path="/api/test", request_method="GET"
             )
 
         # Should be capped at 1000
@@ -360,6 +351,7 @@ class TestDRTMetricsCollector:
         # Reset the global collector for clean testing
         global _metrics_collector
         from application.mothership.middleware.drt_metrics import _metrics_collector
+
         _metrics_collector = None
 
         collector = get_drt_metrics_collector()
@@ -396,6 +388,7 @@ class TestDRTFalsePositiveTracking:
     async def mock_session(self):
         """Create a mock database session for testing."""
         from unittest.mock import MagicMock
+
         session = AsyncMock()
         session.add = MagicMock()
         session.flush = AsyncMock()
@@ -407,12 +400,14 @@ class TestDRTFalsePositiveTracking:
     async def fp_repo(self, mock_session):
         """Create a false positive repository for testing."""
         from application.mothership.repositories.drt import DRTFalsePositiveRepository
+
         return DRTFalsePositiveRepository(mock_session)
 
     @pytest.fixture
     async def pattern_repo(self, mock_session):
         """Create a false positive pattern repository for testing."""
         from application.mothership.repositories.drt import DRTFalsePositivePatternRepository
+
         return DRTFalsePositivePatternRepository(mock_session)
 
     @pytest.mark.asyncio
@@ -421,10 +416,7 @@ class TestDRTFalsePositiveTracking:
         violation_id = "test-violation-123"
 
         result = await fp_repo.mark_false_positive(
-            violation_id=violation_id,
-            marked_by="test-user",
-            reason="Legitimate admin access",
-            confidence=0.9
+            violation_id=violation_id, marked_by="test-user", reason="Legitimate admin access", confidence=0.9
         )
 
         assert result is not None  # Should return an ID
@@ -490,11 +482,7 @@ class TestDRTFalsePositiveTracking:
         """Test recording false positive patterns."""
         from application.mothership.middleware.drt_middleware import BehavioralSignature
 
-        signature = BehavioralSignature(
-            path_pattern="/api/admin",
-            method="GET",
-            headers=("accept", "authorization")
-        )
+        signature = BehavioralSignature(path_pattern="/api/admin", method="GET", headers=("accept", "authorization"))
 
         # Test false positive pattern recording
         await pattern_repo.record_pattern(signature, is_false_positive=True)
@@ -510,11 +498,7 @@ class TestDRTFalsePositiveTracking:
         """Test updating existing false positive pattern."""
         from application.mothership.middleware.drt_middleware import BehavioralSignature
 
-        signature = BehavioralSignature(
-            path_pattern="/api/admin",
-            method="GET",
-            headers=("accept", "authorization")
-        )
+        signature = BehavioralSignature(path_pattern="/api/admin", method="GET", headers=("accept", "authorization"))
 
         # Mock existing pattern
         mock_pattern = MagicMock()
@@ -528,7 +512,7 @@ class TestDRTFalsePositiveTracking:
         # Should update existing pattern
         assert mock_pattern.total_violations == 6
         assert mock_pattern.false_positive_count == 4
-        assert mock_pattern.false_positive_rate == 4/6
+        assert mock_pattern.false_positive_rate == 4 / 6
 
     @pytest.mark.asyncio
     async def test_get_patterns_above_threshold(self, pattern_repo):
@@ -540,7 +524,7 @@ class TestDRTFalsePositiveTracking:
                 method="GET",
                 false_positive_count=8,
                 total_violations=10,
-                false_positive_rate=0.8
+                false_positive_rate=0.8,
             ),
             MagicMock(
                 id="pattern2",
@@ -548,7 +532,7 @@ class TestDRTFalsePositiveTracking:
                 method="POST",
                 false_positive_count=2,
                 total_violations=10,
-                false_positive_rate=0.2
+                false_positive_rate=0.2,
             ),
         ]
         pattern_repo._db.execute.return_value.scalars.return_value.all.return_value = mock_patterns
@@ -593,12 +577,9 @@ class TestDRTAPIIntegration:
 
         # Create and configure middleware
         from application.mothership.middleware.drt_middleware import ComprehensiveDRTMiddleware
+
         middleware = ComprehensiveDRTMiddleware(
-            app,
-            enabled=True,
-            similarity_threshold=0.8,
-            auto_escalate=True,
-            alert_on_escalation=True
+            app, enabled=True, similarity_threshold=0.8, auto_escalate=True, alert_on_escalation=True
         )
 
         # Add test endpoints
@@ -612,20 +593,18 @@ class TestDRTAPIIntegration:
 
         # Add DRT monitoring endpoints
         from application.mothership.routers.drt_monitoring import router
+
         app.include_router(router)
 
         # Set the middleware instance for the test
         from application.mothership.routers.drt_monitoring import set_drt_middleware
+
         set_drt_middleware(middleware)
 
         # Create test client
         client = TestClient(app)
 
-        return {
-            "app": app,
-            "middleware": middleware,
-            "client": client
-        }
+        return {"app": app, "middleware": middleware, "client": client}
 
     def test_drt_status_endpoint(self, test_app_with_drt):
         """Test DRT status endpoint returns correct data."""
@@ -657,7 +636,7 @@ class TestDRTAPIIntegration:
             "method": "POST",
             "headers": ["content-type", "authorization"],
             "body_pattern": '{"action":"delete"}',
-            "query_pattern": "force=true"
+            "query_pattern": "force=true",
         }
 
         response = client.post("/drt/attack-vectors", json=attack_vector_data)
@@ -722,11 +701,7 @@ class TestDRTAPIIntegration:
         middleware = test_app_with_drt["middleware"]
 
         # Add an attack vector
-        attack_vector_data = {
-            "path_pattern": "/api/test",
-            "method": "POST",
-            "headers": ["content-type"]
-        }
+        attack_vector_data = {"path_pattern": "/api/test", "method": "POST", "headers": ["content-type"]}
         client.post("/drt/attack-vectors", json=attack_vector_data)
 
         # Make a request that should trigger the attack vector
@@ -739,7 +714,7 @@ class TestDRTAPIIntegration:
         fp_data = {
             "violation_id": "mock-violation-id",
             "reason": "This was legitimate admin access",
-            "confidence": 0.95
+            "confidence": 0.95,
         }
 
         # Note: This would normally require a real violation ID from the database

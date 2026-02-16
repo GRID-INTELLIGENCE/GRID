@@ -24,10 +24,17 @@ from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.responses import Response
 
+from safety.ai_workflow_safety import (
+    TemporalSafetyConfig,
+    get_ai_workflow_safety_engine,
+)
 from safety.api.auth import TrustTier, UserIdentity, get_user_from_token
 from safety.api.rate_limiter import allow_request
 from safety.api.security_headers import SecurityHeadersMiddleware
+from safety.config import SecureConfig
+from safety.content_safety_checker import ContentSafetyChecker
 from safety.escalation.handler import is_user_suspended
+from safety.monitoring import SafetyEvent, get_safety_monitor
 from safety.observability.logging_setup import get_logger, set_trace_context
 from safety.observability.metrics import (
     DETECTOR_HEALTHY,
@@ -43,15 +50,6 @@ from safety.observability.security_monitoring import (
 # [PROJECT GUARDIAN] Integration
 from safety.rules.manager import get_rule_manager
 from safety.workers.worker_utils import check_redis_health, write_audit_event
-
-from safety.ai_workflow_safety import (
-    AIWorkflowSafetyEngine,
-    TemporalSafetyConfig,
-    get_ai_workflow_safety_engine,
-)
-from safety.content_safety_checker import ContentSafetyChecker
-from safety.monitoring import EnhancedSafetyMonitor, SafetyEvent, get_safety_monitor
-from safety.config import SecureConfig
 
 logger = get_logger("api.middleware")
 
@@ -334,13 +332,15 @@ class SafetyMiddleware(BaseHTTPMiddleware):
             content_assessment = self.content_checker.check_content(user_input, user_age)
             if not content_assessment["is_safe"]:
                 logger.warning("content_safety_violation", user_id=user.id, issues=content_assessment["issues"])
-                self.safety_monitor.record_event(SafetyEvent(
-                    event_type="content_violation",
-                    severity="high",
-                    user_id=user.id,
-                    session_id=trace_id,
-                    metadata={"issues": content_assessment["issues"], "input_length": len(user_input)}
-                ))
+                self.safety_monitor.record_event(
+                    SafetyEvent(
+                        event_type="content_violation",
+                        severity="high",
+                        user_id=user.id,
+                        session_id=trace_id,
+                        metadata={"issues": content_assessment["issues"], "input_length": len(user_input)},
+                    )
+                )
                 response = _make_refusal_response("CONTENT_SAFETY_VIOLATION", trace_id, 400)
                 self.security_headers._add_security_headers(response, request)
                 _add_safety_pact_headers(response)
@@ -355,48 +355,52 @@ class SafetyMiddleware(BaseHTTPMiddleware):
                     config=TemporalSafetyConfig(
                         enable_hook_detection=True,
                         enable_wellbeing_tracking=True,
-                        developmental_safety_mode=user_age is not None and user_age < 18
+                        developmental_safety_mode=user_age is not None and user_age < 18,
                     ),
-                    user_age=user_age
+                    user_age=user_age,
                 )
 
                 # Rules 1-3 are evaluated here
                 safety_assessment = await safety_engine.evaluate_request(
                     user_input=user_input,
                     current_time=time.time(),
-                    sensitive_detections=len(content_assessment["issues"])
+                    sensitive_detections=len(content_assessment["issues"]),
                 )
 
                 # Record status in request state
                 request.state.ai_workflow_safety = safety_assessment
 
-                if not safety_assessment['safety_allowed']:
-                    reason = safety_assessment.get('blocked_reason') or (
+                if not safety_assessment["safety_allowed"]:
+                    reason = safety_assessment.get("blocked_reason") or (
                         "STAMINA_EXHAUSTED" if not safety_assessment.get("stamina_allowed") else "SAFETY_VIOLATION"
                     )
                     logger.warning("AI workflow safety violation", user_id=user.id, reason=reason)
 
-                    self.safety_monitor.record_event(SafetyEvent(
-                        event_type="safety_violation",
-                        severity="high",
-                        user_id=user.id,
-                        session_id=trace_id,
-                        metadata={"reason": reason, "assessment": safety_assessment}
-                    ))
+                    self.safety_monitor.record_event(
+                        SafetyEvent(
+                            event_type="safety_violation",
+                            severity="high",
+                            user_id=user.id,
+                            session_id=trace_id,
+                            metadata={"reason": reason, "assessment": safety_assessment},
+                        )
+                    )
 
-                    response = _make_refusal_response(reason, trace_id, 429 if "STAMINA" in reason or "COOLDOWN" in reason else 403)
+                    response = _make_refusal_response(
+                        reason, trace_id, 429 if "STAMINA" in reason or "COOLDOWN" in reason else 403
+                    )
                     self.security_headers._add_security_headers(response, request)
                     _add_safety_pact_headers(response)
                     return response
 
                 # Add safety context to request metadata for worker processing
-                if 'metadata' not in body:
-                    body['metadata'] = {}
+                if "metadata" not in body:
+                    body["metadata"] = {}
 
-                body['metadata']['safety_pact'] = {
-                    'stamina_remaining': safety_assessment.get('remaining_stamina'),
-                    'current_heat': safety_assessment.get('current_heat'),
-                    'flow_bonus': safety_assessment.get('flow_bonus', 1.0)
+                body["metadata"]["safety_pact"] = {
+                    "stamina_remaining": safety_assessment.get("remaining_stamina"),
+                    "current_heat": safety_assessment.get("current_heat"),
+                    "flow_bonus": safety_assessment.get("flow_bonus", 1.0),
                 }
 
             except Exception as exc:

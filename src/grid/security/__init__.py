@@ -28,46 +28,51 @@ from .templates import (
 
 # Import new threat profile and hardened security components
 try:
-    from .threat_profile import (
-        ThreatProfile,
-        ThreatSeverity,
-        ThreatCategory,
-        ThreatIndicator,
-        SecurityGuardrails,
-        DetectionThreshold,
-        MitigationStrategies,
-        MitigationAction,
-        MitigationRule,
-        PreventionFramework,
-        SecurityAssertion,
-        get_threat_profile,
-        get_guardrails,
-        get_mitigation_strategies,
-        get_prevention_framework,
-        check_threat,
-        get_security_status as get_comprehensive_security_status,
-        initialize_security as initialize_threat_profile,
-    )
     from .hardened_middleware import (
+        AdaptiveRateLimiter,
+        HardenedInputValidator,
         HardenedSecurityMiddleware,
         SecurityContext,
         ThreatResponseHandler,
-        AdaptiveRateLimiter,
-        HardenedInputValidator,
         add_hardened_security,
         get_security_context,
-        set_security_context,
         security_context_manager,
+        set_security_context,
     )
     from .security_runner import (
-        SecurityValidator,
-        ValidationStatus,
-        ValidationResult,
-        ValidationReport,
         ComplianceChecker,
-        run_security_validation,
+        SecurityValidator,
+        ValidationReport,
+        ValidationResult,
+        ValidationStatus,
         run_compliance_check,
+        run_security_validation,
     )
+    from .threat_profile import (
+        DetectionThreshold,
+        MitigationAction,
+        MitigationRule,
+        MitigationStrategies,
+        PreventionFramework,
+        SecurityAssertion,
+        SecurityGuardrails,
+        ThreatCategory,
+        ThreatIndicator,
+        ThreatProfile,
+        ThreatSeverity,
+        check_threat,
+        get_guardrails,
+        get_mitigation_strategies,
+        get_prevention_framework,
+        get_threat_profile,
+    )
+    from .threat_profile import (
+        get_security_status as get_comprehensive_security_status,
+    )
+    from .threat_profile import (
+        initialize_security as initialize_threat_profile,
+    )
+
     THREAT_PROFILE_AVAILABLE = True
 except ImportError as e:
     logger = logging.getLogger(__name__)

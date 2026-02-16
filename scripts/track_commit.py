@@ -5,10 +5,10 @@ Tracks commits manually since git is not available in this environment.
 Usage: python scripts/track_commit.py "Commit message" [author]
 """
 
-import json
 import hashlib
+import json
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 COMMITS_FILE = Path(".commits.json")
@@ -23,7 +23,7 @@ def generate_commit_hash(message: str, timestamp: str, author: str) -> str:
 def load_commits() -> list:
     """Load existing commits."""
     if COMMITS_FILE.exists():
-        with open(COMMITS_FILE, "r") as f:
+        with open(COMMITS_FILE) as f:
             return json.load(f)
     return []
 
@@ -37,9 +37,9 @@ def save_commits(commits: list):
 def add_commit(message: str, author: str = "Irfan Kabir"):
     """Add a new commit."""
     commits = load_commits()
-    timestamp = datetime.now(timezone.utc).isoformat()
+    timestamp = datetime.now(UTC).isoformat()
     commit_hash = generate_commit_hash(message, timestamp, author)
-    
+
     commit = {
         "hash": commit_hash,
         "message": message,
@@ -52,7 +52,7 @@ def add_commit(message: str, author: str = "Irfan Kabir"):
     print(f"[{commit_hash}] {message}")
     print(f"Author: {author}")
     print(f"Date: {timestamp}")
-    print(f"Branch: main")
+    print("Branch: main")
     print(f"\nTotal commits: {len(commits)}")
 
 
@@ -62,7 +62,7 @@ def log_commits(n: int = None):
     if not commits:
         print("No commits yet.")
         return
-    
+
     display_commits = commits[-n:] if n else commits
     for commit in reversed(display_commits):
         print(f"\ncommit {commit['hash']}")
@@ -77,7 +77,7 @@ if __name__ == "__main__":
         print("Usage: python track_commit.py <message> [author]")
         print("       python track_commit.py log [n]")
         sys.exit(1)
-    
+
     if sys.argv[1] == "log":
         n = int(sys.argv[2]) if len(sys.argv) > 2 else None
         log_commits(n)

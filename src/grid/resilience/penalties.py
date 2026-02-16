@@ -101,15 +101,9 @@ class DataPenaltySchema:
         Returns:
             DataPenaltySchema instance.
         """
-        severity = (
-            PenaltySeverity(data["severity"])
-            if isinstance(data["severity"], str)
-            else data["severity"]
-        )
+        severity = PenaltySeverity(data["severity"]) if isinstance(data["severity"], str) else data["severity"]
         timestamp = (
-            datetime.fromisoformat(data["timestamp"])
-            if isinstance(data["timestamp"], str)
-            else data["timestamp"]
+            datetime.fromisoformat(data["timestamp"]) if isinstance(data["timestamp"], str) else data["timestamp"]
         )
         return cls(
             violation_type=data["violation_type"],

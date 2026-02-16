@@ -9,6 +9,7 @@ Create Date: 2026-02-13 10:30:00
 from typing import Sequence
 
 import sqlalchemy as sa
+
 from alembic import op
 
 # revision identifiers, used by Alembic.
@@ -92,7 +93,6 @@ def upgrade() -> None:
         unique=False,
     )
 
-
     op.create_table(
         "mothership_connect_account_mappings",
         sa.Column("id", sa.String(length=64), nullable=False),
@@ -140,8 +140,6 @@ def downgrade() -> None:
         table_name="mothership_payment_reconciliation_runs",
     )
     op.drop_table("mothership_payment_reconciliation_runs")
-
-
 
     op.drop_index(
         "ix_mothership_connect_account_mappings_subscription_status",

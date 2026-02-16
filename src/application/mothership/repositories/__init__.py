@@ -679,7 +679,7 @@ __all__ = [
     "CockpitStateRepository",
     # DRT Repositories
     "DRTBehavioralSignatureRepository",
-    "DRTAttackVectorRepository", 
+    "DRTAttackVectorRepository",
     "DRTViolationRepository",
     "DRTEscalatedEndpointRepository",
     "DRTConfigurationRepository",

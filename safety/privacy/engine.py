@@ -1,13 +1,14 @@
-from typing import Dict, Any, List, Optional
+import re
 from dataclasses import dataclass
 from enum import Enum
-import re
-from datetime import datetime
+from typing import Any
+
 
 class PrivacyLevel(Enum):
     STRICT = "strict"
     BALANCED = "balanced"
     MINIMAL = "minimal"
+
 
 class MaskingStrategy(Enum):
     REDACT = "redact"
@@ -17,6 +18,7 @@ class MaskingStrategy(Enum):
     AUDIT = "audit"
     NOOP = "noop"
 
+
 @dataclass
 class DetectedEntity:
     type: str
@@ -24,15 +26,17 @@ class DetectedEntity:
     start: int
     end: int
     confidence: float = 1.0
-    context: Optional[str] = None
+    context: str | None = None
+
 
 @dataclass
 class PrivacyResult:
     masked_text: str
-    detected_entities: List[DetectedEntity]
-    applied_rules: List[str]
+    detected_entities: list[DetectedEntity]
+    applied_rules: list[str]
     processing_time: float
     level: PrivacyLevel
+
 
 class PrivacyEngine:
     """Privacy engine for PII detection and masking"""
@@ -42,97 +46,91 @@ class PrivacyEngine:
         self.patterns = self._load_patterns()
         self.masking_rules = self._load_masking_rules()
 
-    def _load_patterns(self) -> Dict[str, Dict[str, Any]]:
+    def _load_patterns(self) -> dict[str, dict[str, Any]]:
         """Load PII detection patterns"""
         return {
-            'email': {
-                'pattern': r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b',
-                'description': 'Email addresses'
+            "email": {
+                "pattern": r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b",
+                "description": "Email addresses",
             },
-            'phone_us': {
-                'pattern': r'\b(\+?1[-.\s]?)?\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})\b',
-                'description': 'US phone numbers'
+            "phone_us": {
+                "pattern": r"\b(\+?1[-.\s]?)?\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})\b",
+                "description": "US phone numbers",
             },
-            'phone_international': {
-                'pattern': r'\+\d{1,3}[-.\s]?\d{3,}[-.\s]?\d{3,}[-.\s]?\d{3,}',
-                'description': 'International phone numbers'
+            "phone_international": {
+                "pattern": r"\+\d{1,3}[-.\s]?\d{3,}[-.\s]?\d{3,}[-.\s]?\d{3,}",
+                "description": "International phone numbers",
             },
-            'ssn': {
-                'pattern': r'\b\d{3}[-]?\d{2}[-]?\d{4}\b',
-                'description': 'US Social Security Numbers'
+            "ssn": {"pattern": r"\b\d{3}[-]?\d{2}[-]?\d{4}\b", "description": "US Social Security Numbers"},
+            "credit_card": {
+                "pattern": r"\b\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}\b",
+                "description": "Credit card numbers",
             },
-            'credit_card': {
-                'pattern': r'\b\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}\b',
-                'description': 'Credit card numbers'
+            "ip_address": {"pattern": r"\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b", "description": "IP addresses"},
+            "url": {
+                "pattern": r"https?://(?:[-\w.])+(?:[:\d]+)?(?:/(?:[\w/_.])*(?:\?(?:[\w&=%.])*)?(?:#(?:\w*))?)",
+                "description": "URLs",
             },
-            'ip_address': {
-                'pattern': r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b',
-                'description': 'IP addresses'
-            },
-            'url': {
-                'pattern': r'https?://(?:[-\w.])+(?:[:\d]+)?(?:/(?:[\w/_.])*(?:\?(?:[\w&=%.])*)?(?:#(?:\w*))?)',
-                'description': 'URLs'
-            },
-            'date_of_birth': {
-                'pattern': r'\b\d{1,2}[-/]\d{1,2}[-/]\d{2,4}\b',
-                'description': 'Dates of birth'
-            }
+            "date_of_birth": {"pattern": r"\b\d{1,2}[-/]\d{1,2}[-/]\d{2,4}\b", "description": "Dates of birth"},
         }
 
-    def _load_masking_rules(self) -> Dict[str, Dict[str, Any]]:
+    def _load_masking_rules(self) -> dict[str, dict[str, Any]]:
         """Load masking rules based on privacy level"""
         rules = {
             PrivacyLevel.STRICT: {
-                'email': MaskingStrategy.REDACT,
-                'phone_us': MaskingStrategy.REDACT,
-                'phone_international': MaskingStrategy.REDACT,
-                'ssn': MaskingStrategy.REDACT,
-                'credit_card': MaskingStrategy.REDACT,
-                'ip_address': MaskingStrategy.REDACT,
-                'url': MaskingStrategy.REDACT,
-                'date_of_birth': MaskingStrategy.REDACT
+                "email": MaskingStrategy.REDACT,
+                "phone_us": MaskingStrategy.REDACT,
+                "phone_international": MaskingStrategy.REDACT,
+                "ssn": MaskingStrategy.REDACT,
+                "credit_card": MaskingStrategy.REDACT,
+                "ip_address": MaskingStrategy.REDACT,
+                "url": MaskingStrategy.REDACT,
+                "date_of_birth": MaskingStrategy.REDACT,
             },
             PrivacyLevel.BALANCED: {
-                'email': MaskingStrategy.PARTIAL,
-                'phone_us': MaskingStrategy.PARTIAL,
-                'phone_international': MaskingStrategy.PARTIAL,
-                'ssn': MaskingStrategy.HASH,
-                'credit_card': MaskingStrategy.PARTIAL,
-                'ip_address': MaskingStrategy.REDACT,
-                'url': MaskingStrategy.AUDIT,
-                'date_of_birth': MaskingStrategy.PARTIAL
+                "email": MaskingStrategy.PARTIAL,
+                "phone_us": MaskingStrategy.PARTIAL,
+                "phone_international": MaskingStrategy.PARTIAL,
+                "ssn": MaskingStrategy.HASH,
+                "credit_card": MaskingStrategy.PARTIAL,
+                "ip_address": MaskingStrategy.REDACT,
+                "url": MaskingStrategy.AUDIT,
+                "date_of_birth": MaskingStrategy.PARTIAL,
             },
             PrivacyLevel.MINIMAL: {
-                'email': MaskingStrategy.AUDIT,
-                'phone_us': MaskingStrategy.AUDIT,
-                'phone_international': MaskingStrategy.AUDIT,
-                'ssn': MaskingStrategy.REDACT,
-                'credit_card': MaskingStrategy.REDACT,
-                'ip_address': MaskingStrategy.REDACT,
-                'url': MaskingStrategy.NOOP,
-                'date_of_birth': MaskingStrategy.AUDIT
-            }
+                "email": MaskingStrategy.AUDIT,
+                "phone_us": MaskingStrategy.AUDIT,
+                "phone_international": MaskingStrategy.AUDIT,
+                "ssn": MaskingStrategy.REDACT,
+                "credit_card": MaskingStrategy.REDACT,
+                "ip_address": MaskingStrategy.REDACT,
+                "url": MaskingStrategy.NOOP,
+                "date_of_birth": MaskingStrategy.AUDIT,
+            },
         }
         return rules.get(self.level, rules[PrivacyLevel.BALANCED])
 
-    def detect(self, text: str) -> List[DetectedEntity]:
+    def detect(self, text: str) -> list[DetectedEntity]:
         """Detect PII entities in text"""
         detected = []
         for entity_type, config in self.patterns.items():
-            for match in re.finditer(config['pattern'], text, re.IGNORECASE):
-                detected.append(DetectedEntity(
-                    type=entity_type,
-                    value=match.group(),
-                    start=match.start(),
-                    end=match.end(),
-                    confidence=1.0,
-                    context=self._get_context(text, match.start(), match.end())
-                ))
+            for match in re.finditer(config["pattern"], text, re.IGNORECASE):
+                detected.append(
+                    DetectedEntity(
+                        type=entity_type,
+                        value=match.group(),
+                        start=match.start(),
+                        end=match.end(),
+                        confidence=1.0,
+                        context=self._get_context(text, match.start(), match.end()),
+                    )
+                )
         return detected
 
     def mask_text(self, text: str) -> PrivacyResult:
         """Mask PII entities in text"""
         import time
+
         start_time = time.time()
 
         detected_entities = self.detect(text)
@@ -142,22 +140,21 @@ class PrivacyEngine:
         for entity in reversed(detected_entities):
             strategy = self.masking_rules.get(entity.type, MaskingStrategy.AUDIT)
             replacement = self._apply_masking(entity, strategy)
-            masked_text = (
-                masked_text[:entity.start] +
-                replacement +
-                masked_text[entity.end:]
-            )
+            masked_text = masked_text[: entity.start] + replacement + masked_text[entity.end :]
 
         processing_time = time.time() - start_time
-        applied_rules = [f"{entity.type}:{strategy.value}" for entity in detected_entities
-                        for strategy in [self.masking_rules.get(entity.type, MaskingStrategy.AUDIT)]]
+        applied_rules = [
+            f"{entity.type}:{strategy.value}"
+            for entity in detected_entities
+            for strategy in [self.masking_rules.get(entity.type, MaskingStrategy.AUDIT)]
+        ]
 
         return PrivacyResult(
             masked_text=masked_text,
             detected_entities=detected_entities,
             applied_rules=list(set(applied_rules)),
             processing_time=processing_time,
-            level=self.level
+            level=self.level,
         )
 
     def _apply_masking(self, entity: DetectedEntity, strategy: MaskingStrategy) -> str:
@@ -190,6 +187,7 @@ class PrivacyEngine:
     def _hash_value(self, value: str) -> str:
         """Hash the value"""
         import hashlib
+
         return hashlib.sha256(value.encode()).hexdigest()[:8]
 
     def _get_context(self, text: str, start: int, end: int, window: int = 20) -> str:
@@ -198,6 +196,6 @@ class PrivacyEngine:
         context_end = min(len(text), end + window)
         return text[context_start:context_end].strip()
 
-    def batch_process(self, texts: List[str]) -> List[PrivacyResult]:
+    def batch_process(self, texts: list[str]) -> list[PrivacyResult]:
         """Process multiple texts"""
         return [self.mask_text(text) for text in texts]

@@ -7,6 +7,7 @@ from safety.privacy.detector import AsyncPIIDetector
 def detector():
     return AsyncPIIDetector(enable_cache=False)
 
+
 @pytest.mark.asyncio
 async def test_email_detection(detector):
     text = "Contact me at test@example.com for more info."
@@ -16,6 +17,7 @@ async def test_email_detection(detector):
     assert results[0].pii_type == "EMAIL"
     assert results[0].value == "test@example.com"
 
+
 @pytest.mark.asyncio
 async def test_phone_detection(detector):
     text = "Call 555-555-0123 immediately."
@@ -24,6 +26,7 @@ async def test_phone_detection(detector):
     assert len(results) == 1
     # Note: Our regex might be strict or loose, let's verify it matches
     assert results[0].pii_type == "PHONE"
+
 
 @pytest.mark.asyncio
 async def test_multiple_detections(detector):
@@ -35,19 +38,17 @@ async def test_multiple_detections(detector):
     assert "EMAIL" in types
     assert "PHONE" in types
 
+
 @pytest.mark.asyncio
 async def test_no_pii(detector):
     text = "Hello world, this is a safe string."
     results = await detector.detect_async(text)
     assert len(results) == 0
 
+
 @pytest.mark.asyncio
 async def test_batch_processing(detector):
-    texts = [
-        "My email is a@b.com",
-        "No secrets here",
-        "Call 555-555-0199"
-    ]
+    texts = ["My email is a@b.com", "No secrets here", "Call 555-555-0199"]
     results = await detector.detect_batch(texts)
 
     assert len(results) == 3

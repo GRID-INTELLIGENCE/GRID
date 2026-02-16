@@ -237,7 +237,9 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
 
         # Privacy: Minimal permissions by default
-        response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=(), usb=(self), interest-cohort=()"
+        response.headers["Permissions-Policy"] = (
+            "camera=(), microphone=(), geolocation=(), usb=(self), interest-cohort=()"
+        )
 
         # Content Security Policy
         response.headers["Content-Security-Policy"] = self.csp
@@ -317,10 +319,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         """Evict oldest entries if store exceeds max size."""
         if len(self._store) > self.max_store_size:
             # Remove oldest 10% of entries
-            sorted_keys = sorted(
-                self._store.keys(),
-                key=lambda k: max(self._store[k]) if self._store[k] else 0
-            )
+            sorted_keys = sorted(self._store.keys(), key=lambda k: max(self._store[k]) if self._store[k] else 0)
             evict_count = int(self.max_store_size * 0.1)
             for key in sorted_keys[:evict_count]:
                 del self._store[key]

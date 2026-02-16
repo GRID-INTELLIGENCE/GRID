@@ -3,6 +3,7 @@
 Re-exports the observation and privacy routers from the standalone safety API
 so they can be mounted inside the Mothership FastAPI app.
 """
+
 from __future__ import annotations
 
 import logging

@@ -3,7 +3,8 @@ Enhanced Accountability Enforcer with claims/roles support.
 """
 
 import logging
-from datetime import datetime
+from collections import deque
+from datetime import datetime, timedelta
 from typing import Any
 
 from .contract_loader import load_accountability_contract
@@ -16,6 +17,9 @@ from .contracts import (
 )
 
 logger = logging.getLogger(__name__)
+
+_ERROR_RATE_WINDOW = timedelta(minutes=5)
+_MAX_OUTCOMES_PER_ENDPOINT = 1000
 
 
 class EnhancedAccountabilityEnforcer:
@@ -39,6 +43,8 @@ class EnhancedAccountabilityEnforcer:
 
         # Rate limiting store: {rate_key: [timestamps]}
         self._rate_limit_store: dict[str, list[datetime]] = {}
+        # Error rate tracking: {endpoint_key: deque of (timestamp, is_success)}
+        self._error_tracking: dict[str, deque[tuple[datetime, bool]]] = {}
 
         logger.info(f"Enhanced accountability enforcer initialized: mode={enforcement_mode}")
 
@@ -194,9 +200,14 @@ class EnhancedAccountabilityEnforcer:
             validation_violations = self._check_response_validation(endpoint_contract, response_data)
             violations.extend(validation_violations)
 
+        # Record outcome for error rate metrics before checking
+        self._record_outcome(path, method, response_status)
+
         # Check performance SLA
         if response_time_ms:
-            performance_violations = self._check_performance_sla(endpoint_contract, response_time_ms, response_status)
+            performance_violations = self._check_performance_sla(
+                endpoint_contract, path, method, response_time_ms, response_status
+            )
             violations.extend(performance_violations)
 
         # Response violations don't block but are logged
@@ -436,9 +447,37 @@ class EnhancedAccountabilityEnforcer:
 
         return violations
 
+    def _endpoint_key(self, path: str, method: str) -> str:
+        """Build endpoint key for metrics."""
+        return f"{method}:{path}"
+
+    def _record_outcome(self, path: str, method: str, response_status: int) -> None:
+        """Record request outcome for error rate calculation."""
+        key = self._endpoint_key(path, method)
+        if key not in self._error_tracking:
+            self._error_tracking[key] = deque(maxlen=_MAX_OUTCOMES_PER_ENDPOINT)
+        is_success = 200 <= (response_status or 0) < 400
+        now = datetime.utcnow()
+        self._error_tracking[key].append((now, is_success))
+
+    def _get_error_rate(self, path: str, method: str) -> float | None:
+        """Get recent error rate for endpoint (0-1). Returns None if insufficient data."""
+        key = self._endpoint_key(path, method)
+        outcomes = self._error_tracking.get(key)
+        if not outcomes or len(outcomes) < 10:
+            return None
+        cutoff = datetime.utcnow() - _ERROR_RATE_WINDOW
+        recent = [(ts, ok) for ts, ok in outcomes if ts >= cutoff]
+        if len(recent) < 10:
+            return None
+        errors = sum(1 for _, ok in recent if not ok)
+        return errors / len(recent)
+
     def _check_performance_sla(
         self,
         endpoint_contract,
+        path: str,
+        method: str,
         response_time_ms: float,
         response_status: int,
     ) -> list[ContractViolation]:
@@ -461,8 +500,20 @@ class EnhancedAccountabilityEnforcer:
                 )
             )
 
-        # Check error rate (would need historical data)
-        # TODO: Implement error rate checking with metrics
+        # Check error rate with metrics
+        error_rate = self._get_error_rate(path, method)
+        if error_rate is not None and error_rate > performance.max_error_rate:
+            violations.append(
+                ContractViolation(
+                    type=ViolationType.PERFORMANCE,
+                    severity=ContractSeverity.MEDIUM,
+                    message=f"Error rate {error_rate:.2%} exceeds SLA {performance.max_error_rate:.2%}",
+                    field="error_rate",
+                    actual_value=f"{error_rate:.2%}",
+                    expected_value=f"≤{performance.max_error_rate:.2%}",
+                    penalty_points=15,
+                )
+            )
 
         return violations
 

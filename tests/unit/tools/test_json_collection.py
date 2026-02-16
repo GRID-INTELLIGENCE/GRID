@@ -159,12 +159,12 @@ def test_end_to_end() -> None:
 
     print(f"[OK] Verified {bridge_count} bridge and {sensory_count} sensory metrics in database")
 
-    assert (
-        bridge_count == write_results["bridge_inserted"]
-    ), f"Bridge count mismatch: {bridge_count} != {write_results['bridge_inserted']}"
-    assert (
-        sensory_count == write_results["sensory_inserted"]
-    ), f"Sensory count mismatch: {sensory_count} != {write_results['sensory_inserted']}"
+    assert bridge_count == write_results["bridge_inserted"], (
+        f"Bridge count mismatch: {bridge_count} != {write_results['bridge_inserted']}"
+    )
+    assert sensory_count == write_results["sensory_inserted"], (
+        f"Sensory count mismatch: {sensory_count} != {write_results['sensory_inserted']}"
+    )
     print("[OK] Database counts match inserted counts")
 
 

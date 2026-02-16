@@ -325,6 +325,4 @@ async def verify_authentication_required(
             return bypass_result
 
     # 4. Deny-by-default
-    raise AuthenticationError(
-        "Authentication required: provide either a valid API key or bearer token."
-    )
+    raise AuthenticationError("Authentication required: provide either a valid API key or bearer token.")

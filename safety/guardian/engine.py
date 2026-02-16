@@ -536,7 +536,11 @@ class GuardianEngine:
                 (
                     0
                     if m.severity == Severity.CRITICAL
-                    else 1 if m.severity == Severity.HIGH else 2 if m.severity == Severity.MEDIUM else 3
+                    else 1
+                    if m.severity == Severity.HIGH
+                    else 2
+                    if m.severity == Severity.MEDIUM
+                    else 3
                 ),
                 -_get_priority(m.rule_id),
             )

@@ -11,6 +11,7 @@ def engine():
     # Here we use the real one with defaults
     return PrivacyEngine(PrivacyConfig(enable_cache=False))
 
+
 @pytest.mark.asyncio
 async def test_engine_pass_through(engine):
     text = "Hello world"
@@ -21,6 +22,7 @@ async def test_engine_pass_through(engine):
     assert not result.masked
     assert not result.blocked
 
+
 @pytest.mark.asyncio
 async def test_engine_interactive_default(engine):
     # Default is ASK
@@ -30,6 +32,7 @@ async def test_engine_interactive_default(engine):
     assert result.success
     assert result.requires_user_input
     assert len(result.detections) > 0
+
 
 @pytest.mark.asyncio
 async def test_engine_mask_action(engine):
@@ -43,6 +46,7 @@ async def test_engine_mask_action(engine):
     assert result.masked
     assert "test@example.com" not in result.processed_text
     assert "[EMAIL]" in result.processed_text or "**" in result.processed_text
+
 
 @pytest.mark.asyncio
 async def test_engine_block_action(engine):

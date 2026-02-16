@@ -145,19 +145,21 @@ class EventBusSanitizer(Sanitizer):
         try:
             # Get event bus - prefer the instance set via set_event_bus
             event_bus = self._event_bus
-            
+
             # Fallback to sys.modules if instance not set
             if event_bus is None:
                 event_bus_module = sys.modules.get("infrastructure.event_bus.event_system")
                 if not event_bus_module:
                     event_bus_module = sys.modules.get("infrastructure.event_bus.event_system_fixed")
-                
+
                 if event_bus_module:
                     # Try to get the actual EventRouter/EventBus instance from the module
-                    event_bus = getattr(event_bus_module, "_router", None) or \
-                               getattr(event_bus_module, "EventRouter", None) or \
-                               getattr(event_bus_module, "event_bus", None) or \
-                               event_bus_module
+                    event_bus = (
+                        getattr(event_bus_module, "_router", None)
+                        or getattr(event_bus_module, "EventRouter", None)
+                        or getattr(event_bus_module, "event_bus", None)
+                        or event_bus_module
+                    )
 
             if not event_bus:
                 return SanitizationResult(
@@ -317,7 +319,7 @@ class DeferredSanitizer:
     def set_event_bus(self, event_bus: Any) -> None:
         """Set the EventBus instance for EventBus sanitizer."""
         sanitizer = self._sanitizers.get("eventbus")
-        if sanitizer and hasattr(sanitizer, 'set_event_bus'):
+        if sanitizer and hasattr(sanitizer, "set_event_bus"):
             sanitizer.set_event_bus(event_bus)
             logger.info("Wired EventBus to EventBusSanitizer")
 

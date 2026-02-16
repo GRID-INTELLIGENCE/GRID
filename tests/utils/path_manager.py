@@ -1,18 +1,17 @@
-﻿"""
+"""
 Centralized path management for GRID test suite
 Provides atomic path operations to prevent race conditions
 """
 
 import sys
-from pathlib import Path
-from typing import Set, Tuple, List
 import threading
+from pathlib import Path
 
 
 class PathManager:
     """Atomic path management for test environments"""
 
-    _configured_paths: Set[str] = set()
+    _configured_paths: set[str] = set()
     _lock = threading.Lock()
 
     @classmethod
@@ -32,8 +31,8 @@ class PathManager:
             raise ValueError(f"Invalid test_file_path: {test_file_path}") from e
 
         with cls._lock:
-            paths_to_add: List[Tuple[int, str]] = []
-            paths_to_remove: List[str] = []
+            paths_to_add: list[tuple[int, str]] = []
+            paths_to_remove: list[str] = []
 
             # Calculate paths
             src_path = test_file.parent.parent / "src"
@@ -50,7 +49,11 @@ class PathManager:
                 paths_to_add.append((0, src_str))  # Priority 0: insert at beginning
                 cls._configured_paths.add(src_str)
 
-            if work_grid_src_path.exists() and work_grid_str not in sys.path and work_grid_str not in cls._configured_paths:
+            if (
+                work_grid_src_path.exists()
+                and work_grid_str not in sys.path
+                and work_grid_str not in cls._configured_paths
+            ):
                 paths_to_add.append((1, work_grid_str))  # Priority 1: insert after src
                 cls._configured_paths.add(work_grid_str)
 
@@ -75,7 +78,7 @@ class PathManager:
             cls._configured_paths.clear()
 
     @classmethod
-    def get_configured_paths(cls) -> Set[str]:
+    def get_configured_paths(cls) -> set[str]:
         """Get currently configured paths"""
         with cls._lock:
             return cls._configured_paths.copy()

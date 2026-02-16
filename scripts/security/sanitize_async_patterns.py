@@ -161,9 +161,7 @@ def main():
             if "error" in violation:
                 print(f"ERROR in {violation['file']}: {violation['error']}")
             else:
-                print(
-                    f"{violation['file']}:{violation['line']} - {violation['type']}: {violation['description']}"
-                )
+                print(f"{violation['file']}:{violation['line']} - {violation['type']}: {violation['description']}")
                 if "code" in violation:
                     print(f"  Code: {violation['code']}")
 

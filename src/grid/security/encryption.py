@@ -14,11 +14,11 @@ import os
 from datetime import UTC, datetime
 from typing import Any
 
-from grid.security.environment import environment_settings
-
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+
+from grid.security.environment import environment_settings
 
 logger = logging.getLogger(__name__)
 
@@ -96,9 +96,7 @@ class DataEncryption:
                 logger.warning(f"Failed to load GCP secret key: {e}")
 
         # If we reach here, no key was found
-        error_msg = (
-            "Encryption key not found. Set GRID_ENCRYPTION_KEY environment variable."
-        )
+        error_msg = "Encryption key not found. Set GRID_ENCRYPTION_KEY environment variable."
         if environment_settings.is_production:
             error_msg += " Or configure 'grid-production-wealth-data-encryption' in GCP Secret Manager."
 

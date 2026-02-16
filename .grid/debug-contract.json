@@ -1,0 +1,876 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "contract_id": "grid-debug-v1.0",
+  "version": "1.0.0",
+  "description": "GRID Debug Contract — a machine-readable specification of 30 checks across 6 quality dimensions that defines 'clean state' for the GRID codebase. Any LLM agent, CI pipeline, or developer can execute this contract to validate codebase health.",
+  "created": "2026-02-16",
+  "codebase": {
+    "name": "grid-intelligence",
+    "root": "E:\\GRID-main",
+    "languages": ["python", "typescript", "javascript"],
+    "python_version": ">=3.13,<3.14",
+    "node_version": ">=18",
+    "package_manager_python": "uv",
+    "package_manager_js": "npm",
+    "source_paths": ["src/", "safety/", "boundaries/", "cognition/", "arena_api/"],
+    "frontend_path": "frontend/",
+    "test_paths": ["tests/", "safety/tests/", "boundaries/tests/"],
+    "total_python_files": 715,
+    "total_packages": 9
+  },
+  "environment": {
+    "required_tools": [
+      { "name": "uv", "min_version": "0.4.0", "verify": "uv --version" },
+      { "name": "python", "min_version": "3.13", "verify": "python --version" },
+      { "name": "node", "min_version": "18.0", "verify": "node --version" },
+      { "name": "npm", "min_version": "9.0", "verify": "npm --version" }
+    ],
+    "env_vars": {
+      "required": ["MOTHERSHIP_ENVIRONMENT"],
+      "recommended_test_values": {
+        "MOTHERSHIP_ENVIRONMENT": "test",
+        "MOTHERSHIP_DATABASE_URL": "sqlite:///:memory:",
+        "MOTHERSHIP_USE_DATABRICKS": "false",
+        "MOTHERSHIP_REDIS_ENABLED": "false"
+      }
+    }
+  },
+  "dimensions": {
+    "build_integrity": {
+      "id": "build_integrity",
+      "name": "Build Integrity",
+      "description": "Verify all dependencies resolve, packages build, and imports load without error.",
+      "checks": [
+        {
+          "id": "bi-001",
+          "name": "Python dependency resolution",
+          "description": "Verify all Python dependencies resolve without conflicts using the frozen lockfile.",
+          "severity": "critical",
+          "command": "uv sync --frozen",
+          "workdir": ".",
+          "timeout_seconds": 120,
+          "pass_criteria": {
+            "exit_code": 0,
+            "stderr_must_not_contain": ["error", "conflict"],
+            "stdout_must_contain": []
+          },
+          "fix": {
+            "auto_command": "uv sync",
+            "manual_steps": [
+              "Run 'uv lock' to regenerate lockfile",
+              "Check for version conflicts in pyproject.toml"
+            ],
+            "escalation": "If uv sync fails after lock regeneration, inspect pyproject.toml dependency constraints"
+          },
+          "depends_on": [],
+          "tags": ["python", "dependencies", "ci-blocking"]
+        },
+        {
+          "id": "bi-002",
+          "name": "Frontend dependency install",
+          "description": "Install frontend Node.js dependencies from lockfile.",
+          "severity": "critical",
+          "command": "npm ci",
+          "workdir": "frontend/",
+          "timeout_seconds": 120,
+          "pass_criteria": {
+            "exit_code": 0,
+            "stderr_must_not_contain": ["ERR!", "ERESOLVE"],
+            "stdout_must_contain": []
+          },
+          "fix": {
+            "auto_command": "npm install",
+            "manual_steps": [
+              "Delete node_modules and package-lock.json",
+              "Run 'npm install' to regenerate"
+            ],
+            "escalation": "Check for peer dependency conflicts in frontend/package.json"
+          },
+          "depends_on": [],
+          "tags": ["node", "dependencies", "ci-blocking"]
+        },
+        {
+          "id": "bi-003",
+          "name": "Python package build",
+          "description": "Verify the Python package builds a distributable wheel without errors.",
+          "severity": "high",
+          "command": "uv run python -m build",
+          "workdir": ".",
+          "timeout_seconds": 120,
+          "pass_criteria": {
+            "exit_code": 0,
+            "stderr_must_not_contain": ["error", "failed"],
+            "stdout_must_contain": []
+          },
+          "fix": {
+            "auto_command": null,
+            "manual_steps": [
+              "Check pyproject.toml [build-system] and [tool.hatch.build] sections",
+              "Ensure all package source paths are valid"
+            ],
+            "escalation": "Inspect build backend (hatchling) configuration for missing or excluded paths"
+          },
+          "depends_on": ["bi-001"],
+          "tags": ["python", "build", "packaging"]
+        },
+        {
+          "id": "bi-004",
+          "name": "Package verification",
+          "description": "Verify built distributions pass twine metadata checks.",
+          "severity": "high",
+          "command": "uv run twine check dist/*",
+          "workdir": ".",
+          "timeout_seconds": 30,
+          "pass_criteria": {
+            "exit_code": 0,
+            "stderr_must_not_contain": ["error"],
+            "stdout_must_contain": ["PASSED"]
+          },
+          "fix": {
+            "auto_command": null,
+            "manual_steps": [
+              "Fix metadata warnings in pyproject.toml (description, classifiers, urls)",
+              "Rebuild with 'uv run python -m build'"
+            ],
+            "escalation": "Check long_description format and content-type in pyproject.toml"
+          },
+          "depends_on": ["bi-003"],
+          "tags": ["python", "packaging", "metadata"]
+        },
+        {
+          "id": "bi-005",
+          "name": "Frontend full build",
+          "description": "Full production build of the Electron/Vite frontend.",
+          "severity": "high",
+          "command": "npm run build",
+          "workdir": "frontend/",
+          "timeout_seconds": 180,
+          "pass_criteria": {
+            "exit_code": 0,
+            "stderr_must_not_contain": ["error TS", "ERROR"],
+            "stdout_must_contain": []
+          },
+          "fix": {
+            "auto_command": null,
+            "manual_steps": [
+              "Run 'npm run lint' to identify TypeScript errors",
+              "Check vite.config.ts for misconfigured paths"
+            ],
+            "escalation": "Review tsconfig.json and tsconfig.electron.json for path alias issues"
+          },
+          "depends_on": ["bi-002"],
+          "tags": ["node", "build", "frontend"]
+        },
+        {
+          "id": "bi-006",
+          "name": "Import smoke test",
+          "description": "Collect all Python tests without executing them — validates that all imports resolve.",
+          "severity": "critical",
+          "command": "uv run pytest tests/ --collect-only -q --ignore=tests/e2e --ignore=tests/test_ollama.py --ignore=tests/scratch",
+          "workdir": ".",
+          "timeout_seconds": 60,
+          "pass_criteria": {
+            "exit_code": 0,
+            "stderr_must_not_contain": ["ModuleNotFoundError", "ImportError", "SyntaxError"],
+            "stdout_must_contain": ["test"]
+          },
+          "fix": {
+            "auto_command": null,
+            "manual_steps": [
+              "Run the command and inspect which module fails to import",
+              "Check conftest.py sys.path setup",
+              "Verify the failing module's imports are correct"
+            ],
+            "escalation": "Cross-reference PREEXISTING_ISSUES.md for known import failures"
+          },
+          "depends_on": ["bi-001"],
+          "tags": ["python", "imports", "ci-blocking"]
+        }
+      ]
+    },
+    "type_safety": {
+      "id": "type_safety",
+      "name": "Type Safety",
+      "description": "Static type checking for Python (mypy) and TypeScript (tsc).",
+      "checks": [
+        {
+          "id": "ts-001",
+          "name": "mypy strict check",
+          "description": "Run mypy on Python source with strict mode, respecting pyproject.toml overrides.",
+          "severity": "high",
+          "command": "uv run mypy src/ --ignore-missing-imports",
+          "workdir": ".",
+          "timeout_seconds": 300,
+          "pass_criteria": {
+            "exit_code": 0,
+            "stderr_must_not_contain": [],
+            "stdout_must_contain": []
+          },
+          "fix": {
+            "auto_command": null,
+            "manual_steps": [
+              "Run mypy and fix reported type errors",
+              "Add type: ignore comments only for justified third-party issues",
+              "Check [[tool.mypy.overrides]] in pyproject.toml for module-specific settings"
+            ],
+            "escalation": "Review mypy_path and explicit_package_bases in pyproject.toml [tool.mypy]"
+          },
+          "depends_on": ["bi-001"],
+          "tags": ["python", "types", "static-analysis"]
+        },
+        {
+          "id": "ts-002",
+          "name": "TypeScript renderer check",
+          "description": "Type-check the Vite/React renderer code without emitting.",
+          "severity": "high",
+          "command": "npx tsc --noEmit",
+          "workdir": "frontend/",
+          "timeout_seconds": 120,
+          "pass_criteria": {
+            "exit_code": 0,
+            "stderr_must_not_contain": ["error TS"],
+            "stdout_must_contain": []
+          },
+          "fix": {
+            "auto_command": null,
+            "manual_steps": [
+              "Fix TypeScript errors reported by tsc",
+              "Check tsconfig.json include/exclude paths"
+            ],
+            "escalation": "Review path aliases in tsconfig.json and vite.config.ts"
+          },
+          "depends_on": ["bi-002"],
+          "tags": ["typescript", "types", "frontend"]
+        },
+        {
+          "id": "ts-003",
+          "name": "TypeScript Electron check",
+          "description": "Type-check the Electron main process code without emitting.",
+          "severity": "high",
+          "command": "npx tsc -p tsconfig.electron.json --noEmit",
+          "workdir": "frontend/",
+          "timeout_seconds": 60,
+          "pass_criteria": {
+            "exit_code": 0,
+            "stderr_must_not_contain": ["error TS"],
+            "stdout_must_contain": []
+          },
+          "fix": {
+            "auto_command": null,
+            "manual_steps": [
+              "Fix TypeScript errors in electron/ directory",
+              "Ensure tsconfig.electron.json includes correct paths"
+            ],
+            "escalation": "Check electron main/preload entry points match tsconfig"
+          },
+          "depends_on": ["bi-002"],
+          "tags": ["typescript", "types", "electron"]
+        },
+        {
+          "id": "ts-004",
+          "name": "py.typed marker verification",
+          "description": "Verify py.typed marker files exist in key Python packages for PEP 561 compliance.",
+          "severity": "medium",
+          "command": "uv run python -c \"import pathlib; markers = list(pathlib.Path('src').rglob('py.typed')); print(f'Found {len(markers)} py.typed markers'); assert len(markers) >= 8, f'Expected >= 8, found {len(markers)}'\"",
+          "workdir": ".",
+          "timeout_seconds": 10,
+          "pass_criteria": {
+            "exit_code": 0,
+            "stderr_must_not_contain": ["AssertionError"],
+            "stdout_must_contain": ["py.typed"]
+          },
+          "fix": {
+            "auto_command": null,
+            "manual_steps": [
+              "Create empty py.typed files in top-level package directories under src/",
+              "See PEP 561 for marker file requirements"
+            ],
+            "escalation": "Ensure all packages listed in [tool.hatch.build.targets.wheel].packages have py.typed"
+          },
+          "depends_on": [],
+          "tags": ["python", "types", "pep561"]
+        }
+      ]
+    },
+    "test_coverage": {
+      "id": "test_coverage",
+      "name": "Test Coverage",
+      "description": "Run test suites and verify coverage thresholds are met.",
+      "checks": [
+        {
+          "id": "tc-001",
+          "name": "Unit tests",
+          "description": "Run Python unit tests with verbose output, fail on first error.",
+          "severity": "critical",
+          "command": "uv run pytest tests/unit/ -v --tb=short -x --timeout=30",
+          "workdir": ".",
+          "timeout_seconds": 180,
+          "pass_criteria": {
+            "exit_code": 0,
+            "stderr_must_not_contain": ["ERRORS", "FAILED"],
+            "stdout_must_contain": ["passed"]
+          },
+          "fix": {
+            "auto_command": null,
+            "manual_steps": [
+              "Run failing tests individually to isolate the failure",
+              "Check test fixtures and conftest.py for missing setup"
+            ],
+            "escalation": "Cross-reference PREEXISTING_ISSUES.md for known test failures"
+          },
+          "depends_on": ["bi-001", "bi-006"],
+          "tags": ["python", "tests", "unit", "ci-blocking"]
+        },
+        {
+          "id": "tc-002",
+          "name": "Integration tests",
+          "description": "Run Python integration tests excluding slow-marked tests.",
+          "severity": "high",
+          "command": "uv run pytest tests/integration/ -v --tb=short -m \"not slow\" --timeout=30 --ignore=tests/integration/test_enhanced_rag_integration.py --ignore=tests/integration/test_enhanced_rag_server.py",
+          "workdir": ".",
+          "timeout_seconds": 300,
+          "pass_criteria": {
+            "exit_code": 0,
+            "stderr_must_not_contain": ["ERRORS"],
+            "stdout_must_contain": []
+          },
+          "fix": {
+            "auto_command": null,
+            "manual_steps": [
+              "Check if external services (Ollama, Redis, DB) are required",
+              "Set MOTHERSHIP_ENVIRONMENT=test and MOTHERSHIP_DATABASE_URL=sqlite:///:memory:",
+              "Run failing tests with -s flag for stdout"
+            ],
+            "escalation": "Some integration tests require Ollama running locally (ollama serve)"
+          },
+          "depends_on": ["bi-001", "bi-006"],
+          "tags": ["python", "tests", "integration"]
+        },
+        {
+          "id": "tc-003",
+          "name": "Coverage threshold",
+          "description": "Run tests with coverage measurement and verify minimum 75% (per pyproject.toml).",
+          "severity": "high",
+          "command": "uv run pytest tests/ --cov=src --cov-report=term-missing --timeout=30 --ignore=tests/e2e --ignore=tests/test_ollama.py --ignore=tests/scratch --ignore=tests/integration/test_enhanced_rag_integration.py --ignore=tests/integration/test_enhanced_rag_server.py -q",
+          "workdir": ".",
+          "timeout_seconds": 600,
+          "pass_criteria": {
+            "exit_code": 0,
+            "stderr_must_not_contain": [],
+            "stdout_must_contain": []
+          },
+          "fix": {
+            "auto_command": null,
+            "manual_steps": [
+              "Run 'uv run coverage report --show-missing' to identify uncovered lines",
+              "Add tests for uncovered critical paths",
+              "Check [tool.coverage.report] fail_under in pyproject.toml"
+            ],
+            "escalation": "Coverage threshold is 75% per pyproject.toml — adjust if needed during early development"
+          },
+          "depends_on": ["tc-001"],
+          "tags": ["python", "tests", "coverage"]
+        },
+        {
+          "id": "tc-004",
+          "name": "Frontend tests",
+          "description": "Run Vitest test suite for the frontend.",
+          "severity": "high",
+          "command": "npm run test",
+          "workdir": "frontend/",
+          "timeout_seconds": 120,
+          "pass_criteria": {
+            "exit_code": 0,
+            "stderr_must_not_contain": ["FAIL"],
+            "stdout_must_contain": []
+          },
+          "fix": {
+            "auto_command": null,
+            "manual_steps": [
+              "Run 'npm run test -- --reporter=verbose' for detailed output",
+              "Check vitest.config.ts for setup issues"
+            ],
+            "escalation": "Ensure test environment matches expected DOM/Node setup"
+          },
+          "depends_on": ["bi-002"],
+          "tags": ["node", "tests", "frontend"]
+        },
+        {
+          "id": "tc-005",
+          "name": "Frontend coverage",
+          "description": "Run Vitest with coverage to verify frontend test coverage.",
+          "severity": "medium",
+          "command": "npm run test:coverage",
+          "workdir": "frontend/",
+          "timeout_seconds": 180,
+          "pass_criteria": {
+            "exit_code": 0,
+            "stderr_must_not_contain": ["FAIL"],
+            "stdout_must_contain": []
+          },
+          "fix": {
+            "auto_command": null,
+            "manual_steps": [
+              "Add tests for uncovered components",
+              "Check coverage thresholds in vitest.config.ts"
+            ],
+            "escalation": "Review coverage report in frontend/coverage/ for gaps"
+          },
+          "depends_on": ["tc-004"],
+          "tags": ["node", "tests", "coverage", "frontend"]
+        },
+        {
+          "id": "tc-006",
+          "name": "Safety subsystem tests",
+          "description": "Run tests for the safety enforcement subsystem.",
+          "severity": "high",
+          "command": "uv run pytest safety/tests/ -v --tb=short --timeout=30",
+          "workdir": ".",
+          "timeout_seconds": 180,
+          "pass_criteria": {
+            "exit_code": 0,
+            "stderr_must_not_contain": ["ERRORS"],
+            "stdout_must_contain": []
+          },
+          "fix": {
+            "auto_command": null,
+            "manual_steps": [
+              "Check safety/ package imports and sys.path in conftest.py",
+              "Set SAFETY_DEGRADED_MODE=true for tests without Redis"
+            ],
+            "escalation": "Safety tests may require Redis — use SAFETY_DEGRADED_MODE=true to mock it"
+          },
+          "depends_on": ["bi-001"],
+          "tags": ["python", "tests", "safety"]
+        },
+        {
+          "id": "tc-007",
+          "name": "Async tests",
+          "description": "Run tests marked with asyncio to verify async code paths.",
+          "severity": "medium",
+          "command": "uv run pytest tests/ -m asyncio -v --tb=short --timeout=30 --ignore=tests/e2e --ignore=tests/test_ollama.py --ignore=tests/scratch",
+          "workdir": ".",
+          "timeout_seconds": 180,
+          "pass_criteria": {
+            "exit_code": 0,
+            "stderr_must_not_contain": ["ERRORS"],
+            "stdout_must_contain": []
+          },
+          "fix": {
+            "auto_command": null,
+            "manual_steps": [
+              "Ensure pytest-asyncio is installed and asyncio_mode=auto in pyproject.toml",
+              "Check for missing event loop fixtures"
+            ],
+            "escalation": "Verify asyncio_default_fixture_loop_scope=function in [tool.pytest.ini_options]"
+          },
+          "depends_on": ["bi-001"],
+          "tags": ["python", "tests", "async"]
+        }
+      ]
+    },
+    "lint_compliance": {
+      "id": "lint_compliance",
+      "name": "Lint Compliance",
+      "description": "Static linting and formatting for Python and TypeScript/JavaScript.",
+      "checks": [
+        {
+          "id": "lc-001",
+          "name": "Ruff lint",
+          "description": "Run ruff linter on Python source with full output format.",
+          "severity": "high",
+          "command": "uv run ruff check . --output-format=full",
+          "workdir": ".",
+          "timeout_seconds": 60,
+          "pass_criteria": {
+            "exit_code": 0,
+            "stderr_must_not_contain": [],
+            "stdout_must_contain": []
+          },
+          "fix": {
+            "auto_command": "uv run ruff check . --fix",
+            "manual_steps": [
+              "Review unfixable errors manually",
+              "Check [tool.ruff.lint] rules in pyproject.toml",
+              "Use per-file-ignores for justified suppressions"
+            ],
+            "escalation": "Review extend-ignore list in pyproject.toml — some rules may be intentionally suppressed"
+          },
+          "depends_on": [],
+          "tags": ["python", "lint", "ruff"]
+        },
+        {
+          "id": "lc-002",
+          "name": "Ruff format check",
+          "description": "Verify Python code is formatted according to ruff format rules.",
+          "severity": "medium",
+          "command": "uv run ruff format --check .",
+          "workdir": ".",
+          "timeout_seconds": 60,
+          "pass_criteria": {
+            "exit_code": 0,
+            "stderr_must_not_contain": [],
+            "stdout_must_contain": []
+          },
+          "fix": {
+            "auto_command": "uv run ruff format .",
+            "manual_steps": [
+              "Run 'uv run ruff format .' to auto-format all files"
+            ],
+            "escalation": "Check [tool.ruff] line-length and exclude settings in pyproject.toml"
+          },
+          "depends_on": [],
+          "tags": ["python", "format", "ruff"]
+        },
+        {
+          "id": "lc-003",
+          "name": "ESLint frontend",
+          "description": "Run ESLint on frontend TypeScript/JavaScript source.",
+          "severity": "high",
+          "command": "npx eslint .",
+          "workdir": "frontend/",
+          "timeout_seconds": 60,
+          "pass_criteria": {
+            "exit_code": 0,
+            "stderr_must_not_contain": ["error"],
+            "stdout_must_contain": []
+          },
+          "fix": {
+            "auto_command": "npx eslint . --fix",
+            "manual_steps": [
+              "Fix errors reported by ESLint",
+              "Check .eslintrc or eslint.config.js for rule overrides"
+            ],
+            "escalation": "Review ESLint plugin compatibility with TypeScript parser"
+          },
+          "depends_on": ["bi-002"],
+          "tags": ["node", "lint", "frontend"]
+        },
+        {
+          "id": "lc-004",
+          "name": "Prettier format check",
+          "description": "Verify frontend code formatting with Prettier.",
+          "severity": "medium",
+          "command": "npm run format:check",
+          "workdir": "frontend/",
+          "timeout_seconds": 30,
+          "pass_criteria": {
+            "exit_code": 0,
+            "stderr_must_not_contain": [],
+            "stdout_must_contain": []
+          },
+          "fix": {
+            "auto_command": "npm run format",
+            "manual_steps": [
+              "Run 'npm run format' in frontend/ to auto-format"
+            ],
+            "escalation": "Check .prettierrc or prettier config in package.json"
+          },
+          "depends_on": ["bi-002"],
+          "tags": ["node", "format", "frontend"]
+        }
+      ]
+    },
+    "runtime_correctness": {
+      "id": "runtime_correctness",
+      "name": "Runtime Correctness",
+      "description": "Verify critical runtime behavior, API endpoints, security, and environment integrity.",
+      "checks": [
+        {
+          "id": "rc-001",
+          "name": "Critical marker tests",
+          "description": "Run tests marked as critical — these must never fail.",
+          "severity": "critical",
+          "command": "uv run pytest tests/ -m critical -v --tb=short --timeout=30 --ignore=tests/e2e --ignore=tests/test_ollama.py",
+          "workdir": ".",
+          "timeout_seconds": 120,
+          "pass_criteria": {
+            "exit_code": 0,
+            "stderr_must_not_contain": ["FAILED", "ERROR"],
+            "stdout_must_contain": []
+          },
+          "fix": {
+            "auto_command": null,
+            "manual_steps": [
+              "Critical test failures MUST be fixed before any commit",
+              "Isolate failing test with 'uv run pytest <test_file>::<test_name> -v -s'"
+            ],
+            "escalation": "Critical failures block all deployments — escalate immediately"
+          },
+          "depends_on": ["bi-001", "bi-006"],
+          "tags": ["python", "tests", "critical", "ci-blocking"]
+        },
+        {
+          "id": "rc-002",
+          "name": "API endpoint tests",
+          "description": "Run API endpoint tests (auth, health, routers).",
+          "severity": "high",
+          "command": "uv run pytest tests/api/ -v --tb=short --timeout=30 -k \"not rate_limit\"",
+          "workdir": ".",
+          "timeout_seconds": 180,
+          "pass_criteria": {
+            "exit_code": 0,
+            "stderr_must_not_contain": ["ERRORS"],
+            "stdout_must_contain": []
+          },
+          "fix": {
+            "auto_command": null,
+            "manual_steps": [
+              "Check middleware stack for recursion or import errors",
+              "Verify auth fixtures and test client setup in conftest.py",
+              "Set MOTHERSHIP_ENVIRONMENT=test"
+            ],
+            "escalation": "API test failures may indicate middleware registration issues — check main.py create_app()"
+          },
+          "depends_on": ["bi-001", "bi-006"],
+          "tags": ["python", "tests", "api"]
+        },
+        {
+          "id": "rc-003",
+          "name": "Security tests",
+          "description": "Run security-focused tests (auth, RBAC, sentinels).",
+          "severity": "high",
+          "command": "uv run pytest tests/security/ -v --tb=short --timeout=30 --ignore=tests/security/test_security_suite.py --ignore=tests/security/test_parasite_guard_integration.py",
+          "workdir": ".",
+          "timeout_seconds": 120,
+          "pass_criteria": {
+            "exit_code": 0,
+            "stderr_must_not_contain": ["ERRORS"],
+            "stdout_must_contain": []
+          },
+          "fix": {
+            "auto_command": null,
+            "manual_steps": [
+              "Check security module imports (some have optional dependencies)",
+              "Verify GRID_SECRET_KEY is set for test environment"
+            ],
+            "escalation": "Security test failures are high priority — check PREEXISTING_ISSUES.md Section 4"
+          },
+          "depends_on": ["bi-001"],
+          "tags": ["python", "tests", "security"]
+        },
+        {
+          "id": "rc-004",
+          "name": "Virtual environment validation",
+          "description": "Run the venv validation script to ensure environment integrity.",
+          "severity": "medium",
+          "command": "uv run python scripts/validate_venv.py",
+          "workdir": ".",
+          "timeout_seconds": 30,
+          "pass_criteria": {
+            "exit_code": 0,
+            "stderr_must_not_contain": ["ERROR", "FAIL"],
+            "stdout_must_contain": []
+          },
+          "fix": {
+            "auto_command": "uv sync",
+            "manual_steps": [
+              "Recreate venv: 'uv venv && uv sync'",
+              "Ensure .venv is in project root"
+            ],
+            "escalation": "If venv validation fails after recreating, check Python version matches pyproject.toml"
+          },
+          "depends_on": ["bi-001"],
+          "tags": ["python", "environment", "venv"]
+        },
+        {
+          "id": "rc-005",
+          "name": "Cognitive tests",
+          "description": "Run cognitive subsystem tests.",
+          "severity": "medium",
+          "command": "uv run pytest tests/cognitive/ -v --tb=short --timeout=30",
+          "workdir": ".",
+          "timeout_seconds": 120,
+          "pass_criteria": {
+            "exit_code": 0,
+            "stderr_must_not_contain": ["ERRORS"],
+            "stdout_must_contain": []
+          },
+          "fix": {
+            "auto_command": null,
+            "manual_steps": [
+              "Check cognitive module imports and optional dependencies",
+              "Verify cognitive config in src/cognitive/"
+            ],
+            "escalation": "Cognitive tests may require specific model files or config"
+          },
+          "depends_on": ["bi-001"],
+          "tags": ["python", "tests", "cognitive"]
+        }
+      ]
+    },
+    "security_and_dependency_health": {
+      "id": "security_and_dependency_health",
+      "name": "Security & Dependency Health",
+      "description": "Security scanning, vulnerability auditing, and secrets detection.",
+      "checks": [
+        {
+          "id": "sd-001",
+          "name": "Bandit security scan",
+          "description": "Static security analysis of Python source code with bandit.",
+          "severity": "high",
+          "command": "uv run bandit -r src/grid src/application src/tools -ll -q",
+          "workdir": ".",
+          "timeout_seconds": 120,
+          "pass_criteria": {
+            "exit_code": 0,
+            "stderr_must_not_contain": [],
+            "stdout_must_contain": []
+          },
+          "fix": {
+            "auto_command": null,
+            "manual_steps": [
+              "Review bandit findings and fix high/medium severity issues",
+              "Add # nosec comments only for justified false positives",
+              "Run 'uv run bandit -r src/ -f json -o bandit-report.json' for machine-readable output"
+            ],
+            "escalation": "High severity bandit findings block production deployment"
+          },
+          "depends_on": ["bi-001"],
+          "tags": ["python", "security", "sast"]
+        },
+        {
+          "id": "sd-002",
+          "name": "Pip audit vulnerability scan",
+          "description": "Scan installed Python packages for known vulnerabilities.",
+          "severity": "high",
+          "command": "uv run pip-audit --desc",
+          "workdir": ".",
+          "timeout_seconds": 120,
+          "pass_criteria": {
+            "exit_code": 0,
+            "stderr_must_not_contain": ["found vulnerability"],
+            "stdout_must_contain": []
+          },
+          "fix": {
+            "auto_command": null,
+            "manual_steps": [
+              "Update vulnerable packages: 'uv lock --upgrade-package <pkg>'",
+              "Check if vulnerability is exploitable in our usage context",
+              "Pin to patched version in pyproject.toml if needed"
+            ],
+            "escalation": "Critical CVEs must be patched or mitigated before deployment"
+          },
+          "depends_on": ["bi-001"],
+          "tags": ["python", "security", "vulnerabilities"]
+        },
+        {
+          "id": "sd-003",
+          "name": "Security gate",
+          "description": "Run the security gate script to enforce maximum allowed findings.",
+          "severity": "critical",
+          "command": "uv run python scripts/security_gate.py bandit-report.json --max-high 0 --max-medium 5",
+          "workdir": ".",
+          "timeout_seconds": 30,
+          "pass_criteria": {
+            "exit_code": 0,
+            "stderr_must_not_contain": ["GATE FAILED"],
+            "stdout_must_contain": []
+          },
+          "fix": {
+            "auto_command": null,
+            "manual_steps": [
+              "First generate bandit report: 'uv run bandit -r src/ -f json -o bandit-report.json'",
+              "Fix high-severity findings (0 allowed)",
+              "Fix medium-severity findings down to threshold (5 allowed)"
+            ],
+            "escalation": "Security gate failure blocks deployment — fix all high findings, reduce medium to <= 5"
+          },
+          "depends_on": ["sd-001"],
+          "tags": ["python", "security", "gate", "ci-blocking"]
+        },
+        {
+          "id": "sd-004",
+          "name": "Secrets detection",
+          "description": "Scan codebase for accidentally committed secrets or credentials.",
+          "severity": "critical",
+          "command": "uv run detect-secrets scan --list-all-plugins 2>NUL || echo 'detect-secrets not installed — install with: uv pip install detect-secrets'",
+          "workdir": ".",
+          "timeout_seconds": 60,
+          "pass_criteria": {
+            "exit_code": 0,
+            "stderr_must_not_contain": ["ERROR"],
+            "stdout_must_contain": []
+          },
+          "fix": {
+            "auto_command": null,
+            "manual_steps": [
+              "Install detect-secrets: 'uv pip install detect-secrets'",
+              "Create baseline: 'detect-secrets scan > .secrets.baseline'",
+              "Audit findings: 'detect-secrets audit .secrets.baseline'",
+              "Remove any actual secrets from codebase and rotate them"
+            ],
+            "escalation": "Any confirmed secret in source MUST be rotated immediately regardless of deployment status"
+          },
+          "depends_on": [],
+          "tags": ["security", "secrets", "ci-blocking"]
+        }
+      ]
+    }
+  },
+  "execution": {
+    "phases": [
+      {
+        "phase": 1,
+        "name": "prerequisites",
+        "checks": ["bi-001", "bi-002"],
+        "parallel": true,
+        "depends_on_phase": null,
+        "description": "Install all dependencies first — Python (uv sync) and Node (npm ci)."
+      },
+      {
+        "phase": 2,
+        "name": "static_analysis",
+        "checks": ["ts-001", "ts-002", "ts-003", "ts-004", "lc-001", "lc-002", "lc-003", "lc-004", "bi-006"],
+        "parallel": true,
+        "depends_on_phase": 1,
+        "description": "Type checking + linting — no runtime needed, fast feedback."
+      },
+      {
+        "phase": 3,
+        "name": "build_verification",
+        "checks": ["bi-003", "bi-004", "bi-005"],
+        "parallel": true,
+        "depends_on_phase": 1,
+        "description": "Full build pipeline — Python wheel + frontend production build."
+      },
+      {
+        "phase": 4,
+        "name": "test_execution",
+        "checks": ["tc-001", "tc-002", "tc-004", "tc-006", "tc-007"],
+        "parallel": true,
+        "depends_on_phase": 2,
+        "description": "Run all test suites — unit, integration, frontend, safety, async."
+      },
+      {
+        "phase": 5,
+        "name": "coverage_and_runtime",
+        "checks": ["tc-003", "tc-005", "rc-001", "rc-002", "rc-003", "rc-004", "rc-005"],
+        "parallel": true,
+        "depends_on_phase": 4,
+        "description": "Coverage thresholds + runtime correctness validation."
+      },
+      {
+        "phase": 6,
+        "name": "security_audit",
+        "checks": ["sd-001", "sd-002", "sd-003", "sd-004"],
+        "parallel": true,
+        "depends_on_phase": 1,
+        "description": "Security scanning — can run early, only needs dependencies installed."
+      }
+    ]
+  },
+  "aggregate_policy": {
+    "pass_requires": "all_dimensions_pass",
+    "dimension_pass_requires": "all_checks_of_severity_critical_and_high_pass",
+    "medium_severity_allowed_failures": 2,
+    "fail_fast_on_critical": true,
+    "max_parallel_checks": 4,
+    "global_timeout_minutes": 30,
+    "retry_on_transient": true,
+    "retry_count": 1,
+    "report_format": "json",
+    "report_path": ".grid/debug-report.json"
+  },
+  "meta_prompt": "You are a codebase health agent. Your single source of truth is this debug contract. Execute as follows:\n\n1. PHASE ORDER: Run checks in phase order (1→6). Within each phase, run checks in parallel up to max_parallel_checks (4).\n\n2. PREREQUISITE VALIDATION: Before any check, verify its depends_on checks have passed. Skip a check if its dependencies failed.\n\n3. PASS/FAIL EVALUATION: For each check:\n   a. Run the command from the specified workdir.\n   b. Compare exit_code against pass_criteria.exit_code.\n   c. Verify stderr does NOT contain any string in stderr_must_not_contain.\n   d. Verify stdout DOES contain all strings in stdout_must_contain (if non-empty).\n   e. If ALL criteria pass → PASS. Otherwise → FAIL.\n\n4. AUTO-FIX ON FAILURE: If a check fails and fix.auto_command is non-null:\n   a. Run the auto_command.\n   b. Re-run the original check command.\n   c. If it passes now → PASS (auto-fixed). If still fails → proceed to step 5.\n\n5. MANUAL ESCALATION: If auto-fix fails or is unavailable:\n   a. Report the check ID, name, severity, command output, and fix.manual_steps.\n   b. If fix.escalation is provided, include it in the report.\n   c. Continue to next check (unless fail_fast_on_critical=true and severity=critical).\n\n6. FAIL-FAST: If fail_fast_on_critical is true and a critical check fails after retry, STOP execution and report immediately.\n\n7. RETRY: If retry_on_transient is true and a check fails, retry once (retry_count=1) before declaring failure.\n\n8. DIMENSION SCORING: A dimension passes if all critical and high severity checks within it pass. Up to medium_severity_allowed_failures (2) medium checks may fail globally.\n\n9. OVERALL VERDICT: The codebase passes if all dimensions pass (pass_requires=all_dimensions_pass).\n\n10. REPORT: Produce a JSON report at report_path (.grid/debug-report.json) with:\n    - contract_id, version, timestamp\n    - overall_result: pass/fail\n    - per-dimension results with check-level detail\n    - for each check: id, name, severity, result (pass/fail/skip/auto-fixed), duration_ms, output_summary\n    - failures array with fix instructions\n\n11. NEVER skip critical checks. NEVER modify the contract. Treat it as immutable specification."
+}

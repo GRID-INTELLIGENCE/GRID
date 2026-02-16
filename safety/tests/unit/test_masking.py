@@ -29,6 +29,7 @@ from safety.privacy.core.masking import (
 # Helper
 # ---------------------------------------------------------------------------
 
+
 def _expected_hash(value: str) -> str:
     return hashlib.sha256(value.encode()).hexdigest()[:16]
 
@@ -36,6 +37,7 @@ def _expected_hash(value: str) -> str:
 # ---------------------------------------------------------------------------
 # _hash_value
 # ---------------------------------------------------------------------------
+
 
 class TestHashValue:
     def test_deterministic(self):
@@ -51,6 +53,7 @@ class TestHashValue:
 # ---------------------------------------------------------------------------
 # RedactStrategy
 # ---------------------------------------------------------------------------
+
 
 class TestRedactStrategy:
     def test_redacts_to_type_label(self):
@@ -73,6 +76,7 @@ class TestRedactStrategy:
 # ---------------------------------------------------------------------------
 # PartialMaskStrategy
 # ---------------------------------------------------------------------------
+
 
 class TestPartialMaskStrategy:
     def test_email_partial_mask(self):
@@ -106,6 +110,7 @@ class TestPartialMaskStrategy:
 # HashStrategy
 # ---------------------------------------------------------------------------
 
+
 class TestHashStrategy:
     def test_hash_format(self):
         result = HashStrategy().mask("secret", "PASSWORD")
@@ -125,6 +130,7 @@ class TestHashStrategy:
 # ---------------------------------------------------------------------------
 # TokenizeStrategy
 # ---------------------------------------------------------------------------
+
 
 class TestTokenizeStrategy:
     def test_token_format(self):
@@ -155,6 +161,7 @@ class TestTokenizeStrategy:
 # AuditStrategy
 # ---------------------------------------------------------------------------
 
+
 class TestAuditStrategy:
     def test_audit_ref_format(self):
         strategy = AuditStrategy()
@@ -179,6 +186,7 @@ class TestAuditStrategy:
 # NoopStrategy
 # ---------------------------------------------------------------------------
 
+
 class TestNoopStrategy:
     def test_value_unchanged(self):
         result = NoopStrategy().mask("visible", "TEST")
@@ -190,6 +198,7 @@ class TestNoopStrategy:
 # ---------------------------------------------------------------------------
 # MaskingEngine
 # ---------------------------------------------------------------------------
+
 
 class TestMaskingEngine:
     def test_mask_text_no_detections(self):
@@ -246,6 +255,7 @@ class TestMaskingEngine:
 # Compliance presets
 # ---------------------------------------------------------------------------
 
+
 class TestCompliancePresets:
     def test_gdpr_engine_uses_partial_for_email(self):
         engine = create_compliance_engine(CompliancePreset.GDPR)
@@ -277,16 +287,20 @@ class TestCompliancePresets:
 # Verify original_hash contains hash, not plaintext
 # ---------------------------------------------------------------------------
 
+
 class TestOriginalHashIntegrity:
     """Ensure no MaskResult stores plaintext PII in original_hash."""
 
-    @pytest.mark.parametrize("strategy_cls", [
-        RedactStrategy,
-        HashStrategy,
-        TokenizeStrategy,
-        AuditStrategy,
-        NoopStrategy,
-    ])
+    @pytest.mark.parametrize(
+        "strategy_cls",
+        [
+            RedactStrategy,
+            HashStrategy,
+            TokenizeStrategy,
+            AuditStrategy,
+            NoopStrategy,
+        ],
+    )
     def test_no_plaintext_in_original_hash(self, strategy_cls):
         value = "sensitive_pii_value"
         result = strategy_cls().mask(value, "TEST")

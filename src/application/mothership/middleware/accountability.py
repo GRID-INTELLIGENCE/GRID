@@ -59,9 +59,7 @@ class AccountabilityMiddleware(BaseHTTPMiddleware):
         self.tracked_prefixes = tracked_prefixes or DEFAULT_TRACKED_PREFIXES
         self.log_degraded = log_degraded
 
-    async def dispatch(
-        self, request: "Request", call_next: RequestResponseEndpoint
-    ) -> "Response":
+    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
         """Process request with accountability tracking.
 
         Args:

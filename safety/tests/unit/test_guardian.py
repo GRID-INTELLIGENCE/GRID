@@ -21,6 +21,7 @@ from safety.guardian.engine import (
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _make_engine(*rules: SafetyRule) -> GuardianEngine:
     """Create a fresh GuardianEngine loaded with the given rules."""
     engine = GuardianEngine(enable_cache=True)
@@ -70,6 +71,7 @@ def _regex_rule(
 # Tests — evaluate()
 # ---------------------------------------------------------------------------
 
+
 class TestEvaluate:
     """Tests for GuardianEngine.evaluate()."""
 
@@ -111,6 +113,7 @@ class TestEvaluate:
 # ---------------------------------------------------------------------------
 # Tests — quick_check()
 # ---------------------------------------------------------------------------
+
 
 class TestQuickCheck:
     """Tests for GuardianEngine.quick_check()."""
@@ -155,6 +158,7 @@ class TestQuickCheck:
 # Tests — cache
 # ---------------------------------------------------------------------------
 
+
 class TestCache:
     """Tests for evaluation caching."""
 
@@ -182,6 +186,7 @@ class TestCache:
 # Tests — singleton
 # ---------------------------------------------------------------------------
 
+
 class TestSingleton:
     """Tests for get_guardian_engine() singleton."""
 
@@ -194,6 +199,7 @@ class TestSingleton:
 # ---------------------------------------------------------------------------
 # Tests — thread safety
 # ---------------------------------------------------------------------------
+
 
 class TestThreadSafety:
     """Test concurrent evaluate() calls don't crash."""

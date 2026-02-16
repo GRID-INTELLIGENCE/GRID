@@ -1,14 +1,14 @@
 import logging
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Tuple, Any
-import yaml
 import os
+from datetime import datetime, timedelta
+from typing import Any
+
+import yaml
 
 from .contracts import (
     AccountabilityContract,
     ContractSeverity,
     EndpointContract,
-    ServiceLevelObjective,
 )
 
 logger = logging.getLogger(__name__)
@@ -18,8 +18,8 @@ class ContractEnforcementResult:
     """Result of enforcing a contract on a request/response."""
 
     def __init__(self):
-        self.violations: List[Dict[str, Any]] = []
-        self.metrics: Dict[str, Any] = {}
+        self.violations: list[dict[str, Any]] = []
+        self.metrics: dict[str, Any] = {}
         self.penalty_points: int = 0
         self.is_compliant: bool = True
 
@@ -45,7 +45,7 @@ class ContractEnforcementResult:
         self.penalty_points += penalty_points
         self.is_compliant = False
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert result to dictionary."""
         return {
             "is_compliant": self.is_compliant,
@@ -60,12 +60,12 @@ class AccountabilityEnforcer:
     """Enforces accountability contracts on API requests and responses."""
 
     def __init__(self, contract_path: str = None):
-        self.contracts: Dict[str, AccountabilityContract] = {}
+        self.contracts: dict[str, AccountabilityContract] = {}
         self.contract_path = contract_path or "config/accountability/contracts.yaml"
         self.load_contracts()
 
         # Track metrics for SLO evaluation
-        self.metrics_store: Dict[str, List[Tuple[datetime, float]]] = {}
+        self.metrics_store: dict[str, list[tuple[datetime, float]]] = {}
 
     def load_contracts(self) -> None:
         """Load contracts from YAML configuration."""
@@ -79,7 +79,7 @@ class AccountabilityEnforcer:
                     logger.warning(f"Contract file not found: {self.contract_path}")
                     return
 
-            with open(self.contract_path, "r") as f:
+            with open(self.contract_path) as f:
                 contract_data = yaml.safe_load(f)
 
             # Convert YAML to Pydantic models
@@ -91,7 +91,7 @@ class AccountabilityEnforcer:
             logger.error(f"Failed to load accountability contracts: {e}")
             # Don't raise, just log error to allow app to start
 
-    def get_contract_for_endpoint(self, path: str, method: str) -> Optional[EndpointContract]:
+    def get_contract_for_endpoint(self, path: str, method: str) -> EndpointContract | None:
         """Get the contract for a specific endpoint."""
         for contract in self.contracts.values():
             endpoint_contract = contract.get_endpoint_contract(path, method)
@@ -103,8 +103,8 @@ class AccountabilityEnforcer:
         self,
         path: str,
         method: str,
-        headers: Dict[str, str],
-        body: Dict[str, Any],
+        headers: dict[str, str],
+        body: dict[str, Any],
         client_ip: str = None,
     ) -> ContractEnforcementResult:
         """Enforce contract on an incoming request."""
@@ -207,8 +207,8 @@ class AccountabilityEnforcer:
         path: str,
         method: str,
         status_code: int,
-        headers: Dict[str, str],
-        body: Dict[str, Any],
+        headers: dict[str, str],
+        body: dict[str, Any],
     ) -> ContractEnforcementResult:
         """Enforce contract on an outgoing response."""
         result = ContractEnforcementResult()

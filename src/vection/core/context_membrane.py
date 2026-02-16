@@ -644,7 +644,7 @@ class ContextMembrane:
         self.add_retention_rule(
             RetentionRule(
                 name="retain_deviations",
-                condition=lambda s: (s.signal_type == SignalType.DEVIATION and s.confidence > 0.7),
+                condition=lambda s: s.signal_type == SignalType.DEVIATION and s.confidence > 0.7,
                 decision=RetentionDecision.RETAIN,
                 priority=100,
             )

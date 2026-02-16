@@ -14,10 +14,9 @@ from grid.legal import (
     LegalAgent,
     PolicyDomain,
     PolicySeverity,
-    UserRightType,
     UserRightsManager,
+    UserRightType,
 )
-
 
 # ---------------------------------------------------------------------------
 # Governance Engine

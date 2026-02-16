@@ -39,7 +39,7 @@ class LoggingAlertChannel:
         """Log the alert."""
         logger.log(
             self._level,
-            f"[PARASITE ALERT] [{alert.severity.value.upper()}] " f"{alert.component}: {alert.message}",
+            f"[PARASITE ALERT] [{alert.severity.value.upper()}] {alert.component}: {alert.message}",
             extra={
                 "alert_id": alert.id,
                 "component": alert.component,
@@ -388,7 +388,7 @@ class ParasiteAlerter:
         # Create escalation alert
         escalation_alert = self._create_alert(context, Severity.CRITICAL, is_escalation=True)
         escalation_alert.message = (
-            f"[ESCALATION] Critical parasite requires manual intervention: " f"{context.pattern} in {context.component}"
+            f"[ESCALATION] Critical parasite requires manual intervention: {context.pattern} in {context.component}"
         )
 
         # Send escalation to all channels

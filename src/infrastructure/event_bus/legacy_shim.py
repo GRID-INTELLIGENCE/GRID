@@ -24,9 +24,7 @@ async def subscribe_legacy(event: str, handler: Callable[[Any], None]) -> Subscr
     Warning:
         This is a legacy API. Use subscribe() instead.
     """
-    logger.warning(
-        "subscribe_legacy is deprecated; use subscribe() instead. " "This will be removed in a future version."
-    )
+    logger.warning("subscribe_legacy is deprecated; use subscribe() instead. This will be removed in a future version.")
 
     # Get EventBus instance and subscribe
     from . import get_eventbus

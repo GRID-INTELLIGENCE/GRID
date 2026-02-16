@@ -1,9 +1,11 @@
+from typing import Any
+
 from zxcvbn import zxcvbn
-from typing import List, Dict, Any
 
 from .config import settings
 
-def validate_password_strength(password: str, user_inputs: List[str] = None) -> Dict[str, Any]:
+
+def validate_password_strength(password: str, user_inputs: list[str] = None) -> dict[str, Any]:
     """
     Validate password strength using zxcvbn.
 
@@ -18,17 +20,17 @@ def validate_password_strength(password: str, user_inputs: List[str] = None) -> 
         user_inputs = []
 
     result = zxcvbn(password, user_inputs=user_inputs)
-    score = result['score']
-    feedback = result['feedback']
+    score = result["score"]
+    feedback = result["feedback"]
 
     is_strong = score >= settings.PASSWORD_COMPLEXITY_SCORE
     if len(password) < settings.PASSWORD_MIN_LENGTH:
         is_strong = False
-        feedback['warning'] = f"Password must be at least {settings.PASSWORD_MIN_LENGTH} characters long."
+        feedback["warning"] = f"Password must be at least {settings.PASSWORD_MIN_LENGTH} characters long."
 
     return {
         "score": score,
         "is_strong": is_strong,
-        "warning": feedback['warning'],
-        "suggestions": feedback['suggestions']
+        "warning": feedback["warning"],
+        "suggestions": feedback["suggestions"],
     }

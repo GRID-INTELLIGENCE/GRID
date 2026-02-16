@@ -30,30 +30,26 @@ import gc
 import os
 import random
 import sys
-import uuid
-import threading
 import time
+import uuid
 from collections import defaultdict
-from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from typing import Any, Callable
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
 # Add src to path for imports
 sys.path.insert(0, str(os.path.join(os.path.dirname(__file__), "..", "..", "src")))
 
-from infrastructure.parasite_guard.config import GuardMode, ParasiteGuardConfig
-from infrastructure.parasite_guard.models import DetectionResult, ParasiteContext, ParasiteSeverity
-from infrastructure.parasite_guard.state_machine import GuardState, ParasiteGuardStateMachine
 from infrastructure.parasite_guard.anomaly_detector import (
     AdaptiveAnomalyDetector,
     MultiWindowAnomalyDetector,
     RateLimitAnomalyDetector,
 )
-
+from infrastructure.parasite_guard.config import ParasiteGuardConfig
+from infrastructure.parasite_guard.models import DetectionResult, ParasiteContext, ParasiteSeverity
+from infrastructure.parasite_guard.state_machine import GuardState, ParasiteGuardStateMachine
 
 # =============================================================================
 # CHAOS EXPERIMENT FRAMEWORK
@@ -476,7 +472,7 @@ class TestDetectionPipelineChaos:
                         timeout=parasite_config.detection_timeout_ms / 1000,
                     )
                     success_count += 1
-                except asyncio.TimeoutError:
+                except TimeoutError:
                     timeout_count += 1
 
         await slow_detection()
@@ -701,7 +697,7 @@ class TestIntegrationChaos:
                         state_machine.transition(GuardState.MONITORING, confidence=0.90)
                     metrics["transitions"] += 1
 
-                except Exception as e:
+                except Exception:
                     metrics["errors"] += 1
 
                 await asyncio.sleep(0.01)

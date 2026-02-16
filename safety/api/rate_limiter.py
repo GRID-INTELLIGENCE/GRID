@@ -340,18 +340,28 @@ async def allow_request(
     # Security: Validate inputs
     if ip_address and not _request_validator.validate_ip_format(ip_address):
         logger.warning(f"Invalid IP format: {ip_address}")
-        return RateLimitResult(allowed=False, remaining=0, reset_seconds=60.0, risk_score=100.0, blocked_reason="invalid_ip")
+        return RateLimitResult(
+            allowed=False, remaining=0, reset_seconds=60.0, risk_score=100.0, blocked_reason="invalid_ip"
+        )
 
     # Security: Check if IP is blocked
     if ip_address and _ip_limiter.is_ip_blocked(ip_address):
         logger.warning(f"Blocked IP attempt: {ip_address}")
-        return RateLimitResult(allowed=False, remaining=0, reset_seconds=3600.0, risk_score=100.0, blocked_reason="ip_blocked")
+        return RateLimitResult(
+            allowed=False, remaining=0, reset_seconds=3600.0, risk_score=100.0, blocked_reason="ip_blocked"
+        )
 
     # Security: Check exponential backoff
     backoff_key = f"{user_id}:{ip_address or 'unknown'}"
     in_backoff, backoff_remaining = _backoff_manager.is_in_backoff(backoff_key)
     if in_backoff:
-        return RateLimitResult(allowed=False, remaining=0, reset_seconds=backoff_remaining, risk_score=75.0, blocked_reason="exponential_backoff")
+        return RateLimitResult(
+            allowed=False,
+            remaining=0,
+            reset_seconds=backoff_remaining,
+            risk_score=75.0,
+            blocked_reason="exponential_backoff",
+        )
 
     # Security: Validate request signature if provided
     if request_signature and request_data and client_id is not None:
@@ -361,7 +371,9 @@ async def allow_request(
             # Record violation for potential backoff
             _backoff_manager.record_violation(backoff_key)
             _ip_limiter.add_suspicious_activity(ip_address or "unknown", 20.0)
-            return RateLimitResult(allowed=False, remaining=0, reset_seconds=300.0, risk_score=90.0, blocked_reason="invalid_signature")
+            return RateLimitResult(
+                allowed=False, remaining=0, reset_seconds=300.0, risk_score=90.0, blocked_reason="invalid_signature"
+            )
 
     # Calculate immediate request risk score
     immediate_risk = 0.0
@@ -463,7 +475,9 @@ async def allow_request(
                 backoff_duration=backoff_duration,
             )
 
-        return RateLimitResult(allowed=final_allowed, remaining=final_remaining, reset_seconds=final_reset, risk_score=risk_score)
+        return RateLimitResult(
+            allowed=final_allowed, remaining=final_remaining, reset_seconds=final_reset, risk_score=risk_score
+        )
 
     except Exception as exc:
         # Fail closed: Redis unavailable means deny
@@ -473,7 +487,13 @@ async def allow_request(
         # Record violation even on Redis failure
         _backoff_manager.record_violation(backoff_key)
 
-        return RateLimitResult(allowed=False, remaining=0, reset_seconds=60.0, risk_score=risk_score + 20.0, blocked_reason="redis_unavailable")
+        return RateLimitResult(
+            allowed=False,
+            remaining=0,
+            reset_seconds=60.0,
+            risk_score=risk_score + 20.0,
+            blocked_reason="redis_unavailable",
+        )
 
 
 async def tighten_limits(user_id: str, factor: float = 0.5) -> None:

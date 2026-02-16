@@ -210,9 +210,7 @@ class TestEnhancedRAGMCPServerWithDeps:
         session_id = "test-session-pytest"
 
         # Create session
-        create_result = await server.server._call_tool_handler(
-            "create_session", {"session_id": session_id}
-        )
+        create_result = await server.server._call_tool_handler("create_session", {"session_id": session_id})
         assert not create_result.isError
 
         # Query with session
@@ -222,15 +220,11 @@ class TestEnhancedRAGMCPServerWithDeps:
         assert not query_result.isError
 
         # Get session
-        get_result = await server.server._call_tool_handler(
-            "get_session", {"session_id": session_id}
-        )
+        get_result = await server.server._call_tool_handler("get_session", {"session_id": session_id})
         assert not get_result.isError
 
         # Delete session
-        delete_result = await server.server._call_tool_handler(
-            "delete_session", {"session_id": session_id}
-        )
+        delete_result = await server.server._call_tool_handler("delete_session", {"session_id": session_id})
         assert not delete_result.isError
 
     @requires_mcp_server
@@ -241,9 +235,7 @@ class TestEnhancedRAGMCPServerWithDeps:
 
         await server.server._call_tool_handler("create_session", {"session_id": session_id})
 
-        result1 = await server.server._call_tool_handler(
-            "query", {"query": "First question", "session_id": session_id}
-        )
+        result1 = await server.server._call_tool_handler("query", {"query": "First question", "session_id": session_id})
         response1 = json.loads(result1.content[0].text)
 
         result2 = await server.server._call_tool_handler(
@@ -293,9 +285,7 @@ class TestEnhancedRAGMCPServerMocked:
     @pytest.mark.asyncio
     async def test_mock_create_session(self, mock_server):
         """Test mock session creation."""
-        result = await mock_server.server._call_tool_handler(
-            "create_session", {"session_id": "mock-session-1"}
-        )
+        result = await mock_server.server._call_tool_handler("create_session", {"session_id": "mock-session-1"})
 
         assert not result.isError
         data = json.loads(result.content[0].text)
@@ -305,9 +295,7 @@ class TestEnhancedRAGMCPServerMocked:
     @pytest.mark.asyncio
     async def test_mock_query(self, mock_server):
         """Test mock query functionality."""
-        await mock_server.server._call_tool_handler(
-            "create_session", {"session_id": "query-session"}
-        )
+        await mock_server.server._call_tool_handler("create_session", {"session_id": "query-session"})
 
         result = await mock_server.server._call_tool_handler(
             "query", {"query": "What is GRID?", "session_id": "query-session"}
@@ -324,19 +312,13 @@ class TestEnhancedRAGMCPServerMocked:
         """Test turn count increases in conversation."""
         session_id = "conv-progress-session"
 
-        await mock_server.server._call_tool_handler(
-            "create_session", {"session_id": session_id}
-        )
+        await mock_server.server._call_tool_handler("create_session", {"session_id": session_id})
 
-        result1 = await mock_server.server._call_tool_handler(
-            "query", {"query": "First", "session_id": session_id}
-        )
+        result1 = await mock_server.server._call_tool_handler("query", {"query": "First", "session_id": session_id})
         data1 = json.loads(result1.content[0].text)
         turn1 = data1["conversation_metadata"]["turn_count"]
 
-        result2 = await mock_server.server._call_tool_handler(
-            "query", {"query": "Second", "session_id": session_id}
-        )
+        result2 = await mock_server.server._call_tool_handler("query", {"query": "Second", "session_id": session_id})
         data2 = json.loads(result2.content[0].text)
         turn2 = data2["conversation_metadata"]["turn_count"]
 
@@ -346,12 +328,8 @@ class TestEnhancedRAGMCPServerMocked:
     @pytest.mark.asyncio
     async def test_mock_get_stats(self, mock_server):
         """Test get_stats returns session statistics."""
-        await mock_server.server._call_tool_handler(
-            "create_session", {"session_id": "stats-session-1"}
-        )
-        await mock_server.server._call_tool_handler(
-            "create_session", {"session_id": "stats-session-2"}
-        )
+        await mock_server.server._call_tool_handler("create_session", {"session_id": "stats-session-1"})
+        await mock_server.server._call_tool_handler("create_session", {"session_id": "stats-session-2"})
 
         result = await mock_server.server._call_tool_handler("get_stats", {})
 
@@ -365,30 +343,22 @@ class TestEnhancedRAGMCPServerMocked:
         """Test session deletion."""
         session_id = "delete-test-session"
 
-        await mock_server.server._call_tool_handler(
-            "create_session", {"session_id": session_id}
-        )
+        await mock_server.server._call_tool_handler("create_session", {"session_id": session_id})
 
-        result = await mock_server.server._call_tool_handler(
-            "delete_session", {"session_id": session_id}
-        )
+        result = await mock_server.server._call_tool_handler("delete_session", {"session_id": session_id})
 
         assert not result.isError
         data = json.loads(result.content[0].text)
         assert data["status"] == "deleted"
 
         # Verify session is deleted
-        get_result = await mock_server.server._call_tool_handler(
-            "get_session", {"session_id": session_id}
-        )
+        get_result = await mock_server.server._call_tool_handler("get_session", {"session_id": session_id})
         assert get_result.isError
 
     @pytest.mark.asyncio
     async def test_mock_unknown_tool(self, mock_server):
         """Test unknown tool returns error."""
-        result = await mock_server.server._call_tool_handler(
-            "unknown_tool", {"arg": "value"}
-        )
+        result = await mock_server.server._call_tool_handler("unknown_tool", {"arg": "value"})
 
         assert result.isError
         data = json.loads(result.content[0].text)
@@ -411,9 +381,7 @@ class TestSessionEdgeCases:
     @pytest.mark.asyncio
     async def test_query_without_session(self, mock_server):
         """Test query without session still works."""
-        result = await mock_server.server._call_tool_handler(
-            "query", {"query": "Test without session"}
-        )
+        result = await mock_server.server._call_tool_handler("query", {"query": "Test without session"})
 
         # Should work, just no session tracking
         assert not result.isError
@@ -423,18 +391,14 @@ class TestSessionEdgeCases:
     @pytest.mark.asyncio
     async def test_delete_nonexistent_session(self, mock_server):
         """Test deleting session that doesn't exist."""
-        result = await mock_server.server._call_tool_handler(
-            "delete_session", {"session_id": "nonexistent"}
-        )
+        result = await mock_server.server._call_tool_handler("delete_session", {"session_id": "nonexistent"})
 
         assert result.isError
 
     @pytest.mark.asyncio
     async def test_get_nonexistent_session(self, mock_server):
         """Test getting session that doesn't exist."""
-        result = await mock_server.server._call_tool_handler(
-            "get_session", {"session_id": "nonexistent"}
-        )
+        result = await mock_server.server._call_tool_handler("get_session", {"session_id": "nonexistent"})
 
         assert result.isError
 
@@ -443,15 +407,11 @@ class TestSessionEdgeCases:
         """Test creating session with same ID twice."""
         session_id = "duplicate-test"
 
-        result1 = await mock_server.server._call_tool_handler(
-            "create_session", {"session_id": session_id}
-        )
+        result1 = await mock_server.server._call_tool_handler("create_session", {"session_id": session_id})
         assert not result1.isError
 
         # Second create should either overwrite or error
-        result2 = await mock_server.server._call_tool_handler(
-            "create_session", {"session_id": session_id}
-        )
+        result2 = await mock_server.server._call_tool_handler("create_session", {"session_id": session_id})
         # Either behavior is acceptable
         assert result2 is not None
 
@@ -482,43 +442,32 @@ async def main():
             print(f"✅ Tools available: {len(result.tools)}")
 
             # Test session lifecycle
-            result = await server.server._call_tool_handler(
-                "create_session", {"session_id": "main-test"}
-            )
+            result = await server.server._call_tool_handler("create_session", {"session_id": "main-test"})
             print("✅ Session created")
 
-            result = await server.server._call_tool_handler(
-                "query", {"query": "Test query", "session_id": "main-test"}
-            )
+            result = await server.server._call_tool_handler("query", {"query": "Test query", "session_id": "main-test"})
             print("✅ Query executed")
 
-            result = await server.server._call_tool_handler(
-                "delete_session", {"session_id": "main-test"}
-            )
+            result = await server.server._call_tool_handler("delete_session", {"session_id": "main-test"})
             print("✅ Session deleted")
 
         except Exception as e:
             print(f"❌ Test failed: {e}")
             import traceback
+
             traceback.print_exc()
     else:
         print("Running mock-based tests...")
         server = MockEnhancedRAGMCPServer()
         print("✅ Mock server created")
 
-        result = await server.server._call_tool_handler(
-            "create_session", {"session_id": "mock-main"}
-        )
+        result = await server.server._call_tool_handler("create_session", {"session_id": "mock-main"})
         print("✅ Mock session created")
 
-        result = await server.server._call_tool_handler(
-            "query", {"query": "Test query", "session_id": "mock-main"}
-        )
+        result = await server.server._call_tool_handler("query", {"query": "Test query", "session_id": "mock-main"})
         print("✅ Mock query executed")
 
-        result = await server.server._call_tool_handler(
-            "delete_session", {"session_id": "mock-main"}
-        )
+        result = await server.server._call_tool_handler("delete_session", {"session_id": "mock-main"})
         print("✅ Mock session deleted")
 
     print("\n" + "=" * 60)

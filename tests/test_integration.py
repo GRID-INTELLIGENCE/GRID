@@ -46,6 +46,7 @@ class GridIntegrationTests:
             # Convert string commands to list for shell=False safety
             if isinstance(cmd, str):
                 import shlex
+
                 cmd = shlex.split(cmd)
 
             result = subprocess.run(cmd, capture_output=True, text=True, shell=False, timeout=timeout)

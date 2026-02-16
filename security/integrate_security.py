@@ -17,11 +17,9 @@ import argparse
 import ast
 import json
 import os
-import re
 from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Set, Tuple
 
 
 class NetworkUsageScanner(ast.NodeVisitor):

@@ -47,11 +47,10 @@ class ResourcePool:
             self._active_count += 1
             self._total_requests += 1
             return ResourceGuard(self)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             self._rejected_requests += 1
             logger.warning(
-                f"Resource pool {self.name} timeout: active={self._active_count}, "
-                f"rejected={self._rejected_requests}"
+                f"Resource pool {self.name} timeout: active={self._active_count}, rejected={self._rejected_requests}"
             )
             raise
 
@@ -171,10 +170,7 @@ class CircuitBreaker:
 
     def _should_attempt_reset(self) -> bool:
         """Check if enough time has passed to attempt recovery."""
-        return (
-            self._state == "open"
-            and time.time() - self._last_failure_time >= self.recovery_timeout_seconds
-        )
+        return self._state == "open" and time.time() - self._last_failure_time >= self.recovery_timeout_seconds
 
     def _record_success(self) -> None:
         """Record a successful operation."""
@@ -225,13 +221,14 @@ class CircuitBreaker:
             result = await func(*args, **kwargs)
             self._record_success()
             return result
-        except Exception as e:
+        except Exception:
             self._record_failure()
             raise
 
 
 class CircuitBreakerOpenError(Exception):
     """Raised when circuit breaker is open."""
+
     pass
 
 

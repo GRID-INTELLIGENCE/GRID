@@ -8,9 +8,7 @@ cognitive imbalances or behavioral conditioning.
 
 from __future__ import annotations
 
-import asyncio
 import time
-from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -51,11 +49,7 @@ class TestTemporalSynchronizationEngine:
 
     def test_burst_limit_enforcement(self):
         """Test burst response limits prevent overwhelming interactions"""
-        config = TemporalSafetyConfig(
-            max_burst_responses=2,
-            burst_window=5.0,
-            min_response_interval=0.1
-        )
+        config = TemporalSafetyConfig(max_burst_responses=2, burst_window=5.0, min_response_interval=0.1)
         engine = AIWorkflowSafetyEngine("test_user", config).temporal_engine
 
         base_time = 1000.0
@@ -133,7 +127,7 @@ class TestHookDetectionEngine:
                 timestamp=1000.0 + i,
                 user_input_length=10,
                 ai_response_length=20,  # Very short responses
-                response_time=0.5
+                response_time=0.5,
             )
             analysis = engine.analyze_interaction(interaction)
 
@@ -151,10 +145,7 @@ class TestHookDetectionEngine:
 
         for i, ts in enumerate(timestamps):
             interaction = InteractionRecord(
-                timestamp=ts,
-                user_input_length=15,
-                ai_response_length=50,
-                response_time=1.0
+                timestamp=ts, user_input_length=15, ai_response_length=50, response_time=1.0
             )
             analysis = engine.analyze_interaction(interaction)
 
@@ -175,7 +166,7 @@ class TestHookDetectionEngine:
                 timestamp=1000.0 + i,
                 user_input_length=20,
                 ai_response_length=length,
-                response_time=1.0  # Constant response time = increasing complexity
+                response_time=1.0,  # Constant response time = increasing complexity
             )
             analysis = engine.analyze_interaction(interaction)
 
@@ -189,10 +180,7 @@ class TestHookDetectionEngine:
 
         # Low risk interaction
         interaction = InteractionRecord(
-            timestamp=1000.0,
-            user_input_length=20,
-            ai_response_length=100,
-            response_time=1.0
+            timestamp=1000.0, user_input_length=20, ai_response_length=100, response_time=1.0
         )
         analysis = engine.analyze_interaction(interaction)
 
@@ -210,17 +198,19 @@ class TestHookDetectionEngine:
                 timestamp=1000.0 + i * 0.1,  # Bursty
                 user_input_length=5,
                 ai_response_length=15,  # Short responses
-                response_time=0.3  # Fast responses
+                response_time=0.3,  # Fast responses
             )
             analysis = engine.analyze_interaction(interaction)
 
         # Should recommend actions and/or show elevated risk
         actions = analysis.recommended_actions
-        assert (analysis.risk_level != HookRisk.NONE or
-                any("delay" in action.lower() for action in actions) or
-                any("review" in action.lower() for action in actions) or
-                any("protocol" in action.lower() for action in actions) or
-                len(actions) > 0)
+        assert (
+            analysis.risk_level != HookRisk.NONE
+            or any("delay" in action.lower() for action in actions)
+            or any("review" in action.lower() for action in actions)
+            or any("protocol" in action.lower() for action in actions)
+            or len(actions) > 0
+        )
 
 
 class TestUserWellbeingTracker:
@@ -238,7 +228,7 @@ class TestUserWellbeingTracker:
                 timestamp=base_time + i * 2,  # Every 2 seconds = 30 per minute
                 user_input_length=20,
                 ai_response_length=100,
-                response_time=1.0
+                response_time=1.0,
             )
             tracker.update_metrics(interaction)
 
@@ -260,7 +250,7 @@ class TestUserWellbeingTracker:
                 timestamp=base_time + i * 2.0,  # Perfectly consistent 2-second intervals
                 user_input_length=20,
                 ai_response_length=100,
-                response_time=1.0  # Very consistent response times
+                response_time=1.0,  # Very consistent response times
             )
             tracker.update_metrics(interaction)
 
@@ -281,7 +271,7 @@ class TestUserWellbeingTracker:
                 timestamp=1000.0 + i * 10,  # Spaced out
                 user_input_length=20,
                 ai_response_length=100,
-                response_time=1.0
+                response_time=1.0,
             )
             tracker.update_metrics(interaction)
 
@@ -295,13 +285,18 @@ class TestUserWellbeingTracker:
                 timestamp=1000.0 + i * 1,  # Dense
                 user_input_length=50,
                 ai_response_length=300,
-                response_time=1.0 + (i % 3) * 0.5  # Variable timing
+                response_time=1.0 + (i % 3) * 0.5,  # Variable timing
             )
             tracker.update_metrics(interaction)
 
         # Dense interactions should update metrics (load level is implementation-dependent)
         assert tracker.current_metrics.total_interactions == 15
-        assert tracker.current_metrics.cognitive_load_level in [CognitiveLoad.LOW, CognitiveLoad.MODERATE, CognitiveLoad.HIGH, CognitiveLoad.CRITICAL]
+        assert tracker.current_metrics.cognitive_load_level in [
+            CognitiveLoad.LOW,
+            CognitiveLoad.MODERATE,
+            CognitiveLoad.HIGH,
+            CognitiveLoad.CRITICAL,
+        ]
 
     def test_behavioral_loop_risk(self):
         """Test detection of behavioral loop patterns"""
@@ -315,7 +310,7 @@ class TestUserWellbeingTracker:
                 user_input_length=15,
                 ai_response_length=30,  # Very similar short responses
                 response_time=0.8,
-                similarity_score=0.9  # High similarity
+                similarity_score=0.9,  # High similarity
             )
             tracker.update_metrics(interaction)
 
@@ -325,11 +320,14 @@ class TestUserWellbeingTracker:
         assert metrics.behavioral_loop_risk > 0.3
         assert metrics.pattern_repetition_score > 0.7
 
-    @pytest.mark.parametrize("user_age,expected_mode", [
-        (16, True),   # Young user - developmental mode on
-        (25, False),  # Adult user - developmental mode off
-        (None, False) # Unknown age - developmental mode off
-    ])
+    @pytest.mark.parametrize(
+        "user_age,expected_mode",
+        [
+            (16, True),  # Young user - developmental mode on
+            (25, False),  # Adult user - developmental mode off
+            (None, False),  # Unknown age - developmental mode off
+        ],
+    )
     def test_developmental_safety_mode(self, user_age, expected_mode):
         """Test developmental safety mode activation for young users"""
         config = TemporalSafetyConfig(developmental_safety_mode=True)
@@ -338,10 +336,7 @@ class TestUserWellbeingTracker:
         # Simulate some interactions
         for i in range(5):
             interaction = InteractionRecord(
-                timestamp=1000.0 + i,
-                user_input_length=20,
-                ai_response_length=100,
-                response_time=1.0
+                timestamp=1000.0 + i, user_input_length=20, ai_response_length=100, response_time=1.0
             )
             tracker.update_metrics(interaction)
 
@@ -350,9 +345,9 @@ class TestUserWellbeingTracker:
 
         if expected_mode:
             # Should have calculated developmental safety score
-            assert hasattr(metrics, 'developmental_safety_score')
-            assert hasattr(metrics, 'attention_span_risk')
-            assert hasattr(metrics, 'influence_vulnerability')
+            assert hasattr(metrics, "developmental_safety_score")
+            assert hasattr(metrics, "attention_span_risk")
+            assert hasattr(metrics, "influence_vulnerability")
         else:
             # Should not have developmental-specific calculations
             assert metrics.developmental_safety_score == 1.0  # Default safe value
@@ -376,15 +371,15 @@ class TestAIWorkflowSafetyEngine:
             user_input="Hello, how are you?",
             ai_response="I'm doing well, thank you for asking!",
             response_time=1.2,
-            current_time=1000.0
+            current_time=1000.0,
         )
 
         # Should pass safety checks
-        assert assessment['safety_allowed'] is True
-        assert assessment['temporal_allowed'] is True
-        assert assessment['hook_risk_level'] == 'none'
-        assert 'wellbeing_metrics' in assessment
-        assert 'interaction_record' in assessment
+        assert assessment["safety_allowed"] is True
+        assert assessment["temporal_allowed"] is True
+        assert assessment["hook_risk_level"] == "none"
+        assert "wellbeing_metrics" in assessment
+        assert "interaction_record" in assessment
 
     @pytest.mark.asyncio
     async def test_safety_violation_detection(self):
@@ -399,24 +394,21 @@ class TestAIWorkflowSafetyEngine:
         # First interaction - should pass
         now = time.time()
         assessment1 = await engine.evaluate_interaction(
-            user_input="Test input",
-            ai_response="Test response",
-            response_time=1.0,
-            current_time=now
+            user_input="Test input", ai_response="Test response", response_time=1.0, current_time=now
         )
-        assert assessment1['safety_allowed'] is True
+        assert assessment1["safety_allowed"] is True
 
         # Immediate second interaction - should be blocked by temporal safety
         assessment2 = await engine.evaluate_interaction(
             user_input="Another test",
             ai_response="Another response",
             response_time=1.0,
-            current_time=now + 0.5  # Too soon
+            current_time=now + 0.5,  # Too soon
         )
 
-        assert assessment2['safety_allowed'] is False
-        assert assessment2['temporal_allowed'] is False
-        assert 'Response too soon' in assessment2['temporal_reason']
+        assert assessment2["safety_allowed"] is False
+        assert assessment2["temporal_allowed"] is False
+        assert "Response too soon" in assessment2["temporal_reason"]
 
     @pytest.mark.asyncio
     async def test_hook_risk_integration(self):
@@ -433,7 +425,7 @@ class TestAIWorkflowSafetyEngine:
                 user_input="Short input",
                 ai_response="Very short response",  # Repetitive short responses
                 response_time=0.5,
-                current_time=1000.0 + i * 0.1  # Bursty timing
+                current_time=1000.0 + i * 0.1,  # Bursty timing
             )
 
         # Check final assessment
@@ -441,15 +433,15 @@ class TestAIWorkflowSafetyEngine:
             user_input="Another short input",
             ai_response="Another short response",
             response_time=0.5,
-            current_time=1010.0
+            current_time=1010.0,
         )
 
         # Should have full assessment shape; hook detection may or may not trigger
-        assert 'hook_risk_level' in assessment
-        assert 'detected_patterns' in assessment
-        assert 'recommended_actions' in assessment
-        assert len(assessment['detected_patterns']) >= 0
-        assert len(assessment['recommended_actions']) >= 0
+        assert "hook_risk_level" in assessment
+        assert "detected_patterns" in assessment
+        assert "recommended_actions" in assessment
+        assert len(assessment["detected_patterns"]) >= 0
+        assert len(assessment["recommended_actions"]) >= 0
 
     def test_safety_status_reporting(self):
         """Test safety status reporting"""
@@ -459,17 +451,19 @@ class TestAIWorkflowSafetyEngine:
         status = engine.get_safety_status()
 
         expected_keys = [
-            'temporal_pattern', 'hook_detection_enabled',
-            'wellbeing_tracking_enabled', 'developmental_mode',
-            'current_wellbeing_metrics'
+            "temporal_pattern",
+            "hook_detection_enabled",
+            "wellbeing_tracking_enabled",
+            "developmental_mode",
+            "current_wellbeing_metrics",
         ]
 
         for key in expected_keys:
             assert key in status
 
-        assert status['temporal_pattern'] == 'consistent'
-        assert status['hook_detection_enabled'] is True
-        assert status['wellbeing_tracking_enabled'] is True
+        assert status["temporal_pattern"] == "consistent"
+        assert status["hook_detection_enabled"] is True
+        assert status["wellbeing_tracking_enabled"] is True
 
 
 class TestDefensiveOffensiveSafetyBalance:
@@ -480,7 +474,7 @@ class TestDefensiveOffensiveSafetyBalance:
         """Test defensive blocking of high-risk patterns"""
         config = TemporalSafetyConfig(
             min_response_interval=0.1,  # Permissive timing
-            max_burst_responses=10,     # Permissive bursting
+            max_burst_responses=10,  # Permissive bursting
             heat_threshold=100.0,
         )
         engine = AIWorkflowSafetyEngine("test_defensive_blocks", config)
@@ -489,21 +483,21 @@ class TestDefensiveOffensiveSafetyBalance:
         for i in range(15):  # Many repetitive interactions
             assessment = await engine.evaluate_interaction(
                 user_input="x" * 5,  # Very short input
-                ai_response="ok",    # Very short response
-                response_time=0.2,   # Fast response
-                current_time=1000.0 + i * 0.05  # Very bursty
+                ai_response="ok",  # Very short response
+                response_time=0.2,  # Fast response
+                current_time=1000.0 + i * 0.05,  # Very bursty
             )
 
             # Should have assessment; may detect risks over time
-            assert 'hook_risk_level' in assessment
-            assert 'safety_allowed' in assessment
+            assert "hook_risk_level" in assessment
+            assert "safety_allowed" in assessment
 
     @pytest.mark.asyncio
     async def test_offensive_monitoring_without_blocking(self):
         """Test offensive monitoring that doesn't block but provides insights"""
         config = TemporalSafetyConfig(
             min_response_interval=0.01,  # Very permissive
-            max_burst_responses=100,      # Very permissive
+            max_burst_responses=100,  # Very permissive
             heat_threshold=100.0,
         )
         engine = AIWorkflowSafetyEngine("test_offensive_monitor", config)
@@ -511,19 +505,16 @@ class TestDefensiveOffensiveSafetyBalance:
         # Monitor many interactions without blocking (tight time range to avoid heat)
         for i in range(20):
             assessment = await engine.evaluate_interaction(
-                user_input=f"Input {i}",
-                ai_response=f"Response {i}",
-                response_time=0.5,
-                current_time=1000.0 + i * 0.1
+                user_input=f"Input {i}", ai_response=f"Response {i}", response_time=0.5, current_time=1000.0 + i * 0.1
             )
 
             # Should allow all but monitor well-being
-            assert assessment['safety_allowed'] is True
-            assert 'wellbeing_metrics' in assessment
+            assert assessment["safety_allowed"] is True
+            assert "wellbeing_metrics" in assessment
 
             # Well-being tracking should accumulate data
-            metrics = assessment['wellbeing_metrics']
-            assert metrics['total_interactions'] == i + 1
+            metrics = assessment["wellbeing_metrics"]
+            assert metrics["total_interactions"] == i + 1
 
     @pytest.mark.asyncio
     async def test_adaptive_safety_response(self):
@@ -536,36 +527,41 @@ class TestDefensiveOffensiveSafetyBalance:
 
         # Start with safe interactions
         assessment = await engine.evaluate_interaction(
-            user_input="Normal question",
-            ai_response="Normal response",
-            response_time=1.0,
-            current_time=1000.0
+            user_input="Normal question", ai_response="Normal response", response_time=1.0, current_time=1000.0
         )
 
-        assert assessment['safety_allowed'] is True
-        assert assessment['hook_risk_level'] == 'none'
+        assert assessment["safety_allowed"] is True
+        assert assessment["hook_risk_level"] == "none"
 
         # Escalate to concerning pattern
         for i in range(12):
             await engine.evaluate_interaction(
                 user_input="!",  # Minimal input
-                ai_response=".", # Minimal response
+                ai_response=".",  # Minimal response
                 response_time=0.3,
-                current_time=1000.0 + i * 0.1
+                current_time=1000.0 + i * 0.1,
             )
 
         # Should now have assessment with recommended actions (may be empty)
         final_assessment = await engine.evaluate_interaction(
-            user_input="?",
-            ai_response="!",
-            response_time=0.3,
-            current_time=1015.0
+            user_input="?", ai_response="!", response_time=0.3, current_time=1015.0
         )
 
-        actions = final_assessment['recommended_actions']
+        actions = final_assessment["recommended_actions"]
         assert isinstance(actions, list)
         # If hook detection triggered, actions should include safety keywords
         if len(actions) > 0:
-            action_text = ' '.join(actions).lower()
-            assert any(keyword in action_text for keyword in
-                      ['delay', 'review', 'protocol', 'pattern', 'cognitive', 'monitor', 'variance', 'frequency'])
+            action_text = " ".join(actions).lower()
+            assert any(
+                keyword in action_text
+                for keyword in [
+                    "delay",
+                    "review",
+                    "protocol",
+                    "pattern",
+                    "cognitive",
+                    "monitor",
+                    "variance",
+                    "frequency",
+                ]
+            )

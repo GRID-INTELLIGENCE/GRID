@@ -1,14 +1,15 @@
 from datetime import datetime, timedelta
-from typing import Optional, Dict, Any
+from typing import Any
+
+import redis
 from jose import JWTError, jwt
 from passlib.context import CryptContext
-import redis
-from fastapi import HTTPException, status
 
 from ...src.grid.core.config import settings
 
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 
 class AuthManager:
     """Authentication and authorization manager"""
@@ -24,7 +25,7 @@ class AuthManager:
         """Hash a password"""
         return pwd_context.hash(password)
 
-    def create_access_token(self, data: Dict[str, Any], expires_delta: Optional[timedelta] = None) -> str:
+    def create_access_token(self, data: dict[str, Any], expires_delta: timedelta | None = None) -> str:
         """Create JWT access token"""
         to_encode = data.copy()
         if expires_delta:
@@ -35,7 +36,7 @@ class AuthManager:
         encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
         return encoded_jwt
 
-    def verify_token(self, token: str) -> Optional[Dict[str, Any]]:
+    def verify_token(self, token: str) -> dict[str, Any] | None:
         """Verify and decode JWT token"""
         try:
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
@@ -43,7 +44,7 @@ class AuthManager:
         except JWTError:
             return None
 
-    def authenticate_user(self, username: str, password: str) -> Optional[Dict[str, Any]]:
+    def authenticate_user(self, username: str, password: str) -> dict[str, Any] | None:
         """Authenticate user with username and password"""
         # In real implementation, this would query the database
         # For now, return mock user data
@@ -56,7 +57,7 @@ class AuthManager:
                 "is_active": True,
                 "trust_tier": "privileged",
                 "created_at": datetime.utcnow().isoformat(),
-                "hashed_password": self.get_password_hash(password)
+                "hashed_password": self.get_password_hash(password),
             }
         elif username == "user" and password == "user123":
             return {
@@ -67,11 +68,11 @@ class AuthManager:
                 "is_active": True,
                 "trust_tier": "user",
                 "created_at": datetime.utcnow().isoformat(),
-                "hashed_password": self.get_password_hash(password)
+                "hashed_password": self.get_password_hash(password),
             }
         return None
 
-    def get_user_by_username(self, username: str) -> Optional[Dict[str, Any]]:
+    def get_user_by_username(self, username: str) -> dict[str, Any] | None:
         """Get user by username"""
         # In real implementation, this would query the database
         if username == "admin":
@@ -82,7 +83,7 @@ class AuthManager:
                 "full_name": "Administrator",
                 "is_active": True,
                 "trust_tier": "privileged",
-                "created_at": datetime.utcnow().isoformat()
+                "created_at": datetime.utcnow().isoformat(),
             }
         elif username == "user":
             return {
@@ -92,7 +93,7 @@ class AuthManager:
                 "full_name": "Regular User",
                 "is_active": True,
                 "trust_tier": "user",
-                "created_at": datetime.utcnow().isoformat()
+                "created_at": datetime.utcnow().isoformat(),
             }
         return None
 
@@ -116,13 +117,13 @@ class AuthManager:
 
         return True
 
-    def get_trust_tier_limits(self, trust_tier: str) -> Dict[str, int]:
+    def get_trust_tier_limits(self, trust_tier: str) -> dict[str, int]:
         """Get rate limits for trust tier"""
         limits = {
             "anon": {"requests": 10, "window": 60},
             "user": {"requests": 100, "window": 60},
             "verified": {"requests": 500, "window": 60},
-            "privileged": {"requests": 1000, "window": 60}
+            "privileged": {"requests": 1000, "window": 60},
         }
         return limits.get(trust_tier, limits["anon"])
 
@@ -133,16 +134,17 @@ class AuthManager:
         required_level = tiers.index(required_tier) if required_tier in tiers else 0
         return user_level >= required_level
 
-    def log_security_event(self, event_type: str, user_id: str, details: Dict[str, Any]):
+    def log_security_event(self, event_type: str, user_id: str, details: dict[str, Any]):
         """Log security-related events"""
         event = {
             "timestamp": datetime.utcnow().isoformat(),
             "event_type": event_type,
             "user_id": user_id,
-            "details": details
+            "details": details,
         }
         # In real implementation, this would log to security database
         print(f"Security Event: {event}")
+
 
 # Global auth manager instance
 auth_manager = AuthManager()

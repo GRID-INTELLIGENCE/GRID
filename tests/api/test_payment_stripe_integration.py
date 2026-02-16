@@ -220,9 +220,6 @@ class TestWebhookProcessing:
         assert result["processed"] is True
         assert result["duplicate"] is True
 
-
-
-
     @pytest.mark.asyncio
     async def test_livemode_mismatch_is_rejected(self):
         request = _request_with_signature(b'{"id":"evt_live"}')

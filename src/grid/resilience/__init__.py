@@ -20,11 +20,11 @@ from .metrics import (
     get_metrics_collector,
 )
 from .penalties import (
-    DataPenaltySchema,
     PENALTY_RULES,
+    SEVERITY_RANGES,
+    DataPenaltySchema,
     PenaltyRule,
     PenaltySeverity,
-    SEVERITY_RANGES,
     calculate_total_penalty,
     decay_penalty,
     get_score_classification,

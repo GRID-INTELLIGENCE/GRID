@@ -113,6 +113,28 @@ def _refresh_blocklist() -> None:
 
 
 # ---------------------------------------------------------------------------
+# Content-type awareness for entropy check
+# ---------------------------------------------------------------------------
+_ENCODED_CONTENT_PREFIXES = ("image/", "application/octet-stream", "application/base64")
+_DATA_URL_PREFIX = "data:"
+_BASE64_DATA_PATTERN = ";base64,"
+
+
+def _is_encoded_content(text: str, content_type: str | None) -> bool:
+    """Return True if payload appears to be base64/encoded content (skip entropy check)."""
+    # 1. Content-Type header indicates binary/encoded
+    if content_type:
+        ct_lower = content_type.split(";")[0].strip().lower()
+        if any(ct_lower.startswith(p) for p in _ENCODED_CONTENT_PREFIXES):
+            return True
+    # 2. Data URL (inline base64 image) in payload
+    text_start = text.lstrip()[:120]
+    if _DATA_URL_PREFIX in text_start and _BASE64_DATA_PATTERN in text_start:
+        return True
+    return False
+
+
+# ---------------------------------------------------------------------------
 # Entropy / length heuristics
 # ---------------------------------------------------------------------------
 _MAX_INPUT_LENGTH = 50_000  # characters
@@ -141,11 +163,17 @@ class PreCheckResult:
     reason_code: str | None = None
 
 
-def quick_block(text: str) -> PreCheckResult:
+def quick_block(text: str, content_type: str | None = None) -> PreCheckResult:
     """
     Synchronous pre-check. Returns PreCheckResult.
 
     MUST stay under 50ms. No network calls, no ML inference.
+
+    Args:
+        text: Input text to evaluate.
+        content_type: Optional HTTP Content-Type (e.g. from request header).
+            When image/* or application/octet-stream, entropy check is skipped
+            to avoid false positives on base64-encoded images.
     """
     start = time.monotonic()
     try:
@@ -227,10 +255,11 @@ def quick_block(text: str) -> PreCheckResult:
             )
             return PreCheckResult(blocked=True, reason_code="SAFETY_CANARY_DETECTED")
 
-        # TODO: Entropy check can false-positive on base64-encoded images or
-        #       legitimate encoded content. Add content-type awareness.
-        # 5. Entropy heuristic (detect obfuscated / encoded payloads)
-        if len(normalized) > 200:
+        # 5. Entropy heuristic (detect obfuscated / encoded payloads).
+        #    Skip when content-type or payload indicates base64-encoded images
+        #    or other legitimate encoded content to avoid false positives.
+        _skip_entropy = _is_encoded_content(normalized, content_type)
+        if not _skip_entropy and len(normalized) > 200:
             entropy = _shannon_entropy(normalized)
             if entropy > _HIGH_ENTROPY_THRESHOLD:
                 REFUSALS_TOTAL.labels(reason_code="HIGH_ENTROPY_PAYLOAD").inc()

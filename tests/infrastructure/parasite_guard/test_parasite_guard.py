@@ -6,7 +6,7 @@ import pytest
 
 from infrastructure.parasite_guard.config import ParasiteGuardConfig
 from infrastructure.parasite_guard.detectors import Detector
-from infrastructure.parasite_guard.middleware import ParasiteDetectorMiddleware
+from infrastructure.parasite_guard.middleware import ParasiteGuardMiddleware
 from infrastructure.parasite_guard.models import DetectionResult, ParasiteContext, ParasiteSeverity
 
 
@@ -40,7 +40,7 @@ async def test_middleware_passthrough():
 
     # We need to mock _create_detector_chain to use our MockDetector
     with patch("infrastructure.metrics.REGISTRY"):
-        middleware = ParasiteDetectorMiddleware(app, config)
+        middleware = ParasiteGuardMiddleware(app, config)
         middleware.detector_chain.detect = AsyncMock(return_value=DetectionResult(detected=False))
 
         scope = {"type": "http", "method": "GET", "path": "/"}
@@ -60,7 +60,7 @@ async def test_middleware_blocking():
     config = ParasiteGuardConfig(enabled=True)
 
     with patch("infrastructure.metrics.REGISTRY"):
-        middleware = ParasiteDetectorMiddleware(app, config)
+        middleware = ParasiteGuardMiddleware(app, config)
 
         # Mock detection result
         context = ParasiteContext(

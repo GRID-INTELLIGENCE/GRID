@@ -183,9 +183,7 @@ class DRTMetricsCollector:
     def _update_false_positive_rate(self) -> None:
         """Update false positive rate calculation."""
         if self.metrics.violations_total > 0:
-            self.metrics.false_positive_rate = (
-                self.metrics.false_positives_marked / self.metrics.violations_total
-            )
+            self.metrics.false_positive_rate = self.metrics.false_positives_marked / self.metrics.violations_total
 
     def get_metrics_dict(self) -> dict[str, Any]:
         """Get all metrics as a dictionary for Prometheus-style export."""
@@ -195,43 +193,36 @@ class DRTMetricsCollector:
             "drt_violations_by_severity": dict(self.metrics.violations_by_severity),
             "drt_violations_by_path": dict(self.metrics.violations_by_path),
             "drt_violations_by_method": dict(self.metrics.violations_by_method),
-
             # Escalation metrics
             "drt_escalations_total": self.metrics.escalations_total,
             "drt_escalated_endpoints_current": self.metrics.escalated_endpoints_count,
             "drt_escalation_duration_avg_minutes": self.metrics.escalation_duration_avg,
-
             # Performance metrics
             "drt_processing_time_avg_ms": self.metrics.processing_time_avg * 1000,
             "drt_processing_operations_total": self.metrics.processing_count,
-
             # Behavioral data metrics
             "drt_behavioral_signatures_total": self.metrics.behavioral_signatures_total,
             "drt_attack_vectors_total": self.metrics.attack_vectors_total,
-
             # False positive metrics
             "drt_false_positives_marked": self.metrics.false_positives_marked,
             "drt_false_positive_rate": self.metrics.false_positive_rate,
-
             # System health metrics
             "drt_cleanup_operations_total": self.metrics.cleanup_operations,
             "drt_db_operation_errors_total": self.metrics.db_operation_errors,
-
             # Time-series metrics
             "drt_violations_last_hour": self.metrics.violations_last_hour,
             "drt_violations_last_24h": self.metrics.violations_last_24h,
             "drt_escalations_last_hour": self.metrics.escalations_last_hour,
             "drt_escalations_last_24h": self.metrics.escalations_last_24h,
-
             # Similarity score statistics
             "drt_similarity_scores_count": len(self.metrics.similarity_scores),
             "drt_similarity_scores_avg": (
                 sum(self.metrics.similarity_scores) / len(self.metrics.similarity_scores)
-                if self.metrics.similarity_scores else 0.0
+                if self.metrics.similarity_scores
+                else 0.0
             ),
             "drt_similarity_scores_min": min(self.metrics.similarity_scores) if self.metrics.similarity_scores else 0.0,
             "drt_similarity_scores_max": max(self.metrics.similarity_scores) if self.metrics.similarity_scores else 0.0,
-
             # Metadata
             "drt_metrics_last_updated": self.metrics.last_updated,
             "drt_uptime_seconds": time.time() - self._start_time,
@@ -246,13 +237,13 @@ class DRTMetricsCollector:
             if isinstance(value, dict):
                 # Handle labeled metrics (e.g., violations by severity)
                 for label_value, count in value.items():
-                    lines.append(f'# HELP {key} DRT {key.replace("_", " ")}')
-                    lines.append(f'# TYPE {key} gauge')
+                    lines.append(f"# HELP {key} DRT {key.replace('_', ' ')}")
+                    lines.append(f"# TYPE {key} gauge")
                     lines.append(f'{key}{{label="{label_value}"}} {count}')
             elif isinstance(value, (int, float)):
-                lines.append(f'# HELP {key} DRT {key.replace("_", " ")}')
-                lines.append(f'# TYPE {key} gauge')
-                lines.append(f'{key} {value}')
+                lines.append(f"# HELP {key} DRT {key.replace('_', ' ')}")
+                lines.append(f"# TYPE {key} gauge")
+                lines.append(f"{key} {value}")
             # Skip non-numeric values
 
         return "\n".join(lines)

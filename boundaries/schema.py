@@ -1,6 +1,7 @@
 """
 Load and validate boundary configuration against the boundary schema.
 """
+
 from __future__ import annotations
 
 import json

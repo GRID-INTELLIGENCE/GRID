@@ -1,6 +1,7 @@
 """Core agentic system orchestrator."""
 
 from __future__ import annotations
+
 import json
 import logging
 import os
@@ -12,7 +13,8 @@ from cognitive.light_of_the_seven.cognitive_layer.schemas.cognitive_state import
 from cognitive.scaffolding_engine import get_scaffolding_engine
 from grid.exceptions import SkillStoreError
 from grid.xai.explainer import explainer
-from safety.guardian.engine import RuleAction, Severity as GuardianSeverity, get_guardian_engine
+from safety.guardian.engine import RuleAction, get_guardian_engine
+from safety.guardian.engine import Severity as GuardianSeverity
 
 from .agent_executor import AgentExecutor
 from .event_bus import EventBus, get_event_bus
@@ -355,17 +357,22 @@ class AgenticSystem:
             results.append(result)
 
             # --- Guardian safety gate: evaluate iteration output ---
-            result_text = json.dumps(result.get("result", {})) if isinstance(result.get("result"), dict) else str(result.get("result", ""))
+            result_text = (
+                json.dumps(result.get("result", {}))
+                if isinstance(result.get("result"), dict)
+                else str(result.get("result", ""))
+            )
             matches, latency_ms = guardian.evaluate(result_text, use_cache=True)
 
             blocking_matches = [
-                m for m in matches
+                m
+                for m in matches
                 if m.action in (RuleAction.BLOCK, RuleAction.CANARY)
-                or (m.action == RuleAction.ESCALATE and m.severity in (GuardianSeverity.HIGH, GuardianSeverity.CRITICAL))
+                or (
+                    m.action == RuleAction.ESCALATE and m.severity in (GuardianSeverity.HIGH, GuardianSeverity.CRITICAL)
+                )
             ]
-            warning_matches = [
-                m for m in matches if m.action in (RuleAction.WARN, RuleAction.LOG)
-            ]
+            warning_matches = [m for m in matches if m.action in (RuleAction.WARN, RuleAction.LOG)]
 
             audit_entry: dict[str, Any] = {
                 "iteration": i + 1,
@@ -388,7 +395,9 @@ class AgenticSystem:
                 break
 
             # Convergence: require both success outcome AND confidence above floor
-            execution_confidence = result.get("cognitive_state", {}).get("estimated_load", 5.0) if result.get("cognitive_state") else 5.0
+            execution_confidence = (
+                result.get("cognitive_state", {}).get("estimated_load", 5.0) if result.get("cognitive_state") else 5.0
+            )
             # Normalize: lower cognitive load = higher confidence (load 0-10 → confidence 1.0-0.0)
             iteration_confidence = max(0.0, 1.0 - (execution_confidence / 10.0))
 
@@ -418,9 +427,7 @@ class AgenticSystem:
                 "safety_passed": safety_passed,
                 "total_matches": total_guardian_matches,
                 "total_warnings": total_warnings,
-                "blocked_at_iteration": next(
-                    (a["iteration"] for a in iteration_audits if a["guardian_blocked"]), None
-                ),
+                "blocked_at_iteration": next((a["iteration"] for a in iteration_audits if a["guardian_blocked"]), None),
             },
         }
 

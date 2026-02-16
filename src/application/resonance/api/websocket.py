@@ -190,9 +190,7 @@ class AckTracker:
                         return True
                     else:
                         # NACK received - client reported error
-                        logger.warning(
-                            f"NACK received for message {envelope.id}: " f"{ack.get('error_code', 'unknown')}"
-                        )
+                        logger.warning(f"NACK received for message {envelope.id}: {ack.get('error_code', 'unknown')}")
                         del self._pending[envelope.id]
                         return False
 
@@ -213,7 +211,7 @@ class AckTracker:
                     except Exception:
                         break
                 else:
-                    logger.warning(f"ACK timeout for message {envelope.id} after " f"{self._max_retries} retries")
+                    logger.warning(f"ACK timeout for message {envelope.id} after {self._max_retries} retries")
 
             except json.JSONDecodeError:
                 # Not valid JSON, continue waiting

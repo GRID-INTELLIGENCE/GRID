@@ -510,7 +510,9 @@ class ParasiteAttackSimulator:
         # Legacy metrics (for backward compatibility)
         self.metrics.detected_parasites = self.metrics.detected_total
         self.metrics.null_responses = self.metrics.detected_by_body
-        self.metrics.normal_responses = self.metrics.total_requests - self.metrics.detected_total - self.metrics.timeouts_or_errors
+        self.metrics.normal_responses = (
+            self.metrics.total_requests - self.metrics.detected_total - self.metrics.timeouts_or_errors
+        )
 
         # Status code breakdown
         status_counts: dict[int, int] = defaultdict(int)
@@ -535,36 +537,36 @@ class ParasiteAttackSimulator:
         print("ATTACK SIMULATION SUMMARY")
         print("=" * 80)
 
-        print(f"\nRequest Metrics:")
+        print("\nRequest Metrics:")
         print(f"  Total Requests:     {self.metrics.total_requests}")
         print(f"  Detection Rate:     {self.metrics.detection_rate:.2%}")
         print(f"  Avg Response Time:  {self.metrics.avg_response_time_ms:.2f}ms")
 
-        print(f"\nDetection Breakdown:")
+        print("\nDetection Breakdown:")
         print(f"  Detected (total):   {self.metrics.detected_total}")
         print(f"    - By 403 status:  {self.metrics.detected_by_status_403}")
         print(f"    - By body meta:   {self.metrics.detected_by_body}")
         print(f"  Timeouts/Errors:    {self.metrics.timeouts_or_errors}")
         print(f"  Normal (unblocked): {self.metrics.normal_responses}")
 
-        print(f"\nStatus Code Breakdown:")
+        print("\nStatus Code Breakdown:")
         for status, count in sorted(self.metrics.status_breakdown.items()):
             label = "(timeout/error)" if status == 0 else ""
             print(f"  HTTP {status:3d}: {count:4d} {label}")
 
-        print(f"\nState Transitions:")
+        print("\nState Transitions:")
         if self.monitor.transitions:
             for i, t in enumerate(self.monitor.transitions, 1):
                 print(f"  {i}. {t.from_state} -> {t.to_state} ({t.trigger})")
         else:
             print("  No state transitions recorded")
 
-        print(f"\nTransition Graph:")
+        print("\nTransition Graph:")
         graph = self.monitor.get_transition_graph()
         for edge, count in graph.items():
             print(f"  {edge}: {count}")
 
-        print(f"\nAttack Pattern Breakdown:")
+        print("\nAttack Pattern Breakdown:")
         pattern_stats = defaultdict(lambda: {"total": 0, "detected": 0, "by_403": 0, "by_body": 0, "errors": 0})
         for result in self.metrics.attack_results:
             pattern_stats[result.pattern]["total"] += 1
@@ -625,7 +627,9 @@ async def main():
             simulator.metrics.timeouts_or_errors = sum(1 for r in results if r.is_timeout_or_error)
             simulator.metrics.detected_parasites = simulator.metrics.detected_total
             simulator.metrics.null_responses = simulator.metrics.detected_by_body
-            simulator.metrics.normal_responses = len(results) - simulator.metrics.detected_total - simulator.metrics.timeouts_or_errors
+            simulator.metrics.normal_responses = (
+                len(results) - simulator.metrics.detected_total - simulator.metrics.timeouts_or_errors
+            )
 
             # Status breakdown
             status_counts: dict[int, int] = defaultdict(int)

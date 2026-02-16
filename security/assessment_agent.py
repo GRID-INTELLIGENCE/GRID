@@ -6,16 +6,12 @@ AI agent for automated security testing of the GRID system, simulating attacks a
 Developed based on the security assessment specification.
 """
 
-import asyncio
 import json
 import logging
-import os
-import socket
 import sys
-import time
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 # Add parent directory to path for security module
 sys.path.insert(0, str(Path(__file__).parent.parent))

@@ -7,10 +7,9 @@ Provides CLI interface to view blocked/allowed requests and manage whitelist.
 
 import json
 import sys
-import time
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 try:
     from rich.console import Console
@@ -411,7 +410,7 @@ class NetworkMonitor:
             anomalies["alerts"].append(
                 {
                     "level": "HIGH",
-                    "message": f'High blocked request rate: {anomalies["blocked_rate"]:.1f} per hour',
+                    "message": f"High blocked request rate: {anomalies['blocked_rate']:.1f} per hour",
                     "recommendation": "Review network access patterns and potential attack",
                 }
             )

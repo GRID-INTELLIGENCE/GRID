@@ -69,14 +69,14 @@ def _check_persistence_mode() -> str:
     """Validate persistence mode configuration and prevent memory mode in production."""
     mode = os.getenv("MOTHERSHIP_PERSISTENCE_MODE", "memory").strip().lower()
     environment = os.getenv("ENVIRONMENT", os.getenv("ENV", "")).lower()
-    
+
     if mode != "db" and environment in ("production", "prod"):
         raise RuntimeError(
             "Memory persistence mode is not allowed in production. "
             "Set MOTHERSHIP_PERSISTENCE_MODE=db for production use. "
             "Memory mode causes data loss on restart and lacks audit trails."
         )
-    
+
     return mode
 
 
@@ -206,8 +206,26 @@ def _require_stripe_client(settings: Settings):
 
 
 def _base_url(request: Request) -> str:
-    """Return a normalized origin URL used for redirects and hosted sessions."""
-    # TODO(you): in production behind reverse proxies, ensure forwarded host/proto are trusted.
+    """Return a normalized origin URL used for redirects and hosted sessions.
+
+    When behind a trusted reverse proxy, uses X-Forwarded-Proto and X-Forwarded-Host
+    after validation. Set TRUST_PROXY=true and optionally TRUSTED_HOSTS (comma-separated)
+    to allow forwarded headers in production.
+    """
+    trust_proxy = os.getenv("TRUST_PROXY", "").strip().lower() in ("1", "true", "yes")
+    trusted_hosts: set[str] = set()
+    if raw := os.getenv("TRUSTED_HOSTS", "").strip():
+        trusted_hosts = {h.strip().lower() for h in raw.split(",") if h.strip()}
+
+    if trust_proxy:
+        proto = (request.headers.get("X-Forwarded-Proto") or "").strip().lower()
+        host = (request.headers.get("X-Forwarded-Host") or "").strip()
+        # Validate proto (http/https only)
+        if proto in ("http", "https") and host and "\n" not in host and "\r" not in host:
+            host_lower = host.split(":")[0].lower()
+            if not trusted_hosts or host_lower in trusted_hosts:
+                return f"{proto}://{host}".rstrip("/")
+
     return str(request.base_url).rstrip("/")
 
 
@@ -253,11 +271,51 @@ async def _save_mapping(user_id: str, stripe_account_id: str, meta: dict[str, An
 
     if mode != "db":
         async with _CONNECT_MAP_LOCK:
+            pending_key = f"__pending_{stripe_account_id}"
+            if pending_key in _CONNECT_MAP_MEMORY:
+                existing = _CONNECT_MAP_MEMORY.pop(pending_key)
+                payload = {
+                    **existing,
+                    "user_id": user_id,
+                    "stripe_account_id": stripe_account_id,
+                    "meta": meta or existing.get("meta") or {},
+                }
             _CONNECT_MAP_MEMORY[user_id] = payload
         return payload
 
     sessionmaker = get_async_sessionmaker()
     async with sessionmaker() as session:
+        pending_row = (
+            (
+                await session.execute(
+                    select(ConnectAccountMappingRow).where(
+                        ConnectAccountMappingRow.stripe_account_id == stripe_account_id,
+                        ConnectAccountMappingRow.user_id.startswith("__pending_"),  # type: ignore[attr-defined]
+                    )
+                )
+            )
+            .scalars()
+            .first()
+        )
+        if pending_row is not None:
+            pending_row.user_id = user_id
+            pending_row.stripe_account_id = stripe_account_id
+            pending_row.meta = meta or pending_row.meta or {}
+            pending_row.updated_at = datetime.now(UTC)
+            try:
+                await session.commit()
+            except Exception:
+                await session.rollback()
+                raise
+            return {
+                "user_id": user_id,
+                "stripe_account_id": stripe_account_id,
+                "subscription_id": pending_row.subscription_id,
+                "subscription_status": pending_row.subscription_status,
+                "subscription_price_id": pending_row.subscription_price_id,
+                "meta": pending_row.meta or {},
+            }
+
         row = (
             (await session.execute(select(ConnectAccountMappingRow).where(ConnectAccountMappingRow.user_id == user_id)))
             .scalars()
@@ -297,9 +355,9 @@ async def _save_subscription_state(
     mode = _check_persistence_mode()
 
     if mode != "db":
-        # TODO(you): if you disable DB persistence, replace this with your durable storage (Redis/Postgres/etc.).
         async with _CONNECT_MAP_LOCK:
-            for key, value in _CONNECT_MAP_MEMORY.items():
+            found = False
+            for key, value in list(_CONNECT_MAP_MEMORY.items()):
                 if value.get("stripe_account_id") == account_id:
                     _CONNECT_MAP_MEMORY[key] = {
                         **value,
@@ -307,6 +365,17 @@ async def _save_subscription_state(
                         "subscription_status": subscription_status,
                         "subscription_price_id": subscription_price_id,
                     }
+                    found = True
+                    break
+            if not found:
+                _CONNECT_MAP_MEMORY[f"__pending_{account_id}"] = {
+                    "user_id": f"__pending_{account_id}",
+                    "stripe_account_id": account_id,
+                    "subscription_id": subscription_id,
+                    "subscription_status": subscription_status,
+                    "subscription_price_id": subscription_price_id,
+                    "meta": {"source": "webhook_onboarding_first"},
+                }
         return
 
     sessionmaker = get_async_sessionmaker()
@@ -322,13 +391,23 @@ async def _save_subscription_state(
                 .first()
             )
             if not row:
-                # TODO(you): create an onboarding-first policy if webhook arrives before local mapping exists.
-                return
-
-            row.subscription_id = subscription_id
-            row.subscription_status = subscription_status
-            row.subscription_price_id = subscription_price_id
-            row.updated_at = datetime.now(UTC)
+                row = ConnectAccountMappingRow(
+                    id=f"cam_{uuid.uuid4().hex}",
+                    user_id=f"__pending_{account_id}",
+                    stripe_account_id=account_id,
+                    subscription_id=subscription_id,
+                    subscription_status=subscription_status,
+                    subscription_price_id=subscription_price_id,
+                    meta={"source": "webhook_onboarding_first"},
+                    created_at=datetime.now(UTC),
+                    updated_at=datetime.now(UTC),
+                )
+                session.add(row)
+            else:
+                row.subscription_id = subscription_id
+                row.subscription_status = subscription_status
+                row.subscription_price_id = subscription_price_id
+                row.updated_at = datetime.now(UTC)
 
 
 async def _update_mapping_by_account(
@@ -716,7 +795,7 @@ async def create_connected_account(
                     }
                 },
             },
-        }
+        },
     )
 
     account_id = account.get("id")
@@ -741,9 +820,7 @@ async def create_connected_account(
 
 
 @router.post("/accounts/onboarding-link")
-async def create_onboarding_link(
-    request: Request, auth: RequiredAuth, settings: Settings, csrf_token: str = Form(...)
-):
+async def create_onboarding_link(request: Request, auth: RequiredAuth, settings: Settings, csrf_token: str = Form(...)):
     """Create V2 Account Link for onboarding and redirect merchant to Stripe-hosted flow."""
     # Validate CSRF token
     if not _validate_csrf_token(csrf_token):
@@ -769,7 +846,7 @@ async def create_onboarding_link(
                     "return_url": f"{base}/api/v1/connect-demo/dashboard?accountId={account_id}",
                 },
             },
-        }
+        },
     )
 
     onboarding_url = account_link.get("url")
@@ -1020,7 +1097,7 @@ async def connected_account_subscription_checkout(
             "line_items": [{"price": price_id, "quantity": 1}],
             "success_url": f"{base}/api/v1/connect-demo/success?session_id={{CHECKOUT_SESSION_ID}}",
             "cancel_url": f"{base}/api/v1/connect-demo/dashboard",
-        }
+        },
     )
 
     checkout_url = session.get("url")
@@ -1054,7 +1131,7 @@ async def connected_account_billing_portal(
         {
             "customer_account": account_id,
             "return_url": f"{base}/api/v1/connect-demo/dashboard",
-        }
+        },
     )
 
     portal_url = portal_session.get("url")
@@ -1381,7 +1458,9 @@ async def webhook_billing_snapshot(request: Request, settings: Settings):
         )
 
     # Wrap in asyncio.to_thread to prevent blocking event loop (CPU-bound cryptographic operation)
-    event_notification = await asyncio.to_thread(stripe_client.parse_event_notification, payload, signature, webhook_secret)
+    event_notification = await asyncio.to_thread(
+        stripe_client.parse_event_notification, payload, signature, webhook_secret
+    )
     event_id = (
         event_notification.get("id")
         if isinstance(event_notification, dict)

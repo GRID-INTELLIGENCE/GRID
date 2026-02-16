@@ -222,7 +222,7 @@ class UserContextManager:
         patterns = list(self.profile.tool_usage_patterns.values())
         # Sort by usage count and success rate
         patterns.sort(
-            key=lambda p: (p.usage_count * p.success_rate),
+            key=lambda p: p.usage_count * p.success_rate,
             reverse=True,
         )
         return patterns[:limit]

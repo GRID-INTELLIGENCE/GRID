@@ -103,12 +103,13 @@ def _resolve_expected_livemode(settings: Settings) -> bool | None:
         return False
     # auto mode
     if hasattr(settings, "is_production"):
-        return bool(getattr(settings, "is_production"))
+        return bool(settings.is_production)
     return None
 
 
 def _is_pending_like(status: PaymentStatus) -> bool:
     return status in {PaymentStatus.PENDING, PaymentStatus.PROCESSING}
+
 
 # =============================================================================
 # Payment Endpoints
@@ -225,7 +226,11 @@ async def payment_webhook(
         if gateway.get_name() == "stripe":
             expected_livemode = _resolve_expected_livemode(settings)
             event_livemode = event.get("livemode")
-            if expected_livemode is not None and isinstance(event_livemode, bool) and event_livemode != expected_livemode:
+            if (
+                expected_livemode is not None
+                and isinstance(event_livemode, bool)
+                and event_livemode != expected_livemode
+            ):
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail=(
@@ -278,7 +283,12 @@ async def payment_webhook(
                     await uow.webhook_events.update(webhook_event)
                 else:
                     await uow.webhook_events.add(webhook_event)
-            return {"processed": False, "event_id": event_id, "event_type": event_type, "reason": "ignored_non_terminal_event"}
+            return {
+                "processed": False,
+                "event_id": event_id,
+                "event_type": event_type,
+                "reason": "ignored_non_terminal_event",
+            }
 
         if not gateway_transaction_id:
             webhook_event.mark_failed("missing_transaction_reference")
@@ -287,7 +297,12 @@ async def payment_webhook(
                     await uow.webhook_events.update(webhook_event)
                 else:
                     await uow.webhook_events.add(webhook_event)
-            return {"processed": False, "event_id": event_id, "event_type": event_type, "reason": "missing_transaction_reference"}
+            return {
+                "processed": False,
+                "event_id": event_id,
+                "event_type": event_type,
+                "reason": "missing_transaction_reference",
+            }
 
         # Find transaction
         transactions = await uow.payment_transactions.get_all()
@@ -302,7 +317,12 @@ async def payment_webhook(
                     await uow.webhook_events.update(webhook_event)
                 else:
                     await uow.webhook_events.add(webhook_event)
-            return {"processed": False, "event_id": event_id, "event_type": event_type, "reason": "transaction_not_found"}
+            return {
+                "processed": False,
+                "event_id": event_id,
+                "event_type": event_type,
+                "reason": "transaction_not_found",
+            }
 
         if event_type in success_events:
             transaction.mark_completed(gateway_transaction_id)
@@ -452,11 +472,7 @@ async def list_stuck_pending_payments(
     cutoff = datetime.now(UTC) - timedelta(minutes=threshold_minutes)
 
     transactions = await uow.payment_transactions.get_all()
-    stuck = [
-        tx
-        for tx in transactions
-        if _is_pending_like(tx.status) and tx.created_at <= cutoff
-    ]
+    stuck = [tx for tx in transactions if _is_pending_like(tx.status) and tx.created_at <= cutoff]
     stuck.sort(key=lambda tx: tx.created_at)
     stuck = stuck[:max_limit]
 

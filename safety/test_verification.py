@@ -1,12 +1,15 @@
 """Final verification test for fixes."""
 
-import sys
 import os
+import sys
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import asyncio
-from safety.context_safe_engine_manager import ContextSafeEngineManager
+
 from safety.ai_workflow_safety import TemporalSafetyConfig
+from safety.context_safe_engine_manager import ContextSafeEngineManager
+
 
 async def main():
     """Verify all fixes."""
@@ -48,6 +51,7 @@ async def main():
     print("\n" + "=" * 60)
     print("Verification complete. Check debug.log for timestamp consistency.")
     print("=" * 60)
+
 
 if __name__ == "__main__":
     asyncio.run(main())

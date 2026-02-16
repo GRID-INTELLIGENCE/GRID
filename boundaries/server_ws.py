@@ -2,6 +2,7 @@
 WebSocket server for persistent boundary/consent/guardrail event streaming.
 Subscribers receive real-time log events; events are also persisted via BoundaryEventLogger.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -10,6 +11,7 @@ from typing import Any
 
 try:
     import websockets
+
     HAS_WEBSOCKETS = True
 except ImportError:
     HAS_WEBSOCKETS = False

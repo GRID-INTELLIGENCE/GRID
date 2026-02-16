@@ -16,7 +16,7 @@ import socket
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable, Tuple
+from typing import Any, Callable
 from urllib.parse import urlparse
 
 import yaml
@@ -561,8 +561,7 @@ if _disable_requested and not _is_dev_env:
     apply_all_patches()
 elif _disable_requested and _is_dev_env:
     logger.critical(
-        "NETWORK SECURITY DISABLED — GRID_ENV=%s, DISABLE_NETWORK_SECURITY=true. "
-        "This MUST NOT be used in production.",
+        "NETWORK SECURITY DISABLED — GRID_ENV=%s, DISABLE_NETWORK_SECURITY=true. This MUST NOT be used in production.",
         os.environ.get("GRID_ENV"),
     )
 else:

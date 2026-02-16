@@ -119,7 +119,7 @@ class MCPValidator:
     def check_rag_db(self) -> bool:
         rag_db = Path(".rag_db/chroma.sqlite3")
         if rag_db.exists():
-            logger.info(f"[OK] RAG DB exists ({rag_db.stat().st_size / (1024*1024):.1f} MB)")
+            logger.info(f"[OK] RAG DB exists ({rag_db.stat().st_size / (1024 * 1024):.1f} MB)")
             return True
         self.warning("RAG DB not found")
         return False

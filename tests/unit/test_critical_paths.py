@@ -16,9 +16,8 @@ These tests are intentionally fast, isolated, and deterministic.
 
 import os
 import sys
-import tempfile
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -123,8 +122,8 @@ class TestAuthenticationTokens:
     @pytest.mark.asyncio
     async def test_token_expiration(self, token_manager) -> None:
         """Test that expired tokens are rejected."""
-        from datetime import timedelta
         import time
+        from datetime import timedelta
 
         token = token_manager.create_access_token(
             data={"sub": "test-user-123", "roles": ["user"]},
@@ -424,7 +423,7 @@ class TestEventBus:
     @pytest.mark.asyncio
     async def test_event_history(self, event_bus) -> None:
         """Test event history is recorded."""
-        from unified_fabric import Event, EventDomain
+        from unified_fabric import Event
 
         await event_bus.publish(
             Event(
@@ -518,7 +517,7 @@ class TestRAGEngineBasic:
 
     def test_rag_config_from_env(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Test RAGConfig can be created from environment."""
-        from tools.rag.config import RAGConfig, ModelMode
+        from tools.rag.config import RAGConfig
 
         monkeypatch.setenv("RAG_VECTOR_STORE_PROVIDER", "chroma")
         monkeypatch.setenv("RAG_EMBEDDING_PROVIDER", "ollama")

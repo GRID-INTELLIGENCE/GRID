@@ -18,7 +18,6 @@ Date: 2026-02-05
 from __future__ import annotations
 
 import asyncio
-import hashlib
 import json
 import logging
 import time
@@ -28,7 +27,7 @@ from contextlib import asynccontextmanager
 from contextvars import ContextVar
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
-from typing import Any, Callable
+from typing import Any
 
 from fastapi import FastAPI, Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
@@ -103,11 +102,13 @@ class SecurityContext:
 
     def audit(self, event: str, details: dict[str, Any] | None = None) -> None:
         """Add audit entry."""
-        self.audit_entries.append({
-            "timestamp": datetime.now(tz=UTC).isoformat(),
-            "event": event,
-            "details": details or {},
-        })
+        self.audit_entries.append(
+            {
+                "timestamp": datetime.now(tz=UTC).isoformat(),
+                "event": event,
+                "details": details or {},
+            }
+        )
 
     def to_dict(self) -> dict[str, Any]:
         """Serialize to dictionary for logging."""
@@ -287,9 +288,7 @@ class ThreatResponseHandler:
 
         return None
 
-    def _create_blocked_response(
-        self, ctx: SecurityContext, threat_info: dict[str, Any]
-    ) -> JSONResponse:
+    def _create_blocked_response(self, ctx: SecurityContext, threat_info: dict[str, Any]) -> JSONResponse:
         """Create blocked response."""
         return JSONResponse(
             status_code=403,
@@ -305,9 +304,7 @@ class ThreatResponseHandler:
             },
         )
 
-    async def _quarantine_request(
-        self, ctx: SecurityContext, threat_info: dict[str, Any]
-    ) -> None:
+    async def _quarantine_request(self, ctx: SecurityContext, threat_info: dict[str, Any]) -> None:
         """Add request to quarantine for analysis."""
         self._quarantine[ctx.request_id] = {
             "context": ctx.to_dict(),
@@ -321,9 +318,7 @@ class ThreatResponseHandler:
             threat_info.get("severity"),
         )
 
-    async def _dispatch_alert(
-        self, ctx: SecurityContext, threat_info: dict[str, Any]
-    ) -> None:
+    async def _dispatch_alert(self, ctx: SecurityContext, threat_info: dict[str, Any]) -> None:
         """Dispatch security alert."""
         alert = {
             "type": "security_alert",
@@ -337,9 +332,7 @@ class ThreatResponseHandler:
         await self._alert_queue.put(alert)
         log.warning("Security alert dispatched: %s", json.dumps(alert, default=str))
 
-    async def _escalate(
-        self, ctx: SecurityContext, threat_info: dict[str, Any]
-    ) -> None:
+    async def _escalate(self, ctx: SecurityContext, threat_info: dict[str, Any]) -> None:
         """Escalate to security team."""
         log.critical(
             "SECURITY ESCALATION: Request %s from %s - Severity: %s - Path: %s",
@@ -407,10 +400,7 @@ class HardenedInputValidator:
 
         # Determine overall validity
         if results["threats"]:
-            max_severity = max(
-                ThreatSeverity[t["severity"]].value
-                for t in results["threats"]
-            )
+            max_severity = max(ThreatSeverity[t["severity"]].value for t in results["threats"])
             results["valid"] = max_severity < ThreatSeverity.HIGH.value
             results["max_severity"] = ThreatSeverity(max_severity).name
 
@@ -424,11 +414,13 @@ class HardenedInputValidator:
         user_agent = request.headers.get("user-agent", "")
         result = check_threat(user_agent, request.client.host if request.client else "unknown")
         if result["detected"]:
-            threats.append({
-                "source": "header:user-agent",
-                "severity": result["severity"],
-                "indicators": result["indicators"],
-            })
+            threats.append(
+                {
+                    "source": "header:user-agent",
+                    "severity": result["severity"],
+                    "indicators": result["indicators"],
+                }
+            )
 
         # Check for suspicious headers
         suspicious_headers = ["x-forwarded-for", "x-real-ip", "x-originating-ip"]
@@ -437,11 +429,13 @@ class HardenedInputValidator:
             if value:
                 result = check_threat(value, request.client.host if request.client else "unknown")
                 if result["detected"]:
-                    threats.append({
-                        "source": f"header:{header}",
-                        "severity": result["severity"],
-                        "indicators": result["indicators"],
-                    })
+                    threats.append(
+                        {
+                            "source": f"header:{header}",
+                            "severity": result["severity"],
+                            "indicators": result["indicators"],
+                        }
+                    )
 
         return threats
 
@@ -453,20 +447,24 @@ class HardenedInputValidator:
             # Check key
             key_result = check_threat(key, request.client.host if request.client else "unknown")
             if key_result["detected"]:
-                threats.append({
-                    "source": f"query_key:{key}",
-                    "severity": key_result["severity"],
-                    "indicators": key_result["indicators"],
-                })
+                threats.append(
+                    {
+                        "source": f"query_key:{key}",
+                        "severity": key_result["severity"],
+                        "indicators": key_result["indicators"],
+                    }
+                )
 
             # Check value
             value_result = check_threat(value, request.client.host if request.client else "unknown")
             if value_result["detected"]:
-                threats.append({
-                    "source": f"query_value:{key}",
-                    "severity": value_result["severity"],
-                    "indicators": value_result["indicators"],
-                })
+                threats.append(
+                    {
+                        "source": f"query_value:{key}",
+                        "severity": value_result["severity"],
+                        "indicators": value_result["indicators"],
+                    }
+                )
 
         return threats
 
@@ -484,11 +482,13 @@ class HardenedInputValidator:
             guardrails = get_guardrails()
             max_size = int(guardrails.max_request_size_mb.value * 1024 * 1024)
             if len(body) > max_size:
-                threats.append({
-                    "source": "body:size",
-                    "severity": ThreatSeverity.MEDIUM.name,
-                    "indicators": [{"name": "oversized_body", "size": len(body), "max": max_size}],
-                })
+                threats.append(
+                    {
+                        "source": "body:size",
+                        "severity": ThreatSeverity.MEDIUM.name,
+                        "indicators": [{"name": "oversized_body", "size": len(body), "max": max_size}],
+                    }
+                )
                 return threats
 
             # Try to parse as JSON
@@ -500,11 +500,13 @@ class HardenedInputValidator:
                 body_str = body.decode("utf-8", errors="replace")
                 result = check_threat(body_str, request.client.host if request.client else "unknown")
                 if result["detected"]:
-                    threats.append({
-                        "source": "body:raw",
-                        "severity": result["severity"],
-                        "indicators": result["indicators"],
-                    })
+                    threats.append(
+                        {
+                            "source": "body:raw",
+                            "severity": result["severity"],
+                            "indicators": result["indicators"],
+                        }
+                    )
 
         except Exception as e:
             log.warning("Body validation error: %s", e)
@@ -519,11 +521,13 @@ class HardenedInputValidator:
             data = json.loads(body)
             threats.extend(self._check_json_recursive(data, "body"))
         except json.JSONDecodeError:
-            threats.append({
-                "source": "body:json",
-                "severity": ThreatSeverity.LOW.name,
-                "indicators": [{"name": "invalid_json"}],
-            })
+            threats.append(
+                {
+                    "source": "body:json",
+                    "severity": ThreatSeverity.LOW.name,
+                    "indicators": [{"name": "invalid_json"}],
+                }
+            )
 
         return threats
 
@@ -540,11 +544,13 @@ class HardenedInputValidator:
         guardrails = get_guardrails()
         max_depth = int(guardrails.max_json_depth.value)
         if depth > max_depth:
-            threats.append({
-                "source": f"{path}:depth",
-                "severity": ThreatSeverity.MEDIUM.name,
-                "indicators": [{"name": "excessive_nesting", "depth": depth}],
-            })
+            threats.append(
+                {
+                    "source": f"{path}:depth",
+                    "severity": ThreatSeverity.MEDIUM.name,
+                    "indicators": [{"name": "excessive_nesting", "depth": depth}],
+                }
+            )
             return threats
 
         if isinstance(data, dict):
@@ -552,11 +558,13 @@ class HardenedInputValidator:
                 # Check key
                 key_result = check_threat(str(key), "json")
                 if key_result["detected"]:
-                    threats.append({
-                        "source": f"{path}.{key}:key",
-                        "severity": key_result["severity"],
-                        "indicators": key_result["indicators"],
-                    })
+                    threats.append(
+                        {
+                            "source": f"{path}.{key}:key",
+                            "severity": key_result["severity"],
+                            "indicators": key_result["indicators"],
+                        }
+                    )
 
                 # Recurse into value
                 threats.extend(self._check_json_recursive(value, f"{path}.{key}", depth + 1))
@@ -568,11 +576,13 @@ class HardenedInputValidator:
         elif isinstance(data, str):
             result = check_threat(data, "json")
             if result["detected"]:
-                threats.append({
-                    "source": path,
-                    "severity": result["severity"],
-                    "indicators": result["indicators"],
-                })
+                threats.append(
+                    {
+                        "source": path,
+                        "severity": result["severity"],
+                        "indicators": result["indicators"],
+                    }
+                )
 
         return threats
 
@@ -595,16 +605,18 @@ class HardenedSecurityMiddleware(BaseHTTPMiddleware):
     """
 
     # Paths excluded from security checks
-    EXCLUDED_PATHS = frozenset([
-        "/health",
-        "/health/live",
-        "/health/ready",
-        "/ping",
-        "/metrics",
-        "/docs",
-        "/redoc",
-        "/openapi.json",
-    ])
+    EXCLUDED_PATHS = frozenset(
+        [
+            "/health",
+            "/health/live",
+            "/health/ready",
+            "/ping",
+            "/metrics",
+            "/docs",
+            "/redoc",
+            "/openapi.json",
+        ]
+    )
 
     def __init__(self, app: FastAPI, **kwargs):
         super().__init__(app)
@@ -618,9 +630,7 @@ class HardenedSecurityMiddleware(BaseHTTPMiddleware):
 
         log.info("HardenedSecurityMiddleware initialized")
 
-    async def dispatch(
-        self, request: Request, call_next: RequestResponseEndpoint
-    ) -> Response:
+    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
         """Process request through security pipeline."""
         # Create security context
         ctx = SecurityContext(

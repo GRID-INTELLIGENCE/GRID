@@ -3,6 +3,7 @@
 This module provides REST endpoints for monitoring data corruption events,
 viewing penalty scores, and managing endpoint accountability.
 """
+
 from __future__ import annotations
 
 import logging
@@ -23,8 +24,10 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/corruption", tags=["Data Corruption Monitoring"])
 
+
 class CorruptionEventRequest(BaseModel):
     """Request model for manually reporting a corruption event."""
+
     endpoint: str = Field(..., description="The endpoint where corruption was detected")
     severity: str = Field(..., description="Severity level (LOW, MEDIUM, HIGH, CRITICAL)")
     corruption_type: str = Field(..., description="Type of corruption")
@@ -33,16 +36,20 @@ class CorruptionEventRequest(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
     correlation_id: str | None = Field(None, description="Optional correlation ID")
 
+
 class CorruptionEventResponse(BaseModel):
     """Response model for corruption event reporting."""
+
     success: bool
     penalty_applied: float
     endpoint: str
     correlation_id: str
     message: str
 
+
 class EndpointHealthResponse(BaseModel):
     """Response model for endpoint health status."""
+
     endpoint: str
     penalty_score: float
     is_critical: bool
@@ -50,14 +57,18 @@ class EndpointHealthResponse(BaseModel):
     recommendation: str
     last_updated: str
 
+
 class CriticalEndpointsResponse(BaseModel):
     """Response model for critical endpoints list."""
+
     critical_count: int
     endpoints: list[EndpointHealthResponse]
     system_health: str
 
+
 class CorruptionStatsResponse(BaseModel):
     """Response model for corruption statistics."""
+
     total_endpoints_monitored: int
     critical_endpoints: int
     total_penalty_score: float
@@ -65,18 +76,19 @@ class CorruptionStatsResponse(BaseModel):
     highest_penalty_endpoint: str | None
     system_status: str
 
+
 @router.post(
     "/report",
     response_model=CorruptionEventResponse,
     summary="Report a data corruption event",
-    description="Manually report a data corruption event for tracking and penalty calculation"
+    description="Manually report a data corruption event for tracking and penalty calculation",
 )
 async def report_corruption_event(
     request: Request,
     event: CorruptionEventRequest,
 ) -> CorruptionEventResponse:
     """Report a data corruption event.
-    
+
     This endpoint allows manual reporting of corruption events that may not be
     automatically detected by the middleware.
     """
@@ -85,19 +97,16 @@ async def report_corruption_event(
     except KeyError:
         raise HTTPException(
             status_code=400,
-            detail=f"Invalid severity level: {event.severity}. Must be one of: LOW, MEDIUM, HIGH, CRITICAL"
+            detail=f"Invalid severity level: {event.severity}. Must be one of: LOW, MEDIUM, HIGH, CRITICAL",
         )
-    
+
     try:
         corruption_type = CorruptionType(event.corruption_type)
     except ValueError:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Invalid corruption type: {event.corruption_type}"
-        )
-    
+        raise HTTPException(status_code=400, detail=f"Invalid corruption type: {event.corruption_type}")
+
     correlation_id = event.correlation_id or str(id(request))
-    
+
     penalty = record_corruption_event(
         endpoint=event.endpoint,
         severity=severity,
@@ -107,12 +116,12 @@ async def report_corruption_event(
         affected_resources=event.affected_resources,
         metadata=event.metadata,
     )
-    
+
     is_critical = corruption_tracker.is_endpoint_critical(event.endpoint)
     message = f"Corruption event recorded. Penalty: {penalty:.2f}"
     if is_critical:
         message += " ENDPOINT IS NOW CRITICAL - immediate action required"
-    
+
     return CorruptionEventResponse(
         success=True,
         penalty_applied=penalty,
@@ -121,24 +130,22 @@ async def report_corruption_event(
         message=message,
     )
 
+
 @router.get(
     "/health/{endpoint:path}",
     response_model=EndpointHealthResponse,
     summary="Get health status for a specific endpoint",
-    description="Retrieve the current corruption penalty score and health status for an endpoint"
+    description="Retrieve the current corruption penalty score and health status for an endpoint",
 )
 async def get_endpoint_health(endpoint: str) -> EndpointHealthResponse:
     """Get the health status and penalty score for a specific endpoint."""
     health = corruption_tracker.get_endpoint_health(endpoint)
-    
+
     if health["penalty_score"] == 0.0:
-        raise HTTPException(
-            status_code=404,
-            detail=f"No corruption data found for endpoint: {endpoint}"
-        )
-    
+        raise HTTPException(status_code=404, detail=f"No corruption data found for endpoint: {endpoint}")
+
     from datetime import datetime, timezone
-    
+
     return EndpointHealthResponse(
         endpoint=health["endpoint"],
         penalty_score=health["penalty_score"],
@@ -148,30 +155,33 @@ async def get_endpoint_health(endpoint: str) -> EndpointHealthResponse:
         last_updated=datetime.now(UTC).isoformat(),
     )
 
+
 @router.get(
     "/critical",
     response_model=CriticalEndpointsResponse,
     summary="List critical endpoints",
-    description="Get a list of all endpoints that have exceeded the critical penalty threshold"
+    description="Get a list of all endpoints that have exceeded the critical penalty threshold",
 )
 async def get_critical_endpoints() -> CriticalEndpointsResponse:
     """Get a list of all critical endpoints with their penalty scores."""
     critical = corruption_tracker.get_critical_endpoints()
-    
+
     endpoints = []
     for endpoint, penalty in critical:
         health = corruption_tracker.get_endpoint_health(endpoint)
         from datetime import datetime, timezone
-        
-        endpoints.append(EndpointHealthResponse(
-            endpoint=endpoint,
-            penalty_score=health["penalty_score"],
-            is_critical=True,
-            severity=health["severity"],
-            recommendation=health["recommendation"],
-            last_updated=datetime.now(UTC).isoformat(),
-        ))
-    
+
+        endpoints.append(
+            EndpointHealthResponse(
+                endpoint=endpoint,
+                penalty_score=health["penalty_score"],
+                is_critical=True,
+                severity=health["severity"],
+                recommendation=health["recommendation"],
+                last_updated=datetime.now(UTC).isoformat(),
+            )
+        )
+
     # Determine system health
     if len(endpoints) == 0:
         system_health = "HEALTHY"
@@ -179,34 +189,35 @@ async def get_critical_endpoints() -> CriticalEndpointsResponse:
         system_health = "DEGRADED"
     else:
         system_health = "CRITICAL"
-    
+
     return CriticalEndpointsResponse(
         critical_count=len(endpoints),
         endpoints=endpoints,
         system_health=system_health,
     )
 
+
 @router.get(
     "/stats",
     response_model=CorruptionStatsResponse,
     summary="Get corruption statistics",
-    description="Get overall corruption statistics and system health metrics"
+    description="Get overall corruption statistics and system health metrics",
 )
 async def get_corruption_stats() -> CorruptionStatsResponse:
     """Get overall corruption statistics."""
     total_endpoints = len(corruption_tracker._endpoint_penalties)
     critical_count = len(corruption_tracker._critical_endpoints)
-    
+
     total_penalty = sum(corruption_tracker._endpoint_penalties.values())
     average_penalty = total_penalty / total_endpoints if total_endpoints > 0 else 0.0
-    
+
     highest_penalty_endpoint = None
     highest_penalty = 0.0
     for endpoint, penalty in corruption_tracker._endpoint_penalties.items():
         if penalty > highest_penalty:
             highest_penalty = penalty
             highest_penalty_endpoint = endpoint
-    
+
     # Determine system status
     if critical_count == 0 and total_penalty < 10:
         system_status = "HEALTHY"
@@ -214,7 +225,7 @@ async def get_corruption_stats() -> CorruptionStatsResponse:
         system_status = "DEGRADED"
     else:
         system_status = "CRITICAL"
-    
+
     return CorruptionStatsResponse(
         total_endpoints_monitored=total_endpoints,
         critical_endpoints=critical_count,
@@ -224,18 +235,19 @@ async def get_corruption_stats() -> CorruptionStatsResponse:
         system_status=system_status,
     )
 
+
 @router.post(
     "/reset/{endpoint:path}",
     response_model=dict[str, Any],
     summary="Reset endpoint penalties",
-    description="Reset all corruption penalties for a specific endpoint (admin only)"
+    description="Reset all corruption penalties for a specific endpoint (admin only)",
 )
 async def reset_endpoint_penalties(
     endpoint: str,
     reason: str = Query(..., description="Reason for resetting penalties"),
 ) -> dict[str, Any]:
     """Reset all penalties for a specific endpoint.
-    
+
     This is an admin-only operation that should be used after fixing
     the underlying issues that caused the corruption.
     """
@@ -244,12 +256,9 @@ async def reset_endpoint_penalties(
         del corruption_tracker._penalties[endpoint]
         corruption_tracker._endpoint_penalties.pop(endpoint, None)
         corruption_tracker._critical_endpoints.discard(endpoint)
-        
-        logger.info(
-            "Corruption penalties reset for endpoint %s. Reason: %s",
-            endpoint, reason
-        )
-        
+
+        logger.info("Corruption penalties reset for endpoint %s. Reason: %s", endpoint, reason)
+
         return {
             "success": True,
             "endpoint": endpoint,
@@ -264,11 +273,12 @@ async def reset_endpoint_penalties(
             "reason": reason,
         }
 
+
 @router.get(
     "/penalties",
     response_model=dict[str, float],
     summary="Get all endpoint penalties",
-    description="Get a mapping of all endpoints to their current penalty scores"
+    description="Get a mapping of all endpoints to their current penalty scores",
 )
 async def get_all_penalties() -> dict[str, float]:
     """Get the current penalty score for all monitored endpoints."""

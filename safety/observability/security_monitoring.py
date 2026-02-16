@@ -405,7 +405,7 @@ class RealTimeMonitor:
     def _trigger_alert(self, severity: SecurityEventSeverity, count: int) -> None:
         """Trigger a security alert"""
         minutes = self.monitoring_window.total_seconds() / 60
-        alert_msg = f"SECURITY ALERT: {count} {severity.value} severity events " f"in {minutes:.0f} minutes"
+        alert_msg = f"SECURITY ALERT: {count} {severity.value} severity events in {minutes:.0f} minutes"
 
         # Log the alert
         alert_event = SecurityEvent(

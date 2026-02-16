@@ -5,6 +5,19 @@ Provides contract enforcement, scoring, and penalty calculation capabilities.
 """
 
 # Import and re-export all components from contracts
+# Import from calculator
+from .calculator import (
+    AccountabilityCalculator,
+    DeliveryClassification,
+    DeliveryScore,
+    get_accountability_calculator,
+)
+
+# Import from contract loader
+from .contract_loader import (
+    ContractLoader,
+    load_accountability_contract,
+)
 from .contracts import (
     AccountabilityContract,
     ComplianceRequirement,
@@ -31,20 +44,6 @@ from .enforcer_enhanced import (
     EnhancedAccountabilityEnforcer,
     get_enhanced_accountability_enforcer,
     set_enhanced_accountability_enforcer,
-)
-
-# Import from calculator
-from .calculator import (
-    AccountabilityCalculator,
-    DeliveryClassification,
-    DeliveryScore,
-    get_accountability_calculator,
-)
-
-# Import from contract loader
-from .contract_loader import (
-    load_accountability_contract,
-    ContractLoader,
 )
 
 __all__ = [

@@ -189,9 +189,7 @@ class AccountabilityCalculator:
         score = 100.0
 
         if metric:
-            score, penalties, bonuses = self._apply_metric_adjustments(
-                metric, score, latency_ms, now
-            )
+            score, penalties, bonuses = self._apply_metric_adjustments(metric, score, latency_ms, now)
 
         # Apply latency bonus even without prior metrics
         if latency_ms is not None and latency_ms < self.LOW_LATENCY_THRESHOLD_MS:
@@ -209,9 +207,7 @@ class AccountabilityCalculator:
         with self._lock:
             endpoint_penalties = self._data_penalties.get(endpoint, [])
             if endpoint_penalties:
-                penalty_points = calculate_total_penalty(
-                    endpoint_penalties, now, self._half_life_hours
-                )
+                penalty_points = calculate_total_penalty(endpoint_penalties, now, self._half_life_hours)
                 if penalty_points > 0:
                     penalties.append(
                         {
@@ -377,9 +373,7 @@ class AccountabilityCalculator:
         else:
             return DeliveryClassification.CRITICAL
 
-    def _generate_recommendation(
-        self, penalties: list[dict[str, Any]], classification: str
-    ) -> str:
+    def _generate_recommendation(self, penalties: list[dict[str, Any]], classification: str) -> str:
         """Generate actionable recommendation based on penalties.
 
         Args:
@@ -395,20 +389,14 @@ class AccountabilityCalculator:
         critical_penalties = [p for p in penalties if p.get("points", 0) <= -15]
         if critical_penalties:
             top = critical_penalties[0]
-            return (
-                f"CRITICAL: Address {top['type']} immediately. "
-                f"{len(critical_penalties)} severe issue(s) detected."
-            )
+            return f"CRITICAL: Address {top['type']} immediately. {len(critical_penalties)} severe issue(s) detected."
 
         if penalties:
             top = penalties[0]
             value = top.get("value")
             threshold = top.get("threshold")
             if value is not None and threshold is not None:
-                return (
-                    f"Improve {top['type']} "
-                    f"(current: {value:.1f}, target: {threshold})."
-                )
+                return f"Improve {top['type']} (current: {value:.1f}, target: {threshold})."
             return f"Improve {top['type']}."
 
         return "Review monitoring configuration."
@@ -471,11 +459,7 @@ class AccountabilityCalculator:
             Dictionary mapping endpoint to latest DeliveryScore.
         """
         with self._lock:
-            return {
-                endpoint: history[-1]
-                for endpoint, history in self._history.items()
-                if history
-            }
+            return {endpoint: history[-1] for endpoint, history in self._history.items() if history}
 
     def export_summary(self) -> dict[str, Any]:
         """Export summary of all endpoint scores for monitoring.

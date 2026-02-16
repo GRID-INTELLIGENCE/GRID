@@ -74,8 +74,7 @@ class Settings(BaseSettings):
         is_weak = len(key) < 32 or any(p in key_lower for p in weak_patterns)
         if is_weak and environment == "production":
             raise ValueError(
-                "SECRET_KEY is too weak for production. "
-                "Set GRID_SECRET_KEY to a value >= 32 chars with good entropy."
+                "SECRET_KEY is too weak for production. Set GRID_SECRET_KEY to a value >= 32 chars with good entropy."
             )
         if is_weak:
             _logger.warning(

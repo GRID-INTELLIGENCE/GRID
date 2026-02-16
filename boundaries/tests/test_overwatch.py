@@ -1,4 +1,5 @@
 """Unit tests for Overwatch: ingest_event, escalation, persistAlerts, wrap_logger_with_overwatch."""
+
 from __future__ import annotations
 
 import tempfile
@@ -24,9 +25,12 @@ def _overwatch_config(
         "overwatch": {
             "enabled": enabled,
             "logDir": log_dir,
-            "alertOn": alert_on or [
-                "boundary_violation", "guardrail_triggered",
-                "preparedness_gate", "service_refused",
+            "alertOn": alert_on
+            or [
+                "boundary_violation",
+                "guardrail_triggered",
+                "preparedness_gate",
+                "service_refused",
             ],
             "escalation": {
                 "thresholdCount": threshold_count,
@@ -76,10 +80,15 @@ class TestOverwatchIngestEvent(unittest.TestCase):
         ow = Overwatch(config)
         alerts: list[dict] = []
         ow.register_handler(alerts.append)
-        ow.ingest_event({
-            "eventType": "preparedness_gate", "eventId": "e1",
-            "scope": "exp", "actorId": "model", "payload": {"x": 1},
-        })
+        ow.ingest_event(
+            {
+                "eventType": "preparedness_gate",
+                "eventId": "e1",
+                "scope": "exp",
+                "actorId": "model",
+                "payload": {"x": 1},
+            }
+        )
         self.assertEqual(len(alerts), 1)
         self.assertEqual(alerts[0].get("eventType"), "overwatch_alert")
         self.assertEqual(alerts[0]["payload"]["alertType"], "single")
@@ -131,8 +140,11 @@ class TestWrapLoggerWithOverwatch(unittest.TestCase):
         logger = BoundaryEventLogger(enabled=True, persist_to_file=False, log_dir=Path(tempfile.gettempdir()))
         wrap_logger_with_overwatch(logger, ow)
         event = {
-            "eventId": "x", "timestamp": "2020-01-01T00:00:00Z",
-            "eventType": "preparedness_gate", "severity": "warn", "payload": {},
+            "eventId": "x",
+            "timestamp": "2020-01-01T00:00:00Z",
+            "eventType": "preparedness_gate",
+            "severity": "warn",
+            "payload": {},
         }
         logger._emit(event)
         self.assertEqual(len(ingested), 1)
@@ -148,8 +160,11 @@ class TestWrapLoggerWithOverwatch(unittest.TestCase):
             logger = BoundaryEventLogger(enabled=True, persist_to_file=True, log_dir=log_dir)
             wrap_logger_with_overwatch(logger, ow)
             event = {
-                "eventId": "y", "timestamp": "2020-01-01T00:00:00Z",
-                "eventType": "boundary_check", "severity": "audit", "payload": {},
+                "eventId": "y",
+                "timestamp": "2020-01-01T00:00:00Z",
+                "eventType": "boundary_check",
+                "severity": "audit",
+                "payload": {},
             }
             logger._emit(event)
             logger.close()

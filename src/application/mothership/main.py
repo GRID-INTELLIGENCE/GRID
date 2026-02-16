@@ -269,7 +269,9 @@ async def logging_middleware(request: Request, call_next: Callable) -> Response:
 
     # Log response
     duration = time.time() - start_time
-    logger.info("Response: %s %s status=%s duration=%.3fs", request.method, request.url.path, response.status_code, duration)
+    logger.info(
+        "Response: %s %s status=%s duration=%.3fs", request.method, request.url.path, response.status_code, duration
+    )
 
     return response
 

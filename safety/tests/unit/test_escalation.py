@@ -19,8 +19,10 @@ import safety.escalation.handler as _handler
 
 def _make_get_redis_mock(mock_redis):
     """Return an async callable that returns mock_redis (for patching _get_redis)."""
+
     async def _fake():
         return mock_redis
+
     return _fake
 
 
@@ -37,6 +39,7 @@ def _reset_handler_state():
 # ---------------------------------------------------------------------------
 # is_user_suspended
 # ---------------------------------------------------------------------------
+
 
 class TestIsUserSuspended:
     """Tests for is_user_suspended()."""
@@ -78,6 +81,7 @@ class TestIsUserSuspended:
 # _suspend_user
 # ---------------------------------------------------------------------------
 
+
 class TestSuspendUser:
     """Tests for _suspend_user()."""
 
@@ -104,6 +108,7 @@ class TestSuspendUser:
 # ---------------------------------------------------------------------------
 # _check_misuse
 # ---------------------------------------------------------------------------
+
 
 class TestCheckMisuse:
     """Tests for _check_misuse() threshold logic."""

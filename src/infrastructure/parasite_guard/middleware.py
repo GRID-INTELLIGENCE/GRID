@@ -91,7 +91,7 @@ class ParasiteGuardMiddleware:
         # Find EventSubscriptionLeakDetector and wire the event bus
         # Note: DetectorChain stores detectors in .detectors (not ._detectors)
         for detector in self.detector_chain.detectors:
-            if hasattr(detector, 'set_event_bus'):
+            if hasattr(detector, "set_event_bus"):
                 detector.set_event_bus(event_bus)
                 logger.info(f"Wired EventBus to {detector.name} detector")
                 break
@@ -99,7 +99,7 @@ class ParasiteGuardMiddleware:
             logger.warning("EventSubscriptionLeakDetector not found in detector chain")
 
         # Also wire to sanitizer
-        if hasattr(self.deferred_sanitizer, 'set_event_bus'):
+        if hasattr(self.deferred_sanitizer, "set_event_bus"):
             self.deferred_sanitizer.set_event_bus(event_bus)
             logger.info("Wired EventBus to DeferredSanitizer")
 
@@ -195,16 +195,9 @@ class ParasiteGuardMiddleware:
                 # Publish event (fire and forget via create_task to avoid blocking response)
                 from infrastructure.event_bus import Event
 
-                event = Event(
-                    topic="system.security.parasite_detected",
-                    data=event_data,
-                    source="parasite_guard"
-                )
+                event = Event(topic="system.security.parasite_detected", data=event_data, source="parasite_guard")
 
-                asyncio.create_task(
-                    self.event_bus.publish(event),
-                    name=f"emit_parasite_event_{context.id}"
-                )
+                asyncio.create_task(self.event_bus.publish(event), name=f"emit_parasite_event_{context.id}")
             except Exception as e:
                 logger.error(f"Failed to emit parasite event: {e}")
 

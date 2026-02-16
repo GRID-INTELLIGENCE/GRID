@@ -48,6 +48,9 @@ class AuditEventType(Enum):
     WEALTH_DATA_EXPORT = "WEALTH_DATA_EXPORT"
     WEALTH_ANALYSIS_RUN = "WEALTH_ANALYSIS_RUN"
 
+    # Inference / AI
+    INFERENCE_REQUEST = "INFERENCE_REQUEST"
+
 
 class AuditLogger:
     """
@@ -227,7 +230,6 @@ class AuditLogger:
             resource="wealth_management",
             metadata={"operation": operation, "asset_count": asset_count},
         )
-
 
     def log_secret_access(self, secret_name: str, user_id: str = "system", success: bool = True) -> None:
         """Log secret access event."""

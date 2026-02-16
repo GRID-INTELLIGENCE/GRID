@@ -89,9 +89,11 @@ class ParasiteGuardConfig:
 
     # Global mode (overrides component modes if set)
     global_mode: GuardMode | None = field(
-        default_factory=lambda: GuardMode[os.getenv("PARASITE_GUARD_MODE", "DISABLED").upper()]
-        if os.getenv("PARASITE_GUARD_MODE")
-        else None
+        default_factory=lambda: (
+            GuardMode[os.getenv("PARASITE_GUARD_MODE", "DISABLED").upper()]
+            if os.getenv("PARASITE_GUARD_MODE")
+            else None
+        )
     )
 
     # Component-specific configs
@@ -102,12 +104,8 @@ class ParasiteGuardConfig:
     max_detection_depth: int = field(default_factory=lambda: int(os.getenv("PARASITE_MAX_DEPTH", "5")))
 
     # Anomaly detection settings (tunable thresholds)
-    anomaly_z_threshold: float = field(
-        default_factory=lambda: float(os.getenv("PARASITE_ANOMALY_Z_THRESHOLD", "3.5"))
-    )
-    anomaly_window_size: int = field(
-        default_factory=lambda: int(os.getenv("PARASITE_ANOMALY_WINDOW_SIZE", "60"))
-    )
+    anomaly_z_threshold: float = field(default_factory=lambda: float(os.getenv("PARASITE_ANOMALY_Z_THRESHOLD", "3.5")))
+    anomaly_window_size: int = field(default_factory=lambda: int(os.getenv("PARASITE_ANOMALY_WINDOW_SIZE", "60")))
     anomaly_adaptive_percentile: float = field(
         default_factory=lambda: float(os.getenv("PARASITE_ANOMALY_ADAPTIVE_PERCENTILE", "99.0"))
     )

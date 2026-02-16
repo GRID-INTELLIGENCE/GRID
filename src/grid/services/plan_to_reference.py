@@ -1,8 +1,9 @@
-from typing import List, Optional, Dict, Any, Union
+import re
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-import re
+from typing import Any
+
 
 class Severity(Enum):
     CRITICAL = "🔴"
@@ -10,32 +11,38 @@ class Severity(Enum):
     MEDIUM = "🟡"
     LOW = "🟢"
 
+
 class Impact(Enum):
     BLOCKING = "🎯"
     WARNING = "⚠️"
     INFO = "💡"
 
+
 class Status(Enum):
     RESOLVED = "✅"
     UNRESOLVED = "❌"
 
+
 @dataclass
 class PlanItem:
     """Represents a single item in a plan"""
+
     text: str
-    number: Optional[int] = None
+    number: int | None = None
     resolved: bool = False
-    reference: Optional[str] = None
+    reference: str | None = None
     severity: Severity = Severity.MEDIUM
     impact: Impact = Impact.INFO
     status: Status = Status.UNRESOLVED
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
+
 
 @dataclass
 class PlanReference:
     """Represents a resolved reference"""
+
     path: str
-    symbol: Optional[str] = None
+    symbol: str | None = None
     file_type: str = "file"
     exists: bool = False
     is_workspace_relative: bool = True
@@ -47,59 +54,70 @@ class PlanReference:
             return f"{self.path}:{self.symbol}"
         return self.path
 
+
 @dataclass
 class ResolutionResult:
     """Result of resolving a plan item to references"""
+
     plan_item: PlanItem
-    candidates: List[PlanReference] = field(default_factory=list)
-    selected_reference: Optional[PlanReference] = None
+    candidates: list[PlanReference] = field(default_factory=list)
+    selected_reference: PlanReference | None = None
     confidence_score: float = 0.0
-    error_message: Optional[str] = None
+    error_message: str | None = None
+
 
 @dataclass
 class PlanResolution:
     """Complete resolution of a plan"""
+
     source: str
-    items: List[ResolutionResult] = field(default_factory=list)
+    items: list[ResolutionResult] = field(default_factory=list)
     total_items: int = 0
     resolved_count: int = 0
     unresolved_count: int = 0
-    severity_breakdown: Dict[Severity, int] = field(default_factory=dict)
-    impact_breakdown: Dict[Impact, int] = field(default_factory=dict)
+    severity_breakdown: dict[Severity, int] = field(default_factory=dict)
+    impact_breakdown: dict[Impact, int] = field(default_factory=dict)
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
+
 
 @dataclass
 class FormatPivot:
     """Configuration for format conversion"""
+
     output_format: str  # 'csv', 'markdown', 'mermaid', 'verification_chain'
     include_metadata: bool = True
     include_verification: bool = True
-    custom_headers: Optional[Dict[str, str]] = None
+    custom_headers: dict[str, str] | None = None
+
 
 @dataclass
 class FlowTraceNode:
     """Node in a flow trace diagram"""
+
     id: str
     label: str
-    reference: Optional[str] = None
-    connections: List[str] = field(default_factory=list)
+    reference: str | None = None
+    connections: list[str] = field(default_factory=list)
     node_type: str = "process"  # process, decision, start, end
+
 
 @dataclass
 class VerificationChain:
     """Verification workflow chain"""
-    stages: List[Dict[str, Any]] = field(default_factory=list)
-    artifacts: List[str] = field(default_factory=list)
-    checkpoints: List[str] = field(default_factory=list)
+
+    stages: list[dict[str, Any]] = field(default_factory=list)
+    artifacts: list[str] = field(default_factory=list)
+    checkpoints: list[str] = field(default_factory=list)
+
 
 class PlanParser:
     """Parses various plan formats into structured items"""
 
     @staticmethod
-    def parse_numbered_plan(text: str) -> List[PlanItem]:
+    def parse_numbered_plan(text: str) -> list[PlanItem]:
         """Parse numbered list format: 1. Item 2. Item"""
         items = []
-        lines = text.strip().split('\n')
+        lines = text.strip().split("\n")
 
         for line in lines:
             line = line.strip()
@@ -107,7 +125,7 @@ class PlanParser:
                 continue
 
             # Match numbered items: "1. Item" or "1) Item"
-            match = re.match(r'^(\d+)[\.\)\s]+\s*(.+)$', line)
+            match = re.match(r"^(\d+)[\.\)\s]+\s*(.+)$", line)
             if match:
                 number = int(match.group(1))
                 text_content = match.group(2).strip()
@@ -116,10 +134,10 @@ class PlanParser:
         return items
 
     @staticmethod
-    def parse_bullet_plan(text: str) -> List[PlanItem]:
+    def parse_bullet_plan(text: str) -> list[PlanItem]:
         """Parse bullet list format: - Item • Item"""
         items = []
-        lines = text.strip().split('\n')
+        lines = text.strip().split("\n")
 
         for i, line in enumerate(lines, 1):
             line = line.strip()
@@ -127,17 +145,17 @@ class PlanParser:
                 continue
 
             # Match bullet items
-            if line.startswith(('- ', '• ', '* ')):
+            if line.startswith(("- ", "• ", "* ")):
                 text_content = line[2:].strip()
                 items.append(PlanItem(text=text_content, number=i))
 
         return items
 
     @staticmethod
-    def parse_checklist_plan(text: str) -> List[PlanItem]:
+    def parse_checklist_plan(text: str) -> list[PlanItem]:
         """Parse checklist format: ☐ Item ☑ Item"""
         items = []
-        lines = text.strip().split('\n')
+        lines = text.strip().split("\n")
 
         for i, line in enumerate(lines, 1):
             line = line.strip()
@@ -145,11 +163,12 @@ class PlanParser:
                 continue
 
             # Match checklist items
-            if line.startswith(('☐ ', '☑ ', '□ ', '☒ ')):
+            if line.startswith(("☐ ", "☑ ", "□ ", "☒ ")):
                 text_content = line[2:].strip()
                 items.append(PlanItem(text=text_content, number=i))
 
         return items
+
 
 class ReferenceResolver:
     """Resolves plan items to concrete file/symbol references"""
@@ -157,15 +176,15 @@ class ReferenceResolver:
     def __init__(self, workspace_root: Path):
         self.workspace_root = workspace_root
         self.reference_patterns = {
-            'auth': ['src/grid/api/routers/auth.py', 'src/grid/crud/user.py'],
-            'config': ['src/grid/core/config.py', '.vscode/settings.json'],
-            'test': ['tests/', 'test_'],
-            'docs': ['docs/', '.md'],
-            'rules': ['.claude/rules/', '.md'],
-            'skills': ['.cursor/skills/', 'SKILL.md']
+            "auth": ["src/grid/api/routers/auth.py", "src/grid/crud/user.py"],
+            "config": ["src/grid/core/config.py", ".vscode/settings.json"],
+            "test": ["tests/", "test_"],
+            "docs": ["docs/", ".md"],
+            "rules": [".claude/rules/", ".md"],
+            "skills": [".cursor/skills/", "SKILL.md"],
         }
 
-    def resolve_plan(self, plan_items: List[PlanItem]) -> PlanResolution:
+    def resolve_plan(self, plan_items: list[PlanItem]) -> PlanResolution:
         """Resolve all items in a plan"""
         results = []
 
@@ -173,11 +192,7 @@ class ReferenceResolver:
             result = self._resolve_single_item(item)
             results.append(result)
 
-        resolution = PlanResolution(
-            source="parsed plan",
-            items=results,
-            total_items=len(plan_items)
-        )
+        resolution = PlanResolution(source="parsed plan", items=results, total_items=len(plan_items))
 
         self._calculate_statistics(resolution)
         return resolution
@@ -208,24 +223,24 @@ class ReferenceResolver:
 
         return result
 
-    def _find_direct_matches(self, text: str) -> List[PlanReference]:
+    def _find_direct_matches(self, text: str) -> list[PlanReference]:
         """Find direct file/symbol matches"""
         candidates = []
 
         # Check for explicit file references in text
-        file_refs = re.findall(r'`([^`]+)`', text)
+        file_refs = re.findall(r"`([^`]+)`", text)
         for ref in file_refs:
             path = Path(ref)
             if path.exists() or self._is_workspace_path(path):
-                candidates.append(PlanReference(
-                    path=str(path),
-                    exists=path.exists(),
-                    is_workspace_relative=self._is_workspace_path(path)
-                ))
+                candidates.append(
+                    PlanReference(
+                        path=str(path), exists=path.exists(), is_workspace_relative=self._is_workspace_path(path)
+                    )
+                )
 
         return candidates
 
-    def _find_pattern_matches(self, text: str) -> List[PlanReference]:
+    def _find_pattern_matches(self, text: str) -> list[PlanReference]:
         """Find matches using keyword patterns"""
         candidates = []
         text_lower = text.lower()
@@ -234,25 +249,23 @@ class ReferenceResolver:
             if keyword in text_lower:
                 for pattern in patterns:
                     path = Path(pattern)
-                    if path.exists() or pattern.endswith('/'):
+                    if path.exists() or pattern.endswith("/"):
                         # Directory pattern
-                        candidates.append(PlanReference(
-                            path=pattern.rstrip('/'),
-                            file_type="directory",
-                            exists=path.exists(),
-                            is_workspace_relative=True
-                        ))
+                        candidates.append(
+                            PlanReference(
+                                path=pattern.rstrip("/"),
+                                file_type="directory",
+                                exists=path.exists(),
+                                is_workspace_relative=True,
+                            )
+                        )
                     else:
                         # File pattern
-                        candidates.append(PlanReference(
-                            path=pattern,
-                            exists=path.exists(),
-                            is_workspace_relative=True
-                        ))
+                        candidates.append(PlanReference(path=pattern, exists=path.exists(), is_workspace_relative=True))
 
         return candidates
 
-    def _find_contextual_matches(self, text: str) -> List[PlanReference]:
+    def _find_contextual_matches(self, text: str) -> list[PlanReference]:
         """Find matches using conversation context (placeholder)"""
         # This would use conversation history to find relevant files
         return []
@@ -276,10 +289,9 @@ class ReferenceResolver:
         # Calculate severity/impact breakdowns
         for result in resolution.items:
             item = result.plan_item
-            resolution.severity_breakdown[item.severity] = \
-                resolution.severity_breakdown.get(item.severity, 0) + 1
-            resolution.impact_breakdown[item.impact] = \
-                resolution.impact_breakdown.get(item.impact, 0) + 1
+            resolution.severity_breakdown[item.severity] = resolution.severity_breakdown.get(item.severity, 0) + 1
+            resolution.impact_breakdown[item.impact] = resolution.impact_breakdown.get(item.impact, 0) + 1
+
 
 class OutputGenerator:
     """Generates various output formats from resolved plans"""
@@ -330,7 +342,7 @@ class OutputGenerator:
                 f'"{item.reference or ""}"',
                 item.severity.name,
                 item.impact.name,
-                item.status.name
+                item.status.name,
             ]
             output.append(",".join(row))
 
@@ -353,10 +365,11 @@ class OutputGenerator:
 
             # Connect items in sequence
             if i > 1:
-                prev_id = f"item{i-1}"
+                prev_id = f"item{i - 1}"
                 output.append(f"{prev_id} --> {node_id}")
 
         return "\n".join(output)
+
 
 class PlanToReferenceService:
     """Main service for plan-to-reference functionality"""
@@ -397,7 +410,7 @@ class PlanToReferenceService:
         """Validate that a path is within workspace boundaries"""
         return self.resolver._is_workspace_path(Path(path))
 
-    def get_resolution_statistics(self, resolution: PlanResolution) -> Dict[str, Any]:
+    def get_resolution_statistics(self, resolution: PlanResolution) -> dict[str, Any]:
         """Get statistics about a resolution"""
         return {
             "total_items": resolution.total_items,
@@ -405,5 +418,5 @@ class PlanToReferenceService:
             "unresolved_count": resolution.unresolved_count,
             "resolution_rate": resolution.resolved_count / resolution.total_items if resolution.total_items > 0 else 0,
             "severity_breakdown": {k.name: v for k, v in resolution.severity_breakdown.items()},
-            "impact_breakdown": {k.name: v for k, v in resolution.impact_breakdown.items()}
+            "impact_breakdown": {k.name: v for k, v in resolution.impact_breakdown.items()},
         }

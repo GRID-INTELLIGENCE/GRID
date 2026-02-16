@@ -1,6 +1,7 @@
 """
 DRT (Don't Repeat Themselves) Monitoring Router.
 """
+
 from __future__ import annotations
 
 import logging
@@ -14,13 +15,13 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from ..repositories.drt import (
-    DRTBehavioralSignatureRepository,
     DRTAttackVectorRepository,
-    DRTViolationRepository,
-    DRTEscalatedEndpointRepository,
+    DRTBehavioralSignatureRepository,
     DRTConfigurationRepository,
-    DRTFalsePositiveRepository,
+    DRTEscalatedEndpointRepository,
     DRTFalsePositivePatternRepository,
+    DRTFalsePositiveRepository,
+    DRTViolationRepository,
 )
 
 logger = logging.getLogger(__name__)
@@ -96,8 +97,7 @@ async def get_drt_status(middleware: ComprehensiveDRTMiddleware = Depends(get_dr
 
 @router.post("/attack-vectors")
 async def add_attack_vector(
-    request: AttackVectorAddRequest,
-    middleware: ComprehensiveDRTMiddleware = Depends(get_drt_middleware)
+    request: AttackVectorAddRequest, middleware: ComprehensiveDRTMiddleware = Depends(get_drt_middleware)
 ) -> dict[str, str]:
     signature = BehavioralSignature(
         path_pattern=request.path_pattern,
@@ -111,20 +111,17 @@ async def add_attack_vector(
 
 
 @router.get("/escalated-endpoints")
-async def get_escalated_endpoints(middleware: ComprehensiveDRTMiddleware = Depends(get_drt_middleware)) -> dict[str, Any]:
+async def get_escalated_endpoints(
+    middleware: ComprehensiveDRTMiddleware = Depends(get_drt_middleware),
+) -> dict[str, Any]:
     now = datetime.utcnow()
-    escalated = {
-        path: expires.isoformat()
-        for path, expires in middleware.ESCALATED_ENDPOINTS.items()
-        if expires > now
-    }
+    escalated = {path: expires.isoformat() for path, expires in middleware.ESCALATED_ENDPOINTS.items() if expires > now}
     return {"escalated_endpoints": escalated}
 
 
 @router.post("/escalate/{path:path}")
 async def escalate_endpoint(
-    path: str,
-    middleware: ComprehensiveDRTMiddleware = Depends(get_drt_middleware)
+    path: str, middleware: ComprehensiveDRTMiddleware = Depends(get_drt_middleware)
 ) -> dict[str, str]:
     middleware._escalate_endpoint(path)
     return {"status": "success", "message": f"Endpoint escalated: {path}"}
@@ -132,8 +129,7 @@ async def escalate_endpoint(
 
 @router.post("/de-escalate/{path:path}")
 async def de_escalate_endpoint(
-    path: str,
-    middleware: ComprehensiveDRTMiddleware = Depends(get_drt_middleware)
+    path: str, middleware: ComprehensiveDRTMiddleware = Depends(get_drt_middleware)
 ) -> dict[str, str]:
     if path in middleware.ESCALATED_ENDPOINTS:
         del middleware.ESCALATED_ENDPOINTS[path]
@@ -142,7 +138,9 @@ async def de_escalate_endpoint(
 
 
 @router.get("/behavioral-history")
-async def get_behavioral_history(middleware: ComprehensiveDRTMiddleware = Depends(get_drt_middleware)) -> dict[str, Any]:
+async def get_behavioral_history(
+    middleware: ComprehensiveDRTMiddleware = Depends(get_drt_middleware),
+) -> dict[str, Any]:
     history = [
         {
             "path_pattern": b.path_pattern,
@@ -157,44 +155,44 @@ async def get_behavioral_history(middleware: ComprehensiveDRTMiddleware = Depend
 
 @router.post("/false-positives", response_model=FalsePositiveResponse)
 async def mark_false_positive(
-    request: FalsePositiveRequest,
-    middleware: ComprehensiveDRTMiddleware = Depends(get_drt_middleware)
+    request: FalsePositiveRequest, middleware: ComprehensiveDRTMiddleware = Depends(get_drt_middleware)
 ) -> FalsePositiveResponse:
     """Mark a violation as a false positive."""
     from ..db.engine import get_db_session
     from ..middleware.drt_metrics import record_false_positive
-    
+
     async with get_db_session() as session:
         fp_repo = DRTFalsePositiveRepository(session)
         pattern_repo = DRTFalsePositivePatternRepository(session)
         violation_repo = DRTViolationRepository(session)
-        
+
         # Mark the violation as false positive
         fp_id = await fp_repo.mark_false_positive(
             violation_id=request.violation_id,
             reason=request.reason,
             confidence=request.confidence,
-            marked_by="api_user"  # Could be enhanced to get actual user
+            marked_by="api_user",  # Could be enhanced to get actual user
         )
-        
+
         # Record metrics
         record_false_positive()
-        
+
         # Get violation details for pattern learning
         violation = await violation_repo.get_recent(limit=1, min_similarity=0.0)
         if violation:
             # Extract signature from violation (simplified - in real implementation
             # you'd reconstruct the signature from violation metadata)
             from ..middleware.drt_middleware import BehavioralSignature
+
             signature = BehavioralSignature(
                 path_pattern=violation[0]["request_path"],
                 method=violation[0]["request_method"],
                 headers=[],  # Would need to extract from meta
             )
-            
+
             # Record pattern for learning
             await pattern_repo.record_pattern(signature, is_false_positive=True)
-        
+
         return FalsePositiveResponse(
             id=fp_id,
             violation_id=request.violation_id,
@@ -206,23 +204,25 @@ async def mark_false_positive(
 
 
 @router.get("/false-positives/stats", response_model=FalsePositiveStatsResponse)
-async def get_false_positive_stats(middleware: ComprehensiveDRTMiddleware = Depends(get_drt_middleware)) -> FalsePositiveStatsResponse:
+async def get_false_positive_stats(
+    middleware: ComprehensiveDRTMiddleware = Depends(get_drt_middleware),
+) -> FalsePositiveStatsResponse:
     """Get false positive statistics."""
     from ..db.engine import get_db_session
-    
+
     async with get_db_session() as session:
         fp_repo = DRTFalsePositiveRepository(session)
         pattern_repo = DRTFalsePositivePatternRepository(session)
-        
+
         # Get statistics
         total_fp = await fp_repo.count()
         recent_fp = await fp_repo.count(hours=24)
         fp_rate = await fp_repo.get_false_positive_rate(hours=24)
-        
+
         # Get learned patterns
         patterns = await pattern_repo.get_patterns_above_threshold(threshold=0.5)
         patterns_learned = len(patterns)
-        
+
         return FalsePositiveStatsResponse(
             total_false_positives=total_fp,
             false_positive_rate=fp_rate,
@@ -234,18 +234,16 @@ async def get_false_positive_stats(middleware: ComprehensiveDRTMiddleware = Depe
 
 @router.get("/false-positives/recent")
 async def get_recent_false_positives(
-    hours: int = 24,
-    limit: int = 50,
-    middleware: ComprehensiveDRTMiddleware = Depends(get_drt_middleware)
+    hours: int = 24, limit: int = 50, middleware: ComprehensiveDRTMiddleware = Depends(get_drt_middleware)
 ) -> dict[str, Any]:
     """Get recent false positive records."""
     from ..db.engine import get_db_session
-    
+
     async with get_db_session() as session:
         fp_repo = DRTFalsePositiveRepository(session)
-        
+
         false_positives = await fp_repo.get_recent(hours=hours, limit=limit)
-        
+
         return {
             "false_positives": false_positives,
             "count": len(false_positives),
@@ -258,19 +256,16 @@ async def get_recent_false_positives(
 async def get_false_positive_patterns(
     threshold: float = 0.8,
     active_only: bool = True,
-    middleware: ComprehensiveDRTMiddleware = Depends(get_drt_middleware)
+    middleware: ComprehensiveDRTMiddleware = Depends(get_drt_middleware),
 ) -> dict[str, Any]:
     """Get learned false positive patterns."""
     from ..db.engine import get_db_session
-    
+
     async with get_db_session() as session:
         pattern_repo = DRTFalsePositivePatternRepository(session)
-        
-        patterns = await pattern_repo.get_patterns_above_threshold(
-            threshold=threshold,
-            active_only=active_only
-        )
-        
+
+        patterns = await pattern_repo.get_patterns_above_threshold(threshold=threshold, active_only=active_only)
+
         return {
             "patterns": patterns,
             "count": len(patterns),
@@ -282,17 +277,16 @@ async def get_false_positive_patterns(
 
 @router.delete("/false-positive-patterns/{pattern_id}")
 async def deactivate_false_positive_pattern(
-    pattern_id: str,
-    middleware: ComprehensiveDRTMiddleware = Depends(get_drt_middleware)
+    pattern_id: str, middleware: ComprehensiveDRTMiddleware = Depends(get_drt_middleware)
 ) -> dict[str, str]:
     """Deactivate a false positive pattern."""
     from ..db.engine import get_db_session
-    
+
     async with get_db_session() as session:
         pattern_repo = DRTFalsePositivePatternRepository(session)
-        
+
         success = await pattern_repo.deactivate_pattern(pattern_id)
-        
+
         if success:
             return {"status": "success", "message": f"Pattern {pattern_id} deactivated"}
         else:

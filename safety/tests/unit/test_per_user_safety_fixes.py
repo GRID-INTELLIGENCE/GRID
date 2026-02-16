@@ -4,8 +4,8 @@ Test script to verify per-user safety engine isolation and race condition fixes
 """
 
 import asyncio
-import time
-from safety.ai_workflow_safety import get_ai_workflow_safety_engine, TemporalSafetyConfig
+
+from safety.ai_workflow_safety import get_ai_workflow_safety_engine
 
 
 async def test_per_user_isolation():
@@ -23,10 +23,7 @@ async def test_per_user_isolation():
 
     # Test temporal isolation - user1 has a response
     assessment1 = await engine1.evaluate_interaction(
-        user_input="Hello",
-        ai_response="Hi there!",
-        response_time=1.0,
-        current_time=1000.0
+        user_input="Hello", ai_response="Hi there!", response_time=1.0, current_time=1000.0
     )
 
     # user2 should not be affected by user1's interaction
@@ -34,12 +31,12 @@ async def test_per_user_isolation():
         user_input="Hello",
         ai_response="Hi there!",
         response_time=1.0,
-        current_time=1000.1  # Very soon after user1
+        current_time=1000.1,  # Very soon after user1
     )
 
     # Both should be allowed since they have separate temporal tracking
-    assert assessment1['safety_allowed'] is True
-    assert assessment2['safety_allowed'] is True
+    assert assessment1["safety_allowed"] is True
+    assert assessment2["safety_allowed"] is True
 
     print("✓ Per-user isolation working correctly")
 
@@ -54,14 +51,11 @@ async def test_concurrent_access():
 
         for i in range(count):
             assessment = await engine.evaluate_interaction(
-                user_input=f"Message {i}",
-                ai_response=f"Response {i}",
-                response_time=0.5,
-                current_time=1000.0 + i * 0.1
+                user_input=f"Message {i}", ai_response=f"Response {i}", response_time=0.5, current_time=1000.0 + i * 0.1
             )
 
             # Should be allowed for this test
-            if not assessment['safety_allowed']:
+            if not assessment["safety_allowed"]:
                 print(f"User {user_id} interaction {i} blocked: {assessment.get('temporal_reason')}")
 
     # Run concurrent interactions for multiple users
@@ -102,15 +96,12 @@ async def test_statistics_safety():
 
     # Test with minimal data
     assessment = await engine.evaluate_interaction(
-        user_input="Hi",
-        ai_response="Hello",
-        response_time=1.0,
-        current_time=1000.0
+        user_input="Hi", ai_response="Hello", response_time=1.0, current_time=1000.0
     )
 
     # Should not crash with minimal data
-    assert assessment['safety_allowed'] is True
-    assert 'wellbeing_metrics' in assessment
+    assert assessment["safety_allowed"] is True
+    assert "wellbeing_metrics" in assessment
 
     # Test temporal pattern detection with minimal data
     pattern = engine.temporal_engine.get_temporal_pattern()

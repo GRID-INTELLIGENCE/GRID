@@ -87,21 +87,20 @@ async def create_api_key(
     if request.expires_in_days:
         expires_at = datetime.now(UTC) + timedelta(days=request.expires_in_days)
 
-    # Get user's subscription tier (default to FREE for now)
-    # TODO: Integrate with subscription repository in Phase 1.2
+    # Get user's subscription tier from subscription repository
     tier = SubscriptionTier.FREE
-
-    # Create API key record
-    api_key = APIKey(
-        user_id=user_id,
-        key_hash=hashed_key,
-        key_prefix=plaintext_key[:8],
-        tier=tier,
-        name=request.name,
-        expires_at=expires_at,
-    )
-
     async with uow.transaction():
+        subscription = await uow.subscriptions.get_active_by_user(user_id)
+        if subscription and subscription.is_active():
+            tier = subscription.tier
+        api_key = APIKey(
+            user_id=user_id,
+            key_hash=hashed_key,
+            key_prefix=plaintext_key[:8],
+            tier=tier,
+            name=request.name,
+            expires_at=expires_at,
+        )
         await uow.api_keys.add(api_key)
 
     return APIKeyCreatedResponse(

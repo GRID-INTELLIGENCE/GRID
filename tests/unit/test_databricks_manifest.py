@@ -12,7 +12,6 @@ import pytest
 
 from tools.rag.databricks_manifest import DatabricksFileState, DatabricksManifestTracker
 
-
 # ============================================================================
 # Test Fixtures
 # ============================================================================

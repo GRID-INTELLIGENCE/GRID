@@ -21,8 +21,8 @@ HAS_SKILLS = False
 HAS_RAG = False
 
 try:
-    from grid.skills.registry import SkillsRegistry
     from grid.skills.base import Skill
+    from grid.skills.registry import SkillsRegistry
 
     HAS_SKILLS = True
 except ImportError:
@@ -30,8 +30,8 @@ except ImportError:
     Skill = None
 
 try:
-    from tools.rag.rag_engine import RAGEngine
     from tools.rag.config import RAGConfig
+    from tools.rag.rag_engine import RAGEngine
 
     HAS_RAG = True
 except ImportError:
@@ -409,9 +409,7 @@ class TestRAGDocumentIndexing:
     @pytest.mark.asyncio
     async def test_query_after_indexing(self, rag_engine):
         """Test query returns newly indexed content."""
-        await rag_engine.index(
-            [{"content": "UniqueKeywordForTesting 123", "metadata": {"topic": "test"}}]
-        )
+        await rag_engine.index([{"content": "UniqueKeywordForTesting 123", "metadata": {"topic": "test"}}])
 
         result = await rag_engine.query("UniqueKeywordForTesting")
 

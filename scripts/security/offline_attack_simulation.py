@@ -14,7 +14,6 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
 
 # Add project root to path
 project_root = Path(__file__).parent.parent.parent
@@ -96,6 +95,7 @@ INJECTION_PAYLOADS = {
 @dataclass
 class AttackResult:
     """Result from a single attack test."""
+
     category: str
     payload: str
     detected: bool
@@ -108,6 +108,7 @@ class AttackResult:
 @dataclass
 class SimulationReport:
     """Aggregated simulation report."""
+
     total_attacks: int = 0
     detected_attacks: int = 0
     missed_attacks: int = 0
@@ -131,6 +132,7 @@ class OfflineAttackSimulator:
         """Initialize detection components."""
         try:
             from grid.security import get_threat_profile, initialize_threat_profile
+
             initialize_threat_profile()
             self.threat_profile = get_threat_profile()
             self.detectors_available = True
@@ -143,6 +145,7 @@ class OfflineAttackSimulator:
         try:
             from infrastructure.parasite_guard.config import ParasiteGuardConfig
             from infrastructure.parasite_guard.detectors import DetectorChain
+
             self.config = ParasiteGuardConfig()
             logger.info("Parasite Guard config loaded")
         except ImportError as e:
@@ -267,12 +270,12 @@ class OfflineAttackSimulator:
         self.report.detected_attacks = sum(1 for r in self.report.results if r.detected)
         self.report.missed_attacks = self.report.total_attacks - self.report.detected_attacks
         self.report.detection_rate = (
-            self.report.detected_attacks / self.report.total_attacks
-            if self.report.total_attacks > 0 else 0.0
+            self.report.detected_attacks / self.report.total_attacks if self.report.total_attacks > 0 else 0.0
         )
         self.report.avg_detection_time_ms = (
             sum(r.response_time_ms for r in self.report.results) / len(self.report.results)
-            if self.report.results else 0.0
+            if self.report.results
+            else 0.0
         )
 
         # Calculate by category
@@ -291,16 +294,16 @@ class OfflineAttackSimulator:
         print("SIMULATION RESULTS")
         print("=" * 80)
 
-        print(f"\n📊 Overall Metrics:")
+        print("\n📊 Overall Metrics:")
         print(f"  Total Attacks Tested:  {self.report.total_attacks}")
         print(f"  Attacks Detected:      {self.report.detected_attacks}")
         print(f"  Attacks Missed:        {self.report.missed_attacks}")
         print(f"  Detection Rate:        {self.report.detection_rate:.1%}")
         print(f"  Avg Detection Time:    {self.report.avg_detection_time_ms:.3f}ms")
 
-        print(f"\n📋 Results by Category:")
+        print("\n📋 Results by Category:")
         print(f"  {'Category':<25} {'Detected':<10} {'Missed':<10} {'Rate':<10}")
-        print(f"  {'-'*55}")
+        print(f"  {'-' * 55}")
 
         for category, stats in sorted(self.report.by_category.items()):
             rate = stats["detected"] / stats["total"] if stats["total"] > 0 else 0.0
@@ -310,13 +313,13 @@ class OfflineAttackSimulator:
         # Print missed attacks for review
         missed = [r for r in self.report.results if not r.detected]
         if missed:
-            print(f"\n⚠️  Missed Attacks (requiring attention):")
+            print("\n⚠️  Missed Attacks (requiring attention):")
             for r in missed[:10]:  # Show first 10
                 print(f"  - [{r.category}] {r.payload[:60]}...")
             if len(missed) > 10:
                 print(f"  ... and {len(missed) - 10} more")
 
-        print(f"\n{'='*80}")
+        print(f"\n{'=' * 80}")
 
         # Overall assessment
         if self.report.detection_rate >= 0.9:
@@ -328,7 +331,7 @@ class OfflineAttackSimulator:
         else:
             print("❌ POOR: Detection rate below 50%, critical improvements needed")
 
-        print(f"{'='*80}\n")
+        print(f"{'=' * 80}\n")
 
 
 async def run_state_machine_test():
@@ -344,7 +347,7 @@ async def run_state_machine_test():
         )
 
         sm = ParasiteStateMachine()
-        print(f"\n✅ State Machine initialized")
+        print("\n✅ State Machine initialized")
         print(f"   Initial state: {sm.current_state}")
 
         transitions = [
@@ -355,7 +358,7 @@ async def run_state_machine_test():
             ("return_to_monitoring", "Return to monitoring"),
         ]
 
-        print(f"\n🔄 Testing State Transitions:")
+        print("\n🔄 Testing State Transitions:")
         for action, description in transitions:
             try:
                 if hasattr(sm, action):
@@ -384,7 +387,7 @@ async def run_detector_chain_test():
         config = ParasiteGuardConfig()
 
         # Try to create detector chain
-        print(f"\n✅ Parasite Guard Config loaded")
+        print("\n✅ Parasite Guard Config loaded")
         print(f"   Enabled: {config.enabled}")
         print(f"   Mode: {config.global_mode.name if config.global_mode else 'component-level'}")
 

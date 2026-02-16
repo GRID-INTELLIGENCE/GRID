@@ -7,6 +7,7 @@ Provides integration with Stripe payment processing.
 from __future__ import annotations
 
 import logging
+import os
 from typing import Any
 
 try:
@@ -129,12 +130,11 @@ class StripeGateway(PaymentGatewayBase):
     ) -> dict[str, Any]:
         """Create a Stripe subscription."""
         try:
-            # Map tier to Stripe price ID (would come from config/database)
-            # For now, using placeholder - should be configured properly
+            # Map tier to Stripe price ID from environment (STRIPE_PRICE_STARTER, etc.)
             price_map = {
-                "starter": "price_starter",  # Should be actual Stripe price ID
-                "professional": "price_pro",
-                "enterprise": "price_enterprise",
+                "starter": os.getenv("STRIPE_PRICE_STARTER", "price_starter"),
+                "professional": os.getenv("STRIPE_PRICE_PROFESSIONAL", "price_pro"),
+                "enterprise": os.getenv("STRIPE_PRICE_ENTERPRISE", "price_enterprise"),
             }
 
             price_id = price_map.get(tier.lower())

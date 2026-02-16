@@ -113,8 +113,7 @@ class TestRedTeamVectors:
             assert result.reason_code is not None
         else:
             assert result.blocked is False, (
-                f"[{category}] FALSE POSITIVE — unexpected block for: "
-                f"{input_text!r} (code={result.reason_code})"
+                f"[{category}] FALSE POSITIVE — unexpected block for: {input_text!r} (code={result.reason_code})"
             )
 
 
@@ -153,8 +152,7 @@ class TestDetectionRate:
         fp_rate = len(false_positives) / total if total > 0 else 0
         max_fp_rate = 0.05  # Max 5% false positive rate
 
-        assert (
-            fp_rate <= max_fp_rate
-        ), f"False positive rate {fp_rate:.1%} exceeds {max_fp_rate:.0%}. " f"False positives:\n" + "\n".join(
-            f"  {text} (code={code})" for text, code in false_positives
+        assert fp_rate <= max_fp_rate, (
+            f"False positive rate {fp_rate:.1%} exceeds {max_fp_rate:.0%}. "
+            f"False positives:\n" + "\n".join(f"  {text} (code={code})" for text, code in false_positives)
         )

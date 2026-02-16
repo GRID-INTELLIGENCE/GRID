@@ -1,12 +1,12 @@
-from pydantic import BaseModel, ConfigDict
-from typing import Optional
 from datetime import datetime
+
+from pydantic import BaseModel, ConfigDict
 
 
 class UserBase(BaseModel):
     username: str
     email: str
-    full_name: Optional[str] = None
+    full_name: str | None = None
     is_active: bool = True
     trust_tier: str = "user"  # anon, user, verified, privileged
 
@@ -16,13 +16,13 @@ class UserCreate(UserBase):
 
 
 class UserUpdate(UserBase):
-    password: Optional[str] = None
+    password: str | None = None
 
 
 class User(UserBase):
     id: int
     created_at: datetime
-    last_login: Optional[datetime] = None
+    last_login: datetime | None = None
     login_count: int = 0
 
     model_config = ConfigDict(from_attributes=True)
@@ -34,4 +34,4 @@ class Token(BaseModel):
 
 
 class TokenData(BaseModel):
-    username: Optional[str] = None
+    username: str | None = None

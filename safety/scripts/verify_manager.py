@@ -29,14 +29,18 @@ def test_deep_object_analysis():
     unsafe_code_nested = {"meta": {"script": "eval('os.system(\"rm -rf\")')"}}
     result = manager.evaluate_request("user2", "user", unsafe_code_nested)
     assert not result.is_safe, "Unsafe nested code NOT blocked"
-    assert any("Forbidden function call: eval" in r for r in result.violations), f"Unexpected reasons: {result.violations}"
+    assert any("Forbidden function call: eval" in r for r in result.violations), (
+        f"Unexpected reasons: {result.violations}"
+    )
     logger.info(f"PASS: Nested Code Injection blocked: {result.violations[0]}")
 
     # Case 3: Forbidden Config Key
     unsafe_config = {"settings": {"debug_mode": True, "admin": True}}
     result = manager.evaluate_request("user3", "user", unsafe_config)
     assert not result.is_safe, "Unsafe config key NOT blocked"
-    assert any("Unauthorized configuration key" in r for r in result.violations), f"Unexpected reasons: {result.violations}"
+    assert any("Unauthorized configuration key" in r for r in result.violations), (
+        f"Unexpected reasons: {result.violations}"
+    )
     logger.info(f"PASS: Forbidden Config Key blocked: {result.violations[0]}")
 
     # Case 4: Harmful Prompt (RuleEngine pattern)

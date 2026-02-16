@@ -31,8 +31,8 @@ except ImportError:
     CaseResponse = None
 
 try:
-    from grid.skills.registry import SkillsRegistry
     from grid.skills.base import Skill
+    from grid.skills.registry import SkillsRegistry
 
     HAS_SKILLS = True
 except ImportError:

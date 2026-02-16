@@ -10,14 +10,12 @@ def client():
     with TestClient(app) as c:
         yield c
 
+
 def test_detect_endpoint(client):
     response = client.post(
         "/privacy/detect",
-        json={
-            "text": "My email is test@example.com",
-            "preset": "balanced"
-        },
-        headers={"Authorization": "Bearer mock-token"} # Mock auth if needed or rely on degraded/dev mode
+        json={"text": "My email is test@example.com", "preset": "balanced"},
+        headers={"Authorization": "Bearer mock-token"},  # Mock auth if needed or rely on degraded/dev mode
     )
     # Auth might fail if not mocked or configured.
     # SafetyMiddleware checks auth.
@@ -33,14 +31,13 @@ def test_privacy_health(client):
     response = client.get("/health")
     assert response.status_code == 200
 
+
 def test_batch_limit_validation(client):
     # Test with 101 items (should fail)
     texts = ["a"] * 101
-    response = client.post(
-        "/privacy/batch",
-        json={"texts": texts}
-    )
+    response = client.post("/privacy/batch", json={"texts": texts})
     assert response.status_code == 422  # Validation error
+
 
 def test_batch_success(client):
     # Test with 100 items (should pass)
@@ -55,7 +52,7 @@ def test_batch_success(client):
     response = client.post(
         "/privacy/batch",
         json={"texts": texts},
-        headers={"Authorization": "Bearer mock"} # user dependency might fail if not degraded/mocked effectively
+        headers={"Authorization": "Bearer mock"},  # user dependency might fail if not degraded/mocked effectively
     )
     # If 422, it's validation. If 401/403/200, validation passed.
     assert response.status_code != 422, f"Validation failed: {response.text}"

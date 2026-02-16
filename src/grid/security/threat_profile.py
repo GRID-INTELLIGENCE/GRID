@@ -19,18 +19,15 @@ Date: 2026-02-05
 from __future__ import annotations
 
 import hashlib
-import json
 import logging
 import os
 import re
 import sys
 import threading
-import time
 from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from enum import Enum, auto
-from functools import lru_cache
 from pathlib import Path
 from typing import Any, Callable, TypeVar
 
@@ -957,24 +954,30 @@ class PreventionFramework:
             SecurityAssertion(
                 name="no_debug_mode_production",
                 description="Debug mode must be disabled in production",
-                check=lambda: os.getenv("GRID_ENVIRONMENT") != "production"
-                or os.getenv("DEBUG", "0").lower() not in ("1", "true"),
+                check=lambda: (
+                    os.getenv("GRID_ENVIRONMENT") != "production"
+                    or os.getenv("DEBUG", "0").lower() not in ("1", "true")
+                ),
                 severity=ThreatSeverity.HIGH,
             ),
             SecurityAssertion(
                 name="https_required_production",
                 description="HTTPS must be required in production",
-                check=lambda: os.getenv("GRID_ENVIRONMENT") != "production"
-                or os.getenv("REQUIRE_HTTPS", "1").lower() in ("1", "true"),
+                check=lambda: (
+                    os.getenv("GRID_ENVIRONMENT") != "production"
+                    or os.getenv("REQUIRE_HTTPS", "1").lower() in ("1", "true")
+                ),
                 severity=ThreatSeverity.HIGH,
             ),
             SecurityAssertion(
                 name="secrets_not_in_env",
                 description="Secrets should use secrets manager, not environment",
-                check=lambda: not any(
-                    k.endswith(("_KEY", "_SECRET", "_TOKEN", "_PASSWORD")) and len(v) > 10
-                    for k, v in os.environ.items()
-                    if not k.startswith("GRID_")
+                check=lambda: (
+                    not any(
+                        k.endswith(("_KEY", "_SECRET", "_TOKEN", "_PASSWORD")) and len(v) > 10
+                        for k, v in os.environ.items()
+                        if not k.startswith("GRID_")
+                    )
                 ),
                 severity=ThreatSeverity.MEDIUM,
             ),

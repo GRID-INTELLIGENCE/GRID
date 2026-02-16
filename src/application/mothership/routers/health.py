@@ -787,9 +787,9 @@ async def chaos_resilience_health() -> dict[str, Any]:
     to ensure system stability under chaos testing conditions.
     """
     try:
-        from ..utils.resource_management import get_resource_pool, _resource_pools, _circuit_breakers
-        from ..utils.graceful_degradation import get_degradation_manager
         from ..middleware.circuit_breaker import get_circuit_manager
+        from ..utils.graceful_degradation import get_degradation_manager
+        from ..utils.resource_management import _circuit_breakers, _resource_pools, get_resource_pool
 
         # Get degradation manager status
         degradation_mgr = get_degradation_manager()
@@ -854,14 +854,20 @@ async def chaos_resilience_health() -> dict[str, Any]:
         return {
             "timestamp": utc_now().isoformat(),
             "resilience_score": resilience_score,
-            "overall_status": "healthy" if resilience_score > 0.7 else "degraded" if resilience_score > 0.3 else "critical",
+            "overall_status": "healthy"
+            if resilience_score > 0.7
+            else "degraded"
+            if resilience_score > 0.3
+            else "critical",
             "components": {
                 "degradation_manager": system_status,
                 "circuit_breakers": circuit_breakers,
                 "resource_pools": resource_pools,
                 "circuit_middleware": circuit_status,
             },
-            "recommendations": _get_resilience_recommendations(resilience_score, system_status, resource_pools, circuit_breakers),
+            "recommendations": _get_resilience_recommendations(
+                resilience_score, system_status, resource_pools, circuit_breakers
+            ),
         }
 
     except ImportError as e:

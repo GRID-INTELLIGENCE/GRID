@@ -4,6 +4,7 @@ This middleware automatically detects and reports data corruption events during
 request processing. It integrates with the DataCorruptionPenaltyTracker to apply
 penalties to endpoints that cause data or environment corruption.
 """
+
 from __future__ import annotations
 
 import logging
@@ -23,9 +24,10 @@ from grid.resilience.data_corruption_penalty import (
 
 logger = logging.getLogger(__name__)
 
+
 class DataCorruptionDetectionMiddleware(BaseHTTPMiddleware):
     """Middleware that detects and reports data corruption events."""
-    
+
     def __init__(
         self,
         app: ASGIApp,
@@ -69,13 +71,13 @@ class DataCorruptionDetectionMiddleware(BaseHTTPMiddleware):
             },
         }
         self._tracked_requests: dict[str, dict[str, Any]] = {}
-    
+
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         """Process a request and detect any corruption events."""
         request_id = str(id(request))
         correlation_id = request.headers.get("X-Correlation-ID", str(datetime.now(UTC).timestamp()))
         endpoint = f"{request.method} {request.url.path}"
-        
+
         # Track request metadata
         self._tracked_requests[request_id] = {
             "endpoint": endpoint,
@@ -85,40 +87,36 @@ class DataCorruptionDetectionMiddleware(BaseHTTPMiddleware):
                 "user_agent": request.headers.get("User-Agent"),
                 "content_type": request.headers.get("Content-Type"),
                 "client_ip": request.client.host if request.client else None,
-            }
+            },
         }
-        
+
         try:
             response = await call_next(request)
-            
+
             # Check for corruption indicators in response
-            await self._check_response_for_corruption(
-                request_id, response, correlation_id
-            )
-            
+            await self._check_response_for_corruption(request_id, response, correlation_id)
+
             # Add corruption penalty headers to response
             penalty = self.tracker.get_endpoint_penalty(endpoint)
             response.headers["X-Data-Penalty-Score"] = str(penalty)
             response.headers["X-Data-Penalty-Correlation-ID"] = correlation_id
-            
+
             if self.tracker.is_endpoint_critical(endpoint):
                 response.headers["X-Endpoint-Critical"] = "true"
                 response.headers["X-Endpoint-Warning"] = "Data corruption detected"
-            
+
             return response
-            
+
         except Exception as e:
             # Record exception as potential corruption event
-            await self._record_exception_as_corruption(
-                request_id, e, correlation_id
-            )
-            
+            await self._record_exception_as_corruption(request_id, e, correlation_id)
+
             # Re-raise the exception to let other handlers deal with it
             raise
         finally:
             # Clean up tracking data
             self._tracked_requests.pop(request_id, None)
-    
+
     async def _check_response_for_corruption(
         self,
         request_id: str,
@@ -129,20 +127,18 @@ class DataCorruptionDetectionMiddleware(BaseHTTPMiddleware):
         request_data = self._tracked_requests.get(request_id)
         if not request_data:
             return
-        
+
         endpoint = request_data["endpoint"]
         status_code = str(response.status_code)
-        
+
         # Check status code indicators
         if status_code in self.corruption_indicators:
             indicator = self.corruption_indicators[status_code]
-            
+
             # Only record if it's a server error
             if response.status_code >= 500:
-                self._record_corruption_from_indicator(
-                    endpoint, correlation_id, indicator, request_data
-                )
-    
+                self._record_corruption_from_indicator(endpoint, correlation_id, indicator, request_data)
+
     def _record_corruption_from_indicator(
         self,
         endpoint: str,
@@ -154,7 +150,7 @@ class DataCorruptionDetectionMiddleware(BaseHTTPMiddleware):
         severity = indicator.get("severity", CorruptionSeverity.LOW)
         corruption_type = indicator.get("corruption_type", CorruptionType.ENVIRONMENT)
         description = indicator.get("description", "Unknown corruption detected")
-        
+
         penalty = record_corruption_event(
             endpoint=endpoint,
             severity=severity,
@@ -163,12 +159,9 @@ class DataCorruptionDetectionMiddleware(BaseHTTPMiddleware):
             correlation_id=correlation_id,
             metadata=request_data.get("metadata", {}),
         )
-        
-        logger.warning(
-            "Corruption indicator detected for %s: %s (penalty: %.2f)",
-            endpoint, description, penalty
-        )
-    
+
+        logger.warning("Corruption indicator detected for %s: %s (penalty: %.2f)", endpoint, description, penalty)
+
     async def _record_exception_as_corruption(
         self,
         request_id: str,
@@ -179,13 +172,13 @@ class DataCorruptionDetectionMiddleware(BaseHTTPMiddleware):
         request_data = self._tracked_requests.get(request_id)
         if not request_data:
             return
-        
+
         endpoint = request_data["endpoint"]
         exception_type = type(exception).__name__
-        
+
         # Determine severity and type based on exception
         corruption_info = self._classify_exception(exception)
-        
+
         penalty = record_corruption_event(
             endpoint=endpoint,
             severity=corruption_info["severity"],
@@ -198,18 +191,20 @@ class DataCorruptionDetectionMiddleware(BaseHTTPMiddleware):
             },
             stack_trace=str(exception) if hasattr(exception, "__traceback__") else None,
         )
-        
+
         logger.error(
             "Exception detected as corruption for %s: %s (penalty: %.2f)",
-            endpoint, str(exception), penalty,
-            exc_info=True
+            endpoint,
+            str(exception),
+            penalty,
+            exc_info=True,
         )
-    
+
     def _classify_exception(self, exception: Exception) -> dict[str, Any]:
         """Classify an exception to determine corruption severity and type."""
         exception_name = type(exception).__name__.lower()
         exception_str = str(exception).lower()
-        
+
         # Database integrity errors
         if any(term in exception_name for term in ["integrity", "constraint", "foreign"]):
             return {
@@ -217,7 +212,7 @@ class DataCorruptionDetectionMiddleware(BaseHTTPMiddleware):
                 "corruption_type": CorruptionType.REFERENTIAL_INTEGRITY,
                 "description": "Database integrity constraint violated",
             }
-        
+
         # Validation errors
         if any(term in exception_name for term in ["validation", "value", "type"]):
             return {
@@ -225,7 +220,7 @@ class DataCorruptionDetectionMiddleware(BaseHTTPMiddleware):
                 "corruption_type": CorruptionType.DATA_VALIDATION,
                 "description": "Data validation failed",
             }
-        
+
         # Deadlock and concurrency issues
         if any(term in exception_str for term in ["deadlock", "lock timeout", "concurrent"]):
             return {
@@ -233,7 +228,7 @@ class DataCorruptionDetectionMiddleware(BaseHTTPMiddleware):
                 "corruption_type": CorruptionType.PERFORMANCE,
                 "description": "Concurrency issue detected",
             }
-        
+
         # Schema errors
         if any(term in exception_str for term in ["column", "table", "schema", "does not exist"]):
             return {
@@ -241,7 +236,7 @@ class DataCorruptionDetectionMiddleware(BaseHTTPMiddleware):
                 "corruption_type": CorruptionType.SCHEMA_VIOLATION,
                 "description": "Schema violation detected",
             }
-        
+
         # Connection and environment errors
         if any(term in exception_name for term in ["connection", "timeout", "refused", "unavailable"]):
             return {
@@ -249,30 +244,26 @@ class DataCorruptionDetectionMiddleware(BaseHTTPMiddleware):
                 "corruption_type": CorruptionType.ENVIRONMENT,
                 "description": "Environment connectivity issue",
             }
-        
+
         # Default: environment error with medium severity
         return {
             "severity": CorruptionSeverity.MEDIUM,
             "corruption_type": CorruptionType.ENVIRONMENT,
             "description": "Unhandled exception detected",
         }
-    
+
     def get_endpoint_health_report(self, endpoint: str) -> dict[str, Any]:
         """Get a health report for a specific endpoint."""
         return self.tracker.get_endpoint_health(endpoint)
-    
+
     def get_critical_endpoints_report(self) -> list[dict[str, Any]]:
         """Get a report of all critical endpoints."""
         critical = self.tracker.get_critical_endpoints()
         return [
-            {
-                "endpoint": endpoint,
-                "penalty_score": penalty,
-                **self.tracker.get_endpoint_health(endpoint)
-            }
+            {"endpoint": endpoint, "penalty_score": penalty, **self.tracker.get_endpoint_health(endpoint)}
             for endpoint, penalty in critical
         ]
-    
+
     def add_corruption_indicator(
         self,
         name: str,
@@ -294,12 +285,12 @@ def create_data_corruption_middleware(
     critical_endpoints: set[str] | None = None,
 ) -> DataCorruptionDetectionMiddleware:
     """Create and attach the data corruption detection middleware to a FastAPI app.
-    
+
     Args:
         app: The FastAPI application
         tracker: Optional custom tracker instance
         critical_endpoints: Set of endpoints to always monitor closely
-        
+
     Returns:
         The configured middleware instance
     """
@@ -308,9 +299,9 @@ def create_data_corruption_middleware(
         tracker=tracker,
         critical_endpoints=critical_endpoints,
     )
-    
+
     # Add middleware to app (it will be handled by FastAPI's middleware stack)
     app.add_middleware(DataCorruptionDetectionMiddleware)
-    
+
     logger.info("Data corruption detection middleware initialized")
     return middleware

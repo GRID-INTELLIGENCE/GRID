@@ -1,20 +1,21 @@
 """
 Verification script for GRID security and utility fixes
 """
-import unittest
-import tempfile
+
 import os
+import tempfile
+import unittest
 from unittest.mock import MagicMock, patch
+
 from sqlalchemy.orm import Session
+from src.grid.models.user import User
 
 # Import the modules to test
 from src.grid.security.environment import EnvironmentSettings, environment_settings
 from tests.utils.path_manager import PathManager
-from src.grid.core.security import authenticate_user
-from src.grid.models.user import User
+
 
 class TestFixes(unittest.TestCase):
-
     def test_path_manager_validation(self):
         """Test PathManager input validation"""
         # Test empty string
@@ -31,8 +32,8 @@ class TestFixes(unittest.TestCase):
             PathManager.setup_test_paths(non_existent)
 
         # Test valid temporary file
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
-            f.write('# Test file')
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
+            f.write("# Test file")
             temp_file = f.name
 
         try:
@@ -51,14 +52,14 @@ class TestFixes(unittest.TestCase):
 
         # Test LOG_LEVEL invalid
         with self.assertRaises(ValidationError):
-            settings = EnvironmentSettings(LOG_LEVEL='INVALID')
+            settings = EnvironmentSettings(LOG_LEVEL="INVALID")
 
         # Test GOOGLE_CLOUD_PROJECT empty string
         with self.assertRaises(ValidationError):
-            settings = EnvironmentSettings(GOOGLE_CLOUD_PROJECT='')
+            settings = EnvironmentSettings(GOOGLE_CLOUD_PROJECT="")
 
-    @patch('src.grid.core.security.verify_password')
-    @patch('src.grid.core.security.crud_get_user_by_username')
+    @patch("src.grid.core.security.verify_password")
+    @patch("src.grid.core.security.crud_get_user_by_username")
     def test_security_guards(self, mock_get_user, mock_verify):
         """Test security environment guards"""
         # Save original environment
@@ -66,7 +67,7 @@ class TestFixes(unittest.TestCase):
 
         # Setup mock user and db
         mock_db = MagicMock(spec=Session)
-        mock_user = User(username='testuser', hashed_password='hashed_secret', is_active=True)
+        mock_user = User(username="testuser", hashed_password="hashed_secret", is_active=True)
         mock_get_user.return_value = mock_user
         mock_verify.return_value = True
 
@@ -96,6 +97,6 @@ class TestFixes(unittest.TestCase):
         finally:
             environment_settings.MOTHERSHIP_ENVIRONMENT = original_env
 
-if __name__ == '__main__':
-    unittest.main()
 
+if __name__ == "__main__":
+    unittest.main()

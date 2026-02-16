@@ -22,6 +22,7 @@ from safety.api.security_headers import (
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _make_request(
     method: str = "GET",
     path: str = "/",
@@ -55,6 +56,7 @@ def _make_request(
 # ---------------------------------------------------------------------------
 # Security headers presence
 # ---------------------------------------------------------------------------
+
 
 class TestSecurityHeaders:
     """Verify all expected security headers are set."""
@@ -112,6 +114,7 @@ class TestSecurityHeaders:
 # CSRF token generation + validation
 # ---------------------------------------------------------------------------
 
+
 class TestCSRFTokens:
     """Tests for CSRF token generation and validation."""
 
@@ -159,6 +162,7 @@ class TestCSRFTokens:
 # CSRF exempt paths
 # ---------------------------------------------------------------------------
 
+
 class TestCSRFExemptPaths:
     """Verify CSRF-exempt prefixes bypass validation."""
 
@@ -175,20 +179,17 @@ class TestCSRFExemptPaths:
 # CORS check
 # ---------------------------------------------------------------------------
 
+
 class TestCORSCheck:
     """Tests for CORS origin validation."""
 
     def test_allowed_origin_passes(self):
-        middleware = SecurityHeadersMiddleware(
-            None, allowed_origins={"https://app.example.com"}
-        )
+        middleware = SecurityHeadersMiddleware(None, allowed_origins={"https://app.example.com"})
         request = _make_request(headers={"origin": "https://app.example.com"})
         assert middleware._check_cors(request) is True
 
     def test_disallowed_origin_fails(self):
-        middleware = SecurityHeadersMiddleware(
-            None, allowed_origins={"https://app.example.com"}
-        )
+        middleware = SecurityHeadersMiddleware(None, allowed_origins={"https://app.example.com"})
         request = _make_request(headers={"origin": "https://evil.com"})
         assert middleware._check_cors(request) is False
 
@@ -201,6 +202,7 @@ class TestCORSCheck:
 # ---------------------------------------------------------------------------
 # get_security_headers utility
 # ---------------------------------------------------------------------------
+
 
 class TestGetSecurityHeaders:
     """Tests for the get_security_headers() utility."""

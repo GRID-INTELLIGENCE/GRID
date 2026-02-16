@@ -254,16 +254,59 @@ class GeminiAuthenticator:
         return params
 
     async def _get_oauth_token(self) -> str:
-        """Get OAuth2 token (placeholder for implementation)."""
-        # Implementation would use google-auth library
-        logger.warning("OAuth2 authentication not fully implemented")
-        return self._token or ""
+        """Get OAuth2 token using google-auth (ADC or default credentials)."""
+        try:
+            import google.auth
+            from google.auth.transport.requests import Request
+
+            def _fetch() -> str:
+                credentials, _ = google.auth.default(
+                    scopes=["https://www.googleapis.com/auth/cloud-platform"]
+                )
+                if credentials.expired:
+                    credentials.refresh(Request())
+                return credentials.token or ""
+
+            return await asyncio.to_thread(_fetch) or self._token or ""
+        except ImportError:
+            logger.warning("google-auth not installed. Install with: pip install google-auth")
+            return self._token or ""
+        except Exception as e:
+            logger.warning("OAuth2 token refresh failed: %s", e)
+            return self._token or ""
 
     async def _get_service_account_token(self) -> str:
-        """Get service account token (placeholder for implementation)."""
-        # Implementation would use google-auth library with service account
-        logger.warning("Service account authentication not fully implemented")
-        return self._token or ""
+        """Get service account token using google-auth."""
+        try:
+            from google.oauth2 import service_account
+            from google.auth.transport.requests import Request
+
+            path = self.config.service_account_path or os.environ.get(
+                "GOOGLE_APPLICATION_CREDENTIALS"
+            )
+            if path and os.path.isfile(path):
+                credentials = service_account.Credentials.from_service_account_file(
+                    path, scopes=["https://www.googleapis.com/auth/cloud-platform"]
+                )
+                credentials.refresh(Request())
+                return credentials.token or ""
+            import google.auth
+
+            def _adc_token() -> str:
+                creds, _ = google.auth.default(
+                    scopes=["https://www.googleapis.com/auth/cloud-platform"]
+                )
+                if creds.expired:
+                    creds.refresh(Request())
+                return creds.token or ""
+
+            return await asyncio.to_thread(_adc_token) or self._token or ""
+        except ImportError:
+            logger.warning("google-auth not installed. Install with: pip install google-auth")
+            return self._token or ""
+        except Exception as e:
+            logger.warning("Service account token refresh failed: %s", e)
+            return self._token or ""
 
 
 class GeminiCloudClient:

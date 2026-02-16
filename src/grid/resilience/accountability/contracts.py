@@ -7,16 +7,19 @@ Defines the contract schema for accountability enforcement, including:
 - Security requirements
 - Compliance requirements
 """
+
 import re
 from dataclasses import dataclass, field
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from enum import Enum
-from typing import Any, Dict, List, Literal, Optional, Union
+from typing import Any, Literal, Optional
+
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 
 class ContractSeverity(str, Enum):
     """Severity levels for contract violations."""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -25,6 +28,7 @@ class ContractSeverity(str, Enum):
 
 class ViolationType(str, Enum):
     """Types of contract violations."""
+
     AUTHENTICATION = "authentication"
     AUTHORIZATION = "authorization"
     VALIDATION = "validation"
@@ -41,6 +45,7 @@ class ViolationType(str, Enum):
 @dataclass
 class ContractViolation:
     """Represents a single contract violation."""
+
     type: ViolationType
     severity: ContractSeverity
     message: str
@@ -49,14 +54,14 @@ class ContractViolation:
     expected_value: Any = None
     penalty_points: int = 10
     timestamp: datetime = field(default_factory=lambda: datetime.now(UTC))
-    
+
     # Alias for backward compatibility
     @property
     def violation_type(self) -> ViolationType:
         """Alias for type property."""
         return self.type
-    
-    def to_dict(self) -> Dict[str, Any]:
+
+    def to_dict(self) -> dict[str, Any]:
         """Convert violation to dictionary."""
         return {
             "type": self.type.value,
@@ -74,31 +79,32 @@ class ContractViolation:
 @dataclass
 class EnforcementResult:
     """Result of contract enforcement."""
+
     allowed: bool = True
-    violations: List[ContractViolation] = field(default_factory=list)
-    actions_taken: List[str] = field(default_factory=list)
+    violations: list[ContractViolation] = field(default_factory=list)
+    actions_taken: list[str] = field(default_factory=list)
     enforcement_mode: str = "monitor"
     endpoint_contract: Optional["EndpointContract"] = None
     endpoint_path: str = ""
     http_method: str = ""
-    
+
     # Alias for backward compatibility
     @property
     def is_compliant(self) -> bool:
         """Alias for allowed property."""
         return self.allowed
-    
+
     @property
     def total_penalty_points(self) -> int:
         """Calculate total penalty points from violations."""
         return sum(v.penalty_points for v in self.violations)
-    
+
     def add_violation(self, violation: ContractViolation) -> None:
         """Add a violation to the result."""
         self.violations.append(violation)
         # Note: allowed may be set separately based on enforcement mode
-    
-    def to_dict(self) -> Dict[str, Any]:
+
+    def to_dict(self) -> dict[str, Any]:
         """Convert result to dictionary."""
         return {
             "allowed": self.allowed,
@@ -115,22 +121,22 @@ class EnforcementResult:
 
 class ContractManager:
     """Manager for loading and caching accountability contracts."""
-    
+
     def __init__(self):
-        self._contracts: Dict[str, "AccountabilityContract"] = {}
-    
+        self._contracts: dict[str, AccountabilityContract] = {}
+
     def register_contract(self, contract: "AccountabilityContract") -> None:
         """Register a contract."""
         self._contracts[contract.service_name] = contract
-    
+
     def get_contract(self, service_name: str) -> Optional["AccountabilityContract"]:
         """Get a contract by service name."""
         return self._contracts.get(service_name)
-    
-    def get_all_contracts(self) -> Dict[str, "AccountabilityContract"]:
+
+    def get_all_contracts(self) -> dict[str, "AccountabilityContract"]:
         """Get all registered contracts."""
         return self._contracts.copy()
-    
+
     def find_endpoint_contract(self, path: str, method: str) -> Optional["EndpointContract"]:
         """Find an endpoint contract across all registered contracts."""
         for contract in self._contracts.values():
@@ -142,152 +148,87 @@ class ContractManager:
 
 class DataValidationRule(BaseModel):
     """Data validation rule for request/response validation."""
+
     field: str = Field("", description="Field to validate (optional, derived from dict key)")
     type: str = Field("string", description="Expected type (string, number, boolean, object, array)")
     required: bool = Field(True, description="Whether the field is required")
-    pattern: Optional[str] = Field(None, description="Regex pattern for string validation")
-    min_length: Optional[int] = Field(None, description="Minimum length for strings/arrays")
-    max_length: Optional[int] = Field(None, description="Maximum length for strings/arrays")
-    min_value: Optional[Union[int, float]] = Field(None, description="Minimum value for numbers")
-    max_value: Optional[Union[int, float]] = Field(None, description="Maximum value for numbers")
-    enum: Optional[List[Any]] = Field(None, description="Allowed values")
-    custom_validator: Optional[str] = Field(
-        None, 
-        description="Path to custom validation function (module.path:function_name)"
+    pattern: str | None = Field(None, description="Regex pattern for string validation")
+    min_length: int | None = Field(None, description="Minimum length for strings/arrays")
+    max_length: int | None = Field(None, description="Maximum length for strings/arrays")
+    min_value: int | float | None = Field(None, description="Minimum value for numbers")
+    max_value: int | float | None = Field(None, description="Maximum value for numbers")
+    enum: list[Any] | None = Field(None, description="Allowed values")
+    custom_validator: str | None = Field(
+        None, description="Path to custom validation function (module.path:function_name)"
     )
 
 
 class PerformanceSLA(BaseModel):
     """Performance SLA requirements for an endpoint."""
-    max_latency_ms: int = Field(
-        1000, 
-        description="Maximum allowed latency in milliseconds"
-    )
-    max_error_rate: float = Field(
-        0.01, 
-        description="Maximum allowed error rate (0-1)"
-    )
-    min_throughput_rps: int = Field(
-        10, 
-        description="Minimum required requests per second"
-    )
-    timeout_ms: int = Field(
-        30000, 
-        description="Request timeout in milliseconds"
-    )
+
+    max_latency_ms: int = Field(1000, description="Maximum allowed latency in milliseconds")
+    max_error_rate: float = Field(0.01, description="Maximum allowed error rate (0-1)")
+    min_throughput_rps: int = Field(10, description="Minimum required requests per second")
+    timeout_ms: int = Field(30000, description="Request timeout in milliseconds")
 
 
 class SecurityRequirement(BaseModel):
     """Security requirements for an endpoint."""
+
     authentication_required: bool = Field(True, description="Authentication required")
-    required_roles: List[str] = Field(
-        default_factory=list, 
-        description="Required roles for access"
-    )
-    required_permissions: List[str] = Field(
-        default_factory=list, 
-        description="Required permissions"
-    )
-    ip_whitelist: Optional[List[str]] = Field(
-        None, 
-        description="Allowed IP addresses/CIDR ranges"
-    )
-    rate_limit: Optional[int] = Field(
-        None, 
-        description="Max requests per minute per client"
-    )
-    request_signing_required: bool = Field(
-        False, 
-        description="Require request signing"
-    )
-    response_encryption_required: bool = Field(
-        False, 
-        description="Require response encryption"
-    )
+    required_roles: list[str] = Field(default_factory=list, description="Required roles for access")
+    required_permissions: list[str] = Field(default_factory=list, description="Required permissions")
+    ip_whitelist: list[str] | None = Field(None, description="Allowed IP addresses/CIDR ranges")
+    rate_limit: int | None = Field(None, description="Max requests per minute per client")
+    request_signing_required: bool = Field(False, description="Require request signing")
+    response_encryption_required: bool = Field(False, description="Require response encryption")
 
 
 class ComplianceRequirement(BaseModel):
     """Compliance requirements for an endpoint."""
+
     gdpr: bool = Field(False, description="GDPR compliance required")
     hipaa: bool = Field(False, description="HIPAA compliance required")
     pci_dss: bool = Field(False, description="PCI DSS compliance required")
-    data_retention_days: int = Field(
-        90, 
-        description="Required data retention period in days"
-    )
-    audit_logging: bool = Field(
-        True, 
-        description="Audit logging required"
-    )
+    data_retention_days: int = Field(90, description="Required data retention period in days")
+    audit_logging: bool = Field(True, description="Audit logging required")
     data_classification: str = Field(
-        "public", 
-        description="Data classification level (public, internal, confidential, restricted)"
+        "public", description="Data classification level (public, internal, confidential, restricted)"
     )
 
 
 class EndpointContract(BaseModel):
     """Contract defining requirements for a specific API endpoint."""
+
     path: str = Field(..., description="Endpoint path (can include wildcards)")
-    methods: List[str] = Field(
-        ["GET"], 
-        description="HTTP methods this contract applies to"
+    methods: list[str] = Field(["GET"], description="HTTP methods this contract applies to")
+    description: str = Field(..., description="Description of the endpoint's purpose")
+    request_validation: dict[str, DataValidationRule] = Field(
+        default_factory=dict, description="Request validation rules"
     )
-    description: str = Field(
-        ..., 
-        description="Description of the endpoint's purpose"
+    response_validation: dict[str, DataValidationRule] = Field(
+        default_factory=dict, description="Response validation rules"
     )
-    request_validation: Dict[str, DataValidationRule] = Field(
-        default_factory=dict, 
-        description="Request validation rules"
-    )
-    response_validation: Dict[str, DataValidationRule] = Field(
-        default_factory=dict, 
-        description="Response validation rules"
-    )
-    performance: PerformanceSLA = Field(
-        default_factory=PerformanceSLA, 
-        description="Performance requirements"
-    )
-    security: SecurityRequirement = Field(
-        default_factory=SecurityRequirement, 
-        description="Security requirements"
-    )
+    performance: PerformanceSLA = Field(default_factory=PerformanceSLA, description="Performance requirements")
+    security: SecurityRequirement = Field(default_factory=SecurityRequirement, description="Security requirements")
     compliance: ComplianceRequirement = Field(
-        default_factory=ComplianceRequirement, 
-        description="Compliance requirements"
+        default_factory=ComplianceRequirement, description="Compliance requirements"
     )
-    enabled: bool = Field(
-        True, 
-        description="Whether this contract is actively enforced"
-    )
-    severity: ContractSeverity = Field(
-        ContractSeverity.MEDIUM, 
-        description="Default severity for violations"
-    )
-    penalty_points: int = Field(
-        10, 
-        description="Penalty points for violations"
-    )
-    auto_remediation: bool = Field(
-        False, 
-        description="Enable automatic remediation"
-    )
-    tags: List[str] = Field(
-        default_factory=list, 
-        description="Tags for categorization"
-    )
+    enabled: bool = Field(True, description="Whether this contract is actively enforced")
+    severity: ContractSeverity = Field(ContractSeverity.MEDIUM, description="Default severity for violations")
+    penalty_points: int = Field(10, description="Penalty points for violations")
+    auto_remediation: bool = Field(False, description="Enable automatic remediation")
+    tags: list[str] = Field(default_factory=list, description="Tags for categorization")
     created_at: datetime = Field(
-        default_factory=lambda: datetime.now(UTC), 
-        description="When this contract was created"
+        default_factory=lambda: datetime.now(UTC), description="When this contract was created"
     )
     updated_at: datetime = Field(
-        default_factory=lambda: datetime.now(UTC), 
-        description="When this contract was last updated"
+        default_factory=lambda: datetime.now(UTC), description="When this contract was last updated"
     )
 
     @field_validator("methods")
     @classmethod
-    def validate_http_method(cls, v: List[str]) -> List[str]:
+    def validate_http_method(cls, v: list[str]) -> list[str]:
         valid_methods = {
             "GET",
             "POST",
@@ -308,132 +249,116 @@ class EndpointContract(BaseModel):
 
     @model_validator(mode="before")
     @classmethod
-    def update_timestamp(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+    def update_timestamp(cls, values: dict[str, Any]) -> dict[str, Any]:
         values["updated_at"] = datetime.now(UTC)
         return values
 
 
 class ServiceLevelObjective(BaseModel):
     """Service Level Objective for accountability."""
+
     name: str = Field(..., description="Name of the SLO")
     description: str = Field(..., description="Description of the SLO")
     measurement: str = Field(..., description="What to measure (e.g., 'latency', 'error_rate')")
     threshold: float = Field(..., description="Threshold value")
     threshold_type: Literal["lt", "lte", "gt", "gte", "eq", "neq"] = Field(
-        "lte", 
-        description="Comparison operator for threshold"
+        "lte", description="Comparison operator for threshold"
     )
-    window: str = Field(
-        "1h", 
-        description="Time window for evaluation (e.g., '5m', '1h', '1d')"
-    )
-    severity: ContractSeverity = Field(
-        ContractSeverity.MEDIUM, 
-        description="Severity if SLO is violated"
-    )
-    penalty_points: int = Field(
-        5, 
-        description="Penalty points if SLO is violated"
-    )
+    window: str = Field("1h", description="Time window for evaluation (e.g., '5m', '1h', '1d')")
+    severity: ContractSeverity = Field(ContractSeverity.MEDIUM, description="Severity if SLO is violated")
+    penalty_points: int = Field(5, description="Penalty points if SLO is violated")
 
 
 class AccountabilityContract(BaseModel):
     """Complete accountability contract for a service."""
+
     service_name: str = Field(..., description="Name of the service")
     version: str = Field("1.0.0", description="Contract version")
     description: str = Field(..., description="Description of the service and contract")
-    endpoints: List[EndpointContract] = Field(
-        default_factory=list, 
-        description="List of endpoint contracts"
-    )
-    slos: List[ServiceLevelObjective] = Field(
-        default_factory=list, 
-        description="Service Level Objectives"
-    )
+    endpoints: list[EndpointContract] = Field(default_factory=list, description="List of endpoint contracts")
+    slos: list[ServiceLevelObjective] = Field(default_factory=list, description="Service Level Objectives")
     default_security: SecurityRequirement = Field(
-        default_factory=SecurityRequirement, 
-        description="Default security requirements"
+        default_factory=SecurityRequirement, description="Default security requirements"
     )
     default_compliance: ComplianceRequirement = Field(
-        default_factory=ComplianceRequirement, 
-        description="Default compliance requirements"
+        default_factory=ComplianceRequirement, description="Default compliance requirements"
     )
     created_at: datetime = Field(
-        default_factory=lambda: datetime.now(UTC), 
-        description="When this contract was created"
+        default_factory=lambda: datetime.now(UTC), description="When this contract was created"
     )
     updated_at: datetime = Field(
-        default_factory=lambda: datetime.now(UTC), 
-        description="When this contract was last updated"
+        default_factory=lambda: datetime.now(UTC), description="When this contract was last updated"
     )
 
-    def get_endpoint_contract(self, path: str, method: str) -> Optional[EndpointContract]:
+    def get_endpoint_contract(self, path: str, method: str) -> EndpointContract | None:
         """Find the most specific contract for the given path and method."""
         method = method.upper()
-        
+
         # First try exact match
         for contract in self.endpoints:
             if contract.path == path and method in contract.methods:
                 return contract
-        
+
         # Then try wildcard match (e.g., /api/*)
-        path_parts = path.strip('/').split('/')
-        
+        path_parts = path.strip("/").split("/")
+
         for contract in self.endpoints:
-            if '*' in contract.path and method in contract.methods:
-                contract_parts = contract.path.strip('/').split('/')
+            if "*" in contract.path and method in contract.methods:
+                contract_parts = contract.path.strip("/").split("/")
                 if len(path_parts) != len(contract_parts):
                     continue
-                    
+
                 match = True
                 for p, cp in zip(path_parts, contract_parts):
-                    if cp == '*':
+                    if cp == "*":
                         continue
                     if p != cp:
                         match = False
                         break
-                        
+
                 if match:
                     return contract
-        
+
         return None
 
-    def validate_request(self, path: str, method: str, request_data: dict) -> List[dict]:
+    def validate_request(self, path: str, method: str, request_data: dict) -> list[dict]:
         """Validate a request against the contract."""
         contract = self.get_endpoint_contract(path, method)
         if not contract:
             return [{"error": "no_matching_contract", "message": f"No contract found for {method} {path}"}]
-            
+
         return self._validate_data(contract.request_validation, request_data)
-    
-    def validate_response(self, path: str, method: str, response_data: dict) -> List[dict]:
+
+    def validate_response(self, path: str, method: str, response_data: dict) -> list[dict]:
         """Validate a response against the contract."""
         contract = self.get_endpoint_contract(path, method)
         if not contract:
             return []
-            
+
         return self._validate_data(contract.response_validation, response_data)
-    
-    def _validate_data(self, rules: Dict[str, DataValidationRule], data: dict) -> List[dict]:
+
+    def _validate_data(self, rules: dict[str, DataValidationRule], data: dict) -> list[dict]:
         """Validate data against validation rules."""
         errors = []
-        
+
         for field, rule in rules.items():
             if field not in data:
                 if rule.required:
-                    errors.append({
-                        "field": field,
-                        "error": "missing_required_field",
-                        "message": f"Required field '{field}' is missing"
-                    })
+                    errors.append(
+                        {
+                            "field": field,
+                            "error": "missing_required_field",
+                            "message": f"Required field '{field}' is missing",
+                        }
+                    )
                 continue
-                
+
             value = data[field]
-            
+
             # Type checking
             expected_type = rule.type.lower()
             type_ok = False
-            
+
             if expected_type == "string":
                 type_ok = isinstance(value, str)
             elif expected_type == "number":
@@ -444,60 +369,74 @@ class AccountabilityContract(BaseModel):
                 type_ok = isinstance(value, dict)
             elif expected_type == "array":
                 type_ok = isinstance(value, list)
-                
+
             if not type_ok:
-                errors.append({
-                    "field": field,
-                    "error": "invalid_type",
-                    "message": f"Field '{field}' must be of type {expected_type}, got {type(value).__name__}"
-                })
+                errors.append(
+                    {
+                        "field": field,
+                        "error": "invalid_type",
+                        "message": f"Field '{field}' must be of type {expected_type}, got {type(value).__name__}",
+                    }
+                )
                 continue
-                
+
             # Additional validations
             if expected_type == "string":
                 if rule.min_length is not None and len(value) < rule.min_length:
-                    errors.append({
-                        "field": field,
-                        "error": "min_length",
-                        "message": f"Field '{field}' must be at least {rule.min_length} characters"
-                    })
-                    
+                    errors.append(
+                        {
+                            "field": field,
+                            "error": "min_length",
+                            "message": f"Field '{field}' must be at least {rule.min_length} characters",
+                        }
+                    )
+
                 if rule.max_length is not None and len(value) > rule.max_length:
-                    errors.append({
-                        "field": field,
-                        "error": "max_length",
-                        "message": f"Field '{field}' must be at most {rule.max_length} characters"
-                    })
-                    
+                    errors.append(
+                        {
+                            "field": field,
+                            "error": "max_length",
+                            "message": f"Field '{field}' must be at most {rule.max_length} characters",
+                        }
+                    )
+
                 if rule.pattern and not re.match(rule.pattern, value):
-                    errors.append({
-                        "field": field,
-                        "error": "pattern_mismatch",
-                        "message": f"Field '{field}' does not match required pattern"
-                    })
-                    
+                    errors.append(
+                        {
+                            "field": field,
+                            "error": "pattern_mismatch",
+                            "message": f"Field '{field}' does not match required pattern",
+                        }
+                    )
+
             elif expected_type in ("int", "float", "number"):
                 if rule.min_value is not None and value < rule.min_value:
-                    errors.append({
-                        "field": field,
-                        "error": "min_value",
-                        "message": f"Field '{field}' must be at least {rule.min_value}"
-                    })
-                    
+                    errors.append(
+                        {
+                            "field": field,
+                            "error": "min_value",
+                            "message": f"Field '{field}' must be at least {rule.min_value}",
+                        }
+                    )
+
                 if rule.max_value is not None and value > rule.max_value:
-                    errors.append({
-                        "field": field,
-                        "error": "max_value",
-                        "message": f"Field '{field}' must be at most {rule.max_value}"
-                    })
-                    
+                    errors.append(
+                        {
+                            "field": field,
+                            "error": "max_value",
+                            "message": f"Field '{field}' must be at most {rule.max_value}",
+                        }
+                    )
+
             if rule.enum and value not in rule.enum:
-                errors.append({
-                    "field": field,
-                    "error": "invalid_enum_value",
-                    "message": f"Field '{field}' must be one of {rule.enum}"
-                })
-                
+                errors.append(
+                    {
+                        "field": field,
+                        "error": "invalid_enum_value",
+                        "message": f"Field '{field}' must be one of {rule.enum}",
+                    }
+                )
+
             # TODO: Add support for custom validators
-            
+
         return errors

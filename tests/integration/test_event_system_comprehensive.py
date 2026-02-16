@@ -154,9 +154,9 @@ class TestEventBusCore:
         # Verify routing
         assert len(high_priority_events) == 1, "Should route high priority event"
         assert len(low_priority_events) == 1, "Should route low priority event"
-        assert (
-            high_priority_events[0]["case_id"] == "high_priority_case"
-        ), "High priority handler should receive high event"
+        assert high_priority_events[0]["case_id"] == "high_priority_case", (
+            "High priority handler should receive high event"
+        )
 
 
 class TestEventPersistence:
@@ -297,9 +297,9 @@ class TestEventHandlers:
 
         # Per-event average
         avg_time_per_event = processing_time / 100
-        assert (
-            avg_time_per_event < 0.05
-        ), f"Each event should take <50ms on average, took {avg_time_per_event * 1000:.1f}ms"
+        assert avg_time_per_event < 0.05, (
+            f"Each event should take <50ms on average, took {avg_time_per_event * 1000:.1f}ms"
+        )
 
 
 class TestEventSystemIntegration:
@@ -408,9 +408,9 @@ class TestEventSystemIntegration:
 
         # Verify all events are for same case
         case_ids = [event["case_id"] for event in lifecycle_events]
-        assert all(
-            case_id == "lifecycle_test_case" for case_id in case_ids
-        ), "All events should be for the same case ID"
+        assert all(case_id == "lifecycle_test_case" for case_id in case_ids), (
+            "All events should be for the same case ID"
+        )
 
     @pytest.mark.asyncio
     async def test_event_system_error_recovery(self):

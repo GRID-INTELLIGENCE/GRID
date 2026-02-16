@@ -28,11 +28,7 @@ class PaymentReconciliationService:
         )
 
         transactions = await self.uow.payment_transactions.get_all()
-        candidates = [
-            tx
-            for tx in transactions
-            if tx.gateway_transaction_id and tx.created_at >= cutoff
-        ]
+        candidates = [tx for tx in transactions if tx.gateway_transaction_id and tx.created_at >= cutoff]
 
         mismatches: list[dict[str, Any]] = []
         auto_reconciled = 0

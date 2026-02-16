@@ -4,7 +4,6 @@ Log Collection and Preservation Script
 Collects all security-related logs for forensic analysis and preserves them in a timestamped archive.
 """
 
-import os
 import shutil
 import zipfile
 from datetime import datetime

@@ -1,4 +1,5 @@
-from prometheus_client import Histogram, Counter, REGISTRY
+from prometheus_client import REGISTRY, Counter, Histogram
+
 
 def _get_or_create_metric(metric_class, name, documentation, **kwargs):
     try:
@@ -9,13 +10,14 @@ def _get_or_create_metric(metric_class, name, documentation, **kwargs):
     except Exception:
         # Fallback if internal access changes
         try:
-             return metric_class(name, documentation, **kwargs)
+            return metric_class(name, documentation, **kwargs)
         except ValueError:
-             # Last resort: try to find it in registry manually if above check failed
-             for collector in REGISTRY._collector_to_names:
-                 if name in REGISTRY._collector_to_names[collector]:
-                     return collector
-             raise
+            # Last resort: try to find it in registry manually if above check failed
+            for collector in REGISTRY._collector_to_names:
+                if name in REGISTRY._collector_to_names[collector]:
+                    return collector
+            raise
+
 
 DETECTION_LATENCY = _get_or_create_metric(
     Histogram,

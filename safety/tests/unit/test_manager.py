@@ -526,7 +526,6 @@ class TestTrustTier:
 
 
 class TestEvaluationContext:
-
     def test_defaults(self):
         ctx = EvaluationContext(user_id="u1", trust_tier=TrustTier.USER)
         assert ctx.session_id is None

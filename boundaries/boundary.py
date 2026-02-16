@@ -116,7 +116,9 @@ class BoundaryEngine:
             # Fail-closed: unknown boundary IDs are denied, not allowed.
             # This prevents typos or removed configs from silently granting access.
             self._logger.log_boundary_check(
-                boundary_id, allowed=False, scope=scope,
+                boundary_id,
+                allowed=False,
+                scope=scope,
                 payload={"reason": "unknown_boundary_id"},
             )
             return False
@@ -178,7 +180,9 @@ class BoundaryEngine:
         if not guardrail:
             # Fail-closed: unknown guardrail IDs trigger block, not silent pass.
             self._logger.log_guardrail_triggered(
-                guardrail_id, "block", scope=scope,
+                guardrail_id,
+                "block",
+                scope=scope,
                 payload={"reason": "unknown_guardrail_id"},
             )
             return ("block", False)

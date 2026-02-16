@@ -1,11 +1,10 @@
-from typing import Optional, Dict, Any
-from dataclasses import dataclass
-from datetime import datetime
-import time
 import asyncio
+import time
+from dataclasses import dataclass
+from typing import Any
 
 from ..models.inference import InferenceRequest, InferenceResponse
-from ..core.config import settings
+
 
 @dataclass
 class ProcessingResult:
@@ -13,7 +12,8 @@ class ProcessingResult:
     tokens_used: int
     processing_time: float
     model: str
-    metadata: Optional[Dict[str, Any]] = None
+    metadata: dict[str, Any] | None = None
+
 
 class InferenceService:
     """Service for handling inference requests"""
@@ -26,7 +26,7 @@ class InferenceService:
             "gpt-3.5-turbo": "gpt-3.5-turbo",
             "gpt-4": "gpt-4",
             "claude-2": "claude-2",
-            "local-model": "local-model"
+            "local-model": "local-model",
         }
 
     async def process(self, request: InferenceRequest) -> InferenceResponse:
@@ -54,7 +54,7 @@ class InferenceService:
                 model=result.model,
                 tokens_used=result.tokens_used,
                 processing_time=processing_time,
-                metadata=result.metadata
+                metadata=result.metadata,
             )
 
             # Cache the result
@@ -90,7 +90,7 @@ class InferenceService:
             result=f"Local model response to: {request.prompt[:50]}...",
             tokens_used=len(request.prompt.split()) * 2,
             processing_time=0.5,
-            model="local-model"
+            model="local-model",
         )
 
     async def _call_openai_model(self, request: InferenceRequest) -> ProcessingResult:
@@ -100,7 +100,7 @@ class InferenceService:
             result=f"OpenAI {request.model} response to: {request.prompt[:50]}...",
             tokens_used=len(request.prompt.split()) * 3,
             processing_time=1.0,
-            model=request.model
+            model=request.model,
         )
 
     async def _call_anthropic_model(self, request: InferenceRequest) -> ProcessingResult:
@@ -110,7 +110,7 @@ class InferenceService:
             result=f"Anthropic Claude response to: {request.prompt[:50]}...",
             tokens_used=len(request.prompt.split()) * 2,
             processing_time=0.8,
-            model=request.model
+            model=request.model,
         )
 
     async def _call_default_model(self, request: InferenceRequest) -> ProcessingResult:
@@ -120,7 +120,7 @@ class InferenceService:
             result=f"Default model response to: {request.prompt[:50]}...",
             tokens_used=len(request.prompt.split()) * 2,
             processing_time=0.3,
-            model="default"
+            model="default",
         )
 
     def _validate_request(self, request: InferenceRequest) -> bool:
@@ -135,10 +135,5 @@ class InferenceService:
 
     def _generate_cache_key(self, request: InferenceRequest) -> str:
         """Generate cache key for request"""
-        key_parts = [
-            request.prompt,
-            str(request.model),
-            str(request.max_tokens),
-            str(request.temperature)
-        ]
+        key_parts = [request.prompt, str(request.model), str(request.max_tokens), str(request.temperature)]
         return "|".join(key_parts)

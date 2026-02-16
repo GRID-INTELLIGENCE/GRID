@@ -8,11 +8,11 @@ from datetime import UTC, datetime, timedelta
 import pytest
 
 from grid.resilience.penalties import (
-    DataPenaltySchema,
     PENALTY_RULES,
+    SEVERITY_RANGES,
+    DataPenaltySchema,
     PenaltyRule,
     PenaltySeverity,
-    SEVERITY_RANGES,
     calculate_total_penalty,
     decay_penalty,
     get_score_classification,
@@ -154,6 +154,7 @@ class TestPenaltyRule:
 
     def test_calculate_points_dynamic(self):
         """Test calculating points with dynamic calculator."""
+
         def dynamic_calc(ctx):
             return ctx.get("multiplier", 1) * 10
 

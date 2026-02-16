@@ -3,6 +3,7 @@ Boundaries module: schema and enforcement for boundaries, consent, and guardrail
 Preserves the right to refuse service at any instance with WebSocket-persistent logging.
 Includes preparedness framework (risk tiers, gates, biosecurity scope) and overwatch (monitoring/alerting).
 """
+
 from boundaries.boundary import Boundary, BoundaryEngine, Consent, Guardrail
 from boundaries.logger_ws import BoundaryEventLogger, get_logger
 from boundaries.overwatch import Overwatch, wrap_logger_with_overwatch

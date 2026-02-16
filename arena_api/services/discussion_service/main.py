@@ -68,9 +68,7 @@ class TracedDiscussionAgent:
             await self.discuss(sub_query, context, depth + 1)
 
         result = f"Response for '{query}' based on context {list(context.keys())}"
-        current_step = ReasoningStep(
-            step_id=step_id, query=query, thought=thought, result=result, sub_steps=sub_steps
-        )
+        current_step = ReasoningStep(step_id=step_id, query=query, thought=thought, result=result, sub_steps=sub_steps)
 
         if depth == 0:
             self.trace.append(current_step)
@@ -107,8 +105,30 @@ def extract_topics_simple(args: Mapping[str, Any]) -> dict[str, Any]:
     sentences = [s.strip() for s in sentences if s.strip()]
 
     stop_words = {
-        "the", "a", "an", "and", "or", "but", "in", "on", "at", "to", "for", "of", "with", "by",
-        "is", "are", "was", "were", "be", "been", "being", "have", "has", "had"
+        "the",
+        "a",
+        "an",
+        "and",
+        "or",
+        "but",
+        "in",
+        "on",
+        "at",
+        "to",
+        "for",
+        "of",
+        "with",
+        "by",
+        "is",
+        "are",
+        "was",
+        "were",
+        "be",
+        "been",
+        "being",
+        "have",
+        "has",
+        "had",
     }
 
     tech_patterns = [
@@ -130,13 +150,7 @@ def extract_topics_simple(args: Mapping[str, Any]) -> dict[str, Any]:
         if len(topic_name) < 3 or topic_name in seen_topics:
             return
         seen_topics.add(topic_name)
-        topics.append({
-            "topic": topic_name,
-            "context": context,
-            "pins": [],
-            "connections": [],
-            "weight": weight
-        })
+        topics.append({"topic": topic_name, "context": context, "pins": [], "connections": [], "weight": weight})
 
     for sentence in sentences:
         for pattern in tech_patterns:
@@ -274,9 +288,7 @@ class DiscussionService:
 
         @self.app.post("/discuss", response_model=DiscussionResponse)
         async def discuss(
-            request: DiscussionRequest,
-            req: Request,
-            authenticated: bool = Depends(self._authenticate_request)
+            request: DiscussionRequest, req: Request, authenticated: bool = Depends(self._authenticate_request)
         ):
             """Discuss current events with topic extraction and reasoning."""
             start_time = asyncio.get_event_loop().time()
@@ -290,14 +302,13 @@ class DiscussionService:
 
                 topics_result = None
                 if request.extract_topics:
-                    topics_result = await self._extract_topics(
-                        request.text, request.use_llm_topics, max_topics=8
-                    )
+                    topics_result = await self._extract_topics(request.text, request.use_llm_topics, max_topics=8)
 
                 context = {
                     "text": request.text,
                     "topics": topics_result.get("output", {}).get("wall_board", {}).get("topics", [])
-                    if topics_result else [],
+                    if topics_result
+                    else [],
                     "timestamp": datetime.now(UTC).isoformat(),
                 }
 

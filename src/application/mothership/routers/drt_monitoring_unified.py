@@ -10,7 +10,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
-from ..middleware.drt_middleware_unified import get_unified_drt_middleware, UnifiedDRTMiddleware
+from ..middleware.drt_middleware_unified import UnifiedDRTMiddleware, get_unified_drt_middleware
 
 logger = logging.getLogger(__name__)
 
@@ -59,16 +59,12 @@ class EndpointSummaryResponse(BaseModel):
 async def get_drt_status(middleware: UnifiedDRTMiddleware = Depends(get_unified_drt_middleware)) -> StatusResponse:
     """Get unified DRT system status from core engine."""
     status = middleware.get_status()
-    return StatusResponse(
-        timestamp=datetime.utcnow().isoformat(),
-        **status
-    )
+    return StatusResponse(timestamp=datetime.utcnow().isoformat(), **status)
 
 
 @router.post("/attack-vectors")
 async def add_attack_vector(
-    request: AttackVectorAddRequest,
-    middleware: UnifiedDRTMiddleware = Depends(get_unified_drt_middleware)
+    request: AttackVectorAddRequest, middleware: UnifiedDRTMiddleware = Depends(get_unified_drt_middleware)
 ) -> dict[str, str]:
     """Add attack vector to core DRT monitor."""
     middleware.add_attack_vector(
@@ -79,28 +75,22 @@ async def add_attack_vector(
         attack_type=request.attack_type,
         severity=request.severity,
     )
-    return {
-        "status": "success", 
-        "message": f"Attack vector added: {request.method} {request.endpoint}"
-    }
+    return {"status": "success", "message": f"Attack vector added: {request.method} {request.endpoint}"}
 
 
 @router.get("/escalated-endpoints")
-async def get_escalated_endpoints(middleware: UnifiedDRTMiddleware = Depends(get_unified_drt_middleware)) -> dict[str, Any]:
+async def get_escalated_endpoints(
+    middleware: UnifiedDRTMiddleware = Depends(get_unified_drt_middleware),
+) -> dict[str, Any]:
     """Get list of currently escalated endpoints."""
     now = datetime.utcnow()
-    escalated = {
-        path: expires.isoformat()
-        for path, expires in middleware.escalated_endpoints.items()
-        if expires > now
-    }
+    escalated = {path: expires.isoformat() for path, expires in middleware.escalated_endpoints.items() if expires > now}
     return {"escalated_endpoints": escalated}
 
 
 @router.post("/escalate/{path:path}")
 async def escalate_endpoint(
-    path: str,
-    middleware: UnifiedDRTMiddleware = Depends(get_unified_drt_middleware)
+    path: str, middleware: UnifiedDRTMiddleware = Depends(get_unified_drt_middleware)
 ) -> dict[str, str]:
     """Manually escalate an endpoint."""
     # Create a mock monitoring result for manual escalation
@@ -111,21 +101,21 @@ async def escalate_endpoint(
             "attack_type": "manual",
             "similarity_score": 1.0,
             "threat_level": "medium",
-        }
+        },
     }
-    
+
     # Handle escalation through middleware
     from fastapi import Request
+
     mock_request = Request({"type": "http", "method": "GET", "url": {"path": path}})
     await middleware._handle_escalation(mock_request, monitoring_result)
-    
+
     return {"status": "success", "message": f"Endpoint escalated: {path}"}
 
 
 @router.post("/de-escalate/{path:path}")
 async def de_escalate_endpoint(
-    path: str,
-    middleware: UnifiedDRTMiddleware = Depends(get_unified_drt_middleware)
+    path: str, middleware: UnifiedDRTMiddleware = Depends(get_unified_drt_middleware)
 ) -> dict[str, str]:
     """De-escalate an endpoint."""
     if path in middleware.escalated_endpoints:
@@ -135,25 +125,26 @@ async def de_escalate_endpoint(
 
 
 @router.get("/behavioral-history")
-async def get_behavioral_history(middleware: UnifiedDRTMiddleware = Depends(get_unified_drt_middleware)) -> dict[str, Any]:
+async def get_behavioral_history(
+    middleware: UnifiedDRTMiddleware = Depends(get_unified_drt_middleware),
+) -> dict[str, Any]:
     """Get behavioral history from core DRT monitor."""
     # Get all endpoint summaries and extract history
     all_summaries = {}
     for endpoint in middleware.drt_monitor.behavioral_history.keys():
         summary = middleware.get_endpoint_summary(endpoint)
         all_summaries[endpoint] = summary
-    
+
     return {"behavioral_summaries": all_summaries}
 
 
 @router.get("/endpoint/{path:path}/summary")
 async def get_endpoint_summary(
-    path: str,
-    middleware: UnifiedDRTMiddleware = Depends(get_unified_drt_middleware)
+    path: str, middleware: UnifiedDRTMiddleware = Depends(get_unified_drt_middleware)
 ) -> EndpointSummaryResponse:
     """Get detailed summary for a specific endpoint."""
     summary = middleware.get_endpoint_summary(path)
-    
+
     return EndpointSummaryResponse(
         endpoint=summary.get("endpoint", path),
         behavior_count=summary.get("behavior_count", 0),
@@ -170,12 +161,12 @@ async def get_endpoint_summary(
 async def get_system_overview(middleware: UnifiedDRTMiddleware = Depends(get_unified_drt_middleware)) -> dict[str, Any]:
     """Get comprehensive system overview."""
     status = middleware.get_status()
-    
+
     # Get endpoint summaries
     endpoint_summaries = {}
     for endpoint in list(middleware.drt_monitor.behavioral_history.keys())[:10]:  # Limit to 10 for performance
         endpoint_summaries[endpoint] = middleware.get_endpoint_summary(endpoint)
-    
+
     return {
         "system_status": status,
         "endpoint_summaries": endpoint_summaries,

@@ -96,7 +96,7 @@ def setup_logging(*, json_output: bool = True, log_level: str = "INFO") -> None:
 
     # Configure loguru
     loguru_logger.remove()  # Remove default handler
-    log_format = "<green>{time:YYYY-MM-DDTHH:mm:ss.SSSZ}</green> | " "<level>{level: <8}</level> | " "{message}"
+    log_format = "<green>{time:YYYY-MM-DDTHH:mm:ss.SSSZ}</green> | <level>{level: <8}</level> | {message}"
     if json_output:
         loguru_logger.add(
             sys.stderr,

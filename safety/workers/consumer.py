@@ -17,6 +17,10 @@ from typing import Any
 
 import redis.asyncio as aioredis
 
+from safety.ai_workflow_safety import (
+    TemporalSafetyConfig,
+    get_ai_workflow_safety_engine,
+)
 from safety.detectors.post_check import post_check
 from safety.escalation.handler import escalate
 from safety.model.client import call_model
@@ -42,10 +46,6 @@ from safety.workers.worker_utils import (
     publish_response,
     setup_shutdown_handler,
     write_audit_event,
-)
-from safety.ai_workflow_safety import (
-    get_ai_workflow_safety_engine,
-    TemporalSafetyConfig,
 )
 
 logger = get_logger("workers.consumer")
@@ -112,7 +112,7 @@ async def _process_message(msg_id: str, fields: dict[str, str]) -> None:
                 ),
                 timeout=10.0,
             )
-        except asyncio.TimeoutError:
+        except TimeoutError:
             logger.error("post_check_timeout", request_id=request_id)
             # Fail closed: treat as flagged
             from safety.detectors.post_check import PostCheckResult
@@ -135,8 +135,8 @@ async def _process_message(msg_id: str, fields: dict[str, str]) -> None:
                 config=TemporalSafetyConfig(
                     enable_hook_detection=True,
                     enable_wellbeing_tracking=True,
-                    developmental_safety_mode=metadata.get("user_age", 25) < 18
-                )
+                    developmental_safety_mode=metadata.get("user_age", 25) < 18,
+                ),
             )
 
             # Record real interaction timing
@@ -145,17 +145,18 @@ async def _process_message(msg_id: str, fields: dict[str, str]) -> None:
                 ai_response=result.text,
                 response_time=latency,
                 current_time=time.time(),
-                sensitive_detections=len(check_result.evidence.get("detections", [])) if check_result.flagged else 0
+                sensitive_detections=len(check_result.evidence.get("detections", [])) if check_result.flagged else 0,
             )
 
             if not safety_assessment["safety_allowed"]:
                 # Override check_result if workflow safety fails
                 from safety.detectors.post_check import PostCheckResult
+
                 check_result = PostCheckResult(
                     flagged=True,
                     reason_code=safety_assessment.get("blocked_reason", "AI_WORKFLOW_VIOLATION"),
                     severity="high",
-                    evidence=safety_assessment
+                    evidence=safety_assessment,
                 )
         except Exception as safety_exc:
             logger.error("ai_workflow_safety_error_in_worker", error=str(safety_exc), request_id=request_id)

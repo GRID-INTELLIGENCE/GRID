@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import os
 from datetime import UTC, datetime
 from types import SimpleNamespace
 
@@ -27,13 +26,7 @@ class _FakeAccountsAPI:
         account_id = f"acct_test_{self._counter}"
         account = {
             "id": account_id,
-            "configuration": {
-                "merchant": {
-                    "capabilities": {
-                        "card_payments": {"status": "active"}
-                    }
-                }
-            },
+            "configuration": {"merchant": {"capabilities": {"card_payments": {"status": "active"}}}},
             "requirements": {"summary": {"minimum_deadline": {"status": "none"}}},
         }
         self._accounts[account_id] = account
@@ -274,6 +267,7 @@ class TestConnectEventsEndpoint:
         assert data["events"][0]["event_type"] == "event.new"
         assert data["events"][1]["event_type"] == "event.old"
 
+
 @pytest.fixture
 def connect_route_client(connect_env, fake_client, settings):
     app = FastAPI()
@@ -342,16 +336,11 @@ class TestConnectRouteIntegration:
         assert payload["event_count"] == 2
         assert payload["events"][0]["event_type"] == "event.new"
         assert payload["events"][1]["event_type"] == "event.old"
+
     def test_account_status_route_returns_expected_shape(self, connect_route_client, fake_client):
         fake_client.v2.core.accounts._accounts["acct_test_status"] = {
             "id": "acct_test_status",
-            "configuration": {
-                "merchant": {
-                    "capabilities": {
-                        "card_payments": {"status": "active"}
-                    }
-                }
-            },
+            "configuration": {"merchant": {"capabilities": {"card_payments": {"status": "active"}}}},
             "requirements": {"summary": {"minimum_deadline": {"status": "none"}}},
         }
 
@@ -362,4 +351,3 @@ class TestConnectRouteIntegration:
         assert payload["ready_to_process_payments"] is True
         assert payload["requirements_status"] == "none"
         assert payload["onboarding_complete"] is True
-

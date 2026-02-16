@@ -5,7 +5,7 @@ resilience metrics.
 """
 
 from datetime import UTC, datetime, timedelta
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -14,7 +14,7 @@ from grid.resilience.accountability import (
     DeliveryClassification,
     DeliveryScore,
 )
-from grid.resilience.metrics import MetricsCollector, OperationMetrics
+from grid.resilience.metrics import MetricsCollector
 from grid.resilience.penalties import DataPenaltySchema, PenaltySeverity
 
 
@@ -180,9 +180,7 @@ class TestAccountabilityCalculator:
         endpoint = "GET:/api/recent-error"
 
         # Record a recent failure
-        collector.record_attempt(
-            endpoint, success=False, error=Exception("Test error")
-        )
+        collector.record_attempt(endpoint, success=False, error=Exception("Test error"))
 
         score = calculator.calculate_score(endpoint)
 
@@ -235,9 +233,7 @@ class TestAccountabilityCalculator:
         for _ in range(2):
             collector.record_attempt(endpoint, success=True)
         for _ in range(8):
-            collector.record_attempt(
-                endpoint, success=False, error=Exception("Error")
-            )
+            collector.record_attempt(endpoint, success=False, error=Exception("Error"))
             collector.record_fallback(endpoint)
 
         score = calculator.calculate_score(endpoint)
@@ -416,8 +412,8 @@ class TestAccountabilityMiddlewareIntegration:
     def test_middleware_imports(self):
         """Test that middleware can be imported."""
         from application.mothership.middleware.accountability import (
-            AccountabilityMiddleware,
             DEFAULT_TRACKED_PREFIXES,
+            AccountabilityMiddleware,
         )
 
         assert AccountabilityMiddleware is not None
@@ -444,9 +440,7 @@ class TestAccountabilityMiddlewareIntegration:
         mock_app = MagicMock()
         custom_prefixes = ("/custom/", "/v2/")
 
-        middleware = AccountabilityMiddleware(
-            mock_app, tracked_prefixes=custom_prefixes, log_degraded=False
-        )
+        middleware = AccountabilityMiddleware(mock_app, tracked_prefixes=custom_prefixes, log_degraded=False)
 
         assert middleware.tracked_prefixes == custom_prefixes
         assert middleware.log_degraded is False

@@ -14,7 +14,7 @@ from typing import Any, AsyncIterator, TypeVar
 
 logger = logging.getLogger(__name__)
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class TimeoutManager:
@@ -64,6 +64,7 @@ class TimeoutManager:
             logger.warning(f"Operation {operation_name} was cancelled due to timeout ({timeout}s)")
             if on_timeout == "circuit" and circuit_breaker_name:
                 from .resource_management import get_circuit_breaker
+
                 cb = get_circuit_breaker(circuit_breaker_name)
                 # Simulate a failure to trigger circuit breaker
                 try:
@@ -108,11 +109,12 @@ class TimeoutManager:
 
         try:
             return await asyncio.wait_for(coro, timeout=timeout)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             logger.warning(f"Operation {operation_name} timed out after {timeout}s")
 
             if on_timeout == "circuit" and circuit_breaker_name:
                 from .resource_management import get_circuit_breaker
+
                 cb = get_circuit_breaker(circuit_breaker_name)
                 # Simulate a failure to trigger circuit breaker
                 try:
@@ -209,7 +211,7 @@ class GracefulShutdown:
 
             try:
                 await asyncio.wait_for(self._shutdown_event.wait(), timeout=min(1.0, remaining_time))
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 continue
 
         logger.info("Graceful shutdown completed")
@@ -234,6 +236,7 @@ class GracefulShutdown:
 
 class ShutdownRequestedError(Exception):
     """Raised when shutdown is requested and new operations are not allowed."""
+
     pass
 
 

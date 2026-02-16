@@ -18,6 +18,19 @@ import os
 import sys
 from pathlib import Path
 
+# ---------------------------------------------------------------------------
+# Windows console encoding fix: ensure emoji / UTF-8 output works on Windows
+# even when the console code-page is something other than UTF-8 (e.g. cp1252).
+# Setting the env-var propagates to any child processes, and reconfigure()
+# fixes the *already-open* stdout/stderr streams in this process.
+# ---------------------------------------------------------------------------
+if sys.platform == "win32":
+    os.environ.setdefault("PYTHONIOENCODING", "utf-8")
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    if hasattr(sys.stderr, "reconfigure"):
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 VENV_DIR = PROJECT_ROOT / ".venv"
 
@@ -92,7 +105,9 @@ def check_python_version() -> bool:
         expected = pv_file.read_text().strip()
         actual = f"{sys.version_info.major}.{sys.version_info.minor}"
         if actual.startswith(expected):
-            print(f"{PASS} Python version {sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro} matches .python-version ({expected})")
+            print(
+                f"{PASS} Python version {sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro} matches .python-version ({expected})"
+            )
         else:
             print(f"{FAIL} Python {actual} does not match .python-version ({expected})")
             ok = False
@@ -153,7 +168,7 @@ def main() -> int:
     results.append(check_python_version())
 
     # 5. Critical packages
-    print(f"\nCritical package imports:")
+    print("\nCritical package imports:")
     results.append(check_critical_packages())
 
     print()

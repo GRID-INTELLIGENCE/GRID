@@ -23,7 +23,6 @@ Usage:
 import argparse
 import asyncio
 import json
-import os
 import random
 import signal
 import statistics
@@ -46,6 +45,7 @@ sys.path.insert(0, str(project_root / "src"))
 @dataclass
 class ChaosResult:
     """Result of a chaos experiment."""
+
     experiment_name: str
     start_time: str
     end_time: str
@@ -60,6 +60,7 @@ class ChaosResult:
 @dataclass
 class ChaosReport:
     """Complete chaos testing report."""
+
     timestamp: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
     experiments: list[ChaosResult] = field(default_factory=list)
     overall_success: bool = False
@@ -108,10 +109,7 @@ class ChaosTestSuite:
                 if random.random() < 0.05:
                     raise ConnectionError("Simulated packet loss")
 
-                response = requests.get(
-                    f"{self.target_url}/health",
-                    timeout=2.0
-                )
+                response = requests.get(f"{self.target_url}/health", timeout=2.0)
                 return response.status_code == 200, time.perf_counter()
             except Exception as e:
                 return False, str(e)
@@ -229,7 +227,7 @@ class ChaosTestSuite:
                 try:
                     response = requests.get(
                         f"{self.target_url}/health",
-                        timeout=5.0  # Longer timeout under stress
+                        timeout=5.0,  # Longer timeout under stress
                     )
                     if response.status_code == 200:
                         success_count += 1
@@ -316,10 +314,7 @@ class ChaosTestSuite:
                 }
 
                 response = requests.post(
-                    f"{self.target_url}/api/test",
-                    headers=headers,
-                    json={"test": "parasite"},
-                    timeout=2.0
+                    f"{self.target_url}/api/test", headers=headers, json={"test": "parasite"}, timeout=2.0
                 )
 
                 # Check for null response (parasite handled)
@@ -436,22 +431,26 @@ class ChaosTestSuite:
 
             is_valid = to_state in valid_transitions.get(from_state, [])
 
-            transitions.append({
-                "from": from_state,
-                "to": to_state,
-                "valid": is_valid,
-                "timestamp": time.perf_counter(),
-            })
+            transitions.append(
+                {
+                    "from": from_state,
+                    "to": to_state,
+                    "valid": is_valid,
+                    "timestamp": time.perf_counter(),
+                }
+            )
 
             if is_valid:
                 transitions_count += 1
             else:
                 invalid_transitions += 1
-                events.append({
-                    "type": "invalid_transition",
-                    "from": from_state,
-                    "to": to_state,
-                })
+                events.append(
+                    {
+                        "type": "invalid_transition",
+                        "from": from_state,
+                        "to": to_state,
+                    }
+                )
 
             await asyncio.sleep(0.1)
 
@@ -516,16 +515,18 @@ class ChaosTestSuite:
                 results.append(result)
             except Exception as e:
                 print(f"\n❌ Experiment {name} failed: {e}")
-                results.append(ChaosResult(
-                    experiment_name=name.lower().replace(" ", "_"),
-                    start_time=datetime.now(UTC).isoformat(),
-                    end_time=datetime.now(UTC).isoformat(),
-                    duration_seconds=0,
-                    success=False,
-                    error_rate=1.0,
-                    recovery_time_seconds=-1,
-                    events=[{"type": "experiment_failure", "error": str(e)}],
-                ))
+                results.append(
+                    ChaosResult(
+                        experiment_name=name.lower().replace(" ", "_"),
+                        start_time=datetime.now(UTC).isoformat(),
+                        end_time=datetime.now(UTC).isoformat(),
+                        duration_seconds=0,
+                        success=False,
+                        error_rate=1.0,
+                        recovery_time_seconds=-1,
+                        events=[{"type": "experiment_failure", "error": str(e)}],
+                    )
+                )
 
         # Generate report
         successful = sum(1 for r in results if r.success)
@@ -600,18 +601,10 @@ Examples:
     )
 
     parser.add_argument("--all", action="store_true", help="Run all chaos experiments")
-    parser.add_argument(
-        "--network-partition", action="store_true", help="Network partition chaos"
-    )
-    parser.add_argument(
-        "--resource-exhaustion", action="store_true", help="Resource exhaustion chaos"
-    )
-    parser.add_argument(
-        "--parasite-flood", action="store_true", help="Parasite flood chaos"
-    )
-    parser.add_argument(
-        "--state-machine", action="store_true", help="State machine chaos"
-    )
+    parser.add_argument("--network-partition", action="store_true", help="Network partition chaos")
+    parser.add_argument("--resource-exhaustion", action="store_true", help="Resource exhaustion chaos")
+    parser.add_argument("--parasite-flood", action="store_true", help="Parasite flood chaos")
+    parser.add_argument("--state-machine", action="store_true", help="State machine chaos")
     parser.add_argument("--duration", type=int, default=10, help="Duration per experiment (seconds)")
     parser.add_argument("--url", default="http://localhost:8000", help="Target URL")
     parser.add_argument("--output", type=Path, help="Output directory for reports")
