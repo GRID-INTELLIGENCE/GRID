@@ -278,8 +278,8 @@ class GeminiAuthenticator:
     async def _get_service_account_token(self) -> str:
         """Get service account token using google-auth."""
         try:
-            from google.oauth2 import service_account
             from google.auth.transport.requests import Request
+            from google.oauth2 import service_account
 
             path = self.config.service_account_path or os.environ.get(
                 "GOOGLE_APPLICATION_CREDENTIALS"

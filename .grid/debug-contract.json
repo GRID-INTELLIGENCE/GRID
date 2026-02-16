@@ -784,7 +784,7 @@
           "name": "Secrets detection",
           "description": "Scan codebase for accidentally committed secrets or credentials.",
           "severity": "critical",
-          "command": "uv run detect-secrets scan --list-all-plugins 2>NUL || echo 'detect-secrets not installed — install with: uv pip install detect-secrets'",
+          "command": "uv run detect-secrets scan --list-all-plugins 2>&1 || echo 'detect-secrets not installed — install with: uv pip install detect-secrets'",
           "workdir": ".",
           "timeout_seconds": 60,
           "pass_criteria": {
