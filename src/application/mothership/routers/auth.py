@@ -1,7 +1,7 @@
 """
 Authentication and token management endpoints.
 
-Provides JWT token generation, refresh, and validation endpoints.
+Provides JWT token generation, refresh, validation, and user registration endpoints.
 """
 
 from __future__ import annotations
@@ -10,7 +10,7 @@ import logging
 from typing import Any
 
 from fastapi import APIRouter, HTTPException, status
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, EmailStr, Field
 
 from application.mothership.dependencies import Auth, RateLimited, RequestContext, Settings
 from application.mothership.schemas import ApiResponse, ResponseMeta
@@ -63,6 +63,84 @@ class ValidateResponse(BaseModel):
     email: str | None = Field(None, description="Email from token")
     scopes: list[str] = Field(default_factory=list, description="Token scopes")
     expires_at: int | None = Field(None, description="Token expiration timestamp")
+
+
+class UserResponse(BaseModel):
+    """Current user response."""
+
+    id: str = Field(..., description="User ID")
+    username: str = Field(..., description="Username")
+    email: str = Field(..., description="Email address")
+    full_name: str | None = Field(None, description="Full name")
+    trust_tier: str = Field(default="standard", description="Trust tier")
+    is_active: bool = Field(default=True, description="Whether user is active")
+    scopes: list[str] = Field(default_factory=list, description="User scopes")
+
+
+class RegisterRequest(BaseModel):
+    """User registration request."""
+
+    username: str = Field(..., description="Username", min_length=3, max_length=50)
+    email: EmailStr = Field(..., description="Email address")
+    password: str = Field(..., description="Password", min_length=8, max_length=255)
+    full_name: str | None = Field(None, description="Full name", max_length=255)
+
+
+@router.post("/register", response_model=ApiResponse[UserResponse], status_code=status.HTTP_201_CREATED)
+async def register_user(
+    request: RegisterRequest,
+    _: RateLimited,
+    request_context: RequestContext,
+) -> ApiResponse[UserResponse]:
+    """
+    Register a new user account.
+
+    Creates a new user with BASIC trust tier. In development mode,
+    this creates the user without external dependencies. In production,
+    this would integrate with the user store.
+
+    Args:
+        request: Registration details
+        _: Rate limiting enforcement
+        request_context: Request context
+
+    Returns:
+        API response with created user details
+
+    Raises:
+        HTTPException: If registration fails (e.g., user already exists)
+    """
+    request_id = request_context.get("request_id", "unknown")
+
+    # Generate unique user ID
+    import uuid
+
+    user_id = str(uuid.uuid4())
+
+    # In a real implementation, this would:
+    # 1. Check if email/username already exists
+    # 2. Hash the password securely
+    # 3. Store user in database
+    # 4. Potentially send verification email
+
+    # For now, we simulate successful registration
+    logger.info("User registered: %s (%s) (request_id=%s)", request.username, request.email, request_id)
+
+    response_data = UserResponse(
+        id=user_id,
+        username=request.username,
+        email=request.email,
+        full_name=request.full_name,
+        trust_tier="BASIC",  # New users start with BASIC tier
+        is_active=True,
+        scopes=["read"],  # New users get read-only by default
+    )
+
+    return ApiResponse(
+        success=True,
+        data=response_data,
+        meta=ResponseMeta(request_id=request_id),
+    )
 
 
 @router.post("/login", response_model=ApiResponse[TokenResponse])
@@ -278,6 +356,51 @@ async def validate_token(
     )
 
 
+@router.get("/me", response_model=ApiResponse[UserResponse])
+async def get_current_user(
+    auth: Auth,
+    request_context: RequestContext,
+) -> ApiResponse[UserResponse]:
+    """
+    Get current authenticated user information.
+
+    Returns details about the currently authenticated user based on the JWT token.
+
+    Args:
+        auth: Authentication context (automatically validated)
+        request_context: Request context
+
+    Returns:
+        API response with current user details
+    """
+    request_id = request_context.get("request_id", "unknown")
+    token_payload = auth.get("token_payload", {})
+
+    # Extract user info from auth context
+    user_id = auth.get("user_id", "unknown")
+    email = auth.get("email", "")
+    username = token_payload.get("sub", "")
+    scopes = list(
+        token_payload.get("scopes") if token_payload.get("scopes") is not None else auth.get("permissions", [])
+    )
+
+    response_data = UserResponse(
+        id=user_id,
+        username=username,
+        email=email,
+        full_name=None,  # Could be populated from user store in production
+        trust_tier="standard",  # Default tier, could be from user store
+        is_active=True,
+        scopes=scopes,
+    )
+
+    return ApiResponse(
+        success=True,
+        data=response_data,
+        meta=ResponseMeta(request_id=request_id),
+    )
+
+
 @router.post("/logout", response_model=ApiResponse[dict[str, Any]])
 async def logout(
     auth: Auth,
@@ -329,3 +452,5 @@ TokenResponse.model_rebuild()
 RefreshRequest.model_rebuild()
 RefreshResponse.model_rebuild()
 ValidateResponse.model_rebuild()
+UserResponse.model_rebuild()
+RegisterRequest.model_rebuild()

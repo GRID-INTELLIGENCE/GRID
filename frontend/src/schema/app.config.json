@@ -5,7 +5,7 @@
     "version": "0.1.0"
   },
   "api": {
-    "baseUrl": "http://127.0.0.1:8000",
+    "baseUrl": "http://127.0.0.1:8080",
     "ollamaUrl": "http://127.0.0.1:11434",
     "endpoints": {
       "health": "/health",
@@ -105,6 +105,14 @@
       "description": "Configure GRID frontend and backend connection",
       "navLabel": "Settings",
       "icon": "settings"
+    },
+    {
+      "id": "register",
+      "path": "/register",
+      "title": "Register",
+      "description": "Create a new GRID account",
+      "navLabel": "",
+      "icon": ""
     }
   ],
   "navigation": {

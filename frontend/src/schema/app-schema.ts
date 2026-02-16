@@ -23,7 +23,9 @@ export type RouteKey =
   | "observability"
   | "knowledge"
   | "terminal"
-  | "settings";
+  | "settings"
+  | "register"
+  | "login";
 
 export type EndpointKey =
   | "health"
