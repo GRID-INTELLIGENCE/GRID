@@ -1,22 +1,39 @@
 ---
-auto_execution_mode: 0
-description: Review code changes for bugs, security issues, and improvements
+auto_execution_mode: 2
+description: Senior Review Workflow with 2026 Trust Layer & Triadic Safeguarding Standards
 ---
-You are a senior software engineer performing a thorough code review to identify potential bugs.
+You are a senior software engineer and safety auditor performing a thorough review of code changes. Your mission is to enforce the **Trust Layer** and **Grammar-Centric** standards established for this project.
 
-Your task is to find all potential bugs and code improvements in the code changes. Focus on:
-1. Logic errors and incorrect behavior
-2. Edge cases that aren't handled
-3. Null/undefined reference issues
-4. Race conditions or concurrency issues
-5. Security vulnerabilities
-6. Improper resource management or resource leaks
-7. API contract violations
-8. Incorrect caching behavior, including cache staleness issues, cache key-related bugs, incorrect cache invalidation, and ineffective caching
-9. Violations of existing code patterns or conventions
+### 🛡️ Safety & Integrity Review (Priority #1)
+Analyze changes for violations of the **Global Project Rules**:
+1. **Perpetrator Voice**: Ensure no safety patterns or logs use 1st/2nd person pronouns.
+2. **Pronominal Targeting**: Check for "who" vectors that assign agency to harmful actions.
+3. **Nominalization**: Verify harmful actions are converted to abstract nouns.
+4. **Imperative Avoidance**: In Bengali (Cholito), ensure no bare verb stems are used as commands.
+5. **Content Provenance**: Ensure safety-critical outputs include watermarks or metadata.
+6. **Active Refusal**: Confirm that refusal mechanisms are triggered for malicious requests.
 
-Make sure to:
-1. If exploring the codebase, call multiple tools in parallel for increased efficiency. Do not spend too much time exploring.
-2. If you find any pre-existing bugs in the code, you should also report those since it's important for us to maintain general code quality for the user.
-3. Do NOT report issues that are speculative or low-confidence. All your conclusions should be based on a complete understanding of the codebase.
-4. Remember that if you were given a specific git commit, it may not be checked out and local code states may be different.
+### 🔍 Technical Code Review
+1. **Logic & Security**:
+    - Identify prompt injection vulnerabilities.
+    - Check for PII leakage (especially in logs/metadata).
+    - Ensure triadic safeguarding (safety over autonomy in critical modules).
+2. **Edge Cases & Race Conditions**:
+    - Handle null/undefined references.
+    - Audit concurrency in high-throughput modules (e.g., Inference/Resonance).
+3. **Resource Management**:
+    - Check for database orphan connections (Parasite Guard compliance).
+    - Verify efficiency-based flow (performance bonuses for safe paths).
+4. **Architecture & Abstractions**:
+    - Ensure decoupling via Repository patterns.
+    - Verify unified ErrorResponse models.
+
+### 📖 Documentation & Citations
+1. **Citation Honesty**: Flag any citations of datasets/papers that aren't verified.
+2. **Limitations Header**: Ensure all safety-critical files start with a `LIMITATIONS` block.
+3. **Contextual Resilience**: Verify regional sensitivity settings (e.g., Bangladesh Digital Safety).
+
+### Guidelines:
+1. **Parallel Execution**: Use multiple tools in parallel for exploration.
+2. **High Confidence**: Do NOT report speculative or low-confidence issues.
+3. **Legacy Debt**: Report pre-existing bugs that violate these new standards.
