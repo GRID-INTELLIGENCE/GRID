@@ -5,8 +5,11 @@ import type { OllamaModel, OllamaToken } from "@/lib/grid-client";
 import { ollamaClient } from "@/lib/grid-client";
 import { cn } from "@/lib/utils";
 import { appConfig } from "@/schema";
-import { Bot, Circle, Loader2, RefreshCw, Send, User } from "lucide-react";
+import { apiClient } from "@/api/client";
+import { Bot, Circle, Loader2, RefreshCw, Send, Shield, User } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+
+type ChatMode = "ollama" | "resonance";
 
 interface ChatMessage {
   id: string;
@@ -16,6 +19,8 @@ interface ChatMessage {
   model?: string;
   duration?: number;
   tokenCount?: number;
+  safetyState?: string;
+  activityId?: string;
 }
 
 export function ChatPage() {
@@ -26,6 +31,7 @@ export function ChatPage() {
   const [selectedModel, setSelectedModel] = useState(cfg.defaultModel);
   const [models, setModels] = useState<OllamaModel[]>([]);
   const [ollamaOnline, setOllamaOnline] = useState<boolean | null>(null);
+  const [chatMode, setChatMode] = useState<ChatMode>("resonance");
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -53,10 +59,63 @@ export function ChatPage() {
     });
   }, [messages]);
 
-  const sendMessage = useCallback(async () => {
-    const text = input.trim();
-    if (!text || isStreaming) return;
+  const sendViaResonance = useCallback(async (text: string) => {
+    const userMsg: ChatMessage = {
+      id: `user-${Date.now()}`,
+      role: "user",
+      content: text,
+      timestamp: Date.now(),
+    };
 
+    const assistantMsg: ChatMessage = {
+      id: `assistant-${Date.now()}`,
+      role: "assistant",
+      content: "",
+      timestamp: Date.now(),
+      model: "resonance",
+    };
+
+    setMessages((prev) => [...prev, userMsg, assistantMsg]);
+    setInput("");
+    setIsStreaming(true);
+
+    try {
+      const startTime = Date.now();
+      const result = await apiClient.processResonance({ query: text });
+      const elapsed = Date.now() - startTime;
+
+      const responseText = [
+        result.message || "Processed.",
+        result.context ? `\n\n**Context:** ${typeof result.context === 'object' ? JSON.stringify(result.context.content || result.context, null, 2).slice(0, 500) : result.context}` : "",
+        result.paths ? `\n\n**Paths Available:** ${typeof result.paths === 'object' ? (result.paths.total_options || 'multiple') + ' options' : result.paths}` : "",
+      ].join("");
+
+      setMessages((prev) => {
+        const updated = [...prev];
+        const last = updated[updated.length - 1];
+        if (last.role === "assistant") {
+          last.content = responseText;
+          last.duration = elapsed;
+          last.safetyState = result.state;
+          last.activityId = result.activity_id;
+        }
+        return updated;
+      });
+    } catch (err) {
+      setMessages((prev) => {
+        const updated = [...prev];
+        const last = updated[updated.length - 1];
+        if (last.role === "assistant") {
+          last.content = `Resonance error: ${err instanceof Error ? err.message : String(err)}`;
+        }
+        return updated;
+      });
+    } finally {
+      setIsStreaming(false);
+    }
+  }, []);
+
+  const sendViaOllama = useCallback(async (text: string) => {
     const userMsg: ChatMessage = {
       id: `user-${Date.now()}`,
       role: "user",
@@ -77,7 +136,6 @@ export function ChatPage() {
     setIsStreaming(true);
 
     try {
-      // Build messages array for Ollama
       const history = [
         { role: "system" as const, content: cfg.systemPrompt },
         ...messages.map((m) => ({ role: m.role, content: m.content })),
@@ -136,7 +194,18 @@ export function ChatPage() {
       });
       setIsStreaming(false);
     }
-  }, [input, isStreaming, messages, selectedModel, cfg.systemPrompt]);
+  }, [messages, selectedModel, cfg.systemPrompt]);
+
+  const sendMessage = useCallback(async () => {
+    const text = input.trim();
+    if (!text || isStreaming) return;
+
+    if (chatMode === "resonance") {
+      await sendViaResonance(text);
+    } else {
+      await sendViaOllama(text);
+    }
+  }, [input, isStreaming, chatMode, sendViaResonance, sendViaOllama]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -161,35 +230,50 @@ export function ChatPage() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          {/* Model selector */}
-          <select
-            value={selectedModel}
-            onChange={(e) => setSelectedModel(e.target.value)}
-            className="rounded-md border border-[var(--border)] bg-[var(--card)] px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
+          {/* Mode toggle */}
+          <Button
+            variant={chatMode === "resonance" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setChatMode(chatMode === "resonance" ? "ollama" : "resonance")}
+            className="gap-1.5 text-xs"
           >
-            {models.length > 0 ? (
-              models.map((m) => (
-                <option key={m.name} value={m.name}>
-                  {m.name}
-                </option>
-              ))
-            ) : (
-              <option value={selectedModel}>{selectedModel}</option>
-            )}
-          </select>
+            <Shield className="h-3 w-3" />
+            {chatMode === "resonance" ? "Trust Layer" : "Direct LLM"}
+          </Button>
 
-          {/* Ollama status */}
+          {/* Model selector (only in Ollama mode) */}
+          {chatMode === "ollama" && (
+            <select
+              value={selectedModel}
+              onChange={(e) => setSelectedModel(e.target.value)}
+              className="rounded-md border border-[var(--border)] bg-[var(--card)] px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
+            >
+              {models.length > 0 ? (
+                models.map((m) => (
+                  <option key={m.name} value={m.name}>
+                    {m.name}
+                  </option>
+                ))
+              ) : (
+                <option value={selectedModel}>{selectedModel}</option>
+              )}
+            </select>
+          )}
+
+          {/* Status badge */}
           <Badge
-            variant={ollamaOnline ? "success" : "warning"}
+            variant={chatMode === "resonance" ? "success" : (ollamaOnline ? "success" : "warning")}
             className="gap-1.5"
           >
             <Circle
               className={cn(
                 "h-2 w-2 fill-current",
-                ollamaOnline ? "text-[var(--success)]" : "text-[var(--warning)]"
+                chatMode === "resonance"
+                  ? "text-[var(--success)]"
+                  : ollamaOnline ? "text-[var(--success)]" : "text-[var(--warning)]"
               )}
             />
-            {ollamaOnline ? "Ollama Online" : "Ollama Offline"}
+            {chatMode === "resonance" ? "Resonance Active" : (ollamaOnline ? "Ollama Online" : "Ollama Offline")}
           </Badge>
 
           <Button
@@ -292,7 +376,7 @@ export function ChatPage() {
           <Button
             size="icon"
             onClick={sendMessage}
-            disabled={!input.trim() || isStreaming || !ollamaOnline}
+            disabled={!input.trim() || isStreaming || (chatMode === "ollama" && !ollamaOnline)}
           >
             {isStreaming ? (
               <Loader2 className="h-4 w-4 animate-spin" />

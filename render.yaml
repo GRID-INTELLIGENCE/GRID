@@ -1,0 +1,32 @@
+# GRID — Render.com Deployment Configuration
+# Deploys the Mothership API as a single web service.
+# https://render.com/docs/yaml-spec
+
+services:
+  - type: web
+    name: grid-mothership
+    runtime: python
+    region: singapore  # closest to Bangladesh
+    plan: starter
+    buildCommand: |
+      pip install uv &&
+      uv sync --frozen --no-dev
+    startCommand: |
+      uv run uvicorn application.mothership.main:create_app --factory --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHONPATH
+        value: src
+      - key: MOTHERSHIP_ENVIRONMENT
+        value: production
+      - key: MOTHERSHIP_SECRET_KEY
+        generateValue: true
+      - key: MOTHERSHIP_RATE_LIMIT_ENABLED
+        value: "true"
+      - key: MOTHERSHIP_USE_DATABRICKS
+        value: "false"
+      - key: MOTHERSHIP_REDIS_ENABLED
+        value: "false"
+      - key: PYTHONUNBUFFERED
+        value: "1"
+    healthCheckPath: /ping
+    autoDeploy: false

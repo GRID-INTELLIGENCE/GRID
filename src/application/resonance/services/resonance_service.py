@@ -7,6 +7,7 @@ Follows Mothership patterns: FastAPI routers → services → repositories.
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import uuid
 from typing import Any
@@ -127,25 +128,28 @@ class ResonanceService:
             context=context,
         )
 
-        # Store events and persist activity metadata
+        # Store events locally (sync, fast)
         events = resonance.get_recent_events(limit=100)
         self._activity_events[activity_id] = events
-        await self._repository.save_activity_metadata(activity_id, activity_type, query, context)
 
         # Get envelope metrics for richer telemetry
         envelope_metrics = resonance.envelope.get_metrics()
 
-        # Log to Databricks
-        await self.databricks_bridge.log_event(
-            "ACTIVITY_PROCESSED",
-            {
-                "activity_id": activity_id,
-                "type": activity_type,
-                "query": query,
-                "feedback": feedback.__dict__ if hasattr(feedback, "__dict__") else str(feedback),
-                "envelope": envelope_metrics.__dict__ if envelope_metrics else None,
-            },
-            impact=0.9,
+        # Parallelize I/O: persist metadata + log to Databricks concurrently
+        await asyncio.gather(
+            self._repository.save_activity_metadata(activity_id, activity_type, query, context),
+            self.databricks_bridge.log_event(
+                "ACTIVITY_PROCESSED",
+                {
+                    "activity_id": activity_id,
+                    "type": activity_type,
+                    "query": query,
+                    "feedback": feedback.__dict__ if hasattr(feedback, "__dict__") else str(feedback),
+                    "envelope": envelope_metrics.__dict__ if envelope_metrics else None,
+                },
+                impact=0.9,
+            ),
+            return_exceptions=True,
         )
 
         return activity_id, feedback

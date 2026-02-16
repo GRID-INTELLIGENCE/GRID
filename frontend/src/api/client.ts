@@ -1,7 +1,7 @@
 import axios, { AxiosInstance, AxiosResponse, AxiosError } from 'axios';
 import { jwtDecode } from 'jwt-decode';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
 interface AuthTokens {
   access_token: string;
@@ -53,6 +53,34 @@ interface PrivacyResponse {
     end: number;
   }>;
   applied_rules: string[];
+}
+
+interface ResonanceResponse {
+  activity_id: string;
+  state: string;
+  urgency: number;
+  message: string;
+  context: Record<string, any> | null;
+  paths: Record<string, any> | null;
+  envelope: Record<string, any> | null;
+  timestamp: string;
+}
+
+interface DefinitiveResponse {
+  activity_id: string;
+  progress: number;
+  canvas_before: string;
+  canvas_after: string;
+  summary: string;
+  faq: Array<{ question: string; answer: string }>;
+  use_cases: Array<{ audience: string; scenario: string; entrypoint: string; output: string }>;
+  api_mechanics: string[];
+  structured: Record<string, any>;
+  context: Record<string, any> | null;
+  paths: Record<string, any> | null;
+  choices: Array<{ direction: string; option: Record<string, any>; why: string }>;
+  skills: Record<string, any>;
+  rag: Record<string, any> | null;
 }
 
 class ApiClient {
@@ -146,7 +174,7 @@ class ApiClient {
 
   // Authentication methods
   async login(credentials: LoginCredentials): Promise<AuthTokens> {
-    const response = await this.client.post<AuthTokens>('/auth/token', credentials);
+    const response = await this.client.post<AuthTokens>('/api/v1/auth/login', credentials);
     this.setTokens(response.data);
     return response.data;
   }
@@ -160,7 +188,7 @@ class ApiClient {
   }
 
   async getCurrentUser(): Promise<User> {
-    const response = await this.client.get<User>('/auth/me');
+    const response = await this.client.get<User>('/api/v1/auth/me');
     return response.data;
   }
 
@@ -203,6 +231,41 @@ class ApiClient {
 
   async getPrivacyLevels(): Promise<any> {
     const response = await this.client.get('/api/v1/privacy/levels');
+    return response.data;
+  }
+
+  // Resonance methods (trust layer)
+  async processResonance(request: {
+    query: string;
+    activity_type?: string;
+    context?: Record<string, any>;
+  }): Promise<ResonanceResponse> {
+    const response = await this.client.post<ResonanceResponse>('/api/v1/resonance/process', {
+      query: request.query,
+      activity_type: request.activity_type || 'general',
+      context: request.context || {},
+    });
+    return response.data;
+  }
+
+  async definitiveStep(request: {
+    query: string;
+    progress?: number;
+    target_schema?: string;
+    use_rag?: boolean;
+    use_llm?: boolean;
+    max_chars?: number;
+  }): Promise<DefinitiveResponse> {
+    const response = await this.client.post<DefinitiveResponse>('/api/v1/resonance/definitive', {
+      query: request.query,
+      activity_type: 'general',
+      context: {},
+      progress: request.progress ?? 0.65,
+      target_schema: request.target_schema ?? 'context_engineering',
+      use_rag: request.use_rag ?? false,
+      use_llm: request.use_llm ?? false,
+      max_chars: request.max_chars ?? 280,
+    });
     return response.data;
   }
 

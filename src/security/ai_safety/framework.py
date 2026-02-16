@@ -129,6 +129,7 @@ class ContentModerator:
         self.mental_health_keywords = self._load_mental_health_patterns()
         self.privacy_patterns = self._load_privacy_patterns()
         self.harmful_patterns = self._load_harmful_patterns()
+        self.safety_patterns = self._load_safety_patterns()
 
     def _load_se_asia_patterns(self) -> dict[str, list[str]]:
         """Load Southeast Asia cultural sensitivity patterns."""
@@ -201,6 +202,15 @@ class ContentModerator:
         """Load harmful content patterns."""
         return ["violence", "kill", "hurt", "attack", "weapon", "drugs", "illegal", "criminal", "abuse", "hate"]
 
+    def _load_safety_patterns(self) -> dict[str, list[tuple[str, str]]]:
+        """Load harmful content detection tokens with confidence tiers."""
+        try:
+            from .patterns import HARMFUL_PATTERNS
+            return HARMFUL_PATTERNS
+        except ImportError:
+            logger.warning("Safety patterns module not available")
+            return {}
+
     async def analyze_content(
         self, content: str, content_type: ContentType = ContentType.TEXT
     ) -> list[SafetyViolation]:
@@ -221,6 +231,9 @@ class ContentModerator:
 
         # Check for cultural sensitivities
         violations.extend(await self._check_cultural_sensitivity(normalized_content))
+
+        # Check for harmful content patterns
+        violations.extend(await self._check_safety_patterns(content))
 
         return violations
 
@@ -310,6 +323,46 @@ class ContentModerator:
                             confidence=0.6,
                             description=f"Cultural sensitivity issue in {category}: {pattern}",
                             evidence={"category": category, "pattern": pattern},
+                        )
+                    )
+
+        return violations
+
+    async def _check_safety_patterns(self, content: str) -> list[SafetyViolation]:
+        """Check for harmful content detection tokens."""
+        violations = []
+
+        # Severity mapping by category
+        _critical = {"nonconsensual_media", "violence", "gendered_violence"}
+        _high = {"distress_signals", "platform_exploitation"}
+
+        for category, entries in self.safety_patterns.items():
+            for token, confidence in entries:
+                if token in content:
+                    cat_severity = (
+                        ThreatLevel.CRITICAL
+                        if category in _critical
+                        else ThreatLevel.HIGH
+                        if category in _high
+                        else ThreatLevel.MEDIUM
+                    )
+                    # Medium-confidence tokens are capped at MEDIUM severity
+                    if confidence == "medium" and cat_severity in (ThreatLevel.HIGH, ThreatLevel.CRITICAL):
+                        effective_severity = ThreatLevel.MEDIUM
+                    else:
+                        effective_severity = cat_severity
+
+                    violations.append(
+                        SafetyViolation(
+                            category=SafetyCategory.HARMFUL_CONTENT,
+                            severity=effective_severity,
+                            confidence=0.9 if confidence == "high" else 0.5,
+                            description=f"Harmful content detected ({category})",
+                            evidence={
+                                "category": category,
+                                "token": token,
+                                "confidence_tier": confidence,
+                            },
                         )
                     )
 
