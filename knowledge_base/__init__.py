@@ -12,6 +12,11 @@ Features:
 - Security and access controls
 - Scalable architecture
 
+Provider note: This package uses the OpenAI API only for embeddings and LLM
+(OPENAI_ATLAS_API / OPENAI_API_KEY required). For multi-provider RAG including
+local Ollama, Anthropic, or OpenAI-compatible endpoints, use the main RAG stack
+under ``src/tools/rag``.
+
 Author: GRID AI Assistant
 Version: 1.0.0
 """

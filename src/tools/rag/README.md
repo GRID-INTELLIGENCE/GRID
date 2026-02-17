@@ -1,13 +1,13 @@
 # GRID RAG System
 
-Unified Retrieval-Augmented Generation (RAG) system for GRID with local-only operation.
+Unified Retrieval-Augmented Generation (RAG) system for GRID. Supports **local-only operation** (Ollama + ChromaDB) by default and **external API providers** (OpenAI, Anthropic, OpenAI-compatible endpoints) when configured.
 
 ## Features
 
-- **Local-Only Operation**: All RAG context stays on your computer
-- **Nomic Embed Text V2**: Uses `nomic-embed-text-v2` for high-quality embeddings
-- **Local Ollama Models**: Supports `ministral` and `gpt-oss-safeguard` for queries
-- **ChromaDB Storage**: Persistent vector store with efficient similarity search
+- **Local-first default**: Ollama for embeddings and LLM, ChromaDB for vector storage
+- **External API support**: Optional OpenAI, Anthropic, or any OpenAI-compatible endpoint (e.g. LiteLLM)
+- **Nomic Embed Text**: Local embeddings via Ollama; optional OpenAI embeddings
+- **ChromaDB Storage**: Persistent vector store (can be used with external embed/LLM)
 - **Easy Querying**: Simple API for indexing and querying your project
 
 ## Setup
@@ -90,21 +90,58 @@ print(f"Documents: {stats['document_count']}")
 
 ## Configuration
 
-Configuration can be set via environment variables:
+Configuration can be set via environment variables.
+
+### Local-only (default)
 
 ```bash
 # Embedding model
 export RAG_EMBEDDING_MODEL="nomic-embed-text-v2-moe:latest"
 export RAG_EMBEDDING_MODE="local"  # local or cloud
+export RAG_EMBEDDING_PROVIDER="ollama"
 
 # LLM model
 export RAG_LLM_MODEL_LOCAL="ministral-3:3b"  # or gpt-oss-safeguard
-export RAG_LLM_MODE="local"  # local or cloud
+export RAG_LLM_MODE="local"  # local, cloud, copilot, or external
 
-# Vector store
+# Vector store (unchanged when using external APIs)
 export RAG_VECTOR_STORE_PATH=".rag_db"
 export RAG_COLLECTION_NAME="grid_knowledge_base"
 
+# Ollama
+export OLLAMA_BASE_URL="http://localhost:11434"
+```
+
+### Using external API providers
+
+To use OpenAI, Anthropic, or an OpenAI-compatible endpoint for the LLM and/or embeddings:
+
+```bash
+# Use external LLM (OpenAI)
+export RAG_LLM_MODE="external"
+export RAG_LLM_PROVIDER="openai"   # or anthropic, openai_compatible
+export RAG_LLM_MODEL="gpt-4o-mini" # or OPENAI_MODEL
+export OPENAI_API_KEY="sk-..."
+
+# Optional: proxy or custom endpoint (e.g. LiteLLM)
+export OPENAI_BASE_URL="https://your-proxy.com/v1"
+# or for openai_compatible only: RAG_LLM_API_BASE
+
+# Use external embeddings (OpenAI)
+export RAG_EMBEDDING_PROVIDER="openai"
+export RAG_EMBEDDING_MODEL="text-embedding-3-small"
+export OPENAI_API_KEY="sk-..."
+
+# Anthropic (when RAG_LLM_PROVIDER=anthropic)
+export ANTHROPIC_API_KEY="sk-ant-..."
+export ANTHROPIC_MODEL="claude-3-5-sonnet-20241022"
+```
+
+Vector store can remain ChromaDB; only the embedding and LLM backends switch to external APIs.
+
+### Other options
+
+```bash
 # Chunking
 export RAG_CHUNK_SIZE="800"
 export RAG_CHUNK_OVERLAP="100"
@@ -112,9 +149,6 @@ export RAG_CHUNK_OVERLAP="100"
 # Retrieval
 export RAG_TOP_K="10"
 export RAG_SIMILARITY_THRESHOLD="0.0"
-
-# Ollama
-export OLLAMA_BASE_URL="http://localhost:11434"
 ```
 
 ## Architecture
@@ -122,12 +156,15 @@ export OLLAMA_BASE_URL="http://localhost:11434"
 ### Components
 
 1. **Embedding Provider** (`embeddings/`)
-   - `NomicEmbeddingV2`: Uses nomic-embed-text-v2-moe:latest via Ollama
+   - Ollama (default): nomic-embed-text via Ollama
+   - OpenAI: `RAG_EMBEDDING_PROVIDER=openai` with `OPENAI_API_KEY`
    - Returns dense vectors (not sparse dicts)
 
 2. **LLM Provider** (`llm/`)
-   - `OllamaLocalLLM`: Local Ollama models (ministral, gpt-oss-safeguard)
-   - `OllamaCloudLLM`: Cloud Ollama models (optional)
+   - `OllamaLocalLLM` / `OllamaCloudLLM`: Local or cloud Ollama
+   - `OpenAILLM`: OpenAI API (or OpenAI-compatible via base_url)
+   - `AnthropicLLM`: Anthropic Claude API
+   - `OpenAICompatibleLLM`: LiteLLM or any OpenAI-compatible chat completions endpoint
 
 3. **Vector Store** (`vector_store/`)
    - `ChromaDBVectorStore`: ChromaDB-based persistent storage
@@ -150,20 +187,15 @@ ChromaDB Vector Store (persistent)
 Query → Embedding → Retrieval → LLM → Answer
 ```
 
-## Local-Only Guarantee
+## Local-first default
 
-The RAG system is configured to operate locally by default:
+The RAG system defaults to local operation:
 
-- **Embeddings**: Uses local Ollama (`nomic-embed-text-v2`)
-- **LLM**: Uses local Ollama models (`ministral`, `gpt-oss-safeguard`)
-- **Storage**: ChromaDB stores data locally in `.rag_db/`
-- **No External APIs**: No calls to OpenAI, Anthropic, or other cloud services
+- **Embeddings**: Local Ollama (`nomic-embed-text`) unless `RAG_EMBEDDING_PROVIDER=openai`
+- **LLM**: Local Ollama unless `RAG_LLM_MODE=external` and `RAG_LLM_PROVIDER` (openai, anthropic, openai_compatible)
+- **Storage**: ChromaDB stores data locally in `.rag_db/` (used for both local and external backends)
 
-To enforce local-only mode:
-```python
-config = RAGConfig.from_env()
-config.ensure_local_only()  # Raises error if cloud mode is set
-```
+To use external APIs, set the env vars in "Using external API providers" above. The main RAG stack lives under `src/tools/rag`; the `knowledge_base/` package is a separate, OpenAI-only subsystem.
 
 ## Best Practices
 

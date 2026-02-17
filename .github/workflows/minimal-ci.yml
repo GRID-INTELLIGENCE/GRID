@@ -29,3 +29,12 @@ jobs:
         run: |
           uv venv
           uv sync --group dev --group test
+
+      - name: Policy and governance tests (persistent)
+        run: |
+          uv run pytest tests/config/test_devprograms_external_api_access.py tests/config/test_runtime_policy.py tests/test_external_llm_provider.py -v --tb=short
+
+      - name: Lint policy and RAG code (ruff)
+        run: |
+          uv run ruff check tests/config/ src/tools/rag/config.py src/tools/rag/llm/factory.py src/tools/rag/llm/openai_llm.py src/tools/rag/llm/anthropic_llm.py src/tools/rag/llm/openai_compatible.py src/tools/runtime_policy.py --output-format=concise
+        continue-on-error: true

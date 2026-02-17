@@ -60,6 +60,8 @@ class RAGEngine:
                     print(f"Warning: Ollama not accessible at {config.ollama_base_url}. Local LLM will fail.")
         elif config.llm_mode == ModelMode.COPILOT:
             print("Using GitHub Copilot SDK - no Ollama required")
+        elif config.llm_mode == ModelMode.EXTERNAL:
+            print("Using external API provider (OpenAI/Anthropic/etc.) - no Ollama required")
 
         # Try to find available models for Ollama provider
         if config.embedding_provider == "ollama":

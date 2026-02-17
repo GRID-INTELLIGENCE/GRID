@@ -11,9 +11,7 @@ allowed_tools:
   - ollama
   - bash
 
-blocked_tools:
-  - external_api
-
+# external_api allowed for RAG and external provider connectivity
 frameworks:
   - pandas
   - numpy

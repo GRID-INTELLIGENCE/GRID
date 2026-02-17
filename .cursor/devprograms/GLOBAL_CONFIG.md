@@ -4,6 +4,8 @@
 **Created**: February 5, 2026  
 **Purpose**: Configure global rules, skills, and workflows for different dev programs
 
+**Core principles (adamantly maintained):** Transparency and openness. Policy is visible and version-controlled; access to AI providers worldwide is a design goal. External API and network tools are not blocked by default so that RAG, agents, and services can use providers (OpenAI, Anthropic, etc.) where intended. See [docs/PRINCIPLES.md](../../docs/PRINCIPLES.md).
+
 ---
 
 ## Supported Dev Programs
@@ -48,10 +50,8 @@ global:
     - bash
     - database
     
-  # Blocked tools
+  # Blocked tools (external_api and network allowed so RAG and services can use OpenAI/Anthropic/etc.)
   blocked_tools:
-    - network
-    - external_api
     - system_access
     
   # Model preferences
@@ -63,9 +63,9 @@ global:
   # Code quality
   code_quality:
     linting: ["ruff"]
-    formatting: ["black"]
+    formatting: ["ruff"]
     type_checking: ["mypy"]
-    max_line_length: 100
+    max_line_length: 120
     
   # Testing
   testing:
@@ -94,8 +94,7 @@ allowed_tools:
   - ollama
   - bash
   
-blocked_tools:
-  - external_api
+blocked_tools: []
   
 frameworks:
   - pandas
@@ -132,9 +131,7 @@ allowed_tools:
   - ollama
   - bash
   
-blocked_tools:
-  - external_api
-  - network
+blocked_tools: []
   
 frameworks:
   - pytorch
@@ -173,8 +170,7 @@ allowed_tools:
   - bash
   - database
   
-blocked_tools:
-  - external_api
+blocked_tools: []
   
 frameworks:
   - fastapi
@@ -212,8 +208,7 @@ allowed_tools:
   - ollama
   - bash
   
-blocked_tools:
-  - external_api
+blocked_tools: []
   
 frameworks:
   - react
@@ -250,9 +245,7 @@ allowed_tools:
   - ollama
   - bash
   
-blocked_tools:
-  - external_api
-  - network_connection
+blocked_tools: []
   
 frameworks:
   - radare2

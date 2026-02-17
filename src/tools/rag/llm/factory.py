@@ -14,13 +14,17 @@ class LLMProviderType(StrEnum):
     OLLAMA_LOCAL = "ollama-local"  # Local Ollama models (default)
     OLLAMA_CLOUD = "ollama-cloud"  # Cloud Ollama models
     COPILOT = "copilot"  # GitHub Copilot SDK with web fetching
+    OPENAI = "openai"  # OpenAI API (or OpenAI-compatible via base_url)
+    ANTHROPIC = "anthropic"  # Anthropic Claude API
+    GEMINI = "gemini"  # Google Gemini API
+    OPENAI_COMPATIBLE = "openai_compatible"  # LiteLLM or any OpenAI-compatible endpoint
     SIMPLE = "simple"  # Simple fallback
 
 
 def get_llm_provider(
     provider_type: str | None = None, config: RAGConfig | None = None, model: str | None = None
 ) -> BaseLLMProvider:
-    """Get an LLM provider with local/cloud selection.
+    """Get an LLM provider with local/cloud/external selection.
 
     Args:
         provider_type: Type of provider (default: based on config)
@@ -39,6 +43,8 @@ def get_llm_provider(
             provider_type = LLMProviderType.OLLAMA_CLOUD.value
         elif config.llm_mode == ModelMode.COPILOT:
             provider_type = LLMProviderType.COPILOT.value
+        elif config.llm_mode == ModelMode.EXTERNAL:
+            provider_type = (config.external_provider or "openai").lower()
         else:
             provider_type = LLMProviderType.OLLAMA_LOCAL.value
 
@@ -50,6 +56,17 @@ def get_llm_provider(
             model = config.llm_model_cloud or "llama2"
         elif config.llm_mode == ModelMode.COPILOT:
             model = config.llm_model_copilot
+        elif config.llm_mode == ModelMode.EXTERNAL:
+            if provider_type == LLMProviderType.OPENAI.value:
+                model = config.openai_model
+            elif provider_type == LLMProviderType.ANTHROPIC.value:
+                model = config.anthropic_model
+            elif provider_type == LLMProviderType.GEMINI.value:
+                model = config.gemini_model
+            elif provider_type == LLMProviderType.OPENAI_COMPATIBLE.value:
+                model = config.openai_model  # or a dedicated field; reuse openai_model
+            else:
+                model = config.openai_model
         else:
             model = config.llm_model_local
 
@@ -65,6 +82,53 @@ def get_llm_provider(
         from .copilot import CopilotLLM
 
         return CopilotLLM(model=model)
+    elif provider_type == LLMProviderType.OPENAI.value:
+        from .openai_llm import OpenAILLM
+
+        if not config.openai_api_key:
+            raise ValueError(
+                "External OpenAI mode requires OPENAI_API_KEY. Set RAG_LLM_MODE=external and RAG_LLM_PROVIDER=openai."
+            )
+        return OpenAILLM(
+            model=model,
+            api_key=config.openai_api_key,
+            base_url=config.openai_base_url,
+        )
+    elif provider_type == LLMProviderType.ANTHROPIC.value:
+        from .anthropic_llm import AnthropicLLM
+
+        if not config.anthropic_api_key:
+            raise ValueError(
+                "External Anthropic mode requires ANTHROPIC_API_KEY. Set RAG_LLM_MODE=external and RAG_LLM_PROVIDER=anthropic."
+            )
+        return AnthropicLLM(
+            model=model,
+            api_key=config.anthropic_api_key,
+        )
+    elif provider_type == LLMProviderType.OPENAI_COMPATIBLE.value:
+        from .openai_compatible import OpenAICompatibleLLM
+
+        api_base = config.llm_api_base or config.openai_base_url
+        if not api_base:
+            raise ValueError(
+                "OpenAI-compatible mode requires OPENAI_BASE_URL or RAG_LLM_API_BASE. Set RAG_LLM_MODE=external and RAG_LLM_PROVIDER=openai_compatible."
+            )
+        return OpenAICompatibleLLM(
+            model=model,
+            api_base=api_base,
+            api_key=config.openai_api_key,
+        )
+    elif provider_type == LLMProviderType.GEMINI.value:
+        from .gemini import GeminiLLM
+
+        if not config.gemini_api_key:
+            raise ValueError(
+                "External Gemini mode requires GEMINI_API_KEY. Set RAG_LLM_MODE=external and RAG_LLM_PROVIDER=gemini."
+            )
+        return GeminiLLM(
+            model=model,
+            api_key=config.gemini_api_key,
+        )
     elif provider_type == LLMProviderType.SIMPLE.value:
         from .simple import SimpleLLM
 

@@ -3,6 +3,10 @@ Knowledge Base Configuration
 ============================
 
 Centralized configuration management for the GRID Knowledge Base system.
+
+Note: The Knowledge Base is OpenAI-only (embeddings and LLM). Set OPENAI_ATLAS_API
+(or the configured API key env) for external use. For local or multi-provider RAG,
+use src/tools/rag instead.
 """
 
 import os

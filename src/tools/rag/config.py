@@ -23,6 +23,7 @@ class ModelMode(StrEnum):
     LOCAL = "local"  # Use local Ollama models
     CLOUD = "cloud"  # Use cloud Ollama models
     COPILOT = "copilot"  # Use GitHub Copilot SDK
+    EXTERNAL = "external"  # Use external API providers (OpenAI, Anthropic, etc.)
 
 
 @dataclass
@@ -52,6 +53,17 @@ class RAGConfig:
     # Ollama configuration
     ollama_base_url: str = "http://localhost:11434"  # Local Ollama
     ollama_cloud_url: str | None = None  # Cloud Ollama URL if using cloud
+
+    # External API provider configuration
+    openai_api_key: str | None = None  # OpenAI API key
+    openai_base_url: str | None = None  # Optional: proxy or custom endpoint (e.g. LiteLLM)
+    openai_model: str = "gpt-4o-mini"  # Default OpenAI model
+    anthropic_api_key: str | None = None  # Anthropic API key
+    anthropic_model: str = "claude-3-5-sonnet-20241022"  # Default Anthropic model
+    gemini_api_key: str | None = None  # Google Gemini API key
+    gemini_model: str = "gemini-1.5-flash"  # Default Gemini model
+    external_provider: str = "openai"  # Default external provider: openai, anthropic, openai_compatible
+    llm_api_base: str | None = None  # For openai_compatible: base URL for chat completions
 
     # Chunking configuration
     chunk_size: int = 1000
@@ -112,6 +124,16 @@ class RAGConfig:
             # Ollama config
             ollama_base_url=os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"),
             ollama_cloud_url=os.getenv("OLLAMA_CLOUD_URL"),
+            # External API provider config
+            openai_api_key=os.getenv("OPENAI_API_KEY"),
+            openai_base_url=os.getenv("OPENAI_BASE_URL") or os.getenv("RAG_LLM_OPENAI_BASE"),
+            openai_model=os.getenv("RAG_LLM_MODEL", os.getenv("OPENAI_MODEL", "gpt-4o-mini")),
+            anthropic_api_key=os.getenv("ANTHROPIC_API_KEY"),
+            anthropic_model=os.getenv("ANTHROPIC_MODEL", "claude-3-5-sonnet-20241022"),
+            gemini_api_key=os.getenv("GEMINI_API_KEY"),
+            gemini_model=os.getenv("GEMINI_MODEL", "gemini-1.5-flash"),
+            external_provider=os.getenv("RAG_LLM_PROVIDER", os.getenv("RAG_EXTERNAL_PROVIDER", "openai")),
+            llm_api_base=os.getenv("OPENAI_BASE_URL") or os.getenv("RAG_LLM_API_BASE"),
             # Chunking config
             chunk_size=int(os.getenv("RAG_CHUNK_SIZE", "1000")),
             chunk_overlap=int(os.getenv("RAG_CHUNK_OVERLAP", "150")),
@@ -143,11 +165,10 @@ class RAGConfig:
         )
 
     def ensure_local_only(self) -> None:
-        """Ensure configuration is set for local-only operation."""
-        if self.embedding_mode == ModelMode.CLOUD:
-            raise ValueError("Cloud embedding mode not allowed. Set RAG_EMBEDDING_MODE=local or use local mode.")
-        if self.llm_mode == ModelMode.CLOUD and not self.ollama_cloud_url:
-            raise ValueError(
-                "Cloud LLM mode requires OLLAMA_CLOUD_URL to be set. For local-only operation, set RAG_LLM_MODE=local"
-            )
-        # Copilot mode is allowed as it uses GitHub's infrastructure
+        """Legacy method - no longer enforces local-only operation.
+
+        This method is kept for backward compatibility but no longer raises errors.
+        The codebase now freely supports external API providers (OpenAI, Anthropic, Gemini).
+        """
+        # No-op: External providers are now fully supported
+        pass

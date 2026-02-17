@@ -1,0 +1,55 @@
+# GRID runtime policy: principles and tool/network reach
+# Derived from docs/PRINCIPLES.md and .cursor/devprograms/GLOBAL_CONFIG.md.
+# This file drives runtime behavior: network and external API access, tool allow/block.
+# Open-source principles and freedom to think: access is default, restriction exception.
+
+version: "1.0"
+source:
+  principles: "docs/PRINCIPLES.md"
+  devprograms: ".cursor/devprograms/GLOBAL_CONFIG.md"
+
+# Core principles (code-readable flags for runtime behavior)
+principles:
+  transparency: true
+  openness: true
+  freedom_to_think: true
+  access_default: true   # access is default; restriction is exception
+  network_and_external_api_allowed_by_default: true
+
+# Network and external call reach (changes runtime behavior)
+network:
+  allowed: true
+  # If false, runtime should deny outbound HTTP/external calls except allowlisted
+
+external_api:
+  allowed: true
+  # If false, runtime should deny calls to OpenAI, Anthropic, etc.
+
+# Tool policy: only these may appear in blocked_tools (minimal restriction)
+# Anything else (e.g. external_api, network) must NOT be blocked per principles
+blocked_tools_allowlist:
+  - system_access
+
+# Tools protected as core rights: must never be in blocked_tools
+# Restricting these would violate freedom to think and open-source principles
+protected_tools:
+  - external_api
+  - network
+  - network_connection
+  - web_search
+  - mcp_web_fetch
+  - fetch
+  - http
+  - requests
+
+# Global default blocked list (only names in blocked_tools_allowlist may appear here)
+# Permits full reach for network and external API; only system_access restricted
+blocked_tools:
+  - system_access
+# Optional override per program (program_id -> list); omit = use global
+program_overrides: {}
+
+# Code quality (aligned with IDE/runtime expectations)
+code_quality:
+  formatter: ruff
+  max_line_length: 120

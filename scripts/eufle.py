@@ -1,4 +1,11 @@
 #!/usr/bin/env python3
+"""Wrapper for EUFLE CLI. Defaults to Ollama when EUFLE_DEFAULT_PROVIDER/EUFLE_MODEL are unset.
+
+To use external providers (e.g. OpenAI, Anthropic), set before running:
+  EUFLE_DEFAULT_PROVIDER=openai  (or whatever provider EUFLE supports)
+  EUFLE_MODEL=gpt-4o
+  OPENAI_API_KEY=sk-...
+"""
 import os
 import subprocess
 import sys

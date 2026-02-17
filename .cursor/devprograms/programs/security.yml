@@ -11,10 +11,7 @@ allowed_tools:
   - ollama
   - bash
 
-blocked_tools:
-  - external_api
-  - network_connection
-
+# external_api and network_connection allowed for RAG and external provider connectivity
 frameworks:
   - radare2
   - frida
