@@ -1,0 +1,33 @@
+sequenceDiagram
+    participant User
+    participant API as FastAPI
+    participant Receptionist
+    participant Lawyer
+    participant EventBus
+    participant Database
+
+    User->>API: POST /api/v1/agentic/cases
+    Note over User,API: Raw Input Processing
+    API->>Receptionist: Process Request
+    Receptionist->>EventBus: CaseCreatedEvent
+    EventBus->>Database: Store Initial Case
+
+    Receptionist->>Receptionist: Categorize & Prioritize
+    Note over Receptionist: Analyze request type<br/>Assign priority
+    Receptionist->>EventBus: CaseCategorizedEvent
+    EventBus->>Database: Update Metadata
+
+    Receptionist->>Lawyer: Assign Case
+    Note over Receptionist,Lawyer: Role-based processing
+    Lawyer->>EventBus: CaseReferenceGeneratedEvent
+    EventBus->>Database: Store References
+
+    Lawyer->>Lawyer: Process Task
+    Note over Lawyer: Execute with expertise<br/>Track progress
+    Lawyer->>EventBus: CaseExecutedEvent
+    EventBus->>Database: Track Progress
+
+    Lawyer->>API: Return Results
+    API->>User: Case Resolution
+    Lawyer->>EventBus: CaseCompletedEvent
+    EventBus->>Database: Final Status

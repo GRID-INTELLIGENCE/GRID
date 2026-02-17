@@ -1,0 +1,46 @@
+---
+description: AI workflow safety and user well-being standards for temporal safety, hook detection, and developmental safeguards
+globs: safety/**/*.py
+alwaysApply: false
+---
+
+# AI Safety & User Well-Being
+
+Applies when editing code in `safety/` that touches AI workflow safety, user well-being, or cognitive/developmental protection.
+
+## User safety vs security
+
+- **User safety**: Cognitive temporal balance, hook/behavioral loop prevention, developmental protection (e.g. young users), long-term well-being. Aim for defensive opus + offensive agility.
+- **Security**: Auth, secrets, injection, rate limits, content blocking. Keep existing fail-closed and audit rules.
+
+Address both; do not weaken either for the other.
+
+## Critical invariants
+
+1. **No shared mutable global state for concurrent users**  
+   Per-request or per-session safety engines (e.g. temporal, hook, wellbeing) must not share one global instance across users. Use per-user/per-session instances or explicit context.
+
+2. **Temporal logic consistency**  
+   Use one time reference per decision (e.g. `current_time` or `now`) for interval, burst, and session checks. Do not mix `time.time()` in one place and a passed `current_time` in another for the same logical check.
+
+3. **Middleware and response timing**  
+   AI workflow safety that evaluates “AI response” should run when the real response exists (e.g. response pipeline or worker), not only in the request pipeline with a placeholder. Document where evaluation runs.
+
+4. **Statistics and edge cases**  
+   Before `statistics.mean`/`variance` or division, guard empty sequences and zero denominators (e.g. hook/wellbeing calculations). Avoid `StatisticsError` and `ZeroDivisionError` in hot paths.
+
+5. **Sensitive profile data**  
+   Do not log or expose user age or other profile fields beyond what’s required for developmental_safety_mode and metrics. Prefer minimal inclusion in audit events.
+
+## Testing
+
+- Add or extend tests in `safety/tests/unit/test_ai_workflow_safety.py` for new behavior.
+- Cover: temporal limits, burst/session, hook patterns, wellbeing metrics, developmental mode, and (when possible) concurrent access or per-user isolation.
+- Run: `uv run pytest safety/tests/unit/test_ai_workflow_safety.py -q --tb=short`
+
+## References
+
+- Implementation and review context: conversation “Enhance AI Safety and Review”
+- Engine: `safety/ai_workflow_safety.py`
+- Middleware: `safety/api/middleware.py` (step 4.5)
+- Review tool: `python scripts/multi_review_marker.py safety/`

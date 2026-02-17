@@ -1,0 +1,229 @@
+# Dev Drive setup artifacts
+Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle
+complete-dev-drive-setup.md
+dev-drive-manual-setup.md
+setup-dev-drive.ps1
+current_mypy_errors.txt
+*.vhdx
+
+# Environment configuration files (keep examples, ignore local overrides)
+.env.venv
+.env.local
+.envrc
+
+# Virtual environments - unified root strategy
+# Only allow root .venv, exclude all others
+venv/
+*/venv/
+*/.venv/
+!/.venv/
+
+# Python cache and build artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Testing and coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+.hypothesis/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.cursor/
+.cursorignore
+.claude/
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs and runtime
+logs/
+*.log
+rag_logs/
+rag_db/
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+*.tmp
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Cache and data directories
+.cache/
+.mypy_cache/
+.ruff_cache/
+.rag_db/
+
+# Node.js (if present)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Rust (if present)
+target/
+Cargo.lock
+**/*.rs.bk
+
+# Docker
+.dockerignore
+
+# Large generated files
+*.vhdx
+*.vhd
+*.iso
+*.dmg
+
+# Arena/the_chase game files
+Arena/
+Hogwarts/
+
+# Build and dependency directories
+k8s/
+circuits/
+codemaps/
+
+# Tools and utilities
+tools/ambient_sound/
+tools/pulse_monitor/
+tools/zoology_mapper/
+
+
+# Configuration files
+grid.code-workspace
+light_of_the_seven/grid.code-workspace
+
+# Media assets
+media/
+assets/*.png
+assets/*.jpg
+assets/*.jpeg
+assets/*.gif
+
+# Lock files (except uv.lock at root)
+**/uv.lock
+!uv.lock
+
+# IDE and editor ignores
+.private/
+.agentignore
+.cascadeignore
+.zed/
+
+# Generated docs and reports (keep core files)
+*.md
+!README.md
+!PROJECT_CHECKPOINT.md
+!.windsurf/rules/README.md
+docs/
+reports/
+
+# Test outputs and errors
+*_output*.txt
+*_errors*.json
+*_errors*.txt
+test_*.txt
+test_*.json
+property_test_error.txt
+reproduce_*.py
+reproduce_*.txt
+
+# Temporary analysis files
+check_import*.py
+check_output.txt
+recent_docs.txt
+error_code.json
+schema_errors.txt
+safety_errors.txt
+secrets_errors*.txt
+version_errors*.txt
+ruff_errors.txt
+mypy_errors*.txt
+mypy_final_report.txt
+
+# Generated data
+data/all_*.json
+data/all_*.csv
+data/*_metrics.json
+data/*_report.json
+data/project_data_export.json
+data/debug_stress.json
+
+# Artifacts and generated assets
+artifacts/*.json
+artifacts/*.png
+artifacts/repo_analysis/
+artifacts/spacetime_viz/
+
+# Research and experimental
+research_snapshots/
+archival/
+legacy_src/
+
+# Additional grid modules not in core
+grid/cli/
+grid/constants.py
+grid/events/
+grid/io/
+grid/safety/
+grid/security/
+grid/version_3_5.py
+grid/version_4_5.py
+
+# Rust projects
+rust/
+
+# Scripts and utilities
+scripts/
+*.ps1
+
+# Environment files
+.env.development
+.env.production
+.env.staging

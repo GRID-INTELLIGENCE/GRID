@@ -1,0 +1,23 @@
+graph LR
+    subgraph "Before Optimization"
+        B1[cache_ops<br/>1,446 ops/sec]
+        B2[eviction<br/>36 ops/sec]
+        B3[honor_decay<br/>5,628 ops/sec]
+    end
+
+    subgraph "After Optimization"
+        A1[cache_ops<br/>7,281 ops/sec<br/>🚀 5x improvement]
+        A2[eviction<br/>6,336 ops/sec<br/>🚀 175x improvement]
+        A3[honor_decay<br/>3.1M ops/sec<br/>🚀 550x improvement]
+    end
+
+    B1 -.-> A1
+    B2 -.-> A2
+    B3 -.-> A3
+
+    style B1 fill:#ffcdd2
+    style B2 fill:#ffcdd2
+    style B3 fill:#ffcdd2
+    style A1 fill:#c8e6c9
+    style A2 fill:#c8e6c9
+    style A3 fill:#c8e6c9

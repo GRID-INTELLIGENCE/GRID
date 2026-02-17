@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GRID - Use Case Coverage Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #fafbfc;
+            --bg-secondary: #ffffff;
+            --text-primary: #1a1d21;
+            --text-secondary: #5e6670;
+            --accent-1: #6366f1;
+            --accent-2: #8b5cf6;
+            --accent-3: #a855f7;
+            --gradient-warm: linear-gradient(135deg, #f97316 0%, #ea580c 50%, #dc2626 100%);
+            --gradient-cool: linear-gradient(135deg, #06b6d4 0%, #0891b2 50%, #0284c7 100%);
+            --gradient-purple: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 50%, #6d28d9 100%);
+            --gradient-green: linear-gradient(135deg, #22c55e 0%, #16a34a 50%, #15803d 100%);
+            --gradient-sunset: linear-gradient(135deg, #f472b6 0%, #ec4899 50%, #db2777 100%);
+            --shadow-soft: 0 4px 24px rgba(0, 0, 0, 0.06);
+            --shadow-hover: 0 12px 40px rgba(99, 102, 241, 0.15);
+        }
+
+        body {
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            min-height: 100vh;
+            color: var(--text-primary);
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background: linear-gradient(180deg, #1e1b4b 0%, #312e81 100%);
+            padding: 30px 24px;
+            color: white;
+            overflow-y: auto;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #c4b5fd, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-subtitle {
+            font-size: 0.85rem;
+            color: #a5b4fc;
+            margin-bottom: 40px;
+        }
+
+        .nav-section {
+            margin-bottom: 32px;
+        }
+
+        .nav-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #818cf8;
+            margin-bottom: 16px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-bottom: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.95rem;
+            color: #c7d2fe;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(99, 102, 241, 0.3));
+        }
+
+        .stat-mini {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .stat-mini-value {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #e0e7ff;
+        }
+
+        .stat-mini-label {
+            font-size: 0.8rem;
+            color: #a5b4fc;
+        }
+
+        .main-content {
+            margin-left: 280px;
+            padding: 40px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .page-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-top: 4px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+            color: #166534;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 0.85rem;
+        }
+
+        .badge::before {
+            content: '●';
+            font-size: 0.6rem;
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 24px;
+        }
+
+        .card {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--shadow-soft);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-hover);
+            transform: translateY(-2px);
+        }
+
+        .card.col-8 {
+            grid-column: span 8;
+        }
+
+        .card.col-6 {
+            grid-column: span 6;
+        }
+
+        .card.col-4 {
+            grid-column: span 4;
+        }
+
+        .card.col-12 {
+            grid-column: span 12;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .card-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        .icon-purple {
+            background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+        }
+
+        .icon-blue {
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+        }
+
+        .icon-green {
+            background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+        }
+
+        .icon-orange {
+            background: linear-gradient(135deg, #ffedd5, #fed7aa);
+        }
+
+        .icon-pink {
+            background: linear-gradient(135deg, #fce7f3, #fbcfe8);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        .chart-container.tall {
+            height: 380px;
+        }
+
+        .metrics-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .metric-card {
+            background: var(--bg-secondary);
+            border-radius: 14px;
+            padding: 20px 24px;
+            box-shadow: var(--shadow-soft);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+        }
+
+        .metric-card.purple::before {
+            background: var(--gradient-purple);
+        }
+
+        .metric-card.cool::before {
+            background: var(--gradient-cool);
+        }
+
+        .metric-card.green::before {
+            background: var(--gradient-green);
+        }
+
+        .metric-card.sunset::before {
+            background: var(--gradient-sunset);
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .metric-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            margin-top: 12px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 1s ease;
+        }
+
+        .legend-horizontal {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 3px;
+        }
+
+        @media (max-width: 1200px) {
+
+            .card.col-8,
+            .card.col-6,
+            .card.col-4 {
+                grid-column: span 12;
+            }
+
+            .metrics-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .metrics-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <aside class="sidebar">
+        <div class="logo">GRID</div>
+        <div class="logo-subtitle">Coverage Analytics</div>
+
+        <nav class="nav-section">
+            <div class="nav-title">Overview</div>
+            <div class="nav-item active">📊 Dashboard</div>
+            <div class="nav-item">📈 Trends</div>
+            <div class="nav-item">📋 Reports</div>
+        </nav>
+
+        <nav class="nav-section">
+            <div class="nav-title">Categories</div>
+            <div class="nav-item">🌐 API Layer</div>
+            <div class="nav-item">⚙️ Core Services</div>
+            <div class="nav-item">💾 Database</div>
+            <div class="nav-item">🔌 Plugins</div>
+        </nav>
+
+        <div class="nav-section">
+            <div class="nav-title">Quick Stats</div>
+            <div class="stat-mini">
+                <div class="stat-mini-value">79.6%</div>
+                <div class="stat-mini-label">Overall Coverage</div>
+            </div>
+            <div class="stat-mini">
+                <div class="stat-mini-value">15</div>
+                <div class="stat-mini-label">Categories</div>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="header">
+            <div>
+                <h1 class="page-title">Use Case Coverage</h1>
+                <p class="page-subtitle">Real-time insights across all categories</p>
+            </div>
+            <div class="badge">Above Target</div>
+        </header>
+
+        <div class="metrics-row">
+            <div class="metric-card purple">
+                <div class="metric-value">79.6%</div>
+                <div class="metric-label">Overall Coverage</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 79.6%; background: var(--gradient-purple);"></div>
+                </div>
+            </div>
+            <div class="metric-card cool">
+                <div class="metric-value">3,777</div>
+                <div class="metric-label">Lines Covered</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 79.6%; background: var(--gradient-cool);"></div>
+                </div>
+            </div>
+            <div class="metric-card green">
+                <div class="metric-value">8</div>
+                <div class="metric-label">Excellent Categories</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 53%; background: var(--gradient-green);"></div>
+                </div>
+            </div>
+            <div class="metric-card sunset">
+                <div class="metric-value">4,747</div>
+                <div class="metric-label">Total Lines</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 100%; background: var(--gradient-sunset);"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid-layout">
+            <div class="card col-8">
+                <div class="card-header">
+                    <h3 class="card-title">Coverage by Category</h3>
+                    <div class="card-icon icon-purple">📊</div>
+                </div>
+                <div class="chart-container tall">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card col-4">
+                <div class="card-header">
+                    <h3 class="card-title">Status Distribution</h3>
+                    <div class="card-icon icon-green">📈</div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card col-6">
+                <div class="card-header">
+                    <h3 class="card-title">Category Strength</h3>
+                    <div class="card-icon icon-blue">🎯</div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="radarChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card col-6">
+                <div class="card-header">
+                    <h3 class="card-title">Lines by Category</h3>
+                    <div class="card-icon icon-orange">📁</div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="linesChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card col-12">
+                <div class="card-header">
+                    <h3 class="card-title">Architectural Layer Coverage</h3>
+                    <div class="card-icon icon-pink">🏗️</div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="layerChart"></canvas>
+                </div>
+                <div class="legend-horizontal">
+                    <div class="legend-item"><span class="legend-dot" style="background: #8b5cf6;"></span> Presentation
+                    </div>
+                    <div class="legend-item"><span class="legend-dot" style="background: #06b6d4;"></span> Business
+                        Logic</div>
+                    <div class="legend-item"><span class="legend-dot" style="background: #22c55e;"></span> Data Layer
+                    </div>
+                    <div class="legend-item"><span class="legend-dot" style="background: #f97316;"></span>
+                        Infrastructure</div>
+                    <div class="legend-item"><span class="legend-dot" style="background: #ec4899;"></span> Extensions
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        Chart.defaults.font.family='Outfit';
+        Chart.defaults.color='#5e6670';
+
+        // Vibrant gradient colors
+        const gradients={
+            purple: ['#8b5cf6','#7c3aed','#6d28d9'],
+            blue: ['#3b82f6','#2563eb','#1d4ed8'],
+            cyan: ['#06b6d4','#0891b2','#0284c7'],
+            green: ['#22c55e','#16a34a','#15803d'],
+            orange: ['#f97316','#ea580c','#dc2626'],
+            pink: ['#ec4899','#db2777','#be185d'],
+            indigo: ['#6366f1','#4f46e5','#4338ca']
+        };
+
+        const useCaseData={
+            categories: ['API','CLI','Core','Database','Bridge','NER/NLP','Pattern','Vision','Plugins','Workflow','Financial','Valuation','Geometric','Transformer','Utils'],
+            coverage: [95.9,75.7,48.0,100,100,85.2,88.5,92.3,97.5,78.4,82.1,88.9,90.2,76.8,94.3],
+            lines: [380,148,456,124,86,312,520,180,98,268,95,142,115,135,188]
+        };
+
+        // Category Bar Chart
+        const categoryCtx=document.getElementById('categoryChart').getContext('2d');
+        const categoryGradient=categoryCtx.createLinearGradient(0,0,0,400);
+        categoryGradient.addColorStop(0,'rgba(139, 92, 246, 0.9)');
+        categoryGradient.addColorStop(1,'rgba(99, 102, 241, 0.6)');
+
+        new Chart(categoryCtx,{
+            type: 'bar',
+            data: {
+                labels: useCaseData.categories,
+                datasets: [{
+                    data: useCaseData.coverage,
+                    backgroundColor: useCaseData.coverage.map((v,i) => {
+                        const ctx=categoryCtx;
+                        const gradient=ctx.createLinearGradient(0,0,0,300);
+                        if(v>=90) {
+                            gradient.addColorStop(0,'#22c55e');
+                            gradient.addColorStop(1,'#16a34a');
+                        } else if(v>=80) {
+                            gradient.addColorStop(0,'#8b5cf6');
+                            gradient.addColorStop(1,'#6d28d9');
+                        } else if(v>=70) {
+                            gradient.addColorStop(0,'#f97316');
+                            gradient.addColorStop(1,'#ea580c');
+                        } else {
+                            gradient.addColorStop(0,'#ef4444');
+                            gradient.addColorStop(1,'#dc2626');
+                        }
+                        return gradient;
+                    }),
+                    borderRadius: 6,
+                    borderSkipped: false,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {display: false},
+                    tooltip: {
+                        backgroundColor: '#1e1b4b',
+                        padding: 14,
+                        titleFont: {size: 13},
+                        bodyFont: {size: 12},
+                        cornerRadius: 8,
+                        callbacks: {
+                            label: (ctx) => `Coverage: ${ctx.raw}%`
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {display: false},
+                        ticks: {font: {size: 11}}
+                    },
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        grid: {color: '#e5e7eb',drawBorder: false},
+                        ticks: {callback: v => v+'%'}
+                    }
+                }
+            }
+        });
+
+        // Status Doughnut Chart
+        new Chart(document.getElementById('statusChart'),{
+            type: 'doughnut',
+            data: {
+                labels: ['Excellent ≥90%','Good 80-89%','Fair 70-79%','Needs Work <70%'],
+                datasets: [{
+                    data: [8,3,3,1],
+                    backgroundColor: ['#22c55e','#8b5cf6','#f97316','#ef4444'],
+                    borderWidth: 0,
+                    hoverOffset: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '65%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {padding: 16,usePointStyle: true,pointStyle: 'circle'}
+                    }
+                }
+            }
+        });
+
+        // Radar Chart
+        new Chart(document.getElementById('radarChart'),{
+            type: 'radar',
+            data: {
+                labels: ['API','CLI','Core','Database','NER','Pattern','Vision','Plugins'],
+                datasets: [{
+                    label: 'Coverage',
+                    data: [95.9,75.7,48.0,100,85.2,88.5,92.3,97.5],
+                    backgroundColor: 'rgba(139, 92, 246, 0.2)',
+                    borderColor: '#8b5cf6',
+                    borderWidth: 2,
+                    pointBackgroundColor: '#8b5cf6',
+                    pointRadius: 4
+                },{
+                    label: 'Target',
+                    data: [80,80,80,80,80,80,80,80],
+                    backgroundColor: 'transparent',
+                    borderColor: '#e5e7eb',
+                    borderWidth: 2,
+                    borderDash: [5,5],
+                    pointRadius: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        max: 100,
+                        grid: {color: '#e5e7eb'},
+                        pointLabels: {font: {size: 11}},
+                        ticks: {stepSize: 20,display: false}
+                    }
+                },
+                plugins: {
+                    legend: {position: 'bottom',labels: {usePointStyle: true}}
+                }
+            }
+        });
+
+        // Lines Horizontal Bar
+        new Chart(document.getElementById('linesChart'),{
+            type: 'bar',
+            data: {
+                labels: ['Pattern','Core','API','NER/NLP','Workflow','Utils','Vision','CLI'],
+                datasets: [{
+                    data: [520,456,380,312,268,188,180,148],
+                    backgroundColor: [
+                        '#8b5cf6','#6366f1','#3b82f6','#06b6d4',
+                        '#22c55e','#f97316','#ec4899','#a855f7'
+                    ],
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {display: false},
+                    tooltip: {
+                        backgroundColor: '#1e1b4b',
+                        padding: 12,
+                        cornerRadius: 8,
+                        callbacks: {
+                            label: ctx => `${ctx.raw} lines`
+                        }
+                    }
+                },
+                scales: {
+                    x: {grid: {color: '#e5e7eb'},ticks: {font: {size: 11}}},
+                    y: {grid: {display: false},ticks: {font: {size: 11}}}
+                }
+            }
+        });
+
+        // Layer Line Chart
+        new Chart(document.getElementById('layerChart'),{
+            type: 'line',
+            data: {
+                labels: ['Presentation','Business Logic','Data Layer','Infrastructure','Extensions'],
+                datasets: [{
+                    data: [85.8,87.3,100,48.0,97.5],
+                    borderColor: '#8b5cf6',
+                    backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: ['#8b5cf6','#06b6d4','#22c55e','#f97316','#ec4899'],
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 8,
+                    pointHoverRadius: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {display: false},
+                    tooltip: {
+                        backgroundColor: '#1e1b4b',
+                        padding: 14,
+                        cornerRadius: 8,
+                        callbacks: {
+                            label: ctx => `Coverage: ${ctx.raw}%`
+                        }
+                    }
+                },
+                scales: {
+                    x: {grid: {display: false}},
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        grid: {color: '#e5e7eb'},
+                        ticks: {callback: v => v+'%'}
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

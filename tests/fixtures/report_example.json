@@ -1,0 +1,103 @@
+{
+    "timestamp": "2025-12-20T12:06:00Z",
+    "grep_performance": {
+        "metrics": {
+            "simple_pattern_ms": 7,
+            "regex_pattern_ms": 2,
+            "import_pattern_ms": 16,
+            "searchable_files": 53
+        },
+        "scopes": [
+            {
+                "path": "grid/*.py",
+                "safe": true,
+                "reason": "Core module directory"
+            },
+            {
+                "path": "tests/*.py",
+                "safe": true,
+                "reason": "Test suite directory"
+            },
+            {
+                "path": "light_of_the_seven/**/*.py",
+                "safe": false,
+                "reason": "Contains problematic great_hall/nul path"
+            }
+        ],
+        "patterns": [
+            {
+                "pattern": "def ",
+                "type": "simple",
+                "execution_time_ms": 7,
+                "matches": 151
+            },
+            {
+                "pattern": "class.*Model",
+                "type": "regex",
+                "execution_time_ms": 2,
+                "matches": 0
+            },
+            {
+                "pattern": "import",
+                "type": "import",
+                "execution_time_ms": 16,
+                "matches": 97
+            },
+            {
+                "pattern": "TODO",
+                "type": "comment",
+                "execution_time_ms": 2,
+                "matches": 0
+            },
+            {
+                "pattern": "async def",
+                "type": "async",
+                "execution_time_ms": 1,
+                "matches": 49
+            }
+        ]
+    },
+    "schema_validation": {
+        "sound_layer": {
+            "schema_present": true,
+            "properties_count": 8,
+            "validation_errors": []
+        },
+        "vision_layer": {
+            "schema_present": true,
+            "properties_count": 12,
+            "validation_errors": []
+        },
+        "exhibits": {
+            "total_count": 3,
+            "valid_count": 3,
+            "invalid_exhibits": []
+        }
+    },
+    "recommendations": [
+        {
+            "category": "performance",
+            "priority": "high",
+            "action": "Use scoped searches in grid/ and tests/ directories only",
+            "rationale": "Avoids OS errors from problematic paths while maintaining sub-16ms response times"
+        },
+        {
+            "category": "schema",
+            "priority": "medium",
+            "action": "Add schema validation to pre-commit hooks",
+            "rationale": "Prevent invalid exhibit manifests from being committed"
+        },
+        {
+            "category": "tooling",
+            "priority": "medium",
+            "action": "Add PowerShell completion for common search patterns",
+            "rationale": "Improve developer experience with validated pattern templates"
+        },
+        {
+            "category": "documentation",
+            "priority": "low",
+            "action": "Document schema versioning policy",
+            "rationale": "Prepare for future sensory layer schema evolution"
+        }
+    ]
+}

@@ -1,0 +1,31 @@
+program: analytics-data
+version: 1.0
+model: ministral
+timeout_sec: 30
+strict_mode: false
+
+allowed_tools:
+  - filesystem
+  - git
+  - python-repl
+  - ollama
+  - bash
+
+blocked_tools:
+  - external_api
+
+frameworks:
+  - pandas
+  - numpy
+
+workflows:
+  - data_ingestion
+  - data_cleaning
+  - data_visualization
+
+skills:
+  - transform.pivot_table
+  - context.data_analysis
+  - compress.metric_summary
+
+coverage_threshold: 70

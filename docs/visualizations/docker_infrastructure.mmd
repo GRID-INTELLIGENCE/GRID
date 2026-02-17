@@ -1,0 +1,46 @@
+graph TB
+    subgraph "Load Balancer"
+        LB[Nginx/Traefik]
+    end
+
+    subgraph "Application Services"
+        LB --> APP[Main App :8080]
+        LB --> MCP1[Database MCP :8081]
+        LB --> MCP2[Filesystem MCP :8082]
+        LB --> MCP3[Memory MCP :8083]
+    end
+
+    subgraph "Health Monitoring"
+        APP --> HC1[Health Endpoint]
+        MCP1 --> HC2[Health Endpoint]
+        MCP2 --> HC3[Health Endpoint]
+        MCP3 --> HC4[Health Endpoint]
+    end
+
+    subgraph "Data Layer"
+        APP --> DB[(PostgreSQL)]
+        MCP1 --> DB
+        APP --> VS[(ChromaDB)]
+        MCP2 --> FS[Local Filesystem]
+        MCP3 --> KG[(Knowledge Graph)]
+    end
+
+    subgraph "Monitoring Stack"
+        HC1 --> PROM[Prometheus]
+        HC2 --> PROM
+        HC3 --> PROM
+        HC4 --> PROM
+        PROM --> GRAF[Grafana Dashboard]
+    end
+
+    style LB fill:#e1f5fe
+    style APP fill:#e8f5e8
+    style MCP1 fill:#fff3e0
+    style MCP2 fill:#fff3e0
+    style MCP3 fill:#fff3e0
+    style DB fill:#fce4ec
+    style VS fill:#fce4ec
+    style FS fill:#fce4ec
+    style KG fill:#fce4ec
+    style PROM fill:#f3e5f5
+    style GRAF fill:#f3e5f5

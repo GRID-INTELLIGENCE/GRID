@@ -1,0 +1,4045 @@
+{
+  "modules": {
+    "main": {
+      "path": "src\\main.py",
+      "imports": [
+        "src",
+        "fastapi"
+      ]
+    },
+    "pattern_engine": {
+      "path": "src\\pattern_engine.py",
+      "imports": []
+    },
+    "__init__": {
+      "path": "src\\__init__.py",
+      "imports": []
+    },
+    "api.cognition": {
+      "path": "src\\api\\cognition.py",
+      "imports": []
+    },
+    "api.dependencies": {
+      "path": "src\\api\\dependencies.py",
+      "imports": [
+        "src",
+        "sqlalchemy",
+        "typing"
+      ]
+    },
+    "api.main": {
+      "path": "src\\api\\main.py",
+      "imports": [
+        "src",
+        "fastapi"
+      ]
+    },
+    "api.middleware": {
+      "path": "src\\api\\middleware.py",
+      "imports": [
+        "starlette",
+        "uuid",
+        "time"
+      ]
+    },
+    "api.ner_routes": {
+      "path": "src\\api\\ner_routes.py",
+      "imports": []
+    },
+    "api.rag": {
+      "path": "src\\api\\rag.py",
+      "imports": []
+    },
+    "api.router": {
+      "path": "src\\api\\router.py",
+      "imports": [
+        "pydantic",
+        "src",
+        "datetime",
+        "enum",
+        "typing",
+        "fastapi"
+      ]
+    },
+    "api.routers": {
+      "path": "src\\api\\routers.py",
+      "imports": [
+        "src",
+        "fastapi",
+        "sqlalchemy",
+        "typing"
+      ]
+    },
+    "api.routes": {
+      "path": "src\\api\\routes.py",
+      "imports": []
+    },
+    "api.server": {
+      "path": "src\\api\\server.py",
+      "imports": [
+        "src",
+        "fastapi"
+      ]
+    },
+    "api.__init__": {
+      "path": "src\\api\\__init__.py",
+      "imports": [
+        "router"
+      ]
+    },
+    "api.v1.endpoints.grid": {
+      "path": "src\\api\\v1\\endpoints\\grid.py",
+      "imports": []
+    },
+    "ares.setup": {
+      "path": "src\\ares\\setup.py",
+      "imports": []
+    },
+    "ares.ares.setup": {
+      "path": "src\\ares\\ares\\setup.py",
+      "imports": []
+    },
+    "ares.ares.docs.source.conf": {
+      "path": "src\\ares\\ares\\docs\\source\\conf.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-autodan.setup": {
+      "path": "src\\ares\\ares\\plugins\\ares-autodan\\setup.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-autodan.src.__init__": {
+      "path": "src\\ares\\ares\\plugins\\ares-autodan\\src\\__init__.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-autodan.src.ares_autodan.strategies.autodan": {
+      "path": "src\\ares\\ares\\plugins\\ares-autodan\\src\\ares_autodan\\strategies\\autodan.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-autodan.src.ares_autodan.strategies.opt_utils": {
+      "path": "src\\ares\\ares\\plugins\\ares-autodan\\src\\ares_autodan\\strategies\\opt_utils.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-autodan.src.ares_autodan.strategies.string_utils": {
+      "path": "src\\ares\\ares\\plugins\\ares-autodan\\src\\ares_autodan\\strategies\\string_utils.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-autodan.src.ares_autodan.strategies.__init__": {
+      "path": "src\\ares\\ares\\plugins\\ares-autodan\\src\\ares_autodan\\strategies\\__init__.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-autodan.src.ares_autodan.strategies.assets.__init__": {
+      "path": "src\\ares\\ares\\plugins\\ares-autodan\\src\\ares_autodan\\strategies\\assets\\__init__.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-autodan.tests.strategies.test_autodan": {
+      "path": "src\\ares\\ares\\plugins\\ares-autodan\\tests\\strategies\\test_autodan.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-garak.setup": {
+      "path": "src\\ares\\ares\\plugins\\ares-garak\\setup.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-garak.src.ares_garak.__init__": {
+      "path": "src\\ares\\ares\\plugins\\ares-garak\\src\\ares_garak\\__init__.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-garak.src.ares_garak.evals.encoding": {
+      "path": "src\\ares\\ares\\plugins\\ares-garak\\src\\ares_garak\\evals\\encoding.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-garak.src.ares_garak.evals.__init__": {
+      "path": "src\\ares\\ares\\plugins\\ares-garak\\src\\ares_garak\\evals\\__init__.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-garak.src.ares_garak.strategies.encoding": {
+      "path": "src\\ares\\ares\\plugins\\ares-garak\\src\\ares_garak\\strategies\\encoding.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-garak.src.ares_garak.strategies.__init__": {
+      "path": "src\\ares\\ares\\plugins\\ares-garak\\src\\ares_garak\\strategies\\__init__.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-garak.tests.__init__": {
+      "path": "src\\ares\\ares\\plugins\\ares-garak\\tests\\__init__.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-garak.tests.evals.test_encoding_detectors": {
+      "path": "src\\ares\\ares\\plugins\\ares-garak\\tests\\evals\\test_encoding_detectors.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-garak.tests.strategies.test_encoding_strategies": {
+      "path": "src\\ares\\ares\\plugins\\ares-garak\\tests\\strategies\\test_encoding_strategies.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-gcg.setup": {
+      "path": "src\\ares\\ares\\plugins\\ares-gcg\\setup.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-gcg.src.ares_gcg.__init__": {
+      "path": "src\\ares\\ares\\plugins\\ares-gcg\\src\\ares_gcg\\__init__.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-gcg.src.ares_gcg.goals.gcg_goals": {
+      "path": "src\\ares\\ares\\plugins\\ares-gcg\\src\\ares_gcg\\goals\\gcg_goals.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-gcg.src.ares_gcg.goals.__init__": {
+      "path": "src\\ares\\ares\\plugins\\ares-gcg\\src\\ares_gcg\\goals\\__init__.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-gcg.src.ares_gcg.strategies.gcg": {
+      "path": "src\\ares\\ares\\plugins\\ares-gcg\\src\\ares_gcg\\strategies\\gcg.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-gcg.src.ares_gcg.strategies.utils": {
+      "path": "src\\ares\\ares\\plugins\\ares-gcg\\src\\ares_gcg\\strategies\\utils.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-gcg.src.ares_gcg.strategies.__init__": {
+      "path": "src\\ares\\ares\\plugins\\ares-gcg\\src\\ares_gcg\\strategies\\__init__.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-gcg.tests.strategies.test_gcg": {
+      "path": "src\\ares\\ares\\plugins\\ares-gcg\\tests\\strategies\\test_gcg.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-granite-io.setup": {
+      "path": "src\\ares\\ares\\plugins\\ares-granite-io\\setup.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-granite-io.src.ares_granite_io.__init__": {
+      "path": "src\\ares\\ares\\plugins\\ares-granite-io\\src\\ares_granite_io\\__init__.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-granite-io.src.ares_granite_io.connectors.granite_io": {
+      "path": "src\\ares\\ares\\plugins\\ares-granite-io\\src\\ares_granite_io\\connectors\\granite_io.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-granite-io.src.ares_granite_io.connectors.__init__": {
+      "path": "src\\ares\\ares\\plugins\\ares-granite-io\\src\\ares_granite_io\\connectors\\__init__.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-granite-io.tests.__init__": {
+      "path": "src\\ares\\ares\\plugins\\ares-granite-io\\tests\\__init__.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-granite-io.tests.connectors.test_granite_io": {
+      "path": "src\\ares\\ares\\plugins\\ares-granite-io\\tests\\connectors\\test_granite_io.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-granite-io.tests.strategies.test_attack_strategies": {
+      "path": "src\\ares\\ares\\plugins\\ares-granite-io\\tests\\strategies\\test_attack_strategies.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-human-jailbreak.setup": {
+      "path": "src\\ares\\ares\\plugins\\ares-human-jailbreak\\setup.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-human-jailbreak.src.ares_human_jailbreak.__init__": {
+      "path": "src\\ares\\ares\\plugins\\ares-human-jailbreak\\src\\ares_human_jailbreak\\__init__.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-human-jailbreak.src.ares_human_jailbreak.strategies.human_jailbreak": {
+      "path": "src\\ares\\ares\\plugins\\ares-human-jailbreak\\src\\ares_human_jailbreak\\strategies\\human_jailbreak.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-human-jailbreak.src.ares_human_jailbreak.strategies.__init__": {
+      "path": "src\\ares\\ares\\plugins\\ares-human-jailbreak\\src\\ares_human_jailbreak\\strategies\\__init__.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-human-jailbreak.tests.strategies.test_human_jailbreak": {
+      "path": "src\\ares\\ares\\plugins\\ares-human-jailbreak\\tests\\strategies\\test_human_jailbreak.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-icarus-connector.src.ares_icarus_connector.connector": {
+      "path": "src\\ares\\ares\\plugins\\ares-icarus-connector\\src\\ares_icarus_connector\\connector.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-icarus-connector.src.ares_icarus_connector.__init__": {
+      "path": "src\\ares\\ares\\plugins\\ares-icarus-connector\\src\\ares_icarus_connector\\__init__.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-intrinsics.setup": {
+      "path": "src\\ares\\ares\\plugins\\ares-intrinsics\\setup.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-intrinsics.src.ares_intrinsics.evals.formatters": {
+      "path": "src\\ares\\ares\\plugins\\ares-intrinsics\\src\\ares_intrinsics\\evals\\formatters.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-intrinsics.src.ares_intrinsics.evals.intrinsics": {
+      "path": "src\\ares\\ares\\plugins\\ares-intrinsics\\src\\ares_intrinsics\\evals\\intrinsics.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-intrinsics.src.ares_intrinsics.evals.__init__": {
+      "path": "src\\ares\\ares\\plugins\\ares-intrinsics\\src\\ares_intrinsics\\evals\\__init__.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-intrinsics.tests.evals.test_intrinsics": {
+      "path": "src\\ares\\ares\\plugins\\ares-intrinsics\\tests\\evals\\test_intrinsics.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-litellm-connector.setup": {
+      "path": "src\\ares\\ares\\plugins\\ares-litellm-connector\\setup.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-litellm-connector.src.ares_litellm.__init__": {
+      "path": "src\\ares\\ares\\plugins\\ares-litellm-connector\\src\\ares_litellm\\__init__.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-litellm-connector.tests.test_litellm": {
+      "path": "src\\ares\\ares\\plugins\\ares-litellm-connector\\tests\\test_litellm.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-pyrit.setup": {
+      "path": "src\\ares\\ares\\plugins\\ares-pyrit\\setup.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-pyrit.src.ares_pyrit.util": {
+      "path": "src\\ares\\ares\\plugins\\ares-pyrit\\src\\ares_pyrit\\util.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-pyrit.src.ares_pyrit.__init__": {
+      "path": "src\\ares\\ares\\plugins\\ares-pyrit\\src\\ares_pyrit\\__init__.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-pyrit.src.ares_pyrit.strategy.crescendo": {
+      "path": "src\\ares\\ares\\plugins\\ares-pyrit\\src\\ares_pyrit\\strategy\\crescendo.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-pyrit.src.ares_pyrit.strategy.__init__": {
+      "path": "src\\ares\\ares\\plugins\\ares-pyrit\\src\\ares_pyrit\\strategy\\__init__.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-pyrit.tests.test_crescendo": {
+      "path": "src\\ares\\ares\\plugins\\ares-pyrit\\tests\\test_crescendo.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-pyrit.tests.__init__": {
+      "path": "src\\ares\\ares\\plugins\\ares-pyrit\\tests\\__init__.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-vllm-connector.setup": {
+      "path": "src\\ares\\ares\\plugins\\ares-vllm-connector\\setup.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-vllm-connector.src.ares_vllm_connector.__init__": {
+      "path": "src\\ares\\ares\\plugins\\ares-vllm-connector\\src\\ares_vllm_connector\\__init__.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-vllm-connector.tests.test_vllm": {
+      "path": "src\\ares\\ares\\plugins\\ares-vllm-connector\\tests\\test_vllm.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-watsonx-orchestrate.src.ares_watsonx_orchestrate.__init__": {
+      "path": "src\\ares\\ares\\plugins\\ares-watsonx-orchestrate\\src\\ares_watsonx_orchestrate\\__init__.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-watsonx-orchestrate.src.ares_watsonx_orchestrate.connector.wxo_connector": {
+      "path": "src\\ares\\ares\\plugins\\ares-watsonx-orchestrate\\src\\ares_watsonx_orchestrate\\connector\\wxo_connector.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-watsonx-orchestrate.src.ares_watsonx_orchestrate.connector.__init__": {
+      "path": "src\\ares\\ares\\plugins\\ares-watsonx-orchestrate\\src\\ares_watsonx_orchestrate\\connector\\__init__.py",
+      "imports": []
+    },
+    "ares.ares.plugins.ares-watsonx-orchestrate.tests.test_wxo_connector": {
+      "path": "src\\ares\\ares\\plugins\\ares-watsonx-orchestrate\\tests\\test_wxo_connector.py",
+      "imports": []
+    },
+    "ares.ares.plugins.new-plugin-template.setup": {
+      "path": "src\\ares\\ares\\plugins\\new-plugin-template\\setup.py",
+      "imports": []
+    },
+    "ares.ares.plugins.new-plugin-template.src.ares_template.__init__": {
+      "path": "src\\ares\\ares\\plugins\\new-plugin-template\\src\\ares_template\\__init__.py",
+      "imports": []
+    },
+    "ares.ares.src.ares.cli": {
+      "path": "src\\ares\\ares\\src\\ares\\cli.py",
+      "imports": []
+    },
+    "ares.ares.src.ares.dashboard": {
+      "path": "src\\ares\\ares\\src\\ares\\dashboard.py",
+      "imports": []
+    },
+    "ares.ares.src.ares.exception": {
+      "path": "src\\ares\\ares\\src\\ares\\exception.py",
+      "imports": []
+    },
+    "ares.ares.src.ares.logging_config": {
+      "path": "src\\ares\\ares\\src\\ares\\logging_config.py",
+      "imports": []
+    },
+    "ares.ares.src.ares.redteam": {
+      "path": "src\\ares\\ares\\src\\ares\\redteam.py",
+      "imports": []
+    },
+    "ares.ares.src.ares.show": {
+      "path": "src\\ares\\ares\\src\\ares\\show.py",
+      "imports": []
+    },
+    "ares.ares.src.ares.utils": {
+      "path": "src\\ares\\ares\\src\\ares\\utils.py",
+      "imports": []
+    },
+    "ares.ares.src.ares.__init__": {
+      "path": "src\\ares\\ares\\src\\ares\\__init__.py",
+      "imports": []
+    },
+    "ares.ares.src.ares.connectors.connector": {
+      "path": "src\\ares\\ares\\src\\ares\\connectors\\connector.py",
+      "imports": []
+    },
+    "ares.ares.src.ares.connectors.guarded_connector": {
+      "path": "src\\ares\\ares\\src\\ares\\connectors\\guarded_connector.py",
+      "imports": []
+    },
+    "ares.ares.src.ares.connectors.huggingface": {
+      "path": "src\\ares\\ares\\src\\ares\\connectors\\huggingface.py",
+      "imports": []
+    },
+    "ares.ares.src.ares.connectors.restful_connector": {
+      "path": "src\\ares\\ares\\src\\ares\\connectors\\restful_connector.py",
+      "imports": []
+    },
+    "ares.ares.src.ares.connectors.watsonx_agent_connector": {
+      "path": "src\\ares\\ares\\src\\ares\\connectors\\watsonx_agent_connector.py",
+      "imports": []
+    },
+    "ares.ares.src.ares.connectors.watsonx_connector": {
+      "path": "src\\ares\\ares\\src\\ares\\connectors\\watsonx_connector.py",
+      "imports": []
+    },
+    "ares.ares.src.ares.connectors.watsonx_rest_connector": {
+      "path": "src\\ares\\ares\\src\\ares\\connectors\\watsonx_rest_connector.py",
+      "imports": []
+    },
+    "ares.ares.src.ares.connectors.__init__": {
+      "path": "src\\ares\\ares\\src\\ares\\connectors\\__init__.py",
+      "imports": []
+    },
+    "ares.ares.src.ares.connectors.guardrails.granite_guardian_hf": {
+      "path": "src\\ares\\ares\\src\\ares\\connectors\\guardrails\\granite_guardian_hf.py",
+      "imports": []
+    },
+    "ares.ares.src.ares.connectors.guardrails.guardrail_hf": {
+      "path": "src\\ares\\ares\\src\\ares\\connectors\\guardrails\\guardrail_hf.py",
+      "imports": []
+    },
+    "ares.ares.src.ares.connectors.guardrails.reject": {
+      "path": "src\\ares\\ares\\src\\ares\\connectors\\guardrails\\reject.py",
+      "imports": []
+    },
+    "ares.ares.src.ares.connectors.guardrails.shield_gemma_hf": {
+      "path": "src\\ares\\ares\\src\\ares\\connectors\\guardrails\\shield_gemma_hf.py",
+      "imports": []
+    },
+    "ares.ares.src.ares.connectors.guardrails.__init__": {
+      "path": "src\\ares\\ares\\src\\ares\\connectors\\guardrails\\__init__.py",
+      "imports": []
+    },
+    "ares.ares.src.ares.evals.attack_eval": {
+      "path": "src\\ares\\ares\\src\\ares\\evals\\attack_eval.py",
+      "imports": []
+    },
+    "ares.ares.src.ares.evals.huggingface_eval": {
+      "path": "src\\ares\\ares\\src\\ares\\evals\\huggingface_eval.py",
+      "imports": []
+    },
+    "ares.ares.src.ares.evals.keyword_eval": {
+      "path": "src\\ares\\ares\\src\\ares\\evals\\keyword_eval.py",
+      "imports": []
+    },
+    "ares.ares.src.ares.evals.llm_eval": {
+      "path": "src\\ares\\ares\\src\\ares\\evals\\llm_eval.py",
+      "imports": []
+    },
+    "ares.ares.src.ares.evals.__init__": {
+      "path": "src\\ares\\ares\\src\\ares\\evals\\__init__.py",
+      "imports": []
+    },
+    "ares.ares.src.ares.evals.eval_resources.__init__": {
+      "path": "src\\ares\\ares\\src\\ares\\evals\\eval_resources\\__init__.py",
+      "imports": []
+    },
+    "ares.ares.src.ares.goals.attack_goal": {
+      "path": "src\\ares\\ares\\src\\ares\\goals\\attack_goal.py",
+      "imports": []
+    },
+    "ares.ares.src.ares.goals.generic_attack_goal": {
+      "path": "src\\ares\\ares\\src\\ares\\goals\\generic_attack_goal.py",
+      "imports": []
+    },
+    "ares.ares.src.ares.goals.__init__": {
+      "path": "src\\ares\\ares\\src\\ares\\goals\\__init__.py",
+      "imports": []
+    },
+    "ares.ares.src.ares.strategies.attack_strategy": {
+      "path": "src\\ares\\ares\\src\\ares\\strategies\\attack_strategy.py",
+      "imports": []
+    },
+    "ares.ares.src.ares.strategies.direct_requests": {
+      "path": "src\\ares\\ares\\src\\ares\\strategies\\direct_requests.py",
+      "imports": []
+    },
+    "ares.ares.src.ares.strategies.__init__": {
+      "path": "src\\ares\\ares\\src\\ares\\strategies\\__init__.py",
+      "imports": []
+    },
+    "ares.ares.tests.test_cli": {
+      "path": "src\\ares\\ares\\tests\\test_cli.py",
+      "imports": []
+    },
+    "ares.ares.tests.test_redteamer": {
+      "path": "src\\ares\\ares\\tests\\test_redteamer.py",
+      "imports": []
+    },
+    "ares.ares.tests.test_show": {
+      "path": "src\\ares\\ares\\tests\\test_show.py",
+      "imports": []
+    },
+    "ares.ares.tests.test_utils": {
+      "path": "src\\ares\\ares\\tests\\test_utils.py",
+      "imports": []
+    },
+    "ares.ares.tests.__init__": {
+      "path": "src\\ares\\ares\\tests\\__init__.py",
+      "imports": []
+    },
+    "ares.ares.tests.connectors.test_granite_guardian_hf": {
+      "path": "src\\ares\\ares\\tests\\connectors\\test_granite_guardian_hf.py",
+      "imports": []
+    },
+    "ares.ares.tests.connectors.test_guarded_connector": {
+      "path": "src\\ares\\ares\\tests\\connectors\\test_guarded_connector.py",
+      "imports": []
+    },
+    "ares.ares.tests.connectors.test_guardrail_reject": {
+      "path": "src\\ares\\ares\\tests\\connectors\\test_guardrail_reject.py",
+      "imports": []
+    },
+    "ares.ares.tests.connectors.test_huggingface": {
+      "path": "src\\ares\\ares\\tests\\connectors\\test_huggingface.py",
+      "imports": []
+    },
+    "ares.ares.tests.connectors.test_restful_connector": {
+      "path": "src\\ares\\ares\\tests\\connectors\\test_restful_connector.py",
+      "imports": []
+    },
+    "ares.ares.tests.connectors.test_shield_gemma_hf": {
+      "path": "src\\ares\\ares\\tests\\connectors\\test_shield_gemma_hf.py",
+      "imports": []
+    },
+    "ares.ares.tests.connectors.test_watsonx_agent_connector": {
+      "path": "src\\ares\\ares\\tests\\connectors\\test_watsonx_agent_connector.py",
+      "imports": []
+    },
+    "ares.ares.tests.connectors.test_watsonx_connector": {
+      "path": "src\\ares\\ares\\tests\\connectors\\test_watsonx_connector.py",
+      "imports": []
+    },
+    "ares.ares.tests.connectors.test_watsonx_rest_connector": {
+      "path": "src\\ares\\ares\\tests\\connectors\\test_watsonx_rest_connector.py",
+      "imports": []
+    },
+    "ares.ares.tests.evals.test_huggingface_eval": {
+      "path": "src\\ares\\ares\\tests\\evals\\test_huggingface_eval.py",
+      "imports": []
+    },
+    "ares.ares.tests.evals.test_keyword_eval": {
+      "path": "src\\ares\\ares\\tests\\evals\\test_keyword_eval.py",
+      "imports": []
+    },
+    "ares.ares.tests.evals.test_llm_eval": {
+      "path": "src\\ares\\ares\\tests\\evals\\test_llm_eval.py",
+      "imports": []
+    },
+    "ares.ares.tests.evals.__init__": {
+      "path": "src\\ares\\ares\\tests\\evals\\__init__.py",
+      "imports": []
+    },
+    "ares.ares.tests.goals.test_generic_attack_goal": {
+      "path": "src\\ares\\ares\\tests\\goals\\test_generic_attack_goal.py",
+      "imports": []
+    },
+    "ares.ares.tests.strategies.test_attack_strategy": {
+      "path": "src\\ares\\ares\\tests\\strategies\\test_attack_strategy.py",
+      "imports": []
+    },
+    "ares.ares.tests.strategies.__init__": {
+      "path": "src\\ares\\ares\\tests\\strategies\\__init__.py",
+      "imports": []
+    },
+    "ares.docs.source.conf": {
+      "path": "src\\ares\\docs\\source\\conf.py",
+      "imports": []
+    },
+    "ares.plugins.ares-autodan.setup": {
+      "path": "src\\ares\\plugins\\ares-autodan\\setup.py",
+      "imports": []
+    },
+    "ares.plugins.ares-autodan.src.__init__": {
+      "path": "src\\ares\\plugins\\ares-autodan\\src\\__init__.py",
+      "imports": []
+    },
+    "ares.plugins.ares-autodan.src.ares_autodan.strategies.autodan": {
+      "path": "src\\ares\\plugins\\ares-autodan\\src\\ares_autodan\\strategies\\autodan.py",
+      "imports": []
+    },
+    "ares.plugins.ares-autodan.src.ares_autodan.strategies.opt_utils": {
+      "path": "src\\ares\\plugins\\ares-autodan\\src\\ares_autodan\\strategies\\opt_utils.py",
+      "imports": []
+    },
+    "ares.plugins.ares-autodan.src.ares_autodan.strategies.string_utils": {
+      "path": "src\\ares\\plugins\\ares-autodan\\src\\ares_autodan\\strategies\\string_utils.py",
+      "imports": []
+    },
+    "ares.plugins.ares-autodan.src.ares_autodan.strategies.__init__": {
+      "path": "src\\ares\\plugins\\ares-autodan\\src\\ares_autodan\\strategies\\__init__.py",
+      "imports": []
+    },
+    "ares.plugins.ares-autodan.src.ares_autodan.strategies.assets.__init__": {
+      "path": "src\\ares\\plugins\\ares-autodan\\src\\ares_autodan\\strategies\\assets\\__init__.py",
+      "imports": []
+    },
+    "ares.plugins.ares-autodan.tests.strategies.test_autodan": {
+      "path": "src\\ares\\plugins\\ares-autodan\\tests\\strategies\\test_autodan.py",
+      "imports": []
+    },
+    "ares.plugins.ares-garak.setup": {
+      "path": "src\\ares\\plugins\\ares-garak\\setup.py",
+      "imports": []
+    },
+    "ares.plugins.ares-garak.src.ares_garak.__init__": {
+      "path": "src\\ares\\plugins\\ares-garak\\src\\ares_garak\\__init__.py",
+      "imports": []
+    },
+    "ares.plugins.ares-garak.src.ares_garak.evals.encoding": {
+      "path": "src\\ares\\plugins\\ares-garak\\src\\ares_garak\\evals\\encoding.py",
+      "imports": []
+    },
+    "ares.plugins.ares-garak.src.ares_garak.evals.__init__": {
+      "path": "src\\ares\\plugins\\ares-garak\\src\\ares_garak\\evals\\__init__.py",
+      "imports": []
+    },
+    "ares.plugins.ares-garak.src.ares_garak.strategies.encoding": {
+      "path": "src\\ares\\plugins\\ares-garak\\src\\ares_garak\\strategies\\encoding.py",
+      "imports": []
+    },
+    "ares.plugins.ares-garak.src.ares_garak.strategies.__init__": {
+      "path": "src\\ares\\plugins\\ares-garak\\src\\ares_garak\\strategies\\__init__.py",
+      "imports": []
+    },
+    "ares.plugins.ares-garak.tests.__init__": {
+      "path": "src\\ares\\plugins\\ares-garak\\tests\\__init__.py",
+      "imports": []
+    },
+    "ares.plugins.ares-garak.tests.evals.test_encoding_detectors": {
+      "path": "src\\ares\\plugins\\ares-garak\\tests\\evals\\test_encoding_detectors.py",
+      "imports": []
+    },
+    "ares.plugins.ares-garak.tests.strategies.test_encoding_strategies": {
+      "path": "src\\ares\\plugins\\ares-garak\\tests\\strategies\\test_encoding_strategies.py",
+      "imports": []
+    },
+    "ares.plugins.ares-gcg.setup": {
+      "path": "src\\ares\\plugins\\ares-gcg\\setup.py",
+      "imports": []
+    },
+    "ares.plugins.ares-gcg.src.ares_gcg.__init__": {
+      "path": "src\\ares\\plugins\\ares-gcg\\src\\ares_gcg\\__init__.py",
+      "imports": []
+    },
+    "ares.plugins.ares-gcg.src.ares_gcg.goals.gcg_goals": {
+      "path": "src\\ares\\plugins\\ares-gcg\\src\\ares_gcg\\goals\\gcg_goals.py",
+      "imports": []
+    },
+    "ares.plugins.ares-gcg.src.ares_gcg.goals.__init__": {
+      "path": "src\\ares\\plugins\\ares-gcg\\src\\ares_gcg\\goals\\__init__.py",
+      "imports": []
+    },
+    "ares.plugins.ares-gcg.src.ares_gcg.strategies.gcg": {
+      "path": "src\\ares\\plugins\\ares-gcg\\src\\ares_gcg\\strategies\\gcg.py",
+      "imports": []
+    },
+    "ares.plugins.ares-gcg.src.ares_gcg.strategies.utils": {
+      "path": "src\\ares\\plugins\\ares-gcg\\src\\ares_gcg\\strategies\\utils.py",
+      "imports": []
+    },
+    "ares.plugins.ares-gcg.src.ares_gcg.strategies.__init__": {
+      "path": "src\\ares\\plugins\\ares-gcg\\src\\ares_gcg\\strategies\\__init__.py",
+      "imports": []
+    },
+    "ares.plugins.ares-gcg.tests.strategies.test_gcg": {
+      "path": "src\\ares\\plugins\\ares-gcg\\tests\\strategies\\test_gcg.py",
+      "imports": []
+    },
+    "ares.plugins.ares-granite-io.setup": {
+      "path": "src\\ares\\plugins\\ares-granite-io\\setup.py",
+      "imports": []
+    },
+    "ares.plugins.ares-granite-io.src.ares_granite_io.__init__": {
+      "path": "src\\ares\\plugins\\ares-granite-io\\src\\ares_granite_io\\__init__.py",
+      "imports": []
+    },
+    "ares.plugins.ares-granite-io.src.ares_granite_io.connectors.granite_io": {
+      "path": "src\\ares\\plugins\\ares-granite-io\\src\\ares_granite_io\\connectors\\granite_io.py",
+      "imports": []
+    },
+    "ares.plugins.ares-granite-io.src.ares_granite_io.connectors.__init__": {
+      "path": "src\\ares\\plugins\\ares-granite-io\\src\\ares_granite_io\\connectors\\__init__.py",
+      "imports": []
+    },
+    "ares.plugins.ares-granite-io.tests.__init__": {
+      "path": "src\\ares\\plugins\\ares-granite-io\\tests\\__init__.py",
+      "imports": []
+    },
+    "ares.plugins.ares-granite-io.tests.connectors.test_granite_io": {
+      "path": "src\\ares\\plugins\\ares-granite-io\\tests\\connectors\\test_granite_io.py",
+      "imports": []
+    },
+    "ares.plugins.ares-granite-io.tests.strategies.test_attack_strategies": {
+      "path": "src\\ares\\plugins\\ares-granite-io\\tests\\strategies\\test_attack_strategies.py",
+      "imports": []
+    },
+    "ares.plugins.ares-human-jailbreak.setup": {
+      "path": "src\\ares\\plugins\\ares-human-jailbreak\\setup.py",
+      "imports": []
+    },
+    "ares.plugins.ares-human-jailbreak.src.ares_human_jailbreak.__init__": {
+      "path": "src\\ares\\plugins\\ares-human-jailbreak\\src\\ares_human_jailbreak\\__init__.py",
+      "imports": []
+    },
+    "ares.plugins.ares-human-jailbreak.src.ares_human_jailbreak.strategies.human_jailbreak": {
+      "path": "src\\ares\\plugins\\ares-human-jailbreak\\src\\ares_human_jailbreak\\strategies\\human_jailbreak.py",
+      "imports": []
+    },
+    "ares.plugins.ares-human-jailbreak.src.ares_human_jailbreak.strategies.__init__": {
+      "path": "src\\ares\\plugins\\ares-human-jailbreak\\src\\ares_human_jailbreak\\strategies\\__init__.py",
+      "imports": []
+    },
+    "ares.plugins.ares-human-jailbreak.tests.strategies.test_human_jailbreak": {
+      "path": "src\\ares\\plugins\\ares-human-jailbreak\\tests\\strategies\\test_human_jailbreak.py",
+      "imports": []
+    },
+    "ares.plugins.ares-icarus-connector.src.ares_icarus_connector.connector": {
+      "path": "src\\ares\\plugins\\ares-icarus-connector\\src\\ares_icarus_connector\\connector.py",
+      "imports": []
+    },
+    "ares.plugins.ares-icarus-connector.src.ares_icarus_connector.__init__": {
+      "path": "src\\ares\\plugins\\ares-icarus-connector\\src\\ares_icarus_connector\\__init__.py",
+      "imports": []
+    },
+    "ares.plugins.ares-intrinsics.setup": {
+      "path": "src\\ares\\plugins\\ares-intrinsics\\setup.py",
+      "imports": []
+    },
+    "ares.plugins.ares-intrinsics.src.ares_intrinsics.evals.formatters": {
+      "path": "src\\ares\\plugins\\ares-intrinsics\\src\\ares_intrinsics\\evals\\formatters.py",
+      "imports": []
+    },
+    "ares.plugins.ares-intrinsics.src.ares_intrinsics.evals.intrinsics": {
+      "path": "src\\ares\\plugins\\ares-intrinsics\\src\\ares_intrinsics\\evals\\intrinsics.py",
+      "imports": []
+    },
+    "ares.plugins.ares-intrinsics.src.ares_intrinsics.evals.__init__": {
+      "path": "src\\ares\\plugins\\ares-intrinsics\\src\\ares_intrinsics\\evals\\__init__.py",
+      "imports": []
+    },
+    "ares.plugins.ares-intrinsics.tests.evals.test_intrinsics": {
+      "path": "src\\ares\\plugins\\ares-intrinsics\\tests\\evals\\test_intrinsics.py",
+      "imports": []
+    },
+    "ares.plugins.ares-litellm-connector.setup": {
+      "path": "src\\ares\\plugins\\ares-litellm-connector\\setup.py",
+      "imports": []
+    },
+    "ares.plugins.ares-litellm-connector.src.ares_litellm.__init__": {
+      "path": "src\\ares\\plugins\\ares-litellm-connector\\src\\ares_litellm\\__init__.py",
+      "imports": []
+    },
+    "ares.plugins.ares-litellm-connector.tests.test_litellm": {
+      "path": "src\\ares\\plugins\\ares-litellm-connector\\tests\\test_litellm.py",
+      "imports": []
+    },
+    "ares.plugins.ares-pyrit.setup": {
+      "path": "src\\ares\\plugins\\ares-pyrit\\setup.py",
+      "imports": []
+    },
+    "ares.plugins.ares-pyrit.src.ares_pyrit.util": {
+      "path": "src\\ares\\plugins\\ares-pyrit\\src\\ares_pyrit\\util.py",
+      "imports": []
+    },
+    "ares.plugins.ares-pyrit.src.ares_pyrit.__init__": {
+      "path": "src\\ares\\plugins\\ares-pyrit\\src\\ares_pyrit\\__init__.py",
+      "imports": []
+    },
+    "ares.plugins.ares-pyrit.src.ares_pyrit.strategy.crescendo": {
+      "path": "src\\ares\\plugins\\ares-pyrit\\src\\ares_pyrit\\strategy\\crescendo.py",
+      "imports": []
+    },
+    "ares.plugins.ares-pyrit.src.ares_pyrit.strategy.__init__": {
+      "path": "src\\ares\\plugins\\ares-pyrit\\src\\ares_pyrit\\strategy\\__init__.py",
+      "imports": []
+    },
+    "ares.plugins.ares-pyrit.tests.test_crescendo": {
+      "path": "src\\ares\\plugins\\ares-pyrit\\tests\\test_crescendo.py",
+      "imports": []
+    },
+    "ares.plugins.ares-pyrit.tests.__init__": {
+      "path": "src\\ares\\plugins\\ares-pyrit\\tests\\__init__.py",
+      "imports": []
+    },
+    "ares.plugins.ares-vllm-connector.setup": {
+      "path": "src\\ares\\plugins\\ares-vllm-connector\\setup.py",
+      "imports": []
+    },
+    "ares.plugins.ares-vllm-connector.src.ares_vllm_connector.__init__": {
+      "path": "src\\ares\\plugins\\ares-vllm-connector\\src\\ares_vllm_connector\\__init__.py",
+      "imports": []
+    },
+    "ares.plugins.ares-vllm-connector.tests.test_vllm": {
+      "path": "src\\ares\\plugins\\ares-vllm-connector\\tests\\test_vllm.py",
+      "imports": []
+    },
+    "ares.plugins.ares-watsonx-orchestrate.src.ares_watsonx_orchestrate.__init__": {
+      "path": "src\\ares\\plugins\\ares-watsonx-orchestrate\\src\\ares_watsonx_orchestrate\\__init__.py",
+      "imports": []
+    },
+    "ares.plugins.ares-watsonx-orchestrate.src.ares_watsonx_orchestrate.connector.wxo_connector": {
+      "path": "src\\ares\\plugins\\ares-watsonx-orchestrate\\src\\ares_watsonx_orchestrate\\connector\\wxo_connector.py",
+      "imports": []
+    },
+    "ares.plugins.ares-watsonx-orchestrate.src.ares_watsonx_orchestrate.connector.__init__": {
+      "path": "src\\ares\\plugins\\ares-watsonx-orchestrate\\src\\ares_watsonx_orchestrate\\connector\\__init__.py",
+      "imports": []
+    },
+    "ares.plugins.ares-watsonx-orchestrate.tests.test_wxo_connector": {
+      "path": "src\\ares\\plugins\\ares-watsonx-orchestrate\\tests\\test_wxo_connector.py",
+      "imports": []
+    },
+    "ares.plugins.new-plugin-template.setup": {
+      "path": "src\\ares\\plugins\\new-plugin-template\\setup.py",
+      "imports": []
+    },
+    "ares.plugins.new-plugin-template.src.ares_template.__init__": {
+      "path": "src\\ares\\plugins\\new-plugin-template\\src\\ares_template\\__init__.py",
+      "imports": []
+    },
+    "ares.src.ares.cli": {
+      "path": "src\\ares\\src\\ares\\cli.py",
+      "imports": []
+    },
+    "ares.src.ares.dashboard": {
+      "path": "src\\ares\\src\\ares\\dashboard.py",
+      "imports": []
+    },
+    "ares.src.ares.exception": {
+      "path": "src\\ares\\src\\ares\\exception.py",
+      "imports": []
+    },
+    "ares.src.ares.logging_config": {
+      "path": "src\\ares\\src\\ares\\logging_config.py",
+      "imports": []
+    },
+    "ares.src.ares.redteam": {
+      "path": "src\\ares\\src\\ares\\redteam.py",
+      "imports": []
+    },
+    "ares.src.ares.show": {
+      "path": "src\\ares\\src\\ares\\show.py",
+      "imports": []
+    },
+    "ares.src.ares.utils": {
+      "path": "src\\ares\\src\\ares\\utils.py",
+      "imports": []
+    },
+    "ares.src.ares.__init__": {
+      "path": "src\\ares\\src\\ares\\__init__.py",
+      "imports": []
+    },
+    "ares.src.ares.connectors.connector": {
+      "path": "src\\ares\\src\\ares\\connectors\\connector.py",
+      "imports": []
+    },
+    "ares.src.ares.connectors.guarded_connector": {
+      "path": "src\\ares\\src\\ares\\connectors\\guarded_connector.py",
+      "imports": []
+    },
+    "ares.src.ares.connectors.huggingface": {
+      "path": "src\\ares\\src\\ares\\connectors\\huggingface.py",
+      "imports": []
+    },
+    "ares.src.ares.connectors.restful_connector": {
+      "path": "src\\ares\\src\\ares\\connectors\\restful_connector.py",
+      "imports": []
+    },
+    "ares.src.ares.connectors.watsonx_agent_connector": {
+      "path": "src\\ares\\src\\ares\\connectors\\watsonx_agent_connector.py",
+      "imports": []
+    },
+    "ares.src.ares.connectors.watsonx_connector": {
+      "path": "src\\ares\\src\\ares\\connectors\\watsonx_connector.py",
+      "imports": []
+    },
+    "ares.src.ares.connectors.watsonx_rest_connector": {
+      "path": "src\\ares\\src\\ares\\connectors\\watsonx_rest_connector.py",
+      "imports": []
+    },
+    "ares.src.ares.connectors.__init__": {
+      "path": "src\\ares\\src\\ares\\connectors\\__init__.py",
+      "imports": []
+    },
+    "ares.src.ares.connectors.guardrails.granite_guardian_hf": {
+      "path": "src\\ares\\src\\ares\\connectors\\guardrails\\granite_guardian_hf.py",
+      "imports": []
+    },
+    "ares.src.ares.connectors.guardrails.guardrail_hf": {
+      "path": "src\\ares\\src\\ares\\connectors\\guardrails\\guardrail_hf.py",
+      "imports": []
+    },
+    "ares.src.ares.connectors.guardrails.reject": {
+      "path": "src\\ares\\src\\ares\\connectors\\guardrails\\reject.py",
+      "imports": []
+    },
+    "ares.src.ares.connectors.guardrails.shield_gemma_hf": {
+      "path": "src\\ares\\src\\ares\\connectors\\guardrails\\shield_gemma_hf.py",
+      "imports": []
+    },
+    "ares.src.ares.connectors.guardrails.__init__": {
+      "path": "src\\ares\\src\\ares\\connectors\\guardrails\\__init__.py",
+      "imports": []
+    },
+    "ares.src.ares.evals.attack_eval": {
+      "path": "src\\ares\\src\\ares\\evals\\attack_eval.py",
+      "imports": []
+    },
+    "ares.src.ares.evals.huggingface_eval": {
+      "path": "src\\ares\\src\\ares\\evals\\huggingface_eval.py",
+      "imports": []
+    },
+    "ares.src.ares.evals.keyword_eval": {
+      "path": "src\\ares\\src\\ares\\evals\\keyword_eval.py",
+      "imports": []
+    },
+    "ares.src.ares.evals.llm_eval": {
+      "path": "src\\ares\\src\\ares\\evals\\llm_eval.py",
+      "imports": []
+    },
+    "ares.src.ares.evals.__init__": {
+      "path": "src\\ares\\src\\ares\\evals\\__init__.py",
+      "imports": []
+    },
+    "ares.src.ares.evals.eval_resources.__init__": {
+      "path": "src\\ares\\src\\ares\\evals\\eval_resources\\__init__.py",
+      "imports": []
+    },
+    "ares.src.ares.goals.attack_goal": {
+      "path": "src\\ares\\src\\ares\\goals\\attack_goal.py",
+      "imports": []
+    },
+    "ares.src.ares.goals.generic_attack_goal": {
+      "path": "src\\ares\\src\\ares\\goals\\generic_attack_goal.py",
+      "imports": []
+    },
+    "ares.src.ares.goals.__init__": {
+      "path": "src\\ares\\src\\ares\\goals\\__init__.py",
+      "imports": []
+    },
+    "ares.src.ares.strategies.attack_strategy": {
+      "path": "src\\ares\\src\\ares\\strategies\\attack_strategy.py",
+      "imports": []
+    },
+    "ares.src.ares.strategies.direct_requests": {
+      "path": "src\\ares\\src\\ares\\strategies\\direct_requests.py",
+      "imports": []
+    },
+    "ares.src.ares.strategies.__init__": {
+      "path": "src\\ares\\src\\ares\\strategies\\__init__.py",
+      "imports": []
+    },
+    "ares.tests.test_cli": {
+      "path": "src\\ares\\tests\\test_cli.py",
+      "imports": []
+    },
+    "ares.tests.test_redteamer": {
+      "path": "src\\ares\\tests\\test_redteamer.py",
+      "imports": []
+    },
+    "ares.tests.test_show": {
+      "path": "src\\ares\\tests\\test_show.py",
+      "imports": []
+    },
+    "ares.tests.test_utils": {
+      "path": "src\\ares\\tests\\test_utils.py",
+      "imports": []
+    },
+    "ares.tests.__init__": {
+      "path": "src\\ares\\tests\\__init__.py",
+      "imports": []
+    },
+    "ares.tests.connectors.test_granite_guardian_hf": {
+      "path": "src\\ares\\tests\\connectors\\test_granite_guardian_hf.py",
+      "imports": []
+    },
+    "ares.tests.connectors.test_guarded_connector": {
+      "path": "src\\ares\\tests\\connectors\\test_guarded_connector.py",
+      "imports": []
+    },
+    "ares.tests.connectors.test_guardrail_reject": {
+      "path": "src\\ares\\tests\\connectors\\test_guardrail_reject.py",
+      "imports": []
+    },
+    "ares.tests.connectors.test_huggingface": {
+      "path": "src\\ares\\tests\\connectors\\test_huggingface.py",
+      "imports": []
+    },
+    "ares.tests.connectors.test_restful_connector": {
+      "path": "src\\ares\\tests\\connectors\\test_restful_connector.py",
+      "imports": []
+    },
+    "ares.tests.connectors.test_shield_gemma_hf": {
+      "path": "src\\ares\\tests\\connectors\\test_shield_gemma_hf.py",
+      "imports": []
+    },
+    "ares.tests.connectors.test_watsonx_agent_connector": {
+      "path": "src\\ares\\tests\\connectors\\test_watsonx_agent_connector.py",
+      "imports": []
+    },
+    "ares.tests.connectors.test_watsonx_connector": {
+      "path": "src\\ares\\tests\\connectors\\test_watsonx_connector.py",
+      "imports": []
+    },
+    "ares.tests.connectors.test_watsonx_rest_connector": {
+      "path": "src\\ares\\tests\\connectors\\test_watsonx_rest_connector.py",
+      "imports": []
+    },
+    "ares.tests.evals.test_huggingface_eval": {
+      "path": "src\\ares\\tests\\evals\\test_huggingface_eval.py",
+      "imports": []
+    },
+    "ares.tests.evals.test_keyword_eval": {
+      "path": "src\\ares\\tests\\evals\\test_keyword_eval.py",
+      "imports": []
+    },
+    "ares.tests.evals.test_llm_eval": {
+      "path": "src\\ares\\tests\\evals\\test_llm_eval.py",
+      "imports": []
+    },
+    "ares.tests.evals.__init__": {
+      "path": "src\\ares\\tests\\evals\\__init__.py",
+      "imports": []
+    },
+    "ares.tests.goals.test_generic_attack_goal": {
+      "path": "src\\ares\\tests\\goals\\test_generic_attack_goal.py",
+      "imports": []
+    },
+    "ares.tests.strategies.test_attack_strategy": {
+      "path": "src\\ares\\tests\\strategies\\test_attack_strategy.py",
+      "imports": []
+    },
+    "ares.tests.strategies.__init__": {
+      "path": "src\\ares\\tests\\strategies\\__init__.py",
+      "imports": []
+    },
+    "bridge.__init__": {
+      "path": "src\\bridge\\__init__.py",
+      "imports": []
+    },
+    "bridge.task_state.emitter": {
+      "path": "src\\bridge\\task_state\\emitter.py",
+      "imports": []
+    },
+    "bridge.task_state.model": {
+      "path": "src\\bridge\\task_state\\model.py",
+      "imports": [
+        "enum",
+        "typing"
+      ]
+    },
+    "bridge.task_state.receiver": {
+      "path": "src\\bridge\\task_state\\receiver.py",
+      "imports": []
+    },
+    "bridge.task_state.__init__": {
+      "path": "src\\bridge\\task_state\\__init__.py",
+      "imports": [
+        "model",
+        "typing"
+      ]
+    },
+    "bridge.temperature.controller": {
+      "path": "src\\bridge\\temperature\\controller.py",
+      "imports": []
+    },
+    "bridge.temperature.model": {
+      "path": "src\\bridge\\temperature\\model.py",
+      "imports": []
+    },
+    "bridge.temperature.monitor": {
+      "path": "src\\bridge\\temperature\\monitor.py",
+      "imports": []
+    },
+    "bridge.temperature.__init__": {
+      "path": "src\\bridge\\temperature\\__init__.py",
+      "imports": [
+        "dataclasses",
+        "typing"
+      ]
+    },
+    "cli.grid_cli": {
+      "path": "src\\cli\\grid_cli.py",
+      "imports": []
+    },
+    "cli.main": {
+      "path": "src\\cli\\main.py",
+      "imports": [
+        "src",
+        "asyncio",
+        "subprocess",
+        "click",
+        "inspect",
+        "sys",
+        "pathlib"
+      ]
+    },
+    "cli.__init__": {
+      "path": "src\\cli\\__init__.py",
+      "imports": []
+    },
+    "concept.temporal_translation": {
+      "path": "src\\concept\\temporal_translation.py",
+      "imports": [
+        "random",
+        "time"
+      ]
+    },
+    "concept.docs.templates.custom_function_template": {
+      "path": "src\\concept\\docs\\templates\\custom_function_template.py",
+      "imports": [
+        "pydantic",
+        "requests",
+        "os",
+        "datetime",
+        "json",
+        "typing"
+      ]
+    },
+    "concept.template_response.call": {
+      "path": "src\\concept\\template_response\\call.py",
+      "imports": [
+        "requests",
+        "json",
+        "os"
+      ]
+    },
+    "concept.template_response.field": {
+      "path": "src\\concept\\template_response\\field.py",
+      "imports": [
+        "networkx",
+        "matplotlib",
+        "pandas",
+        "collections",
+        "numpy",
+        "re"
+      ]
+    },
+    "concept.tests.test_check": {
+      "path": "src\\concept\\tests\\test_check.py",
+      "imports": []
+    },
+    "concept.tests.test_temporal_translation": {
+      "path": "src\\concept\\tests\\test_temporal_translation.py",
+      "imports": [
+        "builtins",
+        "types",
+        "temporal_translation"
+      ]
+    },
+    "core.application": {
+      "path": "src\\core\\application.py",
+      "imports": [
+        "contextlib",
+        "src",
+        "__future__",
+        "typing"
+      ]
+    },
+    "core.architecture": {
+      "path": "src\\core\\architecture.py",
+      "imports": [
+        "src",
+        "__future__",
+        "enum",
+        "dataclasses",
+        "typing",
+        "time"
+      ]
+    },
+    "core.compatibility": {
+      "path": "src\\core\\compatibility.py",
+      "imports": [
+        "scoring",
+        "src",
+        "__future__",
+        "typing"
+      ]
+    },
+    "core.config": {
+      "path": "src\\core\\config.py",
+      "imports": [
+        "dataclasses",
+        "__future__",
+        "typing",
+        "os"
+      ]
+    },
+    "core.dependency_injection": {
+      "path": "src\\core\\dependency_injection.py",
+      "imports": [
+        "typing"
+      ]
+    },
+    "core.documentation_index": {
+      "path": "src\\core\\documentation_index.py",
+      "imports": [
+        "__future__",
+        "datetime",
+        "enum",
+        "dataclasses",
+        "typing"
+      ]
+    },
+    "core.documentation_scanner": {
+      "path": "src\\core\\documentation_scanner.py",
+      "imports": [
+        "src",
+        "__future__",
+        "typing",
+        "pathlib",
+        "re"
+      ]
+    },
+    "core.effort_model": {
+      "path": "src\\core\\effort_model.py",
+      "imports": []
+    },
+    "core.events": {
+      "path": "src\\core\\events.py",
+      "imports": [
+        "__future__",
+        "datetime",
+        "enum",
+        "dataclasses",
+        "typing"
+      ]
+    },
+    "core.exceptions": {
+      "path": "src\\core\\exceptions.py",
+      "imports": []
+    },
+    "core.grid_system": {
+      "path": "src\\core\\grid_system.py",
+      "imports": [
+        "src",
+        "__future__",
+        "typing",
+        "pathlib",
+        "threading",
+        "time"
+      ]
+    },
+    "core.input_handler": {
+      "path": "src\\core\\input_handler.py",
+      "imports": [
+        "src",
+        "dataclasses",
+        "__future__",
+        "typing"
+      ]
+    },
+    "core.logging": {
+      "path": "src\\core\\logging.py",
+      "imports": [
+        "logging",
+        "sys",
+        "pythonjsonlogger",
+        "typing"
+      ]
+    },
+    "core.output_handler": {
+      "path": "src\\core\\output_handler.py",
+      "imports": [
+        "src",
+        "dataclasses",
+        "__future__",
+        "typing"
+      ]
+    },
+    "core.retry_policy": {
+      "path": "src\\core\\retry_policy.py",
+      "imports": [
+        "sqlalchemy",
+        "dataclasses",
+        "datetime",
+        "typing"
+      ]
+    },
+    "core.security": {
+      "path": "src\\core\\security.py",
+      "imports": [
+        "src",
+        "hashlib",
+        "datetime",
+        "base64",
+        "json",
+        "typing",
+        "hmac"
+      ]
+    },
+    "core.security_pipeline_middleware": {
+      "path": "src\\core\\security_pipeline_middleware.py",
+      "imports": [
+        "src",
+        "dataclasses",
+        "typing"
+      ]
+    },
+    "core.test_context": {
+      "path": "src\\core\\test_context.py",
+      "imports": [
+        "datetime",
+        "numpy",
+        "typing",
+        "contextlib",
+        "random"
+      ]
+    },
+    "core.the_grid": {
+      "path": "src\\core\\the_grid.py",
+      "imports": []
+    },
+    "core.__init__": {
+      "path": "src\\core\\__init__.py",
+      "imports": []
+    },
+    "core.config.settings": {
+      "path": "src\\core\\config\\settings.py",
+      "imports": [
+        "dataclasses",
+        "typing",
+        "os"
+      ]
+    },
+    "core.config.__init__": {
+      "path": "src\\core\\config\\__init__.py",
+      "imports": [
+        "settings"
+      ]
+    },
+    "database.migrations": {
+      "path": "src\\database\\migrations.py",
+      "imports": [
+        "src",
+        "alembic",
+        "os"
+      ]
+    },
+    "database.models": {
+      "path": "src\\database\\models.py",
+      "imports": [
+        "enum",
+        "sqlalchemy",
+        "__future__",
+        "datetime"
+      ]
+    },
+    "database.session": {
+      "path": "src\\database\\session.py",
+      "imports": [
+        "src",
+        "models",
+        "sqlalchemy"
+      ]
+    },
+    "database.__init__": {
+      "path": "src\\database\\__init__.py",
+      "imports": []
+    },
+    "database.alembic.env": {
+      "path": "src\\database\\alembic\\env.py",
+      "imports": []
+    },
+    "database.alembic.script": {
+      "path": "src\\database\\alembic\\script.py",
+      "imports": []
+    },
+    "database.alembic.versions.20251129_create_retry_records": {
+      "path": "src\\database\\alembic\\versions\\20251129_create_retry_records.py",
+      "imports": []
+    },
+    "database.models.temporal_event": {
+      "path": "src\\database\\models\\temporal_event.py",
+      "imports": []
+    },
+    "demos.demo_vision_to_chaplin": {
+      "path": "src\\demos\\demo_vision_to_chaplin.py",
+      "imports": []
+    },
+    "grid.codestral_client": {
+      "path": "src\\grid\\codestral_client.py",
+      "imports": []
+    },
+    "grid.config": {
+      "path": "src\\grid\\config.py",
+      "imports": []
+    },
+    "grid.exceptions": {
+      "path": "src\\grid\\exceptions.py",
+      "imports": []
+    },
+    "grid.logging": {
+      "path": "src\\grid\\logging.py",
+      "imports": []
+    },
+    "grid.main": {
+      "path": "src\\grid\\main.py",
+      "imports": [
+        "src",
+        "fastapi",
+        "pydantic",
+        "typing"
+      ]
+    },
+    "grid._version": {
+      "path": "src\\grid\\_version.py",
+      "imports": []
+    },
+    "grid.__init__": {
+      "path": "src\\grid\\__init__.py",
+      "imports": [
+        "_version"
+      ]
+    },
+    "grid.api.glimpse": {
+      "path": "src\\grid\\api\\glimpse.py",
+      "imports": [
+        "src",
+        "asyncio",
+        "datetime",
+        "json",
+        "typing",
+        "fastapi"
+      ]
+    },
+    "grid.api.health": {
+      "path": "src\\grid\\api\\health.py",
+      "imports": []
+    },
+    "grid.api.tasks": {
+      "path": "src\\grid\\api\\tasks.py",
+      "imports": []
+    },
+    "grid.api.__init__": {
+      "path": "src\\grid\\api\\__init__.py",
+      "imports": []
+    },
+    "grid.cli.commands": {
+      "path": "src\\grid\\cli\\commands.py",
+      "imports": [
+        "src",
+        "dataclasses",
+        "__future__",
+        "typing"
+      ]
+    },
+    "grid.cli.ingestion": {
+      "path": "src\\grid\\cli\\ingestion.py",
+      "imports": [
+        "pathlib",
+        "json",
+        "typing"
+      ]
+    },
+    "grid.cli.main": {
+      "path": "src\\grid\\cli\\main.py",
+      "imports": [
+        "typing"
+      ]
+    },
+    "grid.cli.utils": {
+      "path": "src\\grid\\cli\\utils.py",
+      "imports": [
+        "json",
+        "typing"
+      ]
+    },
+    "grid.cli.__init__": {
+      "path": "src\\grid\\cli\\__init__.py",
+      "imports": [
+        "main",
+        "utils",
+        "ingestion",
+        "commands"
+      ]
+    },
+    "grid.concept.engine": {
+      "path": "src\\grid\\concept\\engine.py",
+      "imports": [
+        "enum",
+        "dataclasses",
+        "patterns",
+        "typing"
+      ]
+    },
+    "grid.concept.patterns": {
+      "path": "src\\grid\\concept\\patterns.py",
+      "imports": [
+        "dataclasses",
+        "typing"
+      ]
+    },
+    "grid.concept.__init__": {
+      "path": "src\\grid\\concept\\__init__.py",
+      "imports": [
+        "patterns",
+        "engine"
+      ]
+    },
+    "grid.core.engine": {
+      "path": "src\\grid\\core\\engine.py",
+      "imports": [
+        "src"
+      ]
+    },
+    "grid.core.fear": {
+      "path": "src\\grid\\core\\fear.py",
+      "imports": []
+    },
+    "grid.core.temporal": {
+      "path": "src\\grid\\core\\temporal.py",
+      "imports": []
+    },
+    "grid.financial.analysis": {
+      "path": "src\\grid\\financial\\analysis.py",
+      "imports": []
+    },
+    "grid.financial.__init__": {
+      "path": "src\\grid\\financial\\__init__.py",
+      "imports": []
+    },
+    "grid.models.base": {
+      "path": "src\\grid\\models\\base.py",
+      "imports": []
+    },
+    "grid.models.task": {
+      "path": "src\\grid\\models\\task.py",
+      "imports": []
+    },
+    "grid.models.user": {
+      "path": "src\\grid\\models\\user.py",
+      "imports": []
+    },
+    "grid.models.__init__": {
+      "path": "src\\grid\\models\\__init__.py",
+      "imports": [
+        "__future__",
+        "datetime",
+        "enum",
+        "dataclasses",
+        "typing"
+      ]
+    },
+    "grid.pattern.engine": {
+      "path": "src\\grid\\pattern\\engine.py",
+      "imports": [
+        "src",
+        "__future__",
+        "types",
+        "datetime",
+        "enum",
+        "typing"
+      ]
+    },
+    "grid.pattern.__init__": {
+      "path": "src\\grid\\pattern\\__init__.py",
+      "imports": []
+    },
+    "grid.physics.engine": {
+      "path": "src\\grid\\physics\\engine.py",
+      "imports": []
+    },
+    "grid.physics.__init__": {
+      "path": "src\\grid\\physics\\__init__.py",
+      "imports": []
+    },
+    "grid.services.communication_tracer": {
+      "path": "src\\grid\\services\\communication_tracer.py",
+      "imports": [
+        "datetime",
+        "enum",
+        "dataclasses",
+        "json",
+        "typing",
+        "uuid"
+      ]
+    },
+    "grid.services.entity_harmonizer": {
+      "path": "src\\grid\\services\\entity_harmonizer.py",
+      "imports": [
+        "difflib",
+        "dataclasses",
+        "typing"
+      ]
+    },
+    "grid.services.event_service": {
+      "path": "src\\grid\\services\\event_service.py",
+      "imports": [
+        "collections",
+        "typing"
+      ]
+    },
+    "grid.services.ner_keyword_detector": {
+      "path": "src\\grid\\services\\ner_keyword_detector.py",
+      "imports": [
+        "enum",
+        "datetime",
+        "re",
+        "typing"
+      ]
+    },
+    "grid.services.reverb_decay": {
+      "path": "src\\grid\\services\\reverb_decay.py",
+      "imports": [
+        "math",
+        "datetime",
+        "typing"
+      ]
+    },
+    "grid.services.task_service": {
+      "path": "src\\grid\\services\\task_service.py",
+      "imports": [
+        "uuid",
+        "typing"
+      ]
+    },
+    "grid.services.websocket_safety": {
+      "path": "src\\grid\\services\\websocket_safety.py",
+      "imports": [
+        "asyncio",
+        "datetime",
+        "collections",
+        "json",
+        "typing"
+      ]
+    },
+    "grid.services.workflow_service": {
+      "path": "src\\grid\\services\\workflow_service.py",
+      "imports": [
+        "typing"
+      ]
+    },
+    "grid.services.__init__": {
+      "path": "src\\grid\\services\\__init__.py",
+      "imports": [
+        "workflow_service",
+        "event_service",
+        "task_service"
+      ]
+    },
+    "grid.subprocess.revise": {
+      "path": "src\\grid\\subprocess\\revise.py",
+      "imports": []
+    },
+    "grid.utils.data_loaders": {
+      "path": "src\\grid\\utils\\data_loaders.py",
+      "imports": [
+        "pathlib",
+        "json",
+        "typing"
+      ]
+    },
+    "grid.vision.optimizer": {
+      "path": "src\\grid\\vision\\optimizer.py",
+      "imports": []
+    },
+    "grid.vision.personas": {
+      "path": "src\\grid\\vision\\personas.py",
+      "imports": []
+    },
+    "grid.vision.summarizer": {
+      "path": "src\\grid\\vision\\summarizer.py",
+      "imports": []
+    },
+    "grid.vision.triage": {
+      "path": "src\\grid\\vision\\triage.py",
+      "imports": []
+    },
+    "grid.vision.__init__": {
+      "path": "src\\grid\\vision\\__init__.py",
+      "imports": []
+    },
+    "kernel.bus": {
+      "path": "src\\kernel\\bus.py",
+      "imports": [
+        "dataclasses",
+        "__future__",
+        "typing"
+      ]
+    },
+    "kernel.core_integration": {
+      "path": "src\\kernel\\core_integration.py",
+      "imports": [
+        "src"
+      ]
+    },
+    "kernel.data_quality": {
+      "path": "src\\kernel\\data_quality.py",
+      "imports": [
+        "datetime",
+        "typing"
+      ]
+    },
+    "kernel.integration_pipeline": {
+      "path": "src\\kernel\\integration_pipeline.py",
+      "imports": [
+        "src",
+        "__future__",
+        "datetime",
+        "dataclasses",
+        "typing"
+      ]
+    },
+    "kernel.message_broker": {
+      "path": "src\\kernel\\message_broker.py",
+      "imports": [
+        "collections",
+        "src",
+        "time",
+        "typing"
+      ]
+    },
+    "kernel.node_ledger": {
+      "path": "src\\kernel\\node_ledger.py",
+      "imports": [
+        "dataclasses",
+        "random",
+        "time",
+        "typing"
+      ]
+    },
+    "kernel.routing": {
+      "path": "src\\kernel\\routing.py",
+      "imports": [
+        "dataclasses",
+        "typing"
+      ]
+    },
+    "kernel.kernel.bus": {
+      "path": "src\\kernel\\kernel\\bus.py",
+      "imports": []
+    },
+    "ml.model.register_model": {
+      "path": "src\\ml\\model\\register_model.py",
+      "imports": []
+    },
+    "nl_dev.cli": {
+      "path": "src\\nl_dev\\cli.py",
+      "imports": []
+    },
+    "nl_dev.code_generator": {
+      "path": "src\\nl_dev\\code_generator.py",
+      "imports": [
+        "shutil",
+        "dataclasses",
+        "typing",
+        "pathlib",
+        "uuid",
+        "ast"
+      ]
+    },
+    "nl_dev.event_stream": {
+      "path": "src\\nl_dev\\event_stream.py",
+      "imports": []
+    },
+    "nl_dev.generator": {
+      "path": "src\\nl_dev\\generator.py",
+      "imports": [
+        "pathlib",
+        "typing"
+      ]
+    },
+    "nl_dev.parser": {
+      "path": "src\\nl_dev\\parser.py",
+      "imports": [
+        "datetime",
+        "dataclasses",
+        "typing",
+        "pathlib",
+        "re"
+      ]
+    },
+    "nl_dev.pipeline": {
+      "path": "src\\nl_dev\\pipeline.py",
+      "imports": []
+    },
+    "nl_dev.plan_generator": {
+      "path": "src\\nl_dev\\plan_generator.py",
+      "imports": [
+        "src",
+        "dataclasses",
+        "typing"
+      ]
+    },
+    "nl_dev.triage": {
+      "path": "src\\nl_dev\\triage.py",
+      "imports": [
+        "src",
+        "__future__",
+        "subprocess",
+        "dataclasses",
+        "typing",
+        "pathlib",
+        "re"
+      ]
+    },
+    "nl_dev.watcher": {
+      "path": "src\\nl_dev\\watcher.py",
+      "imports": []
+    },
+    "nl_dev.__init__": {
+      "path": "src\\nl_dev\\__init__.py",
+      "imports": []
+    },
+    "physics.credit_system": {
+      "path": "src\\physics\\credit_system.py",
+      "imports": [
+        "dataclasses",
+        "__future__",
+        "datetime",
+        "typing"
+      ]
+    },
+    "physics.heat_state": {
+      "path": "src\\physics\\heat_state.py",
+      "imports": [
+        "dataclasses",
+        "__future__"
+      ]
+    },
+    "physics.ubi_physics_engine": {
+      "path": "src\\physics\\ubi_physics_engine.py",
+      "imports": [
+        "src",
+        "dataclasses",
+        "__future__",
+        "typing"
+      ]
+    },
+    "plugins.articulation": {
+      "path": "src\\plugins\\articulation.py",
+      "imports": [
+        "src",
+        "__future__"
+      ]
+    },
+    "plugins.ner_plugin": {
+      "path": "src\\plugins\\ner_plugin.py",
+      "imports": [
+        "src",
+        "__future__",
+        "types",
+        "asyncio",
+        "typing"
+      ]
+    },
+    "plugins.physics": {
+      "path": "src\\plugins\\physics.py",
+      "imports": [
+        "src",
+        "__future__",
+        "typing"
+      ]
+    },
+    "realtime.glimpse.alignment": {
+      "path": "src\\realtime\\glimpse\\alignment.py",
+      "imports": []
+    },
+    "realtime.glimpse.batch_helpers": {
+      "path": "src\\realtime\\glimpse\\batch_helpers.py",
+      "imports": []
+    },
+    "realtime.glimpse.benchmark_cached_batch": {
+      "path": "src\\realtime\\glimpse\\benchmark_cached_batch.py",
+      "imports": []
+    },
+    "realtime.glimpse.benchmark_glimpse": {
+      "path": "src\\realtime\\glimpse\\benchmark_glimpse.py",
+      "imports": []
+    },
+    "realtime.glimpse.benchmark_openai": {
+      "path": "src\\realtime\\glimpse\\benchmark_openai.py",
+      "imports": []
+    },
+    "realtime.glimpse.clarifier_engine": {
+      "path": "src\\realtime\\glimpse\\clarifier_engine.py",
+      "imports": []
+    },
+    "realtime.glimpse.demo_glimpse_engine": {
+      "path": "src\\realtime\\glimpse\\demo_glimpse_engine.py",
+      "imports": []
+    },
+    "realtime.glimpse.engine": {
+      "path": "src\\realtime\\glimpse\\engine.py",
+      "imports": []
+    },
+    "realtime.glimpse.enhanced_clarifier_engine": {
+      "path": "src\\realtime\\glimpse\\enhanced_clarifier_engine.py",
+      "imports": []
+    },
+    "realtime.glimpse.Glimpse": {
+      "path": "src\\realtime\\glimpse\\Glimpse.py",
+      "imports": []
+    },
+    "realtime.glimpse.load_test_openai": {
+      "path": "src\\realtime\\glimpse\\load_test_openai.py",
+      "imports": []
+    },
+    "realtime.glimpse.metrics": {
+      "path": "src\\realtime\\glimpse\\metrics.py",
+      "imports": []
+    },
+    "realtime.glimpse.metrics_server": {
+      "path": "src\\realtime\\glimpse\\metrics_server.py",
+      "imports": []
+    },
+    "realtime.glimpse.performance_optimizer": {
+      "path": "src\\realtime\\glimpse\\performance_optimizer.py",
+      "imports": []
+    },
+    "realtime.glimpse.rate_limiter": {
+      "path": "src\\realtime\\glimpse\\rate_limiter.py",
+      "imports": []
+    },
+    "realtime.glimpse.reverb_model": {
+      "path": "src\\realtime\\glimpse\\reverb_model.py",
+      "imports": []
+    },
+    "realtime.glimpse.sampler_openai": {
+      "path": "src\\realtime\\glimpse\\sampler_openai.py",
+      "imports": []
+    },
+    "realtime.glimpse.vis": {
+      "path": "src\\realtime\\glimpse\\vis.py",
+      "imports": []
+    },
+    "realtime.glimpse.__init__": {
+      "path": "src\\realtime\\glimpse\\__init__.py",
+      "imports": []
+    },
+    "realtime.i_o.smart_optimizer": {
+      "path": "src\\realtime\\i_o\\smart_optimizer.py",
+      "imports": []
+    },
+    "services.contribution_tracker": {
+      "path": "src\\services\\contribution_tracker.py",
+      "imports": [
+        "datetime",
+        "typing"
+      ]
+    },
+    "services.decision_engine": {
+      "path": "src\\services\\decision_engine.py",
+      "imports": [
+        "src",
+        "__future__",
+        "json",
+        "typing",
+        "pathlib"
+      ]
+    },
+    "services.document_indexer": {
+      "path": "src\\services\\document_indexer.py",
+      "imports": []
+    },
+    "services.ner_service": {
+      "path": "src\\services\\ner_service.py",
+      "imports": [
+        "src",
+        "asyncio",
+        "json",
+        "openai",
+        "typing",
+        "re"
+      ]
+    },
+    "services.pattern_engine": {
+      "path": "src\\services\\pattern_engine.py",
+      "imports": [
+        "src"
+      ]
+    },
+    "services.quantum_utils": {
+      "path": "src\\services\\quantum_utils.py",
+      "imports": []
+    },
+    "services.rag_monitor": {
+      "path": "src\\services\\rag_monitor.py",
+      "imports": []
+    },
+    "services.relationship_analyzer": {
+      "path": "src\\services\\relationship_analyzer.py",
+      "imports": [
+        "src",
+        "__future__",
+        "types",
+        "datetime",
+        "dataclasses",
+        "typing"
+      ]
+    },
+    "services.retrieval_service": {
+      "path": "src\\services\\retrieval_service.py",
+      "imports": [
+        "__future__",
+        "database",
+        "openai",
+        "typing"
+      ]
+    },
+    "services.rules_engine": {
+      "path": "src\\services\\rules_engine.py",
+      "imports": [
+        "src",
+        "uuid",
+        "unittest",
+        "typing"
+      ]
+    },
+    "services.scenario_analyzer": {
+      "path": "src\\services\\scenario_analyzer.py",
+      "imports": [
+        "networkx",
+        "sqlalchemy",
+        "src",
+        "datetime",
+        "typing"
+      ]
+    },
+    "services.translator_assistant": {
+      "path": "src\\services\\translator_assistant.py",
+      "imports": [
+        "__future__",
+        "pydantic",
+        "typing"
+      ]
+    },
+    "services.vision_bridge": {
+      "path": "src\\services\\vision_bridge.py",
+      "imports": [
+        "dataclasses",
+        "typing"
+      ]
+    },
+    "services.visual_theme_analyzer": {
+      "path": "src\\services\\visual_theme_analyzer.py",
+      "imports": [
+        "enum",
+        "src",
+        "dataclasses",
+        "typing"
+      ]
+    },
+    "services.translator_assistant.adapters": {
+      "path": "src\\services\\translator_assistant\\adapters.py",
+      "imports": [
+        "models",
+        "service",
+        "typing",
+        "os"
+      ]
+    },
+    "services.translator_assistant.forms": {
+      "path": "src\\services\\translator_assistant\\forms.py",
+      "imports": [
+        "enum",
+        "pydantic",
+        "typing"
+      ]
+    },
+    "services.translator_assistant.models": {
+      "path": "src\\services\\translator_assistant\\models.py",
+      "imports": [
+        "forms",
+        "pydantic",
+        "typing"
+      ]
+    },
+    "services.translator_assistant.service": {
+      "path": "src\\services\\translator_assistant\\service.py",
+      "imports": [
+        "models",
+        "forms",
+        "json",
+        "typing",
+        "pathlib"
+      ]
+    },
+    "services.translator_assistant.__init__": {
+      "path": "src\\services\\translator_assistant\\__init__.py",
+      "imports": [
+        "models",
+        "service",
+        "forms"
+      ]
+    },
+    "throughput_engine.engine": {
+      "path": "src\\throughput_engine\\engine.py",
+      "imports": [
+        "math",
+        "enum",
+        "typing"
+      ]
+    },
+    "throughput_engine.physics_demo": {
+      "path": "src\\throughput_engine\\physics_demo.py",
+      "imports": []
+    },
+    "throughput_engine.test_engine": {
+      "path": "src\\throughput_engine\\test_engine.py",
+      "imports": []
+    },
+    "throughput_engine.__init__": {
+      "path": "src\\throughput_engine\\__init__.py",
+      "imports": []
+    },
+    "tools.annotator": {
+      "path": "src\\tools\\annotator.py",
+      "imports": []
+    },
+    "tools.cli": {
+      "path": "src\\tools\\cli.py",
+      "imports": []
+    },
+    "tools.client_auth": {
+      "path": "src\\tools\\client_auth.py",
+      "imports": []
+    },
+    "tools.cli_auth": {
+      "path": "src\\tools\\cli_auth.py",
+      "imports": []
+    },
+    "tools.contribution_calculator": {
+      "path": "src\\tools\\contribution_calculator.py",
+      "imports": []
+    },
+    "tools.contribution_tracker": {
+      "path": "src\\tools\\contribution_tracker.py",
+      "imports": [
+        "hashlib",
+        "__future__",
+        "datetime",
+        "dataclasses",
+        "json",
+        "typing",
+        "pathlib"
+      ]
+    },
+    "tools.finalize_iteration": {
+      "path": "src\\tools\\finalize_iteration.py",
+      "imports": []
+    },
+    "tools.optimizer": {
+      "path": "src\\tools\\optimizer.py",
+      "imports": []
+    },
+    "tools.water_cutter": {
+      "path": "src\\tools\\water_cutter.py",
+      "imports": [
+        "websockets",
+        "asyncio",
+        "datetime",
+        "numpy",
+        "dataclasses",
+        "logging",
+        "json",
+        "sys",
+        "typing",
+        "signal",
+        "random",
+        "re"
+      ]
+    },
+    "tools.water_cutter_example": {
+      "path": "src\\tools\\water_cutter_example.py",
+      "imports": [
+        "asyncio",
+        "json",
+        "typing",
+        "water_cutter",
+        "argparse"
+      ]
+    },
+    "tools.water_cutter_server": {
+      "path": "src\\tools\\water_cutter_server.py",
+      "imports": [
+        "websockets",
+        "asyncio",
+        "logging",
+        "json",
+        "typing"
+      ]
+    },
+    "tools.gentle_nudge.analyzer": {
+      "path": "src\\tools\\gentle_nudge\\analyzer.py",
+      "imports": [
+        "src",
+        "dataclasses",
+        "typing"
+      ]
+    },
+    "tools.gentle_nudge.main": {
+      "path": "src\\tools\\gentle_nudge\\main.py",
+      "imports": [
+        "analyzer",
+        "recommender",
+        "src",
+        "datetime",
+        "notifier",
+        "argparse"
+      ]
+    },
+    "tools.gentle_nudge.notifier": {
+      "path": "src\\tools\\gentle_nudge\\notifier.py",
+      "imports": [
+        "recommender"
+      ]
+    },
+    "tools.gentle_nudge.recommender": {
+      "path": "src\\tools\\gentle_nudge\\recommender.py",
+      "imports": [
+        "analyzer",
+        "dataclasses",
+        "typing"
+      ]
+    },
+    "tools.gentle_nudge.__init__": {
+      "path": "src\\tools\\gentle_nudge\\__init__.py",
+      "imports": []
+    },
+    "transformer.main": {
+      "path": "src\\transformer\\main.py",
+      "imports": []
+    },
+    "transformer.metrics": {
+      "path": "src\\transformer\\metrics.py",
+      "imports": []
+    },
+    "transformer.tests.test_transformer": {
+      "path": "src\\transformer\\tests\\test_transformer.py",
+      "imports": []
+    },
+    "utils.cognition_grid": {
+      "path": "src\\utils\\cognition_grid.py",
+      "imports": [
+        "enum",
+        "dataclasses",
+        "__future__",
+        "typing"
+      ]
+    },
+    "utils.concept_grid": {
+      "path": "src\\utils\\concept_grid.py",
+      "imports": [
+        "enum",
+        "dataclasses",
+        "__future__",
+        "typing"
+      ]
+    },
+    "valuation.market_analysis": {
+      "path": "src\\valuation\\market_analysis.py",
+      "imports": [
+        "__future__",
+        "pydantic",
+        "typing"
+      ]
+    },
+    "valuation.processing_unit": {
+      "path": "src\\valuation\\processing_unit.py",
+      "imports": [
+        "__future__",
+        "pydantic",
+        "typing"
+      ]
+    },
+    "valuation.valuation_tool": {
+      "path": "src\\valuation\\valuation_tool.py",
+      "imports": [
+        "pydantic",
+        "src",
+        "__future__",
+        "dataclasses",
+        "typing",
+        "pathlib"
+      ]
+    },
+    "vision.tests.test_cli": {
+      "path": "src\\vision\\tests\\test_cli.py",
+      "imports": [
+        "pytest",
+        "io",
+        "vision_ui",
+        "sys",
+        "json",
+        "pathlib",
+        "unittest"
+      ]
+    },
+    "vision.tests.test_multi_profile": {
+      "path": "src\\vision\\tests\\test_multi_profile.py",
+      "imports": [
+        "pytest",
+        "vision_ui",
+        "UI_UX",
+        "json"
+      ]
+    },
+    "vision.tests.test_ocr": {
+      "path": "src\\vision\\tests\\test_ocr.py",
+      "imports": [
+        "pytest",
+        "os",
+        "vision_ui",
+        "pathlib",
+        "unittest"
+      ]
+    },
+    "vision.tests.test_profiles": {
+      "path": "src\\vision\\tests\\test_profiles.py",
+      "imports": [
+        "pytest",
+        "tempfile",
+        "vision_ui",
+        "json",
+        "pathlib"
+      ]
+    },
+    "vision.tests.test_screenshot_integration": {
+      "path": "src\\vision\\tests\\test_screenshot_integration.py",
+      "imports": [
+        "pytest",
+        "vision_ui",
+        "io",
+        "sys",
+        "unittest",
+        "argparse"
+      ]
+    },
+    "vision.tests.test_triage": {
+      "path": "src\\vision\\tests\\test_triage.py",
+      "imports": [
+        "pytest",
+        "io",
+        "rich",
+        "vision_ui",
+        "unittest"
+      ]
+    },
+    "vision.UI_UX.budget": {
+      "path": "src\\vision\\UI_UX\\budget.py",
+      "imports": [
+        "token_utils",
+        "textwrap",
+        "typing"
+      ]
+    },
+    "vision.UI_UX.test_budget": {
+      "path": "src\\vision\\UI_UX\\test_budget.py",
+      "imports": [
+        "vision",
+        "sys",
+        "os"
+      ]
+    },
+    "vision.UI_UX.test_token_utils": {
+      "path": "src\\vision\\UI_UX\\test_token_utils.py",
+      "imports": [
+        "vision"
+      ]
+    },
+    "vision.UI_UX.token_utils": {
+      "path": "src\\vision\\UI_UX\\token_utils.py",
+      "imports": [
+        "__future__",
+        "transformers",
+        "typing"
+      ]
+    },
+    "vision.UI_UX.__init__": {
+      "path": "src\\vision\\UI_UX\\__init__.py",
+      "imports": []
+    },
+    "vision.vision_ui.cli": {
+      "path": "src\\vision\\vision_ui\\cli.py",
+      "imports": [
+        "profiles",
+        "triage",
+        "UI_UX",
+        "sys",
+        "json",
+        "typing",
+        "summarize",
+        "argparse"
+      ]
+    },
+    "vision.vision_ui.ocr": {
+      "path": "src\\vision\\vision_ui\\ocr.py",
+      "imports": [
+        "PIL",
+        "os",
+        "dataclasses",
+        "typing",
+        "pathlib",
+        "re",
+        "pytesseract"
+      ]
+    },
+    "vision.vision_ui.profiles": {
+      "path": "src\\vision\\vision_ui\\profiles.py",
+      "imports": [
+        "os",
+        "dataclasses",
+        "json",
+        "typing",
+        "pathlib"
+      ]
+    },
+    "vision.vision_ui.summarize": {
+      "path": "src\\vision\\vision_ui\\summarize.py",
+      "imports": [
+        "profiles",
+        "UI_UX",
+        "hashlib",
+        "ocr",
+        "dataclasses",
+        "json",
+        "typing"
+      ]
+    },
+    "vision.vision_ui.triage": {
+      "path": "src\\vision\\vision_ui\\triage.py",
+      "imports": [
+        "profiles",
+        "UI_UX",
+        "io",
+        "rich",
+        "summarize",
+        "typing"
+      ]
+    },
+    "vision.vision_ui.__init__": {
+      "path": "src\\vision\\vision_ui\\__init__.py",
+      "imports": []
+    },
+    "vision.vision_ui.tests.test_cli_summarize_multi": {
+      "path": "src\\vision\\vision_ui\\tests\\test_cli_summarize_multi.py",
+      "imports": [
+        "vision_ui",
+        "tempfile"
+      ]
+    },
+    "vision.vision_ui.tests.test_cli_summarize_multi_ui": {
+      "path": "src\\vision\\vision_ui\\tests\\test_cli_summarize_multi_ui.py",
+      "imports": [
+        "vision_ui",
+        "tempfile"
+      ]
+    },
+    "vision.vision_ui.tests.test_persona_budget_ui": {
+      "path": "src\\vision\\vision_ui\\tests\\test_persona_budget_ui.py",
+      "imports": [
+        "vision_ui"
+      ]
+    },
+    "vision.vision_ui.tests.test_profiles": {
+      "path": "src\\vision\\vision_ui\\tests\\test_profiles.py",
+      "imports": [
+        "vision_ui"
+      ]
+    },
+    "vision.vision_ui.tests.test_profiles_ui": {
+      "path": "src\\vision\\vision_ui\\tests\\test_profiles_ui.py",
+      "imports": [
+        "vision_ui"
+      ]
+    },
+    "vision.vision_ui.tests.test_summarize": {
+      "path": "src\\vision\\vision_ui\\tests\\test_summarize.py",
+      "imports": [
+        "vision_ui"
+      ]
+    },
+    "vision.vision_ui.tests.test_summarize_ui": {
+      "path": "src\\vision\\vision_ui\\tests\\test_summarize_ui.py",
+      "imports": [
+        "vision_ui"
+      ]
+    },
+    "workflow_engine.workflow_pipeline_integration": {
+      "path": "src\\workflow_engine\\workflow_pipeline_integration.py",
+      "imports": []
+    },
+    "workflow_engine.workflow_engine.core": {
+      "path": "src\\workflow_engine\\workflow_engine\\core.py",
+      "imports": []
+    },
+    "workflow_engine.workflow_engine.patterns": {
+      "path": "src\\workflow_engine\\workflow_engine\\patterns.py",
+      "imports": []
+    },
+    "workflow_engine.workflow_engine.steps": {
+      "path": "src\\workflow_engine\\workflow_engine\\steps.py",
+      "imports": []
+    },
+    "workflow_engine.workflow_engine.__init__": {
+      "path": "src\\workflow_engine\\workflow_engine\\__init__.py",
+      "imports": []
+    },
+    "workflow_engine.workflow_engine.runners.cli": {
+      "path": "src\\workflow_engine\\workflow_engine\\runners\\cli.py",
+      "imports": []
+    },
+    "workflow_engine.workflow_engine.runners.__init__": {
+      "path": "src\\workflow_engine\\workflow_engine\\runners\\__init__.py",
+      "imports": []
+    },
+    "workflow_engine.workflow_engine.workflows.run_session": {
+      "path": "src\\workflow_engine\\workflow_engine\\workflows\\run_session.py",
+      "imports": []
+    }
+  },
+  "dependencies": {
+    "main": [
+      "src",
+      "fastapi"
+    ],
+    "api.dependencies": [
+      "src",
+      "sqlalchemy",
+      "typing"
+    ],
+    "api.main": [
+      "src",
+      "fastapi"
+    ],
+    "api.middleware": [
+      "starlette",
+      "uuid",
+      "time"
+    ],
+    "api.router": [
+      "pydantic",
+      "src",
+      "datetime",
+      "enum",
+      "typing",
+      "fastapi"
+    ],
+    "api.routers": [
+      "src",
+      "fastapi",
+      "sqlalchemy",
+      "typing"
+    ],
+    "api.server": [
+      "src",
+      "fastapi"
+    ],
+    "api.__init__": [
+      "router"
+    ],
+    "bridge.task_state.model": [
+      "enum",
+      "typing"
+    ],
+    "bridge.task_state.__init__": [
+      "model",
+      "typing"
+    ],
+    "bridge.temperature.__init__": [
+      "dataclasses",
+      "typing"
+    ],
+    "cli.main": [
+      "src",
+      "asyncio",
+      "subprocess",
+      "click",
+      "inspect",
+      "sys",
+      "pathlib"
+    ],
+    "concept.temporal_translation": [
+      "random",
+      "time"
+    ],
+    "concept.docs.templates.custom_function_template": [
+      "pydantic",
+      "requests",
+      "os",
+      "datetime",
+      "json",
+      "typing"
+    ],
+    "concept.template_response.call": [
+      "requests",
+      "json",
+      "os"
+    ],
+    "concept.template_response.field": [
+      "networkx",
+      "matplotlib",
+      "pandas",
+      "collections",
+      "numpy",
+      "re"
+    ],
+    "concept.tests.test_temporal_translation": [
+      "builtins",
+      "types",
+      "temporal_translation"
+    ],
+    "core.application": [
+      "contextlib",
+      "src",
+      "__future__",
+      "typing"
+    ],
+    "core.architecture": [
+      "src",
+      "__future__",
+      "enum",
+      "dataclasses",
+      "typing",
+      "time"
+    ],
+    "core.compatibility": [
+      "scoring",
+      "src",
+      "__future__",
+      "typing"
+    ],
+    "core.config": [
+      "dataclasses",
+      "__future__",
+      "typing",
+      "os"
+    ],
+    "core.dependency_injection": [
+      "typing"
+    ],
+    "core.documentation_index": [
+      "__future__",
+      "datetime",
+      "enum",
+      "dataclasses",
+      "typing"
+    ],
+    "core.documentation_scanner": [
+      "src",
+      "__future__",
+      "typing",
+      "pathlib",
+      "re"
+    ],
+    "core.events": [
+      "__future__",
+      "datetime",
+      "enum",
+      "dataclasses",
+      "typing"
+    ],
+    "core.grid_system": [
+      "src",
+      "__future__",
+      "typing",
+      "pathlib",
+      "threading",
+      "time"
+    ],
+    "core.input_handler": [
+      "src",
+      "dataclasses",
+      "__future__",
+      "typing"
+    ],
+    "core.logging": [
+      "logging",
+      "sys",
+      "pythonjsonlogger",
+      "typing"
+    ],
+    "core.output_handler": [
+      "src",
+      "dataclasses",
+      "__future__",
+      "typing"
+    ],
+    "core.retry_policy": [
+      "sqlalchemy",
+      "dataclasses",
+      "datetime",
+      "typing"
+    ],
+    "core.security": [
+      "src",
+      "hashlib",
+      "datetime",
+      "base64",
+      "json",
+      "typing",
+      "hmac"
+    ],
+    "core.security_pipeline_middleware": [
+      "src",
+      "dataclasses",
+      "typing"
+    ],
+    "core.test_context": [
+      "datetime",
+      "numpy",
+      "typing",
+      "contextlib",
+      "random"
+    ],
+    "core.config.settings": [
+      "dataclasses",
+      "typing",
+      "os"
+    ],
+    "core.config.__init__": [
+      "settings"
+    ],
+    "database.migrations": [
+      "src",
+      "alembic",
+      "os"
+    ],
+    "database.models": [
+      "enum",
+      "sqlalchemy",
+      "__future__",
+      "datetime"
+    ],
+    "database.session": [
+      "src",
+      "models",
+      "sqlalchemy"
+    ],
+    "grid.main": [
+      "src",
+      "fastapi",
+      "pydantic",
+      "typing"
+    ],
+    "grid.__init__": [
+      "_version"
+    ],
+    "grid.api.glimpse": [
+      "src",
+      "asyncio",
+      "datetime",
+      "json",
+      "typing",
+      "fastapi"
+    ],
+    "grid.cli.commands": [
+      "src",
+      "dataclasses",
+      "__future__",
+      "typing"
+    ],
+    "grid.cli.ingestion": [
+      "pathlib",
+      "json",
+      "typing"
+    ],
+    "grid.cli.main": [
+      "typing"
+    ],
+    "grid.cli.utils": [
+      "json",
+      "typing"
+    ],
+    "grid.cli.__init__": [
+      "main",
+      "utils",
+      "ingestion",
+      "commands"
+    ],
+    "grid.concept.engine": [
+      "enum",
+      "dataclasses",
+      "patterns",
+      "typing"
+    ],
+    "grid.concept.patterns": [
+      "dataclasses",
+      "typing"
+    ],
+    "grid.concept.__init__": [
+      "patterns",
+      "engine"
+    ],
+    "grid.core.engine": [
+      "src"
+    ],
+    "grid.models.__init__": [
+      "__future__",
+      "datetime",
+      "enum",
+      "dataclasses",
+      "typing"
+    ],
+    "grid.pattern.engine": [
+      "src",
+      "__future__",
+      "types",
+      "datetime",
+      "enum",
+      "typing"
+    ],
+    "grid.services.communication_tracer": [
+      "datetime",
+      "enum",
+      "dataclasses",
+      "json",
+      "typing",
+      "uuid"
+    ],
+    "grid.services.entity_harmonizer": [
+      "difflib",
+      "dataclasses",
+      "typing"
+    ],
+    "grid.services.event_service": [
+      "collections",
+      "typing"
+    ],
+    "grid.services.ner_keyword_detector": [
+      "enum",
+      "datetime",
+      "re",
+      "typing"
+    ],
+    "grid.services.reverb_decay": [
+      "math",
+      "datetime",
+      "typing"
+    ],
+    "grid.services.task_service": [
+      "uuid",
+      "typing"
+    ],
+    "grid.services.websocket_safety": [
+      "asyncio",
+      "datetime",
+      "collections",
+      "json",
+      "typing"
+    ],
+    "grid.services.workflow_service": [
+      "typing"
+    ],
+    "grid.services.__init__": [
+      "workflow_service",
+      "event_service",
+      "task_service"
+    ],
+    "grid.utils.data_loaders": [
+      "pathlib",
+      "json",
+      "typing"
+    ],
+    "kernel.bus": [
+      "dataclasses",
+      "__future__",
+      "typing"
+    ],
+    "kernel.core_integration": [
+      "src"
+    ],
+    "kernel.data_quality": [
+      "datetime",
+      "typing"
+    ],
+    "kernel.integration_pipeline": [
+      "src",
+      "__future__",
+      "datetime",
+      "dataclasses",
+      "typing"
+    ],
+    "kernel.message_broker": [
+      "collections",
+      "src",
+      "time",
+      "typing"
+    ],
+    "kernel.node_ledger": [
+      "dataclasses",
+      "random",
+      "time",
+      "typing"
+    ],
+    "kernel.routing": [
+      "dataclasses",
+      "typing"
+    ],
+    "nl_dev.code_generator": [
+      "shutil",
+      "dataclasses",
+      "typing",
+      "pathlib",
+      "uuid",
+      "ast"
+    ],
+    "nl_dev.generator": [
+      "pathlib",
+      "typing"
+    ],
+    "nl_dev.parser": [
+      "datetime",
+      "dataclasses",
+      "typing",
+      "pathlib",
+      "re"
+    ],
+    "nl_dev.plan_generator": [
+      "src",
+      "dataclasses",
+      "typing"
+    ],
+    "nl_dev.triage": [
+      "src",
+      "__future__",
+      "subprocess",
+      "dataclasses",
+      "typing",
+      "pathlib",
+      "re"
+    ],
+    "physics.credit_system": [
+      "dataclasses",
+      "__future__",
+      "datetime",
+      "typing"
+    ],
+    "physics.heat_state": [
+      "dataclasses",
+      "__future__"
+    ],
+    "physics.ubi_physics_engine": [
+      "src",
+      "dataclasses",
+      "__future__",
+      "typing"
+    ],
+    "plugins.articulation": [
+      "src",
+      "__future__"
+    ],
+    "plugins.ner_plugin": [
+      "src",
+      "__future__",
+      "types",
+      "asyncio",
+      "typing"
+    ],
+    "plugins.physics": [
+      "src",
+      "__future__",
+      "typing"
+    ],
+    "services.contribution_tracker": [
+      "datetime",
+      "typing"
+    ],
+    "services.decision_engine": [
+      "src",
+      "__future__",
+      "json",
+      "typing",
+      "pathlib"
+    ],
+    "services.ner_service": [
+      "src",
+      "asyncio",
+      "json",
+      "openai",
+      "typing",
+      "re"
+    ],
+    "services.pattern_engine": [
+      "src"
+    ],
+    "services.relationship_analyzer": [
+      "src",
+      "__future__",
+      "types",
+      "datetime",
+      "dataclasses",
+      "typing"
+    ],
+    "services.retrieval_service": [
+      "__future__",
+      "database",
+      "openai",
+      "typing"
+    ],
+    "services.rules_engine": [
+      "src",
+      "uuid",
+      "unittest",
+      "typing"
+    ],
+    "services.scenario_analyzer": [
+      "networkx",
+      "sqlalchemy",
+      "src",
+      "datetime",
+      "typing"
+    ],
+    "services.translator_assistant": [
+      "__future__",
+      "pydantic",
+      "typing"
+    ],
+    "services.vision_bridge": [
+      "dataclasses",
+      "typing"
+    ],
+    "services.visual_theme_analyzer": [
+      "enum",
+      "src",
+      "dataclasses",
+      "typing"
+    ],
+    "services.translator_assistant.adapters": [
+      "models",
+      "service",
+      "typing",
+      "os"
+    ],
+    "services.translator_assistant.forms": [
+      "enum",
+      "pydantic",
+      "typing"
+    ],
+    "services.translator_assistant.models": [
+      "forms",
+      "pydantic",
+      "typing"
+    ],
+    "services.translator_assistant.service": [
+      "models",
+      "forms",
+      "json",
+      "typing",
+      "pathlib"
+    ],
+    "services.translator_assistant.__init__": [
+      "models",
+      "service",
+      "forms"
+    ],
+    "throughput_engine.engine": [
+      "math",
+      "enum",
+      "typing"
+    ],
+    "tools.contribution_tracker": [
+      "hashlib",
+      "__future__",
+      "datetime",
+      "dataclasses",
+      "json",
+      "typing",
+      "pathlib"
+    ],
+    "tools.water_cutter": [
+      "websockets",
+      "asyncio",
+      "datetime",
+      "numpy",
+      "dataclasses",
+      "logging",
+      "json",
+      "sys",
+      "typing",
+      "signal",
+      "random",
+      "re"
+    ],
+    "tools.water_cutter_example": [
+      "asyncio",
+      "json",
+      "typing",
+      "water_cutter",
+      "argparse"
+    ],
+    "tools.water_cutter_server": [
+      "websockets",
+      "asyncio",
+      "logging",
+      "json",
+      "typing"
+    ],
+    "tools.gentle_nudge.analyzer": [
+      "src",
+      "dataclasses",
+      "typing"
+    ],
+    "tools.gentle_nudge.main": [
+      "analyzer",
+      "recommender",
+      "src",
+      "datetime",
+      "notifier",
+      "argparse"
+    ],
+    "tools.gentle_nudge.notifier": [
+      "recommender"
+    ],
+    "tools.gentle_nudge.recommender": [
+      "analyzer",
+      "dataclasses",
+      "typing"
+    ],
+    "utils.cognition_grid": [
+      "enum",
+      "dataclasses",
+      "__future__",
+      "typing"
+    ],
+    "utils.concept_grid": [
+      "enum",
+      "dataclasses",
+      "__future__",
+      "typing"
+    ],
+    "valuation.market_analysis": [
+      "__future__",
+      "pydantic",
+      "typing"
+    ],
+    "valuation.processing_unit": [
+      "__future__",
+      "pydantic",
+      "typing"
+    ],
+    "valuation.valuation_tool": [
+      "pydantic",
+      "src",
+      "__future__",
+      "dataclasses",
+      "typing",
+      "pathlib"
+    ],
+    "vision.tests.test_cli": [
+      "pytest",
+      "io",
+      "vision_ui",
+      "sys",
+      "json",
+      "pathlib",
+      "unittest"
+    ],
+    "vision.tests.test_multi_profile": [
+      "pytest",
+      "vision_ui",
+      "UI_UX",
+      "json"
+    ],
+    "vision.tests.test_ocr": [
+      "pytest",
+      "os",
+      "vision_ui",
+      "pathlib",
+      "unittest"
+    ],
+    "vision.tests.test_profiles": [
+      "pytest",
+      "tempfile",
+      "vision_ui",
+      "json",
+      "pathlib"
+    ],
+    "vision.tests.test_screenshot_integration": [
+      "pytest",
+      "vision_ui",
+      "io",
+      "sys",
+      "unittest",
+      "argparse"
+    ],
+    "vision.tests.test_triage": [
+      "pytest",
+      "io",
+      "rich",
+      "vision_ui",
+      "unittest"
+    ],
+    "vision.UI_UX.budget": [
+      "token_utils",
+      "textwrap",
+      "typing"
+    ],
+    "vision.UI_UX.test_budget": [
+      "vision",
+      "sys",
+      "os"
+    ],
+    "vision.UI_UX.test_token_utils": [
+      "vision"
+    ],
+    "vision.UI_UX.token_utils": [
+      "__future__",
+      "transformers",
+      "typing"
+    ],
+    "vision.vision_ui.cli": [
+      "profiles",
+      "triage",
+      "UI_UX",
+      "sys",
+      "json",
+      "typing",
+      "summarize",
+      "argparse"
+    ],
+    "vision.vision_ui.ocr": [
+      "PIL",
+      "os",
+      "dataclasses",
+      "typing",
+      "pathlib",
+      "re",
+      "pytesseract"
+    ],
+    "vision.vision_ui.profiles": [
+      "os",
+      "dataclasses",
+      "json",
+      "typing",
+      "pathlib"
+    ],
+    "vision.vision_ui.summarize": [
+      "profiles",
+      "UI_UX",
+      "hashlib",
+      "ocr",
+      "dataclasses",
+      "json",
+      "typing"
+    ],
+    "vision.vision_ui.triage": [
+      "profiles",
+      "UI_UX",
+      "io",
+      "rich",
+      "summarize",
+      "typing"
+    ],
+    "vision.vision_ui.tests.test_cli_summarize_multi": [
+      "vision_ui",
+      "tempfile"
+    ],
+    "vision.vision_ui.tests.test_cli_summarize_multi_ui": [
+      "vision_ui",
+      "tempfile"
+    ],
+    "vision.vision_ui.tests.test_persona_budget_ui": [
+      "vision_ui"
+    ],
+    "vision.vision_ui.tests.test_profiles": [
+      "vision_ui"
+    ],
+    "vision.vision_ui.tests.test_profiles_ui": [
+      "vision_ui"
+    ],
+    "vision.vision_ui.tests.test_summarize": [
+      "vision_ui"
+    ],
+    "vision.vision_ui.tests.test_summarize_ui": [
+      "vision_ui"
+    ]
+  },
+  "internal_deps": {
+    "grid.cli.__init__": [
+      "main",
+      "utils"
+    ],
+    "services.retrieval_service": [
+      "database"
+    ],
+    "vision.UI_UX.test_budget": [
+      "vision"
+    ],
+    "vision.UI_UX.test_token_utils": [
+      "vision"
+    ]
+  },
+  "external_deps": {
+    "main": [
+      "src",
+      "fastapi"
+    ],
+    "api.dependencies": [
+      "src",
+      "sqlalchemy",
+      "typing"
+    ],
+    "api.main": [
+      "src",
+      "fastapi"
+    ],
+    "api.middleware": [
+      "starlette",
+      "uuid",
+      "time"
+    ],
+    "api.router": [
+      "pydantic",
+      "src",
+      "datetime",
+      "enum",
+      "typing",
+      "fastapi"
+    ],
+    "api.routers": [
+      "src",
+      "fastapi",
+      "sqlalchemy",
+      "typing"
+    ],
+    "api.server": [
+      "src",
+      "fastapi"
+    ],
+    "api.__init__": [
+      "router"
+    ],
+    "bridge.task_state.model": [
+      "enum",
+      "typing"
+    ],
+    "bridge.task_state.__init__": [
+      "model",
+      "typing"
+    ],
+    "bridge.temperature.__init__": [
+      "dataclasses",
+      "typing"
+    ],
+    "cli.main": [
+      "src",
+      "asyncio",
+      "subprocess",
+      "click",
+      "inspect",
+      "sys",
+      "pathlib"
+    ],
+    "concept.temporal_translation": [
+      "random",
+      "time"
+    ],
+    "concept.docs.templates.custom_function_template": [
+      "pydantic",
+      "requests",
+      "os",
+      "datetime",
+      "json",
+      "typing"
+    ],
+    "concept.template_response.call": [
+      "requests",
+      "json",
+      "os"
+    ],
+    "concept.template_response.field": [
+      "networkx",
+      "matplotlib",
+      "pandas",
+      "collections",
+      "numpy",
+      "re"
+    ],
+    "concept.tests.test_temporal_translation": [
+      "builtins",
+      "types",
+      "temporal_translation"
+    ],
+    "core.application": [
+      "contextlib",
+      "src",
+      "__future__",
+      "typing"
+    ],
+    "core.architecture": [
+      "src",
+      "__future__",
+      "enum",
+      "dataclasses",
+      "typing",
+      "time"
+    ],
+    "core.compatibility": [
+      "scoring",
+      "src",
+      "__future__",
+      "typing"
+    ],
+    "core.config": [
+      "dataclasses",
+      "__future__",
+      "typing",
+      "os"
+    ],
+    "core.dependency_injection": [
+      "typing"
+    ],
+    "core.documentation_index": [
+      "__future__",
+      "datetime",
+      "enum",
+      "dataclasses",
+      "typing"
+    ],
+    "core.documentation_scanner": [
+      "src",
+      "__future__",
+      "typing",
+      "pathlib",
+      "re"
+    ],
+    "core.events": [
+      "__future__",
+      "datetime",
+      "enum",
+      "dataclasses",
+      "typing"
+    ],
+    "core.grid_system": [
+      "src",
+      "__future__",
+      "typing",
+      "pathlib",
+      "threading",
+      "time"
+    ],
+    "core.input_handler": [
+      "src",
+      "dataclasses",
+      "__future__",
+      "typing"
+    ],
+    "core.logging": [
+      "logging",
+      "sys",
+      "pythonjsonlogger",
+      "typing"
+    ],
+    "core.output_handler": [
+      "src",
+      "dataclasses",
+      "__future__",
+      "typing"
+    ],
+    "core.retry_policy": [
+      "sqlalchemy",
+      "dataclasses",
+      "datetime",
+      "typing"
+    ],
+    "core.security": [
+      "src",
+      "hashlib",
+      "datetime",
+      "base64",
+      "json",
+      "typing",
+      "hmac"
+    ],
+    "core.security_pipeline_middleware": [
+      "src",
+      "dataclasses",
+      "typing"
+    ],
+    "core.test_context": [
+      "datetime",
+      "numpy",
+      "typing",
+      "contextlib",
+      "random"
+    ],
+    "core.config.settings": [
+      "dataclasses",
+      "typing",
+      "os"
+    ],
+    "core.config.__init__": [
+      "settings"
+    ],
+    "database.migrations": [
+      "src",
+      "alembic",
+      "os"
+    ],
+    "database.models": [
+      "enum",
+      "sqlalchemy",
+      "__future__",
+      "datetime"
+    ],
+    "database.session": [
+      "src",
+      "models",
+      "sqlalchemy"
+    ],
+    "grid.main": [
+      "src",
+      "fastapi",
+      "pydantic",
+      "typing"
+    ],
+    "grid.__init__": [
+      "_version"
+    ],
+    "grid.api.glimpse": [
+      "src",
+      "asyncio",
+      "datetime",
+      "json",
+      "typing",
+      "fastapi"
+    ],
+    "grid.cli.commands": [
+      "src",
+      "dataclasses",
+      "__future__",
+      "typing"
+    ],
+    "grid.cli.ingestion": [
+      "pathlib",
+      "json",
+      "typing"
+    ],
+    "grid.cli.main": [
+      "typing"
+    ],
+    "grid.cli.utils": [
+      "json",
+      "typing"
+    ],
+    "grid.cli.__init__": [
+      "ingestion",
+      "commands"
+    ],
+    "grid.concept.engine": [
+      "enum",
+      "dataclasses",
+      "patterns",
+      "typing"
+    ],
+    "grid.concept.patterns": [
+      "dataclasses",
+      "typing"
+    ],
+    "grid.concept.__init__": [
+      "patterns",
+      "engine"
+    ],
+    "grid.core.engine": [
+      "src"
+    ],
+    "grid.models.__init__": [
+      "__future__",
+      "datetime",
+      "enum",
+      "dataclasses",
+      "typing"
+    ],
+    "grid.pattern.engine": [
+      "src",
+      "__future__",
+      "types",
+      "datetime",
+      "enum",
+      "typing"
+    ],
+    "grid.services.communication_tracer": [
+      "datetime",
+      "enum",
+      "dataclasses",
+      "json",
+      "typing",
+      "uuid"
+    ],
+    "grid.services.entity_harmonizer": [
+      "difflib",
+      "dataclasses",
+      "typing"
+    ],
+    "grid.services.event_service": [
+      "collections",
+      "typing"
+    ],
+    "grid.services.ner_keyword_detector": [
+      "enum",
+      "datetime",
+      "re",
+      "typing"
+    ],
+    "grid.services.reverb_decay": [
+      "math",
+      "datetime",
+      "typing"
+    ],
+    "grid.services.task_service": [
+      "uuid",
+      "typing"
+    ],
+    "grid.services.websocket_safety": [
+      "asyncio",
+      "datetime",
+      "collections",
+      "json",
+      "typing"
+    ],
+    "grid.services.workflow_service": [
+      "typing"
+    ],
+    "grid.services.__init__": [
+      "workflow_service",
+      "event_service",
+      "task_service"
+    ],
+    "grid.utils.data_loaders": [
+      "pathlib",
+      "json",
+      "typing"
+    ],
+    "kernel.bus": [
+      "dataclasses",
+      "__future__",
+      "typing"
+    ],
+    "kernel.core_integration": [
+      "src"
+    ],
+    "kernel.data_quality": [
+      "datetime",
+      "typing"
+    ],
+    "kernel.integration_pipeline": [
+      "src",
+      "__future__",
+      "datetime",
+      "dataclasses",
+      "typing"
+    ],
+    "kernel.message_broker": [
+      "collections",
+      "src",
+      "time",
+      "typing"
+    ],
+    "kernel.node_ledger": [
+      "dataclasses",
+      "random",
+      "time",
+      "typing"
+    ],
+    "kernel.routing": [
+      "dataclasses",
+      "typing"
+    ],
+    "nl_dev.code_generator": [
+      "shutil",
+      "dataclasses",
+      "typing",
+      "pathlib",
+      "uuid",
+      "ast"
+    ],
+    "nl_dev.generator": [
+      "pathlib",
+      "typing"
+    ],
+    "nl_dev.parser": [
+      "datetime",
+      "dataclasses",
+      "typing",
+      "pathlib",
+      "re"
+    ],
+    "nl_dev.plan_generator": [
+      "src",
+      "dataclasses",
+      "typing"
+    ],
+    "nl_dev.triage": [
+      "src",
+      "__future__",
+      "subprocess",
+      "dataclasses",
+      "typing",
+      "pathlib",
+      "re"
+    ],
+    "physics.credit_system": [
+      "dataclasses",
+      "__future__",
+      "datetime",
+      "typing"
+    ],
+    "physics.heat_state": [
+      "dataclasses",
+      "__future__"
+    ],
+    "physics.ubi_physics_engine": [
+      "src",
+      "dataclasses",
+      "__future__",
+      "typing"
+    ],
+    "plugins.articulation": [
+      "src",
+      "__future__"
+    ],
+    "plugins.ner_plugin": [
+      "src",
+      "__future__",
+      "types",
+      "asyncio",
+      "typing"
+    ],
+    "plugins.physics": [
+      "src",
+      "__future__",
+      "typing"
+    ],
+    "services.contribution_tracker": [
+      "datetime",
+      "typing"
+    ],
+    "services.decision_engine": [
+      "src",
+      "__future__",
+      "json",
+      "typing",
+      "pathlib"
+    ],
+    "services.ner_service": [
+      "src",
+      "asyncio",
+      "json",
+      "openai",
+      "typing",
+      "re"
+    ],
+    "services.pattern_engine": [
+      "src"
+    ],
+    "services.relationship_analyzer": [
+      "src",
+      "__future__",
+      "types",
+      "datetime",
+      "dataclasses",
+      "typing"
+    ],
+    "services.retrieval_service": [
+      "__future__",
+      "openai",
+      "typing"
+    ],
+    "services.rules_engine": [
+      "src",
+      "uuid",
+      "unittest",
+      "typing"
+    ],
+    "services.scenario_analyzer": [
+      "networkx",
+      "sqlalchemy",
+      "src",
+      "datetime",
+      "typing"
+    ],
+    "services.translator_assistant": [
+      "__future__",
+      "pydantic",
+      "typing"
+    ],
+    "services.vision_bridge": [
+      "dataclasses",
+      "typing"
+    ],
+    "services.visual_theme_analyzer": [
+      "enum",
+      "src",
+      "dataclasses",
+      "typing"
+    ],
+    "services.translator_assistant.adapters": [
+      "models",
+      "service",
+      "typing",
+      "os"
+    ],
+    "services.translator_assistant.forms": [
+      "enum",
+      "pydantic",
+      "typing"
+    ],
+    "services.translator_assistant.models": [
+      "forms",
+      "pydantic",
+      "typing"
+    ],
+    "services.translator_assistant.service": [
+      "models",
+      "forms",
+      "json",
+      "typing",
+      "pathlib"
+    ],
+    "services.translator_assistant.__init__": [
+      "models",
+      "service",
+      "forms"
+    ],
+    "throughput_engine.engine": [
+      "math",
+      "enum",
+      "typing"
+    ],
+    "tools.contribution_tracker": [
+      "hashlib",
+      "__future__",
+      "datetime",
+      "dataclasses",
+      "json",
+      "typing",
+      "pathlib"
+    ],
+    "tools.water_cutter": [
+      "websockets",
+      "asyncio",
+      "datetime",
+      "numpy",
+      "dataclasses",
+      "logging",
+      "json",
+      "sys",
+      "typing",
+      "signal",
+      "random",
+      "re"
+    ],
+    "tools.water_cutter_example": [
+      "asyncio",
+      "json",
+      "typing",
+      "water_cutter",
+      "argparse"
+    ],
+    "tools.water_cutter_server": [
+      "websockets",
+      "asyncio",
+      "logging",
+      "json",
+      "typing"
+    ],
+    "tools.gentle_nudge.analyzer": [
+      "src",
+      "dataclasses",
+      "typing"
+    ],
+    "tools.gentle_nudge.main": [
+      "analyzer",
+      "recommender",
+      "src",
+      "datetime",
+      "notifier",
+      "argparse"
+    ],
+    "tools.gentle_nudge.notifier": [
+      "recommender"
+    ],
+    "tools.gentle_nudge.recommender": [
+      "analyzer",
+      "dataclasses",
+      "typing"
+    ],
+    "utils.cognition_grid": [
+      "enum",
+      "dataclasses",
+      "__future__",
+      "typing"
+    ],
+    "utils.concept_grid": [
+      "enum",
+      "dataclasses",
+      "__future__",
+      "typing"
+    ],
+    "valuation.market_analysis": [
+      "__future__",
+      "pydantic",
+      "typing"
+    ],
+    "valuation.processing_unit": [
+      "__future__",
+      "pydantic",
+      "typing"
+    ],
+    "valuation.valuation_tool": [
+      "pydantic",
+      "src",
+      "__future__",
+      "dataclasses",
+      "typing",
+      "pathlib"
+    ],
+    "vision.tests.test_cli": [
+      "pytest",
+      "io",
+      "vision_ui",
+      "sys",
+      "json",
+      "pathlib",
+      "unittest"
+    ],
+    "vision.tests.test_multi_profile": [
+      "pytest",
+      "vision_ui",
+      "UI_UX",
+      "json"
+    ],
+    "vision.tests.test_ocr": [
+      "pytest",
+      "os",
+      "vision_ui",
+      "pathlib",
+      "unittest"
+    ],
+    "vision.tests.test_profiles": [
+      "pytest",
+      "tempfile",
+      "vision_ui",
+      "json",
+      "pathlib"
+    ],
+    "vision.tests.test_screenshot_integration": [
+      "pytest",
+      "vision_ui",
+      "io",
+      "sys",
+      "unittest",
+      "argparse"
+    ],
+    "vision.tests.test_triage": [
+      "pytest",
+      "io",
+      "rich",
+      "vision_ui",
+      "unittest"
+    ],
+    "vision.UI_UX.budget": [
+      "token_utils",
+      "textwrap",
+      "typing"
+    ],
+    "vision.UI_UX.test_budget": [
+      "sys",
+      "os"
+    ],
+    "vision.UI_UX.token_utils": [
+      "__future__",
+      "transformers",
+      "typing"
+    ],
+    "vision.vision_ui.cli": [
+      "profiles",
+      "triage",
+      "UI_UX",
+      "sys",
+      "json",
+      "typing",
+      "summarize",
+      "argparse"
+    ],
+    "vision.vision_ui.ocr": [
+      "PIL",
+      "os",
+      "dataclasses",
+      "typing",
+      "pathlib",
+      "re",
+      "pytesseract"
+    ],
+    "vision.vision_ui.profiles": [
+      "os",
+      "dataclasses",
+      "json",
+      "typing",
+      "pathlib"
+    ],
+    "vision.vision_ui.summarize": [
+      "profiles",
+      "UI_UX",
+      "hashlib",
+      "ocr",
+      "dataclasses",
+      "json",
+      "typing"
+    ],
+    "vision.vision_ui.triage": [
+      "profiles",
+      "UI_UX",
+      "io",
+      "rich",
+      "summarize",
+      "typing"
+    ],
+    "vision.vision_ui.tests.test_cli_summarize_multi": [
+      "vision_ui",
+      "tempfile"
+    ],
+    "vision.vision_ui.tests.test_cli_summarize_multi_ui": [
+      "vision_ui",
+      "tempfile"
+    ],
+    "vision.vision_ui.tests.test_persona_budget_ui": [
+      "vision_ui"
+    ],
+    "vision.vision_ui.tests.test_profiles": [
+      "vision_ui"
+    ],
+    "vision.vision_ui.tests.test_profiles_ui": [
+      "vision_ui"
+    ],
+    "vision.vision_ui.tests.test_summarize": [
+      "vision_ui"
+    ],
+    "vision.vision_ui.tests.test_summarize_ui": [
+      "vision_ui"
+    ]
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "workflow_id": "analytics-data_data_ingestion",
+  "name": "Data Ingestion",
+  "description": "Read and validate data from multiple sources",
+  "program": "analytics-data",
+  "version": "1.0",
+  "steps": [
+    {
+      "step_id": 1,
+      "name": "read_file",
+      "tool": "filesystem",
+      "description": "Read CSV/JSON/Parquet file",
+      "params": {
+        "file_path": "path/to/data.csv",
+        "validate_schema": true
+      }
+    },
+    {
+      "step_id": 2,
+      "name": "validate_schema",
+      "tool": "python-repl",
+      "description": "Validate data schema with pandas",
+      "params": {
+        "columns": ["required_columns"],
+        "dtypes": {"dtypes": "str,int,float"}
+      }
+    },
+    {
+      "step_id": 3,
+      "name": "handle_missing",
+      "tool": "python-repl",
+      "description": "Handle missing values",
+      "params": {
+        "strategy": "drop",
+        "fill_value": null
+      }
+    },
+    {
+      "step_id": 4,
+      "name": "store_db",
+      "tool": "database",
+      "description": "Store in DuckDB/SQLite",
+      "params": {
+        "table": "ingested_data",
+        "format": "parquet"
+      }
+    }
+ ],
+  "output": {
+    "type": "database_record",
+    "location": "duckdb://analytics_data",
+    "schema": "ingested_data"
+  },
+  "error_handling": {
+    "on_failure": "skip_row",
+    "max_errors": 10
+  }
+}

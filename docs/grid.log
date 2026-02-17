@@ -1,0 +1,53 @@
+2025-11-26 22:21:38,287 - grid.services.task_service - INFO - task_service.py:34 - Task created: b3424ccb-0684-4e41-ad91-b0c5102ff484 - Test Task
+2025-11-26 22:21:38,287 - grid.cli.commands - INFO - commands.py:51 - Created task: b3424ccb-0684-4e41-ad91-b0c5102ff484
+2025-11-26 22:21:38,295 - grid.services.task_service - INFO - task_service.py:34 - Task created: f9ba9994-4607-4816-b5eb-ba47083e4539 - Task 1
+2025-11-26 22:21:38,295 - grid.cli.commands - INFO - commands.py:51 - Created task: f9ba9994-4607-4816-b5eb-ba47083e4539
+2025-11-26 22:21:38,308 - grid.cli.main - ERROR - main.py:68 - Error: 'test.event' is not a valid EventType
+2025-11-26 22:21:38,318 - grid.services.workflow_service - INFO - workflow_service.py:25 - Workflow registered: test_wf
+2025-11-26 22:21:38,319 - grid.cli.commands - INFO - commands.py:296 - Registered workflow: test_wf
+2025-11-26 22:30:41,130 - grid.services.task_service - INFO - task_service.py:34 - Task created: a5d4bfdc-915b-4592-a6cf-4b5e8b63117c - Test Task
+2025-11-26 22:30:41,130 - grid.cli.commands - INFO - commands.py:51 - Created task: a5d4bfdc-915b-4592-a6cf-4b5e8b63117c
+2025-11-26 22:30:41,139 - grid.services.task_service - INFO - task_service.py:34 - Task created: c1d8ffc5-ba91-4588-a69c-0d541bfcb317 - Task 1
+2025-11-26 22:30:41,139 - grid.cli.commands - INFO - commands.py:51 - Created task: c1d8ffc5-ba91-4588-a69c-0d541bfcb317
+2025-11-26 22:30:41,153 - grid.cli.main - ERROR - main.py:68 - Error: 'test.event' is not a valid EventType
+2025-11-26 22:30:41,162 - grid.services.workflow_service - INFO - workflow_service.py:25 - Workflow registered: test_wf
+2025-11-26 22:30:41,162 - grid.cli.commands - INFO - commands.py:296 - Registered workflow: test_wf
+2025-11-26 22:36:51,038 - grid.services.task_service - INFO - task_service.py:34 - Task created: e7d535db-6b2b-4fb8-ba61-da55cebf46d6 - Test Task
+2025-11-26 22:36:51,038 - grid.cli.commands - INFO - commands.py:51 - Created task: e7d535db-6b2b-4fb8-ba61-da55cebf46d6
+2025-11-26 22:36:51,046 - grid.services.task_service - INFO - task_service.py:34 - Task created: 82390419-1e22-460e-b576-c0ee3ab84865 - Task 1
+2025-11-26 22:36:51,047 - grid.cli.commands - INFO - commands.py:51 - Created task: 82390419-1e22-460e-b576-c0ee3ab84865
+2025-11-26 22:36:51,060 - grid.cli.main - ERROR - main.py:68 - Error: 'test.event' is not a valid EventType
+2025-11-26 22:36:51,070 - grid.services.workflow_service - INFO - workflow_service.py:25 - Workflow registered: test_wf
+2025-11-26 22:36:51,070 - grid.cli.commands - INFO - commands.py:296 - Registered workflow: test_wf
+2025-11-26 22:45:58,952 - grid.services.task_service - INFO - task_service.py:34 - Task created: 8c85d644-b704-4bc2-a683-9e080f29054c - Test Task
+2025-11-26 22:45:58,952 - grid.cli.commands - INFO - commands.py:51 - Created task: 8c85d644-b704-4bc2-a683-9e080f29054c
+2025-11-26 22:45:58,960 - grid.services.task_service - INFO - task_service.py:34 - Task created: b6d24391-a94c-442a-9a21-6b8e63f22465 - Task 1
+2025-11-26 22:45:58,960 - grid.cli.commands - INFO - commands.py:51 - Created task: b6d24391-a94c-442a-9a21-6b8e63f22465
+2025-11-26 22:45:58,973 - grid.services.event_service - INFO - event_service.py:26 - Event emitted: test.event
+2025-11-26 22:45:58,974 - grid.cli.commands - INFO - commands.py:216 - Emitted event: test.event from test
+2025-11-26 22:45:58,982 - grid.services.workflow_service - INFO - workflow_service.py:25 - Workflow registered: test_wf
+2025-11-26 22:45:58,982 - grid.cli.commands - INFO - commands.py:309 - Registered workflow: test_wf
+2025-11-26 22:51:58,173 - grid.services.task_service - INFO - task_service.py:34 - Task created: 46960981-5271-4b74-a79a-c9517e0d7946 - Test Task
+2025-11-26 22:51:58,173 - grid.cli.commands - INFO - commands.py:51 - Created task: 46960981-5271-4b74-a79a-c9517e0d7946
+2025-11-26 22:51:58,181 - grid.services.task_service - INFO - task_service.py:34 - Task created: 7de49a83-b88c-4591-9396-42f0f5859753 - Task 1
+2025-11-26 22:51:58,181 - grid.cli.commands - INFO - commands.py:51 - Created task: 7de49a83-b88c-4591-9396-42f0f5859753
+2025-11-26 22:51:58,195 - grid.services.event_service - INFO - event_service.py:26 - Event emitted: test.event
+2025-11-26 22:51:58,195 - grid.cli.commands - INFO - commands.py:216 - Emitted event: test.event from test
+2025-11-26 22:51:58,203 - grid.services.workflow_service - INFO - workflow_service.py:25 - Workflow registered: test_wf
+2025-11-26 22:51:58,203 - grid.cli.commands - INFO - commands.py:309 - Registered workflow: test_wf
+2025-11-26 23:24:36,879 - grid.services.task_service - INFO - task_service.py:34 - Task created: 45a1e30d-76ea-4f2b-87cc-4a7d114fbabf - Test Task
+2025-11-26 23:24:36,879 - grid.cli.commands - INFO - commands.py:51 - Created task: 45a1e30d-76ea-4f2b-87cc-4a7d114fbabf
+2025-11-26 23:24:36,888 - grid.services.task_service - INFO - task_service.py:34 - Task created: d8e7eb53-fe0f-48c8-915d-6c9fd0927eac - Task 1
+2025-11-26 23:24:36,888 - grid.cli.commands - INFO - commands.py:51 - Created task: d8e7eb53-fe0f-48c8-915d-6c9fd0927eac
+2025-11-26 23:24:36,902 - grid.services.event_service - INFO - event_service.py:26 - Event emitted: test.event
+2025-11-26 23:24:36,903 - grid.cli.commands - INFO - commands.py:216 - Emitted event: test.event from test
+2025-11-26 23:24:36,910 - grid.services.workflow_service - INFO - workflow_service.py:25 - Workflow registered: test_wf
+2025-11-26 23:24:36,910 - grid.cli.commands - INFO - commands.py:309 - Registered workflow: test_wf
+2025-11-26 23:28:22,345 - grid.services.task_service - INFO - task_service.py:34 - Task created: b8698423-770a-406b-8d5f-45af9c61825f - Test Task
+2025-11-26 23:28:22,345 - grid.cli.commands - INFO - commands.py:51 - Created task: b8698423-770a-406b-8d5f-45af9c61825f
+2025-11-26 23:28:22,353 - grid.services.task_service - INFO - task_service.py:34 - Task created: 0bc2b0dc-8388-4301-8084-29a064c5f927 - Task 1
+2025-11-26 23:28:22,353 - grid.cli.commands - INFO - commands.py:51 - Created task: 0bc2b0dc-8388-4301-8084-29a064c5f927
+2025-11-26 23:28:22,366 - grid.services.event_service - INFO - event_service.py:26 - Event emitted: test.event
+2025-11-26 23:28:22,366 - grid.cli.commands - INFO - commands.py:216 - Emitted event: test.event from test
+2025-11-26 23:28:22,375 - grid.services.workflow_service - INFO - workflow_service.py:25 - Workflow registered: test_wf
+2025-11-26 23:28:22,375 - grid.cli.commands - INFO - commands.py:309 - Registered workflow: test_wf

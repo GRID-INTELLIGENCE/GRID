@@ -1,0 +1,36 @@
+program: security
+version: 1.0
+model: ministral
+timeout_sec: 180
+strict_mode: true
+
+allowed_tools:
+  - filesystem
+  - git
+  - python-repl
+  - ollama
+  - bash
+
+blocked_tools:
+  - external_api
+  - network_connection
+
+frameworks:
+  - radare2
+  - frida
+  - pwntools
+  - scapy
+
+workflows:
+  - vulnerability_analysis
+  - exploit_detection
+  - security_audit
+  - threat_report
+
+skills:
+  - security.scan_codebase
+  - ai_safety.threat_analysis
+  - intelligence.analyze_malware
+  - compress.vulnerability_report
+
+coverage_threshold: 90

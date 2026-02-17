@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GRID Architecture Diagrams</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 40px;
+        }
+        .diagram-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 30px;
+            margin-bottom: 40px;
+            overflow-x: auto;
+        }
+        h2 {
+            margin-top: 0;
+            color: #34495e;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .description {
+            color: #666;
+            font-style: italic;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>GRID Platform Architecture</h1>
+
+    <div class="diagram-container">
+        <h2>1. Unified End-to-End Architecture</h2>
+        <p class="description">Complete data flow from User to Backend, including Electron, React, and Resonance components.</p>
+        <div class="mermaid">
+flowchart TB
+  subgraph User["👤 USER"]
+    action["Clicks / Types / Navigates"]
+  end
+
+  subgraph Electron["⚡ ELECTRON SHELL"]
+    mainProc["main.ts<br/><i>Main Process</i><br/>• Window management<br/>• IPC handlers<br/>• HTTP requests"]
+    preload["preload.ts<br/><i>Context Bridge</i><br/>• Exposes window.grid<br/>• Exposes window.ollama<br/>• Exposes window.windowControls"]
+  end
+
+  subgraph React["⚛️ REACT RENDERER"]
+    app["App.tsx<br/><i>Root Component</i>"]
+    router["HashRouter<br/><i>Client Routing</i>"]
+    shell["AppShell<br/><i>Layout + Nav</i>"]
+    
+    subgraph Pages["📄 PAGES (10)"]
+      dashboard["Dashboard"]
+      chat["ChatPage"]
+      rag["RagQuery"]
+      intel["Intelligence"]
+      cognitive["Cognitive"]
+      security["Security"]
+      obs["Observability"]
+      knowledge["Knowledge"]
+    end
+    
+    subgraph DataLayer["🔄 DATA LAYER"]
+      query["TanStack Query<br/><i>Caching + Fetching</i>"]
+      gridClient["GridClient<br/><i>GRID API calls</i>"]
+      ollamaClient["OllamaClient<br/><i>LLM calls</i>"]
+    end
+    
+    schema["Schema Layer<br/><i>app.config.json</i><br/>• Routes<br/>• Endpoints<br/>• Navigation"]
+  end
+
+  subgraph Backend["🖥️ BACKEND SERVICES"]
+    subgraph FastAPI["FastAPI :8000"]
+      health["/health<br/><i>Health checks</i>"]
+      ragAPI["/rag/query<br/><i>RAG search</i>"]
+      intelAPI["/api/v1/intelligence<br/><i>Intelligence pipeline</i>"]
+      cockpit["/api/v1/cockpit<br/><i>Cognitive status</i>"]
+      secAPI["/security<br/><i>Security posture</i>"]
+    end
+    
+    subgraph Cognitive["🧠 COGNITIVE ENGINE"]
+      cogEngine["CognitiveEngine<br/><i>Pattern detection</i>"]
+      flowMgr["FlowManager<br/><i>State orchestration</i>"]
+      patterns["PatternManager<br/><i>Recognition</i>"]
+    end
+    
+    subgraph Resonance["🔔 RESONANCE"]
+      actRes["ActivityResonance<br/><i>Left-to-right comm</i>"]
+      adsr["ADSR Envelope<br/><i>Haptic feedback</i>"]
+      context["ContextProvider<br/><i>Fast context</i>"]
+      pathViz["PathVisualizer<br/><i>Triage paths</i>"]
+    end
+    
+    ollama["Ollama :11434<br/><i>Local LLM</i><br/>• Chat streaming<br/>• Model management"]
+  end
+
+  %% User Flow
+  action --> app
+  app --> router --> shell --> Pages
+  
+  %% React Internal
+  Pages --> query
+  Pages --> schema
+  query --> gridClient
+  query --> ollamaClient
+  
+  %% IPC Bridge
+  gridClient -->|"window.grid.api()"| preload
+  ollamaClient -->|"window.ollama.chat()"| preload
+  preload -->|"ipcRenderer.invoke()"| mainProc
+  
+  %% Backend Calls
+  mainProc -->|"HTTP GET/POST"| FastAPI
+  mainProc -->|"HTTP Streaming"| ollama
+  
+  %% Backend Internal
+  cockpit --> cogEngine
+  cogEngine --> Resonance
+  actRes --> adsr
+  actRes --> context
+  actRes --> pathViz
+  intelAPI --> cogEngine
+  
+  %% Response Flow (implied by bidirectional)
+  FastAPI -.->|"JSON Response"| mainProc
+  ollama -.->|"NDJSON Tokens"| mainProc
+  mainProc -.->|"IPC Event"| preload
+  preload -.->|"Callback"| DataLayer
+  DataLayer -.->|"State Update"| Pages
+
+  classDef user fill:#e1bee7,stroke:#7b1fa2,color:#000
+  classDef electron fill:#fff3e0,stroke:#ef6c00,color:#000
+  classDef react fill:#bbdefb,stroke:#1976d2,color:#000
+  classDef backend fill:#c8e6c9,stroke:#388e3c,color:#000
+  classDef cognitive fill:#ffe0b2,stroke:#f57c00,color:#000
+  classDef resonance fill:#b2dfdb,stroke:#00796b,color:#000
+
+  class User user
+  class Electron,mainProc,preload electron
+  class React,app,router,shell,Pages,DataLayer,schema react
+  class Backend,FastAPI,health,ragAPI,intelAPI,cockpit,secAPI,ollama backend
+  class Cognitive,cogEngine,flowMgr,patterns cognitive
+  class Resonance,actRes,adsr,context,pathViz resonance
+        </div>
+    </div>
+
+    <div class="diagram-container">
+        <h2>2. Resonance Activity Flow</h2>
+        <p class="description">Sequence of events for processing cognitive activities with haptic-like feedback.</p>
+        <div class="mermaid">
+sequenceDiagram
+  participant C as Cognitive Page
+  participant G as GridClient
+  participant API as FastAPI
+  participant CE as CognitiveEngine
+  participant AR as ActivityResonance
+  participant CP as ContextProvider
+  participant PV as PathVisualizer
+  participant ADSR as ADSR Envelope
+
+  C->>G: Fetch cockpit status
+  G->>API: GET /api/v1/cockpit/status
+  API->>CE: process_cognitive_request()
+  CE->>AR: process_activity("cognitive", query)
+  
+  par Left: Fast Context
+    AR->>CP: get_snapshot()
+    CP-->>AR: ContextSnapshot
+  and Right: Path Triage
+    AR->>PV: triage_paths()
+    PV-->>AR: PathTriage
+  end
+  
+  AR->>ADSR: start_envelope()
+  ADSR-->>AR: EnvelopeMetrics
+  AR->>AR: _generate_feedback()
+  AR-->>CE: ResonanceFeedback
+  CE-->>API: CockpitStatus
+  API-->>G: JSON response
+  G-->>C: Render status cards
+        </div>
+    </div>
+
+    <div class="diagram-container">
+        <h2>3. High-Level Architecture</h2>
+        <p class="description">Top-level view of Electron, Renderer, and Backend components.</p>
+        <div class="mermaid">
+flowchart TB
+  subgraph Electron["Electron Shell"]
+    main["main.ts<br/>(Main Process)"]
+    preload["preload.ts<br/>(Context Bridge)"]
+  end
+
+  subgraph Renderer["React Renderer"]
+    app["App.tsx"]
+    router["HashRouter"]
+    pages["Pages (10)"]
+    schema["Schema Layer"]
+    clients["API Clients"]
+    app --> router --> pages
+    pages --> schema
+    pages --> clients
+  end
+
+  subgraph Backend["Backend Services"]
+    grid["GRID API<br/>:8000"]
+    ollama["Ollama<br/>:11434"]
+  end
+
+  main --> preload
+  preload -->|window.grid| clients
+  preload -->|window.ollama| clients
+  clients -->|IPC| main
+  main -->|HTTP/NDJSON| grid
+  main -->|HTTP/Streaming| ollama
+        </div>
+    </div>
+
+    <div class="diagram-container">
+        <h2>4. IPC Bridge Architecture</h2>
+        <p class="description">Detailed view of the secure IPC communication channel.</p>
+        <div class="mermaid">
+flowchart LR
+  subgraph Renderer["Renderer Process"]
+    gc["GridClient"]
+    oc["OllamaClient"]
+    wg["window.grid"]
+    wo["window.ollama"]
+    wc["window.windowControls"]
+    gc --> wg
+    oc --> wo
+  end
+
+  subgraph Preload["preload.ts"]
+    cb["contextBridge"]
+    ipc["ipcRenderer"]
+  end
+
+  subgraph Main["Main Process"]
+    handlers["IPC Handlers"]
+    http["HTTP Client"]
+  end
+
+  wg --> cb
+  wo --> cb
+  wc --> cb
+  cb --> ipc
+  ipc --> handlers
+  handlers --> http
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+    </script>
+</body>
+</html>

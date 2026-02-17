@@ -1,0 +1,209 @@
+# ============================================================================
+# Git Attributes for GRID Project
+# Updated Jan 18, 2026 - DDD Decoupling Phase
+# Ensures consistent line endings, binary handling, and diff quality
+# ============================================================================
+
+# ===========================================
+# GLOBAL DEFAULT - Normalize all text files
+# ===========================================
+* text=auto eol=lf
+
+# ===========================================
+# SOURCE CODE - Explicit text handling
+# ===========================================
+
+# Python ecosystem
+*.py text diff=python
+*.pyx text diff=python
+*.pxd text diff=python
+*.pyi text diff=python
+pyproject.toml text
+requirements*.txt text
+setup.py text diff=python
+setup.cfg text
+Pipfile text
+Makefile text
+
+# JavaScript/TypeScript ecosystem
+*.js text
+*.jsx text
+*.ts text
+*.tsx text
+*.mjs text
+*.cjs text
+package.json text
+package-lock.json text -diff
+tsconfig.json text
+
+# Configuration files
+*.json text
+*.yaml text
+*.yml text
+*.toml text
+*.cfg text
+*.ini text
+*.conf text
+*.config text
+
+# Documentation
+*.md text diff=markdown
+*.txt text
+*.rst text
+LICENSE text
+CHANGELOG* text
+README* text
+
+# ===========================================
+# SHELL SCRIPTS - Platform-specific EOL
+# ===========================================
+*.sh text eol=lf
+*.bash text eol=lf
+*.zsh text eol=lf
+*.fish text eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# ===========================================
+# DOCKER & INFRASTRUCTURE
+# ===========================================
+Dockerfile text eol=lf
+docker-compose*.yml text eol=lf
+*.dockerfile text eol=lf
+.dockerignore text eol=lf
+
+# ===========================================
+# GIT METADATA
+# ===========================================
+.gitattributes text
+.gitignore text
+.gitmodules text
+
+# ===========================================
+# ML/AI MODELS - Binary (No diff, no merge)
+# ===========================================
+*.pkl binary
+*.pickle binary
+*.joblib binary
+*.model binary
+*.h5 binary
+*.hdf5 binary
+*.pb binary
+*.onnx binary
+*.tflite binary
+*.pt binary
+*.pth binary
+*.bin binary
+*.safetensors binary
+*.gguf binary
+*.ggml binary
+*.llamafile binary
+
+# ===========================================
+# MEDIA FILES - Binary
+# ===========================================
+# Images
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.svg text
+*.bmp binary
+*.tiff binary
+
+# Audio
+*.wav binary
+*.mp3 binary
+*.ogg binary
+*.flac binary
+
+# Video
+*.mp4 binary
+*.webm binary
+*.avi binary
+*.mov binary
+
+# ===========================================
+# ARCHIVES & COMPRESSED
+# ===========================================
+*.zip binary
+*.tar binary
+*.tar.gz binary
+*.tgz binary
+*.7z binary
+*.rar binary
+*.gz binary
+*.bz2 binary
+*.xz binary
+
+# ===========================================
+# DOCUMENTS
+# ===========================================
+*.pdf binary
+*.doc binary
+*.docx binary
+*.xls binary
+*.xlsx binary
+*.ppt binary
+*.pptx binary
+
+# ===========================================
+# DATABASE FILES
+# ===========================================
+*.db binary
+*.sqlite binary
+*.sqlite3 binary
+
+# ===========================================
+# SECRETS PROTECTION - Never diff in plain text
+# ===========================================
+*.pem binary
+*.key binary
+*.cert binary
+*.crt binary
+*.p12 binary
+*.pfx binary
+*.gpg binary
+
+# ===========================================
+# LINGUIST OVERRIDES (GitHub language stats)
+# ===========================================
+docs/* linguist-documentation
+tests/* linguist-tests
+*.lock linguist-generated
+**/vendor/* linguist-vendored
+archive/* linguist-vendored
+
+# ===========================================
+# EXPORT IGNORE (for git archive)
+# ===========================================
+.gitignore export-ignore
+.gitattributes export-ignore
+.github/ export-ignore
+.vscode/ export-ignore
+.cursor/ export-ignore
+config/.agentignore export-ignore
+config/.cursorrules export-ignore
+config/.python-version export-ignore
+config/.secrets.baseline export-ignore
+.env* export-ignore
+__pycache__/ export-ignore
+*.pyc export-ignore
+node_modules/ export-ignore
+.venv/ export-ignore
+tests/ export-ignore
+docs/ export-ignore
+
+# ===========================================
+# MERGE STRATEGIES
+# ===========================================
+# Lock files - take theirs on conflict
+package-lock.json merge=theirs
+uv.lock merge=theirs
+poetry.lock merge=theirs
+
+# Changelog - union merge (combine changes)
+CHANGELOG.md merge=union

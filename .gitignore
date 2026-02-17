@@ -1,0 +1,670 @@
+# ============================================================================
+# GRID Project .gitignore
+# ============================================================================
+# Organized by category - prevents accidental commit of secrets and sensitive data
+# ============================================================================
+
+# ==========================
+# ENVIRONMENT & SECRETS
+# ==========================
+
+# Environment files (may contain API keys, passwords)
+.env
+.env.*
+!.env.example
+!.env.template
+*.env
+.envrc
+
+# Explicit secret/credential files
+**/secrets/
+**/credentials/
+*.secret
+*.secrets
+*.credential
+*.credentials
+*_secret.*
+*_secrets.*
+*_credential.*
+*_credentials.*
+
+# User environment exports (CRITICAL)
+**/user_env*.txt
+**/user_env*.json
+**/env_export*
+**/exported_env*
+
+# API Keys and tokens
+*.apikey
+*.api_key
+**/api_key*
+**/apikey*
+**/*_api_key*
+**/*_apikey*
+**/api_keys.json
+**/api_keys.yaml
+**/api_keys.yml
+**/token*.json
+**/tokens.json
+**/tokens.yaml
+**/access_token*
+**/refresh_token*
+**/auth_token*
+**/auth_tokens*
+
+# Google OAuth client secrets (CRITICAL SECURITY)
+client_secret*.json
+*client_secret*.json
+
+# ==========================
+# CRYPTOGRAPHIC MATERIAL
+# ==========================
+
+# Private keys
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.pk8
+*.ppk
+id_rsa*
+id_ed25519*
+id_ecdsa*
+id_dsa*
+
+# Certificates (private)
+*.crt
+*.cer
+*.der
+*.cert
+!**/certs/public/
+!**/certificates/public/
+
+# Encryption keys
+**/encryption_key*
+**/master_key*
+**/vault_key*
+**/private_key*
+**/keyfile*
+*.aes
+*.gpg
+*.pgp
+
+# JWT secrets
+jwt_secret*
+**/jwt/*.key
+**/jwt_secret*
+
+# SSH and GPG Keys
+**/.ssh/
+**/gpg-keys/
+**/ssh-keys/
+
+# ==========================
+# CLOUD PROVIDER CONFIGS
+# ==========================
+
+# GCP
+**/credentials.json
+**/gcp_credentials*.json
+**/service_account*.json
+**/serviceaccount*.json
+**/google_credentials.json
+application_default_credentials.json
+**/.gcloud/
+
+# AWS
+.aws/
+**/.aws/
+aws_credentials
+aws_config
+**/aws_credentials*
+**/aws_access_keys*
+
+# Azure
+.azure/
+**/.azure/
+azure_credentials*
+
+# Databricks
+.databrickscfg
+**/databricks_token*
+**/databricks_credentials*
+
+# ==========================
+# DATABASE & DATA FILES
+# ==========================
+
+# SQLite databases
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+!**/migrations/*.sql
+
+# Database dumps and backups
+*.sql
+*.dump
+*.backup
+**/*.db.bak
+**/*.sql.bak
+**/db_dumps/
+**/database_backups/
+
+# Redis dumps
+dump.rdb
+*.rdb
+
+# Database connection strings
+**/database_url*
+**/db_connection*
+**/connection_string*
+
+# ==========================
+# VIRTUAL ENVIRONMENTS
+# ==========================
+
+# Only allow root .venv, exclude all others
+venv/
+*/venv/
+*/.venv/
+!/.venv/
+
+# ==========================
+# PYTHON BUILD ARTIFACTS
+# ==========================
+
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# ==========================
+# TESTING & COVERAGE
+# ==========================
+
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+.hypothesis/
+
+# Test credentials
+**/test_credentials*
+**/mock_secrets*
+**/fixtures/secrets/
+
+# Test outputs
+*_output*.txt
+*_errors*.json
+*_errors*.txt
+test_*.txt
+test_*.json
+property_test_error.txt
+reproduce_*.py
+reproduce_*.txt
+
+# Debug files
+**/debug_output/
+*.debug
+
+# ==========================
+# IDE & EDITOR FILES
+# ==========================
+
+# VS Code
+.vscode/
+.vscode/settings.json
+.vscode/launch.json
+.vscode/*.code-workspace
+!.vscode/extensions.json
+!.vscode/tasks.json
+
+# JetBrains
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Other editors
+.cursor/
+config/.cursorrules
+.claude/
+.windsurf/
+.zed/
+*.swp
+*.swo
+*~
+*.sublime-workspace
+
+# Private/ignore files
+.private/
+**/.private/
+config/.agentignore
+.cascadeignore
+
+# ==========================
+# LOGS
+# ==========================
+
+*.log
+**/logs/
+!**/logs/.gitkeep
+**/log/
+*.log.*
+*.log-*
+rag_logs/
+.rag_logs/
+
+# Audit logs (sensitive)
+**/audit_logs/
+**/security_logs/
+**/access_logs/
+
+# ==========================
+# TEMPORARY FILES
+# ==========================
+
+tmp/
+temp/
+.tmp/
+*.tmp
+*.temp
+*.bak
+*.backup
+*.old
+**/*.orig
+**/backups/
+
+# ==========================
+# CACHE DIRECTORIES
+# ==========================
+
+.cache/
+.mypy_cache/
+.ruff_cache/
+.rag_db/
+.rag_db_*/
+rag_db/
+
+# ==========================
+# OS GENERATED FILES
+# ==========================
+
+# macOS
+.DS_Store
+.DS_Store?
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+.directory
+
+# ==========================
+# LARGE GENERATED FILES
+# ==========================
+
+*.vhdx
+*.vhd
+*.iso
+*.dmg
+
+# ==========================
+# NODE.JS
+# ==========================
+
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# npm/yarn configs
+.npmrc
+.yarnrc
+.yarn/
+!.yarn/patches/
+!.yarn/plugins/
+!.yarn/releases/
+!.yarn/sdks/
+!.yarn/versions/
+
+# ==========================
+# RUST
+# ==========================
+
+target/
+Cargo.lock
+**/*.rs.bk
+rust/
+
+# ==========================
+# DOCKER
+# ==========================
+
+.docker/
+.dockerignore
+docker-compose.override.yml
+docker-compose.local.yml
+
+# ==========================
+# TERRAFORM
+# ==========================
+
+*.tfstate
+*.tfstate.*
+.terraform/
+*.tfvars
+!*.tfvars.example
+
+# ==========================
+# ANSIBLE
+# ==========================
+
+**/vault_password*
+**/ansible_vault*
+
+# ==========================
+# VAULT & SECRET MANAGERS
+# ==========================
+
+**/.vault-token
+**/vault_token*
+**/hashicorp_*
+**/secret_manager*
+
+# OAuth
+**/oauth_*.json
+**/.oauth/
+
+# Secrets in config files
+**/*secret*.json
+**/*secret*.yaml
+**/*secret*.yml
+**/*secrets*.json
+**/*secrets*.yaml
+**/*secrets*.yml
+**/secret_config*
+
+# Password files
+**/*password*.txt
+**/*passwd*
+**/htpasswd
+**/.htaccess
+**/auth.json
+**/.netrc
+**/.pypirc
+
+# Private configuration
+**/private_config*
+**/private_settings*
+**/prod_config*
+**/production_config*
+
+# CI/CD Secrets
+**/.github/secrets/
+**/.gitlab-ci-secrets/
+**/ci_secrets*
+**/deploy_key*
+
+# ==========================
+# JUPYTER NOTEBOOKS
+# ==========================
+
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/*
+
+# ==========================
+# DEV DRIVE SETUP ARTIFACTS
+# ==========================
+
+Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle
+complete-dev-drive-setup.md
+dev-drive-manual-setup.md
+setup-dev-drive.ps1
+current_mypy_errors.txt
+
+# ==========================
+# PROJECT-SPECIFIC PATHS
+# ==========================
+
+# Development directories
+dev/temp/
+dev/logs/
+dev/cache/
+
+# Reports
+reports/
+reports/integration/*.txt
+reports/temp/
+reports/cache/
+
+# Extended documentation
+docs-ext/temp/
+
+# Build artifacts
+build/cache/
+build/temp/
+
+# Data directory
+data/
+data/all_*.json
+data/all_*.csv
+data/*_metrics.json
+data/*_report.json
+data/project_data_export.json
+data/debug_stress.json
+data/skills_backups/
+data/skill_versions/
+data/skills_ab_tests/
+data/skills_diagnostics/
+
+# Artifacts
+artifacts/*.json
+artifacts/*.png
+artifacts/repo_analysis/
+artifacts/spacetime_viz/
+artifacts/debug_logs/
+
+# Completion reports (archived)
+docs/completion_reports/
+docs/reports/analysis/analysis_report/
+
+# Research and experimental
+research_snapshots/
+archival/
+legacy_src/
+
+# Additional grid modules not in core
+grid/cli/
+grid/constants.py
+grid/events/
+grid/io/
+grid/safety/
+grid/security/
+grid/version_3_5.py
+grid/version_4_5.py
+
+# Game files
+Hogwarts/
+
+# Build and dependency directories
+k8s/
+circuits/
+codemaps/
+
+# Tools and utilities
+tools/ambient_sound/
+tools/pulse_monitor/
+tools/zoology_mapper/
+
+# Configuration files
+grid.code-workspace
+light_of_the_seven/grid.code-workspace
+
+# Config directory sensitive files
+config/secrets/
+config/env/
+config/ignored/
+config/user_*
+
+# User-specific configurations
+**/user_config/
+**/.user/
+
+# Local development overrides
+*.local.yaml
+*.local.yml
+*.local.json
+*.local.toml
+
+# ==========================
+# MEDIA ASSETS
+# ==========================
+
+media/
+assets/*.png
+assets/*.jpg
+assets/*.jpeg
+assets/*.gif
+
+# ==========================
+# LOCK FILES
+# ==========================
+
+**/uv.lock
+!uv.lock
+
+# pip
+pip.conf
+.pip/
+
+# ==========================
+# MARKDOWN FILES
+# ==========================
+
+*.md
+!README.md
+!ACKNOWLEDGEMENT.md
+!CLAUDE.md
+!PROJECT_CHECKPOINT.md
+!.windsurf/rules/README.md
+
+# Allowed docs
+docs/*.md
+!docs/SECURITY.md
+!docs/SECURITY_ARCHITECTURE.md
+!docs/SECURITY_LABELS.md
+!docs/SECURITY_HARDENING.md
+!docs/SECURITY_HARDENING_REPORT.md
+!docs/SECURITY_MAINTAINABILITY.md
+!docs/SECURITY_REMEDIATION.md
+!docs/INTELLIGENT_SKILLS_SYSTEM.md
+!docs/SKILLS_RAG_QUICKSTART.md
+!docs/SIMPLIFIED_SETUP.md
+!docs/DEVELOPMENT_GUIDE.md
+
+# Internal docs with credentials
+**/CREDENTIALS.md
+**/SECRETS.md
+**/internal_config.md
+**/*_PRIVATE.md
+
+# ==========================
+# SCRIPTS
+# ==========================
+
+scripts/*.py
+!scripts/track_commit.py
+*.ps1
+!scripts/__init__.py
+!scripts/setup.py
+!scripts/validate_security.py
+!scripts/migrate_secrets_to_gcp.py
+!scripts/deploy_security_config.py
+!scripts/agent_setup.ps1
+
+# ==========================
+# TEMPORARY ANALYSIS FILES
+# ==========================
+
+check_import*.py
+check_output.txt
+recent_docs.txt
+error_code.json
+schema_errors.txt
+safety_errors.txt
+secrets_errors*.txt
+version_errors*.txt
+ruff_errors.txt
+mypy_errors*.txt
+mypy_final_report.txt
+
+# ==========================
+# WEALTH MANAGEMENT VAULT
+# ==========================
+
+# Experiment data patterns
+**/active_experiment_data/
+**/client_documents/
+**/pending_verification/
+
+# Security-labeled file patterns (AI Safety)
+**/*_PENDING_*.csv
+**/*_PENDING_*.json
+**/*_TBD_*.csv
+**/*_TBD_*.json
+**/*_CLIENT_*.csv
+
+# Bond and financial documents
+**/bond/*.pdf
+**/bond/*.jpg
+**/appraisals/
+**/insurance_docs/
+
+# ==========================
+# SECURITY SCAN OUTPUTS
+# ==========================
+
+**/security-reports/
+**/vulnerability-scan/
+**/pentest-results/
+*.sarif
+
+# Environment audit reports (may contain redacted but sensitive info)
+environment_audit_report*.json
+environment_accountability_report.json
+
+# Local Netlify folder
+.netlify

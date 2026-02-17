@@ -136,7 +136,7 @@ class PromptInspector:
     def __init__(self, engine: Any = None):
         self.engine = engine or get_guardian_engine()
 
-    def analyze(self, text: str, context: EvaluationContext, include_warnings: bool = False) -> list[Any]:
+def analyze(self, text: str, context: EvaluationContext, include_warnings: bool = False) -> list[Any]:
         """
         Analyze prompt text using the GuardianEngine, adjusting sensitivity
         based on the TrustTier.
@@ -162,7 +162,7 @@ class PromptInspector:
             # Check if action is BLOCK or ESCALATE
             if match.action in (RuleAction.BLOCK, RuleAction.ESCALATE):
                 violating_matches.append(match)
-            elif include_warnings and match.action in (RuleAction.WARN, RuleAction.LOG):
+elif include_warnings and match.action in (RuleAction.WARN, RuleAction.LOG):
                 violating_matches.append(match)
 
         return violating_matches

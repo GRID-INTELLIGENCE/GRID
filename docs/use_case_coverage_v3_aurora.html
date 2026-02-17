@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GRID Coverage - Aurora Theme</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: linear-gradient(135deg, #0c0a1d 0%, #1a0a2e 30%, #2d1b4e 60%, #1a0a2e 100%);
+            min-height: 100vh;
+            color: #e8e0f0;
+            overflow-x: hidden;
+        }
+
+        /* Aurora gradient animation */
+        .aurora-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: -1;
+            background:
+                radial-gradient(ellipse 80% 50% at 20% 40%, rgba(120, 0, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse 60% 40% at 80% 20%, rgba(0, 255, 200, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse 50% 60% at 60% 80%, rgba(255, 0, 150, 0.08) 0%, transparent 50%);
+            animation: aurora 15s ease-in-out infinite;
+        }
+
+        @keyframes aurora {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+
+        header {
+            text-align: center;
+            padding: 60px 0 80px;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00ffc8 0%, #7b2ff7 40%, #f107a3 80%, #ff6b35 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 16px;
+            letter-spacing: -2px;
+        }
+
+        .tagline {
+            font-size: 1.2rem;
+            color: #a89ec8;
+            font-weight: 300;
+        }
+
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            margin-top: 50px;
+        }
+
+        .hero-stat {
+            text-align: center;
+        }
+
+        .hero-value {
+            font-size: 3.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00ffc8, #7b2ff7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-label {
+            font-size: 0.9rem;
+            color: #8a7ca8;
+            margin-top: 8px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            grid-template-rows: auto;
+            gap: 20px;
+        }
+
+        .bento-item {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            padding: 28px;
+            transition: all 0.4s ease;
+        }
+
+        .bento-item:hover {
+            border-color: rgba(123, 47, 247, 0.4);
+            box-shadow:
+                0 20px 60px rgba(123, 47, 247, 0.2),
+                inset 0 0 40px rgba(123, 47, 247, 0.05);
+            transform: translateY(-4px);
+        }
+
+        .bento-item.span-4 {
+            grid-column: span 4;
+        }
+
+        .bento-item.span-3 {
+            grid-column: span 3;
+        }
+
+        .bento-item.span-2 {
+            grid-column: span 2;
+        }
+
+        .bento-item.span-6 {
+            grid-column: span 6;
+        }
+
+        .bento-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .bento-title::before {
+            content: '';
+            width: 4px;
+            height: 18px;
+            background: linear-gradient(135deg, #00ffc8, #7b2ff7);
+            border-radius: 2px;
+        }
+
+        .chart-wrap {
+            position: relative;
+            height: 300px;
+        }
+
+        .chart-wrap.tall {
+            height: 380px;
+        }
+
+        /* Category pills */
+        .category-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .pill {
+            padding: 10px 18px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pill.excellent {
+            background: linear-gradient(135deg, rgba(0, 255, 200, 0.2), rgba(0, 255, 200, 0.1));
+            border: 1px solid rgba(0, 255, 200, 0.3);
+            color: #00ffc8;
+        }
+
+        .pill.good {
+            background: linear-gradient(135deg, rgba(123, 47, 247, 0.2), rgba(123, 47, 247, 0.1));
+            border: 1px solid rgba(123, 47, 247, 0.3);
+            color: #b794f6;
+        }
+
+        .pill.fair {
+            background: linear-gradient(135deg, rgba(255, 107, 53, 0.2), rgba(255, 107, 53, 0.1));
+            border: 1px solid rgba(255, 107, 53, 0.3);
+            color: #ff9f6b;
+        }
+
+        .pill.needs {
+            background: linear-gradient(135deg, rgba(241, 7, 163, 0.2), rgba(241, 7, 163, 0.1));
+            border: 1px solid rgba(241, 7, 163, 0.3);
+            color: #f67bc4;
+        }
+
+        @media (max-width: 1024px) {
+
+            .bento-item.span-4,
+            .bento-item.span-3 {
+                grid-column: span 6;
+            }
+
+            .bento-item.span-2 {
+                grid-column: span 3;
+            }
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.2rem;
+            }
+
+            .hero-stats {
+                flex-direction: column;
+                gap: 24px;
+            }
+
+            .bento-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .bento-item.span-4,
+            .bento-item.span-3,
+            .bento-item.span-2,
+            .bento-item.span-6 {
+                grid-column: span 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="aurora-bg"></div>
+
+    <div class="container">
+        <header>
+            <h1>GRID Coverage</h1>
+            <p class="tagline">Aurora Analytics Dashboard</p>
+
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <div class="hero-value">79.6%</div>
+                    <div class="hero-label">Coverage</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="hero-value">15</div>
+                    <div class="hero-label">Categories</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="hero-value">3,777</div>
+                    <div class="hero-label">Lines</div>
+                </div>
+            </div>
+        </header>
+
+        <div class="bento-grid">
+            <div class="bento-item span-4">
+                <h3 class="bento-title">Coverage by Category</h3>
+                <div class="chart-wrap tall">
+                    <canvas id="mainChart"></canvas>
+                </div>
+            </div>
+
+            <div class="bento-item span-2">
+                <h3 class="bento-title">Distribution</h3>
+                <div class="chart-wrap">
+                    <canvas id="pieChart"></canvas>
+                </div>
+            </div>
+
+            <div class="bento-item span-3">
+                <h3 class="bento-title">Category Radar</h3>
+                <div class="chart-wrap">
+                    <canvas id="radarChart"></canvas>
+                </div>
+            </div>
+
+            <div class="bento-item span-3">
+                <h3 class="bento-title">Architecture Layers</h3>
+                <div class="chart-wrap">
+                    <canvas id="layerChart"></canvas>
+                </div>
+            </div>
+
+            <div class="bento-item span-6">
+                <h3 class="bento-title">Category Status</h3>
+                <div class="category-pills">
+                    <span class="pill excellent">✓ API 95.9%</span>
+                    <span class="pill excellent">✓ Database 100%</span>
+                    <span class="pill excellent">✓ Bridge 100%</span>
+                    <span class="pill excellent">✓ Plugins 97.5%</span>
+                    <span class="pill excellent">✓ Utils 94.3%</span>
+                    <span class="pill excellent">✓ Vision 92.3%</span>
+                    <span class="pill excellent">✓ Geometric 90.2%</span>
+                    <span class="pill good">◐ Valuation 88.9%</span>
+                    <span class="pill good">◐ Pattern 88.5%</span>
+                    <span class="pill good">◐ NER/NLP 85.2%</span>
+                    <span class="pill good">◐ Financial 82.1%</span>
+                    <span class="pill fair">◔ Workflow 78.4%</span>
+                    <span class="pill fair">◔ Transformer 76.8%</span>
+                    <span class="pill fair">◔ CLI 75.7%</span>
+                    <span class="pill needs">○ Core 48.0%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        Chart.defaults.font.family='Space Grotesk';
+        Chart.defaults.color='#a89ec8';
+
+        const auroraColors={
+            cyan: '#00ffc8',
+            purple: '#7b2ff7',
+            pink: '#f107a3',
+            orange: '#ff6b35',
+            violet: '#b794f6'
+        };
+
+        const data={
+            labels: ['API','CLI','Core','DB','Bridge','NER','Pattern','Vision','Plugins','Workflow','Finance','Value','Geo','Transform','Utils'],
+            coverage: [95.9,75.7,48.0,100,100,85.2,88.5,92.3,97.5,78.4,82.1,88.9,90.2,76.8,94.3]
+        };
+
+        // Main bar chart with aurora gradient
+        const mainCtx=document.getElementById('mainChart').getContext('2d');
+        const barGradient=mainCtx.createLinearGradient(0,0,0,400);
+        barGradient.addColorStop(0,auroraColors.cyan);
+        barGradient.addColorStop(0.5,auroraColors.purple);
+        barGradient.addColorStop(1,auroraColors.pink);
+
+        new Chart(mainCtx,{
+            type: 'bar',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    data: data.coverage,
+                    backgroundColor: data.coverage.map(v => {
+                        if(v>=90) return 'rgba(0, 255, 200, 0.8)';
+                        if(v>=80) return 'rgba(123, 47, 247, 0.8)';
+                        if(v>=70) return 'rgba(255, 107, 53, 0.8)';
+                        return 'rgba(241, 7, 163, 0.8)';
+                    }),
+                    borderRadius: 8,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {legend: {display: false}},
+                scales: {
+                    x: {grid: {display: false},ticks: {font: {size: 10}}},
+                    y: {
+                        max: 100,
+                        grid: {color: 'rgba(255,255,255,0.05)'},
+                        ticks: {callback: v => v+'%'}
+                    }
+                }
+            }
+        });
+
+        // Pie chart
+        new Chart(document.getElementById('pieChart'),{
+            type: 'doughnut',
+            data: {
+                labels: ['≥90%','80-89%','70-79%','<70%'],
+                datasets: [{
+                    data: [7,4,3,1],
+                    backgroundColor: [auroraColors.cyan,auroraColors.purple,auroraColors.orange,auroraColors.pink],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '60%',
+                plugins: {
+                    legend: {position: 'bottom',labels: {padding: 16,usePointStyle: true}}
+                }
+            }
+        });
+
+        // Radar
+        new Chart(document.getElementById('radarChart'),{
+            type: 'radar',
+            data: {
+                labels: ['API','CLI','Core','DB','NER','Pattern','Vision','Plugins'],
+                datasets: [{
+                    data: [95.9,75.7,48.0,100,85.2,88.5,92.3,97.5],
+                    backgroundColor: 'rgba(123, 47, 247, 0.2)',
+                    borderColor: auroraColors.purple,
+                    borderWidth: 2,
+                    pointBackgroundColor: auroraColors.cyan,
+                    pointRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        max: 100,
+                        grid: {color: 'rgba(255,255,255,0.1)'},
+                        angleLines: {color: 'rgba(255,255,255,0.1)'},
+                        pointLabels: {font: {size: 10}}
+                    }
+                },
+                plugins: {legend: {display: false}}
+            }
+        });
+
+        // Layer polar area
+        new Chart(document.getElementById('layerChart'),{
+            type: 'polarArea',
+            data: {
+                labels: ['Presentation','Business','Data','Infra','Extensions'],
+                datasets: [{
+                    data: [85.8,87.3,100,48.0,97.5],
+                    backgroundColor: [
+                        'rgba(0, 255, 200, 0.7)',
+                        'rgba(123, 47, 247, 0.7)',
+                        'rgba(183, 148, 246, 0.7)',
+                        'rgba(255, 107, 53, 0.7)',
+                        'rgba(241, 7, 163, 0.7)'
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        max: 100,
+                        ticks: {display: false},
+                        grid: {color: 'rgba(255,255,255,0.1)'}
+                    }
+                },
+                plugins: {
+                    legend: {position: 'bottom',labels: {padding: 12,usePointStyle: true,font: {size: 10}}}
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

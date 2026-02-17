@@ -1,0 +1,37 @@
+graph LR
+    subgraph "2025 - Legacy"
+        L1[Monolithic] --> L2[Mixed Patterns]
+        L2 --> L3[Limited Testing]
+    end
+
+    subgraph "Early 2026 - Restructure"
+        R1[Clean Root] --> R2[DDD Patterns]
+        R2 --> R3[Event Design]
+    end
+
+    subgraph "Mid 2026 - Enhancement"
+        E1[Agentic System] --> E2[Skills Ecosystem]
+        E2 --> E3[Docker Stack]
+    end
+
+    subgraph "Late 2026 - Production"
+        P1[Performance Opt] --> P2[Cloud Native]
+        P2 --> P3[Advanced AI]
+    end
+
+    L1 -.-> R1
+    R1 -.-> E1
+    E1 -.-> P1
+
+    style L1 fill:#ffcdd2
+    style L2 fill:#ffcdd2
+    style L3 fill:#ffcdd2
+    style R1 fill:#fff9c4
+    style R2 fill:#fff9c4
+    style R3 fill:#fff9c4
+    style E1 fill:#c8e6c9
+    style E2 fill:#c8e6c9
+    style E3 fill:#c8e6c9
+    style P1 fill:#e1f5fe
+    style P2 fill:#e1f5fe
+    style P3 fill:#e1f5fe

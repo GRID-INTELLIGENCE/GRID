@@ -1,0 +1,42 @@
+graph TB
+    subgraph "Development"
+        DEV[Local Development] --> COMMIT[Git Commit]
+        COMMIT --> PRE[Pre-push Hook]
+    end
+
+    subgraph "Validation"
+        PRE --> BRAIN[Brain Integrity Check]
+        PRE --> TEST[Fast Unit Tests]
+        PRE --> HYGIENE[Hygiene Checks]
+    end
+
+    subgraph "CI Pipeline"
+        BRAIN --> CI[GitHub Actions]
+        TEST --> CI
+        HYGIENE --> CI
+        CI --> BUILD[Docker Build]
+        CI --> LINT[Linting & Formatting]
+        CI --> SEC[Security Scanning]
+    end
+
+    subgraph "Deployment"
+        BUILD --> DEPLOY[Deploy to Staging]
+        LINT --> DEPLOY
+        SEC --> DEPLOY
+        DEPLOY --> PROD[Production Deployment]
+        DEPLOY --> MONITOR[Monitoring Setup]
+    end
+
+    style DEV fill:#e1f5fe
+    style COMMIT fill:#e3f2fd
+    style PRE fill:#e3f2fd
+    style BRAIN fill:#e8f5e8
+    style TEST fill:#e8f5e8
+    style HYGIENE fill:#e8f5e8
+    style CI fill:#fff3e0
+    style BUILD fill:#fff3e0
+    style LINT fill:#fff3e0
+    style SEC fill:#fff3e0
+    style DEPLOY fill:#fce4ec
+    style PROD fill:#fce4ec
+    style MONITOR fill:#fce4ec
