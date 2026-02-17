@@ -25,7 +25,7 @@ try:
     _r.ping()
     _redis_available = True
     _r.close()
-except Exception:
+except Exception:  # noqa: S110
     pass
 
 if not _redis_available:

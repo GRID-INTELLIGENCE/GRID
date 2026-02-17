@@ -18,7 +18,7 @@ import ast
 import json
 import os
 from collections import defaultdict
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 
@@ -141,9 +141,7 @@ class SecurityIntegrator:
             # Filter out excluded directories
             dirs[:] = [d for d in dirs if d not in self.exclude_dirs]
 
-            for file in files:
-                if file.endswith(".py"):
-                    python_files.append(Path(root) / file)
+            python_files.extend(Path(root) / file for file in files if file.endswith(".py"))
 
         total_files = len(python_files)
         print(f"📁 Found {total_files} Python files")
@@ -209,7 +207,7 @@ class SecurityIntegrator:
     def _summarize_results(self) -> dict:
         """Summarize scan results."""
         summary = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "total_files_scanned": sum(len(v) for k, v in self.scan_results.items() if k.startswith("files_")),
             "files_with_network_imports": len(self.scan_results["files_with_network_imports"]),
             "files_with_network_calls": len(self.scan_results["files_with_network_calls"]),
@@ -225,7 +223,7 @@ class SecurityIntegrator:
         """Generate integration report."""
         if output_file is None:
             output_file = str(
-                self.security_path / "logs" / f"integration_report_{int(datetime.now(timezone.utc).timestamp())}.json"
+                self.security_path / "logs" / f"integration_report_{int(datetime.now(UTC).timestamp())}.json"
             )
 
         summary = self._summarize_results()
@@ -296,38 +294,38 @@ class SecurityIntegrator:
         suggestions = []
 
         # Entry points
-        for entry_point in self.scan_results["entry_points"]:
-            suggestions.append(
-                {
-                    "file": entry_point,
-                    "action": "Add 'import security' at the top",
-                    "priority": "HIGH",
-                    "reason": "Application entry point",
-                }
-            )
+        suggestions.extend(
+            {
+                "file": entry_point,
+                "action": "Add 'import security' at the top",
+                "priority": "HIGH",
+                "reason": "Application entry point",
+            }
+            for entry_point in self.scan_results["entry_points"]
+        )
 
         # Files with heavy network usage
-        for item in self.scan_results["files_with_network_imports"]:
-            if len(item["network_calls"]) > 5:
-                suggestions.append(
-                    {
-                        "file": item["file"],
-                        "action": "Review network calls and add @enforce_network_policy decorator",
-                        "priority": "MEDIUM",
-                        "reason": f"High network usage ({len(item['network_calls'])} calls)",
-                    }
-                )
+        suggestions.extend(
+            {
+                "file": item["file"],
+                "action": "Review network calls and add @enforce_network_policy decorator",
+                "priority": "MEDIUM",
+                "reason": f"High network usage ({len(item['network_calls'])} calls)",
+            }
+            for item in self.scan_results["files_with_network_imports"]
+            if len(item["network_calls"]) > 5
+        )
 
         # WebSocket handlers
-        for item in self.scan_results["files_with_websockets"]:
-            suggestions.append(
-                {
-                    "file": item["file"],
-                    "action": "Configure WebSocket policy in network_access_control.yaml",
-                    "priority": "MEDIUM",
-                    "reason": "WebSocket usage detected",
-                }
-            )
+        suggestions.extend(
+            {
+                "file": item["file"],
+                "action": "Configure WebSocket policy in network_access_control.yaml",
+                "priority": "MEDIUM",
+                "reason": "WebSocket usage detected",
+            }
+            for item in self.scan_results["files_with_websockets"]
+        )
 
         return suggestions
 
@@ -340,7 +338,7 @@ This file has been identified as using network resources.
 Security monitoring has been integrated.
 
 File: {filepath}
-Date: {datetime.now(timezone.utc).isoformat()}
+Date: {datetime.now(UTC).isoformat()}
 """
 
 # ============================================================================

@@ -2,6 +2,8 @@
 
 from typing import Any, AsyncGenerator
 
+from tools.rag.types import LLMProviderError
+
 from .base import BaseLLMProvider
 
 
@@ -91,7 +93,7 @@ class GeminiLLM(BaseLLMProvider):
             )
             return response.text
         except Exception as e:
-            raise RuntimeError(f"Gemini API error: {e}") from e
+            raise LLMProviderError(f"Gemini API error: {e}") from e
 
     def stream(
         self,
@@ -139,7 +141,7 @@ class GeminiLLM(BaseLLMProvider):
                 if chunk.text:
                     yield chunk.text
         except Exception as e:
-            raise RuntimeError(f"Gemini streaming error: {e}") from e
+            raise LLMProviderError(f"Gemini streaming error: {e}") from e
 
     async def async_generate(
         self,
@@ -185,7 +187,7 @@ class GeminiLLM(BaseLLMProvider):
         temperature: float = 0.7,
         max_tokens: int | None = None,
         **kwargs: Any,
-    ) -> AsyncGenerator[str, None]:
+    ) -> AsyncGenerator[str]:
         """Stream text generation using async Gemini API.
 
         Note: Gemini's Python SDK doesn't have native async support.
@@ -203,8 +205,6 @@ class GeminiLLM(BaseLLMProvider):
         """
         import asyncio
 
-        loop = asyncio.get_event_loop()
-
         # Collect all chunks from sync stream
         chunks = []
         for chunk in self.stream(
@@ -214,7 +214,7 @@ class GeminiLLM(BaseLLMProvider):
             max_tokens=max_tokens,
             **kwargs,
         ):
-            chunks.append(chunk)
+            chunks.append(chunk)  # noqa: PERF402
 
         # Yield them one by one
         for chunk in chunks:

@@ -19,6 +19,7 @@ import asyncio
 import contextvars
 import gc
 import inspect
+import logging
 import os
 import sys
 import threading
@@ -35,6 +36,8 @@ CallStack = list["SourceLocation"]
 # Context var to track call chain across async boundaries
 _call_chain: contextvars.ContextVar[CallStack] = contextvars.ContextVar("call_chain", default=None)
 _is_tracing: contextvars.ContextVar[bool] = contextvars.ContextVar("is_tracing", default=False)
+
+logger = logging.getLogger(__name__)
 
 
 # ============================================================================
@@ -460,27 +463,43 @@ class ParasiteCallTracer:
             memory_usage_mb=process.memory_info().rss / 1024 / 1024,
         )
 
+    @staticmethod
+    def _safe_repr(obj: Any, limit: int = 100) -> str | None:
+        """Safe repr that won't block on expensive __repr__ implementations."""
+        try:
+            r = repr(obj)
+            return r[:limit]
+        except Exception:
+            return None
+
     def _capture_instances(self, chain: CallStack) -> list[InstanceInfo]:
         """Capture runtime object instances from the call chain."""
         instances: list[InstanceInfo] = []
         seen_ids: set[int] = set()
 
+        # Snapshot GC objects once, capped to avoid scanning millions of objects
+        gc_objects = gc.get_objects()[:50_000]
+
         # Walk all objects in local vars of each frame
         for loc in chain:
             for var_repr in loc.local_variables.values():
                 # Try to find the actual object (limited scan)
-                for obj in gc.get_objects():
+                for obj in gc_objects:
                     obj_id = id(obj)
                     if obj_id in seen_ids:
                         continue
 
                     # Check if this object matches the repr (heuristic)
-                    if repr(obj)[:100] == var_repr:
+                    obj_repr = self._safe_repr(obj)
+                    if obj_repr is None:
+                        seen_ids.add(obj_id)
+                        continue
+                    if obj_repr == var_repr:
                         seen_ids.add(obj_id)
 
                         # Extract metadata
                         type_obj = type(obj)
-                        
+
                         def _get_attr_safe(o: Any, name: str) -> str:
                             try:
                                 # Starlette Request.auth/user raise AssertionError if empty
@@ -493,21 +512,22 @@ class ParasiteCallTracer:
                         for k in dir(obj):
                             if k.startswith("_"):
                                 continue
-                            
+
                             try:
                                 attr_val = getattr(obj, k, None)
                                 if callable(attr_val):
                                     continue
-                                
+
                                 attrs[k] = _get_attr_safe(obj, k)
                                 count += 1
                                 if count >= 10:
                                     break
-                            except (AssertionError, Exception):
+                            except (AssertionError, Exception) as e:
+                                logger.exception(f"Error accessing attribute {k} of {type_obj.__name__}: {e}")
                                 continue
 
-                        # Check if singleton
-                        is_singleton = sum(1 for o in gc.get_objects() if type(o) is type_obj) == 1
+                        # Singleton check skipped to avoid O(n²) GC scan
+                        is_singleton = False
 
                         instances.append(
                             InstanceInfo(

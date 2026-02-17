@@ -14,7 +14,7 @@ import os
 import re
 import socket
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Callable
 from urllib.parse import urlparse
@@ -62,7 +62,7 @@ class NetworkAccessControl:
             "blocked_requests": 0,
             "allowed_requests": 0,
             "data_leaks_detected": 0,
-            "started_at": datetime.now(timezone.utc).isoformat(),
+            "started_at": datetime.now(UTC).isoformat(),
         }
 
         # Create logs directory
@@ -127,7 +127,7 @@ class NetworkAccessControl:
     def _log_audit(self, event_type: str, details: dict):
         """Log audit event to file."""
         audit_entry = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "event_type": event_type,
             "details": details,
         }
@@ -203,7 +203,7 @@ class NetworkAccessControl:
             "domain": domain,
             "scheme": scheme,
             "caller": caller,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
         }
 
         # Check emergency kill switch
@@ -322,7 +322,7 @@ class NetworkAccessControl:
         """Get current metrics."""
         return {
             **self.metrics,
-            "uptime_seconds": (datetime.now(timezone.utc) - datetime.fromisoformat(self.metrics["started_at"])).total_seconds(),
+            "uptime_seconds": (datetime.now(UTC) - datetime.fromisoformat(self.metrics["started_at"])).total_seconds(),
         }
 
     def get_blocked_requests(self, limit: int = 100) -> list[dict]:
@@ -339,7 +339,7 @@ class NetworkAccessControl:
             filepath = str(Path(__file__).parent / "logs" / f"security_report_{int(time.time())}.json")
 
         report = {
-            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "generated_at": datetime.now(UTC).isoformat(),
             "metrics": self.get_metrics(),
             "blocked_requests": self.get_blocked_requests(),
             "allowed_requests": self.get_allowed_requests(),

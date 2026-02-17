@@ -1,4 +1,6 @@
-from typing import Any
+from __future__ import annotations
+
+from typing import Any, Mapping
 
 from pydantic import BaseModel, Field
 
@@ -24,7 +26,7 @@ class InferenceResponse(BaseModel):
     model: str = Field(..., description="The model used for inference")
     tokens_used: int = Field(..., description="Total tokens used")
     processing_time: float = Field(..., description="Time taken for processing in seconds")
-    metadata: dict[str, Any] | None = Field(None, description="Additional response metadata")
+    metadata: Mapping[str, Any] | None = Field(None, description="Additional response metadata")
 
     def dict(self, *args, **kwargs):
         """Compatibility method for Pydantic V2 to V1 dict call."""

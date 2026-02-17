@@ -18,6 +18,7 @@ import pytest
 
 from . import (
     GeminiCloudClient,
+    GeminiEnvironment,
     GeminiResponse,
 )
 from . import (
@@ -179,9 +180,8 @@ class TestGeminiStudioClient:
         config = GeminiConfig(api_key="")
         client = GeminiStudioClient(config=config)
 
-        result = await client.generate("Test prompt")
-        assert "DRY RUN" in result.text
-        assert result.finish_reason == "DRY_RUN"
+        with pytest.raises(GeminiAuthError):
+            await client.generate("Test prompt")
 
     @pytest.mark.asyncio
     async def test_generate_success(self, mock_config: GeminiConfig, mock_response_data: dict[str, Any]) -> None:
@@ -286,6 +286,25 @@ class TestGeminiStudioClient:
             payload = call_args.kwargs["json"]
             assert len(payload["contents"]) == 3
 
+    def test_dry_run_forbidden_in_production(self) -> None:
+        """Dry-run should fail fast in production by default."""
+        with patch.dict(os.environ, {"MOTHERSHIP_ENVIRONMENT": "production"}, clear=False):
+            with pytest.raises(RuntimeError):
+                GeminiStudioClient(config=GeminiConfig(api_key=""))
+
+    def test_dry_run_allowed_in_production_with_override(self) -> None:
+        """Allow explicit production override for dry-run mode."""
+        with patch.dict(
+            os.environ,
+            {
+                "MOTHERSHIP_ENVIRONMENT": "production",
+                "GEMINI_STUDIO_ALLOW_DRY_RUN_IN_PRODUCTION": "true",
+            },
+            clear=False,
+        ):
+            client = GeminiStudioClient(config=GeminiConfig(api_key=""))
+            assert client._dry_run is True
+
 
 # Cloud Client Tests (from __init__.py)
 class TestGeminiCloudClient:
@@ -297,6 +316,30 @@ class TestGeminiCloudClient:
             client = GeminiCloudClient.from_env()
             assert client.config.api_key == "test-key"
 
+    def test_production_blocks_mock_or_pending_modes(self) -> None:
+        """Production should reject mock/pending modes unless explicitly allowed."""
+        with pytest.raises(RuntimeError):
+            GeminiCloudClient(
+                config=CloudConfig(
+                    environment=GeminiEnvironment.PRODUCTION,
+                    pending_deployment=True,
+                    mock_responses=False,
+                    allow_mock_in_production=False,
+                )
+            )
+
+    def test_production_allows_mock_with_explicit_override(self) -> None:
+        """Production override should allow controlled mock mode."""
+        client = GeminiCloudClient(
+            config=CloudConfig(
+                environment=GeminiEnvironment.PRODUCTION,
+                pending_deployment=True,
+                mock_responses=False,
+                allow_mock_in_production=True,
+            )
+        )
+        assert client.config.allow_mock_in_production is True
+
     @pytest.mark.asyncio
     async def test_mock_response(self) -> None:
         """Test mock response generation."""
@@ -307,6 +350,7 @@ class TestGeminiCloudClient:
         assert response.success is True
         assert response.text is not None
         assert "[MOCK]" in response.text
+        assert response.origin == "mock"
 
     @pytest.mark.asyncio
     async def test_pending_deployment_mock(self) -> None:
@@ -318,6 +362,7 @@ class TestGeminiCloudClient:
         assert response.success is True
         assert response.text is not None
         assert "[MOCK]" in response.text
+        assert response.origin == "mock"
 
     @pytest.mark.asyncio
     async def test_health_check(self) -> None:

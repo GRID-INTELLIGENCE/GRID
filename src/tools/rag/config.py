@@ -165,10 +165,19 @@ class RAGConfig:
         )
 
     def ensure_local_only(self) -> None:
-        """Legacy method - no longer enforces local-only operation.
+        """Enforce local-only operation — no external API calls.
 
-        This method is kept for backward compatibility but no longer raises errors.
-        The codebase now freely supports external API providers (OpenAI, Anthropic, Gemini).
+        Raises:
+            ValueError: If config is set to use external providers.
         """
-        # No-op: External providers are now fully supported
-        pass
+        if self.llm_mode == ModelMode.EXTERNAL:
+            raise ValueError(
+                f"Local-only mode required, but llm_mode={self.llm_mode}. "
+                "Set RAG_LLM_MODE=local or remove the ensure_local_only() call."
+            )
+        if self.embedding_provider not in ("ollama", "huggingface", "simple"):
+            raise ValueError(
+                f"Local-only mode requires a local embedding provider, "
+                f"but embedding_provider={self.embedding_provider}. "
+                "Set RAG_EMBEDDING_PROVIDER=ollama (or huggingface/simple)."
+            )

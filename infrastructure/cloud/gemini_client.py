@@ -42,6 +42,23 @@ logger = logging.getLogger(__name__)
 T = TypeVar("T")
 
 
+def _parse_bool(value: str | None, default: bool = False) -> bool:
+    if value is None:
+        return default
+    return value.strip().lower() in {"true", "1", "yes", "y", "on"}
+
+
+def _is_production_environment() -> bool:
+    env = (
+        os.getenv("MOTHERSHIP_ENVIRONMENT")
+        or os.getenv("GRID_ENVIRONMENT")
+        or os.getenv("ENVIRONMENT")
+        or os.getenv("ENV")
+        or "development"
+    )
+    return env.strip().lower() in {"production", "prod"}
+
+
 class GeminiModel(str, Enum):
     """Available Gemini models."""
 
@@ -173,6 +190,9 @@ class GenerationResult:
     usage: dict[str, int] | None = None
     safety_ratings: list[dict[str, Any]] | None = None
     raw_response: Any | None = None
+    origin: str = "live"
+    degraded: bool = False
+    provider_latency_ms: float = 0.0
 
     @property
     def prompt_tokens(self) -> int:
@@ -211,6 +231,16 @@ class GeminiStudioClient:
         self._http_client: httpx_typing.AsyncClient | None = None
         self._initialized = False
         self._dry_run = not self.config.validate()
+
+        allow_dry_run_in_production = _parse_bool(
+            os.getenv("GEMINI_STUDIO_ALLOW_DRY_RUN_IN_PRODUCTION"),
+            False,
+        )
+        if self._dry_run and _is_production_environment() and not allow_dry_run_in_production:
+            raise RuntimeError(
+                "GeminiStudioClient dry-run mode is forbidden in production. "
+                "Set GEMINI_API_KEY or explicitly allow with GEMINI_STUDIO_ALLOW_DRY_RUN_IN_PRODUCTION=true."
+            )
 
     async def __aenter__(self) -> GeminiStudioClient:
         await self.initialize()
@@ -299,6 +329,7 @@ class GeminiStudioClient:
                 model=self.config.model,
                 finish_reason="NO_CANDIDATES",
                 raw_response=data,
+                origin="live",
             )
 
         candidate = candidates[0]
@@ -313,6 +344,7 @@ class GeminiStudioClient:
             usage=data.get("usageMetadata"),
             safety_ratings=candidate.get("safetyRatings"),
             raw_response=data,
+            origin="live",
         )
 
     @with_retry
@@ -334,11 +366,9 @@ class GeminiStudioClient:
             GenerationResult with the model's response
         """
         if self._dry_run:
-            logger.info(f"[DRY RUN] Would generate with prompt: {prompt[:100]}...")
-            return GenerationResult(
-                text="[DRY RUN] No API key configured",
-                model=self.config.model,
-                finish_reason="DRY_RUN",
+            raise GeminiAuthError(
+                "Gemini API key not configured. "
+                "Set GEMINI_API_KEY environment variable to enable Gemini."
             )
 
         if not self._initialized:
@@ -385,9 +415,10 @@ class GeminiStudioClient:
             Text chunks as they are received
         """
         if self._dry_run:
-            logger.info(f"[DRY RUN] Would stream with prompt: {prompt[:100]}...")
-            yield "[DRY RUN] No API key configured"
-            return
+            raise GeminiAuthError(
+                "Gemini API key not configured. "
+                "Set GEMINI_API_KEY environment variable to enable Gemini."
+            )
 
         if not self._initialized:
             await self.initialize()
@@ -446,10 +477,9 @@ class GeminiStudioClient:
             GenerationResult with the model's response
         """
         if self._dry_run:
-            return GenerationResult(
-                text="[DRY RUN] No API key configured",
-                model=self.config.model,
-                finish_reason="DRY_RUN",
+            raise GeminiAuthError(
+                "Gemini API key not configured. "
+                "Set GEMINI_API_KEY environment variable to enable Gemini."
             )
 
         if not self._initialized:
@@ -504,6 +534,8 @@ class GeminiStudioClient:
         return {
             "initialized": self._initialized,
             "dry_run": self._dry_run,
+            "degraded": self._dry_run,
+            "origin": "dry_run" if self._dry_run else "live",
             "model": self.config.model,
             "endpoint": self.config.studio_endpoint,
             "has_api_key": bool(self.config.api_key),

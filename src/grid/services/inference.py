@@ -1,4 +1,5 @@
 import asyncio
+import os
 import time
 from dataclasses import dataclass
 from typing import Any
@@ -15,12 +16,39 @@ class ProcessingResult:
     metadata: dict[str, Any] | None = None
 
 
+def _parse_bool(value: str | None, default: bool = False) -> bool:
+    if value is None:
+        return default
+    return value.strip().lower() in {"true", "1", "yes", "y", "on"}
+
+
+def _is_production_environment() -> bool:
+    env = (
+        os.getenv("MOTHERSHIP_ENVIRONMENT")
+        or os.getenv("GRID_ENVIRONMENT")
+        or os.getenv("ENVIRONMENT")
+        or os.getenv("ENV")
+        or "development"
+    )
+    return env.strip().lower() in {"production", "prod"}
+
+
 class InferenceService:
     """Service for handling inference requests"""
 
     def __init__(self, model_loader=None, cache_service=None):
         self.model_loader = model_loader
         self.cache = cache_service
+        allow_placeholder_in_production = _parse_bool(
+            os.getenv("INFERENCE_ALLOW_PLACEHOLDER_IN_PRODUCTION"),
+            False,
+        )
+        if _is_production_environment() and not allow_placeholder_in_production:
+            raise RuntimeError(
+                "grid.services.inference uses placeholder providers and is forbidden in production. "
+                "Use grid.services.inference_harness or explicitly allow with INFERENCE_ALLOW_PLACEHOLDER_IN_PRODUCTION=true."
+            )
+
         self.models = {
             "default": "gpt-3.5-turbo",
             "gpt-3.5-turbo": "gpt-3.5-turbo",
@@ -49,12 +77,16 @@ class InferenceService:
             result = await self._call_model(request)
             processing_time = time.time() - start_time
 
+            response_metadata = dict(result.metadata or {})
+            response_metadata.setdefault("origin", "placeholder")
+            response_metadata.setdefault("simulated", True)
+
             response = InferenceResponse(
                 result=result.result,
                 model=result.model,
                 tokens_used=result.tokens_used,
                 processing_time=processing_time,
-                metadata=result.metadata,
+                metadata=response_metadata,
             )
 
             # Cache the result
@@ -91,6 +123,11 @@ class InferenceService:
             tokens_used=len(request.prompt.split()) * 2,
             processing_time=0.5,
             model="local-model",
+            metadata={
+                "origin": "placeholder",
+                "provider": "local-model",
+                "simulated": True,
+            },
         )
 
     async def _call_openai_model(self, request: InferenceRequest) -> ProcessingResult:
@@ -101,6 +138,11 @@ class InferenceService:
             tokens_used=len(request.prompt.split()) * 3,
             processing_time=1.0,
             model=request.model,
+            metadata={
+                "origin": "placeholder",
+                "provider": "openai",
+                "simulated": True,
+            },
         )
 
     async def _call_anthropic_model(self, request: InferenceRequest) -> ProcessingResult:
@@ -111,6 +153,11 @@ class InferenceService:
             tokens_used=len(request.prompt.split()) * 2,
             processing_time=0.8,
             model=request.model,
+            metadata={
+                "origin": "placeholder",
+                "provider": "anthropic",
+                "simulated": True,
+            },
         )
 
     async def _call_default_model(self, request: InferenceRequest) -> ProcessingResult:
@@ -121,6 +168,11 @@ class InferenceService:
             tokens_used=len(request.prompt.split()) * 2,
             processing_time=0.3,
             model="default",
+            metadata={
+                "origin": "placeholder",
+                "provider": "default",
+                "simulated": True,
+            },
         )
 
     def _validate_request(self, request: InferenceRequest) -> bool:

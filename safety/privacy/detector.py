@@ -151,7 +151,7 @@ class AsyncPIIDetector:
 
     def enable_patterns(self, patterns: list[str]) -> None:
         """Enable specific patterns only."""
-        self._enabled_patterns = set(p.upper() for p in patterns)
+        self._enabled_patterns = {p.upper() for p in patterns}
 
     def disable_patterns(self, patterns: list[str]) -> None:
         """Disable specific patterns."""

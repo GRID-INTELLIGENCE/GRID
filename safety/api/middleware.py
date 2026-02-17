@@ -98,6 +98,7 @@ def _make_rate_limit_response(reset_seconds: float, trace_id: str) -> JSONRespon
             "window_seconds": int(reset_seconds),
             "support_ticket_id": f"audit-{trace_id}",
         },
+        headers={"Retry-After": str(int(reset_seconds))},
     )
 
 
@@ -153,7 +154,7 @@ class SafetyMiddleware(BaseHTTPMiddleware):
 
         # 0. Fail-closed check: verify safety infrastructure is available
         _bypass_redis = os.getenv("SAFETY_BYPASS_REDIS", "").lower() in ("1", "true", "yes")
-        
+
         if _bypass_redis:
             redis_ok = True
         else:

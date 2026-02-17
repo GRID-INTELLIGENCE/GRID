@@ -9,7 +9,7 @@ from grid.services.llm.llm_client import LLMConfig, OllamaNativeClient
 
 logger = logging.getLogger(__name__)
 
-from tools.rag.types import LLMProvider
+from tools.rag.types import LLMProvider, LLMProviderError
 
 
 class OllamaLLM(LLMProvider):
@@ -46,12 +46,14 @@ class OllamaLLM(LLMProvider):
                 timeout=60,
             )
             return result.stdout.strip()
-        except subprocess.TimeoutExpired:
-            logger.warning(f"Ollama LLM timed out after 60s for model {self.model}")
-            return f"Error: Request timed out for {self.model}"
+        except subprocess.TimeoutExpired as e:
+            logger.error(f"Ollama LLM timed out after 60s for model {self.model}")
+            raise LLMProviderError(f"Ollama request timed out for {self.model}") from e
         except Exception as e:
-            logger.warning(f"Ollama LLM error: {e}")
-            return f"Error: Could not generate response using {self.model}"
+            logger.error(f"Ollama LLM error: {e}")
+            raise LLMProviderError(
+                f"Failed to generate response using Ollama model {self.model}: {e}"
+            ) from e
 
     async def async_generate(self, prompt: str, **kwargs: Any) -> str:
         """Generate text using Ollama (async version).
@@ -82,14 +84,21 @@ class OllamaLLM(LLMProvider):
             if proc.returncode == 0:
                 return stdout.decode("utf-8", errors="replace").strip()
             else:
-                logger.warning(f"Ollama subprocess failed: {stderr.decode('utf-8', errors='replace')}")
-                return f"Error: Ollama returned non-zero exit code for {self.model}"
-        except TimeoutError:
-            logger.warning(f"Ollama async LLM timed out after 60s for model {self.model}")
-            return f"Error: Request timed out for {self.model}"
+                err_msg = stderr.decode('utf-8', errors='replace')
+                logger.error(f"Ollama subprocess failed: {err_msg}")
+                raise LLMProviderError(
+                    f"Ollama returned non-zero exit code for {self.model}: {err_msg}"
+                )
+        except LLMProviderError:
+            raise
+        except TimeoutError as e:
+            logger.error(f"Ollama async LLM timed out after 60s for model {self.model}")
+            raise LLMProviderError(f"Ollama async request timed out for {self.model}") from e
         except Exception as e:
-            logger.warning(f"Ollama async LLM error: {e}")
-            return f"Error: Could not generate response using {self.model}"
+            logger.error(f"Ollama async LLM error: {e}")
+            raise LLMProviderError(
+                f"Failed to generate async response using Ollama model {self.model}: {e}"
+            ) from e
 
 
 class OpenAILLM(LLMProvider):
@@ -120,11 +129,17 @@ class OpenAILLM(LLMProvider):
             **kwargs: Additional parameters (temperature, max_tokens, etc.)
 
         Returns:
-            Generated text or error message
+            Generated text
+
+        Raises:
+            LLMProviderError: If the OpenAI library is missing, API key is absent, or the call fails.
         """
         client = self._get_client()
         if client is None:
-            return "Error: OpenAI library not installed or no API key provided"
+            raise LLMProviderError(
+                "OpenAI library not installed or no API key provided. "
+                "Install with: uv add openai, and set OPENAI_API_KEY."
+            )
 
         try:
             response = client.chat.completions.create(
@@ -135,8 +150,10 @@ class OpenAILLM(LLMProvider):
             )
             return response.choices[0].message.content
         except Exception as e:
-            logger.warning(f"OpenAI LLM error: {e}")
-            return f"Error: Could not generate response using {self.model}"
+            logger.error(f"OpenAI LLM error: {e}")
+            raise LLMProviderError(
+                f"Failed to generate response using OpenAI model {self.model}: {e}"
+            ) from e
 
 
 class SimpleLLM(LLMProvider):

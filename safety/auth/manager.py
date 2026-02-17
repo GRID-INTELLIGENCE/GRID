@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import redis
@@ -29,9 +29,9 @@ class AuthManager:
         """Create JWT access token"""
         to_encode = data.copy()
         if expires_delta:
-            expire = datetime.now(timezone.utc) + expires_delta
+            expire = datetime.now(UTC) + expires_delta
         else:
-            expire = datetime.now(timezone.utc) + timedelta(minutes=15)
+            expire = datetime.now(UTC) + timedelta(minutes=15)
         to_encode.update({"exp": expire})
         encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
         return encoded_jwt
@@ -56,7 +56,7 @@ class AuthManager:
                 "full_name": "Administrator",
                 "is_active": True,
                 "trust_tier": "privileged",
-                "created_at": datetime.now(timezone.utc).isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
                 "hashed_password": self.get_password_hash(password),
             }
         elif username == "user" and password == "user123":
@@ -67,7 +67,7 @@ class AuthManager:
                 "full_name": "Regular User",
                 "is_active": True,
                 "trust_tier": "user",
-                "created_at": datetime.now(timezone.utc).isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
                 "hashed_password": self.get_password_hash(password),
             }
         return None
@@ -83,7 +83,7 @@ class AuthManager:
                 "full_name": "Administrator",
                 "is_active": True,
                 "trust_tier": "privileged",
-                "created_at": datetime.now(timezone.utc).isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
             }
         elif username == "user":
             return {
@@ -93,14 +93,14 @@ class AuthManager:
                 "full_name": "Regular User",
                 "is_active": True,
                 "trust_tier": "user",
-                "created_at": datetime.now(timezone.utc).isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
             }
         return None
 
     def check_rate_limit(self, user_id: str, action: str = "request") -> bool:
         """Check if user is within rate limits"""
         key = f"ratelimit:{user_id}:{action}"
-        current_time = datetime.now(timezone.utc).timestamp()
+        current_time = datetime.now(UTC).timestamp()
 
         # Clean old entries
         self.redis_client.zremrangebyscore(key, 0, current_time - settings.RATE_LIMIT_WINDOW)
@@ -137,7 +137,7 @@ class AuthManager:
     def log_security_event(self, event_type: str, user_id: str, details: dict[str, Any]):
         """Log security-related events"""
         event = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "event_type": event_type,
             "user_id": user_id,
             "details": details,

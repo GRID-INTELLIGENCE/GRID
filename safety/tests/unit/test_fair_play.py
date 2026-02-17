@@ -73,7 +73,7 @@ async def test_deterministic_heat_cooldown():
     now = time.time()
 
     # Heat_Generated = (SensitiveDetections * 10) + (density * 50). 2 detections = 20 heat > 15.
-    result = await engine.evaluate_interaction(
+    await engine.evaluate_interaction(
         "Bad input", "Bad response", 1.0, sensitive_detections=2, current_time=now
     )
 
@@ -157,11 +157,7 @@ async def test_age_appropriate_safety_thresholds():
 
     # Test with dense interactions that should be restricted for young users
     now = time.time()
-    dense_interactions = []
-    for i in range(8):  # Very dense pattern
-        dense_interactions.append(
-            InteractionRecord(now + i * 1, 20, 100, 1.0)  # 1 second intervals
-        )
+    dense_interactions = [InteractionRecord(now + i * 1, 20, 100, 1.0) for i in range(8)]  # Very dense pattern
 
     # Simulate dense interaction history
     for interaction in dense_interactions:

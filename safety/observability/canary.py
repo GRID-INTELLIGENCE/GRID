@@ -24,7 +24,7 @@ class SafetyCanary:
     @staticmethod
     def inject(text: str) -> str:
         """Inject a random canary token into the text."""
-        token = random.choice(CANARY_TOKENS)
+        token = random.choice(CANARY_TOKENS)  # noqa: S311
         # Append to the end of the string
         return f"{text}{token}"
 

@@ -93,7 +93,8 @@ class GRIDSecurityAssessmentAgent:
                     if str(path_obj).startswith(str(Path(allowed).resolve())):
                         is_path_allowed = True
                         break
-                except Exception:
+                except Exception as e:
+                    self.logger.exception(f"Error checking path {allowed}: {e}")
                     continue
 
             # First, check authorization
@@ -252,14 +253,12 @@ class GRIDSecurityAssessmentAgent:
 
         if include_paths:
             report.append("### Allowed Paths")
-            for p in self.system_profile.get("allowed_paths", []):
-                report.append(f"- `{p}`")
+            report.extend(f"- `{p}`" for p in self.system_profile.get("allowed_paths", []))
             report.append("")
 
         if include_users:
             report.append("### Authorized Users")
-            for u in self.system_profile.get("users", []):
-                report.append(f"- `{u}`")
+            report.extend(f"- `{u}`" for u in self.system_profile.get("users", []))
             report.append("")
 
         report.append("## 3. Session Activity & Audit Log")
@@ -287,9 +286,7 @@ class GRIDSecurityAssessmentAgent:
         if blocked_count > 0:
             report.append("### 🚨 SECURITY FINDINGS")
             report.append("The system successfully blocked the following unauthorized actions:")
-            for e in self.audit_events:
-                if e["event_type"] in ["AUTHZ_ACCESS_DENIED", "REQUEST_BLOCKED"]:
-                    report.append(f"- **{e['event_type']}**: {json.dumps(e['details'])}")
+            report.extend(f"- **{e['event_type']}**: {json.dumps(e['details'])}" for e in self.audit_events if e["event_type"] in ["AUTHZ_ACCESS_DENIED", "REQUEST_BLOCKED"])
         else:
             report.append(
                 "✅ **No security breaches simulated.** All attempts were either authorized or no attacks were performed."
@@ -301,8 +298,7 @@ class GRIDSecurityAssessmentAgent:
             # Quick re-scan for the report
             anomalies = self.scan_anomalies("network")
             if anomalies["anomalies_found"] > 0:
-                for d in anomalies["details"]:
-                    report.append(f"- ⚠️ {d}")
+                report.extend(f"- ⚠️ {d}" for d in anomalies["details"])
             else:
                 report.append("No anomalies detected in recent logs.")
             report.append("")
@@ -314,8 +310,7 @@ class GRIDSecurityAssessmentAgent:
             "Review filesystem permissions for non-authorized paths.",
             "Regularly rotate encryption keys and API tokens if detected in logs.",
         ]
-        for rec in recommendations:
-            report.append(f"- {rec}")
+        report.extend(f"- {rec}" for rec in recommendations)
 
         markdown = "\n".join(report)
 

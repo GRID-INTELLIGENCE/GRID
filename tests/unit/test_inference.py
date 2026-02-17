@@ -3,6 +3,8 @@ from tests.utils.path_manager import PathManager
 # Setup paths atomically to prevent race conditions
 PathManager.setup_test_paths(__file__)
 
+import pytest
+
 from grid.services.inference import InferenceService
 
 
@@ -31,3 +33,23 @@ def test_cache_key_generation() -> None:
     assert "gpt-4" in key
     assert "500" in key
     assert "0.7" in key
+
+
+@pytest.mark.asyncio
+async def test_inference_response_marks_placeholder_origin() -> None:
+    service = InferenceService()
+    from grid.models.inference import InferenceRequest
+
+    response = await service.process(InferenceRequest(prompt="Hello", model="gpt-4"))
+
+    assert response.metadata is not None
+    assert response.metadata.get("origin") == "placeholder"
+    assert response.metadata.get("simulated") is True
+
+
+def test_inference_service_blocks_placeholder_in_production(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("MOTHERSHIP_ENVIRONMENT", "production")
+    monkeypatch.delenv("INFERENCE_ALLOW_PLACEHOLDER_IN_PRODUCTION", raising=False)
+
+    with pytest.raises(RuntimeError):
+        InferenceService()

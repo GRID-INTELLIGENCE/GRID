@@ -79,8 +79,7 @@ class AnthropicLLM(BaseLLMProvider):
             temperature=temperature,
             **kwargs,
         ) as stream:
-            for text in stream.text_stream:
-                yield text
+            yield from stream.text_stream
 
     async def async_generate(
         self,

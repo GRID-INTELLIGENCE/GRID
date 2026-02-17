@@ -45,6 +45,12 @@ logger = logging.getLogger(__name__)
 T = TypeVar("T")
 
 
+def _parse_bool(value: str | None, default: bool = False) -> bool:
+    if value is None:
+        return default
+    return value.strip().lower() in {"true", "1", "yes", "y", "on"}
+
+
 class GeminiEnvironment(str, Enum):
     """Gemini Studio deployment environments."""
 
@@ -97,6 +103,7 @@ class GeminiConfig:
     studio_email: str = "caraxesthebloodwyrm02@gmail.com"  # Default studio integration email
     pending_deployment: bool = True
     mock_responses: bool = False
+    allow_mock_in_production: bool = False
 
     @classmethod
     def from_env(cls) -> GeminiConfig:
@@ -131,6 +138,7 @@ class GeminiConfig:
             studio_project_url=env.get("GEMINI_STUDIO_URL"),
             pending_deployment=env.get("GEMINI_DEPLOYED", "false").lower() != "true",
             mock_responses=env.get("GEMINI_MOCK", "false").lower() == "true",
+            allow_mock_in_production=_parse_bool(env.get("GEMINI_ALLOW_MOCK_IN_PRODUCTION"), False),
         )
 
     def validate(self) -> list[str]:
@@ -149,6 +157,12 @@ class GeminiConfig:
         if self.timeout_seconds < 1:
             issues.append("Timeout must be at least 1 second")
 
+        if self.environment == GeminiEnvironment.PRODUCTION:
+            if (self.pending_deployment or self.mock_responses) and not self.allow_mock_in_production:
+                issues.append(
+                    "Mock/pending deployment mode is not allowed in production unless GEMINI_ALLOW_MOCK_IN_PRODUCTION=true"
+                )
+
         return issues
 
 
@@ -164,6 +178,8 @@ class GeminiResponse:
     latency_ms: float = 0.0
     model: str = ""
     usage: dict[str, int] = field(default_factory=dict)
+    origin: str = "live"
+    degraded: bool = False
 
     @classmethod
     def from_api_response(cls, response_data: dict[str, Any], latency: float = 0.0) -> GeminiResponse:
@@ -191,18 +207,28 @@ class GeminiResponse:
                     "completion_tokens": usage_metadata.get("candidatesTokenCount", 0),
                     "total_tokens": usage_metadata.get("totalTokenCount", 0),
                 },
+                origin="live",
+                degraded=False,
             )
         except Exception as e:
             return cls(
                 success=False,
                 error=f"Failed to parse response: {e}",
                 data=response_data,
+                origin="error",
+                degraded=True,
             )
 
     @classmethod
     def error_response(cls, error: str, status_code: int = 500) -> GeminiResponse:
         """Create an error response."""
-        return cls(success=False, error=error, status_code=status_code)
+        return cls(
+            success=False,
+            error=error,
+            status_code=status_code,
+            origin="error",
+            degraded=True,
+        )
 
     @classmethod
     def mock_response(cls, prompt: str) -> GeminiResponse:
@@ -217,6 +243,8 @@ class GeminiResponse:
                 "completion_tokens": 10,
                 "total_tokens": len(prompt.split()) + 10,
             },
+            origin="mock",
+            degraded=True,
         )
 
 
@@ -334,6 +362,16 @@ class GeminiCloudClient:
 
         # Validate config on init
         issues = self.config.validate()
+        if (
+            self.config.environment == GeminiEnvironment.PRODUCTION
+            and (self.config.mock_responses or self.config.pending_deployment)
+            and not self.config.allow_mock_in_production
+        ):
+            raise RuntimeError(
+                "Gemini mock/pending mode is forbidden in production. "
+                "Set GEMINI_DEPLOYED=true and GEMINI_MOCK=false, or explicitly allow with GEMINI_ALLOW_MOCK_IN_PRODUCTION=true."
+            )
+
         if issues and not self.config.mock_responses:
             logger.warning(f"Configuration issues: {issues}")
 
@@ -488,6 +526,9 @@ class GeminiCloudClient:
                 success=True,
                 data={"embeddings": [[0.0] * 768]},  # Mock embedding
                 status_code=200,
+                model="mock-gemini-embedding",
+                origin="mock",
+                degraded=True,
             )
 
         endpoint = f"models/{model}:embedContent"
@@ -566,6 +607,7 @@ class GeminiCloudClient:
             "config_valid": len(self.config.validate()) == 0,
             "pending_deployment": self.config.pending_deployment,
             "mock_mode": self.config.mock_responses,
+            "allow_mock_in_production": self.config.allow_mock_in_production,
             "environment": self.config.environment.value,
             "model": self.config.model_name,
             "request_count": self._request_count,

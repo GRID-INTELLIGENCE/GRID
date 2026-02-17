@@ -316,7 +316,7 @@ async def _check_misuse(user_id: str) -> None:
                     "escalation_count": str(count),
                 },
             )
-        except Exception:
+        except Exception:  # noqa: S110
             pass
 
 

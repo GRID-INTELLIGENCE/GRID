@@ -428,7 +428,7 @@ def run(
     """
     import uvicorn
 
-    _host = host if host is not None else os.getenv("SAFETY_API_HOST", "0.0.0.0")
+    _host = host if host is not None else os.getenv("SAFETY_API_HOST", "0.0.0.0")  # noqa: S104
     _port = port if port is not None else int(os.getenv("SAFETY_API_PORT", "8000"))
     _reload = reload if reload is not None else os.getenv("SAFETY_API_RELOAD", "").lower() in ("1", "true", "yes")
 

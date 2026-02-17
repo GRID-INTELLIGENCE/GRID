@@ -112,7 +112,7 @@ async def _process_message(msg_id: str, fields: dict[str, str]) -> None:
                     request_id=request_id,
                     metadata=metadata
                 )
-        except asyncio.TimeoutError:
+        except TimeoutError:
             logger.error("post_check_timeout", request_id=request_id)
             # Fail closed: treat as flagged
             from safety.detectors.post_check import PostCheckResult

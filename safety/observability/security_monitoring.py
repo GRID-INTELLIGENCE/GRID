@@ -262,12 +262,8 @@ class SecurityLogger:
         limit: int = 1000,
     ) -> list[SecurityEvent]:
         """Search events in log files"""
-        matching_events = []
-
         # Search through recent buffer first
-        for event in self.event_buffer:
-            if self._matches_query(event, query):
-                matching_events.append(event)
+        matching_events = [event for event in self.event_buffer if self._matches_query(event, query)]
 
         # Search through log files if needed
         if len(matching_events) < limit:

@@ -44,10 +44,7 @@ class LogCollector:
             Path("C:/Windows/System32/LogFiles/Firewall/pfirewall.log"),
             # Add other system logs as needed
         ]
-
-        for log_path in security_logs + system_logs:
-            if log_path.exists():
-                collected_files.append(log_path)
+        collected_files = [log_path for log_path in security_logs + system_logs if log_path.exists()]
 
         return collected_files
 

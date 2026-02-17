@@ -522,9 +522,8 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         # Dispose database engine
         try:
             await dispose_async_engine()
-        except Exception:
-            # Ignore errors during shutdown (e.g. NullPool)
-            pass
+        except Exception as e:
+            logger.warning(f"Error disposing async engine during shutdown: {e}")
 
         # Wait for parasite sanitization to complete
         if hasattr(app.state, "parasite_guard"):

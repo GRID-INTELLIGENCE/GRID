@@ -24,7 +24,7 @@ You are auditing THE GRID monorepo's IDE setup for completeness and consistency.
 - `uv` for package management (NOT pip)
 - Ruff for formatting/linting (NOT black, NOT pylint)
 - Async-first architecture (FastAPI, async SQLAlchemy)
-- Local-only AI (Ollama + ChromaDB, zero external API calls)
+- AI: local (Ollama + ChromaDB) and/or external providers (OpenAI, Anthropic) per `docs/PRINCIPLES.md` — open-source principles and freedom to think; access to AI providers and the open web is a core value; config does not restrict external API/network by default
 - Zero tolerance: no `eval()`, no `exec()`, no `pickle`, no auth bypass
 
 **Development Discipline (from .claude/rules/discipline.md):**
@@ -236,6 +236,23 @@ You are auditing THE GRID monorepo's IDE setup for completeness and consistency.
 
 ---
 
+#### 11. Agent/Tool Policy (Dev Programs)
+
+**Check:**
+- `.cursor/devprograms/GLOBAL_CONFIG.md` — global `blocked_tools` and per-program overrides
+- Confirm `external_api` and `network` are **not** in `blocked_tools` (access protected as core right per `docs/PRINCIPLES.md`)
+- Verify alignment with open-source principles and freedom to think (access to ideas, AI providers, open web)
+
+**Questions to answer:**
+1. What is the current global and per-program `blocked_tools` state?
+2. Does it match project values in `docs/PRINCIPLES.md` (no restriction of external API/network by default)?
+3. Are any programs incorrectly restricting access (external_api/network in blocked_tools)?
+4. Is `code_quality.formatting` in GLOBAL_CONFIG aligned with ruff-only standard?
+
+**Expected output:** Dev programs tool policy summary; any mismatch with core values (freedom to think, open-source principles)
+
+---
+
 ### Gap Prioritization Framework
 
 For each gap found, classify by:
@@ -282,7 +299,7 @@ Date: 2026-02-12
 
 ---
 
-[Continue for all 10 categories...]
+[Continue for all 11 categories...]
 
 ## Recommended Actions (Priority Order)
 
@@ -310,7 +327,7 @@ Date: 2026-02-12
 
 Your gap analysis is complete when:
 
-1. ✅ All 10 verification categories checked
+1. ✅ All 11 verification categories checked
 2. ✅ Every gap classified by severity + impact
 3. ✅ Every gap has a specific fix + verification step
 4. ✅ Gaps prioritized in actionable order
@@ -407,6 +424,7 @@ Cursor Agent should produce a ~2000-4000 word report covering:
 - **Performance optimizations** (exclusion patterns incomplete)
 - **Type checking gaps** (mypy config mismatch, Pylance misconfigured)
 - **Documentation holes** (verification checklist incomplete)
+- **Agent/tool policy** (dev programs blocked_tools vs. project intent)
 
 Each gap should have:
 - Specific description

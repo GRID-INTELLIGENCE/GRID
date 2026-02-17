@@ -10,6 +10,7 @@ Covers:
 """
 
 import pytest
+from unittest.mock import patch
 
 from application.resonance.cost_optimizer import (
     BillingMeterEvent,
@@ -229,6 +230,24 @@ class TestMeterEvents:
         sent = await optimizer_with_mock_meter.flush_meter_events()
         assert sent == 1
         assert len(optimizer_with_mock_meter._pending_meter_events) == 0
+        assert optimizer_with_mock_meter._sent_events[0].origin == "callback"
+        assert optimizer_with_mock_meter._sent_events[0].sent_to_provider is True
+
+    @pytest.mark.asyncio
+    async def test_flush_meter_events_default_callback_marks_dry_run(self, cost_optimizer):
+        """Default callback should mark events as dry-run provenance."""
+        event = cost_optimizer.queue_meter_event(
+            customer_id="cus_dry",
+            event_name="test_meter",
+            value=3,
+        )
+
+        sent = await cost_optimizer.flush_meter_events()
+
+        assert sent == 1
+        assert event.sent is True
+        assert event.origin == "dry_run"
+        assert event.sent_to_provider is False
 
     def test_create_stripe_payload(self, cost_optimizer):
         """Test Stripe API payload creation."""
@@ -315,3 +334,24 @@ class TestServiceLifecycle:
         assert "already running" in caplog.text.lower()
 
         await cost_optimizer.stop()
+
+
+class TestProductionGuardrails:
+    """Test production guardrails for dry-run meter callback."""
+
+    def test_production_blocks_default_dry_run_callback(self):
+        with patch.dict("os.environ", {"MOTHERSHIP_ENVIRONMENT": "production"}, clear=False):
+            with pytest.raises(RuntimeError):
+                CostOptimizer(meter_event_callback=None)
+
+    def test_production_override_allows_default_callback(self):
+        with patch.dict(
+            "os.environ",
+            {
+                "MOTHERSHIP_ENVIRONMENT": "production",
+                "COST_OPTIMIZER_ALLOW_DRY_RUN_IN_PRODUCTION": "true",
+            },
+            clear=False,
+        ):
+            optimizer = CostOptimizer(meter_event_callback=None)
+            assert isinstance(optimizer, CostOptimizer)

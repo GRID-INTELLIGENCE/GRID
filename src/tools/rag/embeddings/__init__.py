@@ -12,18 +12,13 @@ try:
 except ImportError:
     OpenAIEmbeddingProvider = None  # type: ignore
 
-# Test provider (for testing only - NOT for production)
-from .test_provider import TestEmbeddingProvider, get_test_provider
-
 __all__ = [
     "BaseEmbeddingProvider",
     "OllamaEmbeddingProvider",
     "HuggingFaceEmbeddingProvider",
     "SimpleEmbedding",
     "SimpleEmbeddings",
-    "TestEmbeddingProvider",
     "get_embedding_provider",
-    "get_test_provider",
     "EmbeddingProviderType",
 ]
 

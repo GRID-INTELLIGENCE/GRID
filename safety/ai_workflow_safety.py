@@ -22,7 +22,7 @@ from collections import deque
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import StrEnum
-from typing import Any, Optional
+from typing import Any
 
 from safety.observability.logging_setup import get_logger
 
@@ -354,9 +354,7 @@ class TemporalSynchronizationEngine:
         if len(recent_responses) < 2:
             return TemporalPattern.CONSISTENT
 
-        intervals = []
-        for i in range(1, len(recent_responses)):
-            intervals.append(recent_responses[i] - recent_responses[i - 1])
+        intervals = [recent_responses[i] - recent_responses[i - 1] for i in range(1, len(recent_responses))]
 
         if not intervals:
             return TemporalPattern.CONSISTENT
@@ -488,9 +486,7 @@ class HookDetectionEngine:
 
         # Check for burst patterns followed by silence (attention manipulation)
         timestamps = [r.timestamp for r in self.interaction_history]
-        intervals = []
-        for i in range(1, len(timestamps)):
-            intervals.append(timestamps[i] - timestamps[i - 1])
+        intervals = [timestamps[i] - timestamps[i - 1] for i in range(1, len(timestamps))]
 
         if intervals:
             # Look for burst-silence patterns
@@ -1150,11 +1146,11 @@ class AIWorkflowSafetyEngine:
         return {**pre_result, **post_result}
 
     @property
-    def user_age(self) -> Optional[int]:
+    def user_age(self) -> int | None:
         return self.wellbeing_tracker.user_age
 
     @user_age.setter
-    def user_age(self, value: Optional[int]):
+    def user_age(self, value: int | None):
         self.wellbeing_tracker.user_age = value
 
     async def evaluate_request(

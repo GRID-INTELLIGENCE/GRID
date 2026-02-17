@@ -20,9 +20,9 @@ async def main():
 
     # Test 1: Timestamp consistency for existing engine
     print("\n1. Testing timestamp consistency (existing engine)...")
-    engine1 = await manager.get_engine("user1")
+    await manager.get_engine("user1")
     await asyncio.sleep(0.01)
-    engine2 = await manager.get_engine("user1")  # Should use same timestamp
+    await manager.get_engine("user1")  # Should use same timestamp
 
     # Test 2: User_id validation
     print("\n2. Testing user_id validation...")

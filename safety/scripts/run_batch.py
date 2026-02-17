@@ -3,7 +3,7 @@ import sys
 
 
 def run_command(cmd):
-    result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+    result = subprocess.run(cmd, shell=True, capture_output=True, text=True)  # noqa: S602
     print(f"Command: {cmd}")
     print("Output:")
     print(result.stdout)

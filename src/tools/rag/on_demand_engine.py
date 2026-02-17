@@ -40,6 +40,8 @@ class OnDemandRAGResult:
     routing: dict[str, Any]
     selected_files: list[dict[str, Any]]
     stats: dict[str, Any]
+    degraded: bool = False
+    degradation_reasons: list[str] | None = None
 
 
 class OnDemandRAGEngine:
@@ -129,13 +131,20 @@ class OnDemandRAGEngine:
 
         # Vector store is ephemeral (built from current file scope)
         store = InMemoryDenseVectorStore()
-        chunk_count = self._index_files_into_store(
+        index_result = self._index_files_into_store(
             files,
             store,
             embedding_provider,
             embedding_fallback_provider,
             max_chunks=max_chunks,
         )
+        chunk_count = index_result["count"]
+        embedding_degraded = index_result["degraded"]
+        degradation_reasons: list[str] = []
+        if index_result["fallback"] > 0:
+            degradation_reasons.append(f"{index_result['fallback']} chunks used fallback embedding provider")
+        if index_result["simple_fallback"] > 0:
+            degradation_reasons.append(f"{index_result['simple_fallback']} chunks used word-frequency embedding (non-semantic)")
 
         if self.hooks.on_chunked:
             self.hooks.on_chunked(chunk_count)
@@ -158,13 +167,19 @@ class OnDemandRAGEngine:
                 expanded.add(str(nf.resolve()))
 
             # Index only newly added files
-            self._index_files_into_store(
+            expand_result = self._index_files_into_store(
                 new_files,
                 store,
                 embedding_provider,
                 embedding_fallback_provider,
                 max_chunks=max_chunks,
             )
+            if expand_result["degraded"]:
+                embedding_degraded = True
+                if expand_result["fallback"] > 0:
+                    degradation_reasons.append(f"expansion round {d+1}: {expand_result['fallback']} fallback")
+                if expand_result["simple_fallback"] > 0:
+                    degradation_reasons.append(f"expansion round {d+1}: {expand_result['simple_fallback']} simple_fallback")
 
         # Final retrieval after expansions
         retrieved = self._retrieve(query_text, store, embedding_provider, top_k=top_k)
@@ -183,6 +198,11 @@ class OnDemandRAGEngine:
             self.hooks.on_prompt(prompt)
 
         answer = llm_provider.generate(prompt=prompt, temperature=temperature)
+
+        # Detect LLM degradation (SimpleLLM fallback)
+        llm_degraded = type(llm_provider).__name__ == "SimpleLLM"
+        if llm_degraded:
+            degradation_reasons.append("LLM degraded to SimpleLLM (Ollama unreachable)")
 
         return OnDemandRAGResult(
             answer=answer,
@@ -203,11 +223,16 @@ class OnDemandRAGEngine:
                 "prefilter_selected": min(prefilter_k_files, len(scored)),
                 "files_indexed_initial": len(files),
                 "chunks_indexed": chunk_count,
+                "embedding_primary": index_result["primary"],
+                "embedding_fallback": index_result["fallback"],
+                "embedding_simple_fallback": index_result["simple_fallback"],
                 "depth": depth,
                 "top_k": top_k,
                 "chunk_size": self.config.chunk_size,
                 "chunk_overlap": self.config.chunk_overlap,
             },
+            degraded=embedding_degraded or llm_degraded,
+            degradation_reasons=degradation_reasons if degradation_reasons else None,
         )
 
     def _prefilter_files(
@@ -332,7 +357,7 @@ class OnDemandRAGEngine:
         embedding_provider: Any,
         embedding_fallback_provider: Any = None,
         max_chunks: int | None = None,
-    ) -> int:
+    ) -> dict[str, Any]:
         ids: list[str] = []
         docs: list[str] = []
         metas: list[dict[str, Any]] = []
@@ -360,7 +385,7 @@ class OnDemandRAGEngine:
                 metas.append({"path": rel, "chunk_index": i, "type": "chunk"})
 
         if not docs:
-            return 0
+            return {"count": 0, "primary": 0, "fallback": 0, "simple_fallback": 0, "degraded": False}
 
         # Embed sequentially (keep one-at-a-time behavior) with progress + ETA
         embeddings: list[list[float]] = []
@@ -368,9 +393,13 @@ class OnDemandRAGEngine:
         t0 = time.time()
         last_print = 0.0
         printed_any = False
+        primary_count = 0
+        fallback_count = 0
+        simple_fallback_count = 0
         for text in docs:
             idx = len(embeddings) + 1
             emb = None
+            origin = "primary"
             # Aggressive truncation for embedding stability across models
             candidate_texts = [text[:2000], text[:1000], text[:600]]
             last_err: Exception | None = None
@@ -383,6 +412,7 @@ class OnDemandRAGEngine:
                     continue
 
             if emb is None and embedding_fallback_provider is not None:
+                origin = "fallback"
                 for ct in candidate_texts:
                     try:
                         emb = embedding_fallback_provider.embed(ct)
@@ -394,11 +424,15 @@ class OnDemandRAGEngine:
             if emb is None:
                 from .embeddings.simple import SimpleEmbedding
 
+                origin = "simple_fallback"
                 emb = SimpleEmbedding(use_tfidf=False).embed(candidate_texts[-1])
 
-            if last_err is not None and emb is not None:
-                # Continue; we intentionally degrade instead of failing hard.
-                pass
+            if origin == "primary":
+                primary_count += 1
+            elif origin == "fallback":
+                fallback_count += 1
+            else:
+                simple_fallback_count += 1
 
             embeddings.append(list(emb) if not isinstance(emb, list) else emb)
 
@@ -417,7 +451,24 @@ class OnDemandRAGEngine:
         if printed_any:
             total_elapsed = time.time() - t0
             print(f"Embedding complete: {total}/{total} (100.0%) | elapsed: {total_elapsed:.1f}s")
-        return len(docs)
+
+        degraded = (fallback_count + simple_fallback_count) > 0
+        if degraded:
+            import logging as _logging
+
+            _log = _logging.getLogger(__name__)
+            _log.warning(
+                "Embedding quality degraded: %d/%d primary, %d fallback, %d simple_fallback",
+                primary_count, total, fallback_count, simple_fallback_count,
+            )
+
+        return {
+            "count": len(docs),
+            "primary": primary_count,
+            "fallback": fallback_count,
+            "simple_fallback": simple_fallback_count,
+            "degraded": degraded,
+        }
 
     def _retrieve(
         self, query_text: str, store: InMemoryDenseVectorStore, embedding_provider: Any, top_k: int

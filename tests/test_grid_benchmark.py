@@ -8,11 +8,12 @@ import time
 from pathlib import Path
 from typing import Any
 
-import numpy as np
 import pytest
 
 # Skip this entire module if required dependencies don't exist
 pytest.importorskip("grid.essence", reason="grid.essence module not implemented")
+
+import numpy as np  # noqa: E402 — imported after skip guard
 
 from grid.application import IntelligenceApplication
 from grid.awareness.context import Context

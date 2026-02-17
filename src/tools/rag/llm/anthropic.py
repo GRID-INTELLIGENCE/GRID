@@ -136,8 +136,7 @@ class AnthropicLLM(BaseLLMProvider):
                 timeout=self.timeout,
                 **kwargs,
             ) as stream:
-                for text in stream.text_stream:
-                    yield text
+                yield from stream.text_stream
         except Exception as e:
             raise RuntimeError(f"Anthropic streaming error: {e}") from e
 
@@ -188,7 +187,7 @@ class AnthropicLLM(BaseLLMProvider):
         temperature: float = 0.7,
         max_tokens: int | None = None,
         **kwargs: Any,
-    ) -> AsyncGenerator[str, None]:
+    ) -> AsyncGenerator[str]:
         """Stream text generation using async Anthropic API.
 
         Args:

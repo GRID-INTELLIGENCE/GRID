@@ -22,6 +22,23 @@ from uuid import uuid4
 logger = logging.getLogger(__name__)
 
 
+def _parse_bool(value: str | None, default: bool = False) -> bool:
+    if value is None:
+        return default
+    return value.strip().lower() in {"true", "1", "yes", "y", "on"}
+
+
+def _is_production_environment() -> bool:
+    env = (
+        os.getenv("MOTHERSHIP_ENVIRONMENT")
+        or os.getenv("GRID_ENVIRONMENT")
+        or os.getenv("ENVIRONMENT")
+        or os.getenv("ENV")
+        or "development"
+    )
+    return env.strip().lower() in {"production", "prod"}
+
+
 class CostTier(StrEnum):
     """Cost tiers for usage-based billing."""
 
@@ -37,7 +54,11 @@ STRIPE_ENABLED = bool(os.getenv("STRIPE_API_KEY", ""))
 
 @dataclass
 class MeterEvent:
-    """Stripe Meter Event representation."""
+    """Stripe Meter Event representation with explicit degradation tracking.
+
+    Following the "Explicit Result" pattern - includes degraded flag to indicate
+    when this event is in dry-run/mock mode vs live Stripe API.
+    """
 
     id: str
     event_name: str
@@ -47,11 +68,13 @@ class MeterEvent:
     identifier: str
     livemode: bool = False
     created: datetime | None = None
+    origin: str = "pending"
+    degraded: bool = False  # True if this is a dry-run/mock event, not sent to Stripe
 
 
 @dataclass
 class MeterSummary:
-    """Summary of meter usage for a customer."""
+    """Summary of meter usage for a customer with explicit degradation tracking."""
 
     meter_id: str
     meter_name: str
@@ -59,11 +82,13 @@ class MeterSummary:
     start_time: datetime
     end_time: datetime
     aggregated_value: int
+    origin: str = "live"
+    degraded: bool = False  # True if summary is from local tracking, not live API
 
 
 @dataclass
 class InvoicePreview:
-    """Preview of upcoming invoice."""
+    """Preview of upcoming invoice with explicit degradation tracking."""
 
     customer_id: str
     amount_due: float
@@ -71,6 +96,8 @@ class InvoicePreview:
     period_start: datetime
     period_end: datetime
     line_items: list[dict[str, Any]] = field(default_factory=list)
+    origin: str = "live"
+    degraded: bool = False  # True if preview is calculated locally, not from Stripe
 
 
 class StripeBilling:
@@ -101,6 +128,7 @@ class StripeBilling:
         api_key: str | None = None,
         meter_event_callback: Callable | None = None,
         cost_tier: CostTier = CostTier.STANDARD,
+        allow_dry_run_in_production: bool | None = None,
     ):
         """
         Initialize Stripe Billing.
@@ -112,6 +140,11 @@ class StripeBilling:
         self._api_key = api_key or os.getenv("STRIPE_API_KEY", "")
         self._meter_callback = meter_event_callback
         self._cost_tier = cost_tier
+        self._allow_dry_run_in_production = (
+            allow_dry_run_in_production
+            if allow_dry_run_in_production is not None
+            else _parse_bool(os.getenv("STRIPE_BILLING_ALLOW_DRY_RUN_IN_PRODUCTION"), False)
+        )
 
         # Client state
         self._stripe: Any = None
@@ -123,8 +156,20 @@ class StripeBilling:
         self._customer_usage: dict[str, int] = {}  # customer_id -> total usage
 
         if self._api_key:
-            self._initialize_client()
+            initialized = self._initialize_client()
+            if not initialized and _is_production_environment() and not self._allow_dry_run_in_production:
+                raise RuntimeError(
+                    "StripeBilling failed to initialize Stripe in production. "
+                    "Set STRIPE_API_KEY correctly or explicitly allow dry-run mode with "
+                    "STRIPE_BILLING_ALLOW_DRY_RUN_IN_PRODUCTION=true."
+                )
         else:
+            if _is_production_environment() and not self._allow_dry_run_in_production and not self._meter_callback:
+                raise RuntimeError(
+                    "StripeBilling dry-run mode is forbidden in production. "
+                    "Set STRIPE_API_KEY, provide a live meter_event_callback, or explicitly allow dry-run mode with "
+                    "STRIPE_BILLING_ALLOW_DRY_RUN_IN_PRODUCTION=true."
+                )
             logger.info("Stripe API key not set - billing in dry-run mode")
 
     def _initialize_client(self) -> bool:
@@ -254,6 +299,8 @@ class StripeBilling:
                     self._meter_callback(event)
                     sent_count += 1
                     event.created = datetime.now(UTC)
+                    event.origin = "callback"
+                    event.degraded = False  # Test callback is intentional, not degraded
                     self._events_sent.append(event)
                 elif self._is_initialized and self._stripe:
                     # Send to Stripe API
@@ -268,12 +315,16 @@ class StripeBilling:
                     )
                     event.created = datetime.now(UTC)
                     event.livemode = response.get("livemode", False)
+                    event.origin = "live"
+                    event.degraded = False  # Real Stripe API call
                     self._events_sent.append(event)
                     sent_count += 1
                 else:
-                    # Dry run mode
+                    # Dry run mode - explicitly mark as degraded
                     logger.info(f"[DRY RUN] Stripe meter event: {event.event_name}={event.value}")
                     event.created = datetime.now(UTC)
+                    event.origin = "dry_run"
+                    event.degraded = True  # Dry run is degraded - not sent to real API
                     self._events_sent.append(event)
                     sent_count += 1
 
@@ -302,7 +353,7 @@ class StripeBilling:
         self,
         customer_id: str,
         meter_name: str = METER_MEANINGFUL_EVENTS,
-    ) -> MeterSummary | None:
+    ) -> MeterSummary:
         """
         Get aggregated meter summary for a customer.
 
@@ -316,6 +367,9 @@ class StripeBilling:
         # Use local tracking when not initialized OR when using test callback
         if not self._is_initialized or self._meter_callback:
             value = self._customer_usage.get(customer_id, 0)
+            origin = "callback" if self._meter_callback else "dry_run"
+            # Degraded when not using live Stripe API
+            is_degraded = not self._is_initialized or self._meter_callback is None
             return MeterSummary(
                 meter_id="local",
                 meter_name=meter_name,
@@ -323,6 +377,8 @@ class StripeBilling:
                 start_time=datetime.now(UTC),
                 end_time=datetime.now(UTC),
                 aggregated_value=value,
+                origin=origin,
+                degraded=is_degraded,
             )
 
         try:
@@ -346,17 +402,38 @@ class StripeBilling:
                             start_time=datetime.fromtimestamp(s.get("start_time", 0), UTC),
                             end_time=datetime.fromtimestamp(s.get("end_time", 0), UTC),
                             aggregated_value=s.get("aggregated_value", 0),
+                            origin="live",
+                            degraded=False,  # Real Stripe API response
                         )
-            return None
+            # No meter found - return degraded result
+            return MeterSummary(
+                meter_id="not_found",
+                meter_name=meter_name,
+                customer_id=customer_id,
+                start_time=datetime.now(UTC),
+                end_time=datetime.now(UTC),
+                aggregated_value=0,
+                origin="not_found",
+                degraded=True,
+            )
 
         except Exception as e:
             logger.error(f"Failed to get meter summary: {e}")
-            return None
+            return MeterSummary(
+                meter_id="error",
+                meter_name=meter_name,
+                customer_id=customer_id,
+                start_time=datetime.now(UTC),
+                end_time=datetime.now(UTC),
+                aggregated_value=0,
+                origin="error",
+                degraded=True,
+            )
 
     async def get_upcoming_invoice(
         self,
         customer_id: str,
-    ) -> InvoicePreview | None:
+    ) -> InvoicePreview:
         """
         Get preview of upcoming invoice for a customer.
 
@@ -368,6 +445,7 @@ class StripeBilling:
         """
         # Use local tracking when not initialized OR when using test callback
         if not self._is_initialized or self._meter_callback:
+            origin = "callback" if self._meter_callback else "dry_run"
             # Logic for overage calculation in dry-run/test mode
             from application.mothership.config import get_settings
 
@@ -419,6 +497,7 @@ class StripeBilling:
                 period_start=datetime.now(UTC),
                 period_end=datetime.now(UTC),
                 line_items=line_items,
+                origin=origin,
             )
 
         try:
@@ -442,11 +521,20 @@ class StripeBilling:
                 period_start=datetime.fromtimestamp(invoice.get("period_start", 0), UTC),
                 period_end=datetime.fromtimestamp(invoice.get("period_end", 0), UTC),
                 line_items=line_items,
+                origin="live",
             )
 
         except Exception as e:
             logger.error(f"Failed to get upcoming invoice: {e}")
-            return None
+            return InvoicePreview(
+                customer_id=customer_id,
+                amount_due=0.0,
+                currency="usd",
+                period_start=datetime.now(UTC),
+                period_end=datetime.now(UTC),
+                origin="error",
+                degraded=True,
+            )
 
     # ─────────────────────────────────────────────────────────────────────────
     # Statistics & Tracking
@@ -462,12 +550,17 @@ class StripeBilling:
 
     def get_billing_stats(self) -> dict[str, Any]:
         """Get billing integration statistics."""
+        origin_counts = {"live": 0, "dry_run": 0, "callback": 0, "pending": 0}
+        for event in self._events_sent:
+            origin_counts[event.origin] = origin_counts.get(event.origin, 0) + 1
+
         return {
             "is_initialized": self._is_initialized,
             "events_sent": len(self._events_sent),
             "events_pending": len(self._pending_events),
             "customers_tracked": len(self._customer_usage),
             "total_usage": sum(self._customer_usage.values()),
+            "events_sent_by_origin": origin_counts,
         }
 
     @property

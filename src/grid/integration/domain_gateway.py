@@ -356,6 +356,12 @@ class GridPersistenceAdapter:
 
     def _load_redis(self) -> None:
         """Attempt to connect to Redis for persistence."""
+        import os
+
+        if os.getenv("SAFETY_BYPASS_REDIS", "").lower() in {"true", "1", "yes"}:
+            logger.debug("Redis bypassed via SAFETY_BYPASS_REDIS, using local cache")
+            return
+
         try:
             import redis.asyncio as redis
 
@@ -363,7 +369,12 @@ class GridPersistenceAdapter:
 
             redis_url = get_secret("REDIS_URL", required=False, default="redis://localhost:6379")
             if redis_url:
-                self._redis_client = redis.from_url(str(redis_url), decode_responses=True)
+                self._redis_client = redis.from_url(
+                    str(redis_url),
+                    decode_responses=True,
+                    socket_connect_timeout=2,
+                    socket_timeout=2,
+                )
                 logger.info("Connected to Redis for persistence")
         except ImportError:
             logger.debug("Redis not available, using local cache")

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import sys
 from unittest.mock import Mock, patch
 
 from grid.skills.ai_safety.base import SafetyCategory, ThreatLevel
@@ -93,6 +94,6 @@ class TestOpenAIAPIEdgeCases:
         mock_config.get_provider_api_key.return_value = "test_key"
         mock_get_config.return_value = mock_config
 
-        # This will trigger the ImportError path since we're not mocking requests
-        violations = check_openai_safety("test content")
-        assert violations == []
+        with patch.dict(sys.modules, {"requests": None}):
+            violations = check_openai_safety("test content")
+            assert violations == []

@@ -18,9 +18,9 @@ async def main():
 
     # Test 1: Timestamp inconsistency
     print("Test 1: Timestamp inconsistency")
-    engine1 = await manager.get_engine("user1")
+    await manager.get_engine("user1")
     await asyncio.sleep(0.01)
-    engine2 = await manager.get_engine("user1")  # Should trigger timestamp update
+    await manager.get_engine("user1")  # Should trigger timestamp update
 
     # Test 2: Invalid user_id
     print("\nTest 2: Invalid user_id")

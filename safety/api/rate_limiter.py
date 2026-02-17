@@ -508,10 +508,7 @@ async def tighten_limits(user_id: str, factor: float = 0.5) -> None:
     """
     try:
         client = await _get_redis()
-        # Find all rate-limit keys for this user
-        keys = []
-        async for key in client.scan_iter(f"ratelimit:{user_id}:*"):
-            keys.append(key)
+        keys = [key async for key in client.scan_iter(f"ratelimit:{user_id}:*")]
         for key in keys:
             tokens = await client.hget(key, "tokens")  # type: ignore[reportUnknownReturnType]
             if tokens is not None:  # type: ignore[reportOptionalMemberAccess]

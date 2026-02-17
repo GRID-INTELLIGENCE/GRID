@@ -11,7 +11,7 @@ When verifying IDE configuration:
 
 1. Identify target IDE (VS Code, Cursor, Windsurf, OpenCode, Antigravity)
 2. Load corresponding verification prompt from `docs/guides/[IDE]_AGENT_VERIFICATION_PROMPT.md`
-3. Execute 10 verification categories systematically
+3. Execute 11 verification categories systematically
 4. Generate gap analysis report with Executive Summary → Findings → Actions
 5. Provide verification commands to run after fixes
 
@@ -92,6 +92,11 @@ Systematically check all 10 categories:
     - Check `docs/guides/IDE_SETUP_VERIFICATION.md` completeness
     - Verify troubleshooting sections tested
     - Check for broken links to config files
+
+11. **Agent/Tool Policy (Dev Programs)**
+    - Check `.cursor/devprograms/GLOBAL_CONFIG.md` for global and per-program `blocked_tools`
+    - Confirm `external_api`/`network` are not restricted (access protected as core right per `docs/PRINCIPLES.md`)
+    - Verify alignment with open-source principles and freedom to think
 
 ### Step 4: Generate Gap Analysis Report
 
@@ -185,6 +190,7 @@ Classify each gap by:
 
 Cross-reference gaps with THE GRID standards:
 
+- **Core values and rights:** `docs/PRINCIPLES.md` (open-source principles, freedom to think; external API/network access protected)
 - **Python 3.13:** `.claude/rules/backend.md`
 - **Development Discipline:** `.claude/rules/discipline.md`
 - **Frontend:** `.claude/rules/frontend.md`

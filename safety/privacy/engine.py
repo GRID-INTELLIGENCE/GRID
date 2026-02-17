@@ -113,18 +113,18 @@ class PrivacyEngine:
     def detect(self, text: str) -> list[DetectedEntity]:
         """Detect PII entities in text"""
         detected = []
-        for entity_type, config in self.patterns.items():
-            for match in re.finditer(config["pattern"], text, re.IGNORECASE):
-                detected.append(
-                    DetectedEntity(
-                        type=entity_type,
-                        value=match.group(),
-                        start=match.start(),
-                        end=match.end(),
-                        confidence=1.0,
-                        context=self._get_context(text, match.start(), match.end()),
-                    )
-                )
+        detected.extend(
+            DetectedEntity(
+                type=entity_type,
+                value=match.group(),
+                start=match.start(),
+                end=match.end(),
+                confidence=1.0,
+                context=self._get_context(text, match.start(), match.end()),
+            )
+            for entity_type, config in self.patterns.items()
+            for match in re.finditer(config["pattern"], text, re.IGNORECASE)
+        )
         return detected
 
     def mask_text(self, text: str) -> PrivacyResult:

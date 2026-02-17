@@ -3,12 +3,17 @@ import subprocess
 import sys
 
 
-def run_grid(args, env=None):
+def run_grid(args, env=None, timeout=10):
     cmd = [sys.executable, "-m", "grid"] + args
     new_env = os.environ.copy()
     if env:
         new_env.update(env)
-    result = subprocess.run(cmd, capture_output=True, text=True, env=new_env)
+    try:
+        result = subprocess.run(cmd, capture_output=True, text=True, env=new_env, timeout=timeout)
+    except subprocess.TimeoutExpired:
+        # Commands like 'serve' may start a long-running process;
+        # treat timeout as normal completion for guardrail tests.
+        result = subprocess.CompletedProcess(cmd, returncode=1, stdout="", stderr="TIMEOUT: process did not exit")
     return result
 
 

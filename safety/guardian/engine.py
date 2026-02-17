@@ -314,9 +314,11 @@ class RegexSetMatcher:
             patterns_snapshot = list(self._patterns.items())
 
         matches = []
-        for rule_id, pattern in patterns_snapshot:
-            for match in pattern.finditer(text):
-                matches.append((rule_id, match.group(), match.start(), match.end()))
+        matches.extend(
+            (rule_id, match.group(), match.start(), match.end())
+            for rule_id, pattern in patterns_snapshot
+            for match in pattern.finditer(text)
+        )
 
         return matches
 
@@ -623,7 +625,7 @@ class GuardianEngine:
     def _get_cache_key(self, text: str, context: dict[str, Any]) -> str:
         """Generate cache key for text evaluation."""
         key_data = f"{text}:{json.dumps(context, sort_keys=True)}:{self.registry.version}"
-        return hashlib.md5(key_data.encode()).hexdigest()
+        return hashlib.md5(key_data.encode()).hexdigest()  # noqa: S324
 
     def _update_cache(self, key: str, value: tuple[list[RuleMatch], float]) -> None:
         """Update cache with LRU eviction."""

@@ -11,14 +11,14 @@ async def test_timestamp_inconsistency():
     print("Testing timestamp inconsistency...")
 
     # Create engine for user1
-    engine1 = await get_safe_engine("user1")
+    await get_safe_engine("user1")
     print("Created engine for user1")
 
     # Wait a bit
     await asyncio.sleep(0.1)
 
     # Access again to trigger timestamp update
-    engine2 = await get_safe_engine("user1")
+    await get_safe_engine("user1")
     print("Accessed engine for user1 again")
 
     # Create multiple engines to potentially trigger cleanup
@@ -45,7 +45,7 @@ async def test_invalid_user_id():
     for user_id, description in test_cases:
         try:
             print(f"Testing {description}: {user_id[:50]}...")
-            engine = await get_safe_engine(user_id)
+            await get_safe_engine(user_id)
             print("  ✓ Accepted (should validate)")
         except Exception as e:
             print(f"  ✗ Rejected: {e}")
@@ -67,7 +67,7 @@ async def test_config_bounds():
         try:
             print(f"Testing {description}...")
             config = make_config()
-            engine = await get_safe_engine("test_user", config)
+            await get_safe_engine("test_user", config)
             print("  ✓ Accepted (should validate bounds)")
         except Exception as e:
             print(f"  ✗ Rejected: {e}")

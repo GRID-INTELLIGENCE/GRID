@@ -32,9 +32,11 @@ class ContentSafetyChecker:
             issues.append({"type": "sensitive_term_detected", "terms": found_terms, "severity": "high"})
 
         # Check for sensitive topics (simplified regex match for example)
-        for topic in self.sensitive_topics:
-            if re.search(rf"\b{topic}\b", text, re.IGNORECASE):
-                issues.append({"type": "sensitive_topic_detected", "topic": topic, "severity": "high"})
+        issues.extend(
+            {"type": "sensitive_topic_detected", "topic": topic, "severity": "high"}
+            for topic in self.sensitive_topics
+            if re.search(rf"\b{topic}\b", text, re.IGNORECASE)
+        )
 
         # Age-appropriate content filtering
         if user_age and user_age < 13:

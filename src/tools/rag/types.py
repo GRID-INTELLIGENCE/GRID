@@ -3,6 +3,15 @@
 from typing import Any, Protocol
 
 
+class EmbeddingProviderError(RuntimeError):
+    """Raised when an embedding provider fails to generate embeddings."""
+
+
+class LLMProviderError(RuntimeError):
+    """Raised when an LLM provider fails to generate a response."""
+
+
+
 class EmbeddingProvider(Protocol):
     """Protocol for embedding providers."""
 

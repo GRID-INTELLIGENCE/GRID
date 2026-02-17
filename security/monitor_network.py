@@ -7,14 +7,12 @@ Provides CLI interface to view blocked/allowed requests and manage whitelist.
 
 import json
 import sys
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
 try:
     from rich.console import Console
-    from rich.layout import Layout
-    from rich.live import Live
     from rich.panel import Panel
     from rich.table import Table
     from rich.text import Text
@@ -316,9 +314,9 @@ class NetworkMonitor:
         rule = {
             "domain": domain,
             "protocol": "https",
-            "description": description or f"Added via monitor at {datetime.now(timezone.utc).isoformat()}",
+            "description": description or f"Added via monitor at {datetime.now(UTC).isoformat()}",
             "added_by": "monitor",
-            "added_date": datetime.now(timezone.utc).isoformat(),
+            "added_date": datetime.now(UTC).isoformat(),
         }
 
         config["whitelist"]["rules"].append(rule)

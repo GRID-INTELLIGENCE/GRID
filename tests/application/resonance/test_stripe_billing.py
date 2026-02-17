@@ -9,6 +9,7 @@ Covers:
 """
 
 import pytest
+from unittest.mock import patch
 
 from application.resonance.stripe_billing import (
     InvoicePreview,
@@ -158,6 +159,20 @@ class TestEventSending:
 
         sent = stripe_billing.get_events_sent()
         assert len(sent) == 1
+        assert sent[0].origin == "callback"
+
+    @pytest.mark.asyncio
+    async def test_send_pending_events_marks_dry_run_origin(self):
+        """Test dry-run path labels event provenance."""
+        billing = StripeBilling(api_key="", meter_event_callback=None)
+        billing.create_meter_event("cus_dry", "test", 5)
+
+        sent_count = await billing.send_pending_events()
+
+        assert sent_count == 1
+        sent = billing.get_events_sent()
+        assert len(sent) == 1
+        assert sent[0].origin == "dry_run"
 
 
 class TestMeterSummary:
@@ -226,6 +241,7 @@ class TestBillingStats:
         assert stats["events_sent"] == 2
         assert stats["customers_tracked"] == 2
         assert stats["total_usage"] == 30
+        assert stats["events_sent_by_origin"]["callback"] == 2
 
 
 class TestMeterConfiguration:
@@ -252,3 +268,24 @@ class TestEnabledState:
     def test_is_enabled_with_callback(self, billing_with_callback):
         """Test enabled state with callback."""
         assert billing_with_callback.is_enabled
+
+
+class TestProductionGuardrails:
+    """Test production guardrails for dry-run mode."""
+
+    def test_production_requires_live_billing_or_override(self):
+        with patch.dict("os.environ", {"MOTHERSHIP_ENVIRONMENT": "production"}, clear=False):
+            with pytest.raises(RuntimeError):
+                StripeBilling(api_key="", meter_event_callback=None)
+
+    def test_production_override_allows_dry_run(self):
+        with patch.dict(
+            "os.environ",
+            {
+                "MOTHERSHIP_ENVIRONMENT": "production",
+                "STRIPE_BILLING_ALLOW_DRY_RUN_IN_PRODUCTION": "true",
+            },
+            clear=False,
+        ):
+            billing = StripeBilling(api_key="", meter_event_callback=None)
+            assert billing is not None

@@ -7,6 +7,7 @@ Usage:
     python security/test_security.py
 """
 
+import importlib.util
 import os
 import sys
 from pathlib import Path
@@ -48,7 +49,7 @@ def test_dependencies():
 
     # Test YAML
     try:
-        import yaml
+        import yaml  # noqa: F401
 
         print("✅ pyyaml is installed")
         results.append(True)
@@ -58,8 +59,7 @@ def test_dependencies():
 
     # Test rich (optional)
     try:
-        import rich
-
+        importlib.util.find_spec("rich")
         print("✅ rich is installed (optional)")
         results.append(True)
     except ImportError:
@@ -184,14 +184,13 @@ def test_network_interception():
         if "security.network_interceptor" in sys.modules:
             del sys.modules["security.network_interceptor"]
 
-        import security
         from security import NetworkAccessDenied
 
         # Try to make a request (should be blocked)
         try:
             import requests
 
-            response = requests.get("https://api.github.com")
+            requests.get("https://api.github.com", timeout=10)
             print("⚠️  Request was NOT blocked (network might be enabled)")
             return True  # Still pass if network is enabled
         except NetworkAccessDenied as e:

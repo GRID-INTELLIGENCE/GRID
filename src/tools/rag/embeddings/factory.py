@@ -33,6 +33,12 @@ def get_embedding_provider(provider_type: str | None = None, config: RAGConfig |
 
     provider_type = provider_type.lower()
 
+    if provider_type == "test":
+        raise ValueError(
+            "Test embedding provider cannot be used via factory in production code. "
+            "Import directly from tools.rag.embeddings.test_provider in test modules only."
+        )
+
     if provider_type == EmbeddingProviderType.OLLAMA.value:
         from .nomic_v2 import OllamaEmbeddingProvider
 

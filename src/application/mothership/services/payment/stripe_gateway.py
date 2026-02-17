@@ -77,6 +77,7 @@ class StripeGateway(PaymentGatewayBase):
                 "status": intent.status,
                 "amount": intent.amount,
                 "currency": intent.currency,
+                "origin": "live",
             }
         except stripe.error.StripeError as e:
             logger.error(f"Stripe payment creation failed: {e}")
@@ -95,6 +96,7 @@ class StripeGateway(PaymentGatewayBase):
                 "type": event.type,
                 "data": event.data.object.to_dict() if hasattr(event.data.object, "to_dict") else event.data.object,
                 "livemode": event.livemode,
+                "origin": "live",
             }
         except ValueError as e:
             logger.error(f"Invalid Stripe webhook payload: {e}")
@@ -119,7 +121,11 @@ class StripeGateway(PaymentGatewayBase):
             return status_map.get(intent.status, PaymentStatus.PENDING)
         except stripe.error.StripeError as e:
             logger.error(f"Stripe transaction status check failed: {e}")
-            return PaymentStatus.FAILED
+            raise IntegrationError(
+                service="stripe",
+                message=f"Transaction status check failed: {str(e)}",
+                details={"error_type": type(e).__name__},
+            ) from e
 
     async def create_subscription(
         self,
@@ -156,6 +162,7 @@ class StripeGateway(PaymentGatewayBase):
                 "status": subscription.status,
                 "current_period_start": subscription.current_period_start,
                 "current_period_end": subscription.current_period_end,
+                "origin": "live",
             }
         except stripe.error.StripeError as e:
             logger.error(f"Stripe subscription creation failed: {e}")
@@ -175,7 +182,11 @@ class StripeGateway(PaymentGatewayBase):
             return True
         except stripe.error.StripeError as e:
             logger.error(f"Stripe subscription cancellation failed: {e}")
-            return False
+            raise IntegrationError(
+                service="stripe",
+                message=f"Subscription cancellation failed: {str(e)}",
+                details={"error_type": type(e).__name__},
+            ) from e
 
     async def refund(
         self,
@@ -201,6 +212,7 @@ class StripeGateway(PaymentGatewayBase):
                 "amount": refund.amount,
                 "status": refund.status,
                 "currency": refund.currency,
+                "origin": "live",
             }
         except stripe.error.StripeError as e:
             logger.error(f"Stripe refund failed: {e}")

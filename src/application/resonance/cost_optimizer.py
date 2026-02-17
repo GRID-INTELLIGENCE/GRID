@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import os
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
@@ -22,6 +23,23 @@ from typing import Any
 from uuid import uuid4
 
 logger = logging.getLogger(__name__)
+
+
+def _parse_bool(value: str | None, default: bool = False) -> bool:
+    if value is None:
+        return default
+    return value.strip().lower() in {"true", "1", "yes", "y", "on"}
+
+
+def _is_production_environment() -> bool:
+    env = (
+        os.getenv("MOTHERSHIP_ENVIRONMENT")
+        or os.getenv("GRID_ENVIRONMENT")
+        or os.getenv("ENVIRONMENT")
+        or os.getenv("ENV")
+        or "development"
+    )
+    return env.strip().lower() in {"production", "prod"}
 
 
 class CostTier(StrEnum):
@@ -77,6 +95,8 @@ class BillingMeterEvent:
     metadata: dict[str, Any] = field(default_factory=dict)
     sent: bool = False
     sent_at: datetime | None = None
+    origin: str = "pending"
+    sent_to_provider: bool = False
 
 
 @dataclass
@@ -135,6 +155,7 @@ class CostOptimizer:
         databricks_client: Any | None = None,
         meter_event_callback: Callable[[BillingMeterEvent], bool] | None = None,
         cost_tier: CostTier = CostTier.STANDARD,
+        allow_dry_run_in_production: bool | None = None,
     ):
         """
         Initialize Cost Optimizer.
@@ -147,8 +168,21 @@ class CostOptimizer:
         """
         self._stripe_api_key = stripe_api_key
         self._databricks_client = databricks_client
+        self._is_default_meter_callback = meter_event_callback is None
         self._meter_callback = meter_event_callback or self._default_meter_callback
         self._cost_tier = cost_tier
+        self._allow_dry_run_in_production = (
+            allow_dry_run_in_production
+            if allow_dry_run_in_production is not None
+            else _parse_bool(os.getenv("COST_OPTIMIZER_ALLOW_DRY_RUN_IN_PRODUCTION"), False)
+        )
+
+        if self._is_default_meter_callback and _is_production_environment() and not self._allow_dry_run_in_production:
+            raise RuntimeError(
+                "CostOptimizer dry-run meter callback is forbidden in production. "
+                "Provide a live meter_event_callback or explicitly allow with "
+                "COST_OPTIMIZER_ALLOW_DRY_RUN_IN_PRODUCTION=true."
+            )
 
         # Current allocation
         self._allocation = ResourceAllocation(
@@ -176,6 +210,8 @@ class CostOptimizer:
 
     def _default_meter_callback(self, event: BillingMeterEvent) -> bool:
         """Default meter callback - logs event (no actual Stripe call)."""
+        event.origin = "dry_run"
+        event.sent_to_provider = False
         logger.info(f"[DRY RUN] Stripe meter event: {event.event_name} = {event.value}")
         return True
 
@@ -422,10 +458,16 @@ class CostOptimizer:
 
         for event in events_to_send:
             try:
+                if self._is_default_meter_callback:
+                    event.origin = "dry_run"
+                else:
+                    event.origin = "callback"
+
                 success = self._meter_callback(event)
                 if success:
                     event.sent = True
                     event.sent_at = datetime.now(UTC)
+                    event.sent_to_provider = not self._is_default_meter_callback
                     sent_count += 1
 
                     # Update cost metrics

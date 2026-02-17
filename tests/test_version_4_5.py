@@ -8,11 +8,12 @@ Tests validate v4.5 characteristics:
 - Autonomous discoveries
 """
 
-import numpy as np
 import pytest
 
 # Skip this entire module if required dependencies don't exist
 pytest.importorskip("grid.version_4_5", reason="grid.version_4_5 module not implemented")
+
+import numpy as np  # noqa: E402 — imported after skip guard
 
 from grid.version_4_5 import AdaptiveConfig, IntelligenceV45, PredictionState, V45Metrics
 

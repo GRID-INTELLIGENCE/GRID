@@ -8,11 +8,12 @@ These will be re-enabled in Phase 3 Sprint 2 after dependency resolution.
 
 from unittest.mock import Mock, patch
 
-import numpy as np
 import pytest
 
 # Skip collection entirely for this module
 pytest.skip("HuggingFace Hub importlib_metadata version issue", allow_module_level=True)
+
+import numpy as np  # noqa: E402 — imported after skip guard
 
 from tools.rag.cross_encoder_reranker import CrossEncoderReranker
 from tools.rag.embeddings.simple import SimpleEmbeddings

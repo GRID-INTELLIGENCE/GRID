@@ -1,1 +1,80 @@
-{}
+{
+    "python.defaultInterpreterPath": ".venv/Scripts/python.exe",
+    "python.languageServer": "Pylance",
+    "python.analysis.typeCheckingMode": "basic",
+    "python.analysis.extraPaths": [
+        "./src",
+        "./safety",
+        "./security",
+        "./boundaries"
+    ],
+    "python.testing.pytestEnabled": true,
+    "python.testing.pytestArgs": [
+        "tests"
+    ],
+    "[python]": {
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.formatOnSave": true,
+        "editor.rulers": [
+            120
+        ],
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit",
+            "source.fixAll": "explicit"
+        }
+    },
+    "files.eol": "\n",
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true,
+    "files.autoSave": "onFocusChange",
+    "files.exclude": {
+        "**/.venv": true,
+        "**/__pycache__": true,
+        "**/.pytest_cache": true,
+        "**/.mypy_cache": true,
+        "**/.ruff_cache": true,
+        "**/node_modules": true,
+        "**/dist": true,
+        "**/build": true,
+        "**/archive": true,
+        "**/.rag_db": true,
+        "**/.rag_logs": true,
+        "**/.test_rag_db": true,
+        "**/.test_eval_rag_db": true
+    },
+    "search.exclude": {
+        "**/.venv": true,
+        "**/__pycache__": true,
+        "**/.pytest_cache": true,
+        "**/.mypy_cache": true,
+        "**/.ruff_cache": true,
+        "**/node_modules": true,
+        "**/dist": true,
+        "**/build": true,
+        "**/archive": true,
+        "**/uv.lock": true
+    },
+    "files.watcherExclude": {
+        "**/.venv/**": true,
+        "**/__pycache__/**": true,
+        "**/.pytest_cache/**": true,
+        "**/.mypy_cache/**": true,
+        "**/.ruff_cache/**": true,
+        "**/node_modules/**": true,
+        "**/dist/**": true,
+        "**/build/**": true,
+        "**/archive/**": true
+    },
+    "ruff.importStrategy": "fromEnvironment",
+    "editor.formatOnSave": true,
+    "terminal.integrated.defaultProfile.windows": "PowerShell",
+    "terminal.integrated.env.windows": {
+        "PROJECT_ROOT": "${workspaceFolder}",
+        "PYTHONPATH": "${workspaceFolder}/src",
+        "GRID_HOME": "${workspaceFolder}/src/grid",
+        "COGNITIVE_HOME": "${workspaceFolder}/src/cognitive",
+        "RESONANCE_HOME": "${workspaceFolder}/src/application/resonance",
+        "ENV": "development",
+        "PYTHON_VERSION": "3.13"
+    }
+}

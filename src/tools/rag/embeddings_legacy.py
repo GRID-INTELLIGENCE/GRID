@@ -9,7 +9,7 @@ from grid.services.embeddings.embedding_client import OllamaEmbeddingClient
 
 logger = logging.getLogger(__name__)
 
-from .types import EmbeddingProvider
+from .types import EmbeddingProvider, EmbeddingProviderError
 
 
 class OllamaEmbedding(EmbeddingProvider):
@@ -35,9 +35,10 @@ class OllamaEmbedding(EmbeddingProvider):
             # Convert to sparse dict (keep only significant values)
             return {str(i): v for i, v in enumerate(vector) if abs(v) > 0.01}
         except Exception as e:
-            logger.warning(f"Ollama embedding error: {e}")
-            # Fallback to simple embedding
-            return SimpleEmbedding().embed(text)
+            logger.error(f"Ollama embedding failed: {e}")
+            raise EmbeddingProviderError(
+                f"Failed to generate embedding using Ollama model {self.model}: {e}"
+            ) from e
 
     async def _async_subprocess_embed(self, text: str) -> dict[str, float]:
         """Get embeddings using Ollama via async subprocess."""
@@ -70,17 +71,21 @@ class OllamaEmbedding(EmbeddingProvider):
             client = self._get_native_client()
             resp = await client.embed([text], model=self.model)
             if not resp.embeddings:
-                return {}
+                raise EmbeddingProviderError("Ollama returned empty embeddings")
             vector = resp.embeddings[0]
             # Convert to sparse dict (keep only significant values)
             return {str(i): v for i, v in enumerate(vector) if abs(v) > 0.01}
+        except EmbeddingProviderError:
+            raise
         except Exception as e:
             logger.debug(f"Ollama Native embedding error: {e}, trying async subprocess...")
             try:
                 return await self._async_subprocess_embed(text)
             except Exception as e2:
-                logger.warning(f"Ollama async subprocess error: {e2}, falling back to simple embedding")
-                return SimpleEmbedding().embed(text)
+                logger.error(f"Ollama async subprocess also failed: {e2}")
+                raise EmbeddingProviderError(
+                    f"Failed to generate embedding using Ollama model {self.model}: {e2}"
+                ) from e2
 
     def embed_batch(self, texts: list[str]) -> list[dict[str, float]]:
         """Get embeddings for multiple texts (sync fallback to individual)."""
@@ -95,8 +100,10 @@ class OllamaEmbedding(EmbeddingProvider):
             results = [{str(i): v for i, v in enumerate(vector) if abs(v) > 0.01} for vector in resp.embeddings]
             return results
         except Exception as e:
-            print(f"Ollama Native batch embedding error: {e}")
-            return [SimpleEmbedding().embed(t) for t in texts]
+            logger.error(f"Ollama batch embedding failed: {e}")
+            raise EmbeddingProviderError(
+                f"Failed to generate batch embeddings using Ollama model {self.model}: {e}"
+            ) from e
 
 
 class SimpleEmbedding(EmbeddingProvider):
@@ -213,16 +220,27 @@ class OpenAIEmbedding(EmbeddingProvider):
         """Get embeddings using OpenAI API."""
         try:
             from openai import OpenAI  # type: ignore[import-untyped]
+        except ImportError as e:
+            raise EmbeddingProviderError(
+                "OpenAI library not installed. Install with: uv add openai"
+            ) from e
 
-            client = OpenAI(api_key=self.api_key) if self.api_key else OpenAI()
+        if not self.api_key:
+            raise EmbeddingProviderError(
+                "OpenAI API key not provided. Set OPENAI_API_KEY environment variable."
+            )
 
+        try:
+            client = OpenAI(api_key=self.api_key)
             response = client.embeddings.create(model=self.model, input=text)
             vector = response.data[0].embedding
             # Convert to sparse dict
             return {str(i): v for i, v in enumerate(vector) if abs(v) > 0.01}
         except Exception as e:
-            logger.warning(f"OpenAI embedding error: {e}")
-            return SimpleEmbedding().embed(text)
+            logger.error(f"OpenAI embedding failed: {e}")
+            raise EmbeddingProviderError(
+                f"Failed to generate embedding using OpenAI model {self.model}: {e}"
+            ) from e
 
     def embed_batch(self, texts: list[str]) -> list[dict[str, float]]:
         """Get embeddings for multiple texts."""
@@ -261,15 +279,20 @@ class HuggingFaceEmbedding(EmbeddingProvider):
     def embed(self, text: str) -> dict[str, float]:
         """Get embeddings using Hugging Face model."""
         if self.model is None:
-            return SimpleEmbedding().embed(text)
+            raise EmbeddingProviderError(
+                f"HuggingFace model '{self.model_name}' failed to load. "
+                "Ensure sentence-transformers is installed: uv add sentence-transformers"
+            )
 
         try:
             vector = self.model.encode(text).tolist()
             # Convert to sparse dict
             return {str(i): v for i, v in enumerate(vector) if abs(v) > 0.01}
         except Exception as e:
-            logger.warning(f"Hugging Face embedding error: {e}")
-            return SimpleEmbedding().embed(text)
+            logger.error(f"Hugging Face embedding failed: {e}")
+            raise EmbeddingProviderError(
+                f"Failed to generate embedding using HuggingFace model {self.model_name}: {e}"
+            ) from e
 
     def embed_batch(self, texts: list[str]) -> list[dict[str, float]]:
         """Get embeddings for multiple texts."""

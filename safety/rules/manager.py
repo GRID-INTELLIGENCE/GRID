@@ -250,8 +250,7 @@ class RecursiveInspector:
             if any(k in obj for k in ("def ", "import ", "class ", ";", "eval(", "exec(", "os.", "sys.", "subprocess")):
                 # If it looks like code, we MUST run code analysis
                 code_violations = self.code_analyzer.analyze(obj)
-                for v in code_violations:
-                    violations.append(f"[{path}] {v}")
+                violations.extend(f"[{path}] {v}" for v in code_violations)
 
         return violations
 
@@ -322,8 +321,7 @@ class SafetyRuleManager:
         flattened_text = json.dumps(data) if isinstance(data, (dict, list)) else str(data)
         prompt_violations = self.prompt_inspector.analyze(flattened_text, ctx)
 
-        for match in prompt_violations:
-            reasons.append(f"Content Policy Violation: {match.rule_name} (Severity: {match.severity.value})")
+        reasons.extend(f"Content Policy Violation: {match.rule_name} (Severity: {match.severity.value})" for match in prompt_violations)
 
         is_safe = len(reasons) == 0
 

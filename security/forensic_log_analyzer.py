@@ -137,8 +137,7 @@ class ForensicLogAnalyzer:
         blocked = analysis["blocked_requests"]
         if blocked:
             report.append("## Blocked Requests")
-            for req in blocked:
-                report.append(f"- **{req['timestamp']}**: {req['method']} {req['url']} (Reason: {req['reason']})")
+            report.extend(f"- **{req['timestamp']}**: {req['method']} {req['url']} (Reason: {req['reason']})" for req in blocked)
             report.append("")
         else:
             report.append("## Blocked Requests")
@@ -149,8 +148,7 @@ class ForensicLogAnalyzer:
         inits = analysis["network_initializations"]
         if inits:
             report.append("## Network Access Control")
-            for init in inits:
-                report.append(f"- **{init['timestamp']}**: {init['message']}")
+            report.extend(f"- **{init['timestamp']}**: {init['message']}" for init in inits)
             report.append("")
         else:
             report.append("## Network Access Control")
@@ -161,16 +159,14 @@ class ForensicLogAnalyzer:
         errors = analysis["errors_warnings"]
         if errors:
             report.append("## Errors and Warnings")
-            for err in errors:
-                report.append(f"- **{err['level']}** {err['timestamp']}: {err['message']}")
+            report.extend(f"- **{err['level']}** {err['timestamp']}: {err['message']}" for err in errors)
             report.append("")
 
         # Anomalies
         anomalies = analysis["anomalies"]
         if anomalies:
             report.append("## Anomalies Detected")
-            for anomaly in anomalies:
-                report.append(f"- {anomaly}")
+            report.extend(f"- {anomaly}" for anomaly in anomalies)
             report.append("")
 
         # Assessment
