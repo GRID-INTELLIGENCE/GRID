@@ -60,11 +60,13 @@ from .db.engine import dispose_async_engine, get_async_engine
 from .dependencies import get_cockpit_service, get_uow, reset_cockpit_service
 from .exceptions import MothershipError
 from .middleware.data_corruption import DataCorruptionDetectionMiddleware
+from .middleware.drt_middleware_unified import UnifiedDRTMiddleware, set_unified_drt_middleware
 from .middleware.stream_monitor import StreamMonitorMiddleware
 from .routers import create_api_router
 from .routers.agentic import router as agentic_router
 from .routers.cockpit import router as cockpit_router
 from .routers.corruption_monitoring import router as corruption_router
+from .routers.drt_monitoring_unified import router as drt_router
 from .routers.health import router as health_router
 from .routers.payment import get_payment_gateway
 from .routers.safety import router as safety_router
@@ -681,8 +683,6 @@ The API supports multiple authentication methods:
     # 2. Mothership custom middlewares (Centralized Setup)
     from .middleware import setup_middleware
     from .middleware.accountability_contract import AccountabilityContractMiddleware
-    from .middleware.drt_middleware_unified import UnifiedDRTMiddleware, set_unified_drt_middleware
-    from .routers.drt_monitoring_unified import router as drt_router
 
     # This sets up:
     # - ErrorHandlingMiddleware

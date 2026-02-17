@@ -7,11 +7,12 @@ using JSON files. Data survives application restarts.
 
 from __future__ import annotations
 
+import aiofiles
 import asyncio
 import json
 import logging
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
@@ -168,7 +169,7 @@ class DRTStorage:
         )
 
     def _load_behavioral_history(self) -> None:
-        """Load behavioral history from disk."""
+        """Load behavioral history from disk (synchronous for __init__)."""
         if self.behavioral_history_file.exists():
             try:
                 with open(self.behavioral_history_file) as f:
@@ -180,7 +181,7 @@ class DRTStorage:
                 self._behavioral_history = []
 
     def _load_attack_vectors(self) -> None:
-        """Load attack vectors from disk."""
+        """Load attack vectors from disk (synchronous for __init__)."""
         if self.attack_vectors_file.exists():
             try:
                 with open(self.attack_vectors_file) as f:
@@ -198,23 +199,23 @@ class DRTStorage:
             await self._save_attack_vectors()
 
     async def _save_behavioral_history(self) -> None:
-        """Save behavioral history to disk."""
+        """Save behavioral history to disk asynchronously."""
         try:
             # Limit history before saving
             history_to_save = self._behavioral_history[-self.max_history_entries :]
 
-            with open(self.behavioral_history_file, "w") as f:
-                json.dump(history_to_save, f, indent=2)
+            async with aiofiles.open(self.behavioral_history_file, mode="w") as f:
+                await f.write(json.dumps(history_to_save, indent=2))
 
             logger.debug(f"Saved {len(history_to_save)} behavioral history entries")
         except Exception as e:
             logger.error(f"Failed to save behavioral history: {e}")
 
     async def _save_attack_vectors(self) -> None:
-        """Save attack vectors to disk."""
+        """Save attack vectors to disk asynchronously."""
         try:
-            with open(self.attack_vectors_file, "w") as f:
-                json.dump(self._attack_vectors, f, indent=2)
+            async with aiofiles.open(self.attack_vectors_file, mode="w") as f:
+                await f.write(json.dumps(self._attack_vectors, indent=2))
 
             logger.debug(f"Saved {len(self._attack_vectors)} attack vectors")
         except Exception as e:

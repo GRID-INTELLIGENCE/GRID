@@ -9,7 +9,7 @@ import asyncio
 import logging
 import random
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from typing import Any, Callable
 
 from fastapi import Request, Response
@@ -142,7 +142,7 @@ class UnifiedDRTMiddleware(BaseHTTPMiddleware):
 
         elif self.enforcement_mode == "enforce":
             # Apply rate limiting and other enforcement measures
-            self.escalated_endpoints[path] = datetime.utcnow() + timedelta(minutes=self.escalation_timeout_minutes)
+            self.escalated_endpoints[path] = datetime.now(timezone.utc) + timedelta(minutes=self.escalation_timeout_minutes)
 
             if self.alert_on_escalation:
                 logger.warning(
@@ -156,7 +156,7 @@ class UnifiedDRTMiddleware(BaseHTTPMiddleware):
             await asyncio.sleep(0.1 * self.rate_limit_multiplier)
 
         # Record escalation in middleware state
-        self.escalated_endpoints[path] = datetime.utcnow() + timedelta(minutes=self.escalation_timeout_minutes)
+        self.escalated_endpoints[path] = datetime.now(timezone.utc) + timedelta(minutes=self.escalation_timeout_minutes)
 
     def _add_drt_headers(self, response: Response, monitoring_result: dict[str, Any]) -> None:
         """Add DRT monitoring headers to response."""
@@ -188,7 +188,7 @@ class UnifiedDRTMiddleware(BaseHTTPMiddleware):
         """Log API movement for audit trail."""
 
         log_data = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "method": request.method,
             "path": request.url.path,
             "query": request.url.query,

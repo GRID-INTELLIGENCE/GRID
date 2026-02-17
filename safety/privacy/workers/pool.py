@@ -82,10 +82,8 @@ class PrivacyWorkerPool:
             async with self._semaphore:
                 try:
                     # Run in executor to avoid blocking
-                    result = await asyncio.wait_for(
-                        asyncio.get_event_loop().run_in_executor(self._executor, lambda: processor(item)),
-                        timeout=self._items_timeout,
-                    )
+                    async with asyncio.timeout(self._items_timeout):
+                        result = await asyncio.get_event_loop().run_in_executor(self._executor, lambda: processor(item))
                     return {"index": index, "result": result, "error": None}
                 except TimeoutError:
                     logger.warning("batch_item_timeout", index=index)
@@ -155,10 +153,8 @@ class PrivacyWorkerPool:
         async def process_item(text: str, index: int) -> dict[str, Any]:
             async with semaphore:
                 try:
-                    result = await asyncio.wait_for(
-                        asyncio.get_event_loop().run_in_executor(self._executor, lambda: processor(text)),
-                        timeout=self._items_timeout,
-                    )
+                    async with asyncio.timeout(self._items_timeout):
+                        result = await asyncio.get_event_loop().run_in_executor(self._executor, lambda: processor(text))
                     return {"index": index, "result": result, "error": None}
                 except TimeoutError:
                     return {

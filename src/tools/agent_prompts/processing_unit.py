@@ -13,7 +13,7 @@ import asyncio
 import hashlib
 import json
 from dataclasses import asdict, dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -135,7 +135,7 @@ class ProcessingUnit:
         """
         # Step 1: Initial logging and categorization
         case_id = self._generate_case_id(raw_input)
-        timestamp = datetime.now().isoformat()
+        timestamp = datetime.now(timezone.utc).isoformat()
 
         # Step 2: Structure raw input with iterative logging
         structured_data = self.case_filing.log_and_categorize(
@@ -251,7 +251,7 @@ class ProcessingUnit:
     def _generate_case_id(self, raw_input: str) -> str:
         """Generate unique case ID from input."""
         # Use hash of input + timestamp for uniqueness
-        hash_input = f"{raw_input}{datetime.now().isoformat()}"
+        hash_input = f"{raw_input}{datetime.now(timezone.utc).isoformat()}"
         case_hash = hashlib.sha256(hash_input.encode()).hexdigest()[:12]
         return f"CASE-{case_hash}"
 

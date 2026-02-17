@@ -175,10 +175,8 @@ class AckTracker:
         # Retry loop
         for attempt in range(self._max_retries):
             try:
-                ack_data = await asyncio.wait_for(
-                    ws.receive_text(),
-                    timeout=self._timeout,
-                )
+                async with asyncio.timeout(self._timeout):
+                    ack_data = await ws.receive_text()
                 ack = json.loads(ack_data)
 
                 # Check if this is an ACK for our message
@@ -452,7 +450,8 @@ async def websocket_endpoint(
         while True:
             # Check for incoming messages (ping/pong)
             try:
-                data = await asyncio.wait_for(websocket.receive_text(), timeout=1.0)
+                async with asyncio.timeout(1.0):
+                    data = await websocket.receive_text()
                 # Handle ping/pong or other messages if needed
                 if data == "ping":
                     await websocket.send_text("pong")

@@ -79,7 +79,8 @@ class SecurityAuditChannel:
             }
 
             # Write to file (append mode)
-            import aiofiles  # type: ignore[import-not-found,import-untyped]
+            import aiofiles
+            import json
 
             async with aiofiles.open(self._audit_file, "a") as f:
                 await f.write(json.dumps(audit_entry) + "\n")

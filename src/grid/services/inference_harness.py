@@ -10,7 +10,7 @@ import os
 import subprocess
 import tempfile
 from dataclasses import dataclass
-from enum import Enum
+from enum import Enum, StrEnum
 from pathlib import Path
 from typing import Any, Protocol, runtime_checkable
 
@@ -18,7 +18,7 @@ from typing import Any, Protocol, runtime_checkable
 logger = logging.getLogger("grid.inference")
 
 
-class ProviderType(Enum):
+class ProviderType(StrEnum):
     """Supported inference providers."""
 
     OLLAMA = "ollama"

@@ -27,7 +27,7 @@ import logging
 import os
 import time
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
 from typing import Any
@@ -351,7 +351,7 @@ class EnhancedCognitiveEngine:
             metrics.record_phase("xai_generation", time.time() - phase_start)
 
             # Cache state
-            self._state_cache[user_id] = (cognitive_state, datetime.now())
+            self._state_cache[user_id] = (cognitive_state, datetime.now(timezone.utc))
 
             # Build result
             result = {
@@ -404,7 +404,7 @@ class EnhancedCognitiveEngine:
         interaction = {
             "user_id": user_id,
             "action": action,
-            "timestamp": datetime.now(),
+            "timestamp": datetime.now(timezone.utc),
             "case_id": case_id,
             "metadata": metadata or {},
         }
@@ -677,7 +677,7 @@ class EnhancedCognitiveEngine:
         temporal_route: dict[str, Any],
     ) -> dict[str, Any]:
         """Generate comprehensive XAI explanation with cognitive context."""
-        decision_id = f"{interaction['user_id']}_{interaction['action']}_{datetime.now().isoformat()}"
+        decision_id = f"{interaction['user_id']}_{interaction['action']}_{datetime.now(timezone.utc).isoformat()}"
 
         # Build cognitive context
         load_type = cognitive_state.load_type

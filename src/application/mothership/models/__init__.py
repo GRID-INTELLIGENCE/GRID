@@ -11,7 +11,7 @@ from __future__ import annotations
 import uuid
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timezone
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 # =============================================================================
@@ -19,7 +19,7 @@ from typing import Any
 # =============================================================================
 
 
-class SessionStatus(str, Enum):
+class SessionStatus(StrEnum):
     """Session lifecycle states."""
 
     INITIALIZING = "initializing"
@@ -30,7 +30,7 @@ class SessionStatus(str, Enum):
     TERMINATED = "terminated"
 
 
-class OperationStatus(str, Enum):
+class OperationStatus(StrEnum):
     """Operation execution states."""
 
     PENDING = "pending"
@@ -43,7 +43,7 @@ class OperationStatus(str, Enum):
     TIMEOUT = "timeout"
 
 
-class OperationType(str, Enum):
+class OperationType(StrEnum):
     """Types of cockpit operations."""
 
     SYSTEM_CHECK = "system_check"
@@ -59,7 +59,7 @@ class OperationType(str, Enum):
     CUSTOM = "custom"
 
 
-class SystemState(str, Enum):
+class SystemState(StrEnum):
     """Overall system states."""
 
     OFFLINE = "offline"
@@ -71,7 +71,7 @@ class SystemState(str, Enum):
     ERROR = "error"
 
 
-class ComponentHealth(str, Enum):
+class ComponentHealth(StrEnum):
     """Health status for system components."""
 
     HEALTHY = "healthy"
@@ -80,7 +80,7 @@ class ComponentHealth(str, Enum):
     UNKNOWN = "unknown"
 
 
-class AlertSeverity(str, Enum):
+class AlertSeverity(StrEnum):
     """Alert severity levels."""
 
     INFO = "info"

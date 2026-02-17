@@ -2,6 +2,15 @@
 GUARDIAN - Dynamic Rule Loader
 Project GUARDIAN: Phase 1 - Dynamic Rule Loading and Hot-Reload
 
+LIMITATIONS:
+    - Default keyword patterns contain pronominal forms (e.g. "kill myself",
+      "hate you") required for accurate detection of real-world harmful input.
+      These are technical detection artifacts, not generative content.
+      Rule names and descriptions use nominalized forms per Trust Layer Rule 1.1/1.2.
+    - Distress signals (self-harm, suicidal ideation) route to ESCALATE action
+      (care pathway), never BLOCK, per Trust Layer Rule 4.2.
+    - Pattern data is AI-assembled. No external dataset is cited unless verified.
+
 Loads safety rules from YAML/JSON files with hot-reload capability.
 Supports versioning, validation, and atomic updates.
 """

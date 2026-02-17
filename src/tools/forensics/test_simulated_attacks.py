@@ -44,8 +44,10 @@ class TestFilesystemAttacks:
         # Verify audit logging
         audit_log_path = _mcp_filesystem / "audit.log"
         if audit_log_path.exists():
-            with open(audit_log_path, encoding="utf-8") as f:
-                logs = [json.loads(line.strip()) for line in f if line.strip()]
+            import aiofiles
+            async with aiofiles.open(audit_log_path, encoding="utf-8") as f:
+                content = await f.read()
+                logs = [json.loads(line.strip()) for line in content.splitlines() if line.strip()]
 
             # Find the access denied event
             denied_events = [
@@ -69,8 +71,10 @@ class TestFilesystemAttacks:
         # Verify audit logging
         audit_log_path = _mcp_filesystem / "audit.log"
         if audit_log_path.exists():
-            with open(audit_log_path, encoding="utf-8") as f:
-                logs = [json.loads(line.strip()) for line in f if line.strip()]
+            import aiofiles
+            async with aiofiles.open(audit_log_path, encoding="utf-8") as f:
+                content = await f.read()
+                logs = [json.loads(line.strip()) for line in content.splitlines() if line.strip()]
 
             # Find the access granted event
             access_events = [
@@ -100,8 +104,10 @@ class TestPlaywrightAttacks:
         # Verify audit logging
         audit_log_path = _mcp_playwright / "audit.log"
         if audit_log_path.exists():
-            with open(audit_log_path, encoding="utf-8") as f:
-                logs = [json.loads(line.strip()) for line in f if line.strip()]
+            import aiofiles
+            async with aiofiles.open(audit_log_path, encoding="utf-8") as f:
+                content = await f.read()
+                logs = [json.loads(line.strip()) for line in content.splitlines() if line.strip()]
 
             # Find the access denied event
             denied_events = [
@@ -121,8 +127,10 @@ class TestPlaywrightAttacks:
         # Verify audit logging
         audit_log_path = _mcp_playwright / "audit.log"
         if audit_log_path.exists():
-            with open(audit_log_path, encoding="utf-8") as f:
-                logs = [json.loads(line.strip()) for line in f if line.strip()]
+            import aiofiles
+            async with aiofiles.open(audit_log_path, encoding="utf-8") as f:
+                content = await f.read()
+                logs = [json.loads(line.strip()) for line in content.splitlines() if line.strip()]
 
             # Find the access denied event
             denied_events = [

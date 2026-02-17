@@ -13,13 +13,13 @@ from __future__ import annotations
 import logging
 import time
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
-class ViolationType(Enum):
+class ViolationType(StrEnum):
     REINFORCEMENT_BURST = "reinforcement_burst"
     PATTERN_DRIFT = "pattern_drift"
     VELOCITY_ANOMALY = "velocity_anomaly"

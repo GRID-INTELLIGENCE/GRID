@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+import aiofiles
 import json
 import logging
-from datetime import datetime
 from pathlib import Path
+from datetime import datetime, timezone
 from typing import Any
 
 from .schemas import IntegrationStateUpdate
@@ -54,15 +55,15 @@ class IntegrationStateManager:
             }
 
     async def _save_state(self) -> None:
-        """Save integration state to JSON."""
+        """Save integration state to JSON asynchronously."""
         try:
             # Ensure directory exists
             self.integration_json_path.parent.mkdir(parents=True, exist_ok=True)
 
             # Write atomically
             temp_path = self.integration_json_path.with_suffix(".tmp")
-            with open(temp_path, "w", encoding="utf-8") as f:
-                json.dump(self._state, f, indent=2)
+            async with aiofiles.open(temp_path, mode="w", encoding="utf-8") as f:
+                await f.write(json.dumps(self._state, indent=2))
             temp_path.replace(self.integration_json_path)
 
             logger.debug(f"Saved integration state to {self.integration_json_path}")
@@ -95,7 +96,7 @@ class IntegrationStateManager:
             self._state["routing_history"].append(
                 {
                     "path": str(route_path),
-                    "timestamp": datetime.now().isoformat(),
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
                     "updates": updates,
                 }
             )

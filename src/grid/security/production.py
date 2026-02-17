@@ -8,13 +8,13 @@ from __future__ import annotations
 import logging
 import os
 from dataclasses import dataclass
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
-class Environment(Enum):
+class Environment(StrEnum):
     """Deployment environments."""
 
     DEVELOPMENT = "development"
@@ -22,7 +22,7 @@ class Environment(Enum):
     PRODUCTION = "production"
 
 
-class SecurityLevel(Enum):
+class SecurityLevel(StrEnum):
     """Security enforcement levels."""
 
     PERMISSIVE = "permissive"

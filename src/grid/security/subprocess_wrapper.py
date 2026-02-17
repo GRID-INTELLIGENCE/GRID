@@ -437,7 +437,8 @@ class SecureSubprocess:
             )
 
             try:
-                stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=timeout)
+                async with asyncio.timeout(timeout):
+                    stdout, stderr = await process.communicate()
             except TimeoutError:
                 process.kill()
                 await process.wait()

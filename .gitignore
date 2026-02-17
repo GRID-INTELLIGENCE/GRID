@@ -674,3 +674,10 @@ environment_accountability_report.json
 
 # Local Netlify folder
 .netlify
+
+# ==========================
+# CASCADE / OPENCODE SCRATCH
+# ==========================
+.cascade_context.json
+codeq.txt
+codequality.txt

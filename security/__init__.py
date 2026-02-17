@@ -213,14 +213,14 @@ def whitelist_domain(domain: str, description: str = ""):
             return False
 
     # Add to whitelist
-    from datetime import datetime
+    from datetime import datetime, timezone
 
     rule = {
         "domain": domain,
         "protocol": "https",
         "description": description or "Added programmatically",
         "added_by": "api",
-        "added_date": datetime.utcnow().isoformat(),
+        "added_date": datetime.now(pytz.utc).isoformat(),
     }
 
     config["whitelist"]["rules"].append(rule)

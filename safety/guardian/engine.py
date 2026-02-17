@@ -2,6 +2,16 @@
 GUARDIAN - Unified Rule Engine
 Project GUARDIAN: Phase 1 - Unified Rule Orchestration
 
+LIMITATIONS:
+    - Keyword and regex matching alone is NOT sufficient for production safety
+      without classifier context (embedding-based, LLM-scored, or human review).
+    - Detection patterns necessarily contain pronominal forms (e.g. first/second
+      person pronouns) to match real-world harmful text. These are technical
+      artifacts for detection accuracy, not generative content. Rule names and
+      descriptions use nominalized forms per Trust Layer Rule 1.1/1.2.
+    - Pattern data in this module is AI-assembled from public safety taxonomies.
+      No external dataset is cited unless explicitly verified.
+
 This module provides a high-performance, unified rule engine for safety enforcement.
 Uses hybrid approach: Aho-Corasick Trie for keywords + Compiled RegexSet for patterns.
 Optimized for <50ms pre-check budget.
@@ -25,7 +35,7 @@ import time
 from collections import OrderedDict, defaultdict
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from enum import Enum, auto
+from enum import Enum, StrEnum, auto
 from typing import Any
 
 # Try to import optional performance libraries
@@ -46,7 +56,7 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
-class MatchType(Enum):
+class MatchType(StrEnum):
     """Types of pattern matching supported."""
 
     KEYWORD = auto()  # Simple substring matching (Trie)
@@ -55,7 +65,7 @@ class MatchType(Enum):
     COMPOSITE = auto()  # Combination of multiple patterns
 
 
-class Severity(Enum):
+class Severity(StrEnum):
     """Severity levels for rule matches."""
 
     LOW = "low"
@@ -64,7 +74,7 @@ class Severity(Enum):
     CRITICAL = "critical"
 
 
-class RuleAction(Enum):
+class RuleAction(StrEnum):
     """Actions to take when rule matches."""
 
     BLOCK = "block"
@@ -256,20 +266,38 @@ class RegexSetMatcher:
         self._rule_map: dict[str, SafetyRule] = {}  # rule_id -> rule
         self._lock = threading.RLock()
 
+    @staticmethod
+    def _validate_regex(pattern: str, rule_id: str) -> bool:
+        """Validate regex pattern is safe to compile (ReDoS guard)."""
+        try:
+            re.compile(pattern)
+        except re.error as e:
+            logger.warning(f"Invalid regex in rule {rule_id}: {e}")
+            return False
+        # Heuristic: reject patterns with nested quantifiers (common ReDoS vector)
+        if re.search(r"(\.\*|\.\+|\.\?)\s*(\.\*|\.\+|\.\?)", pattern):
+            logger.warning(f"Potentially unsafe nested quantifiers in rule {rule_id}")
+            return False
+        return True
+
     def add_rule(self, rule: SafetyRule) -> None:
         """Add a regex rule."""
         with self._lock:
             if rule.match_type != MatchType.REGEX:
                 return
 
-            # Combine all patterns with OR
-            if rule.patterns:
+            # Combine all patterns with OR (with ReDoS validation)
+            safe_patterns = [
+                p for p in rule.patterns
+                if self._validate_regex(p, rule.id)
+            ]
+            if safe_patterns:
                 flags = 0 if rule.case_sensitive else re.IGNORECASE
-                combined = "|".join(f"({p})" for p in rule.patterns)
+                combined = "|".join(f"({p})" for p in safe_patterns)
                 self._patterns[rule.id] = re.compile(combined, flags)
                 self._rule_map[rule.id] = rule
 
-                logger.debug(f"Added regex rule {rule.id} with {len(rule.patterns)} patterns")
+                logger.debug(f"Added regex rule {rule.id} with {len(safe_patterns)} patterns")
 
     def match(self, text: str) -> list[tuple[str, str, int, int]]:
         """
@@ -280,12 +308,15 @@ class RegexSetMatcher:
         if not text:
             return []
 
-        matches = []
-
+        # Snapshot patterns under lock, then iterate without lock to avoid
+        # serializing concurrent evaluations during regex matching
         with self._lock:
-            for rule_id, pattern in self._patterns.items():
-                for match in pattern.finditer(text):
-                    matches.append((rule_id, match.group(), match.start(), match.end()))
+            patterns_snapshot = list(self._patterns.items())
+
+        matches = []
+        for rule_id, pattern in patterns_snapshot:
+            for match in pattern.finditer(text):
+                matches.append((rule_id, match.group(), match.start(), match.end()))
 
         return matches
 
@@ -372,6 +403,12 @@ class RuleRegistry:
         with self._lock:
             self._version = version
             self._last_updated = datetime.now(UTC).isoformat()
+
+    @property
+    def version(self) -> str:
+        """Get registry version (thread-safe)."""
+        with self._lock:
+            return self._version
 
     def get_stats(self) -> dict[str, Any]:
         """Get registry statistics."""
@@ -529,7 +566,7 @@ class GuardianEngine:
         # Sort by priority and severity
         def _get_priority(rule_id: str) -> int:
             rule = self.registry.get(rule_id)
-            return rule.priority if rule else 0
+            return rule.priority if rule else 999
 
         matches.sort(
             key=lambda m: (
@@ -546,12 +583,14 @@ class GuardianEngine:
             )
         )
 
-        # Limit matches per rule
-        seen_rules = set()
+        # Limit matches per rule using SafetyRule.max_matches
+        rule_match_counts: dict[str, int] = defaultdict(int)
         filtered_matches = []
         for match in matches:
-            if match.rule_id not in seen_rules:
-                seen_rules.add(match.rule_id)
+            rule = self.registry.get(match.rule_id)
+            max_allowed = rule.max_matches if rule else 1
+            if rule_match_counts[match.rule_id] < max_allowed:
+                rule_match_counts[match.rule_id] += 1
                 filtered_matches.append(match)
 
         elapsed_ms = (time.perf_counter() - start_time) * 1000
@@ -583,7 +622,7 @@ class GuardianEngine:
 
     def _get_cache_key(self, text: str, context: dict[str, Any]) -> str:
         """Generate cache key for text evaluation."""
-        key_data = f"{text}:{json.dumps(context, sort_keys=True)}:{self.registry._version}"
+        key_data = f"{text}:{json.dumps(context, sort_keys=True)}:{self.registry.version}"
         return hashlib.md5(key_data.encode()).hexdigest()
 
     def _update_cache(self, key: str, value: tuple[list[RuleMatch], float]) -> None:

@@ -19,7 +19,7 @@ from collections import defaultdict
 from collections.abc import Awaitable, Callable
 from dataclasses import asdict, dataclass, field
 from datetime import UTC, datetime
-from enum import Enum
+from enum import Enum, IntEnum, StrEnum
 from typing import Any, Optional
 
 from .domain_routing import expand_domains, infer_domain, normalize_domains, resolve_target_domains
@@ -28,7 +28,7 @@ from .event_schemas import validate_event
 logger = logging.getLogger(__name__)
 
 
-class EventDomain(Enum):
+class EventDomain(StrEnum):
     """Event routing domains"""
 
     SAFETY = "safety"
@@ -37,7 +37,7 @@ class EventDomain(Enum):
     ALL = "all"
 
 
-class EventPriority(Enum):
+class EventPriority(IntEnum):
     """Event priority levels"""
 
     LOW = 0
@@ -212,7 +212,8 @@ class DynamicEventBus:
             await self.publish(event, wait_for_handlers=True)
 
             # Wait for response
-            response = await asyncio.wait_for(future, timeout=timeout)
+            async with asyncio.timeout(timeout):
+                response = await future
             response.response_time_ms = (time.perf_counter() - start_time) * 1000
             return response
 
@@ -237,7 +238,8 @@ class DynamicEventBus:
         """Background worker to process queued events"""
         while self._running:
             try:
-                event = await asyncio.wait_for(self._queue.get(), timeout=0.1)
+                async with asyncio.timeout(0.1):
+                    event = await self._queue.get()
                 await self._dispatch_event(event)
             except TimeoutError:
                 continue

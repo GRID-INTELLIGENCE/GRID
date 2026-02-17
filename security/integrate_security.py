@@ -18,7 +18,7 @@ import ast
 import json
 import os
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 
@@ -209,7 +209,7 @@ class SecurityIntegrator:
     def _summarize_results(self) -> dict:
         """Summarize scan results."""
         summary = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "total_files_scanned": sum(len(v) for k, v in self.scan_results.items() if k.startswith("files_")),
             "files_with_network_imports": len(self.scan_results["files_with_network_imports"]),
             "files_with_network_calls": len(self.scan_results["files_with_network_calls"]),
@@ -225,7 +225,7 @@ class SecurityIntegrator:
         """Generate integration report."""
         if output_file is None:
             output_file = str(
-                self.security_path / "logs" / f"integration_report_{int(datetime.utcnow().timestamp())}.json"
+                self.security_path / "logs" / f"integration_report_{int(datetime.now(timezone.utc).timestamp())}.json"
             )
 
         summary = self._summarize_results()
@@ -340,7 +340,7 @@ This file has been identified as using network resources.
 Security monitoring has been integrated.
 
 File: {filepath}
-Date: {datetime.utcnow().isoformat()}
+Date: {datetime.now(timezone.utc).isoformat()}
 """
 
 # ============================================================================

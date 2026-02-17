@@ -10,7 +10,7 @@ from __future__ import annotations
 import uuid
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 # =============================================================================
@@ -18,7 +18,7 @@ from typing import Any
 # =============================================================================
 
 
-class SystemStatus(str, Enum):
+class SystemStatus(StrEnum):
     """Overall system status indicators."""
 
     OPERATIONAL = "operational"
@@ -29,7 +29,7 @@ class SystemStatus(str, Enum):
     ERROR = "error"
 
 
-class ComponentType(str, Enum):
+class ComponentType(StrEnum):
     """Types of system components managed by the cockpit."""
 
     API_SERVER = "api_server"
@@ -43,7 +43,7 @@ class ComponentType(str, Enum):
     MONITOR = "monitor"
 
 
-class ComponentHealth(str, Enum):
+class ComponentHealth(StrEnum):
     """Health status for individual components."""
 
     HEALTHY = "healthy"
@@ -54,7 +54,7 @@ class ComponentHealth(str, Enum):
     STOPPING = "stopping"
 
 
-class TaskStatus(str, Enum):
+class TaskStatus(StrEnum):
     """Status of cockpit tasks."""
 
     PENDING = "pending"
@@ -67,7 +67,7 @@ class TaskStatus(str, Enum):
     RETRYING = "retrying"
 
 
-class TaskPriority(str, Enum):
+class TaskPriority(StrEnum):
     """Priority levels for task scheduling."""
 
     CRITICAL = "critical"
@@ -77,7 +77,7 @@ class TaskPriority(str, Enum):
     BACKGROUND = "background"
 
 
-class AlertSeverity(str, Enum):
+class AlertSeverity(StrEnum):
     """Severity levels for system alerts."""
 
     CRITICAL = "critical"
@@ -87,7 +87,7 @@ class AlertSeverity(str, Enum):
     DEBUG = "debug"
 
 
-class SessionState(str, Enum):
+class SessionState(StrEnum):
     """States for user sessions."""
 
     ACTIVE = "active"
@@ -96,7 +96,7 @@ class SessionState(str, Enum):
     TERMINATED = "terminated"
 
 
-class OperationMode(str, Enum):
+class OperationMode(StrEnum):
     """Cockpit operational modes."""
 
     NORMAL = "normal"

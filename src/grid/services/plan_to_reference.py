@@ -1,24 +1,24 @@
 import re
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import Enum, StrEnum
 from pathlib import Path
 from typing import Any
 
 
-class Severity(Enum):
+class Severity(StrEnum):
     CRITICAL = "🔴"
     HIGH = "🟠"
     MEDIUM = "🟡"
     LOW = "🟢"
 
 
-class Impact(Enum):
+class Impact(StrEnum):
     BLOCKING = "🎯"
     WARNING = "⚠️"
     INFO = "💡"
 
 
-class Status(Enum):
+class Status(StrEnum):
     RESOLVED = "✅"
     UNRESOLVED = "❌"
 

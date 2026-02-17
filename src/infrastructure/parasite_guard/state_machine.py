@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from enum import Enum, auto
+from enum import Enum, StrEnum, auto
 
 
-class GuardState(Enum):
+class GuardState(StrEnum):
     INITIALIZING = auto()
     MONITORING = auto()
     DETECTING = auto()

@@ -5,7 +5,7 @@
 [![Tests](https://github.com/caraxesthebloodwyrm02/GRID/actions/workflows/minimal-ci.yml/badge.svg?branch=main)](https://github.com/caraxesthebloodwyrm02/GRID/actions/workflows/minimal-ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python 3.13+](https://img.shields.io/badge/python-3.13%2B-blue.svg)](https://www.python.org/downloads/)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Linter: Ruff](https://img.shields.io/badge/linter-ruff-261230.svg)](https://github.com/astral-sh/ruff)
 
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/caraxesthebloodwyrm02/GRID/pulls)
 [![Maintained](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/caraxesthebloodwyrm02/GRID/graphs/commit-activity)
@@ -141,7 +141,19 @@ GRID (Geometric Resonance Intelligence Driver) is a comprehensive framework for 
 - **Event-Driven Agentic System**: Complete case management workflow with continuous learning
 - **Domain-Driven Design**: Professional architectural patterns with service layer decoupling
 
-## 🚀 What's New (January 2026)
+## 🚀 What's New (February 2026)
+
+### v2.3.0 — CI & Code Quality Hardening
+
+- ✅ **CI Pipeline Fixes** — Re-enabled push triggers, fixed test collection (`test_ollama.py`, `test_honor_decay_edge_cases.py`)
+- ✅ **Formatter Consolidation** — Replaced Black with Ruff format in CI; single toolchain for linting + formatting
+- ✅ **Expanded Ruff Rules** — Added S (security), SIM (simplify), C4 (comprehensions), PERF (performance) rules
+- ✅ **Blocking I/O Fix** — Fixed critical async function in `agentic_system.py`
+- ✅ **GUARDIAN Engine Hardening** — ReDoS guard, LIMITATIONS headers (Trust Layer Rule 3.2), encapsulation fixes, priority sort bug fix
+- ✅ **Pytest Timeout** — Default 300s timeout prevents CI hangs
+- ✅ **CI Matrix Aligned** — Test matrix matches `requires-python >=3.13`
+
+### January 2026
 
 ### Major Enhancements:
 
@@ -297,7 +309,7 @@ Copilot suggests next lines; GRID analyzes entire codebases, maps relationships,
 **Recommended:** 16GB RAM, SSD
 
 **Platforms:** Windows, Mac (Intel/M1), Linux
-**Requirements:** Python 3.9+
+**Requirements:** Python 3.13+
 
 </details>
 
@@ -729,9 +741,8 @@ Optimized pre-push hook ensures:
 
 ### Tooling
 
-- **Ruff**: Fast Python linter (`uv run ruff check .`)
-- **Black**: Code formatter (`uv run black .`)
-- **Pyright**: Type checker (`uv run pyright .`)
+- **Ruff**: Fast Python linter + formatter (`uv run ruff check .` / `uv run ruff format .`)
+- **Mypy**: Type checker (`uv run mypy src/`)
 - **Pytest**: Test runner (`uv run pytest tests/`)
 
 **VS Code Tasks** (Ctrl+Shift+P → "Run Task"):

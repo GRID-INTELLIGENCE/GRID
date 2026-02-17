@@ -14,7 +14,7 @@ import uuid
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Any
 
 from . import Event, EventDomain, get_event_bus
@@ -25,7 +25,7 @@ from .safety_bridge import SafetyContext, get_safety_bridge
 logger = logging.getLogger(__name__)
 
 
-class RevenueType(Enum):
+class RevenueType(StrEnum):
     """Types of revenue"""
 
     TRADING_PROFIT = "trading_profit"
@@ -35,7 +35,7 @@ class RevenueType(Enum):
     SUBSCRIPTION = "subscription"
 
 
-class PipelineStage(Enum):
+class PipelineStage(StrEnum):
     """Pipeline stages"""
 
     SIGNAL_RECEIVED = "signal_received"

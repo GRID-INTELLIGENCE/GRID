@@ -8,7 +8,7 @@ field validation, custom validators, and documentation.
 from __future__ import annotations
 
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from pydantic import (
@@ -40,7 +40,7 @@ class BaseRequest(BaseModel):
 # =============================================================================
 
 
-class TaskPriorityRequest(str, Enum):
+class TaskPriorityRequest(StrEnum):
     """Task priority levels for requests."""
 
     CRITICAL = "critical"
@@ -50,7 +50,7 @@ class TaskPriorityRequest(str, Enum):
     BACKGROUND = "background"
 
 
-class AlertSeverityRequest(str, Enum):
+class AlertSeverityRequest(StrEnum):
     """Alert severity levels for requests."""
 
     CRITICAL = "critical"
@@ -59,7 +59,7 @@ class AlertSeverityRequest(str, Enum):
     INFO = "info"
 
 
-class ComponentTypeRequest(str, Enum):
+class ComponentTypeRequest(StrEnum):
     """Component types for requests."""
 
     API_SERVER = "api_server"
@@ -73,7 +73,7 @@ class ComponentTypeRequest(str, Enum):
     MONITOR = "monitor"
 
 
-class OperationModeRequest(str, Enum):
+class OperationModeRequest(StrEnum):
     """Cockpit operation modes for requests."""
 
     NORMAL = "normal"

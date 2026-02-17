@@ -410,10 +410,8 @@ async def rag_websocket_endpoint(websocket, session_id: str):
         while True:
             try:
                 # Wait for message with timeout
-                data = await asyncio.wait_for(
-                    websocket.receive_text(),
-                    timeout=HEARTBEAT_INTERVAL * 2,  # 2x heartbeat interval
-                )
+                async with asyncio.timeout(HEARTBEAT_INTERVAL * 2):
+                    data = await websocket.receive_text()
                 last_activity = time.time()
 
                 message = json.loads(data)

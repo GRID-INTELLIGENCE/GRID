@@ -43,7 +43,8 @@ class ResourcePool:
     async def acquire(self) -> ResourceGuard:
         """Acquire a resource guard."""
         try:
-            await asyncio.wait_for(self._semaphore.acquire(), timeout=self.timeout_seconds)
+            async with asyncio.timeout(self.timeout_seconds):
+                await self._semaphore.acquire()
             self._active_count += 1
             self._total_requests += 1
             return ResourceGuard(self)

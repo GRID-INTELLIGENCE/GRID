@@ -7,7 +7,7 @@ import asyncio
 import logging
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from enum import Enum
+from enum import Enum, StrEnum
 from pathlib import Path
 from typing import Any
 
@@ -21,7 +21,7 @@ from .brain import AIBrain
 logger = logging.getLogger(__name__)
 
 
-class NodeType(Enum):
+class NodeType(StrEnum):
     ENTITY = "entity"
     EVENT = "event"
     PATTERN = "pattern"
@@ -31,7 +31,7 @@ class NodeType(Enum):
     NAVIGATION = "navigation"
 
 
-class RelationType(Enum):
+class RelationType(StrEnum):
     CAUSES = "causes"
     ENHANCES = "enhances"
     INHIBITS = "inhibits"

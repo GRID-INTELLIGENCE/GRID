@@ -1,6 +1,6 @@
 """User cognitive profile schema for personalization."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any
 
@@ -138,4 +138,4 @@ class UserCognitiveProfile(BaseModel):
 
     def update_timestamp(self) -> None:
         """Update the updated_at timestamp."""
-        self.updated_at = datetime.now()
+        self.updated_at = datetime.now(timezone.utc)

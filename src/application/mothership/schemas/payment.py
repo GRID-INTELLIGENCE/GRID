@@ -7,7 +7,7 @@ Pydantic schemas for payment-related API requests and responses.
 from __future__ import annotations
 
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from pydantic import BaseModel, Field
@@ -15,7 +15,7 @@ from pydantic import BaseModel, Field
 from ..schemas import BaseSchema
 
 
-class PaymentStatusSchema(str, Enum):
+class PaymentStatusSchema(StrEnum):
     """Payment status for API responses."""
 
     PENDING = "pending"
@@ -27,14 +27,14 @@ class PaymentStatusSchema(str, Enum):
     PARTIALLY_REFUNDED = "partially_refunded"
 
 
-class PaymentGatewaySchema(str, Enum):
+class PaymentGatewaySchema(StrEnum):
     """Payment gateway types."""
 
     STRIPE = "stripe"
     # BKASH = "bkash"  # Decommissioned
 
 
-class SubscriptionTierSchema(str, Enum):
+class SubscriptionTierSchema(StrEnum):
     """Subscription tier levels."""
 
     FREE = "free"
@@ -43,7 +43,7 @@ class SubscriptionTierSchema(str, Enum):
     ENTERPRISE = "enterprise"
 
 
-class SubscriptionStatusSchema(str, Enum):
+class SubscriptionStatusSchema(StrEnum):
     """Subscription status."""
 
     ACTIVE = "active"

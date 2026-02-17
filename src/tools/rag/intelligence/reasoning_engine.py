@@ -9,7 +9,7 @@ Part of Phase 3: Reasoning Layer
 
 import logging
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Any
 
 from .evidence_extractor import Evidence, EvidenceSet, EvidenceStrength, EvidenceType
@@ -17,7 +17,7 @@ from .evidence_extractor import Evidence, EvidenceSet, EvidenceStrength, Evidenc
 logger = logging.getLogger(__name__)
 
 
-class ReasoningStepType(Enum):
+class ReasoningStepType(StrEnum):
     """Types of reasoning steps in the chain."""
 
     OBSERVATION = "observation"  # What we observe in the evidence

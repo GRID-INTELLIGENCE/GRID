@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from cognitive.light_of_the_seven.cognitive_layer.schemas.cognitive_state import CognitiveState
 from cognitive.light_of_the_seven.cognitive_layer.schemas.user_cognitive_profile import UserCognitiveProfile
@@ -72,7 +72,7 @@ class TemporalRouter:
     def _is_urgent(self, state: CognitiveState, profile: UserCognitiveProfile, context: dict, decision: dict):
         """Urgent temporal pattern routing."""
         deadline = context.get("deadline")
-        if deadline and deadline - datetime.now() < timedelta(hours=24):
+        if deadline and deadline - datetime.now(timezone.utc) < timedelta(hours=24):
             decision["route_type"] = "expedited"
             decision["priority"] = "critical"
             decision["temporal_adaptations"].append("deadline_aware")

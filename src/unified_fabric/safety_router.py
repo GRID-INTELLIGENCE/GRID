@@ -14,7 +14,7 @@ import logging
 import time
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Any
 
 from . import Event, EventDomain, EventResponse, get_event_bus
@@ -22,7 +22,7 @@ from . import Event, EventDomain, EventResponse, get_event_bus
 logger = logging.getLogger(__name__)
 
 
-class SafetyDecision(Enum):
+class SafetyDecision(StrEnum):
     """Safety validation decision"""
 
     ALLOW = "allow"
@@ -31,7 +31,7 @@ class SafetyDecision(Enum):
     ESCALATE = "escalate"
 
 
-class ThreatLevel(Enum):
+class ThreatLevel(StrEnum):
     """Threat severity levels"""
 
     NONE = "none"

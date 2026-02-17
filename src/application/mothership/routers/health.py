@@ -69,8 +69,8 @@ async def _check_database_connectivity(db_url: str, timeout: float = 5.0) -> tup
         engine = create_async_engine(async_url, pool_pre_ping=True)
 
         try:
-            check_task = asyncio.create_task(_db_ping(engine))
-            await asyncio.wait_for(check_task, timeout=timeout)
+            async with asyncio.timeout(timeout):
+                await _db_ping(engine)
         finally:
             await engine.dispose()
 
@@ -112,7 +112,8 @@ async def _check_redis_connectivity(redis_url: str, timeout: float = 5.0) -> tup
         client = aioredis.from_url(redis_url)
 
         try:
-            await asyncio.wait_for(client.ping(), timeout=timeout)
+            async with asyncio.timeout(timeout):
+                await client.ping()
         finally:
             await client.close()
 

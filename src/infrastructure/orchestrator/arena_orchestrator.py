@@ -11,7 +11,7 @@ import json
 import logging
 import time
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Any
 
 from ..ai_ml.intelligence_system import (  # type: ignore[import-not-found]
@@ -24,7 +24,7 @@ from ..event_bus.event_system import EventBus, EventPriority  # type: ignore[imp
 from ..service_mesh.mesh import ServiceMesh, ServiceRegistration, ServiceType  # type: ignore[import-not-found]
 
 
-class OrchestratorState(Enum):
+class OrchestratorState(StrEnum):
     """Orchestrator states."""
 
     INITIALIZING = "initializing"

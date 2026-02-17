@@ -1,8 +1,9 @@
 """Skill generator for automated persistence of successful cases."""
 
+import aiofiles
 import json
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -47,11 +48,11 @@ class SkillGenerator:
             "title": f"Skill: {case_id}",
             "summary": f"Automated skill generated from successful execution of case {case_id}.",
             "references": [{"type": "case_id", "value": case_id}],
-            "generated_at": datetime.now().isoformat(),
+            "generated_at": datetime.now(timezone.utc).isoformat(),
         }
 
-        with open(skill_dir / "metadata.json", "w") as f:
-            json.dump(metadata, f, indent=4)
+        async with aiofiles.open(skill_dir / "metadata.json", "w") as f:
+            await f.write(json.dumps(metadata, indent=4))
 
         # Generate overview.md
         overview = f"""# Skill: {case_id}
@@ -64,8 +65,8 @@ class SkillGenerator:
 - Task: {experience.get("task", "N/A")}
 - Execution Time: {experience.get("execution_time_seconds", "N/A")}s
 """
-        with open(skill_dir / "artifacts" / "overview.md", "w") as f:
-            f.write(overview)
+        async with aiofiles.open(skill_dir / "artifacts" / "overview.md", "w") as f:
+            await f.write(overview)
 
         logger.info(f"Generated skill for case {case_id} at {skill_dir}")
 

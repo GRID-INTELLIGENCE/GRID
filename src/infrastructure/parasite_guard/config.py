@@ -9,11 +9,11 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass, field
-from enum import Enum, auto
+from enum import Enum, StrEnum, auto
 from typing import Any
 
 
-class GuardMode(Enum):
+class GuardMode(StrEnum):
     """Operating modes for the parasite guard."""
 
     DISABLED = auto()  # Completely disabled

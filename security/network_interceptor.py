@@ -14,7 +14,7 @@ import os
 import re
 import socket
 import time
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Any, Callable
 from urllib.parse import urlparse
@@ -62,7 +62,7 @@ class NetworkAccessControl:
             "blocked_requests": 0,
             "allowed_requests": 0,
             "data_leaks_detected": 0,
-            "started_at": datetime.utcnow().isoformat(),
+            "started_at": datetime.now(timezone.utc).isoformat(),
         }
 
         # Create logs directory
@@ -127,7 +127,7 @@ class NetworkAccessControl:
     def _log_audit(self, event_type: str, details: dict):
         """Log audit event to file."""
         audit_entry = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "event_type": event_type,
             "details": details,
         }
@@ -203,14 +203,14 @@ class NetworkAccessControl:
             "domain": domain,
             "scheme": scheme,
             "caller": caller,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
         # Check emergency kill switch
         emergency = self.config.get("emergency", {})
         if emergency.get("kill_switch", False):
             reason = "EMERGENCY KILL SWITCH ACTIVE - ALL NETWORK ACCESS DISABLED"
-            logger.critical(f"🚨 {reason}")
+            logger.critical(f" {reason}")
             self._log_blocked_request(request_info, reason)
             return False, reason
 
@@ -218,7 +218,7 @@ class NetworkAccessControl:
         global_config = self.config.get("global", {})
         if not global_config.get("network_enabled", False):
             reason = "Global network access is DISABLED"
-            logger.warning(f"🚫 BLOCKED: {method} {url} - {reason}")
+            logger.warning(f" BLOCKED: {method} {url} - {reason}")
             self._log_blocked_request(request_info, reason)
             return False, reason
 
@@ -226,14 +226,14 @@ class NetworkAccessControl:
         if emergency.get("localhost_only", True):
             if domain not in ["localhost", "127.0.0.1", "::1", ""]:
                 reason = "Only localhost access allowed (emergency mode)"
-                logger.warning(f"🚫 BLOCKED: {method} {url} - {reason}")
+                logger.warning(f" BLOCKED: {method} {url} - {reason}")
                 self._log_blocked_request(request_info, reason)
                 return False, reason
 
         # Check for data leaks
         if self._check_data_leak(url, data, headers):
             reason = "Potential DATA LEAK detected"
-            logger.critical(f"🚨 BLOCKED: {method} {url} - {reason}")
+            logger.critical(f" BLOCKED: {method} {url} - {reason}")
             self._log_blocked_request(request_info, reason)
             self._log_audit("DATA_LEAK_BLOCKED", request_info)
             return False, reason
@@ -241,14 +241,14 @@ class NetworkAccessControl:
         # Check whitelist
         if self._check_whitelist(url):
             reason = "URL in whitelist"
-            logger.info(f"✅ ALLOWED: {method} {url} - {reason}")
+            logger.info(f" ALLOWED: {method} {url} - {reason}")
             self._log_allowed_request(request_info, reason)
             return True, reason
 
         # Check blacklist
         if self._check_blacklist(url):
             reason = "URL in blacklist"
-            logger.warning(f"🚫 BLOCKED: {method} {url} - {reason}")
+            logger.warning(f" BLOCKED: {method} {url} - {reason}")
             self._log_blocked_request(request_info, reason)
             return False, reason
 
@@ -256,12 +256,12 @@ class NetworkAccessControl:
         default_policy = self.config.get("default_policy", "deny")
         if default_policy == "deny":
             reason = "Default policy is DENY - not in whitelist"
-            logger.warning(f"🚫 BLOCKED: {method} {url} - {reason}")
+            logger.warning(f" BLOCKED: {method} {url} - {reason}")
             self._log_blocked_request(request_info, reason)
             return False, reason
         else:
             reason = "Default policy is ALLOW"
-            logger.info(f"✅ ALLOWED: {method} {url} - {reason}")
+            logger.info(f" ALLOWED: {method} {url} - {reason}")
             self._log_allowed_request(request_info, reason)
             return True, reason
 
@@ -307,7 +307,7 @@ class NetworkAccessControl:
         # Alert if threshold reached
         alert_threshold = self.config.get("global", {}).get("alerts", {}).get("alert_threshold", 10)
         if self.metrics["blocked_requests"] % alert_threshold == 0:
-            logger.critical(f"🚨 ALERT: {self.metrics['blocked_requests']} requests blocked!")
+            logger.critical(f" ALERT: {self.metrics['blocked_requests']} requests blocked!")
 
     def _log_allowed_request(self, request_info: dict, reason: str):
         """Log allowed request."""
@@ -322,7 +322,7 @@ class NetworkAccessControl:
         """Get current metrics."""
         return {
             **self.metrics,
-            "uptime_seconds": (datetime.utcnow() - datetime.fromisoformat(self.metrics["started_at"])).total_seconds(),
+            "uptime_seconds": (datetime.now(timezone.utc) - datetime.fromisoformat(self.metrics["started_at"])).total_seconds(),
         }
 
     def get_blocked_requests(self, limit: int = 100) -> list[dict]:
@@ -339,7 +339,7 @@ class NetworkAccessControl:
             filepath = str(Path(__file__).parent / "logs" / f"security_report_{int(time.time())}.json")
 
         report = {
-            "generated_at": datetime.utcnow().isoformat(),
+            "generated_at": datetime.now(timezone.utc).isoformat(),
             "metrics": self.get_metrics(),
             "blocked_requests": self.get_blocked_requests(),
             "allowed_requests": self.get_allowed_requests(),

@@ -6,10 +6,10 @@ Defines roles, permissions, and hierarchical access levels for GRID.
 
 from __future__ import annotations
 
-from enum import Enum
+from enum import StrEnum
 
 
-class Permission(str, Enum):
+class Permission(StrEnum):
     """Granular permissions for the system."""
 
     READ = "read"
@@ -22,7 +22,7 @@ class Permission(str, Enum):
     BILLING_WRITE = "billing_write"
 
 
-class Role(str, Enum):
+class Role(StrEnum):
     """Standardized roles for users and services."""
 
     ANONYMOUS = "anonymous"

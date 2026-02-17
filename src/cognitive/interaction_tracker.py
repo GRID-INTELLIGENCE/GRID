@@ -6,11 +6,12 @@ data for cognitive state inference and profile learning.
 
 from __future__ import annotations
 
+import aiofiles
 import json
 import logging
 from collections import defaultdict
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from enum import Enum
 from pathlib import Path
 from typing import Any
@@ -213,7 +214,7 @@ class InteractionTracker:
             case_id: Associated case ID
             user_id: User identifier
         """
-        self._active_sessions[session_id] = (datetime.now(), case_id)
+        self._active_sessions[session_id] = (datetime.now(timezone.utc), case_id)
         logger.debug(f"Started session {session_id} for user {user_id}, case {case_id}")
 
     async def end_session(
@@ -239,7 +240,7 @@ class InteractionTracker:
             return None
 
         start_time, case_id = self._active_sessions[session_id]
-        duration = (datetime.now() - start_time).total_seconds()
+        duration = (datetime.now(timezone.utc) - start_time).total_seconds()
 
         # Create completion event
         event = InteractionEvent(
@@ -295,7 +296,7 @@ class InteractionTracker:
         Returns:
             Interaction summary
         """
-        since = datetime.now() - time_window
+        since = datetime.now(timezone.utc) - time_window
         events = await self.get_events(user_id, limit=None, since=since)
 
         if not events:
@@ -323,7 +324,7 @@ class InteractionTracker:
 
         # Count recent errors and retries
         recent_window = timedelta(minutes=30)
-        recent_since = datetime.now() - recent_window
+        recent_since = datetime.now(timezone.utc) - recent_window
         recent = [e for e in events if e.timestamp >= recent_since]
 
         summary.recent_errors = sum(1 for e in recent if e.outcome in ["failure", "error"])
@@ -345,7 +346,7 @@ class InteractionTracker:
         Returns:
             Dictionary of detected patterns
         """
-        events = await self.get_events(user_id, limit=None, since=datetime.now() - time_window)
+        events = await self.get_events(user_id, limit=None, since=datetime.now(timezone.utc) - time_window)
 
         if not events:
             return {}
@@ -405,7 +406,7 @@ class InteractionTracker:
             return None
 
         start_time, _ = self._active_sessions[session_id]
-        return (datetime.now() - start_time).total_seconds()
+        return (datetime.now(timezone.utc) - start_time).total_seconds()
 
     async def infer_sentiment_from_text(self, text: str) -> Sentiment:
         """Infer sentiment from text using simple heuristics.
@@ -446,7 +447,7 @@ class InteractionTracker:
         return Sentiment.NEUTRAL
 
     async def _persist_events(self, user_id: str, events: list[InteractionEvent]) -> None:
-        """Persist events to disk.
+        """Persist events to disk asynchronously.
 
         Args:
             user_id: User identifier
@@ -458,14 +459,14 @@ class InteractionTracker:
         user_log_path = self.storage_path / f"{user_id}.jsonl"
 
         try:
-            with open(user_log_path, "a") as f:
+            async with aiofiles.open(user_log_path, mode="a") as f:
                 for event in events:
-                    f.write(json.dumps(event.to_dict()) + "\n")
+                    await f.write(json.dumps(event.to_dict()) + "\n")
         except Exception as e:
             logger.error(f"Error persisting events for {user_id}: {e}")
 
     async def load_from_disk(self, user_id: str, limit: int = 100) -> list[InteractionEvent]:
-        """Load persisted events from disk.
+        """Load persisted events from disk asynchronously.
 
         Args:
             user_id: User identifier
@@ -481,8 +482,8 @@ class InteractionTracker:
 
         events = []
         try:
-            with open(user_log_path) as f:
-                for line in f:
+            async with aiofiles.open(user_log_path, mode="r") as f:
+                async for line in f:
                     if line.strip():
                         events.append(InteractionEvent.from_dict(json.loads(line)))
         except Exception as e:

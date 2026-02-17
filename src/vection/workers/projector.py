@@ -21,7 +21,7 @@ import time
 from collections import deque
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any
 
@@ -222,7 +222,7 @@ class Projector:
             return
 
         self._running = True
-        self._started_at = datetime.now()
+        self._started_at = datetime.now(timezone.utc)
         self._task = asyncio.create_task(self._processing_loop())
         logger.info("Projector worker started")
 
@@ -398,7 +398,7 @@ class Projector:
             "tracked_sessions": len(self._session_inputs),
             "default_horizon": self._default_horizon,
             "confidence_threshold": self._confidence_threshold,
-            "uptime_seconds": ((datetime.now() - self._started_at).total_seconds() if self._started_at else 0),
+            "uptime_seconds": ((datetime.now(timezone.utc) - self._started_at).total_seconds() if self._started_at else 0),
         }
 
     def reset(self) -> None:

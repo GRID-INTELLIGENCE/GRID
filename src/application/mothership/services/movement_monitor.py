@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 import logging
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +46,7 @@ class MovementMonitor:
 
     def cleanup_old_data(self) -> None:
         """Remove data older than the retention period."""
-        cutoff = datetime.utcnow() - timedelta(hours=self.retention_hours)
+        cutoff = datetime.now(timezone.utc) - timedelta(hours=self.retention_hours)
 
         # Clean API movements
         for endpoint in list(self.api_movements.keys()):
@@ -76,7 +76,7 @@ class MovementMonitor:
     ) -> None:
         """Record an API request/response."""
         movement = {
-            "timestamp": datetime.utcnow(),
+            "timestamp": datetime.now(timezone.utc),
             "path": path,
             "method": method.upper(),
             "status_code": status_code,
@@ -101,8 +101,8 @@ class MovementMonitor:
             "path": path,
             "client_ip": client_ip,
             "user_id": user_id,
-            "connected_at": datetime.utcnow(),
-            "last_activity": datetime.utcnow(),
+            "connected_at": datetime.now(timezone.utc),
+            "last_activity": datetime.now(timezone.utc),
             "metadata": metadata or {},
             "message_count": 0,
             "last_message": None,
@@ -121,10 +121,10 @@ class MovementMonitor:
             return
 
         conn = self.websocket_connections[connection_id]
-        conn["last_activity"] = datetime.utcnow()
+        conn["last_activity"] = datetime.now(timezone.utc)
         conn["message_count"] += 1
         conn["last_message"] = {
-            "timestamp": datetime.utcnow(),
+            "timestamp": datetime.now(timezone.utc),
             "type": message_type,
             "size": message_size,
             "direction": direction,
@@ -145,7 +145,7 @@ class MovementMonitor:
             return
 
         conn = self.websocket_connections[connection_id]
-        conn["disconnected_at"] = datetime.utcnow()
+        conn["disconnected_at"] = datetime.now(timezone.utc)
         conn["disconnect_reason"] = reason
         conn["disconnect_error"] = error
 
@@ -157,7 +157,7 @@ class MovementMonitor:
 
     def get_connection_stats(self) -> dict:
         """Get statistics about WebSocket connections."""
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         active_connections = len(self.websocket_connections)
 
         # Calculate connection durations
@@ -173,7 +173,7 @@ class MovementMonitor:
 
     def _calculate_messages_per_minute(self) -> float:
         """Calculate messages per minute over the last hour."""
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         one_hour_ago = now - timedelta(hours=1)
 
         # Count messages in the last hour
@@ -206,7 +206,7 @@ class MovementMonitor:
                         "endpoint": endpoint,
                         "error_rate": error_rate,
                         "severity": "high",
-                        "timestamp": datetime.utcnow().isoformat(),
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
                     }
                 )
 
@@ -220,12 +220,12 @@ class MovementMonitor:
                         "connection_id": conn_id,
                         "message_count": conn["message_count"],
                         "severity": "medium",
-                        "timestamp": datetime.utcnow().isoformat(),
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
                     }
                 )
 
             # Check for long-running connections
-            duration_hours = (datetime.utcnow() - conn["connected_at"]).total_seconds() / 3600
+            duration_hours = (datetime.now(timezone.utc) - conn["connected_at"]).total_seconds() / 3600
             if duration_hours > 24:  # 24-hour threshold
                 anomalies.append(
                     {
@@ -233,7 +233,7 @@ class MovementMonitor:
                         "connection_id": conn_id,
                         "duration_hours": duration_hours,
                         "severity": "low",
-                        "timestamp": datetime.utcnow().isoformat(),
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
                     }
                 )
 

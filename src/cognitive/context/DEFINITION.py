@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import Enum, StrEnum
 
 
-class ActivityDomain(Enum):
+class ActivityDomain(StrEnum):
     """Domains of user activity for cognitive analysis."""
 
     SOFTWARE_DEVELOPMENT = "software_development"

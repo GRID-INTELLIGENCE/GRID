@@ -13,7 +13,7 @@ import time
 from collections import defaultdict, deque
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
-from enum import Enum
+from enum import Enum, StrEnum
 from pathlib import Path
 from typing import Any, Callable
 
@@ -22,7 +22,7 @@ import httpx
 logger = logging.getLogger(__name__)
 
 
-class SecurityEventType(Enum):
+class SecurityEventType(StrEnum):
     """Types of security events to monitor"""
 
     # Authentication events
@@ -61,7 +61,7 @@ class SecurityEventType(Enum):
     AUDIT_LOG_ACCESS = "audit_log_access"
 
 
-class SecurityEventSeverity(Enum):
+class SecurityEventSeverity(StrEnum):
     """Severity levels for security events"""
 
     LOW = "low"

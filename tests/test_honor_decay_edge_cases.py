@@ -5,15 +5,17 @@ Verification Tests for Phase 1: Honor Decay Edge Cases & De-escalation Grace Per
 import sys
 import time
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 # Add Arena path to sys.path
 arena_path = Path(__file__).parent.parent / "Arena" / "the_chase" / "python" / "src"
-if not (arena_path / "the_chase").exists():
-    raise ImportError("the_chase path does not exist")
 if str(arena_path) not in sys.path:
     sys.path.insert(0, str(arena_path))
 
 import pytest
+
+THE_CHASE_AVAILABLE = False
+THE_CHASE_ERROR = "the_chase module not found"
 
 try:
     from the_chase.overwatch.rewards import (
@@ -23,8 +25,23 @@ try:
         RewardEscalator,
         RewardLevel,
     )
-except ImportError:
-    pytest.skip("Optional dependency 'the_chase' not available", allow_module_level=True)
+
+    THE_CHASE_AVAILABLE = True
+except ImportError as e:
+    THE_CHASE_ERROR = str(e)
+    if TYPE_CHECKING:
+        from the_chase.overwatch.rewards import (
+            Achievement,
+            AchievementType,
+            CharacterRewardState,
+            RewardEscalator,
+            RewardLevel,
+        )
+
+
+pytestmark = pytest.mark.skipif(
+    not THE_CHASE_AVAILABLE, reason=f"Optional dependency 'the_chase' not available: {THE_CHASE_ERROR}"
+)
 
 
 def test_incremental_decay():

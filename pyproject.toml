@@ -1,6 +1,6 @@
 [project]
 name = "grid-intelligence"
-version = "2.2.2"
+version = "2.3.0"
 description = "GRID - Geometric Resonance Intelligence Driver: A comprehensive framework for exploring complex systems through geometric resonance patterns, cognitive decision support, local-first AI, and event-driven agentic systems"
 authors = [{ name = "Irfan Kabir", email = "irfankabir02@gmail.com" }]
 requires-python = ">=3.13,<3.14"
@@ -212,8 +212,8 @@ python_files = ["test_*.py"]
 python_functions = ["test_*"]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
-# Note: pytest-timeout timeout is set via command-line --timeout flag or @pytest.mark.timeout()
-# Default timeout can be set via: pytest --timeout=300 --timeout-method=thread
+timeout = 300
+timeout_method = "thread"
 
 # Exclude scratch tests from default runs
 # Scratch tests are experimental and should not block CI
@@ -274,7 +274,7 @@ exclude = [
 ]
 
 [tool.ruff.lint]
-select = ["E", "F", "B", "I", "W", "UP", "ASYNC"]
+select = ["E", "F", "B", "I", "W", "UP", "ASYNC", "S", "SIM", "C4", "PERF"]
 extend-ignore = [
     "B007", # Unused loop control variable (stylistic)
     "B008", # Allow FastAPI Depends()
@@ -285,6 +285,11 @@ extend-ignore = [
     "E741", # Ambiguous variable name (contextual)
     "W293", # Whitespace in blank lines (docstrings)
     "UP035", # Deprecated typing imports (widespread, auto-fixable later)
+    "S101", # Use of assert detected (some test assertions use it)
+    "S105", # Possible hardcoded password (false positives for config keys)
+    "S106", # Possible hardcoded password
+    "S107", # Possible hardcoded password
+    "SIM", # Simplify - too aggressive for now
 ]
 
 [tool.ruff.lint.per-file-ignores]

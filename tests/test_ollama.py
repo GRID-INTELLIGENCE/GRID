@@ -9,15 +9,25 @@ OLLAMA_URL = "http://localhost:11434/api/tags"
 
 def _ollama_reachable() -> bool:
     try:
+        import httpx
+
         httpx.get(OLLAMA_URL, timeout=2.0)
         return True
     except Exception:
         return False
 
 
-pytestmark = pytest.mark.skipif(not _ollama_reachable(), reason="Ollama not running")
+@pytest.fixture(scope="session")
+def ollama_available():
+    """Session-scoped check for Ollama availability."""
+    return _ollama_reachable()
 
 
-def test_ollama_tags():
-    r = httpx.get(OLLAMA_URL, timeout=10.0)
-    assert r.status_code == 200
+@pytest.mark.usefixtures("ollama_available")
+class TestOllama:
+    """Tests that require Ollama to be running."""
+
+    def test_ollama_tags(self):
+        """Test that Ollama API is accessible."""
+        r = httpx.get(OLLAMA_URL, timeout=10.0)
+        assert r.status_code == 200

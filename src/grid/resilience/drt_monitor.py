@@ -7,7 +7,7 @@ Detects endpoint behavioral similarities to previous attack vectors and escalate
 import hashlib
 import logging
 from collections import Counter, defaultdict
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 import numpy as np
@@ -29,7 +29,7 @@ class BehavioralFingerprint:
         self.method = method.upper()
         self.client_ip = client_ip
         self.user_agent = user_agent
-        self.timestamp = datetime.utcnow()
+        self.timestamp = datetime.now(timezone.utc)
         self.features = self._extract_features()
 
     def _extract_features(self) -> dict[str, Any]:
@@ -148,7 +148,7 @@ class ProtectionEscalationEngine:
             "attack_type": attack_type,
             "similarity_score": similarity_score,
             "threat_level": threat_level,
-            "escalation_time": datetime.utcnow().isoformat(),
+            "escalation_time": datetime.now(timezone.utc).isoformat(),
             "architectural_hardening": self._apply_architectural_hardening(endpoint),
             "api_enforcement": self._apply_api_enforcement(endpoint),
             "websocket_overhead": self._apply_websocket_overhead(endpoint),
@@ -165,7 +165,7 @@ class ProtectionEscalationEngine:
             severity=CorruptionSeverity.CRITICAL if threat_level == "critical" else CorruptionSeverity.HIGH,
             corruption_type=CorruptionType.SECURITY,
             description=f"Behavioral similarity to attack vector '{attack_type}' detected. Protections escalated.",
-            correlation_id=f"escalation_{endpoint}_{datetime.utcnow().timestamp()}",
+            correlation_id=f"escalation_{endpoint}_{datetime.now(timezone.utc).timestamp()}",
             affected_resources=[endpoint, "security_infrastructure"],
             metadata={
                 "attack_type": attack_type,
@@ -200,7 +200,7 @@ class ProtectionEscalationEngine:
 
     def _apply_websocket_overhead(self, endpoint: str) -> dict[str, Any]:
         """Apply unique WebSocket overhead for suspicious endpoints."""
-        overhead_id = f"ws_overhead_{hash(endpoint + str(datetime.utcnow())) % 10000}"
+        overhead_id = f"ws_overhead_{hash(endpoint + str(datetime.now(timezone.utc))) % 10000}"
 
         # Generate unique overhead measures
         overhead_measures = {
@@ -341,7 +341,7 @@ class DRTMonitor:
         if self.escalation_timeout_minutes <= 0:
             return 0
 
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         expired = []
         for endpoint, config in self.escalation_engine.escalated_endpoints.items():
             escalation_time = config.get("escalation_time")
@@ -366,7 +366,7 @@ class DRTMonitor:
 
     def _cleanup_old_entries(self, endpoint: str):
         """Clean up old behavioral entries beyond retention period."""
-        cutoff_time = datetime.utcnow() - timedelta(hours=self.retention_hours)
+        cutoff_time = datetime.now(timezone.utc) - timedelta(hours=self.retention_hours)
 
         self.behavioral_history[endpoint] = [
             fp for fp in self.behavioral_history[endpoint] if fp.timestamp >= cutoff_time

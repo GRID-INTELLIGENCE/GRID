@@ -21,7 +21,7 @@ import time
 from collections import deque
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Any
 
 from safety.observability.logging_setup import get_logger
@@ -29,14 +29,14 @@ from safety.observability.logging_setup import get_logger
 logger = get_logger("ai_workflow_safety")
 
 
-class CognitiveLoad(Enum):
+class CognitiveLoad(StrEnum):
     LOW = "low"
     MODERATE = "moderate"
     HIGH = "high"
     CRITICAL = "critical"
 
 
-class HookRisk(Enum):
+class HookRisk(StrEnum):
     NONE = "none"
     LOW = "low"
     MODERATE = "moderate"
@@ -44,7 +44,7 @@ class HookRisk(Enum):
     CRITICAL = "critical"
 
 
-class TemporalPattern(Enum):
+class TemporalPattern(StrEnum):
     CONSISTENT = "consistent"
     BURSTY = "bursty"
     IRREGULAR = "irregular"

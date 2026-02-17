@@ -14,13 +14,13 @@ import time
 from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
-class ComponentState(Enum):
+class ComponentState(StrEnum):
     """Component lifecycle states."""
 
     INITIALIZING = "initializing"
@@ -32,7 +32,7 @@ class ComponentState(Enum):
     TERMINATED = "terminated"
 
 
-class ComponentType(Enum):
+class ComponentType(StrEnum):
     """Types of components in the pool."""
 
     PROCESSOR = "processor"

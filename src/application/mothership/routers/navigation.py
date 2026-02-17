@@ -270,10 +270,11 @@ async def create_navigation_plan(
     request_id = _safe_request_id(request_context)
     # #region agent log
     import json
+    import aiofiles
 
     try:
-        with open(r"e:\grid\.cursor\debug.log", "a", encoding="utf-8") as f:
-            f.write(
+        async with aiofiles.open(r"e:\grid\.cursor\debug.log", mode="a", encoding="utf-8") as f:
+            await f.write(
                 json.dumps(
                     {
                         "sessionId": "debug-session",

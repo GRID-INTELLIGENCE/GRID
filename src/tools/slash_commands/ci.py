@@ -90,10 +90,8 @@ class CICommand(PipelineCommand):
         )
 
         try:
-            stdout_bytes, stderr_bytes = await asyncio.wait_for(
-                proc.communicate(),
-                timeout=timeout,
-            )
+            async with asyncio.timeout(timeout):
+                stdout_bytes, stderr_bytes = await proc.communicate()
             stdout = stdout_bytes.decode("utf-8", errors="replace") if stdout_bytes else ""
             stderr = stderr_bytes.decode("utf-8", errors="replace") if stderr_bytes else ""
             return proc.returncode or 0, stdout, stderr

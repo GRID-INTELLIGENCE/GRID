@@ -10,7 +10,7 @@ allowing duck-typing with static type checking support.
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Protocol, runtime_checkable
 
 
@@ -146,7 +146,7 @@ class DiscoverableAdapter:
         self._obj = obj
         self._salience = max(0.0, min(1.0, salience))
         self._discovery_keys = discovery_keys
-        self._timestamp = datetime.now()
+        self._timestamp = datetime.now(timezone.utc)
 
     def to_dict(self) -> dict[str, Any]:
         """Convert wrapped object to dictionary."""

@@ -11,7 +11,7 @@ from __future__ import annotations
 import logging
 import os
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import Enum, IntEnum, StrEnum
 from typing import Any
 
 # Import quality gates configuration
@@ -39,7 +39,7 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
-class AbrasivenessCadence(str, Enum):
+class AbrasivenessCadence(IntEnum):
     """Execution frequency for abrasiveness control (similar to Storage Sense cadence)."""
 
     LOW_SPACE = 0  # Trigger only when resources are low
@@ -49,7 +49,7 @@ class AbrasivenessCadence(str, Enum):
     CONTINUOUS = -1  # Continuous monitoring (highest abrasiveness)
 
 
-class InferenceAbrasivenessLevel(str, Enum):
+class InferenceAbrasivenessLevel(StrEnum):
     """Levels of inference abrasiveness (how aggressive inference operations are)."""
 
     PASSIVE = "passive"  # Minimal interference, high confidence required
@@ -217,7 +217,7 @@ class InferenceAbrasivenessConfig:
         Returns:
             InferenceAbrasivenessConfig instance
         """
-        from enum import Enum
+        from enum import Enum, IntEnum, StrEnum
 
         # Extract thresholds
         thresholds_data = data.get("thresholds", {})

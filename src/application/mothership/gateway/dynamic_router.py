@@ -20,7 +20,7 @@ import time
 from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Any
 
 from fastapi import HTTPException, Request, Response
@@ -29,7 +29,7 @@ from fastapi.responses import JSONResponse
 logger = logging.getLogger(__name__)
 
 
-class RequestPriority(Enum):
+class RequestPriority(StrEnum):
     """Request priority levels for dynamic routing."""
 
     LOW = "low"
@@ -38,7 +38,7 @@ class RequestPriority(Enum):
     CRITICAL = "critical"
 
 
-class SafetyLevel(Enum):
+class SafetyLevel(StrEnum):
     """AI Safety evaluation levels."""
 
     SAFE = "safe"

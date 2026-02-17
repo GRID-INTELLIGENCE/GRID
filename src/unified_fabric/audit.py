@@ -15,15 +15,15 @@ import json
 import logging
 import uuid
 from dataclasses import asdict, dataclass, field
-from datetime import UTC, datetime
-from enum import Enum
+from datetime import datetime, timezone
+from enum import Enum, StrEnum
 from pathlib import Path
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
-class AuditEventType(Enum):
+class AuditEventType(StrEnum):
     """Types of audit events"""
 
     REQUEST_RECEIVED = "request_received"
@@ -48,7 +48,7 @@ class AuditEntry:
     domain: str
     action: str
     status: str
-    timestamp: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
+    timestamp: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     request_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     correlation_id: str | None = None
     user_id: str | None = None
@@ -215,13 +215,14 @@ class DistributedAuditLogger:
         self._buffer.clear()
 
         # Write to daily log file
-        date_str = datetime.now(UTC).strftime("%Y%m%d")
+        date_str = datetime.now(timezone.utc).strftime("%Y%m%d")
         log_file = self.log_dir / f"audit_{date_str}.jsonl"
 
         try:
-            with open(log_file, "a", encoding="utf-8") as f:
+            import aiofiles
+            async with aiofiles.open(log_file, "a", encoding="utf-8") as f:
                 for entry in entries:
-                    f.write(entry.to_json() + "\n")
+                    await f.write(entry.to_json() + "\n")
         except Exception as e:
             logger.error(f"Failed to flush audit log: {e}")
             # Re-add entries to buffer
@@ -246,15 +247,16 @@ class DistributedAuditLogger:
         entries = []
 
         # Read from today's log file
-        date_str = datetime.now(UTC).strftime("%Y%m%d")
+        date_str = datetime.now(timezone.utc).strftime("%Y%m%d")
         log_file = self.log_dir / f"audit_{date_str}.jsonl"
 
         if not log_file.exists():
             return entries
 
         try:
-            with open(log_file, encoding="utf-8") as f:
-                for line in f:
+            import aiofiles
+            async with aiofiles.open(log_file, mode="r", encoding="utf-8") as f:
+                async for line in f:
                     try:
                         data = json.loads(line.strip())
                         entry = AuditEntry(**data)

@@ -227,28 +227,28 @@ class TopicResponse(BaseModel):
 class DiscussionService:
     """Current Events Discussion Service."""
 
-    def __init__(self):
-        self.app = FastAPI(
+    def __init__(self) -> None:
+        self.app: FastAPI = FastAPI(
             title="Discussion Service",
             description="Current events discussion with topic extraction and reasoning",
             version="1.0.0",
         )
 
-        self.service_name = "discussion_service"
-        self.service_url = os.getenv("DISCUSSION_SERVICE_URL", "http://localhost:8003")
-        self.health_url = f"{self.service_url}/health"
+        self.service_name: str = "discussion_service"
+        self.service_url: str = os.getenv("DISCUSSION_SERVICE_URL", "http://localhost:8003")
+        self.health_url: str = f"{self.service_url}/health"
 
-        self.auth_manager = AuthManager()
-        self.monitoring = MonitoringManager()
-        self.ai_safety = AISafetyManager()
-        self.discussion_agent = TracedDiscussionAgent(max_depth=5)
+        self.auth_manager: AuthManager = AuthManager()
+        self.monitoring: MonitoringManager = MonitoringManager()
+        self.ai_safety: AISafetyManager = AISafetyManager()
+        self.discussion_agent: TracedDiscussionAgent = TracedDiscussionAgent(max_depth=5)
 
         self.discussions: dict[str, dict[str, Any]] = {}
 
         self._setup_middleware()
         self._setup_routes()
 
-    def _setup_middleware(self):
+    def _setup_middleware(self) -> None:
         """Setup middleware."""
         self.app.add_middleware(
             CORSMiddleware,
@@ -258,7 +258,7 @@ class DiscussionService:
             allow_headers=["*"],
         )
 
-    def _setup_routes(self):
+    def _setup_routes(self) -> None:
         """Setup API routes."""
 
         @self.app.get("/health")

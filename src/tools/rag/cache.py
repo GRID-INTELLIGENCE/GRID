@@ -6,7 +6,7 @@ Detects index changes via context hashing to avoid stale answers.
 
 import hashlib
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from typing import Any
 
 
@@ -96,7 +96,7 @@ class QueryCache:
 
         if key in self.cache:
             entry = self.cache[key]
-            now = datetime.now()
+            now = datetime.now(timezone.utc)
             age = now - entry.created_at
 
             # Check TTL
@@ -144,7 +144,7 @@ class QueryCache:
         key = self._make_cache_key(query, top_k, context_hash)
 
         self.cache[key] = CacheEntry(
-            answer=answer, sources=sources, created_at=datetime.now(), context_hash=context_hash
+            answer=answer, sources=sources, created_at=datetime.now(timezone.utc), context_hash=context_hash
         )
 
     def invalidate(self) -> None:

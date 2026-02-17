@@ -13,7 +13,7 @@ import logging
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Any
 
 from . import Event, EventDomain, get_event_bus
@@ -23,7 +23,7 @@ from .safety_bridge import SafetyContext, get_safety_bridge
 logger = logging.getLogger(__name__)
 
 
-class ActionType(Enum):
+class ActionType(StrEnum):
     """Coinbase action types"""
 
     BUY = "buy"
@@ -35,7 +35,7 @@ class ActionType(Enum):
     DEPOSIT = "deposit"
 
 
-class SignalType(Enum):
+class SignalType(StrEnum):
     """Trading signal types"""
 
     ENTRY = "entry"

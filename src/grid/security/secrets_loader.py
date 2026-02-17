@@ -26,14 +26,14 @@ import logging
 import os
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from enum import Enum
+from enum import Enum, StrEnum
 from pathlib import Path
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
-class SecretSource(Enum):
+class SecretSource(StrEnum):
     """Source of the secret value."""
 
     ENVIRONMENT = "environment"

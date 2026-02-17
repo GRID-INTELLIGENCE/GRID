@@ -15,7 +15,7 @@ import statistics
 from collections import defaultdict, deque
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from enum import Enum
+from enum import Enum, StrEnum
 from pathlib import Path
 from typing import Any
 from uuid import uuid4
@@ -23,7 +23,7 @@ from uuid import uuid4
 logger = logging.getLogger(__name__)
 
 
-class MetricType(Enum):
+class MetricType(StrEnum):
     """Performance metric types."""
 
     EXECUTION_TIME = "execution_time"
@@ -36,7 +36,7 @@ class MetricType(Enum):
     RESOURCE_EFFICIENCY = "resource_efficiency"
 
 
-class AlertLevel(Enum):
+class AlertLevel(StrEnum):
     """Performance alert levels."""
 
     INFO = "info"

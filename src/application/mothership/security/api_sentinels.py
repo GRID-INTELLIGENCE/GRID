@@ -17,7 +17,7 @@ import html
 import logging
 import re
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from re import Pattern
 from typing import Any
 
@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 # =============================================================================
 
 
-class AuthLevel(str, Enum):
+class AuthLevel(StrEnum):
     """Authentication levels for API endpoints."""
 
     NONE = "none"  # No authentication required (public endpoints only)
@@ -41,7 +41,7 @@ class AuthLevel(str, Enum):
     ADMIN = "admin"  # Administrative access only
 
 
-class ThreatCategory(str, Enum):
+class ThreatCategory(StrEnum):
     """Categories of security threats."""
 
     SQLI = "sql_injection"
@@ -53,7 +53,7 @@ class ThreatCategory(str, Enum):
     TEMPLATE_INJECTION = "template_injection"
 
 
-class SanitizationAction(str, Enum):
+class SanitizationAction(StrEnum):
     """Actions to take when threats are detected."""
 
     REJECT = "reject"  # Reject the request entirely

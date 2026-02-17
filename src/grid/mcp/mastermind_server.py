@@ -6,12 +6,13 @@ Provides intelligent code analysis, project navigation, and knowledge management
 capabilities for the GRID project.
 """
 
+import aiofiles
 import asyncio
 import json
 import logging
 import sys
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -89,7 +90,7 @@ def format_project_info(info: dict[str, Any]) -> str:
 - Files: {info.get("file_count", 0)}
 - Directories: {info.get("dir_count", 0)}
 - Languages: {", ".join(info.get("languages", []))}
-- Last Updated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+- Last Updated: {datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")}
 """
 
 
@@ -346,8 +347,8 @@ async def analyze_codebase() -> dict[str, Any]:
 
         for py_file in python_files:
             try:
-                with open(py_file, encoding="utf-8") as f:
-                    content = f.read()
+                async with aiofiles.open(py_file, mode="r", encoding="utf-8") as f:
+                    content = await f.read()
                     lines = content.split("\n")
                     total_lines += len(lines)
 
@@ -399,8 +400,9 @@ async def analyze_dependencies() -> dict[str, Any]:
         for req_file in req_files:
             if req_file.exists():
                 if req_file.name == "requirements.txt":
-                    with open(req_file) as f:
-                        for line in f:
+                    async with aiofiles.open(req_file, mode="r") as f:
+                        content = await f.read()
+                        for line in content.split("\n"):
                             line = line.strip()
                             if line and not line.startswith("#"):
                                 deps["external"].append(line)
@@ -409,8 +411,9 @@ async def analyze_dependencies() -> dict[str, Any]:
                     try:
                         import tomllib
 
-                        with open(req_file, "rb") as f:
-                            data = tomllib.load(f)
+                        async with aiofiles.open(req_file, mode="rb") as f:
+                            content = await f.read()
+                            data = tomllib.loads(content.decode("utf-8"))
                             project_deps = data.get("project", {}).get("dependencies", [])
                             deps["external"].extend(project_deps)
                     except Exception:
@@ -489,8 +492,8 @@ async def analyze_file(file_path: str) -> dict[str, Any]:
         # Update file_path to the resolved path for consistency
         result["file_path"] = str(file_path_obj.relative_to(session.project_root))
 
-        with open(file_path_obj, encoding="utf-8") as f:
-            content = f.read()
+        async with aiofiles.open(file_path_obj, mode="r", encoding="utf-8") as f:
+            content = await f.read()
             lines = content.split("\n")
             result["lines"] = len(lines)
 
@@ -536,8 +539,8 @@ async def search_code(pattern: str, file_pattern: str = "*") -> dict[str, Any]:
         for file_path in session.project_root.rglob(file_pattern):
             if file_path.is_file():
                 try:
-                    with open(file_path, encoding="utf-8") as f:
-                        content = f.read()
+                    async with aiofiles.open(file_path, mode="r", encoding="utf-8") as f:
+                        content = await f.read()
                         lines = content.split("\n")
 
                         file_matches = []
@@ -580,8 +583,8 @@ async def find_dependencies(target: str) -> dict[str, Any]:
                     break
 
         if target_path.exists() and target_path.suffix == ".py":
-            with open(target_path, encoding="utf-8") as f:
-                content = f.read()
+            async with aiofiles.open(target_path, mode="r", encoding="utf-8") as f:
+                content = await f.read()
                 for line in content.split("\n"):
                     stripped = line.strip()
                     if stripped.startswith("import ") or stripped.startswith("from "):
@@ -598,8 +601,8 @@ async def find_dependencies(target: str) -> dict[str, Any]:
         for py_file in session.project_root.rglob("*.py"):
             if py_file != target_path:
                 try:
-                    with open(py_file, encoding="utf-8") as f:
-                        content = f.read()
+                    async with aiofiles.open(py_file, mode="r", encoding="utf-8") as f:
+                        content = await f.read()
                         if target_name in content:
                             deps["imported_by"].append(str(py_file.relative_to(session.project_root)))
                 except Exception:

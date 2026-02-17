@@ -11,13 +11,13 @@ import asyncio
 import logging
 from collections.abc import AsyncIterator, Callable
 from contextlib import asynccontextmanager
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
-class DegradationLevel(str, Enum):
+class DegradationLevel(StrEnum):
     """System degradation levels."""
 
     NORMAL = "normal"  # Full functionality
@@ -26,7 +26,7 @@ class DegradationLevel(str, Enum):
     FAILSAFE = "failsafe"  # Bare minimum operations only
 
 
-class ServiceStatus(str, Enum):
+class ServiceStatus(StrEnum):
     """Service operational status."""
 
     HEALTHY = "healthy"

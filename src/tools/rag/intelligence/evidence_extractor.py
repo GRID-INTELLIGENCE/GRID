@@ -11,13 +11,13 @@ import hashlib
 import logging
 import re
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
-class EvidenceType(Enum):
+class EvidenceType(StrEnum):
     """Classification of evidence types found in chunks."""
 
     DEFINITION = "definition"  # Defines what something is
@@ -31,7 +31,7 @@ class EvidenceType(Enum):
     UNKNOWN = "unknown"
 
 
-class EvidenceStrength(Enum):
+class EvidenceStrength(StrEnum):
     """How strongly the evidence supports the query."""
 
     STRONG = "strong"  # Directly answers the query

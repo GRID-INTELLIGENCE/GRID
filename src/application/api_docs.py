@@ -245,8 +245,21 @@ def export_openapi_spec(app: FastAPI, output_path: str | Path) -> None:
     openapi_schema = app.openapi()
 
     # Write to file
-    with open(output_path, "w", encoding="utf-8") as f:
-        json.dump(openapi_schema, f, indent=2, ensure_ascii=False)
+    import aiofiles
+    import asyncio
+
+    async def _async_export():
+        async with aiofiles.open(output_path, "w", encoding="utf-8") as f:
+            await f.write(json.dumps(openapi_schema, indent=2, ensure_ascii=False))
+    
+    try:
+        loop = asyncio.get_event_loop()
+        if loop.is_running():
+            loop.create_task(_async_export())
+        else:
+            asyncio.run(_async_export())
+    except RuntimeError:
+        asyncio.run(_async_export())
 
 
 def export_html_docs(app: FastAPI, output_path: str | Path) -> None:
@@ -306,8 +319,21 @@ def export_html_docs(app: FastAPI, output_path: str | Path) -> None:
     </html>
     """
 
-    with open(output_path, "w", encoding="utf-8") as f:
-        f.write(html_content)
+    import aiofiles
+    import asyncio
+
+    async def _async_export_html():
+        async with aiofiles.open(output_path, "w", encoding="utf-8") as f:
+            await f.write(html_content)
+
+    try:
+        loop = asyncio.get_event_loop()
+        if loop.is_running():
+            loop.create_task(_async_export_html())
+        else:
+            asyncio.run(_async_export_html())
+    except RuntimeError:
+        asyncio.run(_async_export_html())
 
 
 def add_example_responses(

@@ -9,7 +9,7 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from application.mothership.config import BillingSettings
@@ -17,7 +17,7 @@ from application.mothership.config import BillingSettings
 logger = logging.getLogger(__name__)
 
 
-class SubscriptionTier(str, Enum):
+class SubscriptionTier(StrEnum):
     """Subscription tiers."""
 
     FREE = "free"

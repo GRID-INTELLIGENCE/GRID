@@ -551,6 +551,9 @@ def setup_middleware(app: FastAPI, settings: Any) -> None:
     # Request ID (runs last, sets up context for others)
     app.add_middleware(RequestIDMiddleware)
 
+    # API Versioning
+    app.add_middleware(VersioningMiddleware, default_version="v1")
+
     # Request size limiting (deny-by-default security)
     if hasattr(settings, "security"):
         from .request_size import RequestSizeLimitMiddleware
@@ -636,6 +639,7 @@ __all__ = [
     "get_circuit_manager",
     "get_parasite_guard_middleware",
     "get_accountability_middleware",
+    "VersioningMiddleware",
     # Setup function
     "setup_middleware",
 ]

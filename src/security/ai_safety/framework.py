@@ -22,13 +22,13 @@ import time
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
-class ThreatLevel(Enum):
+class ThreatLevel(StrEnum):
     """Threat severity levels."""
 
     NONE = "none"
@@ -38,7 +38,7 @@ class ThreatLevel(Enum):
     CRITICAL = "critical"
 
 
-class ContentType(Enum):
+class ContentType(StrEnum):
     """Types of content to analyze."""
 
     TEXT = "text"
@@ -48,7 +48,7 @@ class ContentType(Enum):
     METADATA = "metadata"
 
 
-class SafetyCategory(Enum):
+class SafetyCategory(StrEnum):
     """Safety evaluation categories."""
 
     HARMFUL_CONTENT = "harmful_content"

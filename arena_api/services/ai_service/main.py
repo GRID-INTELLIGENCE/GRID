@@ -14,7 +14,7 @@ import asyncio
 import logging
 import os
 import re
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 import uvicorn
@@ -57,26 +57,26 @@ class ArenaAIService:
     Example AI service for the Arena architecture.
     """
 
-    def __init__(self):
-        self.app = FastAPI(
+    def __init__(self) -> None:
+        self.app: FastAPI = FastAPI(
             title="Arena AI Service",
             description="AI-powered text generation with safety and compliance",
             version="1.0.0",
         )
 
         # Initialize components
-        self.auth_manager = AuthManager()
-        self.monitoring = MonitoringManager()
-        self.ai_safety = AISafetyManager()
-        self.service_discovery = ServiceDiscovery()
+        self.auth_manager: AuthManager = AuthManager()
+        self.monitoring: MonitoringManager = MonitoringManager()
+        self.ai_safety: AISafetyManager = AISafetyManager()
+        self.service_discovery: ServiceDiscovery = ServiceDiscovery()
 
         # Service configuration
-        self.service_name = "ai_service"
-        self.service_url = os.getenv("AI_SERVICE_URL", "http://localhost:8001")
-        self.health_url = f"{self.service_url}/health"
+        self.service_name: str = "ai_service"
+        self.service_url: str = os.getenv("AI_SERVICE_URL", "http://localhost:8001")
+        self.health_url: str = f"{self.service_url}/health"
 
         # Mock AI model (replace with actual model in production)
-        self.mock_responses = [
+        self.mock_responses: list[str] = [
             "The Arena architecture provides dynamic API routing with built-in safety mechanisms.",
             "Service discovery enables automatic registration and health monitoring of microservices.",
             "AI safety checks prevent harmful content generation and ensure compliance.",
@@ -87,7 +87,7 @@ class ArenaAIService:
         self._setup_middleware()
         self._setup_routes()
 
-    def _setup_middleware(self):
+    def _setup_middleware(self) -> None:
         """Setup middleware."""
         self.app.add_middleware(
             CORSMiddleware,
@@ -97,7 +97,7 @@ class ArenaAIService:
             allow_headers=["*"],
         )
 
-    def _setup_routes(self):
+    def _setup_routes(self) -> None:
         """Setup API routes."""
 
         @self.app.get("/health")
@@ -106,7 +106,7 @@ class ArenaAIService:
             return {
                 "status": "healthy",
                 "service": self.service_name,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "version": "1.0.0",
             }
 
@@ -150,7 +150,7 @@ class ArenaAIService:
                     tokens_used=len(generated_text.split()),
                     safety_score=output_safety.get("score", 0.8),
                     processing_time=round(processing_time, 3),
-                    timestamp=datetime.utcnow(),
+                    timestamp=datetime.now(timezone.utc),
                 )
 
                 return response
@@ -237,7 +237,7 @@ class ArenaAIService:
 
         return {"safe": len(issues) == 0, "score": safety_score, "issues": issues}
 
-    async def register_with_discovery(self):
+    async def register_with_discovery(self) -> None:
         """Register this service with the service discovery system."""
         try:
             _registration_data = {
@@ -262,7 +262,7 @@ class ArenaAIService:
         except Exception as e:
             logger.error(f"Failed to register with discovery: {str(e)}")
 
-    async def start_background_tasks(self):
+    async def start_background_tasks(self) -> None:
         """Start background tasks for the service."""
         # Start monitoring
         await self.monitoring.start()
@@ -276,7 +276,7 @@ class ArenaAIService:
         # Send heartbeats
         asyncio.create_task(self._send_heartbeats())
 
-    async def _send_heartbeats(self):
+    async def _send_heartbeats(self) -> None:
         """Send periodic heartbeats to service discovery."""
         while True:
             try:
@@ -291,7 +291,7 @@ class ArenaAIService:
                 logger.error(f"Heartbeat error: {str(e)}")
                 await asyncio.sleep(10)
 
-    async def shutdown(self):
+    async def shutdown(self) -> None:
         """Shutdown the service."""
         await self.monitoring.stop()
         logger.info("AI service shutdown complete")

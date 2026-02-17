@@ -15,7 +15,7 @@ import tempfile
 import time
 from dataclasses import dataclass
 from datetime import datetime
-from enum import Enum
+from enum import Enum, StrEnum
 from pathlib import Path
 from typing import Any
 
@@ -39,7 +39,7 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
-class SandboxStatus(Enum):
+class SandboxStatus(StrEnum):
     """Sandbox execution status."""
 
     PENDING = "pending"
@@ -50,7 +50,7 @@ class SandboxStatus(Enum):
     KILLED = "killed"
 
 
-class ResourceLimit(Enum):
+class ResourceLimit(StrEnum):
     """Resource limit types."""
 
     CPU_TIME = "cpu_time"
@@ -294,7 +294,8 @@ else:
 
             # Wait for completion with timeout
             try:
-                stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=self.config.timeout)
+                async with asyncio.timeout(self.config.timeout):
+                    stdout, stderr = await process.communicate()
                 status = SandboxStatus.COMPLETED if process.returncode == 0 else SandboxStatus.FAILED
 
             except TimeoutError:

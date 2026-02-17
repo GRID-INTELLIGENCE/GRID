@@ -17,7 +17,7 @@ import hashlib
 import logging
 import os
 import secrets
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from typing import Any
 
 import jwt
@@ -31,11 +31,11 @@ class AuthManager:
     Authentication manager handling various auth methods for the Arena system.
     """
 
-    def __init__(self):
-        self.jwt_secret = os.getenv("ARENA_JWT_SECRET", "arena-secret-key-change-in-production")
-        self.jwt_algorithm = "HS256"
-        self.api_keys = self._load_api_keys()
-        self.service_tokens = {}
+    def __init__(self) -> None:
+        self.jwt_secret: str = os.getenv("ARENA_JWT_SECRET", "arena-secret-key-change-in-production")
+        self.jwt_algorithm: str = "HS256"
+        self.api_keys: dict[str, dict[str, Any]] = self._load_api_keys()
+        self.service_tokens: dict[str, dict[str, Any]] = {}
 
     def _load_api_keys(self) -> dict[str, dict[str, Any]]:
         """Load API keys from configuration."""
@@ -85,7 +85,7 @@ class AuthManager:
             payload = jwt.decode(token, self.jwt_secret, algorithms=[self.jwt_algorithm])
 
             # Check token expiration
-            if payload.get("exp", 0) < datetime.utcnow().timestamp():
+            if payload.get("exp", 0) < datetime.now(timezone.utc).timestamp():
                 return {"authenticated": False, "error": "Token expired"}
 
             return {
@@ -146,7 +146,7 @@ class AuthManager:
                 return {"authenticated": False, "error": "Invalid service token"}
 
             # Check token expiration
-            if service_info.get("expires_at", 0) < datetime.utcnow().timestamp():
+            if service_info.get("expires_at", 0) < datetime.now(timezone.utc).timestamp():
                 return {"authenticated": False, "error": "Service token expired"}
 
             return {
@@ -178,7 +178,11 @@ class AuthManager:
         return all(perm in user_permissions for perm in required_permissions)
 
     def generate_jwt_token(
-        self, user_id: str, permissions: list[str] | None = None, roles: list[str] | None = None, expires_in: int = 3600
+        self,
+        user_id: str,
+        permissions: list[str] | None = None,
+        roles: list[str] | None = None,
+        expires_in: int = 3600,
     ) -> str:
         """
         Generate a JWT token for authenticated users.
@@ -202,8 +206,8 @@ class AuthManager:
             "user_id": user_id,
             "permissions": permissions,
             "roles": roles,
-            "iat": datetime.utcnow(),
-            "exp": datetime.utcnow() + timedelta(seconds=expires_in),
+            "iat": datetime.now(timezone.utc),
+            "exp": datetime.now(timezone.utc) + timedelta(seconds=expires_in),
         }
 
         token = jwt.encode(payload, self.jwt_secret, algorithm=self.jwt_algorithm)
@@ -227,13 +231,13 @@ class AuthManager:
             permissions = ["read"]
 
         token = secrets.token_urlsafe(32)
-        expires_at = datetime.utcnow().timestamp() + expires_in
+        expires_at = datetime.now(timezone.utc).timestamp() + expires_in
 
         self.service_tokens[token] = {
             "service_name": service_name,
             "permissions": permissions,
             "expires_at": expires_at,
-            "created_at": datetime.utcnow().timestamp(),
+            "created_at": datetime.now(timezone.utc).timestamp(),
         }
 
         return token
@@ -252,7 +256,7 @@ class AuthManager:
         if not service_info:
             return None
 
-        if service_info.get("expires_at", 0) < datetime.utcnow().timestamp():
+        if service_info.get("expires_at", 0) < datetime.now(timezone.utc).timestamp():
             # Remove expired token
             del self.service_tokens[token]
             return None
@@ -265,9 +269,9 @@ class RBACManager:
     Role-Based Access Control manager for fine-grained permissions.
     """
 
-    def __init__(self):
-        self.roles = self._load_roles()
-        self.permissions = self._load_permissions()
+    def __init__(self) -> None:
+        self.roles: dict[str, dict[str, Any]] = self._load_roles()
+        self.permissions: dict[str, str] = self._load_permissions()
 
     def _load_roles(self) -> dict[str, dict[str, Any]]:
         """Load role definitions."""

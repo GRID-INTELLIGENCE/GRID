@@ -203,7 +203,8 @@ class AsyncRouterIntegration:
         await self._event_bus.publish(event)
 
         try:
-            result = await asyncio.wait_for(future, timeout=timeout)
+            async with asyncio.timeout(timeout):
+                result = await future
             elapsed = (time.perf_counter() - start_time) * 1000
 
             return RouterResponse(

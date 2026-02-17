@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -49,7 +49,7 @@ class IndexingMetrics:
 
     def finalize(self) -> None:
         """Mark indexing as complete."""
-        self.end_time = datetime.now()
+        self.end_time = datetime.now(timezone.utc)
 
     def report(self) -> str:
         """Generate human-readable report."""

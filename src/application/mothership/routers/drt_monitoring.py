@@ -5,7 +5,7 @@ DRT (Don't Repeat Themselves) Monitoring Router.
 from __future__ import annotations
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
@@ -91,7 +91,7 @@ async def get_drt_status(middleware: ComprehensiveDRTMiddleware = Depends(get_dr
         escalated_endpoints_count=status["escalated_endpoints"],
         behavioral_history_count=status["behavioral_history_count"],
         attack_vectors_count=status["attack_vectors_count"],
-        timestamp=datetime.utcnow().isoformat(),
+        timestamp=datetime.now(timezone.utc).isoformat(),
     )
 
 
@@ -114,7 +114,7 @@ async def add_attack_vector(
 async def get_escalated_endpoints(
     middleware: ComprehensiveDRTMiddleware = Depends(get_drt_middleware),
 ) -> dict[str, Any]:
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     escalated = {path: expires.isoformat() for path, expires in middleware.ESCALATED_ENDPOINTS.items() if expires > now}
     return {"escalated_endpoints": escalated}
 
@@ -199,7 +199,7 @@ async def mark_false_positive(
             marked_by="api_user",
             reason=request.reason,
             confidence=request.confidence,
-            created_at=datetime.utcnow().isoformat(),
+            created_at=datetime.now(timezone.utc).isoformat(),
         )
 
 
@@ -228,7 +228,7 @@ async def get_false_positive_stats(
             false_positive_rate=fp_rate,
             recent_false_positives=recent_fp,
             patterns_learned=patterns_learned,
-            timestamp=datetime.utcnow().isoformat(),
+            timestamp=datetime.now(timezone.utc).isoformat(),
         )
 
 
@@ -248,7 +248,7 @@ async def get_recent_false_positives(
             "false_positives": false_positives,
             "count": len(false_positives),
             "hours": hours,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
 
@@ -271,7 +271,7 @@ async def get_false_positive_patterns(
             "count": len(patterns),
             "threshold": threshold,
             "active_only": active_only,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
 

@@ -76,7 +76,8 @@ class OllamaLLM(LLMProvider):
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
             )
-            stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=60)
+            async with asyncio.timeout(60):
+                stdout, stderr = await proc.communicate()
 
             if proc.returncode == 0:
                 return stdout.decode("utf-8", errors="replace").strip()

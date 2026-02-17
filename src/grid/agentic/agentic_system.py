@@ -8,6 +8,8 @@ import os
 from pathlib import Path
 from typing import Any, Protocol, cast
 
+import aiofiles
+
 from cognitive import CognitiveEngine, InteractionEvent, get_cognitive_engine
 from cognitive.light_of_the_seven.cognitive_layer.schemas.cognitive_state import CognitiveState
 from cognitive.scaffolding_engine import get_scaffolding_engine
@@ -119,7 +121,7 @@ class AgenticSystem:
                     context={"case_id": case_id},
                     user_id=user_id,
                 )
-                adaptations = cast(list[_Adaptation], adaptations_raw)
+                adaptations = cast("list[_Adaptation]", adaptations_raw)
                 cognitive_adaptations = [a.adaptation_type for a in adaptations]
 
                 logger.debug(
@@ -281,8 +283,9 @@ class AgenticSystem:
         import json
 
         try:
-            with open(reference_file_path) as f:
-                reference = cast(dict[str, Any], json.load(f))
+            async with aiofiles.open(reference_file_path) as f:
+                content = await f.read()
+                reference = cast("dict[str, Any]", json.loads(content))
         except FileNotFoundError as e:
             logger.error(f"Reference file not found: {reference_file_path}", exc_info=True)
             raise SkillStoreError(f"Reference file not found: {reference_file_path}") from e
@@ -301,37 +304,37 @@ class AgenticSystem:
             category=category, keywords=keywords, limit=5
         )
 
-        for skill in historical_skills:
-            recommendations.append(
-                {
-                    "case_id": skill["id"],
-                    "category": skill["metadata"].get("category", "Uncategorized"),
-                    "solution": skill["metadata"].get("summary", "Historical skill found"),
-                    "outcome": "success",
-                    "source": "antigravity_skill_store",
-                }
-            )
+        recommendations.extend(
+            {
+                "case_id": skill["id"],
+                "category": skill["metadata"].get("category", "Uncategorized"),
+                "solution": skill["metadata"].get("summary", "Historical skill found"),
+                "outcome": "success",
+                "source": "antigravity_skill_store",
+            }
+            for skill in historical_skills
+        )
 
         # 2. Then look in repository if available
         if self.repository:
             similar_cases = cast(
-                list[_CaseLike],
+                "list[_CaseLike]",
                 await self.repository.find_similar_cases(
                     category=category,
                     keywords=keywords,
                     limit=5,
                 ),
             )
-            for case in similar_cases:
-                recommendations.append(
-                    {
-                        "case_id": case.case_id,
-                        "category": case.category,
-                        "solution": case.solution,
-                        "outcome": case.outcome,
-                        "source": "repository",
-                    }
-                )
+            recommendations.extend(
+                {
+                    "case_id": case.case_id,
+                    "category": case.category,
+                    "solution": case.solution,
+                    "outcome": case.outcome,
+                    "source": "repository",
+                }
+                for case in similar_cases
+            )
 
         return recommendations
 
@@ -439,7 +442,7 @@ class AgenticSystem:
                 "guardian_matches": total_guardian_matches,
                 "guardian_warnings": total_warnings,
                 "iterations_completed": len(results),
-                "evidence": cast(list[Any], iteration_audits)[:2],
+                "evidence": cast("list[Any]", iteration_audits)[:2],
             },
             rationale=(
                 f"Lawyer completed {len(results)} iteration(s). "

@@ -29,7 +29,7 @@ import sys
 from collections.abc import Generator
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-from enum import Enum
+from enum import Enum, StrEnum
 from pathlib import Path
 from typing import Any
 
@@ -61,7 +61,7 @@ grid_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(grid_root))
 
 
-class EmbeddingModelType(Enum):
+class EmbeddingModelType(StrEnum):
     """Supported embedding models."""
 
     BGE_M3 = "BAAI/bge-m3"  # Best open-source, 1024 dim, multilingual
@@ -72,7 +72,7 @@ class EmbeddingModelType(Enum):
     E5_LARGE = "intfloat/e5-large-v2"  # Strong retrieval, 1024 dim
 
 
-class ContentType(Enum):
+class ContentType(StrEnum):
     """Content types for adaptive chunking."""
 
     CODE_PYTHON = "python"
@@ -111,7 +111,7 @@ class ChunkMetadata:
     code_ratio: float = 0.0  # % that is code vs comments
 
     # Timestamps
-    indexed_at: str = field(default_factory=lambda: datetime.now().isoformat())
+    indexed_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for storage (ChromaDB compatible)."""
@@ -172,7 +172,7 @@ class IndexingStats:
     @property
     def duration(self) -> timedelta:
         """Calculate total duration."""
-        end = self.end_time or datetime.now()
+        end = self.end_time or datetime.now(timezone.utc)
         return end - self.start_time
 
     @property
@@ -188,7 +188,7 @@ class IndexingStats:
 
     def finalize(self) -> None:
         """Mark indexing complete."""
-        self.end_time = datetime.now()
+        self.end_time = datetime.now(timezone.utc)
         if self.total_chunks > 0:
             # These would be calculated from actual chunks
             pass

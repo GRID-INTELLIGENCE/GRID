@@ -15,7 +15,7 @@ from abc import ABC, abstractmethod
 from collections import defaultdict
 from collections.abc import Callable
 from dataclasses import asdict, dataclass, field
-from enum import Enum
+from enum import Enum, IntEnum, StrEnum
 from typing import Any, TypeVar
 
 import aio_pika  # type: ignore[import-not-found]
@@ -54,7 +54,7 @@ except Exception:
 T = TypeVar("T")
 
 
-class EventPriority(Enum):
+class EventPriority(IntEnum):
     """Event priority levels."""
 
     LOW = 1
@@ -63,7 +63,7 @@ class EventPriority(Enum):
     CRITICAL = 4
 
 
-class EventStatus(Enum):
+class EventStatus(StrEnum):
     """Event processing status."""
 
     PENDING = "pending"
@@ -224,6 +224,7 @@ class EventStore:
     async def _persist_event(self, event: Event):
         """Persist event to disk."""
         try:
+            import aiofiles
             filename = f"{self.storage_path}/events/{event.id}.json"
             async with aiofiles.open(filename, "w") as f:
                 await f.write(json.dumps(event.to_dict(), indent=2))
@@ -233,6 +234,7 @@ class EventStore:
     async def _persist_result(self, result: EventResult):
         """Persist result to disk."""
         try:
+            import aiofiles
             filename = f"{self.storage_path}/results/{result.event_id}.json"
             async with aiofiles.open(filename, "w") as f:
                 await f.write(json.dumps(asdict(result), indent=2))

@@ -1,16 +1,16 @@
 import re
 from dataclasses import dataclass
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Any
 
 
-class PrivacyLevel(Enum):
+class PrivacyLevel(StrEnum):
     STRICT = "strict"
     BALANCED = "balanced"
     MINIMAL = "minimal"
 
 
-class MaskingStrategy(Enum):
+class MaskingStrategy(StrEnum):
     REDACT = "redact"
     PARTIAL = "partial"
     HASH = "hash"

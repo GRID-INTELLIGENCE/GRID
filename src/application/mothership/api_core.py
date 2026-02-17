@@ -31,7 +31,7 @@ import time
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any, TypeVar
 
 from fastapi import HTTPException, status
@@ -47,7 +47,7 @@ HandlerFunc = Callable[..., Any | Awaitable[Any]]
 # =============================================================================
 
 
-class HandlerState(str, Enum):
+class HandlerState(StrEnum):
     """State of a registered handler."""
 
     ACTIVE = "active"
@@ -56,7 +56,7 @@ class HandlerState(str, Enum):
     DEPRECATED = "deprecated"
 
 
-class InvocationResult(str, Enum):
+class InvocationResult(StrEnum):
     """Result of handler invocation."""
 
     SUCCESS = "success"
@@ -577,16 +577,17 @@ async def summon_handler(
     # Check handler availability
     if not handler.is_available():
         if handler.state == HandlerState.DISABLED:
-            raise HTTPException(
-                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail=f"Handler '{key}' is currently disabled",
+            logger.warning(f"Handler '{key}' summoned but is DISABLED")
+            return InvocationResponse(
+                result=InvocationResult.DISABLED,
+                error=f"Handler '{key}' is currently disabled",
+                handler_key=key,
+                request_id=request_id,
             )
         if handler.circuit_breaker_state.is_open:
             handler.metrics.record_failure("Circuit breaker open")
-            raise HTTPException(
-                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail=f"Handler '{key}' temporarily unavailable (circuit open)",
-            )
+            logger.warning(f"Handler '{key}' summoned but circuit is OPEN")
+            return await _get_invocation_fallback(key, request_id)
 
     # Log deprecation warning
     if handler.state == HandlerState.DEPRECATED:
@@ -597,18 +598,13 @@ async def summon_handler(
 
     try:
         # Handle both sync and async handlers
-        if asyncio.iscoroutinefunction(handler.handler):
-            result = await asyncio.wait_for(
-                handler.handler(*args, **kwargs),
-                timeout=handler.timeout_ms / 1000,
-            )
-        else:
-            # Run sync handler in executor to not block
-            loop = asyncio.get_event_loop()
-            result = await asyncio.wait_for(
-                loop.run_in_executor(None, functools.partial(handler.handler, *args, **kwargs)),
-                timeout=handler.timeout_ms / 1000,
-            )
+        async with asyncio.timeout(handler.timeout_ms / 1000):
+            if asyncio.iscoroutinefunction(handler.handler):
+                result = await handler.handler(*args, **kwargs)
+            else:
+                # Run sync handler in executor to not block
+                loop = asyncio.get_event_loop()
+                result = await loop.run_in_executor(None, functools.partial(handler.handler, *args, **kwargs))
 
         latency_ms = (time.perf_counter() - start_time) * 1000
         handler.metrics.record_success(latency_ms)
@@ -632,16 +628,13 @@ async def summon_handler(
         )
 
         logger.error(f"Handler '{key}' timed out: {error_msg}")
-        raise HTTPException(
-            status_code=status.HTTP_504_GATEWAY_TIMEOUT,
-            detail=error_msg,
-        ) from None
-
-    except HTTPException:
-        # Re-raise HTTP exceptions without wrapping
-        latency_ms = (time.perf_counter() - start_time) * 1000
-        handler.metrics.record_failure("HTTP exception")
-        raise
+        return InvocationResponse(
+            result=InvocationResult.TIMEOUT,
+            error=error_msg,
+            latency_ms=latency_ms,
+            handler_key=key,
+            request_id=request_id,
+        )
 
     except Exception as e:
         latency_ms = (time.perf_counter() - start_time) * 1000
@@ -653,10 +646,38 @@ async def summon_handler(
         )
 
         logger.exception(f"Handler '{key}' failed: {error_msg}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Handler execution failed: {error_msg}",
-        ) from e
+        return InvocationResponse(
+            result=InvocationResult.FAILURE,
+            error=f"Handler execution failed: {error_msg}",
+            latency_ms=latency_ms,
+            handler_key=key,
+            request_id=request_id,
+        )
+
+
+async def _get_invocation_fallback(key: str, request_id: str) -> InvocationResponse[Any]:
+    """Provide a fallback response for handler invocation."""
+    fallback_data: dict[str, Any] = {
+        "fallback": True,
+        "message": "Service temporarily unavailable. Returning limited data.",
+        "timestamp": datetime.now(UTC).isoformat(),
+    }
+
+    # Add key-specific fallbacks
+    if "navigation" in key:
+        fallback_data["plan"] = []
+        fallback_data["status"] = "stalled"
+    elif "intelligence" in key or "ai" in key:
+        fallback_data["analysis"] = {}
+        fallback_data["confidence"] = 0.0
+
+    return InvocationResponse(
+        result=InvocationResult.CIRCUIT_OPEN,
+        data=fallback_data,
+        error="Circuit breaker is open",
+        handler_key=key,
+        request_id=request_id,
+    )
 
 
 def summon_handler_sync(

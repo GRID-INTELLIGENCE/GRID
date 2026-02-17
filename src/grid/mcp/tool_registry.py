@@ -12,8 +12,8 @@ import json
 import logging
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from datetime import datetime
-from enum import Enum
+from datetime import datetime, timezone
+from enum import Enum, StrEnum
 from pathlib import Path
 from typing import Any
 
@@ -22,7 +22,7 @@ import httpx
 logger = logging.getLogger(__name__)
 
 
-class ServerStatus(Enum):
+class ServerStatus(StrEnum):
     """Status of an MCP server."""
 
     UNKNOWN = "unknown"
@@ -204,16 +204,14 @@ class ToolRegistry:
         Args:
             config_path: Path to the MCP configuration file.
         """
+        import aiofiles
         config_path = Path(config_path)
         if not config_path.exists():
             raise FileNotFoundError(f"Configuration file not found: {config_path}")
 
-        # Read file in executor to avoid blocking
-        loop = asyncio.get_event_loop()
-        config_data = await loop.run_in_executor(
-            None,
-            lambda: json.loads(config_path.read_text()),
-        )
+        async with aiofiles.open(config_path, mode="r") as f:
+            content = await f.read()
+            config_data = json.loads(content)
 
         self._parse_config(config_data)
 
@@ -291,7 +289,7 @@ class ToolRegistry:
                 server.status = ServerStatus.UNHEALTHY
                 server.error_message = f"Health check returned {response.status_code}"
 
-            server.last_health_check = datetime.now()
+            server.last_health_check = datetime.now(timezone.utc)
 
             if old_status != server.status:
                 await self._emit("server_status_changed", server_name, server.status)
@@ -301,13 +299,13 @@ class ToolRegistry:
         except httpx.ConnectError:
             server.status = ServerStatus.OFFLINE
             server.error_message = "Connection refused"
-            server.last_health_check = datetime.now()
+            server.last_health_check = datetime.now(timezone.utc)
             return ServerStatus.OFFLINE
 
         except Exception as e:
             server.status = ServerStatus.UNHEALTHY
             server.error_message = str(e)
-            server.last_health_check = datetime.now()
+            server.last_health_check = datetime.now(timezone.utc)
             logger.warning(f"Health check failed for {server_name}: {e}")
             return ServerStatus.UNHEALTHY
 

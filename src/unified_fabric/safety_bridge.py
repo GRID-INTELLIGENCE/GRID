@@ -16,7 +16,7 @@ import sys
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from enum import Enum
+from enum import Enum, StrEnum
 from pathlib import Path
 from typing import Any
 
@@ -48,7 +48,7 @@ from .safety_router import SafetyDecision, SafetyReport, get_safety_router
 logger = logging.getLogger(__name__)
 
 
-class SafetySource(Enum):
+class SafetySource(StrEnum):
     """Source of safety validation"""
 
     WELLNESS_STUDIO = "wellness_studio"

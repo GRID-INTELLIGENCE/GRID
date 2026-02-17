@@ -142,16 +142,16 @@ class PydanticV2Migrator:
         return new_content, changes
 
     def _migrate_datetime_utcnow(self, content: str) -> tuple[str, list[str]]:
-        """Migrate datetime.now(timezone.utc) to datetime.now(timezone.utc)."""
+        """Migrate datetime.utcnow() to datetime.now(timezone.utc)."""
         changes = []
 
-        # Pattern: datetime.now(timezone.utc)
+        # Pattern: datetime.utcnow()
         pattern = r"datetime\.utcnow\(\)"
         count = len(re.findall(pattern, content))
 
         if count > 0:
             new_content = re.sub(pattern, "datetime.now(timezone.utc)", content)
-            changes.append(f"datetime.now(timezone.utc) -> datetime.now(timezone.utc) ({count} occurrences)")
+            changes.append(f"datetime.utcnow() -> datetime.now(timezone.utc) ({count} occurrences)")
             return new_content, changes
 
         return content, changes
@@ -166,7 +166,7 @@ class PydanticV2Migrator:
         count = len(re.findall(pattern, content))
 
         if count > 0:
-            new_content = content.replace("@field_validator(", "@field_validator(")
+            new_content = content.replace("@validator(", "@field_validator(")
             changes.append(f"@validator -> @field_validator ({count} occurrences)")
             return new_content, changes
 
@@ -198,7 +198,7 @@ class PydanticV2Migrator:
         """Migrate .model_dump() to .model_dump() and .model_dump_json() to .model_dump_json()."""
         changes = []
 
-        # Pattern: .model_dump( or .dict)
+        # Pattern: .model_dump( or .dict
         # We need to be careful not to replace .dict in other contexts (like dictionary objects)
         # But in a Pydantic-heavy codebase, most .model_dump() on Pydantic models should be migrated.
 
@@ -254,7 +254,7 @@ class PydanticV2Migrator:
                         break
                 else:
                     # No datetime import found, add new one
-                    imports_to_add.append("from datetime import timezone")
+                    imports_to_add.append("from datetime import datetime, timezone")
 
         # Check if field_validator is needed
         if any("field_validator" in change for change in changes_made):

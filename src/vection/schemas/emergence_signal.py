@@ -10,12 +10,12 @@ from __future__ import annotations
 import hashlib
 import time
 from dataclasses import dataclass, field
-from datetime import datetime
-from enum import Enum
+from datetime import datetime, timezone
+from enum import StrEnum
 from typing import Any
 
 
-class SignalType(str, Enum):
+class SignalType(StrEnum):
     """Types of emergent signals."""
 
     CORRELATION = "correlation"  # Co-occurrence pattern
@@ -28,7 +28,7 @@ class SignalType(str, Enum):
     SATURATION = "saturation"  # Pattern reaching threshold
 
 
-class SignalStrength(str, Enum):
+class SignalStrength(StrEnum):
     """Signal strength levels."""
 
     WEAK = "weak"  # 0.0 - 0.3
@@ -109,7 +109,7 @@ class EmergenceSignal:
         Returns:
             Seconds since first observation.
         """
-        return (datetime.now() - self.first_observed).total_seconds()
+        return (datetime.now(timezone.utc) - self.first_observed).total_seconds()
 
     @property
     def staleness(self) -> float:
@@ -118,7 +118,7 @@ class EmergenceSignal:
         Returns:
             Seconds since last observation.
         """
-        return (datetime.now() - self.last_observed).total_seconds()
+        return (datetime.now(timezone.utc) - self.last_observed).total_seconds()
 
     @property
     def effective_salience(self) -> float:
@@ -145,7 +145,7 @@ class EmergenceSignal:
         except ImportError:
             # Fallback to standard reinforcement if security module missing
             self.source_count += 1
-            self.last_observed = datetime.now()
+            self.last_observed = datetime.now(timezone.utc)
             self.salience = min(1.0, self.salience + boost)
             self.confidence = min(1.0, self.confidence + boost * 0.5)
 

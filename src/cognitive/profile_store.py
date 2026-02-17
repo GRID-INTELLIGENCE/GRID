@@ -8,10 +8,11 @@ The ProfileStore provides:
 
 from __future__ import annotations
 
+import aiofiles
 import json
 import logging
 from collections import Counter, defaultdict
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -70,8 +71,9 @@ class ProfileStore:
         profile_path = self.storage_path / f"{user_id}.json"
         if profile_path.exists():
             try:
-                with open(profile_path) as f:
-                    data = json.load(f)
+                async with aiofiles.open(profile_path, mode="r") as f:
+                    content = await f.read()
+                    data = json.loads(content)
                 profile = UserCognitiveProfile(**data)
                 self._profiles[user_id] = profile
                 return profile
@@ -86,8 +88,8 @@ class ProfileStore:
         Args:
             profile: Profile to create
         """
-        profile.created_at = datetime.now()
-        profile.updated_at = datetime.now()
+        profile.created_at = datetime.now(timezone.utc)
+        profile.updated_at = datetime.now(timezone.utc)
 
         await self.save_profile(profile)
         self._profiles[profile.user_id] = profile
@@ -108,8 +110,8 @@ class ProfileStore:
         # Save to disk
         profile_path = self.storage_path / f"{profile.user_id}.json"
         try:
-            with open(profile_path, "w") as f:
-                json.dump(profile.model_dump(mode="json"), f, indent=2, default=str)
+            async with aiofiles.open(profile_path, mode="w") as f:
+                await f.write(json.dumps(profile.model_dump(mode="json"), indent=2, default=str))
             logger.debug(f"Saved profile for user {profile.user_id}")
         except Exception as e:
             logger.error(f"Error saving profile for {profile.user_id}: {e}")
@@ -175,8 +177,9 @@ class ProfileStore:
 
         for profile_path in self.storage_path.glob("*.json"):
             try:
-                with open(profile_path) as f:
-                    data = json.load(f)
+                async with aiofiles.open(profile_path, mode="r") as f:
+                    content = await f.read()
+                    data = json.loads(content)
                 profiles.append(UserCognitiveProfile(**data))
             except Exception as e:
                 logger.error(f"Error loading profile from {profile_path}: {e}")
@@ -200,7 +203,7 @@ class ProfileStore:
         profile.interaction_history.append(
             {
                 **interaction,
-                "recorded_at": datetime.now().isoformat(),
+                "recorded_at": datetime.now(timezone.utc).isoformat(),
             }
         )
 
@@ -416,7 +419,7 @@ class ProfileStore:
             "working_memory_capacity": profile.working_memory_capacity,
             "cognitive_load_tolerance": profile.cognitive_load_tolerance,
             "mental_model_version": profile.mental_model_version,
-            "profile_age_days": (datetime.now() - profile.created_at).days,
+            "profile_age_days": (datetime.now(timezone.utc) - profile.created_at).days,
         }
 
     async def evolve_mental_model(self, user_id: str) -> dict[str, Any]:

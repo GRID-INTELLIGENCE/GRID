@@ -9,13 +9,13 @@ import hashlib
 import logging
 import re
 from dataclasses import dataclass
-from enum import Enum
+from enum import Enum, StrEnum
 from re import Pattern
 
 logger = logging.getLogger(__name__)
 
 
-class RedactionMode(Enum):
+class RedactionMode(StrEnum):
     """Redaction modes."""
 
     FULL = "full"

@@ -8,7 +8,7 @@ Uses Pydantic v2 for validation, serialization, and OpenAPI schema generation.
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any, Generic, TypeVar
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -25,7 +25,7 @@ T = TypeVar("T")
 # =============================================================================
 
 
-class SystemStatusSchema(str, Enum):
+class SystemStatusSchema(StrEnum):
     """System status for API responses."""
 
     OPERATIONAL = "operational"
@@ -36,7 +36,7 @@ class SystemStatusSchema(str, Enum):
     ERROR = "error"
 
 
-class ComponentHealthSchema(str, Enum):
+class ComponentHealthSchema(StrEnum):
     """Component health status for API responses."""
 
     HEALTHY = "healthy"
@@ -47,7 +47,7 @@ class ComponentHealthSchema(str, Enum):
     STOPPING = "stopping"
 
 
-class TaskStatusSchema(str, Enum):
+class TaskStatusSchema(StrEnum):
     """Task status for API responses."""
 
     PENDING = "pending"
@@ -60,7 +60,7 @@ class TaskStatusSchema(str, Enum):
     RETRYING = "retrying"
 
 
-class TaskPrioritySchema(str, Enum):
+class TaskPrioritySchema(StrEnum):
     """Task priority for API requests/responses."""
 
     CRITICAL = "critical"
@@ -70,7 +70,7 @@ class TaskPrioritySchema(str, Enum):
     BACKGROUND = "background"
 
 
-class AlertSeveritySchema(str, Enum):
+class AlertSeveritySchema(StrEnum):
     """Alert severity for API responses."""
 
     CRITICAL = "critical"
@@ -80,7 +80,7 @@ class AlertSeveritySchema(str, Enum):
     DEBUG = "debug"
 
 
-class OperationModeSchema(str, Enum):
+class OperationModeSchema(StrEnum):
     """Operation mode for API responses."""
 
     NORMAL = "normal"

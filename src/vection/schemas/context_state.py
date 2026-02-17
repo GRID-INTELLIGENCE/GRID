@@ -11,15 +11,15 @@ import hashlib
 import time
 from collections import deque
 from dataclasses import dataclass, field
-from datetime import datetime
-from enum import Enum
+from datetime import datetime, timezone
+from enum import Enum, StrEnum
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     pass
 
 
-class AnchorType(str, Enum):
+class AnchorType(StrEnum):
     """Types of context anchors."""
 
     TOPIC = "topic"  # Subject matter anchor
@@ -78,12 +78,12 @@ class Anchor:
     @property
     def age_seconds(self) -> float:
         """Get anchor age in seconds."""
-        return (datetime.now() - self.created_at).total_seconds()
+        return (datetime.now(timezone.utc) - self.created_at).total_seconds()
 
     @property
     def staleness(self) -> float:
         """Get seconds since last reference."""
-        return (datetime.now() - self.last_referenced).total_seconds()
+        return (datetime.now(timezone.utc) - self.last_referenced).total_seconds()
 
     @property
     def effective_weight(self) -> float:
@@ -98,7 +98,7 @@ class Anchor:
         Args:
             boost: Amount to boost weight.
         """
-        self.last_referenced = datetime.now()
+        self.last_referenced = datetime.now(timezone.utc)
         self.reference_count += 1
         self.weight = min(1.0, self.weight + boost)
 
@@ -227,12 +227,12 @@ class VectionContext:
     @property
     def age_seconds(self) -> float:
         """Get context age in seconds."""
-        return (datetime.now() - self.established_at).total_seconds()
+        return (datetime.now(timezone.utc) - self.established_at).total_seconds()
 
     @property
     def staleness(self) -> float:
         """Get seconds since last update."""
-        return (datetime.now() - self.last_updated).total_seconds()
+        return (datetime.now(timezone.utc) - self.last_updated).total_seconds()
 
     @property
     def is_established(self) -> bool:
@@ -424,7 +424,7 @@ class VectionContext:
 
     def _touch(self) -> None:
         """Update last_updated timestamp."""
-        self.last_updated = datetime.now()
+        self.last_updated = datetime.now(timezone.utc)
         self.interaction_count += 1
 
     def to_dict(self) -> dict[str, Any]:

@@ -23,11 +23,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Any, Callable
 
 
-class PenaltySeverity(Enum):
+class PenaltySeverity(StrEnum):
     """Penalty severity levels with associated point ranges."""
 
     CRITICAL = "critical"  # 20-50 points

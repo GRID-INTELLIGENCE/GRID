@@ -16,7 +16,7 @@ import re
 import time
 from collections import defaultdict, deque
 from dataclasses import asdict, dataclass
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from pathlib import Path
 from typing import Any
@@ -276,7 +276,7 @@ class SecurityMonitor:
 
         report = VulnerabilityReport(
             scan_id=scan_id,
-            timestamp=datetime.now(),
+            timestamp=datetime.now(timezone.utc),
             scan_path=str(codebase_path),
             vulnerabilities=vulnerabilities,
             total_vulnerabilities=len(vulnerabilities),
@@ -377,7 +377,7 @@ class SecurityMonitor:
 
         audit_result = AuditResult(
             audit_id=audit_id,
-            timestamp=datetime.now(),
+            timestamp=datetime.now(timezone.utc),
             user_context=user_context,
             permissions_checked=permissions_checked,
             violations=violations,
@@ -668,7 +668,7 @@ class SecurityMonitor:
             description=description,
             source_ip=source_ip,
             user_id=request_data.get("user_id"),
-            timestamp=datetime.now(),
+            timestamp=datetime.now(timezone.utc),
             request_data={
                 "method": request_data.get("method", ""),
                 "path": request_data.get("path", ""),

@@ -438,7 +438,8 @@ class DeferredSanitizer:
             return
 
         tasks = list(self._active_tasks.values())
-        await asyncio.wait_for(asyncio.gather(*tasks, return_exceptions=True), timeout=timeout)
+        async with asyncio.timeout(timeout):
+            await asyncio.gather(*tasks, return_exceptions=True)
 
     def get_active_count(self) -> int:
         """Get count of active sanitization tasks."""

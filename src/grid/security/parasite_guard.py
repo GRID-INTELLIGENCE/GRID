@@ -33,7 +33,7 @@ from collections import defaultdict
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from enum import Enum
+from enum import Enum, StrEnum
 from pathlib import Path
 from typing import Any, Protocol, TypeVar, cast
 
@@ -115,7 +115,7 @@ class ParasiteGuardConfig:
 # =============================================================================
 
 
-class ParasiteStatus(Enum):
+class ParasiteStatus(StrEnum):
     """Status of a detected parasite."""
 
     DETECTED = "detected"

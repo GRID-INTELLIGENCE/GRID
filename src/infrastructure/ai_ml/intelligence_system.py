@@ -13,7 +13,7 @@ import time
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Any
 
 from ..event_bus.event_system import (  # type: ignore[import-not-found]
@@ -25,7 +25,7 @@ from ..event_bus.event_system import (  # type: ignore[import-not-found]
 )
 
 
-class AISafetyLevel(Enum):
+class AISafetyLevel(StrEnum):
     """AI safety levels."""
 
     PERMITTED = "permitted"
@@ -33,7 +33,7 @@ class AISafetyLevel(Enum):
     PROHIBITED = "prohibited"
 
 
-class DataSensitivity(Enum):
+class DataSensitivity(StrEnum):
     """Data sensitivity levels."""
 
     PUBLIC = "public"
@@ -41,7 +41,7 @@ class DataSensitivity(Enum):
     CRITICAL = "critical"
 
 
-class ModelType(Enum):
+class ModelType(StrEnum):
     """Model types."""
 
     PREDICTIVE = "predictive"
@@ -293,14 +293,11 @@ class ExperimentTracker:
         best_experiment = max(experiments, key=lambda x: x["metrics"][metric])
         return best_experiment["model_name"]
 
-    async def _persist_experiment(self, experiment: dict[str, Any]):
-        """Persist experiment to disk."""
+    async def _save_experiment(self, experiment: dict[str, Any]):
+        """Save experiment to disk asynchronously."""
+        import aiofiles
         import os
-
-        import aiofiles  # type: ignore[import-untyped]
-
         os.makedirs(self.storage_path, exist_ok=True)
-
         filename = f"{self.storage_path}/{experiment['id']}.json"
         async with aiofiles.open(filename, "w") as f:
             await f.write(json.dumps(experiment, indent=2))
@@ -406,7 +403,8 @@ class FrontierIntelligenceSystem:
         while self.processing:
             try:
                 # Get request from queue
-                request = await asyncio.wait_for(self.request_queue.get(), timeout=1.0)
+                async with asyncio.timeout(1.0):
+                    request = await self.request_queue.get()
 
                 # Process request
                 response = await self._process_request(request)

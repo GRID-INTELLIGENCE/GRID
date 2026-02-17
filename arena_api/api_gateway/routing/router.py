@@ -15,8 +15,10 @@ Key Features:
 
 import asyncio
 import logging
-from datetime import datetime, timedelta
-from typing import Any
+from datetime import datetime, timezone, timedelta
+from typing import Any, Awaitable, Callable, Optional
+
+import httpx
 
 logger = logging.getLogger(__name__)
 
@@ -29,17 +31,22 @@ class DynamicRouter:
 
     def __init__(self):
         self.service_discovery = None  # Will be injected
-        self.circuit_breaker = CircuitBreaker()
+        self.client = httpx.AsyncClient(timeout=30.0)
+        self.circuit_breaker = CircuitBreaker(client=self.client)
         self.load_balancer = LoadBalancer()
         self.request_transformer = RequestTransformer()
         self.route_cache = {}
         self.cache_ttl = 300  # 5 minutes
 
+    async def close(self):
+        """Close the HTTP client."""
+        await self.client.aclose()
+
     def set_service_discovery(self, service_discovery):
         """Inject service discovery dependency."""
         self.service_discovery = service_discovery
 
-    async def route_request(self, request, path: str) -> dict[str, Any]:
+    async def route_request(self, request: Any, path: str) -> Response:
         """
         Route an incoming request to the appropriate service.
 
@@ -48,8 +55,11 @@ class DynamicRouter:
             path: Request path
 
         Returns:
-            Response data from the routed service
+            Response from the routed service
         """
+        from fastapi.responses import JSONResponse
+        from application.mothership.api.versioning import get_version_metadata
+
         try:
             # 1. Determine target service
             service_name, service_path = self._parse_service_path(path)
@@ -57,7 +67,10 @@ class DynamicRouter:
             # 2. Get healthy service instances
             service_instances = await self._get_service_instances(service_name)
             if not service_instances:
-                return {"error": "Service unavailable", "service": service_name, "status_code": 503}
+                return JSONResponse(
+                    status_code=503,
+                    content={"error": "Service unavailable", "service": service_name}
+                )
 
             # 3. Select service instance (load balancing)
             target_instance = self.load_balancer.select_instance(service_instances)
@@ -66,13 +79,33 @@ class DynamicRouter:
             transformed_request = await self.request_transformer.transform(request, service_name, service_path)
 
             # 5. Route to service with circuit breaker
-            response = await self.circuit_breaker.call_service(target_instance, transformed_request)
+            response_data = await self.circuit_breaker.call_service(target_instance, transformed_request)
+
+            # Create final response
+            status_code = response_data.get("status_code", 200)
+            response = JSONResponse(
+                status_code=status_code,
+                content=response_data.get("data"),
+                headers=response_data.get("headers")
+            )
+
+            # Inject versioning headers based on path
+            version_str = "v1"
+            if path.startswith("api/v2") or "/api/v2" in path:
+                version_str = "v2"
+            
+            version_meta = get_version_metadata(version_str)
+            if version_meta:
+                version_meta.inject_headers(response)
 
             return response
 
         except Exception as e:
             logger.error(f"Routing error for path {path}: {str(e)}")
-            return {"error": "Internal routing error", "details": str(e), "status_code": 500}
+            return JSONResponse(
+                status_code=500,
+                content={"error": "Internal routing error", "details": str(e)}
+            )
 
     def _parse_service_path(self, path: str) -> tuple[str, str]:
         """
@@ -111,7 +144,8 @@ class CircuitBreaker:
     Circuit breaker pattern implementation for resilient service calls.
     """
 
-    def __init__(self, failure_threshold: int = 5, timeout: float = 30.0):
+    def __init__(self, client: httpx.AsyncClient, failure_threshold: int = 5, timeout: float = 30.0):
+        self.client = client
         self.failure_threshold = failure_threshold
         self.timeout = timeout
         self.failure_counts = {}
@@ -148,7 +182,7 @@ class CircuitBreaker:
             self._record_failure(instance_id)
             if self.failure_counts.get(instance_id, 0) >= self.failure_threshold:
                 self.state[instance_id] = "open"
-                self.last_failure_time[instance_id] = datetime.utcnow()
+                self.last_failure_time[instance_id] = datetime.now(timezone.utc)
 
             raise e
 
@@ -158,7 +192,7 @@ class CircuitBreaker:
         if not last_failure:
             return True
 
-        return (datetime.utcnow() - last_failure) > timedelta(seconds=self.timeout)
+        return (datetime.now(timezone.utc) - last_failure) > timedelta(seconds=self.timeout)
 
     def _record_failure(self, instance_id: str):
         """Record a service call failure."""
@@ -166,17 +200,40 @@ class CircuitBreaker:
 
     async def _make_http_call(self, instance: dict[str, Any], request_data: dict[str, Any]) -> dict[str, Any]:
         """
-        Make HTTP call to service instance.
-        This is a placeholder - actual implementation would use aiohttp or similar.
+        Make actual HTTP call to service instance using httpx.
         """
-        # Placeholder implementation
         instance_url = instance["url"]
-        logger.info(f"Making call to {instance_url}")
+        path = request_data["path"]
+        url = f"{instance_url.rstrip('/')}/{path.lstrip('/')}"
 
-        # Simulate service call - replace with actual HTTP client
-        await asyncio.sleep(0.1)  # Simulate network latency
+        logger.info(f"Routing {request_data['method']} request to {url}")
 
-        return {"status": "success", "data": {"message": f"Response from {instance_url}"}, "status_code": 200}
+        try:
+            async with asyncio.timeout(self.timeout):
+                response = await self.client.request(
+                    method=request_data["method"],
+                    url=url,
+                    headers=request_data["headers"],
+                    params=request_data["query_params"],
+                    content=request_data.get("content"),
+                )
+
+                # Return structured response
+                return {
+                    "status": "success" if response.status_code < 400 else "error",
+                    "status_code": response.status_code,
+                    "headers": dict(response.headers),
+                    "data": response.json() if "application/json" in response.headers.get("content-type", "") else response.text,
+                }
+        except asyncio.TimeoutError:
+            logger.error(f"Timeout calling service {url}")
+            raise Exception(f"Service call timed out: {url}")
+        except httpx.RequestError as e:
+            logger.error(f"HTTP request error calling {url}: {str(e)}")
+            raise Exception(f"Failed to connect to service: {str(e)}")
+        except Exception as e:
+            logger.error(f"Unexpected error calling service {url}: {str(e)}")
+            raise
 
 
 class LoadBalancer:
@@ -214,12 +271,18 @@ class RequestTransformer:
         Transform the request for the target service.
         """
         # Basic transformation - can be extended for specific service requirements
+        try:
+            body = await request.body()
+        except Exception:
+            body = None
+
         transformed = {
             "method": request.method,
             "path": service_path,
             "headers": dict(request.headers),
             "query_params": dict(request.query_params),
             "service_name": service_name,
+            "content": body,
         }
 
         # Add service-specific transformations

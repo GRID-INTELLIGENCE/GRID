@@ -108,7 +108,8 @@ class TimeoutManager:
         timeout = timeout_seconds or self.default_timeout_seconds
 
         try:
-            return await asyncio.wait_for(coro, timeout=timeout)
+            async with asyncio.timeout(timeout):
+                return await coro
         except TimeoutError:
             logger.warning(f"Operation {operation_name} timed out after {timeout}s")
 
@@ -210,7 +211,8 @@ class GracefulShutdown:
                 break
 
             try:
-                await asyncio.wait_for(self._shutdown_event.wait(), timeout=min(1.0, remaining_time))
+                async with asyncio.timeout(min(1.0, remaining_time)):
+                    await self._shutdown_event.wait()
             except TimeoutError:
                 continue
 

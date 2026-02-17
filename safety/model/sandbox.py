@@ -104,10 +104,8 @@ async def run_safe_call(
     # 4. Execute with timeout
     start = time.monotonic()
     try:
-        result = await asyncio.wait_for(
-            call_fn(prompt, **kwargs),
-            timeout=cfg.timeout_seconds,
-        )
+        async with asyncio.timeout(cfg.timeout_seconds):
+            result = await call_fn(prompt, **kwargs)
     except TimeoutError:
         elapsed = time.monotonic() - start
         logger.error(

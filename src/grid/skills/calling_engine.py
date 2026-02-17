@@ -53,7 +53,8 @@ class SkillCallingEngine:
         try:
             # Execute with timeout
             # Note: skill.run might be synchronous, so we run in thread
-            result = await asyncio.wait_for(asyncio.to_thread(skill.run, args), timeout=timeout_ms / 1000)
+            async with asyncio.timeout(timeout_ms / 1000):
+                result = await asyncio.to_thread(skill.run, args)
 
             return SkillCallResult(
                 skill_id=skill_id,

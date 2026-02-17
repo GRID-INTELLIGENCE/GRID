@@ -4,12 +4,13 @@ Databricks Bridge: Real-time Telemetry Sync
 Handles asynchronous telemetry sync and local-first buffering for the Resonance system.
 """
 
+import aiofiles
 import asyncio
 import json
 import logging
 import os
 import threading
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
 from typing import Any
@@ -67,11 +68,11 @@ class DatabricksBridge:
                     pass
                 return super().default(obj)
 
-        event = {"timestamp": datetime.now(UTC).isoformat(), "type": event_type, "data": data, "impact": impact}
+        event = {"timestamp": datetime.now(timezone.utc).isoformat(), "type": event_type, "data": data, "impact": impact}
         # Local persistence (Immediate)
         try:
-            with open(self.buffer_path, "a") as f:
-                f.write(json.dumps(event, cls=EnhancedJSONEncoder) + "\n")
+            async with aiofiles.open(self.buffer_path, mode="a") as f:
+                await f.write(json.dumps(event, cls=EnhancedJSONEncoder) + "\n")
         except Exception as e:
             logger.error(f"Failed to write event to local buffer: {e}")
 
@@ -159,12 +160,13 @@ class DatabricksBridge:
         except Exception as e:
             logger.warning(f"DatabricksBridge: Failed to check remote tuning: {e}")
 
-    def get_pending_tuning(self) -> dict[str, Any] | None:
-        """Check for pending tuning suggestions from the inbox."""
+    async def get_pending_tuning(self) -> dict[str, Any] | None:
+        """Check for pending tuning suggestions from the inbox (Asynchronous)."""
         if self.tuning_path.exists():
             try:
-                with open(self.tuning_path) as f:
-                    return json.load(f)
+                async with aiofiles.open(self.tuning_path, mode="r") as f:
+                    content = await f.read()
+                    return json.loads(content)
             except Exception as e:
                 logger.error(f"Failed to read tuning inbox: {e}")
         return None

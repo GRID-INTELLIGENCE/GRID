@@ -9,7 +9,7 @@ import json
 import os
 import tempfile
 from dataclasses import asdict, dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -103,7 +103,7 @@ class FileTracker:
     def _save_atomic(self) -> None:
         """Save tracker state atomically (write to temp, then rename)."""
         self.persist_dir.mkdir(parents=True, exist_ok=True)
-        self.state.last_updated = datetime.now().isoformat()
+        self.state.last_updated = datetime.now(timezone.utc).isoformat()
 
         # Serialize state
         data = {
@@ -157,7 +157,7 @@ class FileTracker:
         self.state.files[path] = FileState(
             path=path,
             file_hash=file_hash,
-            indexed_at=datetime.now().isoformat(),
+            indexed_at=datetime.now(timezone.utc).isoformat(),
             file_size=file_size,
             chunk_count=chunk_count,
         )

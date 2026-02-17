@@ -27,7 +27,7 @@ import threading
 from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
-from enum import Enum, auto
+from enum import Enum, IntEnum, StrEnum, auto
 from pathlib import Path
 from typing import Any, Callable, TypeVar
 
@@ -41,7 +41,7 @@ T = TypeVar("T")
 # =============================================================================
 
 
-class ThreatSeverity(Enum):
+class ThreatSeverity(IntEnum):
     """Threat severity classification aligned with CVSS scoring."""
 
     CRITICAL = 10  # System compromise, data exfiltration, RCE
@@ -51,7 +51,7 @@ class ThreatSeverity(Enum):
     INFO = 0  # Informational, no immediate risk
 
 
-class ThreatCategory(Enum):
+class ThreatCategory(StrEnum):
     """Categories of security threats."""
 
     INJECTION = auto()  # SQL, Command, Code, Template injection
@@ -723,7 +723,7 @@ class SecurityGuardrails:
 # =============================================================================
 
 
-class MitigationAction(Enum):
+class MitigationAction(StrEnum):
     """Actions that can be taken to mitigate threats."""
 
     BLOCK = auto()  # Block the request/connection

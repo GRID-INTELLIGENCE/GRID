@@ -12,7 +12,7 @@ import time
 import uuid
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Any
 
 import httpx
@@ -23,7 +23,7 @@ from fastapi.middleware.gzip import GZipMiddleware
 logger = logging.getLogger(__name__)
 
 
-class ServiceStatus(Enum):
+class ServiceStatus(StrEnum):
     """Service health status."""
 
     HEALTHY = "healthy"
@@ -257,10 +257,8 @@ class APIGateway:
         circuit_breaker = self.circuit_breakers.get(endpoint.name)
 
         if circuit_breaker and not circuit_breaker.call_allowed():
-            raise HTTPException(
-                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail=f"Circuit breaker open for service: {endpoint.name}",
-            )
+            logger.warning(f"Circuit breaker open for service: {endpoint.name}, using fallback")
+            return await self._get_fallback_response(endpoint.name)
 
         # Prepare request
         url = f"{endpoint.url}{path}"
@@ -289,16 +287,35 @@ class APIGateway:
         except httpx.TimeoutException:
             if circuit_breaker:
                 circuit_breaker.record_failure()
-            raise HTTPException(
-                status_code=status.HTTP_504_GATEWAY_TIMEOUT, detail=f"Service timeout: {endpoint.name}"
-            ) from None
+            logger.error(f"Service timeout: {endpoint.name}")
+            return await self._get_fallback_response(endpoint.name, status_code=status.HTTP_504_GATEWAY_TIMEOUT)
         except Exception as e:
             if circuit_breaker:
                 circuit_breaker.record_failure()
             logger.error(f"Request forwarding failed: {e}")
-            raise HTTPException(
-                status_code=status.HTTP_502_BAD_GATEWAY, detail=f"Service unavailable: {endpoint.name}"
-            ) from e
+            return await self._get_fallback_response(endpoint.name, status_code=status.HTTP_502_BAD_GATEWAY)
+
+    async def _get_fallback_response(self, service_name: str, status_code: int = 503) -> Response:
+        """Provide a fallback response when services are unavailable."""
+        from fastapi.responses import JSONResponse
+
+        fallback_data = {
+            "error": "Service temporarily unavailable",
+            "service": service_name,
+            "status": "degraded_mode",
+            "message": "The system is experiencing technical difficulties. Please try again later.",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
+
+        # Service-specific fallbacks
+        if "ai" in service_name.lower():
+            fallback_data["message"] = "AI features are temporarily unavailable. Static processing active."
+        elif "discussion" in service_name.lower():
+            fallback_data["message"] = "Discussion reasoning is temporarily limited. Direct responses only."
+
+        return JSONResponse(
+            status_code=status_code, content=fallback_data, headers={"X-Gateway-Fallback": "true"}
+        )
 
     async def route_request(self, request: Request) -> Response:
         """Route incoming request."""

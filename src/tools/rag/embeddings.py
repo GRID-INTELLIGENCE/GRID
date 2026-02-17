@@ -51,7 +51,8 @@ class OllamaEmbedding(EmbeddingProvider):
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
             )
-            stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=30)
+            async with asyncio.timeout(30):
+                stdout, stderr = await proc.communicate()
 
             if proc.returncode != 0:
                 raise RuntimeError(f"Ollama failed: {stderr.decode()}")

@@ -29,7 +29,7 @@ from __future__ import annotations
 import logging
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from enum import Enum, auto
+from enum import Enum, StrEnum, auto
 from typing import Any, Protocol
 
 logger = logging.getLogger(__name__)
@@ -81,7 +81,7 @@ class OrchestrationResult:
     error: str | None = None
 
 
-class DomainCategory(Enum):
+class DomainCategory(StrEnum):
     """Bounded context categories."""
 
     INTELLIGENCE = auto()

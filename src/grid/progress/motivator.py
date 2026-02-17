@@ -5,11 +5,12 @@ This module provides real-time progress metrics and motivational milestones
 to keep momentum during the shift from 2nd → 3rd → 4th gear.
 """
 
+import asyncio
 import json
 import subprocess
 import sys
 from dataclasses import asdict, dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -69,20 +70,20 @@ class MotivationEngine:
         """Initialize the motivation engine."""
         self.project_root = project_root or Path(__file__).parent.parent.parent.parent
 
-    def measure_current_state(self) -> GearMetrics:
-        """Measure current project metrics."""
+    async def measure_current_state(self) -> GearMetrics:
+        """Measure current project metrics asynchronously."""
 
         # Test metrics
-        test_passing, test_failing, test_count = self._count_tests()
+        test_passing, test_failing, test_count = await self._count_tests_async()
         test_pass_rate = (test_passing / test_count * 100) if test_count > 0 else 0
 
         # Error metrics
-        import_errors = self._count_errors("ImportError|ModuleNotFoundError")
-        syntax_errors = self._count_errors("SyntaxError")
+        import_errors = await self._count_errors_async("ImportError|ModuleNotFoundError")
+        syntax_errors = await self._count_errors_async("SyntaxError")
 
         # Code quality
-        mypy_errors = self._count_mypy_errors()
-        ruff_issues = self._count_ruff_issues()
+        mypy_errors = await self._count_mypy_errors_async()
+        ruff_issues = await self._count_ruff_issues_async()
 
         # Type coverage (estimated from error ratio)
         type_coverage = max(0, 100 - (mypy_errors * 2))
@@ -91,7 +92,7 @@ class MotivationEngine:
         rpm = self._calculate_rpm(test_pass_rate, import_errors, syntax_errors, mypy_errors, ruff_issues)
 
         return GearMetrics(
-            timestamp=datetime.now().isoformat(),
+            timestamp=datetime.now(timezone.utc).isoformat(),
             rpm=rpm,
             test_pass_rate=test_pass_rate,
             test_count=test_count,
@@ -104,89 +105,59 @@ class MotivationEngine:
             type_coverage=type_coverage,
         )
 
-    def _count_tests(self) -> tuple[int, int, int]:
-        """Count passing and failing tests."""
+    async def _run_cmd_async(self, cmd: list[str], timeout: int = 30) -> str:
+        """Run a command asynchronously."""
         try:
-            result = subprocess.run(
-                [sys.executable, "-m", "pytest", "tests/", "-q", "--tb=no"],
+            proc = await asyncio.create_subprocess_exec(
+                *cmd,
                 cwd=self.project_root,
-                capture_output=True,
-                text=True,
-                timeout=60,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE
             )
-
-            output = result.stdout + result.stderr
-
-            # Parse pytest output
-            passing = output.count(" passed")
-            failing = output.count(" failed")
-            errors = output.count(" error")
-
-            total = passing + failing + errors
-
-            return passing, failing + errors, total if total > 0 else 200  # Assume 200 tests exist
-
+            async with asyncio.timeout(timeout):
+                stdout, stderr = await proc.communicate()
+            return stdout.decode() + stderr.decode()
         except Exception:
+            return ""
+
+    async def _count_tests_async(self) -> tuple[int, int, int]:
+        """Count passing and failing tests asynchronously."""
+        output = await self._run_cmd_async([sys.executable, "-m", "pytest", "tests/", "-q", "--tb=no"], timeout=60)
+        if not output:
             return 0, 200, 200
 
-    def _count_errors(self, pattern: str) -> int:
-        """Count specific error types in test output."""
-        try:
-            result = subprocess.run(
-                [sys.executable, "-m", "pytest", "tests/", "--collect-only", "-q"],
-                cwd=self.project_root,
-                capture_output=True,
-                text=True,
-                timeout=30,
-            )
+        # Parse pytest output
+        passing = output.count(" passed")
+        failing = output.count(" failed")
+        errors = output.count(" error")
 
-            output = result.stdout + result.stderr
-            import re
+        total = passing + failing + errors
+        return passing, failing + errors, total if total > 0 else 200
 
-            matches = re.findall(pattern, output)
-            return len(matches)
-
-        except Exception:
+    async def _count_errors_async(self, pattern: str) -> int:
+        """Count specific error types in test output asynchronously."""
+        output = await self._run_cmd_async([sys.executable, "-m", "pytest", "tests/", "--collect-only", "-q"], timeout=30)
+        if not output:
             return 0
+        import re
+        matches = re.findall(pattern, output)
+        return len(matches)
 
-    def _count_mypy_errors(self) -> int:
-        """Count MyPy type checking errors."""
-        try:
-            result = subprocess.run(
-                ["mypy", "src/", "--ignore-missing-imports"],
-                cwd=self.project_root,
-                capture_output=True,
-                text=True,
-                timeout=30,
-            )
-
-            output = result.stdout
-            # MyPy reports "X error in Y files" at the end
-            import re
-
-            matches = re.findall(r"(\d+) error", output)
-            return int(matches[0]) if matches else 0
-
-        except Exception:
+    async def _count_mypy_errors_async(self) -> int:
+        """Count MyPy type checking errors asynchronously."""
+        output = await self._run_cmd_async(["mypy", "src/", "--ignore-missing-imports"], timeout=30)
+        if not output:
             return 0
+        import re
+        matches = re.findall(r"(\d+) error", output)
+        return int(matches[0]) if matches else 0
 
-    def _count_ruff_issues(self) -> int:
-        """Count Ruff linting issues."""
-        try:
-            result = subprocess.run(
-                ["ruff", "check", "src/"],
-                cwd=self.project_root,
-                capture_output=True,
-                text=True,
-                timeout=30,
-            )
-
-            output = result.stdout
-            # Count lines (each issue is one line)
-            return len([l for l in output.split("\n") if l.strip()])
-
-        except Exception:
+    async def _count_ruff_issues_async(self) -> int:
+        """Count Ruff linting issues asynchronously."""
+        output = await self._run_cmd_async(["ruff", "check", "src/"], timeout=30)
+        if not output:
             return 0
+        return len([l for l in output.split("\n") if l.strip()])
 
     def _calculate_rpm(
         self,
@@ -255,7 +226,7 @@ class MotivationEngine:
         # Build report
         report = []
         report.append("\n" + "=" * 70)
-        report.append(f"🏁 GRID MOTIVATOR - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        report.append(f"🏁 GRID MOTIVATOR - {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')}")
         report.append("=" * 70)
 
         # Current gear status
@@ -378,14 +349,15 @@ async def motivate() -> GearMetrics:
     Returns the current metrics so you can track progress.
     """
     engine = MotivationEngine()
-    metrics = engine.measure_current_state()
+    metrics = await engine.measure_current_state()
     return metrics
 
 
 def print_motivation() -> None:
     """Print motivational report to console."""
     engine = MotivationEngine()
-    metrics = engine.measure_current_state()
+    # Run async in sync context for CLI
+    metrics = asyncio.run(engine.measure_current_state())
     print(engine.generate_report(metrics))
 
 

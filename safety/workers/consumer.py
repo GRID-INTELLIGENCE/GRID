@@ -105,14 +105,14 @@ async def _process_message(msg_id: str, fields: dict[str, str]) -> None:
 
         # Step 2: Run post-check detector with timeout (fail-closed)
         try:
-            check_result = await asyncio.wait_for(
-                post_check(
+            async with asyncio.timeout(10.0):  # Default 10s timeout
+                check_result = await post_check(
                     model_output=result.get("output", "") if isinstance(result, dict) else str(result),
                     original_input=input_text,
-                ),
-                timeout=10.0,
-            )
-        except TimeoutError:
+                    request_id=request_id,
+                    metadata=metadata
+                )
+        except asyncio.TimeoutError:
             logger.error("post_check_timeout", request_id=request_id)
             # Fail closed: treat as flagged
             from safety.detectors.post_check import PostCheckResult

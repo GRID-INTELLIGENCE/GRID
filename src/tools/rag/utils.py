@@ -2,7 +2,7 @@
 
 import logging
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
 
@@ -243,7 +243,7 @@ def check_model_health(
     Returns:
         ModelHealthInfo with status and details
     """
-    now = datetime.now()
+    now = datetime.now(timezone.utc)
 
     try:
         # First check if Ollama is accessible
@@ -335,7 +335,7 @@ def check_models_health(
         ModelHealthCheck with status for all models
     """
     ollama_accessible = check_ollama_connection(base_url)
-    now = datetime.now()
+    now = datetime.now(timezone.utc)
     models: dict[str, ModelHealthInfo] = {}
 
     for model_name in model_names:

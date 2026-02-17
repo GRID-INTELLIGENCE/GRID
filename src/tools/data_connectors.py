@@ -12,13 +12,13 @@ from abc import ABC, abstractmethod
 from collections import defaultdict
 from collections.abc import Callable
 from dataclasses import dataclass
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
-class ConnectorStatus(Enum):
+class ConnectorStatus(StrEnum):
     """Connection status enumeration."""
 
     DISCONNECTED = "disconnected"

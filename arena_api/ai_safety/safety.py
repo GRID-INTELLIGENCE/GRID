@@ -19,14 +19,14 @@ import asyncio
 import logging
 import re
 from dataclasses import dataclass
-from datetime import datetime, timedelta
-from enum import Enum
+from datetime import datetime, timezone, timedelta
+from enum import Enum, StrEnum
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
-class SafetyLevel(Enum):
+class SafetyLevel(StrEnum):
     """AI safety levels."""
 
     LOW = "low"
@@ -35,7 +35,7 @@ class SafetyLevel(Enum):
     CRITICAL = "critical"
 
 
-class ComplianceStandard(Enum):
+class ComplianceStandard(StrEnum):
     """Compliance standards."""
 
     HIPAA = "hipaa"
@@ -225,7 +225,7 @@ class AISafetyManager:
                         passed=False,
                         severity=SafetyLevel.HIGH,
                         details={"reason": "Input too large", "size": content_length},
-                        timestamp=datetime.now(datetime.timezone.utc),
+                        timestamp=datetime.now(timezone.utc),
                         recommendations=["Reduce input size", "Implement streaming for large inputs"],
                     )
 
@@ -247,7 +247,7 @@ class AISafetyManager:
                         passed=False,
                         severity=SafetyLevel.CRITICAL,
                         details={"reason": "Potential SQL injection detected"},
-                        timestamp=datetime.utcnow(),
+                        timestamp=datetime.now(timezone.utc),
                         recommendations=["Sanitize input", "Use parameterized queries"],
                     )
 
@@ -260,7 +260,7 @@ class AISafetyManager:
                         passed=False,
                         severity=SafetyLevel.HIGH,
                         details={"reason": "Potential XSS detected"},
-                        timestamp=datetime.utcnow(),
+                        timestamp=datetime.now(timezone.utc),
                         recommendations=["Sanitize HTML input", "Use content security policies"],
                     )
 
@@ -269,7 +269,7 @@ class AISafetyManager:
                 passed=True,
                 severity=SafetyLevel.LOW,
                 details={"input_length": len(body_content)},
-                timestamp=datetime.now(datetime.timezone.utc),
+                timestamp=datetime.now(timezone.utc),
             )
 
         except Exception as e:
@@ -278,7 +278,7 @@ class AISafetyManager:
                 passed=False,
                 severity=SafetyLevel.MEDIUM,
                 details={"error": str(e)},
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
             )
 
     async def _analyze_content_safety(self, request: Any) -> SafetyCheck:
@@ -310,7 +310,7 @@ class AISafetyManager:
                     passed=False,
                     severity=severity,
                     details={"violations": violations},
-                    timestamp=datetime.utcnow(),
+                    timestamp=datetime.now(timezone.utc),
                     recommendations=["Filter harmful content", "Implement content moderation"],
                 )
 
@@ -319,7 +319,7 @@ class AISafetyManager:
                 passed=True,
                 severity=SafetyLevel.LOW,
                 details={"content_length": len(content)},
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
             )
 
         except Exception as e:
@@ -328,7 +328,7 @@ class AISafetyManager:
                 passed=False,
                 severity=SafetyLevel.MEDIUM,
                 details={"error": str(e)},
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
             )
 
     async def _check_compliance(self, request: Any) -> SafetyCheck:
@@ -359,7 +359,7 @@ class AISafetyManager:
                 # Record compliance violation
                 self.compliance_violations.append(
                     {
-                        "timestamp": datetime.now(datetime.timezone.utc),
+                        "timestamp": datetime.now(timezone.utc),
                         "violations": violations,
                         "request_path": request.url.path,
                     }
@@ -370,7 +370,7 @@ class AISafetyManager:
                     passed=False,
                     severity=SafetyLevel.HIGH,
                     details={"violations": violations},
-                    timestamp=datetime.utcnow(),
+                    timestamp=datetime.now(timezone.utc),
                     recommendations=["Anonymize data", "Implement consent management", "Add data classification"],
                 )
 
@@ -379,7 +379,7 @@ class AISafetyManager:
                 passed=True,
                 severity=SafetyLevel.LOW,
                 details={"standards_checked": ["HIPAA", "GDPR"]},
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
             )
 
         except Exception as e:
@@ -388,7 +388,7 @@ class AISafetyManager:
                 passed=False,
                 severity=SafetyLevel.MEDIUM,
                 details={"error": str(e)},
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
             )
 
     async def _detect_bias(self, request: Any) -> SafetyCheck:
@@ -437,7 +437,7 @@ class AISafetyManager:
                     passed=False,
                     severity=SafetyLevel.MEDIUM,
                     details={"bias_indicators": bias_indicators},
-                    timestamp=datetime.utcnow(),
+                    timestamp=datetime.now(timezone.utc),
                     recommendations=[
                         "Review content for bias",
                         "Implement bias mitigation",
@@ -450,7 +450,7 @@ class AISafetyManager:
                 passed=True,
                 severity=SafetyLevel.LOW,
                 details={"content_analyzed": len(content)},
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
             )
 
         except Exception as e:
@@ -459,7 +459,7 @@ class AISafetyManager:
                 passed=False,
                 severity=SafetyLevel.LOW,
                 details={"error": str(e)},
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
             )
 
     async def _detect_anomalies(self, request: Any) -> SafetyCheck:
@@ -490,7 +490,7 @@ class AISafetyManager:
                     passed=False,
                     severity=SafetyLevel.MEDIUM,
                     details={"anomalies": anomalies},
-                    timestamp=datetime.utcnow(),
+                    timestamp=datetime.now(timezone.utc),
                     recommendations=["Implement rate limiting", "Add bot detection", "Review suspicious patterns"],
                 )
 
@@ -499,7 +499,7 @@ class AISafetyManager:
                 passed=True,
                 severity=SafetyLevel.LOW,
                 details={"checked_patterns": ["user_agent", "parameters"]},
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
             )
 
         except Exception as e:
@@ -508,7 +508,7 @@ class AISafetyManager:
                 passed=False,
                 severity=SafetyLevel.LOW,
                 details={"error": str(e)},
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
             )
 
     async def _extract_request_content(self, request: Any) -> str:

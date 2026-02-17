@@ -28,7 +28,7 @@ import logging
 import time
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from fastapi import Request, Response, status
@@ -44,7 +44,7 @@ logger = logging.getLogger(__name__)
 # =============================================================================
 
 
-class CircuitState(str, Enum):
+class CircuitState(StrEnum):
     """Circuit breaker states."""
 
     CLOSED = "closed"  # Normal operation
@@ -52,7 +52,7 @@ class CircuitState(str, Enum):
     HALF_OPEN = "half_open"  # Testing recovery
 
 
-class FailureType(str, Enum):
+class FailureType(StrEnum):
     """Types of failures that can trigger the circuit breaker."""
 
     TIMEOUT = "timeout"
@@ -541,10 +541,8 @@ class CircuitBreakerMiddleware(BaseHTTPMiddleware):
 
         # Process request
         try:
-            response = await asyncio.wait_for(
-                call_next(request),
-                timeout=self.config.request_timeout_seconds,
-            )
+            async with asyncio.timeout(self.config.request_timeout_seconds):
+                response = await call_next(request)
 
             # Check response status
             if self._is_failure_response(response):

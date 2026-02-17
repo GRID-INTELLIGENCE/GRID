@@ -7,7 +7,7 @@ Provides CLI interface to view blocked/allowed requests and manage whitelist.
 
 import json
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -316,9 +316,9 @@ class NetworkMonitor:
         rule = {
             "domain": domain,
             "protocol": "https",
-            "description": description or f"Added via monitor at {datetime.utcnow().isoformat()}",
+            "description": description or f"Added via monitor at {datetime.now(timezone.utc).isoformat()}",
             "added_by": "monitor",
-            "added_date": datetime.utcnow().isoformat(),
+            "added_date": datetime.now(timezone.utc).isoformat(),
         }
 
         config["whitelist"]["rules"].append(rule)

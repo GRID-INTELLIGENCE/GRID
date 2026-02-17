@@ -94,8 +94,8 @@ jobs:
         run: uv sync --frozen
       - name: Run ruff
         run: uv run ruff check . --output-format=full
-      - name: Run black
-        run: uv run black --check src/grid/ src/application/ src/tools/ tests/
+      - name: Run ruff format
+        run: uv run ruff format --check src/grid/ src/application/ src/tools/ tests/
       - name: Run mypy
         run: uv run mypy src/ --ignore-missing-imports || true
 

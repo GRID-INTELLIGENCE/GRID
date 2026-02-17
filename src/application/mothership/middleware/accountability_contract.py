@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import logging
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Callable
 
 from fastapi import Request, Response, status
@@ -265,75 +265,6 @@ class AccountabilityContractMiddleware(BaseHTTPMiddleware):
                     "severity": v.severity.value,
                     "message": v.message,
                     "field": v.field,
-                    "penalty_points": v.penalty_points,
-                }
-                for v in request_result.violations
-            ],
-            "enforcement_mode": request_result.enforcement_mode,
-            "timestamp": datetime.utcnow().isoformat(),
-        }
-
-        from fastapi.responses import JSONResponse
-
-        return JSONResponse(
-            status_code=status_code,
-            content=error_response,
-            headers={
-                "X-Accountability-Blocked": "true",
-                "X-Accountability-Violations": str(len(request_result.violations)),
-            },
-        )
-
-    def _add_enforcement_headers(
-        self,
-        response: Response,
-        request_result: EnforcementResult,
-        response_result: EnforcementResult,
-    ) -> None:
-        """Add enforcement information to response headers."""
-
-        total_violations = len(request_result.violations) + len(response_result.violations)
-
-        headers = {
-            "X-Accountability-Enforced": "true",
-            "X-Accountability-Mode": self.enforcement_mode,
-            "X-Accountability-Violations": str(total_violations),
-            "X-Accountability-Request-Violations": str(len(request_result.violations)),
-            "X-Accountability-Response-Violations": str(len(response_result.violations)),
-        }
-
-        if total_violations > 0:
-            headers["X-Accountability-Status"] = "violations_detected"
-        else:
-            headers["X-Accountability-Status"] = "compliant"
-
-        # Add headers to response
-        for key, value in headers.items():
-            response.headers[key] = value
-
-    def _log_violations(
-        self,
-        request: Request,
-        request_result: EnforcementResult,
-        response_result: EnforcementResult,
-    ) -> None:
-        """Log accountability violations."""
-
-        all_violations = request_result.violations + response_result.violations
-
-        if not all_violations:
-            return  # No violations to log
-
-        # Log each violation
-        for violation in all_violations:
-            log_data = {
-                "timestamp": datetime.utcnow().isoformat(),
-                "method": request.method,
-                "path": request.url.path,
-                "client_ip": self._get_client_ip(request),
-                "violation_type": violation.type.value,
-                "severity": violation.severity.value,
-                "message": violation.message,
                 "field": violation.field,
                 "penalty_points": violation.penalty_points,
                 "enforcement_mode": self.enforcement_mode,

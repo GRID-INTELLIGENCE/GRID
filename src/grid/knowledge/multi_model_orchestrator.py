@@ -234,7 +234,8 @@ Please provide your insight tailored for the {nav["zone"]} zone of this architec
                 stderr=asyncio.subprocess.PIPE,
             )
 
-            stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=45)
+            async with asyncio.timeout(45):
+                stdout, stderr = await proc.communicate()
             response = stdout.decode().strip()
 
             result = {

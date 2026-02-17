@@ -111,6 +111,7 @@ async def reconciliation_loop(
             logger.exception("Payment reconciliation loop failed: %s", exc)
 
         try:
-            await asyncio.wait_for(stop_event.wait(), timeout=interval)
+            async with asyncio.timeout(interval):
+                await stop_event.wait()
         except TimeoutError:
             continue

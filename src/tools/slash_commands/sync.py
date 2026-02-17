@@ -4,7 +4,7 @@
 
 import logging
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -192,7 +192,7 @@ class SyncCommand(KnowledgeCommand):
                             "file_path": str(lib_file.relative_to(src_path)),
                             "capabilities": capabilities,
                             "centrality_estimate": 0.5,  # Initial estimate
-                            "discovered_at": datetime.now().isoformat(),
+                            "discovered_at": datetime.now(timezone.utc).isoformat(),
                         }
 
                         graph_updates["new_nodes"].append(node_info)
@@ -310,7 +310,7 @@ class SyncCommand(KnowledgeCommand):
         # In quick mode, only index recently modified files
         if quick_mode:
             modified_time = datetime.fromtimestamp(file_path.stat().st_mtime)
-            return modified_time > datetime.now() - timedelta(days=1)
+            return modified_time > datetime.now(timezone.utc) - timedelta(days=1)
 
         # Full mode - index all markdown files
         return file_path.suffix == ".md"

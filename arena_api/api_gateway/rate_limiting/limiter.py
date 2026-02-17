@@ -28,13 +28,13 @@ class RateLimiter:
     Intelligent rate limiter with adaptive capabilities.
     """
 
-    def __init__(self):
-        self.fixed_limits = {}
-        self.sliding_windows = defaultdict(lambda: deque(maxlen=1000))
-        self.token_buckets = {}
-        self.user_limits = {}
-        self.service_limits = {}
-        self.monitoring = None  # Will be injected
+    def __init__(self) -> None:
+        self.fixed_limits: dict[str, int] = {}
+        self.sliding_windows: dict[str, deque[float]] = defaultdict(lambda: deque(maxlen=1000))
+        self.token_buckets: dict[str, TokenBucket] = {}
+        self.user_limits: dict[str, dict[str, int]] = {}
+        self.service_limits: dict[str, int] = {}
+        self.monitoring: Any = None  # Will be injected
 
     def set_monitoring(self, monitoring):
         """Inject monitoring dependency."""

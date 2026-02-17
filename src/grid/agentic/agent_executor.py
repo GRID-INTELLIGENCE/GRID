@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import aiofiles
 import json
 import logging
 import os
@@ -147,10 +148,11 @@ class AgentExecutor:
                 logger.warning(f"Reference file not found: {reference_file_path}")
                 return None
 
-            with open(path, encoding="utf-8") as f:
-                return json.load(f)
+            async with aiofiles.open(path, mode="r", encoding="utf-8") as f:
+                content = await f.read()
+                return json.loads(content)
         except Exception as e:
-            logger.error(f"Error loading reference file: {e}")
+            logger.error(f"Error loading reference file {reference_file_path}: {e}")
             return None
 
     async def _execute_task_by_type(

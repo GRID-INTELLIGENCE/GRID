@@ -5,14 +5,14 @@ from __future__ import annotations
 import json
 import logging
 from datetime import UTC, datetime, timedelta
-from enum import Enum
+from enum import Enum, StrEnum
 from pathlib import Path
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
-class JSONFileType(Enum):
+class JSONFileType(StrEnum):
     """Types of JSON files we can identify."""
 
     BENCHMARK_METRICS = "benchmark_metrics"

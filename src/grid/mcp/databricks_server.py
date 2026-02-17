@@ -5,11 +5,13 @@ Databricks MCP Server with Coinbase Integration
 Provides Databricks operations for Coinbase data processing.
 """
 
+import aiofiles
 import asyncio
 import json
 import os
 import sys
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -396,8 +398,9 @@ class DatabricksCoinbaseMCPServer:
         if not local_file.exists():
             return CallToolResult(content=[TextContent(type="text", text=f"File not found: {local_file}")])
         try:
-            with open(local_file, "rb") as f:
-                self.client.dbfs.upload(dbfs_path, f)
+            async with aiofiles.open(local_file, mode="rb") as f:
+                content = await f.read()
+                self.client.dbfs.upload(dbfs_path, content)
             return CallToolResult(content=[TextContent(type="text", text=f"Uploaded {file_path} to {dbfs_path}")])
         except Exception as e:
             return CallToolResult(content=[TextContent(type="text", text=f"Failed to upload file: {e}")])

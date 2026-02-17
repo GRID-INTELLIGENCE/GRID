@@ -14,14 +14,14 @@ import uuid
 from collections import defaultdict
 from collections.abc import Callable
 from dataclasses import asdict, dataclass, field
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Any
 
 import aiofiles  # type: ignore[import-untyped]
 from aiohttp import ClientSession, ClientTimeout, web  # type: ignore[import-not-found]
 
 
-class ServiceType(Enum):
+class ServiceType(StrEnum):
     """Service types in the mesh."""
 
     API_GATEWAY = "api_gateway"
@@ -32,7 +32,7 @@ class ServiceType(Enum):
     MONITORING_SERVICE = "monitoring_service"
 
 
-class ServiceState(Enum):
+class ServiceState(StrEnum):
     """Service states."""
 
     STARTING = "starting"
@@ -197,6 +197,7 @@ class ServiceRegistry:
     async def _save_registry(self):
         """Save registry to disk."""
         try:
+            import aiofiles
             data = {name: [instance.to_dict() for instance in instances] for name, instances in self.services.items()}
 
             async with aiofiles.open(self.config_file, "w") as f:
@@ -207,6 +208,7 @@ class ServiceRegistry:
     async def _load_registry(self):
         """Load registry from disk."""
         try:
+            import aiofiles
             async with aiofiles.open(self.config_file) as f:
                 content = await f.read()
                 data = json.loads(content)
@@ -388,10 +390,11 @@ class ServiceMesh:
         return self.load_balancer.select_instance(instances)
 
     async def call_service(self, service_name: str, endpoint: str, method: str = "GET", **kwargs) -> Any:
-        """Call a service endpoint."""
+        """Call a service endpoint with circuit breaker and fallback."""
         instance = await self.discover_service(service_name)
         if not instance:
-            raise Exception(f"No healthy instances found for {service_name}")
+            logging.warning(f"No healthy instances found for {service_name}, using fallback")
+            return await self._get_fallback_response(service_name)
 
         circuit_breaker = self.circuit_breakers.get(instance.id)
         if not circuit_breaker:
@@ -402,11 +405,38 @@ class ServiceMesh:
 
         async def make_request():
             async with self.session.request(method, url, **kwargs) as response:
-                if response.status >= 400:
+                if response.status >= 500:
                     raise Exception(f"Service error: {response.status}")
                 return await response.json()
 
-        return await circuit_breaker.call(make_request)
+        try:
+            return await circuit_breaker.call(make_request)
+        except Exception as e:
+            if "Circuit breaker is OPEN" in str(e) or "Service error" in str(e):
+                logging.warning(f"Circuit breaker error or service failure for {service_name}: {e}, using fallback")
+                return await self._get_fallback_response(service_name)
+            raise e
+
+    async def _get_fallback_response(self, service_name: str) -> dict[str, Any]:
+        """Provide a fallback response for service mesh calls."""
+        fallback_data = {
+            "error": "Service temporarily unavailable (Mesh Fallback)",
+            "service": service_name,
+            "status": "degraded_mode",
+            "message": "The service is currently unavailable. Returning simplified data.",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "fallback": True
+        }
+
+        # Service-specific simplified data
+        if "ai" in service_name.lower():
+            fallback_data["generated_text"] = "AI features are temporarily unavailable."
+            fallback_data["confidence"] = 0.0
+        elif "discussion" in service_name.lower():
+            fallback_data["topics"] = []
+            fallback_data["reasoning_chain"] = ["Fallback: reasoning engine unavailable"]
+
+        return fallback_data
 
     async def _health_check_loop(self):
         """Background health check loop."""

@@ -9,7 +9,7 @@ import hashlib
 import logging
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from enum import Enum, auto
+from enum import IntEnum, StrEnum, auto
 
 from pydantic import BaseModel, Field
 
@@ -17,7 +17,7 @@ from pydantic import BaseModel, Field
 logger = logging.getLogger(__name__)
 
 
-class CorruptionSeverity(Enum):
+class CorruptionSeverity(IntEnum):
     """Severity levels for data corruption events."""
 
     LOW = auto()  # Minor data inconsistencies, recoverable
@@ -26,7 +26,7 @@ class CorruptionSeverity(Enum):
     CRITICAL = auto()  # System-wide corruption or data breach
 
 
-class CorruptionType(Enum):
+class CorruptionType(StrEnum):
     """Types of data corruption that can occur."""
 
     DATA_VALIDATION = "data_validation"

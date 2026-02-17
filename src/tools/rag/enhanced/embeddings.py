@@ -5,7 +5,7 @@ Enhanced RAG with improved embedding model and retrieval
 import logging
 import re
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 import chromadb
@@ -372,7 +372,7 @@ class EnhancedRAG:
         if "indexed_at" in metadata:
             try:
                 indexed_date = datetime.fromisoformat(metadata["indexed_at"])
-                days_old = (datetime.now() - indexed_date).days
+                days_old = (datetime.now(timezone.utc) - indexed_date).days
                 if days_old < 7:
                     boost *= 1.05
             except (ValueError, KeyError, TypeError):
@@ -403,7 +403,7 @@ class EnhancedRAG:
             combined_metadata = {
                 **metadata,
                 **chunk_dict_metadata,
-                "indexed_at": datetime.now().isoformat(),
+                "indexed_at": datetime.now(timezone.utc).isoformat(),
                 "chunk_preview": chunk_text[:200],  # Preview for search results
             }
 
@@ -426,7 +426,7 @@ class EnhancedRAG:
                 "total_chunks": len(collection_info["ids"] or []),
                 "chunk_types": {},
                 "avg_semantic_density": 0.0,
-                "index_timestamp": datetime.now().isoformat(),
+                "index_timestamp": datetime.now(timezone.utc).isoformat(),
             }
 
             # Analyze chunk types and semantic density

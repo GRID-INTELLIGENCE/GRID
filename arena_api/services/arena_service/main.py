@@ -137,25 +137,25 @@ class ArenaService:
     - ADSR envelope for behavioral feedback
     """
 
-    def __init__(self):
-        self.app = FastAPI(
+    def __init__(self) -> None:
+        self.app: FastAPI = FastAPI(
             title="Arena Service", description="Arena cache, rewards, and ADSR envelope service", version="1.0.0"
         )
 
-        self.service_name = "arena_service"
-        self.service_url = os.getenv("ARENA_SERVICE_URL", "http://localhost:8002")
-        self.health_url = f"{self.service_url}/health"
+        self.service_name: str = "arena_service"
+        self.service_url: str = os.getenv("ARENA_SERVICE_URL", "http://localhost:8002")
+        self.health_url: str = f"{self.service_url}/health"
 
         self.cache: dict[str, Any] = {}
         self.reward_states: dict[str, CharacterRewardState] = {}
         self.adsr_envelopes: dict[str, ADSREnvelope] = {}
 
-        self.scheduler = AsyncIOScheduler()
+        self.scheduler: AsyncIOScheduler = AsyncIOScheduler()
 
         self._setup_middleware()
         self._setup_routes()
 
-    def _setup_middleware(self):
+    def _setup_middleware(self) -> None:
         """Setup CORS middleware."""
         self.app.add_middleware(
             CORSMiddleware,
@@ -190,7 +190,7 @@ class ArenaService:
             peak_amplitude=metrics.peak_amplitude,
         )
 
-    def _start_decay_scheduler(self):
+    def _start_decay_scheduler(self) -> None:
         """Start honor decay scheduler."""
         self.scheduler.add_job(self._apply_honor_decay, "interval", seconds=86400, id="honor_decay")
         self.scheduler.start()
@@ -202,7 +202,7 @@ class ArenaService:
                 state.decay_honor(rate=0.01)
                 logger.info(f"Applied honor decay to {entity_id}: {state.honor:.2f}")
 
-    def _setup_routes(self):
+    def _setup_routes(self) -> None:
         """Setup API routes."""
 
         @self.app.get("/health")

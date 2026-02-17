@@ -7,11 +7,11 @@ from __future__ import annotations
 import uuid
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from enum import Enum, auto
+from enum import Enum, StrEnum, auto
 from typing import Any
 
 
-class ParasiteSeverity(Enum):
+class ParasiteSeverity(StrEnum):
     """Severity levels for parasite detections."""
 
     CRITICAL = auto()  # Service-impacting

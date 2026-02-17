@@ -101,7 +101,8 @@ class SkillVersionManager:
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
             )
-            stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=10)
+            async with asyncio.timeout(10):
+                stdout, stderr = await proc.communicate()
 
             if proc.returncode == 0:
                 return stdout.decode("utf-8", errors="replace").strip()
@@ -173,35 +174,40 @@ class SkillVersionManager:
         self._logger.info(f"Captured version {version_id} for skill {skill_id}")
         return version
 
-    def _save_version(self, version: SkillVersion):
+    async def _save_version(self, version: SkillVersion):
+        import aiofiles
         skill_dir = self._get_skill_dir(version.skill_id)
         version_file = skill_dir / f"{version.version_id}.json"
 
-        with open(version_file, "w") as f:
-            json.dump(asdict(version), f, indent=2)
+        async with aiofiles.open(version_file, "w") as f:
+            await f.write(json.dumps(asdict(version), indent=2))
 
-    def list_versions(self, skill_id: str) -> list[dict[str, Any]]:
+    async def list_versions(self, skill_id: str) -> list[dict[str, Any]]:
         """List available versions for a skill."""
+        import aiofiles
         skill_dir = self._get_skill_dir(skill_id)
         versions = []
         for v_file in skill_dir.glob("*.json"):
-            with open(v_file) as f:
-                data = json.load(f)
+            async with aiofiles.open(v_file) as f:
+                content = await f.read()
+                data = json.loads(content)
                 # Don't return full snapshot in list
                 data.pop("code_snapshot", None)
                 versions.append(data)
         return sorted(versions, key=lambda x: x["created_at"], reverse=True)
 
-    def get_version(self, skill_id: str, version_id: str) -> SkillVersion | None:
+    async def get_version(self, skill_id: str, version_id: str) -> SkillVersion | None:
         """Fetch a specific version."""
+        import aiofiles
         skill_dir = self._get_skill_dir(skill_id)
         version_file = skill_dir / f"{version_id}.json"
 
         if not version_file.exists():
             return None
 
-        with open(version_file) as f:
-            data = json.load(f)
+        async with aiofiles.open(version_file) as f:
+            content = await f.read()
+            data = json.loads(content)
             return SkillVersion(**data)
 
     def rollback(self, skill_id: str, version_id: str) -> bool:

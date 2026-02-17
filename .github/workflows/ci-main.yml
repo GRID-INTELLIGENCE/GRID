@@ -8,7 +8,7 @@
 name: GRID CI/CD Pipeline
 
 on:
-  workflow_dispatch:  # Manual trigger only - GitHub Actions free tier blocked
+  workflow_dispatch:  # Manual trigger for full pipeline
     inputs:
       run_slow_tests:
         description: "Run slow/integration tests"
@@ -17,17 +17,17 @@ on:
         type: boolean
   repository_dispatch:
     types: [feedback-loop]
-  # Uncomment below when billing is resolved
-  # push:
-  #   branches: [main, master, develop, "feature/**", "release/**", "hotfix/**", "architecture/**"]
-  #   paths-ignore:
-  #     - "**.md"
-  #     - "docs/**"
-  #     - "*.txt"
-  #     - ".gitignore"
-  #     - "LICENSE"
+  push:
+    branches: [main, master]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - "*.txt"
+      - ".gitignore"
+      - "LICENSE"
+  # Uncomment for PR triggers when needed (may hit free tier limits)
   # pull_request:
-  #   branches: [main, master, develop]
+  #   branches: [main, master]
   #   types: [opened, synchronize, reopened]
 
 concurrency:
@@ -177,9 +177,9 @@ jobs:
         run: |
           uv run ruff check . --output-format=full
 
-      - name: "Format check (black)"
+      - name: "Format check (ruff)"
         run: |
-          uv run black --check src/grid/ src/application/ src/tools/ tests/
+          uv run ruff format --check src/grid/ src/application/ src/tools/ tests/
 
       - name: "Type check (mypy)"
         run: |
@@ -251,7 +251,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.11", "3.12", "3.13"]
+        python-version: ["3.13"]
 
     steps:
       - name: "Checkout"

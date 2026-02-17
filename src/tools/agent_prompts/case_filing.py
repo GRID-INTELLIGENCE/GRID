@@ -10,11 +10,11 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 from datetime import datetime
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Any
 
 
-class CaseCategory(Enum):
+class CaseCategory(StrEnum):
     """Case categories."""
 
     CODE_ANALYSIS = "code_analysis"

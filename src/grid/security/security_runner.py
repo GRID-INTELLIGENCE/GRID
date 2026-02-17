@@ -24,7 +24,7 @@ import subprocess
 import sys
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from enum import Enum, auto
+from enum import Enum, auto, StrEnum
 from pathlib import Path
 from typing import Any, Callable
 
@@ -36,7 +36,7 @@ log = logging.getLogger("grid.security.runner")
 # =============================================================================
 
 
-class ValidationStatus(Enum):
+class ValidationStatus(StrEnum):
     """Status of a validation check."""
 
     PASS = auto()

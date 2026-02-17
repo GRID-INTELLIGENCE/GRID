@@ -9,7 +9,7 @@ import json
 import logging
 import os
 from datetime import UTC, datetime
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Any
 
 from .pii_redaction import RedactionMode, redact_log_message
@@ -17,7 +17,7 @@ from .pii_redaction import RedactionMode, redact_log_message
 logger = logging.getLogger(__name__)
 
 
-class AuditEventType(Enum):
+class AuditEventType(StrEnum):
     """Types of audit events."""
 
     # Authentication

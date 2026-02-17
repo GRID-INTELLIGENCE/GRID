@@ -1,12 +1,12 @@
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from enum import Enum
+from datetime import datetime, timezone, timedelta
+from enum import Enum, StrEnum
 from typing import Any
 
 import numpy as np
 
 
-class TemporalRelation(Enum):
+class TemporalRelation(StrEnum):
     """Types of temporal relationships between events/facts."""
 
     BEFORE = "before"
@@ -19,7 +19,7 @@ class TemporalRelation(Enum):
     FINISHES = "finishes"
 
 
-class CrossReferenceDomain(Enum):
+class CrossReferenceDomain(StrEnum):
     """Domains for cross-referencing in temporal reasoning."""
 
     TOPIC = "topic"
@@ -122,7 +122,7 @@ class TemporalReasoning:
         relevant_facts = [
             f
             for f in self.temporal_facts
-            if f.subject == query_subject and datetime.now() - f.timestamp <= self.history_window
+            if f.subject == query_subject and datetime.now(timezone.utc) - f.timestamp <= self.history_window
         ]
 
         paths = []
@@ -302,7 +302,7 @@ class TemporalReasoning:
 
         # Factor in temporal recency, cross-references, and path consistency
         recency_factor = np.mean(
-            [np.exp(-abs((f.timestamp - datetime.now()).total_seconds()) / (24 * 3600)) for f in relevant_facts]
+            [np.exp(-abs((f.timestamp - datetime.now(timezone.utc)).total_seconds()) / (24 * 3600)) for f in relevant_facts]
         )
 
         cross_ref_factor = min(1.0, len(self.cross_references) / 10)  # Scale cross-refs
@@ -316,7 +316,7 @@ class TemporalReasoning:
     def record_processing_event(self, event_type: str, details: dict[str, Any]) -> None:
         """Record processing event for monitoring."""
         event = {
-            "timestamp": datetime.now(),
+            "timestamp": datetime.now(timezone.utc),
             "event_type": event_type,
             "details": details,
             "metrics": {

@@ -24,7 +24,7 @@ import math
 from abc import ABC, abstractmethod
 from collections import Counter, deque
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, TypeVar
 
@@ -1750,7 +1750,7 @@ class TimePattern(PatternRecognizer):
         """
         # Extract document temporal information
         doc_year = document_metadata.get("year")
-        current_year = datetime.now().year
+        current_year = datetime.now(timezone.utc).year
 
         if temporal_intent.era_type == "none" or doc_year is None:
             return TemporalResonance(
