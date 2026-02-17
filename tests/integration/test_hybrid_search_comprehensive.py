@@ -2,8 +2,8 @@
 Comprehensive hybrid search and reranker tests.
 Tests combination of vector and keyword search with reranking capabilities.
 
-NOTE: These tests are skipped due to HuggingFace Hub metadata version conflicts.
-These will be re-enabled in Phase 3 Sprint 2 after dependency resolution.
+Uses conditional imports so mock-based tests always run.
+Real dependency tests (HybridRetriever, CrossEncoderReranker) run only when available.
 """
 
 import time
@@ -12,29 +12,49 @@ from unittest.mock import Mock, patch
 import numpy as np
 import pytest
 
-# Skip collection entirely for this module
-pytest.skip("HuggingFace Hub importlib_metadata version issue", allow_module_level=True)
+# Conditional imports - mock-based tests always run
+HAS_HYBRID_RETRIEVER = False
+HAS_CROSS_ENCODER = False
+HAS_RAG_TYPES = False
 
-from tools.rag.hybrid_retriever import HybridRetriever
+try:
+    from tools.rag.hybrid_retriever import HybridRetriever
 
-# Cross-encoder requires sentence-transformers and torch (needs VC++ Redistributable)
-# Skip if not available
+    HAS_HYBRID_RETRIEVER = True
+except (ImportError, OSError):
+    HybridRetriever = None
+
 try:
     from tools.rag.cross_encoder_reranker import CrossEncoderReranker
 
     HAS_CROSS_ENCODER = True
 except (ImportError, OSError):
-    HAS_CROSS_ENCODER = False
     CrossEncoderReranker = None
 
-pytestmark = pytest.mark.skipif(
-    not HAS_CROSS_ENCODER, reason="Cross-encoder requires sentence-transformers and torch (needs VC++ Redistributable)"
+try:
+    from tools.rag.types import Document, ScoredChunk
+    from tools.rag.vector_store.in_memory_dense import InMemoryDenseStore
+
+    HAS_RAG_TYPES = True
+except (ImportError, OSError):
+    Document = None
+    ScoredChunk = None
+    InMemoryDenseStore = None
+
+requires_hybrid = pytest.mark.skipif(
+    not HAS_HYBRID_RETRIEVER, reason="HybridRetriever not available (HuggingFace Hub conflict)"
+)
+requires_cross_encoder = pytest.mark.skipif(
+    not HAS_CROSS_ENCODER,
+    reason="Cross-encoder requires sentence-transformers and torch (needs VC++ Redistributable)",
+)
+requires_rag_types = pytest.mark.skipif(
+    not HAS_RAG_TYPES, reason="RAG types (Document, ScoredChunk) not available"
 )
 
-from tools.rag.types import Document, ScoredChunk
-from tools.rag.vector_store.in_memory_dense import InMemoryDenseStore
 
-
+@requires_hybrid
+@requires_rag_types
 class TestHybridSearch:
     """Test hybrid search combining vector and keyword search"""
 
@@ -248,6 +268,8 @@ class TestHybridSearch:
         assert max_time < 1.0, f"Max search time {max_time:.3f}s too slow"
 
 
+@requires_cross_encoder
+@requires_rag_types
 class TestCrossEncoderReranker:
     """Test cross-encoder reranking for result quality improvement"""
 
@@ -439,8 +461,57 @@ class TestCrossEncoderReranker:
         assert len(reranked_single) == 1, "Single result should remain single"
 
 
+@requires_hybrid
+@requires_cross_encoder
+@requires_rag_types
 class TestHybridRerankerIntegration:
     """Integration tests for hybrid search with reranking"""
+
+    @pytest.fixture
+    def sample_documents(self):
+        """Create diverse document corpus for testing."""
+        return [
+            Document(
+                content="The Q1 financial report shows revenue of $5.2 million from software sales",
+                metadata={"type": "financial", "quarter": "Q1", "year": 2024},
+                id="doc_1",
+            ),
+            Document(
+                content="Quarter 1 marketing expenses were $800K for digital campaigns",
+                metadata={"type": "financial", "quarter": "Q1", "year": 2024},
+                id="doc_2",
+            ),
+            Document(
+                content="AI models require significant computational resources for training",
+                metadata={"type": "technical", "topic": "AI", "complexity": "high"},
+                id="doc_3",
+            ),
+            Document(
+                content="Python is the preferred programming language for machine learning",
+                metadata={"type": "technical", "topic": "programming", "language": "python"},
+                id="doc_4",
+            ),
+            Document(
+                content="The company invested $3.5M in AI infrastructure during Q1",
+                metadata={"type": "financial", "quarter": "Q1", "category": "investment"},
+                id="doc_5",
+            ),
+            Document(
+                content="Machine learning algorithms improve with large datasets",
+                metadata={"type": "technical", "topic": "AI", "method": "algorithmic"},
+                id="doc_6",
+            ),
+            Document(
+                content="Q2 financial projections show 15% growth in AI software revenue",
+                metadata={"type": "financial", "quarter": "Q2", "category": "projection"},
+                id="doc_7",
+            ),
+            Document(
+                content="Deep learning architectures use neural networks for pattern recognition",
+                metadata={"type": "technical", "topic": "AI", "method": "neural"},
+                id="doc_8",
+            ),
+        ]
 
     def test_hybrid_search_with_reranking_pipeline(self, sample_documents):
         """Scenario: Complete pipeline: hybrid search + reranking"""

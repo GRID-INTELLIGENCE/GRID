@@ -166,12 +166,10 @@ dump.rdb
 # ==========================
 # VIRTUAL ENVIRONMENTS
 # ==========================
-
-# Only allow root .venv, exclude all others
+# uv manages .venv/ with its own internal .gitignore.
+# These entries are safety nets for non-standard venv names.
 venv/
-*/venv/
-*/.venv/
-!/.venv/
+.venv_locked/
 
 # ==========================
 # PYTHON BUILD ARTIFACTS

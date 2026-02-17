@@ -19,7 +19,7 @@ class EnvironmentSettings(BaseSettings):
     """Defines and validates environment variables for the GRID application."""
 
     # Environment Configuration
-    MOTHERSHIP_ENVIRONMENT: Literal["development", "staging", "production"] = Field(
+    MOTHERSHIP_ENVIRONMENT: Literal["development", "staging", "production", "test"] = Field(
         default="development", description="The runtime environment for the application."
     )
 
@@ -67,3 +67,56 @@ def get_environment_settings() -> EnvironmentSettings:
 
 # Initialize and export a singleton instance
 environment_settings = get_environment_settings()
+
+
+def sanitize_environment() -> dict[str, list[str]]:
+    """
+    Sanitize the current process environment variables.
+
+    Scans ``os.environ`` for keys with suspicious characters and removes them.
+    Returns a report mapping category names to lists of messages describing
+    changes that were made.
+    """
+    report: dict[str, list[str]] = {"removed": [], "warnings": []}
+    keys_to_remove: list[str] = []
+    for key in os.environ:
+        # Allow only alphanumeric, underscores, and dots in env-var names
+        if not key.replace("_", "").replace(".", "").isalnum():
+            keys_to_remove.append(key)
+
+    for key in keys_to_remove:
+        logger.warning(f"Removing potentially unsafe environment key: {key}")
+        report["removed"].append(key)
+        del os.environ[key]
+
+    # Deduplicate PATH entries while preserving order
+    raw_path = os.environ.get("PATH", "")
+    if raw_path:
+        seen: set[str] = set()
+        deduped: list[str] = []
+        for entry in raw_path.split(os.pathsep):
+            normed = os.path.normpath(entry) if entry else entry
+            if normed not in seen:
+                seen.add(normed)
+                deduped.append(normed)
+        os.environ["PATH"] = os.pathsep.join(deduped)
+
+    return report
+
+
+def sanitize_path() -> None:
+    """
+    Sanitize the ``PATH`` environment variable in-place.
+
+    Removes non-existent directories and normalises every entry.
+    """
+    raw = os.environ.get("PATH", "")
+    entries = raw.split(os.pathsep)
+    cleaned: list[str] = []
+    for entry in entries:
+        normed = os.path.normpath(entry)
+        if os.path.isdir(normed):
+            cleaned.append(normed)
+        else:
+            logger.debug(f"Removing non-existent PATH entry: {entry}")
+    os.environ["PATH"] = os.pathsep.join(cleaned)

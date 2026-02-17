@@ -9,10 +9,10 @@ Defines the contract schema for accountability enforcement, including:
 """
 import re
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from enum import Enum
 from typing import Any, Dict, List, Literal, Optional, Union
-from pydantic import BaseModel, Field, validator, root_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 
 class ContractSeverity(str, Enum):
@@ -48,7 +48,7 @@ class ContractViolation:
     actual_value: Any = None
     expected_value: Any = None
     penalty_points: int = 10
-    timestamp: datetime = field(default_factory=datetime.utcnow)
+    timestamp: datetime = field(default_factory=lambda: datetime.now(UTC))
     
     # Alias for backward compatibility
     @property
@@ -277,24 +277,39 @@ class EndpointContract(BaseModel):
         description="Tags for categorization"
     )
     created_at: datetime = Field(
-        default_factory=datetime.utcnow, 
+        default_factory=lambda: datetime.now(UTC), 
         description="When this contract was created"
     )
     updated_at: datetime = Field(
-        default_factory=datetime.utcnow, 
+        default_factory=lambda: datetime.now(UTC), 
         description="When this contract was last updated"
     )
 
-    @validator('methods', each_item=True)
-    def validate_http_method(cls, v):
-        valid_methods = {"GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS", "WEBSOCKET", "WS"}
-        if v.upper() not in valid_methods:
-            raise ValueError(f"Invalid HTTP method: {v}")
-        return v.upper()
+    @field_validator("methods")
+    @classmethod
+    def validate_http_method(cls, v: List[str]) -> List[str]:
+        valid_methods = {
+            "GET",
+            "POST",
+            "PUT",
+            "DELETE",
+            "PATCH",
+            "HEAD",
+            "OPTIONS",
+            "WEBSOCKET",
+            "WS",
+        }
+        validated = []
+        for method in v:
+            if method.upper() not in valid_methods:
+                raise ValueError(f"Invalid HTTP method: {method}")
+            validated.append(method.upper())
+        return validated
 
-    @root_validator(skip_on_failure=True)
-    def update_timestamp(cls, values):
-        values['updated_at'] = datetime.utcnow()
+    @model_validator(mode="before")
+    @classmethod
+    def update_timestamp(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        values["updated_at"] = datetime.now(UTC)
         return values
 
 
@@ -344,11 +359,11 @@ class AccountabilityContract(BaseModel):
         description="Default compliance requirements"
     )
     created_at: datetime = Field(
-        default_factory=datetime.utcnow, 
+        default_factory=lambda: datetime.now(UTC), 
         description="When this contract was created"
     )
     updated_at: datetime = Field(
-        default_factory=datetime.utcnow, 
+        default_factory=lambda: datetime.now(UTC), 
         description="When this contract was last updated"
     )
 

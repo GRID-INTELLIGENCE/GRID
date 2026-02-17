@@ -31,6 +31,12 @@ MAX_OVERFLOW_DEFAULT = 10
 POOL_TIMEOUT_DEFAULT = 30
 
 
+def get_database_url() -> str:
+    """Return the configured database URL from application settings."""
+    settings = get_settings()
+    return settings.database.url
+
+
 def _normalize_async_db_url(url: str) -> str:
     url = (url or "").strip()
     if url.startswith("sqlite:///") and "+aiosqlite" not in url:

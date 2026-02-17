@@ -377,23 +377,198 @@ class AdvancedTimeManager(TimeManager):
         self.prediction_enabled = True
 
     def detect_temporal_pattern(self, context_id: str, events: list[dict[str, Any]]) -> dict[str, Any]:
-        """Detect patterns in temporal events."""
-        # TODO: Implement pattern detection algorithm
-        return {"pattern_detected": False}
+        """Detect patterns in temporal events.
+
+        Identifies temporal patterns including:
+        - Fixed intervals (periodic patterns)
+        - Event sequences
+        - Time-of-day clustering
+        """
+        if len(events) < 3:
+            return {"pattern_detected": False, "reason": "insufficient_events"}
+
+        # Sort events by timestamp
+        sorted_events = sorted(events, key=lambda e: e.get("timestamp", 0))
+        timestamps = [e.get("timestamp", 0) for e in sorted_events]
+
+        # Calculate intervals between consecutive events
+        intervals = [timestamps[i] - timestamps[i - 1] for i in range(1, len(timestamps))]
+
+        if not intervals:
+            return {"pattern_detected": False, "reason": "no_intervals"}
+
+        # Detect fixed interval pattern (periodicity)
+        avg_interval = sum(intervals) / len(intervals)
+        variance = sum((i - avg_interval) ** 2 for i in intervals) / len(intervals)
+        std_dev = variance ** 0.5
+
+        # Check if intervals are consistent (low coefficient of variation)
+        if avg_interval > 0 and std_dev / avg_interval < 0.2:
+            self.temporal_patterns[context_id] = {
+                "type": "periodic",
+                "interval": avg_interval,
+                "std_dev": std_dev,
+                "events": len(events),
+            }
+            return {
+                "pattern_detected": True,
+                "pattern_type": "periodic",
+                "interval_seconds": round(avg_interval, 2),
+                "variance": round(variance, 2),
+                "confidence": round(1 - (std_dev / avg_interval), 2),
+            }
+
+        # Check for time-of-day clustering
+        hours = [datetime.fromtimestamp(ts).hour for ts in timestamps]
+        hour_counts: dict[int, int] = {}
+        for h in hours:
+            hour_counts[h] = hour_counts.get(h, 0) + 1
+
+        max_hour_count = max(hour_counts.values())
+        if max_hour_count >= len(events) * 0.5:
+            peak_hour = max(hour_counts.items(), key=lambda x: x[1])[0]
+            self.temporal_patterns[context_id] = {
+                "type": "time_of_day",
+                "peak_hour": peak_hour,
+                "event_count": max_hour_count,
+            }
+            return {
+                "pattern_detected": True,
+                "pattern_type": "time_of_day",
+                "peak_hour": peak_hour,
+                "peak_hour_frequency": max_hour_count,
+                "confidence": round(max_hour_count / len(events), 2),
+            }
+
+        return {"pattern_detected": False, "reason": "no_significant_pattern"}
 
     def predict_next_event(self, context_id: str) -> dict[str, Any] | None:
-        """Predict the next likely event based on patterns."""
+        """Predict the next likely event based on patterns.
+
+        Uses detected temporal patterns to forecast next event time.
+        """
         if not self.prediction_enabled:
             return None
 
-        # TODO: Implement prediction algorithm
+        pattern = self.temporal_patterns.get(context_id)
+        if not pattern:
+            return None
+
+        current_time = time.time()
+
+        if pattern["type"] == "periodic":
+            interval = pattern["interval"]
+            std_dev = pattern.get("std_dev", interval * 0.1)
+            next_event_time = current_time + interval
+            confidence = round(1 - (std_dev / interval), 2) if interval > 0 else 0.5
+
+            return {
+                "predicted_time": next_event_time,
+                "predicted_datetime": datetime.fromtimestamp(next_event_time).isoformat(),
+                "pattern_type": "periodic",
+                "interval": round(interval, 2),
+                "confidence": min(1.0, max(0.0, confidence)),
+                "time_until": round(interval, 2),
+            }
+
+        elif pattern["type"] == "time_of_day":
+            peak_hour = pattern["peak_hour"]
+            now = datetime.now()
+            next_occurrence = now.replace(hour=peak_hour, minute=0, second=0, microsecond=0)
+
+            if next_occurrence <= now:
+                next_occurrence = next_occurrence + timedelta(days=1)
+
+            return {
+                "predicted_time": next_occurrence.timestamp(),
+                "predicted_datetime": next_occurrence.isoformat(),
+                "pattern_type": "time_of_day",
+                "peak_hour": peak_hour,
+                "confidence": round(pattern.get("event_count", 1) / (pattern.get("event_count", 1) + 2), 2),
+                "time_until": round((next_occurrence.timestamp() - current_time), 2),
+            }
+
         return None
 
     def analyze_temporal_distribution(self, context_id: str) -> dict[str, Any]:
-        """Analyze the distribution of events over time."""
+        """Analyze the distribution of events over time.
+
+        Performs statistical analysis on temporal events including:
+        - Hourly distribution
+        - Daily distribution
+        - Inter-event timing statistics
+        - Event frequency trends
+        """
         context = self.get_context(context_id)
         if not context:
             return {}
 
-        # TODO: Implement distribution analysis
-        return {"analysis": "temporal_distribution"}
+        # Get events from context metadata or patterns
+        events = context.temporal_patterns.get("events", [])
+        if not events:
+            return {"analysis": "temporal_distribution", "events_analyzed": 0}
+
+        # Sort events by timestamp
+        sorted_events = sorted(events, key=lambda e: e.get("timestamp", 0))
+        timestamps = [e.get("timestamp", 0) for e in sorted_events]
+
+        if len(timestamps) < 2:
+            return {
+                "analysis": "temporal_distribution",
+                "events_analyzed": len(timestamps),
+                "note": "insufficient_data",
+            }
+
+        # Calculate intervals
+        intervals = [timestamps[i] - timestamps[i - 1] for i in range(1, len(timestamps))]
+
+        # Basic statistics
+        total_duration = timestamps[-1] - timestamps[0]
+        avg_interval = sum(intervals) / len(intervals)
+        min_interval = min(intervals)
+        max_interval = max(intervals)
+
+        # Variance and standard deviation
+        variance = sum((i - avg_interval) ** 2 for i in intervals) / len(intervals)
+        std_dev = variance ** 0.5
+
+        # Hourly distribution
+        hours: dict[int, int] = {}
+        for ts in timestamps:
+            hour = datetime.fromtimestamp(ts).hour
+            hours[hour] = hours.get(hour, 0) + 1
+
+        # Daily distribution (day of week: 0=Monday)
+        days: dict[int, int] = {}
+        for ts in timestamps:
+            day = datetime.fromtimestamp(ts).weekday()
+            days[day] = days.get(day, 0) + 1
+
+        # Peak hour calculation
+        peak_hour = max(hours.items(), key=lambda x: x[1])[0] if hours else None
+        peak_hour_count = hours.get(peak_hour, 0) if peak_hour else 0
+
+        # Event frequency (events per hour)
+        frequency = len(timestamps) / (total_duration / 3600) if total_duration > 0 else 0
+
+        return {
+            "analysis": "temporal_distribution",
+            "events_analyzed": len(timestamps),
+            "time_range": {
+                "start": timestamps[0],
+                "end": timestamps[-1],
+                "duration_hours": round(total_duration / 3600, 2),
+            },
+            "interval_statistics": {
+                "average_seconds": round(avg_interval, 2),
+                "min_seconds": round(min_interval, 2),
+                "max_seconds": round(max_interval, 2),
+                "std_dev_seconds": round(std_dev, 2),
+                "variance": round(variance, 2),
+            },
+            "hourly_distribution": dict(sorted(hours.items())),
+            "daily_distribution": {k: v for k, v in sorted(days.items())},
+            "peak_hour": {"hour": peak_hour, "count": peak_hour_count},
+            "event_frequency_per_hour": round(frequency, 2),
+            "burstiness": round(std_dev / avg_interval if avg_interval > 0 else 0, 2),
+        }

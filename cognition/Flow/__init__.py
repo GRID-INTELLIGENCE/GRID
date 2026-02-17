@@ -227,8 +227,68 @@ class AdvancedFlowManager(FlowManager):
         """Set flow priority."""
         self.flow_priorities[flow_id] = priority
 
-    # Placeholder for advanced features
+    # Advanced features
     def optimize_flow_order(self) -> list[str]:
-        """Optimize flow processing order based on dependencies and priorities."""
-        # TODO: Implement topological sort with priority weighting
-        return list(self.flows.keys())
+        """Optimize flow processing order based on dependencies and priorities.
+
+        Uses Kahn's algorithm for topological sort with priority weighting.
+        Flows with higher priority values are processed earlier.
+        """
+        if not self.flows:
+            return []
+
+        # Build adjacency list and in-degree count
+        in_degree: dict[str, int] = {flow_id: 0 for flow_id in self.flows}
+        dependents: dict[str, list[str]] = {flow_id: [] for flow_id in self.flows}
+
+        # Process dependencies
+        for flow_id, deps in self.flow_dependencies.items():
+            if flow_id not in self.flows:
+                continue
+            for dep_id in deps:
+                if dep_id in self.flows:
+                    dependents[dep_id].append(flow_id)
+                    in_degree[flow_id] += 1
+
+        # Initialize queue with flows that have no dependencies
+        # Use priority for initial sorting (higher priority first)
+        queue = sorted(
+            [flow_id for flow_id in self.flows if in_degree[flow_id] == 0],
+            key=lambda fid: self.flow_priorities.get(fid, 0),
+            reverse=True,
+        )
+
+        result: list[str] = []
+        processed: set[str] = set()
+
+        while queue:
+            # Take highest priority flow from queue
+            current = queue.pop(0)
+            result.append(current)
+            processed.add(current)
+
+            # Update in-degrees for dependent flows
+            for dependent in dependents[current]:
+                in_degree[dependent] -= 1
+                if in_degree[dependent] == 0 and dependent not in processed:
+                    # Insert maintaining priority order
+                    priority = self.flow_priorities.get(dependent, 0)
+                    insert_idx = 0
+                    for i, fid in enumerate(queue):
+                        if self.flow_priorities.get(fid, 0) < priority:
+                            insert_idx = i
+                            break
+                        insert_idx = i + 1
+                    queue.insert(insert_idx, dependent)
+
+        # Check for cycles
+        if len(result) != len(self.flows):
+            self.logger.warning("Circular dependencies detected, returning unsorted flows")
+            # Return flows sorted by priority as fallback
+            return sorted(
+                list(self.flows.keys()),
+                key=lambda fid: self.flow_priorities.get(fid, 0),
+                reverse=True,
+            )
+
+        return result

@@ -532,8 +532,8 @@ class TestStreamingEndpointReliability:
             response = client.post("/api/v1/failing-stream", json={})
             assert response.status_code == 500
 
-        # Wait for recovery timeout (simulate with mock)
-        time.sleep(0.2)  # Wait longer than recovery timeout
+        # Wait for recovery timeout (simulate with mock instead of real sleep)
+        # The mock_time below simulates the passage of 31 seconds
 
         # Test recovery
         with patch("application.mothership.middleware.circuit_breaker.time.time") as mock_time:
@@ -709,7 +709,29 @@ class TestStreamingEndpointReliability:
 
 
 class TestStreamingPerformance:
-    """Performance tests for streaming endpoints."""
+    """Performance tests for streaming endpoints.
+
+    Uses shared GhostRegistry and consolidated app fixtures to avoid
+    redundant setup per test.
+    """
+
+    @pytest.fixture
+    def perf_app(self):
+        """Create a single FastAPI app for performance testing."""
+        app = FastAPI()
+
+        async def concurrent_stream_generator():
+            """Generator for concurrent testing."""
+            for i in range(3):
+                yield {"event": f"event_{i}", "data": {"value": i}}
+                await asyncio.sleep(0.05)
+
+        @app.post("/api/concurrent-stream")
+        async def concurrent_stream_endpoint(data: dict):
+            """Concurrent streaming endpoint."""
+            return EventSourceResponse(concurrent_stream_generator())
+
+        return app
 
     def test_streaming_latency(self):
         """Test streaming endpoint latency."""
@@ -726,8 +748,6 @@ class TestStreamingPerformance:
                 await asyncio.sleep(0.01)  # Small delay
 
         # Test performance
-        import time
-
         start = time.time()
 
         async def test_invocation():
@@ -745,25 +765,9 @@ class TestStreamingPerformance:
         assert len(events) == 3
         assert duration < 0.5  # Should complete in under 500ms
 
-    def test_streaming_concurrency(self):
+    def test_streaming_concurrency(self, perf_app):
         """Test streaming concurrency with multiple clients."""
-        from fastapi import FastAPI
-        from fastapi.testclient import TestClient
-
-        app = FastAPI()
-
-        async def concurrent_stream_generator():
-            """Generator for concurrent testing."""
-            for i in range(3):
-                yield {"event": f"event_{i}", "data": {"value": i}}
-                await asyncio.sleep(0.05)
-
-        @app.post("/api/concurrent-stream")
-        async def concurrent_stream_endpoint(data: dict):
-            """Concurrent streaming endpoint."""
-            return EventSourceResponse(concurrent_stream_generator())
-
-        client = TestClient(app)
+        client = TestClient(perf_app)
 
         # Test multiple concurrent requests
         import concurrent.futures
@@ -800,8 +804,6 @@ class TestStreamingPerformance:
                 await asyncio.sleep(0.001)  # Very small delay
 
         # Test throughput
-        import time
-
         start = time.time()
 
         async def test_invocation():
@@ -866,27 +868,57 @@ class TestStreamingPerformance:
 
 
 class TestStreamingProtocolCompliance:
-    """Tests for SSE protocol compliance."""
+    """Tests for SSE protocol compliance.
 
-    def test_sse_event_format(self):
-        """Test that events follow SSE format."""
-        from fastapi import FastAPI
-        from fastapi.testclient import TestClient
+    Uses a single shared FastAPI app with multiple endpoints to avoid
+    creating separate app instances per test.
+    """
 
+    @pytest.fixture
+    def protocol_app(self):
+        """Create a single FastAPI app with all SSE protocol test endpoints."""
         app = FastAPI()
 
-        async def sse_generator():
+        async def sse_format_generator():
             """Generator producing properly formatted SSE events."""
             yield {"event": "status", "data": json.dumps({"stage": "processing"})}
             yield {"event": "progress", "data": json.dumps({"step": 1, "progress": 50})}
             yield {"event": "result", "data": json.dumps({"status": "completed"})}
 
+        async def id_generator():
+            """Generator with id field."""
+            yield {"id": "1", "event": "message", "data": json.dumps({"id": 1})}
+            yield {"id": "2", "event": "message", "data": json.dumps({"id": 2})}
+
+        async def retry_generator():
+            """Generator with retry field."""
+            yield {"retry": 5000, "event": "status", "data": json.dumps({"status": "retrying"})}
+
+        async def empty_generator():
+            """Generator with empty data."""
+            yield {"event": "heartbeat", "data": ""}
+
         @app.get("/sse-test")
         async def sse_test_endpoint():
-            """SSE test endpoint."""
-            return EventSourceResponse(sse_generator())
+            return EventSourceResponse(sse_format_generator())
 
-        client = TestClient(app)
+        @app.get("/sse-id-test")
+        async def sse_id_test_endpoint():
+            return EventSourceResponse(id_generator())
+
+        @app.get("/sse-retry-test")
+        async def sse_retry_test_endpoint():
+            return EventSourceResponse(retry_generator())
+
+        @app.get("/sse-empty-test")
+        async def sse_empty_test_endpoint():
+            return EventSourceResponse(empty_generator())
+
+        return app
+
+    def test_sse_event_format(self, protocol_app):
+        """Test that events follow SSE format."""
+        client = TestClient(protocol_app)
         response = client.get("/sse-test", headers={"Accept": "text/event-stream"})
 
         assert response.status_code == 200
@@ -912,24 +944,9 @@ class TestStreamingProtocolCompliance:
         # Verify we got all events
         assert len(event_lines) >= 6
 
-    def test_sse_id_field(self):
+    def test_sse_id_field(self, protocol_app):
         """Test SSE id field support."""
-        from fastapi import FastAPI
-        from fastapi.testclient import TestClient
-
-        app = FastAPI()
-
-        async def id_generator():
-            """Generator with id field."""
-            yield {"id": "1", "event": "message", "data": json.dumps({"id": 1})}
-            yield {"id": "2", "event": "message", "data": json.dumps({"id": 2})}
-
-        @app.get("/sse-id-test")
-        async def sse_id_test_endpoint():
-            """SSE id test endpoint."""
-            return EventSourceResponse(id_generator())
-
-        client = TestClient(app)
+        client = TestClient(protocol_app)
         response = client.get("/sse-id-test", headers={"Accept": "text/event-stream"})
 
         assert response.status_code == 200
@@ -949,23 +966,9 @@ class TestStreamingProtocolCompliance:
         assert "id: 1" in event_text
         assert "id: 2" in event_text
 
-    def test_sse_retry_field(self):
+    def test_sse_retry_field(self, protocol_app):
         """Test SSE retry field support."""
-        from fastapi import FastAPI
-        from fastapi.testclient import TestClient
-
-        app = FastAPI()
-
-        async def retry_generator():
-            """Generator with retry field."""
-            yield {"retry": 5000, "event": "status", "data": json.dumps({"status": "retrying"})}
-
-        @app.get("/sse-retry-test")
-        async def sse_retry_test_endpoint():
-            """SSE retry test endpoint."""
-            return EventSourceResponse(retry_generator())
-
-        client = TestClient(app)
+        client = TestClient(protocol_app)
         response = client.get("/sse-retry-test", headers={"Accept": "text/event-stream"})
 
         assert response.status_code == 200
@@ -980,23 +983,9 @@ class TestStreamingProtocolCompliance:
 
         assert "retry: 5000" in event_text
 
-    def test_sse_empty_data(self):
+    def test_sse_empty_data(self, protocol_app):
         """Test handling of empty data in SSE."""
-        from fastapi import FastAPI
-        from fastapi.testclient import TestClient
-
-        app = FastAPI()
-
-        async def empty_generator():
-            """Generator with empty data."""
-            yield {"event": "heartbeat", "data": ""}
-
-        @app.get("/sse-empty-test")
-        async def sse_empty_test_endpoint():
-            """SSE empty data test endpoint."""
-            return EventSourceResponse(empty_generator())
-
-        client = TestClient(app)
+        client = TestClient(protocol_app)
         response = client.get("/sse-empty-test", headers={"Accept": "text/event-stream"})
 
         assert response.status_code == 200
@@ -1012,13 +1001,15 @@ class TestStreamingProtocolCompliance:
 
 
 class TestStreamingEdgeCases:
-    """Edge case tests for streaming endpoints."""
+    """Edge case tests for streaming endpoints.
 
-    def test_streaming_client_disconnect(self):
-        """Test handling of client disconnect during streaming."""
-        from fastapi import FastAPI
-        from fastapi.testclient import TestClient
+    Uses a single shared FastAPI app with all edge case endpoints to avoid
+    creating separate app instances per test.
+    """
 
+    @pytest.fixture
+    def edge_case_app(self):
+        """Create a single FastAPI app with all edge case test endpoints."""
         app = FastAPI()
 
         disconnect_event = asyncio.Event()
@@ -1033,142 +1024,26 @@ class TestStreamingEdgeCases:
                 disconnect_event.set()
                 raise
 
-        @app.post("/disconnect-test")
-        async def disconnect_test_endpoint(data: dict):
-            """Disconnect test endpoint."""
-            return EventSourceResponse(disconnect_generator())
-
-        # Test client disconnect
-        client = TestClient(app)
-        response = client.post("/disconnect-test", json={}, headers={"Accept": "text/event-stream"})
-
-        # Read a few events then close connection
-        events = []
-        for line in response.iter_lines():
-            events.append(line)
-            if len(events) >= 3:
-                break  # Simulate client disconnect
-
-        # Give time for disconnect to be detected
-        time.sleep(0.2)
-
-        # Note: TestClient may not properly simulate client disconnect
-        # The generator cancellation depends on the underlying implementation
-        # For now, we just verify that we can read some events before stopping
-        # In a real scenario, the server would detect the disconnect
-        assert len(events) >= 3  # We read at least 3 lines before stopping
-
-    def test_streaming_slow_consumer(self):
-        """Test handling of slow consumer."""
-        from fastapi import FastAPI
-        from fastapi.testclient import TestClient
-
-        app = FastAPI()
-
         async def fast_generator():
             """Fast generator with slow consumer."""
             for i in range(10):
                 yield {"event": "fast", "data": {"value": i}}
-                await asyncio.sleep(0.01)  # Fast generation
-
-        @app.post("/slow-consumer-test")
-        async def slow_consumer_test_endpoint(data: dict):
-            """Slow consumer test endpoint."""
-            return EventSourceResponse(fast_generator())
-
-        client = TestClient(app)
-        response = client.post("/slow-consumer-test", json={}, headers={"Accept": "text/event-stream"})
-
-        # Consume events - parse_sse_events will consume all events
-        parsed_events = parse_sse_events(response)
-
-        # Should still receive all events (10 events, not 10 lines)
-        assert len(parsed_events) == 10
-
-    def test_streaming_large_event(self):
-        """Test handling of very large events."""
-        from fastapi import FastAPI
-        from fastapi.testclient import TestClient
-
-        app = FastAPI()
+                await asyncio.sleep(0.01)
 
         async def large_event_generator():
             """Generator with large event."""
             large_data = {"data": "x" * 500000}  # 500KB event
             yield {"event": "large", "data": large_data}
 
-        @app.post("/large-event-test")
-        async def large_event_test_endpoint(data: dict):
-            """Large event test endpoint."""
-            return EventSourceResponse(large_event_generator())
-
-        client = TestClient(app)
-        response = client.post("/large-event-test", json={}, headers={"Accept": "text/event-stream"})
-
-        assert response.status_code == 200
-
-        # Should handle large event
-        events = list(response.iter_lines())
-        assert len(events) > 0
-
-    def test_streaming_high_frequency_events(self):
-        """Test handling of high frequency events."""
-        from fastapi import FastAPI
-        from fastapi.testclient import TestClient
-
-        app = FastAPI()
-
         async def high_freq_generator():
             """Generator with high frequency events."""
             for i in range(100):
                 yield {"event": "freq", "data": {"value": i}}
-                await asyncio.sleep(0.001)  # Very high frequency
-
-        @app.post("/high-freq-test")
-        async def high_freq_test_endpoint(data: dict):
-            """High frequency test endpoint."""
-            return EventSourceResponse(high_freq_generator())
-
-        client = TestClient(app)
-        response = client.post("/high-freq-test", json={}, headers={"Accept": "text/event-stream"})
-
-        assert response.status_code == 200
-
-        # Should handle high frequency events (100 events, not 100 lines)
-        parsed_events = parse_sse_events(response)
-        assert len(parsed_events) == 100
-
-    def test_streaming_with_malformed_json(self):
-        """Test handling of malformed JSON in streaming."""
-        from fastapi import FastAPI
-        from fastapi.testclient import TestClient
-
-        app = FastAPI()
+                await asyncio.sleep(0.001)
 
         async def malformed_generator():
             """Generator with malformed JSON."""
-            yield {"event": "bad_data", "data": '{"malformed": "json"'}  # Missing closing brace
-
-        @app.post("/malformed-test")
-        async def malformed_test_endpoint(data: dict):
-            """Malformed JSON test endpoint."""
-            return EventSourceResponse(malformed_generator())
-
-        client = TestClient(app)
-        response = client.post("/malformed-test", json={}, headers={"Accept": "text/event-stream"})
-
-        assert response.status_code == 200
-
-        # Should handle malformed JSON gracefully
-        events = list(response.iter_lines())
-        assert len(events) > 0
-
-    def test_streaming_with_special_characters(self):
-        """Test handling of special characters in streaming."""
-        from fastapi import FastAPI
-        from fastapi.testclient import TestClient
-
-        app = FastAPI()
+            yield {"event": "bad_data", "data": '{"malformed": "json"'}
 
         async def special_char_generator():
             """Generator with special characters."""
@@ -1178,12 +1053,96 @@ class TestStreamingEdgeCases:
             }
             yield {"event": "special", "data": special_data}
 
+        @app.post("/disconnect-test")
+        async def disconnect_test_endpoint(data: dict):
+            return EventSourceResponse(disconnect_generator())
+
+        @app.post("/slow-consumer-test")
+        async def slow_consumer_test_endpoint(data: dict):
+            return EventSourceResponse(fast_generator())
+
+        @app.post("/large-event-test")
+        async def large_event_test_endpoint(data: dict):
+            return EventSourceResponse(large_event_generator())
+
+        @app.post("/high-freq-test")
+        async def high_freq_test_endpoint(data: dict):
+            return EventSourceResponse(high_freq_generator())
+
+        @app.post("/malformed-test")
+        async def malformed_test_endpoint(data: dict):
+            return EventSourceResponse(malformed_generator())
+
         @app.post("/special-char-test")
         async def special_char_test_endpoint(data: dict):
-            """Special characters test endpoint."""
             return EventSourceResponse(special_char_generator())
 
-        client = TestClient(app)
+        return app
+
+    def test_streaming_client_disconnect(self, edge_case_app):
+        """Test handling of client disconnect during streaming."""
+        client = TestClient(edge_case_app)
+        response = client.post("/disconnect-test", json={}, headers={"Accept": "text/event-stream"})
+
+        # Read a few events then close connection
+        events = []
+        for line in response.iter_lines():
+            events.append(line)
+            if len(events) >= 3:
+                break  # Simulate client disconnect
+
+        # Note: TestClient may not properly simulate client disconnect
+        # The generator cancellation depends on the underlying implementation
+        # For now, we just verify that we can read some events before stopping
+        assert len(events) >= 3
+
+    def test_streaming_slow_consumer(self, edge_case_app):
+        """Test handling of slow consumer."""
+        client = TestClient(edge_case_app)
+        response = client.post("/slow-consumer-test", json={}, headers={"Accept": "text/event-stream"})
+
+        # Consume events - parse_sse_events will consume all events
+        parsed_events = parse_sse_events(response)
+
+        # Should still receive all events (10 events, not 10 lines)
+        assert len(parsed_events) == 10
+
+    def test_streaming_large_event(self, edge_case_app):
+        """Test handling of very large events."""
+        client = TestClient(edge_case_app)
+        response = client.post("/large-event-test", json={}, headers={"Accept": "text/event-stream"})
+
+        assert response.status_code == 200
+
+        # Should handle large event
+        events = list(response.iter_lines())
+        assert len(events) > 0
+
+    def test_streaming_high_frequency_events(self, edge_case_app):
+        """Test handling of high frequency events."""
+        client = TestClient(edge_case_app)
+        response = client.post("/high-freq-test", json={}, headers={"Accept": "text/event-stream"})
+
+        assert response.status_code == 200
+
+        # Should handle high frequency events (100 events, not 100 lines)
+        parsed_events = parse_sse_events(response)
+        assert len(parsed_events) == 100
+
+    def test_streaming_with_malformed_json(self, edge_case_app):
+        """Test handling of malformed JSON in streaming."""
+        client = TestClient(edge_case_app)
+        response = client.post("/malformed-test", json={}, headers={"Accept": "text/event-stream"})
+
+        assert response.status_code == 200
+
+        # Should handle malformed JSON gracefully
+        events = list(response.iter_lines())
+        assert len(events) > 0
+
+    def test_streaming_with_special_characters(self, edge_case_app):
+        """Test handling of special characters in streaming."""
+        client = TestClient(edge_case_app)
         response = client.post("/special-char-test", json={}, headers={"Accept": "text/event-stream"})
 
         assert response.status_code == 200
@@ -1684,55 +1643,3 @@ class TestStreamingEndToEnd:
 
         data = response.json()["data"]
         assert data["factory_defaults_version"] == "1.0.0"
-
-
-# =============================================================================
-# Test Utilities
-# =============================================================================
-
-
-def create_test_streaming_app():
-    """Utility to create a test streaming app with minimal configuration."""
-    from fastapi import FastAPI
-
-    app = FastAPI()
-
-    async def test_generator():
-        """Test generator."""
-        for i in range(3):
-            yield {"event": f"test_{i}", "data": {"value": i}}
-            await asyncio.sleep(0.01)
-
-    @app.post("/test-stream")
-    async def test_stream_endpoint(data: dict):
-        """Test streaming endpoint."""
-        return EventSourceResponse(test_generator())
-
-    return app
-
-
-def create_secure_streaming_app():
-    """Utility to create a secure streaming app."""
-    from application.mothership.middleware import (
-        RequestIDMiddleware,
-        SecurityHeadersMiddleware,
-    )
-    from application.mothership.middleware.security_enforcer import SecurityEnforcerMiddleware
-
-    app = FastAPI()
-    app.add_middleware(RequestIDMiddleware)
-    app.add_middleware(SecurityEnforcerMiddleware, strict_mode=True)
-    app.add_middleware(SecurityHeadersMiddleware)
-
-    async def secure_generator():
-        """Secure generator."""
-        for i in range(3):
-            yield {"event": f"secure_{i}", "data": {"value": i, "secure": True}}
-            await asyncio.sleep(0.01)
-
-    @app.post("/secure-stream")
-    async def secure_stream_endpoint(data: dict):
-        """Secure streaming endpoint."""
-        return EventSourceResponse(secure_generator())
-
-    return app

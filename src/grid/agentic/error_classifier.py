@@ -20,7 +20,7 @@ class ErrorCategory(str, Enum):
     LOGIC = "logic"  # Agent logic error, hallucination detection
     DEPENDENCY = "dependency"  # External service or tool failure
     SECURITY = "security"  # Permission or safety filter violation
-COMPLIANCE = "compliance"  # Guardian rule violation, safety policy breach
+    COMPLIANCE = "compliance"  # Guardian rule violation, safety policy breach
     UNKNOWN = "unknown"
 
 
@@ -94,7 +94,7 @@ class ErrorClassifier:
             recoverable = True
             fallback_strategy = "circuit_break"
 
-elif any(kw in message.lower() for kw in ("guardian", "safety", "blocked", "compliance", "rule violation")):
+        elif any(kw in message.lower() for kw in ("guardian", "safety", "blocked", "compliance", "rule violation")):
             category = ErrorCategory.COMPLIANCE
             severity = ErrorSeverity.HIGH
             recoverable = False

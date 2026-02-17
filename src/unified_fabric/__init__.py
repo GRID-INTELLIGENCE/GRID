@@ -133,16 +133,17 @@ class DynamicEventBus:
                 pass
         logger.info(f"EventBus '{self.bus_id}' stopped")
 
-    def subscribe(self, event_type: str, handler: EventHandler, domain: str = "all") -> None:
+    def subscribe(self, event_type: str, handler: EventHandler, domain: str | EventDomain = "all") -> None:
         """
         Subscribe to events of a specific type.
 
         Args:
             event_type: Event type pattern (supports wildcards: "safety.*")
             handler: Async function to handle events
-            domain: Only receive events from this domain
+            domain: Only receive events from this domain (str or EventDomain)
         """
-        normalized_domain = (domain or "all").lower()
+        raw = domain.value if isinstance(domain, EventDomain) else domain
+        normalized_domain = (raw or "all").lower()
         if normalized_domain == "all":
             self._handlers[event_type].append(handler)
         else:
@@ -150,9 +151,10 @@ class DynamicEventBus:
 
         logger.debug(f"Subscribed to '{event_type}' in domain '{domain}'")
 
-    def unsubscribe(self, event_type: str, handler: EventHandler, domain: str = "all") -> None:
+    def unsubscribe(self, event_type: str, handler: EventHandler, domain: str | EventDomain = "all") -> None:
         """Unsubscribe from event type"""
-        normalized_domain = (domain or "all").lower()
+        raw = domain.value if isinstance(domain, EventDomain) else domain
+        normalized_domain = (raw or "all").lower()
         if normalized_domain == "all":
             if handler in self._handlers[event_type]:
                 self._handlers[event_type].remove(handler)

@@ -449,20 +449,40 @@ GRID represents **thoughtful synthesis**—a custom definition that evolved orga
 
 ## Installation
 
-**This repo uses UV as the Python venv/package manager.** Do not use `python -m venv` or `pip` directly—use UV for all venv and package operations.
+**This repo uses [uv](https://docs.astral.sh/uv/) as the Python package manager.** Do not use `python -m venv` or `pip install` directly—use uv for all environment and package operations.
 
-### Quick setup with UV (recommended)
+### Quick setup (one command)
 
 ```powershell
-Set-Location e:\grid
-uv venv --python 3.13 --clear
-.\.venv\Scripts\Activate.ps1
-uv sync --group dev --group test
+uv sync --group dev --group test   # Creates .venv, installs everything
 ```
 
+uv automatically creates a `.venv/` directory next to `pyproject.toml`, pins Python 3.13 (from `.python-version`), and installs all runtime + dev + test dependencies from the lockfile.
+
+### Running commands
+
+```powershell
+uv run pytest                      # Run tests
+uv run ruff check .                # Lint
+uv run python -m grid --help       # Run GRID CLI
+```
+
+Or activate the venv manually: `.\.venv\Scripts\Activate.ps1` (Windows) / `source .venv/bin/activate` (Unix).
+
+### Managing dependencies
+
+```powershell
+uv add <package>                   # Add a runtime dependency
+uv add --group dev <package>       # Add a dev-only dependency
+uv lock                            # Regenerate uv.lock
+uv sync                            # Sync .venv to match lockfile
+```
+
+> [!IMPORTANT]
+> **Do not** run `pip install` inside `.venv`. Use `uv add` to add packages so they are tracked in `pyproject.toml` and `uv.lock`.
+
 > [!NOTE]
-> When running `python -m grid` manually from the root, ensure the `src` directory is in your `PYTHONPATH`:
-> `$env:PYTHONPATH="src"; python -m grid --help`
+> The `.venv/` folder is **disposable**—delete it and run `uv sync` to recreate from scratch at any time. It is never committed to git.
 
 ### Legacy setup (not recommended)
 
@@ -474,14 +494,7 @@ pip install -e .
 
 ## UV usage (per-repo)
 
-See `docs/UV_USAGE.md` for full copy-paste commands. Quick root setup with uv:
-
-```powershell
-Set-Location e:\grid
-uv venv --python 3.13 --clear
-.\.venv\Scripts\Activate.ps1
-uv sync --group dev --group test
-```
+See `docs/UV_USAGE.md` for full copy-paste commands.
 
 ## Key Components
 

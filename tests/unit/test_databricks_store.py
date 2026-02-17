@@ -133,8 +133,8 @@ def test_databricks_add_documents(mock_engine):
                 # Should not raise
                 store.add(ids, documents, embeddings, metadatas)
 
-                # Verify cursor execute was called
-                cursor.execute.assert_called()
+                # Verify connection execute was called (impl uses conn.execute, not cursor)
+                conn.execute.assert_called()
 
 
 def test_databricks_add_mismatched_lengths(mock_engine):
@@ -174,7 +174,7 @@ def test_databricks_retry_on_connection_failure(mock_engine):
                         raise OperationalError("Connection timeout", None, Exception("test"))
                     return None
 
-                cursor.execute.side_effect = side_effect
+                conn.execute.side_effect = side_effect
 
                 ids = ["doc1"]
                 documents = ["Content 1"]
@@ -260,8 +260,8 @@ def test_databricks_delete_documents(mock_engine):
             ids_to_delete = ["doc1", "doc2"]
             store.delete(ids=ids_to_delete)
 
-            # Verify cursor execute was called for deletion
-            cursor.execute.assert_called()
+            # Verify connection execute was called for deletion (impl uses conn.execute)
+            conn.execute.assert_called()
 
 
 # ============================================================================

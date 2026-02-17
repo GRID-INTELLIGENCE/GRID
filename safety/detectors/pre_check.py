@@ -246,3 +246,34 @@ def quick_block(text: str) -> PreCheckResult:
                 "precheck_exceeded_budget",
                 elapsed_ms=round(elapsed * 1000, 2),
             )
+
+
+# ---------------------------------------------------------------------------
+# SQL Injection Validator
+# ---------------------------------------------------------------------------
+class SQLInjectionValidator:
+    """
+    Validates SQL queries against common injection patterns.
+    """
+
+    def __init__(self) -> None:
+        self.dangerous_patterns = [
+            r";\s*DROP\s+TABLE",
+            r"OR\s+['\"]?1['\"]?=['\"]?1",
+            r"UNION\s+SELECT",
+            r"EXEC\s+xp_",
+            r"--",
+            r"/\*",
+        ]
+
+    def validate_query(self, query: str) -> bool:
+        """
+        Returns True if query appears safe, False if dangerous patterns found.
+        """
+        import re
+
+        query_upper = query.upper()
+        for pattern in self.dangerous_patterns:
+            if re.search(pattern, query_upper, re.IGNORECASE):
+                return False
+        return True
