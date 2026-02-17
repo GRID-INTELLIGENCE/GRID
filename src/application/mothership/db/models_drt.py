@@ -130,7 +130,7 @@ class DRTEscalatedEndpointRow(Base):
     )
     escalation_count: Mapped[int] = mapped_column(Integer, default=1)
     last_violation_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=utcnow)
-    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
     alert_sent: Mapped[bool] = mapped_column(Boolean, default=False)
     meta: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
