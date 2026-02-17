@@ -193,7 +193,12 @@ def verify_api_key(api_key: str | None, require_valid: bool = True) -> dict[str,
                 valid_keys[entry.strip()] = Role.SERVICE_ACCOUNT.value
 
     # Legacy fallback for backward compatibility
-    legacy_keys = os.getenv("MOTHERSHIP_VALID_API_KEYS", "").split(",")
+    legacy_keys_raw = os.getenv("MOTHERSHIP_VALID_API_KEYS", "")
+    if legacy_keys_raw.strip():
+        logger.warning(
+            "MOTHERSHIP_VALID_API_KEYS is deprecated — migrate to MOTHERSHIP_API_KEYS (format: key1:role1,key2:role2)"
+        )
+    legacy_keys = legacy_keys_raw.split(",")
     for k in legacy_keys:
         k = k.strip()
         if k and k not in valid_keys:

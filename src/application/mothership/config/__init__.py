@@ -565,7 +565,7 @@ class PaymentSettings:
     stripe_livemode_enforcement: str = "auto"  # auto|live|test|off
 
     # Payment defaults
-    default_gateway: str = "stripe"  # "bkash" or "stripe"
+    default_gateway: str = "stripe"  # "stripe" (bKash decommissioned)
     currency: str = "USD"
     default_timeout_seconds: int = 30
 

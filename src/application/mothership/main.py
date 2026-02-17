@@ -527,7 +527,13 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
             pass
 
         # Wait for parasite sanitization to complete
-        # (Removed as wait_for_sanitization is not available)
+        if hasattr(app.state, "parasite_guard"):
+            try:
+                from infrastructure.parasite_guard import wait_for_sanitization
+
+                await wait_for_sanitization(app.state.parasite_guard)
+            except Exception as e:
+                logger.warning(f"Error waiting for parasite sanitization: {e}")
 
         # Shutdown DRT middleware
         if hasattr(app.state, "drt_middleware"):

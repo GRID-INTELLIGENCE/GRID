@@ -9,8 +9,8 @@ from datetime import UTC, datetime, timezone
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from ..middleware.unified_drt import BehavioralSignature
-    from ..middleware.unified_drt import UnifiedDRTMiddleware as ComprehensiveDRTMiddleware
+    from ..middleware.drt_middleware import BehavioralSignature
+    from ..middleware.drt_middleware_unified import UnifiedDRTMiddleware as ComprehensiveDRTMiddleware
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel

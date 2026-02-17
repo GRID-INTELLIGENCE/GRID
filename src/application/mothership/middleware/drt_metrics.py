@@ -13,9 +13,10 @@ import logging
 import time
 from collections import defaultdict
 from dataclasses import dataclass, field
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from ..middleware.drt_middleware import BehavioralSignature
+if TYPE_CHECKING:
+    from ..middleware.drt_middleware import BehavioralSignature
 
 logger = logging.getLogger(__name__)
 
