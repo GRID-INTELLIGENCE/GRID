@@ -12,19 +12,17 @@ param(
     [switch]$AllowSystem = $true
 )
 
-$explicit = "C:\Users\irfan\AppData\Local\Programs\Python\Python313\python.exe"
+# Resolve project root (parent of scripts/)
+$projectRoot = Split-Path -Parent $PSScriptRoot
 $candidates = @()
 
 if ($env:PYTHON_EXE) {
     $candidates += $env:PYTHON_EXE
 }
 
-$candidates += $explicit
+# Prefer the project's UV-managed venv
 $candidates += @(
-    "E:\grid\.venv\Scripts\python.exe",
-    "E:\Coinbase\.venv\Scripts\python.exe",
-    "E:\wellness_studio\.venv\Scripts\python.exe",
-    "E:\.venv\Scripts\python.exe"
+    "$projectRoot\.venv\Scripts\python.exe"
 )
 
 foreach ($candidate in $candidates) {
@@ -42,4 +40,4 @@ if ($AllowSystem) {
     }
 }
 
-throw "Python interpreter not found. Set PYTHON_EXE or install at $explicit."
+throw "Python interpreter not found. Run 'uv sync' to create .venv, or set PYTHON_EXE."

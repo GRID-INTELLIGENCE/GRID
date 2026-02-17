@@ -44,7 +44,7 @@ All verification steps completed successfully. Environment is properly configure
 
 ```
 Python: 3.13.12
-Executable: E:\grid\.venv\Scripts\python.exe
+Executable: .\.venv\Scripts\python.exe
 Status: Using venv managed by uv
 ```
 
@@ -77,8 +77,8 @@ Status: Using venv managed by uv
 ### Analysis
 
 - **Root Cause**: Different Python environments
-  - `python` command → System Python (`C:\Users\irfan\AppData\Local\Programs\Python\Python313\python.exe`)
-  - `uv run python` → Venv Python (`E:\grid\.venv\Scripts\python.exe`)
+  - `python` command → System Python (not managed by UV)
+  - `uv run python` → Venv Python (`..\.venv\Scripts\python.exe`, managed by UV)
 
 ### Recommendation
 

@@ -34,21 +34,11 @@ Environment Variables → .env file → config/settings.py → Runtime
 
 ## Quick Start
 
-### 1. Create Virtual Environment (Python.org Official Method)
+### 1. Create Virtual Environment (UV)
 
 ```powershell
-# Navigate to grid workspace
-cd E:\grid
-
-# Create venv with pip via ensurepip (official method)
-python -m venv .venv --upgrade-deps
-
-# Activate (Windows PowerShell)
-.\.venv\Scripts\Activate.ps1
-
-# Install dependencies
-pip install -r requirements.txt
-pip install -e .
+# From the project root (where pyproject.toml lives)
+uv sync --group dev --group test   # Creates .venv, installs everything
 ```
 
 ### 2. Configure Environment
@@ -58,7 +48,7 @@ Create a `.env` file at the repository root:
 ```env
 # Core Settings
 GRID_ENVIRONMENT=dev
-GRID_HOME=E:\grid
+GRID_HOME=.
 DEBUG=true
 
 # Database
@@ -85,7 +75,7 @@ settings.stage()
 
 # Verify
 print(settings.environment)  # 'dev'
-print(settings.grid_home)    # E:\grid
+print(settings.grid_home)    # <project root>
 ```
 
 ---
@@ -95,7 +85,7 @@ print(settings.grid_home)    # E:\grid
 ### Directory Structure
 
 ```
-E:\grid/
+<project-root>/
 ├── .env                    # Local environment overrides (git-ignored)
 ├── .venv/                  # Virtual environment (git-ignored)
 ├── config/
@@ -138,7 +128,7 @@ if settings.is_production:
 
 | Setting | Type | Default | Environment Variable |
 |---------|------|---------|---------------------|
-| `grid_home` | Path | `E:\grid` | `GRID_HOME` |
+| `grid_home` | Path | `.` (project root) | `GRID_HOME` |
 | `environment` | str | `dev` | `GRID_ENVIRONMENT` |
 | `debug` | bool | `False` | `DEBUG` |
 | `testing` | bool | `False` | `TESTING` |
@@ -335,14 +325,8 @@ jobs:
         with:
           python-version: "3.13"
 
-      - name: Create venv (official method)
-        run: python -m venv .venv --upgrade-deps
-
-      - name: Install dependencies
-        run: |
-          source .venv/bin/activate
-          pip install -r requirements.txt
-          pip install -e .[dev]
+      - name: Install dependencies (UV)
+        run: uv sync --group dev --group test
 
       - name: Run tests
         run: |
@@ -418,7 +402,7 @@ Output:
 GRID Settings Configuration
 ==================================================
 Environment: dev
-GRID Home: E:\grid
+GRID Home: <project root>
 Debug: False
 Testing: False
 Blocker Disabled: False
@@ -437,8 +421,7 @@ Full Configuration (JSON):
 
 | Task | Command/Location |
 |------|-----------------|
-| Create venv | `python -m venv .venv --upgrade-deps` |
-| Activate venv | `.\.venv\Scripts\Activate.ps1` |
+| Create venv | `uv sync --group dev --group test` |
 | Configure | Edit `.env` file |
 | Stage | `settings.stage()` |
 | Run tests | `pytest tests/ -v` (auto-disables blocker) |

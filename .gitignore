@@ -585,6 +585,7 @@ pip.conf
 
 scripts/*.py
 !scripts/track_commit.py
+!scripts/validate_venv.py
 *.ps1
 !scripts/__init__.py
 !scripts/setup.py

@@ -6,18 +6,14 @@
 
 **Fix:**
 ```powershell
-# Set PYTHONPATH to include GRID src
-cd E:\Projects\GRID
-$env:PYTHONPATH = "E:\Projects\GRID\src"
-
-# Run with correct module path
-uvicorn application.mothership.main:app --host 0.0.0.0 --port 8080
+# From project root
+uv run uvicorn application.mothership.main:app --host 0.0.0.0 --port 8080
 ```
 
 Or use Python directly:
 ```powershell
-cd E:\Projects\GRID
-python -c "import sys; sys.path.insert(0, 'src'); from application.mothership.main import app; import uvicorn; uvicorn.run(app, host='0.0.0.0', port=8080)"
+# From project root
+uv run python -c "import sys; sys.path.insert(0, 'src'); from application.mothership.main import app; import uvicorn; uvicorn.run(app, host='0.0.0.0', port=8080)"
 ```
 
 ---
@@ -103,10 +99,8 @@ CREATE INDEX idx_audits_request_user_created ON audits(request_id, user_id, crea
 
 ### Step 1: Set Environment Variables
 ```powershell
-cd E:\
-
-# Required
-$env:PYTHONPATH = "E:\Projects\GRID\src"
+# From project root
+$env:PYTHONPATH = "src"
 $env:DATABASE_URL = "postgresql+asyncpg://postgres:password@localhost:5432/grid"  # Adjust!
 $env:REDIS_URL = "redis://localhost:6379"
 $env:SAFETY_JWT_SECRET = "dev-secret-key-change-in-production"
@@ -137,16 +131,14 @@ python safety/scripts/migrate.py
 ### Step 4: Start Mothership API
 Open a **new PowerShell window**:
 ```powershell
-cd E:\Projects\GRID
-$env:PYTHONPATH = "E:\Projects\GRID\src"
-uvicorn application.mothership.main:app --host 0.0.0.0 --port 8080
+# From project root
+uv run uvicorn application.mothership.main:app --host 0.0.0.0 --port 8080
 ```
 
 ### Step 5: Start Worker (in another window)
 ```powershell
-cd E:\
-$env:PYTHONPATH = "E:\Projects\GRID\src"
-python -m safety.workers.consumer
+# From project root
+uv run python -m safety.workers.consumer
 ```
 
 ---
@@ -201,21 +193,17 @@ For testing the safety system without full mothership:
 # 1. Start Redis
 redis-server
 
-# 2. Run safety API standalone
-cd E:\
-$env:PYTHONPATH = "E:\Projects\GRID\src"
-python -c "
+# 2. Run safety API standalone (from project root)
+uv run python -c "
 import sys
-sys.path.insert(0, 'E:/Projects/GRID/src')
+sys.path.insert(0, 'src')
 from safety.api.main import app
 import uvicorn
 uvicorn.run(app, host='0.0.0.0', port=8000)
 "
 
-# 3. In another window, start worker
-cd E:\
-$env:PYTHONPATH = "E:\Projects\GRID\src"
-python -m safety.workers.consumer
+# 3. In another window, start worker (from project root)
+uv run python -m safety.workers.consumer
 ```
 
 Then test: `curl http://localhost:8000/health`

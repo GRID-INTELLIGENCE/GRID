@@ -3,7 +3,7 @@
 ## Status: Wired into GRID Mothership
 
 The safety enforcement pipeline is now **fully integrated** into the GRID mothership application at:
-- `E:\Projects\GRID\src\application\mothership\`
+- `src/application/mothership/`
 
 ---
 
@@ -13,7 +13,7 @@ The safety enforcement pipeline is now **fully integrated** into the GRID mother
 Run the Alembic migration to create the `audits` table:
 
 ```bash
-cd E:/Projects/GRID
+# From project root
 alembic upgrade head
 ```
 
@@ -23,7 +23,7 @@ Migration file: `src/application/mothership/db/migrations/versions/f3b4c5d6e7f8_
 Copy and configure the environment variables:
 
 ```bash
-cp E:/safety/.env.example E:/safety/.env
+cp safety/.env.example safety/.env
 ```
 
 **Required variables:**
@@ -115,16 +115,16 @@ User receives response (or escalation notice)
 
 ### Start Mothership API (with safety enforcement)
 ```bash
-cd E:/Projects/GRID
-uvicorn application.mothership.main:app --host 0.0.0.0 --port 8080
+# From project root
+uv run uvicorn application.mothership.main:app --host 0.0.0.0 --port 8080
 ```
 
 The SafetyMiddleware is automatically loaded on startup.
 
 ### Start Safety Worker(s)
 ```bash
-cd E:/
-python -m safety.workers.consumer
+# From project root
+uv run python -m safety.workers.consumer
 ```
 
 Run multiple workers for scale (Redis consumer groups handle load balancing).
@@ -190,8 +190,8 @@ Structured JSON logs at:
 
 ### Run Unit + Red-Team Tests
 ```bash
-cd E:/
-pytest safety/tests/ -v
+# From project root
+uv run pytest safety/tests/ -v
 ```
 
 **Expected:** 101 tests passed, 0 failures, 100% red-team detection rate.
@@ -328,7 +328,7 @@ If issues arise post-deployment:
 
 ## Support
 
-- Documentation: `E:/safety/SAFETY_ENFORCEMENT.md`
-- Tests: `E:/safety/tests/`
+- Documentation: `safety/SAFETY_ENFORCEMENT.md`
+- Tests: `safety/tests/`
 - Issues: File in GRID repository issue tracker
 - Logs: `safety/logs/safety_*.jsonl`

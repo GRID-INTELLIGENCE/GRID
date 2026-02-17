@@ -1,122 +1,83 @@
 # Virtual Environment Setup Guide
 
-> Official Python.org workflow for GRID workspace
+> UV-managed virtual environment for the GRID project
 
 ## Overview
 
-This guide documents the virtual environment setup for the GRID project, following the official Python documentation at [docs.python.org/3/library/venv.html](https://docs.python.org/3/library/venv.html).
+GRID uses **[UV](https://docs.astral.sh/uv/)** as the sole package and environment manager. UV automatically creates and manages the `.venv/` directory. **Do not** use `python -m venv` or `pip install` directly.
 
 ## Quick Start
 
 ```powershell
-# Navigate to grid workspace
-cd E:\grid
-
-# Activate the existing venv
-.\.venv\Scripts\Activate.ps1
+# From the project root (where pyproject.toml lives)
+uv sync --group dev --group test   # Creates .venv, installs everything
 ```
 
-## Official Python.org Steps
+UV reads `.python-version` (pinned to 3.13) and `pyproject.toml` to create an isolated `.venv/` with all dependencies from `uv.lock`.
 
-### 1. Create Virtual Environment
-
-The `venv` module creates lightweight virtual environments with their own site directories:
+## Running Commands
 
 ```powershell
-# Official command (Windows PowerShell)
-python -m venv .venv --upgrade-deps
+uv run pytest                       # Run tests
+uv run python -m grid --help        # Run GRID CLI
+uv run ruff check .                 # Lint
 ```
 
-**Key flags:**
-- `--upgrade-deps` - Upgrades pip to the latest version via `ensurepip`
-- `--system-site-packages` - Include system packages (optional)
-- `--without-pip` - Skip pip installation (not recommended)
-
-### 2. Activate the Environment
+Or activate the venv manually:
 
 | Platform | Shell | Command |
 |----------|-------|---------|
-| Windows | PowerShell | `.venv\Scripts\Activate.ps1` |
-| Windows | cmd.exe | `.venv\Scripts\activate.bat` |
+| Windows | PowerShell | `.\.venv\Scripts\Activate.ps1` |
+| Windows | cmd.exe | `.\.venv\Scripts\activate.bat` |
 | POSIX | bash/zsh | `source .venv/bin/activate` |
 
-### 3. Bootstrap pip with ensurepip
+> **Preferred**: Use `uv run <command>` instead of manual activation. It ensures the correct environment is always used.
 
-By default, `venv` uses `ensurepip` to install pip. To manually upgrade:
-
-```powershell
-python -m ensurepip --upgrade
-```
-
-### 4. Verify Installation
+## Managing Dependencies
 
 ```powershell
-python --version    # Should show Python 3.13.x
-pip --version       # Should show pip 25.x
+uv add <package>                   # Add a runtime dependency
+uv add --group dev <package>       # Add a dev-only dependency
+uv lock                            # Regenerate uv.lock
+uv sync                            # Sync .venv to match lockfile
 ```
 
-### 5. Deactivate
-
-```powershell
-deactivate
-```
-
-## PowerShell Profile Commands
-
-The PowerShell profile (`Microsoft.PowerShell_profile.ps1`) provides these commands:
-
-| Command | Description |
-|---------|-------------|
-| `mkvenv` | Create new venv using official method |
-| `venv` | Activate .venv in current directory |
-| `rmvenv` | Deactivate current venv |
-| `venvstatus` | Show venv status and versions |
-| `grid` | Navigate to E:\grid (auto-activates venv) |
-
-## Auto-Activation
-
-The PowerShell profile automatically:
-1. Navigates to `E:\grid` on startup
-2. Activates `.venv` if present
-3. Sets environment variables from `grid.code-workspace`
-
-## Workspace Integration
-
-The `grid.code-workspace` configures:
-- Default Python interpreter: `E:\grid\.venv\Scripts\python.exe`
-- Terminal auto-activation via `VIRTUAL_ENV` environment variable
-- PYTHONPATH: `E:\grid;E:\grid\src;E:\grid\light_of_the_seven`
-
-## Best Practices (Python.org)
-
-1. **Convention**: Name your venv `.venv` or `venv`
-2. **Location**: Keep in project root directory
-3. **Git**: Already ignored via `.gitignore` (created by venv since Python 3.13)
-4. **Disposable**: Recreate from `requirements.txt` rather than moving
-5. **Not portable**: Always recreate venv at new locations
+> **Do not** run `pip install` inside `.venv`. Use `uv add` so packages are tracked in `pyproject.toml` and `uv.lock`.
 
 ## Recreating the Environment
 
+The `.venv/` folder is **disposable** — delete it and run `uv sync` to recreate from scratch:
+
 ```powershell
-# Remove old venv
 Remove-Item -Recurse -Force .venv
+uv sync --group dev --group test
+```
 
-# Create fresh venv with pip
-python -m venv .venv --upgrade-deps
+## Workspace Integration
 
-# Activate
-.\.venv\Scripts\Activate.ps1
+IDE settings should use relative paths:
+- **Python interpreter**: `.\.venv\Scripts\python.exe` (Windows) / `.venv/bin/python` (POSIX)
+- **PYTHONPATH**: `src` (configured in `pyproject.toml [tool.pytest.ini_options]`)
 
-# Install project dependencies
-pip install -e .[api]
+## Best Practices
 
-# Or from requirements
-pip install -r requirements.txt
+1. **Convention**: Always `.venv` in project root (UV default)
+2. **Git**: Already ignored via `.gitignore` (UV creates its own `.venv/.gitignore`)
+3. **Disposable**: Recreate from `uv sync` — never move or copy `.venv/`
+4. **Isolation**: `include-system-site-packages = false` (UV default)
+5. **Single tool**: Use `uv` for all package operations — no `pip`, no `python -m venv`
+
+## Validation
+
+```powershell
+uv run python --version             # Should show Python 3.13.x
+uv run python -c "import grid"      # Should succeed
+uv run python scripts/validate_venv.py  # Full health check
 ```
 
 ## Troubleshooting
 
-### Execution Policy Error
+### Execution Policy Error (Windows)
 
 If PowerShell blocks activation scripts:
 
@@ -124,25 +85,24 @@ If PowerShell blocks activation scripts:
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
 
-### pip Not Found
-
-Reinstall pip using ensurepip:
-
-```powershell
-python -m ensurepip --upgrade
-```
-
 ### Wrong Python Version
 
-Verify the venv Python matches your system:
+UV uses `.python-version` to select the interpreter. Verify:
 
 ```powershell
-.\.venv\Scripts\python.exe --version
+uv run python --version
+```
+
+If the version is wrong, update `.python-version` and run `uv sync`.
+
+### Packages Missing After Pull
+
+```powershell
+uv sync --group dev --group test   # Re-sync from updated uv.lock
 ```
 
 ## References
 
+- [UV Documentation](https://docs.astral.sh/uv/)
 - [Python venv documentation](https://docs.python.org/3/library/venv.html)
-- [Python ensurepip documentation](https://docs.python.org/3/library/ensurepip.html)
 - [PEP 405 - Python Virtual Environments](https://peps.python.org/pep-0405/)
-- [Microsoft PowerShell Execution Policies](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_execution_policies)

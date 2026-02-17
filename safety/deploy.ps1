@@ -6,17 +6,18 @@ Write-Host "==================================================" -ForegroundColor
 Write-Host ""
 
 # Check if we're in the right directory
-if (-not (Test-Path "E:\safety")) {
-    Write-Host "❌ Error: Please run this script from E:\ directory" -ForegroundColor Red
+$projectRoot = Split-Path -Parent $PSScriptRoot
+if (-not (Test-Path "$projectRoot\pyproject.toml")) {
+    Write-Host "❌ Error: Cannot find project root. Run from the safety/ directory or set GRID_ROOT." -ForegroundColor Red
     exit 1
 }
 
 # Set environment variables
 Write-Host "Setting up environment..." -ForegroundColor Yellow
-$env:PYTHONPATH = "E:\Projects\GRID\src;E:\safety"
+$env:PYTHONPATH = "$projectRoot\src;$PSScriptRoot"
 $env:DATABASE_URL = Read-Host "Enter DATABASE_URL (or press Enter for SQLite test mode)"
 if ([string]::IsNullOrWhiteSpace($env:DATABASE_URL)) {
-    $env:DATABASE_URL = "sqlite+aiosqlite:///E:/temp/safety_test.db"
+    $env:DATABASE_URL = "sqlite+aiosqlite:///./safety_test.db"
     Write-Host "Using SQLite test database: $env:DATABASE_URL" -ForegroundColor Cyan
 }
 
@@ -83,24 +84,25 @@ switch ($choice) {
         Write-Host "Access at: http://localhost:8080" -ForegroundColor Cyan
         Write-Host "Press Ctrl+C to stop" -ForegroundColor Gray
         Write-Host ""
-        cd E:\Projects\GRID
-        uvicorn application.mothership.main:app --host 0.0.0.0 --port 8080
+        Set-Location $projectRoot
+        uv run uvicorn application.mothership.main:app --host 0.0.0.0 --port 8080
     }
     '3' {
         Write-Host "Starting Safety Worker..." -ForegroundColor Yellow
         Write-Host "Press Ctrl+C to stop" -ForegroundColor Gray
         Write-Host ""
-        cd E:\
-        python -m safety.workers.consumer
+        Set-Location $projectRoot
+        uv run python -m safety.workers.consumer
     }
     '4' {
         Write-Host "Starting Safety API (standalone)..." -ForegroundColor Yellow
         Write-Host "Access at: http://localhost:8000" -ForegroundColor Cyan
         Write-Host "Press Ctrl+C to stop" -ForegroundColor Gray
         Write-Host ""
-        python -c "
+        Set-Location $projectRoot
+        uv run python -c "
 import sys
-sys.path.insert(0, 'E:/Projects/GRID/src')
+sys.path.insert(0, 'src')
 from safety.api.main import app
 import uvicorn
 uvicorn.run(app, host='0.0.0.0', port=8000)

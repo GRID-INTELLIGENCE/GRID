@@ -67,7 +67,7 @@
 
 ### 2.2 Analysis
 
-Both environments appear to be using the same `.venv` directory (`E:\grid\.venv`), but:
+Both environments appear to be using the same `.venv` directory, but:
 
 - pip may have additional packages installed outside of uv's dependency resolution
 - Some packages may be transitive dependencies handled differently

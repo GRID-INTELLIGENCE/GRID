@@ -67,8 +67,8 @@ uv run python -m mypy --version    # ✅ mypy 1.19.1
 
 ### Python Environments
 
-- **System Python**: `C:\Users\irfan\AppData\Local\Programs\Python\Python313\python.exe`
-- **UV Venv**: `E:\grid\.venv\Scripts\python.exe` ✅ (Primary)
+- **System Python**: System-installed Python 3.13 (not used directly)
+- **UV Venv**: `.\.venv\Scripts\python.exe` ✅ (Primary, managed by UV)
 
 ### Package Management
 

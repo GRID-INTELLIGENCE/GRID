@@ -2,7 +2,7 @@
 # Streamlines local development with uv
 # Note: Dotfiles (.agentignore, .cursorrules, .python-version, .secrets.baseline) in config/
 
-.PHONY: help install run test lint format clean
+.PHONY: help install run test lint format export-requirements check-venv clean
 
 # Default target
 .DEFAULT_GOAL := help
@@ -39,6 +39,10 @@ format: ## Auto-format code
 	@echo "$(BLUE)Formatting...$(NC)"
 	uv run ruff format .
 	uv run ruff check . --fix
+
+check-venv: ## Validate virtual environment health
+	@echo "$(BLUE)Checking venv health...$(NC)"
+	uv run python scripts/validate_venv.py
 
 export-requirements: ## Export pinned requirements.txt from uv.lock (for legacy/CI compatibility)
 	@echo "$(BLUE)Exporting requirements...$(NC)"
