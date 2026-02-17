@@ -11,7 +11,7 @@ from __future__ import annotations
 import uuid
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timezone
-from enum import StrEnum
+from enum import Enum, StrEnum
 from typing import Any
 
 # =============================================================================

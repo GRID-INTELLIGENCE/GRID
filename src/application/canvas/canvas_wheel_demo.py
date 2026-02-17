@@ -4,7 +4,6 @@ with Environment Wheel visualization showing agent movement tracking.
 """
 
 import asyncio
-import time
 from pathlib import Path
 
 from application.canvas import Canvas
@@ -75,7 +74,7 @@ async def main():
             print(wheel_viz)
             print()
 
-        time.sleep(0.2)
+        await asyncio.sleep(0.2)
 
     # Final comprehensive view
     print("Step 3: Final Environment Wheel Visualization")

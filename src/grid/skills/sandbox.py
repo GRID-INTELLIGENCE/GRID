@@ -15,7 +15,7 @@ import tempfile
 import time
 from dataclasses import dataclass
 from datetime import datetime
-from enum import Enum, StrEnum
+from enum import StrEnum
 from pathlib import Path
 from typing import Any
 
@@ -171,7 +171,7 @@ class SkillsSandbox:
                 # Prepare skill execution
                 exec_script = self._prepare_execution_script(skill_code, skill_args or {})
                 script_path = temp_path / "skill.py"
-                script_path.write_text(exec_script)
+                await asyncio.to_thread(script_path.write_text, exec_script)
 
                 # Set up resource limits
                 self._apply_resource_limits()

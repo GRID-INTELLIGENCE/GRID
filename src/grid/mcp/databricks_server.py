@@ -5,7 +5,6 @@ Databricks MCP Server with Coinbase Integration
 Provides Databricks operations for Coinbase data processing.
 """
 
-import aiofiles
 import asyncio
 import json
 import os
@@ -14,6 +13,8 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+
+import aiofiles
 
 # Add GRID to path
 grid_root = Path(__file__).parent.parent.parent
@@ -395,7 +396,7 @@ class DatabricksCoinbaseMCPServer:
         file_path = args["file_path"]
         dbfs_path = args["dbfs_path"]
         local_file = self.project_path / file_path
-        if not local_file.exists():
+        if not await asyncio.to_thread(local_file.exists):
             return CallToolResult(content=[TextContent(type="text", text=f"File not found: {local_file}")])
         try:
             async with aiofiles.open(local_file, mode="rb") as f:
@@ -408,13 +409,15 @@ class DatabricksCoinbaseMCPServer:
     async def _list_files(self, args: dict[str, Any]) -> CallToolResult:
         subdir = args.get("subdir", ".")
         path = self.project_path / subdir
-        if not path.exists():
+        if not await asyncio.to_thread(path.exists):
             return CallToolResult(content=[TextContent(type="text", text=f"Path not found: {path}")])
         try:
-            files = (
-                [f for f in path.rglob("*") if f.is_file()]
-                if subdir == "."
-                else [f for f in path.iterdir() if f.is_file()]
+            files = await asyncio.to_thread(
+                lambda: (
+                    [f for f in path.rglob("*") if f.is_file()]
+                    if subdir == "."
+                    else [f for f in path.iterdir() if f.is_file()]
+                )
             )
             file_list = [str(f.relative_to(self.project_path)) for f in files]
             return CallToolResult(content=[TextContent(type="text", text=json.dumps(file_list, indent=2))])

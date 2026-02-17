@@ -1,5 +1,6 @@
 """Codebase activity tracker for monitoring Git and file system changes."""
 
+import asyncio
 import logging
 import os
 import subprocess
@@ -51,6 +52,25 @@ class CodebaseTracker:
         except Exception:
             return None
 
+    async def _get_latest_commit_async(self) -> str | None:
+        """Get the latest commit hash (async)."""
+        try:
+            if not self.git_dir.exists():
+                return None
+            proc = await asyncio.create_subprocess_exec(
+                "git",
+                "-C",
+                str(self.root_dir),
+                "rev-parse",
+                "HEAD",
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+            stdout, _ = await proc.communicate()
+            return stdout.decode().strip() if proc.returncode == 0 else None
+        except Exception:
+            return None
+
     def poll_activity(self) -> list[ActivityEvent]:
         """Poll for new activity since last check."""
         events = []
@@ -63,6 +83,25 @@ class CodebaseTracker:
 
         # Check for modified files (quick poll)
         modified_files = self._get_modified_files()
+        for file_path in modified_files:
+            events.append(ActivityEvent(event_type="file_modified", path=file_path, details={"polled": True}))
+
+        self._last_checked_time = time.time()
+        return events
+
+    async def poll_activity_async(self) -> list[ActivityEvent]:
+        """Poll for new activity since last check (async)."""
+        events = []
+
+        # Check for new commits
+        current_commit = await self._get_latest_commit_async()
+        if current_commit and current_commit != self._last_commit_hash:
+            event = await self._capture_commit_event_async(current_commit)
+            events.append(event)
+            self._last_commit_hash = current_commit
+
+        # Check for modified files (quick poll)
+        modified_files = await self._get_modified_files_async()
         for file_path in modified_files:
             events.append(ActivityEvent(event_type="file_modified", path=file_path, details={"polled": True}))
 
@@ -100,6 +139,78 @@ class CodebaseTracker:
             output = subprocess.check_output(
                 ["git", "-C", str(self.root_dir), "status", "--porcelain"], text=True
             ).splitlines()
+
+            modified = []
+            for line in output:
+                if line.strip():
+                    parts = line.split(maxsplit=1)
+                    if len(parts) == 2:
+                        modified.append(parts[1])
+            return modified
+        except Exception:
+            return []
+
+    async def _capture_commit_event_async(self, commit_hash: str) -> ActivityEvent:
+        """Capture details about a new commit (async)."""
+        try:
+            proc = await asyncio.create_subprocess_exec(
+                "git",
+                "-C",
+                str(self.root_dir),
+                "show",
+                "--name-only",
+                "--format=%s",
+                commit_hash,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+            stdout, _ = await proc.communicate()
+            show_output = stdout.decode().splitlines() if proc.returncode == 0 else []
+
+            message = show_output[0] if show_output else ""
+            files = show_output[1:] if len(show_output) > 1 else []
+
+            proc_author = await asyncio.create_subprocess_exec(
+                "git",
+                "-C",
+                str(self.root_dir),
+                "show",
+                "-s",
+                "--format=%an",
+                commit_hash,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+            stdout_author, _ = await proc_author.communicate()
+            author = stdout_author.decode().strip() if proc_author.returncode == 0 else "unknown"
+
+            return ActivityEvent(
+                event_type="git_commit",
+                path=commit_hash,
+                details={
+                    "message": message,
+                    "files": files,
+                    "author": author,
+                },
+                severity="info",
+            )
+        except Exception as e:
+            return ActivityEvent(event_type="error", path="git", details={"error": str(e)}, severity="error")
+
+    async def _get_modified_files_async(self) -> list[str]:
+        """Get list of files modified since last check using git status (async)."""
+        try:
+            proc = await asyncio.create_subprocess_exec(
+                "git",
+                "-C",
+                str(self.root_dir),
+                "status",
+                "--porcelain",
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+            stdout, _ = await proc.communicate()
+            output = stdout.decode().splitlines() if proc.returncode == 0 else []
 
             modified = []
             for line in output:

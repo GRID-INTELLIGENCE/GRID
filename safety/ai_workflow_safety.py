@@ -21,8 +21,8 @@ import time
 from collections import deque
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from enum import Enum, StrEnum
-from typing import Any
+from enum import StrEnum
+from typing import Any, Optional
 
 from safety.observability.logging_setup import get_logger
 
@@ -1461,4 +1461,4 @@ def get_global_ai_workflow_safety_engine(
     config: TemporalSafetyConfig | None = None, user_age: int | None = None
 ) -> AIWorkflowSafetyEngine:
     """DEPRECATED: Use get_ai_workflow_safety_engine with user_id instead"""
-    return AIWorkflowSafetyEngine("global", config or _default_config, user_age)
+    return AIWorkflowSafetyEngine("global", config or TemporalSafetyConfig(), user_age)

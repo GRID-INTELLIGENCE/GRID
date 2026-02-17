@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import os
 import socket
@@ -152,6 +153,44 @@ class EnhancedDatabricksConnector:
                     logger.info(f"Retrying in {retry_delay} seconds...")
                     time.sleep(retry_delay)
                     retry_delay *= 2  # Exponential backoff
+                else:
+                    logger.error(f"All connection attempts failed for {self.working_hostname}")
+                    return False
+
+        return False
+
+    async def validate_connection_async(self) -> bool:
+        """Validate connection with enhanced error handling (async)."""
+        max_retries = 3
+        retry_delay = 2
+
+        for attempt in range(max_retries):
+            try:
+                from databricks import sql
+
+                def _connect():
+                    return sql.connect(
+                        server_hostname=self.working_hostname,
+                        http_path=self.http_path,
+                        access_token=self.access_token,
+                        connection_timeout=30,
+                    )
+
+                conn = await asyncio.to_thread(_connect)
+                with conn:
+                    with conn.cursor() as cursor:
+                        cursor.execute("SELECT 1")
+                        result = cursor.fetchone()
+                        if result:
+                            logger.info(f"Databricks connection validated successfully (attempt {attempt + 1})")
+                            return True
+
+            except Exception as e:
+                logger.warning(f"Connection attempt {attempt + 1} failed: {e}")
+                if attempt < max_retries - 1:
+                    logger.info(f"Retrying in {retry_delay} seconds...")
+                    await asyncio.sleep(retry_delay)
+                    retry_delay *= 2
                 else:
                     logger.error(f"All connection attempts failed for {self.working_hostname}")
                     return False

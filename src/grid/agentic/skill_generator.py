@@ -1,11 +1,13 @@
 """Skill generator for automated persistence of successful cases."""
 
-import aiofiles
+import asyncio
 import json
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
+
+import aiofiles
 
 from .event_bus import get_event_bus
 
@@ -39,16 +41,16 @@ class SkillGenerator:
 
         skill_id = f"case_{case_id}"
         skill_dir = self.skill_store_path / skill_id
-        skill_dir.mkdir(parents=True, exist_ok=True)
+        await asyncio.to_thread(skill_dir.mkdir, parents=True, exist_ok=True)
 
-        (skill_dir / "artifacts").mkdir(exist_ok=True)
+        await asyncio.to_thread((skill_dir / "artifacts").mkdir, exist_ok=True)
 
         # Generate metadata.json
         metadata = {
             "title": f"Skill: {case_id}",
             "summary": f"Automated skill generated from successful execution of case {case_id}.",
             "references": [{"type": "case_id", "value": case_id}],
-            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "generated_at": datetime.now(UTC).isoformat(),
         }
 
         async with aiofiles.open(skill_dir / "metadata.json", "w") as f:

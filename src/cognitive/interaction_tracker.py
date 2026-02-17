@@ -6,15 +6,17 @@ data for cognitive state inference and profile learning.
 
 from __future__ import annotations
 
-import aiofiles
+import asyncio
 import json
 import logging
 from collections import defaultdict
 from dataclasses import dataclass, field
-from datetime import datetime, timezone, timedelta
+from datetime import UTC, datetime, timedelta
 from enum import Enum
 from pathlib import Path
 from typing import Any
+
+import aiofiles
 
 logger = logging.getLogger(__name__)
 
@@ -214,7 +216,7 @@ class InteractionTracker:
             case_id: Associated case ID
             user_id: User identifier
         """
-        self._active_sessions[session_id] = (datetime.now(timezone.utc), case_id)
+        self._active_sessions[session_id] = (datetime.now(UTC), case_id)
         logger.debug(f"Started session {session_id} for user {user_id}, case {case_id}")
 
     async def end_session(
@@ -240,7 +242,7 @@ class InteractionTracker:
             return None
 
         start_time, case_id = self._active_sessions[session_id]
-        duration = (datetime.now(timezone.utc) - start_time).total_seconds()
+        duration = (datetime.now(UTC) - start_time).total_seconds()
 
         # Create completion event
         event = InteractionEvent(
@@ -296,7 +298,7 @@ class InteractionTracker:
         Returns:
             Interaction summary
         """
-        since = datetime.now(timezone.utc) - time_window
+        since = datetime.now(UTC) - time_window
         events = await self.get_events(user_id, limit=None, since=since)
 
         if not events:
@@ -324,7 +326,7 @@ class InteractionTracker:
 
         # Count recent errors and retries
         recent_window = timedelta(minutes=30)
-        recent_since = datetime.now(timezone.utc) - recent_window
+        recent_since = datetime.now(UTC) - recent_window
         recent = [e for e in events if e.timestamp >= recent_since]
 
         summary.recent_errors = sum(1 for e in recent if e.outcome in ["failure", "error"])
@@ -346,7 +348,7 @@ class InteractionTracker:
         Returns:
             Dictionary of detected patterns
         """
-        events = await self.get_events(user_id, limit=None, since=datetime.now(timezone.utc) - time_window)
+        events = await self.get_events(user_id, limit=None, since=datetime.now(UTC) - time_window)
 
         if not events:
             return {}
@@ -406,7 +408,7 @@ class InteractionTracker:
             return None
 
         start_time, _ = self._active_sessions[session_id]
-        return (datetime.now(timezone.utc) - start_time).total_seconds()
+        return (datetime.now(UTC) - start_time).total_seconds()
 
     async def infer_sentiment_from_text(self, text: str) -> Sentiment:
         """Infer sentiment from text using simple heuristics.
@@ -477,12 +479,12 @@ class InteractionTracker:
         """
         user_log_path = self.storage_path / f"{user_id}.jsonl"
 
-        if not user_log_path.exists():
+        if not await asyncio.to_thread(user_log_path.exists):
             return []
 
         events = []
         try:
-            async with aiofiles.open(user_log_path, mode="r") as f:
+            async with aiofiles.open(user_log_path) as f:
                 async for line in f:
                     if line.strip():
                         events.append(InteractionEvent.from_dict(json.loads(line)))
@@ -502,9 +504,9 @@ class InteractionTracker:
 
         # Also clear disk storage
         user_log_path = self.storage_path / f"{user_id}.jsonl"
-        if user_log_path.exists():
+        if await asyncio.to_thread(user_log_path.exists):
             try:
-                user_log_path.unlink()
+                await asyncio.to_thread(user_log_path.unlink)
             except Exception as e:
                 logger.error(f"Error clearing events for {user_id}: {e}")
 

@@ -29,6 +29,7 @@ Example:
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import threading
@@ -762,6 +763,37 @@ class OutputHandler:
                     return self._responses[correlation_id][0]
 
             time.sleep(poll_interval)
+
+        self._stats["cache_misses"] += 1
+        return None
+
+    async def get_response_async(
+        self,
+        correlation_id: str,
+        timeout_seconds: float = 30.0,
+        poll_interval: float = 0.1,
+    ) -> FormattedResponse | None:
+        """
+        Get response by correlation ID, waiting if necessary (async).
+
+        Args:
+            correlation_id: Correlation ID to look up
+            timeout_seconds: Maximum time to wait
+            poll_interval: Polling interval
+
+        Returns:
+            FormattedResponse or None if not found
+        """
+        loop = asyncio.get_running_loop()
+        start_time = loop.time()
+
+        while loop.time() - start_time < timeout_seconds:
+            with self._lock:
+                if correlation_id in self._responses:
+                    self._stats["cache_hits"] += 1
+                    return self._responses[correlation_id][0]
+
+            await asyncio.sleep(poll_interval)
 
         self._stats["cache_misses"] += 1
         return None

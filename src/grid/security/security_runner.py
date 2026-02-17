@@ -164,7 +164,16 @@ class SecurityValidator:
         for name, check in self._checks:
             check_start = time.monotonic()
             try:
-                result = check()
+                # Add timeout to prevent indefinite blocking on slow checks
+                result = await asyncio.wait_for(asyncio.to_thread(check), timeout=60.0)
+                result.duration_ms = (time.monotonic() - check_start) * 1000
+            except asyncio.TimeoutError:
+                result = ValidationResult(
+                    name=name,
+                    status=ValidationStatus.ERROR,
+                    message=f"Check '{name}' timed out after 60 seconds",
+                    severity="HIGH",
+                )
                 result.duration_ms = (time.monotonic() - check_start) * 1000
             except Exception as e:
                 result = ValidationResult(
@@ -173,6 +182,7 @@ class SecurityValidator:
                     message=f"Check failed with error: {e}",
                     severity="HIGH",
                 )
+                result.duration_ms = (time.monotonic() - check_start) * 1000
             report.add_result(result)
 
         report.duration_ms = (time.monotonic() - start) * 1000

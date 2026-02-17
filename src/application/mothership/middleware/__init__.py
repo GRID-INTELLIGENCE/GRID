@@ -32,6 +32,7 @@ from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoin
 from starlette.types import ASGIApp
 
 from ..logging_structured import bind_context, clear_context
+from .versioning import VersioningMiddleware
 
 logger = logging.getLogger(__name__)
 

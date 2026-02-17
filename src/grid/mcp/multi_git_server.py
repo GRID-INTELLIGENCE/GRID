@@ -247,10 +247,20 @@ class MultiGitMCPServer:
                 raise ValueError("No active repository")
             return self.repositories[self.active_repo]
 
-    def _run_git(self, repo: GitRepo, args: list[str]) -> str:
-        """Run git command in repository"""
+    async def _run_git(self, repo: GitRepo, args: list[str]) -> str:
+        """Run git command in repository (non-blocking)."""
         cmd = ["git", "-C", str(repo.path)] + args
-        return subprocess.check_output(cmd, text=True, stderr=subprocess.STDOUT)
+        proc = await asyncio.create_subprocess_exec(
+            *cmd,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.STDOUT,
+        )
+        stdout, _ = await proc.communicate()
+        if proc.returncode != 0:
+            error = subprocess.CalledProcessError(proc.returncode, cmd)
+            error.output = stdout.decode("utf-8", errors="replace")
+            raise error
+        return stdout.decode("utf-8", errors="replace")
 
     async def _list_repos(self, _args: dict[str, Any]) -> CallToolResult:
         """List all repositories"""
@@ -262,7 +272,7 @@ class MultiGitMCPServer:
                     "path": str(repo.path),
                     "description": repo.description or "",
                     "is_active": name == self.active_repo,
-                    "branch": self._get_current_branch(repo) if repo.path.exists() else "N/A",
+                    "branch": await self._get_current_branch(repo) if await asyncio.to_thread(repo.path.exists) else "N/A",
                 }
             )
 
@@ -276,7 +286,7 @@ class MultiGitMCPServer:
 
         self.active_repo = repo_name
         repo = self.repositories[repo_name]
-        branch = self._get_current_branch(repo)
+        branch = await self._get_current_branch(repo)
 
         return CallToolResult(
             content=[
@@ -290,7 +300,7 @@ class MultiGitMCPServer:
         """Get git status"""
         repo = self._get_repo(args.get("repo"))
         try:
-            output = self._run_git(repo, ["status", "--porcelain"])
+            output = await self._run_git(repo, ["status", "--porcelain"])
             return CallToolResult(content=[TextContent(type="text", text=output)])
         except subprocess.CalledProcessError as e:
             return CallToolResult(content=[TextContent(type="text", text=f"Git status failed: {e.output}")])
@@ -300,7 +310,7 @@ class MultiGitMCPServer:
         repo = self._get_repo(args.get("repo"))
         max_count = args.get("max_count", 50)
         try:
-            output = self._run_git(repo, ["log", "--oneline", f"-n{max_count}"])
+            output = await self._run_git(repo, ["log", "--oneline", f"-n{max_count}"])
             return CallToolResult(content=[TextContent(type="text", text=output)])
         except subprocess.CalledProcessError as e:
             return CallToolResult(content=[TextContent(type="text", text=f"Git log failed: {e.output}")])
@@ -322,7 +332,7 @@ class MultiGitMCPServer:
             git_args.append(file_path)
 
         try:
-            output = self._run_git(repo, git_args)
+            output = await self._run_git(repo, git_args)
             return CallToolResult(content=[TextContent(type="text", text=output)])
         except subprocess.CalledProcessError as e:
             return CallToolResult(content=[TextContent(type="text", text=f"Git diff failed: {e.output}")])
@@ -331,7 +341,7 @@ class MultiGitMCPServer:
         """Get git branches"""
         repo = self._get_repo(args.get("repo"))
         try:
-            output = self._run_git(repo, ["branch", "-a"])
+            output = await self._run_git(repo, ["branch", "-a"])
             return CallToolResult(content=[TextContent(type="text", text=output)])
         except subprocess.CalledProcessError as e:
             return CallToolResult(content=[TextContent(type="text", text=f"Git branches failed: {e.output}")])
@@ -343,7 +353,7 @@ class MultiGitMCPServer:
         ref = args.get("ref", "HEAD")
 
         try:
-            output = self._run_git(repo, ["show", f"{ref}:{file_path}"])
+            output = await self._run_git(repo, ["show", f"{ref}:{file_path}"])
             return CallToolResult(content=[TextContent(type="text", text=output)])
         except subprocess.CalledProcessError as e:
             return CallToolResult(content=[TextContent(type="text", text=f"Git show failed: {e.output}")])
@@ -354,10 +364,10 @@ class MultiGitMCPServer:
         path = Path(args["path"])
         description = args.get("description")
 
-        if not path.exists():
+        if not await asyncio.to_thread(path.exists):
             return CallToolResult(content=[TextContent(type="text", text=f"Path does not exist: {path}")])
 
-        if not (path / ".git").exists():
+        if not await asyncio.to_thread((path / ".git").exists):
             return CallToolResult(content=[TextContent(type="text", text=f"Not a git repository: {path}")])
 
         if name in self.repositories:
@@ -367,10 +377,10 @@ class MultiGitMCPServer:
 
         return CallToolResult(content=[TextContent(type="text", text=f"Added repository '{name}' at {path}")])
 
-    def _get_current_branch(self, repo: GitRepo) -> str:
-        """Get current branch of repository"""
+    async def _get_current_branch(self, repo: GitRepo) -> str:
+        """Get current branch of repository."""
         try:
-            output = self._run_git(repo, ["branch", "--show-current"])
+            output = await self._run_git(repo, ["branch", "--show-current"])
             return output.strip()
         except Exception:
             return "unknown"

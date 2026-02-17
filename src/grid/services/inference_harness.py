@@ -9,10 +9,13 @@ import logging
 import os
 import subprocess
 import tempfile
+import time
 from dataclasses import dataclass
-from enum import Enum, StrEnum
+from enum import StrEnum
 from pathlib import Path
 from typing import Any, Protocol, runtime_checkable
+
+import httpx
 
 # Configure logger
 logger = logging.getLogger("grid.inference")
@@ -102,10 +105,16 @@ class InferenceHarness:
         """
         for provider_type in self.priority:
             provider = self.providers.get(provider_type)
-            if provider and provider.is_available():
+            if provider:
                 try:
-                    logger.info(f"Attempting generation with {provider_type.value}...")
-                    return await provider.generate(prompt, **kwargs)
+                    # Check availability with timeout to prevent blocking
+                    is_avail = await asyncio.wait_for(asyncio.to_thread(provider.is_available), timeout=5.0)
+                    if is_avail:
+                        logger.info(f"Attempting generation with {provider_type.value}...")
+                        return await provider.generate(prompt, **kwargs)
+                except TimeoutError:
+                    logger.warning(f"Provider {provider_type.value} availability check timed out")
+                    continue
                 except Exception as e:
                     logger.warning(f"Provider {provider_type.value} failed: {e}")
                     continue
@@ -127,20 +136,14 @@ class OllamaProvider:
 
     def is_available(self) -> bool:
         try:
-            import requests
-
             health_url = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434") + "/api/tags"
-            response = requests.get(health_url, timeout=1)
-            return response.status_code == 200  # type: ignore[no-any-return]
+            response = httpx.get(health_url, timeout=1)
+            return response.status_code == 200
         except Exception:
             return False
 
     async def generate(self, prompt: str, **kwargs: Any) -> InferenceResult:
-        """Executes generation via Ollama REST API."""
-        import time
-
-        import requests
-
+        """Executes generation via Ollama REST API (non-blocking)."""
         start_time = time.perf_counter()
 
         payload = {
@@ -153,9 +156,10 @@ class OllamaProvider:
             },
         }
 
-        response = requests.post(self.base_url, json=payload, timeout=120)
-        response.raise_for_status()
-        data = response.json()
+        async with httpx.AsyncClient() as client:
+            response = await client.post(self.base_url, json=payload, timeout=120)
+            response.raise_for_status()
+            data = response.json()
 
         latency = (time.perf_counter() - start_time) * 1000
 
@@ -188,13 +192,14 @@ class LlamaCPPProvider:
 
     async def generate(self, prompt: str, **kwargs: Any) -> InferenceResult:
         """Executes generation via llama-cli bridge."""
-        import time
-
         start_time = time.perf_counter()
 
-        with tempfile.NamedTemporaryFile("w", delete=False, suffix=".txt", encoding="utf-8") as tf:
-            tf.write(prompt)
-            prompt_file = tf.name
+        def _write_prompt(text: str) -> str:
+            with tempfile.NamedTemporaryFile("w", delete=False, suffix=".txt", encoding="utf-8") as tf:
+                tf.write(text)
+                return tf.name
+
+        prompt_file = await asyncio.to_thread(_write_prompt, prompt)
 
         wsl_model = self._win_to_wsl(self.model_path)
         wsl_prompt = self._win_to_wsl(prompt_file)
@@ -217,7 +222,7 @@ class LlamaCPPProvider:
             stdout, _ = await process.communicate()
             content = stdout.decode().strip()
         finally:
-            os.unlink(prompt_file)
+            await asyncio.to_thread(os.unlink, prompt_file)
 
         latency = (time.perf_counter() - start_time) * 1000
 
@@ -250,17 +255,18 @@ class TransformersProvider:
         return self._available
 
     async def generate(self, prompt: str, **kwargs: Any) -> InferenceResult:
-        """Executes generation via Transformers pipeline."""
-        import time
-
+        """Executes generation via Transformers pipeline (non-blocking)."""
         from transformers import pipeline
 
         start_time = time.perf_counter()
 
         if self._pipeline is None:
-            self._pipeline = pipeline("text-generation", model=self.model_name, device_map="auto")
+            self._pipeline = await asyncio.to_thread(
+                pipeline, "text-generation", model=self.model_name, device_map="auto"
+            )
 
-        outputs = self._pipeline(
+        outputs = await asyncio.to_thread(
+            self._pipeline,
             prompt,
             max_new_tokens=kwargs.get("max_tokens", 256),
             temperature=kwargs.get("temperature", 0.7),

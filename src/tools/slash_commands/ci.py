@@ -160,7 +160,10 @@ class CICommand(PipelineCommand):
         """Run RAG contract tests if RAG files changed"""
         try:
             # Check if RAG files exist and have changes
-            rag_files = list(Path("grid/rag").rglob("*.py")) + list(Path("tools/rag").rglob("*.py"))
+            def _find_rag_files() -> list[Path]:
+                return list(Path("grid/rag").rglob("*.py")) + list(Path("tools/rag").rglob("*.py"))
+
+            rag_files = await asyncio.to_thread(_find_rag_files)
 
             if not rag_files:
                 return {

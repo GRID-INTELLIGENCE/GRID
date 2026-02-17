@@ -12,7 +12,7 @@ import json
 import logging
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from enum import Enum, StrEnum
 from pathlib import Path
 from typing import Any
@@ -206,10 +206,10 @@ class ToolRegistry:
         """
         import aiofiles
         config_path = Path(config_path)
-        if not config_path.exists():
+        if not await asyncio.to_thread(config_path.exists):
             raise FileNotFoundError(f"Configuration file not found: {config_path}")
 
-        async with aiofiles.open(config_path, mode="r") as f:
+        async with aiofiles.open(config_path) as f:
             content = await f.read()
             config_data = json.loads(content)
 
@@ -289,7 +289,7 @@ class ToolRegistry:
                 server.status = ServerStatus.UNHEALTHY
                 server.error_message = f"Health check returned {response.status_code}"
 
-            server.last_health_check = datetime.now(timezone.utc)
+            server.last_health_check = datetime.now(UTC)
 
             if old_status != server.status:
                 await self._emit("server_status_changed", server_name, server.status)
@@ -299,13 +299,13 @@ class ToolRegistry:
         except httpx.ConnectError:
             server.status = ServerStatus.OFFLINE
             server.error_message = "Connection refused"
-            server.last_health_check = datetime.now(timezone.utc)
+            server.last_health_check = datetime.now(UTC)
             return ServerStatus.OFFLINE
 
         except Exception as e:
             server.status = ServerStatus.UNHEALTHY
             server.error_message = str(e)
-            server.last_health_check = datetime.now(timezone.utc)
+            server.last_health_check = datetime.now(UTC)
             logger.warning(f"Health check failed for {server_name}: {e}")
             return ServerStatus.UNHEALTHY
 
@@ -663,7 +663,7 @@ async def quick_setup(config_path: str | Path | None = None) -> ToolRegistry:
             Path("config/mcp_config.json"),
             Path.home() / ".codeium/windsurf/mcp/mcp_config.json",
         ]:
-            if path.exists():
+            if await asyncio.to_thread(path.exists):
                 config_path = path
                 break
 

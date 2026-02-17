@@ -17,12 +17,12 @@ from abc import ABC, abstractmethod
 from collections import defaultdict
 from collections.abc import Callable
 from dataclasses import asdict, dataclass, field
-from enum import Enum, IntEnum, StrEnum
+from enum import IntEnum, StrEnum
+from pathlib import Path
 from typing import Any
 from weakref import WeakMethod, ref
 
 import aio_pika  # type: ignore[import-not-found]
-import aiofiles  # type: ignore[import-not-found,import-untyped]
 import redis.asyncio as redis
 from aio_pika import DeliveryMode, ExchangeType, Message
 
@@ -329,11 +329,9 @@ class EventBus:
         except Exception as e:
             logging.error(f"Failed to connect to RabbitMQ: {e}")
 
-        # Create storage directories
-        import os
-
-        os.makedirs(f"{self.event_store.storage_path}/events", exist_ok=True)
-        os.makedirs(f"{self.event_store.storage_path}/results", exist_ok=True)
+        # Create storage directories (non-blocking)
+        await asyncio.to_thread(Path(f"{self.event_store.storage_path}/events").mkdir, parents=True, exist_ok=True)
+        await asyncio.to_thread(Path(f"{self.event_store.storage_path}/results").mkdir, parents=True, exist_ok=True)
 
         self.running = True
         logging.info("Event bus started")

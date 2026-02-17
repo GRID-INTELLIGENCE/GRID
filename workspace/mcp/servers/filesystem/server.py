@@ -11,6 +11,8 @@ import os
 from datetime import datetime
 from typing import Any
 
+import aiofiles
+
 # Real MCP imports
 from mcp.server import Server
 from mcp.server.models import InitializationOptions
@@ -147,8 +149,8 @@ class ProductionFilesystemMCPServer:
             )
 
         try:
-            with open(path, encoding="utf-8") as f:
-                content = f.read()
+            async with aiofiles.open(path, encoding="utf-8") as f:
+                content = await f.read()
 
             return CallToolResult(content=[TextContent(text=content, type="text")])
         except Exception as e:
@@ -167,9 +169,10 @@ class ProductionFilesystemMCPServer:
 
         try:
             items = []
-            for item in os.listdir(path):
+            raw_items = await asyncio.to_thread(os.listdir, path)
+            for item in raw_items:
                 item_path = os.path.join(path, item)
-                item_type = "directory" if os.path.isdir(item_path) else "file"
+                item_type = "directory" if await asyncio.to_thread(os.path.isdir, item_path) else "file"
                 items.append(f"{item_type}: {item}")
 
             content = "\n".join(items)
@@ -189,10 +192,10 @@ class ProductionFilesystemMCPServer:
             )
 
         try:
-            stat = os.stat(path)
+            stat = await asyncio.to_thread(os.stat, path)
             info = {
                 "path": path,
-                "type": "directory" if os.path.isdir(path) else "file",
+                "type": "directory" if await asyncio.to_thread(os.path.isdir, path) else "file",
                 "size": stat.st_size,
                 "modified": datetime.fromtimestamp(stat.st_mtime).isoformat(),
                 "permissions": oct(stat.st_mode)[-3:],
@@ -214,7 +217,7 @@ class ProductionFilesystemMCPServer:
             )
 
         try:
-            os.makedirs(path, exist_ok=True)
+            await asyncio.to_thread(os.makedirs, path, exist_ok=True)
             return CallToolResult(content=[TextContent(text=f"Directory created: {path}", type="text")])
         except Exception as e:
             return CallToolResult(
@@ -232,8 +235,8 @@ class ProductionFilesystemMCPServer:
             )
 
         try:
-            with open(path, "w", encoding="utf-8") as f:
-                f.write(content)
+            async with aiofiles.open(path, "w", encoding="utf-8") as f:
+                await f.write(content)
 
             return CallToolResult(content=[TextContent(text=f"File written: {path}", type="text")])
         except Exception as e:

@@ -8,13 +8,15 @@ The ProfileStore provides:
 
 from __future__ import annotations
 
-import aiofiles
+import asyncio
 import json
 import logging
 from collections import Counter, defaultdict
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
+
+import aiofiles
 
 from cognitive.light_of_the_seven.cognitive_layer.schemas.user_cognitive_profile import (
     DecisionStyle,
@@ -69,9 +71,9 @@ class ProfileStore:
 
         # Load from disk
         profile_path = self.storage_path / f"{user_id}.json"
-        if profile_path.exists():
+        if await asyncio.to_thread(profile_path.exists):
             try:
-                async with aiofiles.open(profile_path, mode="r") as f:
+                async with aiofiles.open(profile_path) as f:
                     content = await f.read()
                     data = json.loads(content)
                 profile = UserCognitiveProfile(**data)
@@ -88,8 +90,8 @@ class ProfileStore:
         Args:
             profile: Profile to create
         """
-        profile.created_at = datetime.now(timezone.utc)
-        profile.updated_at = datetime.now(timezone.utc)
+        profile.created_at = datetime.now(UTC)
+        profile.updated_at = datetime.now(UTC)
 
         await self.save_profile(profile)
         self._profiles[profile.user_id] = profile
@@ -157,9 +159,9 @@ class ProfileStore:
 
         # Remove from disk
         profile_path = self.storage_path / f"{user_id}.json"
-        if profile_path.exists():
+        if await asyncio.to_thread(profile_path.exists):
             try:
-                profile_path.unlink()
+                await asyncio.to_thread(profile_path.unlink)
                 logger.info(f"Deleted profile for user {user_id}")
                 return True
             except Exception as e:
@@ -175,9 +177,9 @@ class ProfileStore:
         """
         profiles = []
 
-        for profile_path in self.storage_path.glob("*.json"):
+        for profile_path in await asyncio.to_thread(lambda: list(self.storage_path.glob("*.json"))):
             try:
-                async with aiofiles.open(profile_path, mode="r") as f:
+                async with aiofiles.open(profile_path) as f:
                     content = await f.read()
                     data = json.loads(content)
                 profiles.append(UserCognitiveProfile(**data))
@@ -203,7 +205,7 @@ class ProfileStore:
         profile.interaction_history.append(
             {
                 **interaction,
-                "recorded_at": datetime.now(timezone.utc).isoformat(),
+                "recorded_at": datetime.now(UTC).isoformat(),
             }
         )
 
@@ -419,7 +421,7 @@ class ProfileStore:
             "working_memory_capacity": profile.working_memory_capacity,
             "cognitive_load_tolerance": profile.cognitive_load_tolerance,
             "mental_model_version": profile.mental_model_version,
-            "profile_age_days": (datetime.now(timezone.utc) - profile.created_at).days,
+            "profile_age_days": (datetime.now(UTC) - profile.created_at).days,
         }
 
     async def evolve_mental_model(self, user_id: str) -> dict[str, Any]:

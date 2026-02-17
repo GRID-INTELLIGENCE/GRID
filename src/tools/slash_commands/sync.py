@@ -2,9 +2,10 @@
 /sync command implementation - Knowledge refresh workflow
 """
 
+import asyncio
 import logging
 import time
-from datetime import datetime, timezone, timedelta
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -127,13 +128,18 @@ class SyncCommand(KnowledgeCommand):
             docs_path = Path("docs")
             new_documents = []
 
-            if docs_path.exists():
-                for doc_file in docs_path.rglob("*.md"):
+            def _find_md_files(p: Path) -> list[Path]:
+                return list(p.rglob("*.md"))
+
+            if await asyncio.to_thread(docs_path.exists):
+                md_files = await asyncio.to_thread(_find_md_files, docs_path)
+                for doc_file in md_files:
                     if self._should_index_document(doc_file, quick_mode):
-                        content = doc_file.read_text(encoding="utf-8")
+                        content = await asyncio.to_thread(doc_file.read_text, encoding="utf-8")
+                        stat_result = await asyncio.to_thread(doc_file.stat)
                         metadata = {
                             "file_path": str(doc_file.relative_to(docs_path)),
-                            "modified": doc_file.stat().st_mtime,
+                            "modified": stat_result.st_mtime,
                             "doc_id": doc_file.stem,
                             "file_size": len(content),
                         }
@@ -178,8 +184,12 @@ class SyncCommand(KnowledgeCommand):
 
             # Scan for new library files
             src_path = Path("src/grid")
-            if src_path.exists():
-                for lib_file in src_path.rglob("*.py"):
+            def _find_py_files(p: Path) -> list[Path]:
+                return list(p.rglob("*.py"))
+
+            if await asyncio.to_thread(src_path.exists):
+                py_files = await asyncio.to_thread(_find_py_files, src_path)
+                for lib_file in py_files:
                     if lib_file.name.endswith("_library.py"):
                         lib_name = lib_file.stem.replace("_library", "")
 
@@ -192,7 +202,7 @@ class SyncCommand(KnowledgeCommand):
                             "file_path": str(lib_file.relative_to(src_path)),
                             "capabilities": capabilities,
                             "centrality_estimate": 0.5,  # Initial estimate
-                            "discovered_at": datetime.now(timezone.utc).isoformat(),
+                            "discovered_at": datetime.now(UTC).isoformat(),
                         }
 
                         graph_updates["new_nodes"].append(node_info)
@@ -310,7 +320,7 @@ class SyncCommand(KnowledgeCommand):
         # In quick mode, only index recently modified files
         if quick_mode:
             modified_time = datetime.fromtimestamp(file_path.stat().st_mtime)
-            return modified_time > datetime.now(timezone.utc) - timedelta(days=1)
+            return modified_time > datetime.now(UTC) - timedelta(days=1)
 
         # Full mode - index all markdown files
         return file_path.suffix == ".md"

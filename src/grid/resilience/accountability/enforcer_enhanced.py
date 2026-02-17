@@ -4,7 +4,7 @@ Enhanced Accountability Enforcer with claims/roles support.
 
 import logging
 from collections import deque
-from datetime import datetime, timezone, timedelta
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from .contract_loader import load_accountability_contract
@@ -58,7 +58,7 @@ class EnhancedAccountabilityEnforcer:
         """Get RBAC helper for role/permission checking."""
         if self._rbac_helper is None:
             try:
-                from application.mothership.security.rbac import ROLE_PERMISSIONS, Permission, Role
+                from grid.auth.rbac import ROLE_PERMISSIONS, Permission, Role
 
                 self._rbac_helper = {
                     "ROLE_PERMISSIONS": ROLE_PERMISSIONS,
@@ -357,7 +357,7 @@ class EnhancedAccountabilityEnforcer:
         if not rate_limit or not client_ip:
             return violations
 
-        current_time = datetime.now(timezone.utc)
+        current_time = datetime.now(UTC)
         rate_key = f"rate:{client_ip}:{path}"
 
         # Clean old entries (older than 60 seconds)
@@ -457,7 +457,7 @@ class EnhancedAccountabilityEnforcer:
         if key not in self._error_tracking:
             self._error_tracking[key] = deque(maxlen=_MAX_OUTCOMES_PER_ENDPOINT)
         is_success = 200 <= (response_status or 0) < 400
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         self._error_tracking[key].append((now, is_success))
 
     def _get_error_rate(self, path: str, method: str) -> float | None:
@@ -466,7 +466,7 @@ class EnhancedAccountabilityEnforcer:
         outcomes = self._error_tracking.get(key)
         if not outcomes or len(outcomes) < 10:
             return None
-        cutoff = datetime.now(timezone.utc) - _ERROR_RATE_WINDOW
+        cutoff = datetime.now(UTC) - _ERROR_RATE_WINDOW
         recent = [(ts, ok) for ts, ok in outcomes if ts >= cutoff]
         if len(recent) < 10:
             return None

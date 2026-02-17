@@ -5,6 +5,7 @@ Enforces accountability contracts with RBAC and claims support.
 
 from __future__ import annotations
 
+import json
 import logging
 import time
 from datetime import datetime, timezone
@@ -265,6 +266,39 @@ class AccountabilityContractMiddleware(BaseHTTPMiddleware):
                     "severity": v.severity.value,
                     "message": v.message,
                     "field": v.field,
+                }
+                for v in request_result.violations
+            ],
+            "enforcement_mode": self.enforcement_mode,
+        }
+
+        return Response(
+            content=json.dumps(error_response),
+            status_code=status_code,
+            media_type="application/json",
+        )
+
+    def _log_violations(
+        self,
+        request: Request,
+        request_result: EnforcementResult,
+        response_result: EnforcementResult | None,
+    ) -> None:
+        """Log accountability violations for audit trail."""
+        all_violations = list(request_result.violations)
+        if response_result:
+            all_violations.extend(response_result.violations)
+
+        if not all_violations:
+            return
+
+        for violation in all_violations:
+            log_data = {
+                "path": str(request.url.path),
+                "method": request.method,
+                "type": violation.type.value,
+                "severity": violation.severity.value,
+                "message": violation.message,
                 "field": violation.field,
                 "penalty_points": violation.penalty_points,
                 "enforcement_mode": self.enforcement_mode,

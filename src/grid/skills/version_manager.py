@@ -187,7 +187,8 @@ class SkillVersionManager:
         import aiofiles
         skill_dir = self._get_skill_dir(skill_id)
         versions = []
-        for v_file in skill_dir.glob("*.json"):
+        v_files = await asyncio.to_thread(lambda: list(skill_dir.glob("*.json")))
+        for v_file in v_files:
             async with aiofiles.open(v_file) as f:
                 content = await f.read()
                 data = json.loads(content)
@@ -202,7 +203,7 @@ class SkillVersionManager:
         skill_dir = self._get_skill_dir(skill_id)
         version_file = skill_dir / f"{version_id}.json"
 
-        if not version_file.exists():
+        if not await asyncio.to_thread(version_file.exists):
             return None
 
         async with aiofiles.open(version_file) as f:

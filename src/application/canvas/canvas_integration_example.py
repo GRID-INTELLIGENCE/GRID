@@ -1,7 +1,6 @@
 """Canvas Integration Example - Demonstrates Canvas routing with Wheel visualization."""
 
 import asyncio
-import time
 from pathlib import Path
 
 from application.canvas import Canvas
@@ -90,7 +89,7 @@ async def canvas_wheel_integration_demo():
         print()
 
         # Small delay for visibility
-        time.sleep(0.3)
+        await asyncio.sleep(0.3)
 
     # Show final wheel state
     print("4. Final Wheel Visualization After All Routing Operations:")
@@ -163,7 +162,7 @@ async def canvas_wheel_integration_demo():
         print(f"Frame {frame + 1} (Rotation: {canvas.wheel.state.rotation_angle:.2f} rad):")
         print(frame_viz)
         print()
-        time.sleep(0.5)
+        await asyncio.sleep(0.5)
 
     print("=" * 80)
     print("Integration Demo Complete!")

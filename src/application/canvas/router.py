@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from pathlib import Path
 from typing import Any
@@ -106,7 +107,7 @@ class UnifiedRouter:
 
         for dir_name in key_directories:
             dir_path = self.workspace_root / dir_name
-            if not dir_path.exists():
+            if not await asyncio.to_thread(dir_path.exists):
                 continue
 
             # Calculate similarity based on directory name and content
@@ -127,8 +128,11 @@ class UnifiedRouter:
 
                 # Look for specific files that match
                 try:
-                    for file_path in dir_path.rglob("*.py"):
-                        if file_path.is_file():
+                    py_files = await asyncio.to_thread(lambda dp=dir_path: [
+                        fp for fp in dp.rglob("*.py") if fp.is_file()
+                    ])
+                    for file_path in py_files:
+                        if True:
                             file_similarity = self._calculate_file_similarity(file_path, query_words)
                             if file_similarity > 0.2:
                                 matches.append(

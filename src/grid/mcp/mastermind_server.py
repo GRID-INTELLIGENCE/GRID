@@ -6,15 +6,16 @@ Provides intelligent code analysis, project navigation, and knowledge management
 capabilities for the GRID project.
 """
 
-import aiofiles
 import asyncio
 import json
 import logging
 import sys
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from pathlib import Path
 from typing import Any
+
+import aiofiles
 
 # Add GRID to path
 grid_root = Path(__file__).parent.parent.parent.parent
@@ -90,7 +91,7 @@ def format_project_info(info: dict[str, Any]) -> str:
 - Files: {info.get("file_count", 0)}
 - Directories: {info.get("dir_count", 0)}
 - Languages: {", ".join(info.get("languages", []))}
-- Last Updated: {datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")}
+- Last Updated: {datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")}
 """
 
 
@@ -283,18 +284,16 @@ async def get_project_info() -> dict[str, Any]:
     """Get general project information."""
     info = {"root": str(session.project_root), "file_count": 0, "dir_count": 0, "languages": [], "size_mb": 0}
 
-    try:
+    def _scan_project() -> dict[str, Any]:
         file_count = 0
         dir_count = 0
-        languages = set()
+        languages: set[str] = set()
         total_size = 0
 
         for item in session.project_root.rglob("*"):
             if item.is_file():
                 file_count += 1
                 total_size += item.stat().st_size
-
-                # Detect language by extension
                 ext = item.suffix.lower()
                 if ext == ".py":
                     languages.add("Python")
@@ -311,14 +310,15 @@ async def get_project_info() -> dict[str, Any]:
             elif item.is_dir():
                 dir_count += 1
 
-        info.update(
-            {
-                "file_count": file_count,
-                "dir_count": dir_count,
-                "languages": sorted(languages),
-                "size_mb": round(total_size / (1024 * 1024), 2),
-            }
-        )
+        return {
+            "file_count": file_count,
+            "dir_count": dir_count,
+            "languages": sorted(languages),
+            "size_mb": round(total_size / (1024 * 1024), 2),
+        }
+
+    try:
+        info.update(await asyncio.to_thread(_scan_project))
     except Exception as e:
         logger.error(f"Error getting project info: {e}")
 
@@ -337,7 +337,7 @@ async def analyze_codebase() -> dict[str, Any]:
     }
 
     try:
-        python_files = list(session.project_root.rglob("*.py"))
+        python_files = await asyncio.to_thread(lambda: list(session.project_root.rglob("*.py")))
         analysis["files_analyzed"] = len(python_files)
 
         # Simple heuristics for analysis
@@ -347,7 +347,7 @@ async def analyze_codebase() -> dict[str, Any]:
 
         for py_file in python_files:
             try:
-                async with aiofiles.open(py_file, mode="r", encoding="utf-8") as f:
+                async with aiofiles.open(py_file, encoding="utf-8") as f:
                     content = await f.read()
                     lines = content.split("\n")
                     total_lines += len(lines)
@@ -398,9 +398,9 @@ async def analyze_dependencies() -> dict[str, Any]:
         ]
 
         for req_file in req_files:
-            if req_file.exists():
+            if await asyncio.to_thread(req_file.exists):
                 if req_file.name == "requirements.txt":
-                    async with aiofiles.open(req_file, mode="r") as f:
+                    async with aiofiles.open(req_file) as f:
                         content = await f.read()
                         for line in content.split("\n"):
                             line = line.strip()
@@ -420,7 +420,7 @@ async def analyze_dependencies() -> dict[str, Any]:
                         pass
 
         # Find internal modules
-        for py_file in session.project_root.rglob("*.py"):
+        for py_file in await asyncio.to_thread(lambda: list(session.project_root.rglob("*.py"))):
             if py_file.name != "__init__.py":
                 rel_path = py_file.relative_to(session.project_root)
                 module_path = str(rel_path.with_suffix("")).replace("\\", ".")
@@ -440,8 +440,9 @@ async def analyze_test_coverage() -> dict[str, Any]:
 
     try:
         # Count test and source files
-        test_files = list(session.project_root.rglob("*test*.py"))
-        source_files = [f for f in session.project_root.rglob("*.py") if "test" not in f.name.lower()]
+        test_files = await asyncio.to_thread(lambda: list(session.project_root.rglob("*test*.py")))
+        all_py = await asyncio.to_thread(lambda: list(session.project_root.rglob("*.py")))
+        source_files = [f for f in all_py if "test" not in f.name.lower()]
 
         coverage["test_files"] = len(test_files)
         coverage["source_files"] = len(source_files)
@@ -484,7 +485,7 @@ async def analyze_file(file_path: str) -> dict[str, Any]:
             result["error"] = "Access denied: file path outside project directory"
             return result
 
-        if not file_path_obj.exists():
+        if not await asyncio.to_thread(file_path_obj.exists):
             result["error"] = "File not found"
             return result
 
@@ -492,7 +493,7 @@ async def analyze_file(file_path: str) -> dict[str, Any]:
         # Update file_path to the resolved path for consistency
         result["file_path"] = str(file_path_obj.relative_to(session.project_root))
 
-        async with aiofiles.open(file_path_obj, mode="r", encoding="utf-8") as f:
+        async with aiofiles.open(file_path_obj, encoding="utf-8") as f:
             content = await f.read()
             lines = content.split("\n")
             result["lines"] = len(lines)
@@ -536,10 +537,13 @@ async def search_code(pattern: str, file_pattern: str = "*") -> dict[str, Any]:
 
         regex = re.compile(pattern, re.IGNORECASE)
 
-        for file_path in session.project_root.rglob(file_pattern):
-            if file_path.is_file():
+        all_files = await asyncio.to_thread(lambda: [
+            f for f in session.project_root.rglob(file_pattern) if f.is_file()
+        ])
+        for file_path in all_files:
+            if True:
                 try:
-                    async with aiofiles.open(file_path, mode="r", encoding="utf-8") as f:
+                    async with aiofiles.open(file_path, encoding="utf-8") as f:
                         content = await f.read()
                         lines = content.split("\n")
 
@@ -575,15 +579,16 @@ async def find_dependencies(target: str) -> dict[str, Any]:
 
     try:
         target_path = Path(target)
-        if not target_path.exists():
+        if not await asyncio.to_thread(target_path.exists):
             # Try to find it
-            for py_file in session.project_root.rglob("*.py"):
+            all_py = await asyncio.to_thread(lambda: list(session.project_root.rglob("*.py")))
+            for py_file in all_py:
                 if py_file.name == target or str(py_file).endswith(target):
                     target_path = py_file
                     break
 
-        if target_path.exists() and target_path.suffix == ".py":
-            async with aiofiles.open(target_path, mode="r", encoding="utf-8") as f:
+        if await asyncio.to_thread(target_path.exists) and target_path.suffix == ".py":
+            async with aiofiles.open(target_path, encoding="utf-8") as f:
                 content = await f.read()
                 for line in content.split("\n"):
                     stripped = line.strip()
@@ -597,11 +602,11 @@ async def find_dependencies(target: str) -> dict[str, Any]:
                             deps["external_packages"].append(stripped)
 
         # Find files that import this target
-        target_name = target_path.stem if target_path.exists() else target
-        for py_file in session.project_root.rglob("*.py"):
+        target_name = target_path.stem if await asyncio.to_thread(target_path.exists) else target
+        for py_file in await asyncio.to_thread(lambda: list(session.project_root.rglob("*.py"))):
             if py_file != target_path:
                 try:
-                    async with aiofiles.open(py_file, mode="r", encoding="utf-8") as f:
+                    async with aiofiles.open(py_file, encoding="utf-8") as f:
                         content = await f.read()
                         if target_name in content:
                             deps["imported_by"].append(str(py_file.relative_to(session.project_root)))
@@ -643,7 +648,7 @@ async def get_project_structure(max_depth: int = 3) -> dict[str, Any]:
 
         return node
 
-    structure["tree"] = build_tree(session.project_root)
+    structure["tree"] = await asyncio.to_thread(build_tree, session.project_root)
     return structure
 
 

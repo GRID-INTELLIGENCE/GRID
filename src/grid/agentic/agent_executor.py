@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
-import aiofiles
+import asyncio
 import json
 import logging
 import os
 from pathlib import Path
 from typing import Any
+
+import aiofiles
 
 from .adaptive_timeout import AdaptiveTimeoutManager
 from .error_classifier import ErrorClassifier
@@ -144,11 +146,11 @@ class AgentExecutor:
                 logger.error(f"Access denied: path outside knowledge base: {reference_file_path}")
                 return None
 
-            if not path.exists():
+            if not await asyncio.to_thread(path.exists):
                 logger.warning(f"Reference file not found: {reference_file_path}")
                 return None
 
-            async with aiofiles.open(path, mode="r", encoding="utf-8") as f:
+            async with aiofiles.open(path, encoding="utf-8") as f:
                 content = await f.read()
                 return json.loads(content)
         except Exception as e:

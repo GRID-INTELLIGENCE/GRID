@@ -13,7 +13,7 @@ import time
 from collections import defaultdict, deque
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
-from enum import Enum, StrEnum
+from enum import StrEnum
 from pathlib import Path
 from typing import Any, Callable
 

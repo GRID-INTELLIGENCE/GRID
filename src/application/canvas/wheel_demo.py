@@ -1,7 +1,6 @@
 """Demo script showing the environment wheel visualization."""
 
 import asyncio
-import time
 from pathlib import Path
 
 from application.canvas import Canvas
@@ -69,7 +68,7 @@ async def demo_wheel():
             print()
 
         # Small delay for animation
-        time.sleep(0.5)
+        await asyncio.sleep(0.5)
 
     # Show final visualization
     print("=" * 60)

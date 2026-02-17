@@ -15,8 +15,8 @@ import json
 import logging
 import uuid
 from dataclasses import asdict, dataclass, field
-from datetime import datetime, timezone
-from enum import Enum, StrEnum
+from datetime import UTC, datetime
+from enum import StrEnum
 from pathlib import Path
 from typing import Any
 
@@ -48,7 +48,7 @@ class AuditEntry:
     domain: str
     action: str
     status: str
-    timestamp: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    timestamp: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
     request_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     correlation_id: str | None = None
     user_id: str | None = None
@@ -215,7 +215,7 @@ class DistributedAuditLogger:
         self._buffer.clear()
 
         # Write to daily log file
-        date_str = datetime.now(timezone.utc).strftime("%Y%m%d")
+        date_str = datetime.now(UTC).strftime("%Y%m%d")
         log_file = self.log_dir / f"audit_{date_str}.jsonl"
 
         try:
@@ -247,15 +247,15 @@ class DistributedAuditLogger:
         entries = []
 
         # Read from today's log file
-        date_str = datetime.now(timezone.utc).strftime("%Y%m%d")
+        date_str = datetime.now(UTC).strftime("%Y%m%d")
         log_file = self.log_dir / f"audit_{date_str}.jsonl"
 
-        if not log_file.exists():
+        if not await asyncio.to_thread(log_file.exists):
             return entries
 
         try:
             import aiofiles
-            async with aiofiles.open(log_file, mode="r", encoding="utf-8") as f:
+            async with aiofiles.open(log_file, encoding="utf-8") as f:
                 async for line in f:
                     try:
                         data = json.loads(line.strip())
