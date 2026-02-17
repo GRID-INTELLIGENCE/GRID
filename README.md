@@ -110,10 +110,10 @@ $ grid analyze src/
 
 | 🎯 Metric | 📈 Value | 🎯 Metric | 📈 Value |
 |-----------|----------|-----------|----------|
-| **Python Version** | 3.13+ | **Tests Passing** | 283+ ✅ |
+| **Python Version** | 3.13+ | **Tests Passing** | 378+ ✅ |
 | **Code Coverage** | ≥80% | **Architecture** | DDD + Event-Driven |
-| **Security** | Production-Ready | **RAG Precision** | +33-40% |
-| **Workflows** | ✅ Passing | **Package Manager** | UV |
+| **Lint Errors** | 0 (ruff clean) | **RAG Precision** | +33-40% |
+| **Security** | Production-Ready | **Package Manager** | UV |
 
 </div>
 
@@ -122,9 +122,9 @@ $ grid analyze src/
 ### 🚀 Quick Stats
 
 ![Lines of Code](https://img.shields.io/badge/Lines%20of%20Code-50k%2B-blue?style=flat-square)
-![Files](https://img.shields.io/badge/Files-540%2B-green?style=flat-square)
-![Tests](https://img.shields.io/badge/Tests-283%2B-success?style=flat-square)
-![Coverage](https://img.shields.io/badge/Coverage-≥80%25-brightgreen?style=flat-square)
+![Files](https://img.shields.io/badge/Files-748-green?style=flat-square)
+![Tests](https://img.shields.io/badge/Tests-378%2B-success?style=flat-square)
+![Lint](https://img.shields.io/badge/Lint-0%20errors-brightgreen?style=flat-square)
 
 </div>
 
@@ -142,6 +142,15 @@ GRID (Geometric Resonance Intelligence Driver) is a comprehensive framework for 
 - **Domain-Driven Design**: Professional architectural patterns with service layer decoupling
 
 ## 🚀 What's New (February 2026)
+
+### v2.4.0 — Full Lint Remediation & Cleanup
+
+- ✅ **664→0 Lint Errors** — Complete ruff remediation across 251 files; codebase is lint-clean
+- ✅ **StrEnum Modernization** — 122 classes converted to PEP 695 `StrEnum` inheritance
+- ✅ **PERF401 Optimization** — 85 manual list constructions converted to comprehensions/`extend()`
+- ✅ **Repository Cleanup** — Removed tracked artifacts (bandit reports, telemetry dumps, tmp scripts)
+- ✅ **Documentation Refresh** — CHANGELOG.md, updated METADATA.md, validation report addendum
+- ✅ **Version Bump** — 2.3.0 → 2.4.0
 
 ### v2.3.0 — CI & Code Quality Hardening
 

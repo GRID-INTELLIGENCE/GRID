@@ -679,9 +679,19 @@ environment_accountability_report.json
 # CASCADE / OPENCODE SCRATCH
 # ==========================
 .cascade_context.json
+.commits.json
 codeq.txt
 codequality.txt
 tmpclaude-*
 diff_ac.txt
 pytest_out*.txt
+test_results.txt
 nul
+
+# ==========================
+# GENERATED REPORTS & TELEMETRY
+# ==========================
+bandit-report.json
+config.secrets.baseline
+resonance_telemetry_events.jsonl
+tmp_scan_*.py
