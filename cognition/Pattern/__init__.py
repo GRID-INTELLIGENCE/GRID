@@ -58,6 +58,7 @@ class CognitivePattern:
     template: dict[str, Any] | None = None
     confidence_threshold: float = 0.5
     metadata: dict[str, Any] = field(default_factory=dict)
+    learning_state: dict[str, Any] | None = None
 
     def add_feature(self, feature: PatternFeature) -> None:
         """Add a feature to the pattern."""
@@ -362,14 +363,33 @@ class PatternManager:
         }
 
 
-# Future extension points
 class AdvancedPatternManager(PatternManager):
-    """Advanced pattern manager with additional capabilities."""
+    """Advanced pattern manager with Online Logistic Regression learning.
 
-    def __init__(self):
+    Implements a production-safe learning algorithm:
+    - **Bias**: starts at -0.5 (skeptical default, ~37% base probability)
+    - **Clamping**: z-score bounded to [-20, 20] to prevent overflow
+    - **L2 Regularization**: sparse decay (0.001) prevents weight explosion
+    - **JSON Persistence**: all state in ``learning_state`` dict, no Pickle
+    """
+
+    # Hyperparameters
+    LEARNING_RATE: float = 0.1
+    DECAY: float = 0.001  # L2 regularization factor
+    MAX_SCORE: float = 20.0  # Clamping range for z-score
+    DEFAULT_BIAS: float = -0.5  # Skeptical default (~37% probability)
+
+    def __init__(self, learning_rate: float = 0.1, decay: float = 0.001) -> None:
         super().__init__()
         self.pattern_relationships: dict[str, list[str]] = {}
         self.learning_enabled = False
+        self.learning_rate = learning_rate
+        self.decay = decay
+        self.match_history: list[dict[str, Any]] = []
+
+    # ------------------------------------------------------------------
+    # Relationship helpers (unchanged)
+    # ------------------------------------------------------------------
 
     def add_relationship(self, pattern_id: str, related_pattern_id: str) -> None:
         """Add a relationship between patterns."""
@@ -381,15 +401,140 @@ class AdvancedPatternManager(PatternManager):
         """Enable pattern learning from matches."""
         self.learning_enabled = True
 
-    # Placeholder for advanced features
-    def learn_from_match(self, pattern_id: str, input_data: Any, confidence: float) -> None:
-        """Learn from successful matches to improve patterns."""
-        if not self.learning_enabled:
-            return
-
-        # TODO: Implement learning algorithm
-        pass
-
     def find_related_patterns(self, pattern_id: str) -> list[str]:
         """Find patterns related to the given pattern."""
         return self.pattern_relationships.get(pattern_id, [])
+
+    # ------------------------------------------------------------------
+    # Online Logistic Regression internals
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _sigmoid(z: float) -> float:
+        """Numerically stable sigmoid with clamping.
+
+        Clamps *z* to [-20, 20] before computing ``1 / (1 + exp(-z))``
+        to prevent :class:`OverflowError` from ``math.exp``.
+        """
+        z = max(-20.0, min(20.0, z))
+        return 1.0 / (1.0 + math.exp(-z))
+
+    def _init_learning_state(self, pattern: CognitivePattern) -> dict[str, Any]:
+        """Ensure *pattern* has a valid ``learning_state`` dict.
+
+        Returns the (possibly freshly-created) state for convenience.
+        """
+        if pattern.learning_state is None:
+            pattern.learning_state = {
+                "weights": {},
+                "bias": self.DEFAULT_BIAS,
+                "samples_seen": 0,
+                "version": "v1",
+            }
+        return pattern.learning_state
+
+    def _extract_features(self, input_data: Any) -> dict[str, float]:
+        """Convert raw input into a normalised feature dictionary.
+
+        - **str**: bag-of-words with ``log(1 + count)`` scaling
+        - **dict**: values cast to ``float`` directly
+        - **list**: delegates to the parent matcher (no features extracted)
+        """
+        features: dict[str, float] = {}
+
+        if isinstance(input_data, str):
+            for word in input_data.lower().split():
+                features[word] = features.get(word, 0.0) + 1.0
+            # Log-scale to tame repeated tokens
+            for key in features:
+                features[key] = math.log(1.0 + features[key])
+
+        elif isinstance(input_data, dict):
+            for k, v in input_data.items():
+                try:
+                    features[str(k)] = float(v)
+                except (TypeError, ValueError):
+                    continue
+
+        return features
+
+    # ------------------------------------------------------------------
+    # Public API
+    # ------------------------------------------------------------------
+
+    def predict_proba(self, pattern_id: str, input_data: Any) -> float:
+        """Calculate the probability (0.0–1.0) that *input_data* matches *pattern_id*.
+
+        Uses the learned weights and bias with a clamped sigmoid activation.
+        Returns 0.0 if the pattern is not registered.
+        """
+        pattern = self.get_pattern(pattern_id)
+        if not pattern:
+            return 0.0
+
+        state = self._init_learning_state(pattern)
+        weights = state["weights"]
+        features = self._extract_features(input_data)
+
+        # Dot product: bias + Σ(w_i · x_i)
+        z_score: float = state["bias"]
+        for feature_name, feature_value in features.items():
+            z_score += weights.get(feature_name, 0.0) * feature_value
+
+        return self._sigmoid(z_score)
+
+    def learn_from_match(
+        self,
+        pattern_id: str,
+        input_data: Any,
+        actual_label: float,
+    ) -> None:
+        """Online SGD update with L2 regularisation.
+
+        Args:
+            pattern_id: Pattern to update.
+            input_data: The observed input (str, dict, …).
+            actual_label: ``1.0`` for a confirmed match, ``0.0`` for no-match.
+        """
+        if not self.learning_enabled:
+            return
+
+        pattern = self.get_pattern(pattern_id)
+        if not pattern:
+            self.logger.warning("Cannot learn: pattern %s not found", pattern_id)
+            return
+
+        state = self._init_learning_state(pattern)
+        features = self._extract_features(input_data)
+
+        # Forward pass
+        predicted_prob = self.predict_proba(pattern_id, input_data)
+
+        # Error signal
+        error = actual_label - predicted_prob
+
+        # Update bias: b ← b + η · error
+        state["bias"] += self.learning_rate * error
+
+        # Update weights with sparse L2 decay:
+        # w_i ← w_i + η · (error · x_i  −  λ · w_i)
+        weights = state["weights"]
+        for feature_name, feature_value in features.items():
+            current_w = weights.get(feature_name, 0.0)
+            gradient = error * feature_value
+            regularisation = self.decay * current_w
+            weights[feature_name] = current_w + self.learning_rate * (gradient - regularisation)
+
+        state["samples_seen"] += 1
+
+        self.match_history.append(
+            {"pattern_id": pattern_id, "label": actual_label, "predicted": predicted_prob}
+        )
+        self.logger.info(
+            "Learned on %s: label=%.1f, predicted=%.4f, error=%.4f, samples=%d",
+            pattern_id,
+            actual_label,
+            predicted_prob,
+            error,
+            state["samples_seen"],
+        )
