@@ -372,7 +372,7 @@ rust/
 # ==========================
 
 .docker/
-.dockerignore
+# .dockerignore intentionally tracked for Docker builds
 docker-compose.override.yml
 docker-compose.local.yml
 
@@ -569,30 +569,9 @@ pip.conf
 .pip/
 
 # ==========================
-# MARKDOWN FILES
+# MARKDOWN FILES (Sensitive Only)
 # ==========================
-
-*.md
-!README.md
-!ACKNOWLEDGEMENT.md
-!CLAUDE.md
-!PROJECT_CHECKPOINT.md
-!BRANCH_ORGANIZATION.md
-!.windsurf/rules/README.md
-
-# Allowed docs
-docs/*.md
-!docs/SECURITY.md
-!docs/SECURITY_ARCHITECTURE.md
-!docs/SECURITY_LABELS.md
-!docs/SECURITY_HARDENING.md
-!docs/SECURITY_HARDENING_REPORT.md
-!docs/SECURITY_MAINTAINABILITY.md
-!docs/SECURITY_REMEDIATION.md
-!docs/INTELLIGENT_SKILLS_SYSTEM.md
-!docs/SKILLS_RAG_QUICKSTART.md
-!docs/SIMPLIFIED_SETUP.md
-!docs/DEVELOPMENT_GUIDE.md
+# NOTE: Markdown files are tracked by default. Only block sensitive docs.
 
 # Internal docs with credentials
 **/CREDENTIALS.md
@@ -629,6 +608,33 @@ version_errors*.txt
 ruff_errors.txt
 mypy_errors*.txt
 mypy_final_report.txt
+
+# ==========================
+# ROOT EPHEMERAL OUTPUTS
+# ==========================
+
+# Report/analysis artifacts
+attack_results.json
+daily_report.json
+gh_report.json
+integrated_report.json
+parasite_analysis_report.json
+security_validation_report.json
+resonance_architecture_reference.json
+
+# Chaos/stress test outputs
+chaos_err.txt
+chaos_out.txt
+chaos_test_results.txt
+
+# Database dumps at root
+dump.rdb
+mothership.db
+
+# Misc root artifacts
+plan.txt
+project-structure.mmd
+grid.code-workspace
 
 # ==========================
 # WEALTH MANAGEMENT VAULT

@@ -1,4 +1,5 @@
 {
+    "// NOTE": "Pyright is used by Pylance (VS Code) for real-time IDE feedback. MyPy (pyproject.toml [tool.mypy]) is the CI-authoritative type checker. Both are intentional.",
     "typeCheckingMode":  "strict",
     "reportMissingImports":  true,
     "reportMissingTypeStubs":  false,

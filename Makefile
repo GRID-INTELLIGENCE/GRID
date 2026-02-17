@@ -37,8 +37,12 @@ lint: ## Run static analysis (Ruff + Mypy)
 
 format: ## Auto-format code
 	@echo "$(BLUE)Formatting...$(NC)"
-	uv run black grid application tools tests
+	uv run ruff format .
 	uv run ruff check . --fix
+
+export-requirements: ## Export pinned requirements.txt from uv.lock (for legacy/CI compatibility)
+	@echo "$(BLUE)Exporting requirements...$(NC)"
+	uv export -f requirements-txt --no-hashes -o requirements-pip.txt
 
 clean: ## Clean build artifacts and caches
 	@echo "$(RED)Cleaning...$(NC)"

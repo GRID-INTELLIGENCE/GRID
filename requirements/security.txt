@@ -1,8 +1,0 @@
-
-# Security Dependencies
-zxcvbn-python>=4.4.0
-slowapi>=0.1.9
-email-validator>=2.1.0.post1
-argon2-cffi>=23.1.0
-psycopg2-binary>=2.9.0
-

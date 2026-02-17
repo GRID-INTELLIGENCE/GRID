@@ -1,17 +1,22 @@
-# Pre-commit hooks for GRID codebase
+# ============================================================================
+# GRID Pre-Commit Configuration (Unified: Code Quality + Security)
+# ============================================================================
 # Install: pre-commit install
 # Run manually: pre-commit run --all-files
+# ============================================================================
 
 repos:
-  # Ruff - Fast Python linter (replaces flake8, isort, etc.)
+  # ==========================================================================
+  # CODE QUALITY
+  # ==========================================================================
+
+  # Ruff - Fast Python linter (replaces flake8, isort, black)
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.8.0
     hooks:
-      # Run the linter
       - id: ruff
         args: [--fix]
         name: Ruff linter (with fixes)
-      # Run the formatter
       - id: ruff-format
         name: Ruff formatter
 
@@ -30,7 +35,6 @@ repos:
           - sqlalchemy
           - fastapi
           - types-requests
-        # Only check staged files in critical directories
         files: ^(src/grid/|workspace/mcp/|src/tools/).*\.py$
         exclude: ^(tests/|Arena/|cognition/|config/)
 
@@ -51,15 +55,61 @@ repos:
       - id: check-added-large-files
         name: Check for large files
         args: [--maxkb=500]
+      - id: check-case-conflict
+        name: Check case conflicts
       - id: check-merge-conflict
         name: Check for merge conflicts
+      - id: no-commit-to-branch
+        name: Protect main branches
+        args: ["--branch", "main", "--branch", "master", "--branch", "production"]
       - id: detect-private-key
         name: Detect private keys
+      - id: detect-aws-credentials
+        name: Detect AWS credentials
+        args: ["--allow-missing-credentials"]
       - id: mixed-line-ending
         name: Fix mixed line endings
         args: [--fix=lf]
 
-  # Security checks
+  # ==========================================================================
+  # SECRET DETECTION
+  # ==========================================================================
+
+  # Detect-secrets: Yelp's enterprise-grade secret scanner
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.4.0
+    hooks:
+      - id: detect-secrets
+        name: Detect hardcoded secrets
+        args:
+          - "--baseline"
+          - ".secrets.baseline"
+          - "--exclude-files"
+          - ".*test.*|.*fixture.*|.*mock.*"
+          - "--base64-limit"
+          - "4.5"
+          - "--hex-limit"
+          - "3.0"
+        exclude: |
+          (?x)^(
+            .*\.lock$|
+            .*\.min\.js$|
+            .*\.min\.css$|
+            package-lock\.json$|
+            uv\.lock$
+          )$
+
+  # Gitleaks: Fast, comprehensive secret scanner
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.18.1
+    hooks:
+      - id: gitleaks
+        name: Gitleaks secret scan
+        args:
+          - "--verbose"
+          - "--redact"
+
+  # Bandit: Python security linter
   - repo: https://github.com/PyCQA/bandit
     rev: 1.7.10
     hooks:
@@ -68,10 +118,94 @@ repos:
         args: [-c, pyproject.toml, -ll]
         additional_dependencies: ["bandit[toml]"]
 
-# Configuration
+  # ==========================================================================
+  # CUSTOM GRID SECURITY HOOKS
+  # ==========================================================================
+
+  - repo: local
+    hooks:
+      # Block common API key patterns
+      - id: check-api-keys
+        name: Check for API key patterns
+        entry: |
+          python -c "
+          import re
+          import sys
+
+          patterns = [
+              (r'sk-[a-zA-Z0-9]{20,}', 'OpenAI API key'),
+              (r'sk_live_[a-zA-Z0-9]{20,}', 'Stripe live key'),
+              (r'sk_test_[a-zA-Z0-9]{20,}', 'Stripe test key'),
+              (r'ghp_[a-zA-Z0-9]{36}', 'GitHub personal access token'),
+              (r'gho_[a-zA-Z0-9]{36}', 'GitHub OAuth token'),
+              (r'github_pat_[a-zA-Z0-9_]{22,}', 'GitHub fine-grained PAT'),
+              (r'xox[baprs]-[a-zA-Z0-9-]{10,}', 'Slack token'),
+              (r'AKIA[0-9A-Z]{16}', 'AWS access key'),
+              (r'dapi[a-f0-9]{32}', 'Databricks token'),
+              (r'AIza[0-9A-Za-z_-]{35}', 'Google API key'),
+          ]
+
+          found = False
+          for filepath in sys.argv[1:]:
+              try:
+                  with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+                      content = f.read()
+                      for pattern, name in patterns:
+                          matches = re.findall(pattern, content)
+                          if matches:
+                              print(f'FAIL {filepath}: Found potential {name}')
+                              found = True
+              except Exception:
+                  pass
+
+          sys.exit(1 if found else 0)
+          "
+        language: python
+        types: [text]
+        exclude: |
+          (?x)^(
+            .*test.*|
+            .*\.lock$|
+            \.pre-commit.*
+          )$
+
+      # Block .env files from being committed
+      - id: check-env-files
+        name: Block .env files
+        entry: |
+          python -c "
+          import sys
+          import os
+
+          blocked_patterns = ['.env', 'user_env', 'credentials', 'secrets.json', 'secrets.yaml']
+          found = False
+
+          for filepath in sys.argv[1:]:
+              basename = os.path.basename(filepath).lower()
+              for pattern in blocked_patterns:
+                  if pattern in basename and 'example' not in basename and 'template' not in basename:
+                      print(f'FAIL {filepath}: Environment/secrets file should not be committed!')
+                      found = True
+
+          sys.exit(1 if found else 0)
+          "
+        language: python
+        types: [text]
+
+      # Safety: Check for known vulnerabilities in dependencies
+      - id: safety-check
+        name: Safety dependency check
+        entry: bash -c 'command -v safety >/dev/null 2>&1 && safety check --full-report || echo "WARNING Safety not installed, skipping..."'
+        language: system
+        files: ^pyproject\.toml$
+        pass_filenames: false
+
+# ============================================================================
+# CONFIGURATION
+# ============================================================================
 default_language_version:
   python: python3.13
 
-# Performance optimization
-fail_fast: false  # Run all hooks even if one fails
+fail_fast: false
 minimum_pre_commit_version: "3.0.0"
+default_stages: [commit, push]
