@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 
 from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
@@ -18,7 +18,7 @@ class APIKeyRow(Base):
     key_prefix: Mapped[str] = mapped_column(String(32), index=True)
     tier: Mapped[str] = mapped_column(String(32), default="free", index=True)
     name: Mapped[str] = mapped_column(String(256), default="")
-    last_used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=utcnow)
     expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     meta: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
@@ -53,7 +53,7 @@ class PaymentTransactionRow(Base):
     meta: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
     idempotency_key: Mapped[str] = mapped_column(String(128), index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     failure_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
 

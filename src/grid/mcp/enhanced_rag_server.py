@@ -362,14 +362,22 @@ class EnhancedRAGMCPServer:
 
 
 # Create global server instance for MCP CLI
-server = EnhancedRAGMCPServer()
+server: EnhancedRAGMCPServer | None = None
+
+
+def get_server() -> EnhancedRAGMCPServer:
+    """Get or create global server instance."""
+    global server
+    if server is None:
+        server = EnhancedRAGMCPServer()
+    return server
 
 
 async def main():
     """Main server function."""
     # Run the server
     async with stdio_server() as (read_stream, write_stream):
-        await server.run(
+        await get_server().run(
             read_stream,
             write_stream,
             InitializationOptions(

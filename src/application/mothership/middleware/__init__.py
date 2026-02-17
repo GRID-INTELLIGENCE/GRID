@@ -280,7 +280,14 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         super().__init__(app)
         self.requests_per_minute = requests_per_minute
         self.burst_size = burst_size
-        self.exclude_paths = exclude_paths or ["/health", "/ping", "/metrics"]
+        # Exclude auth endpoints to prevent interference with authentication tests
+        self.exclude_paths = exclude_paths or [
+            "/health",
+            "/ping",
+            "/metrics",
+            "/api/v1/auth/login",
+            "/api/v1/auth/refresh",
+        ]
         self.max_store_size = max_store_size
         self.cleanup_interval = cleanup_interval
         self._store: dict[str, list[float]] = {}

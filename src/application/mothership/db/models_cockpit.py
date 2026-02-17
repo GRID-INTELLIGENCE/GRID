@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 
 from sqlalchemy import JSON, Boolean, DateTime, Float, ForeignKey, Integer, String, Text
@@ -16,7 +16,7 @@ class CockpitStateRow(Base):
     state: Mapped[str] = mapped_column(String(32), index=True)
     version: Mapped[str] = mapped_column(String(32), default="1.0.0")
     started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
     total_sessions: Mapped[int] = mapped_column(Integer, default=0)
     active_sessions: Mapped[int] = mapped_column(Integer, default=0)
     total_operations: Mapped[int] = mapped_column(Integer, default=0)
@@ -106,7 +106,7 @@ class CockpitAlertRow(Base):
     source: Mapped[str] = mapped_column(String(128), default="")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     acknowledged_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    resolved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    resolved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=utcnow)
     is_acknowledged: Mapped[bool] = mapped_column(Boolean, default=False)
     is_resolved: Mapped[bool] = mapped_column(Boolean, default=False)
     acknowledged_by: Mapped[str | None] = mapped_column(String(128), nullable=True)

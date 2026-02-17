@@ -73,6 +73,7 @@ class AccountabilityContractMiddleware(BaseHTTPMiddleware):
 
         start_time = time.time()
 
+        response = None
         try:
             # Extract authentication context
             auth_context = await self._extract_auth_context(request)
@@ -121,7 +122,12 @@ class AccountabilityContractMiddleware(BaseHTTPMiddleware):
 
         except Exception as e:
             logger.error(f"Accountability middleware error: {e}")
-            # In case of middleware error, allow request but log
+            # If we already have a response, just return it (maybe add header)
+            if response is not None:
+                response.headers["X-Accountability-Error"] = "middleware_error"
+                return response
+            
+            # If we haven't called call_next yet, call it now
             response = await call_next(request)
             response.headers["X-Accountability-Error"] = "middleware_error"
             return response
@@ -276,6 +282,26 @@ class AccountabilityContractMiddleware(BaseHTTPMiddleware):
             status_code=status_code,
             media_type="application/json",
         )
+
+    def _add_enforcement_headers(
+        self,
+        response: Response,
+        request_result: EnforcementResult,
+        response_result: EnforcementResult | None,
+    ) -> None:
+        """Add accountability enforcement headers to the response."""
+        response.headers["X-Accountability-Status"] = (
+            "enforced" if self.enforcement_mode == "enforce" else "monitored"
+        )
+        
+        total_violations = len(request_result.violations)
+        if response_result:
+            total_violations += len(response_result.violations)
+            
+        response.headers["X-Accountability-Violation-Count"] = str(total_violations)
+        
+        if total_violations > 0:
+            response.headers["X-Accountability-Violation"] = "true"
 
     def _log_violations(
         self,

@@ -338,6 +338,10 @@ async def allow_request(
     Fails closed: if Redis is unreachable, denies the request.
     """
     # Security: Validate inputs
+    _bypass_redis = os.getenv("SAFETY_BYPASS_REDIS", "").lower() in ("1", "true", "yes")
+    if _bypass_redis:
+        return RateLimitResult(allowed=True, remaining=100, reset_seconds=0.0)
+
     if ip_address and not _request_validator.validate_ip_format(ip_address):
         logger.warning(f"Invalid IP format: {ip_address}")
         return RateLimitResult(

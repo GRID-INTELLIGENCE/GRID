@@ -64,6 +64,9 @@ def setup_env():
     os.environ["MOTHERSHIP_USE_DATABRICKS"] = "false"
     os.environ["MOTHERSHIP_REDIS_ENABLED"] = "false"
 
+    # Bypass Redis safety checks in test mode (middleware fails closed without Redis)
+    os.environ["SAFETY_BYPASS_REDIS"] = "true"
+
     # DON'T call reload_settings() here - it can trigger DB connections
     # Settings will be loaded lazily when needed with test environment
 

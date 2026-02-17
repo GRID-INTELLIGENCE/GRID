@@ -9,7 +9,8 @@ from datetime import UTC, datetime, timezone
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from ..middleware.drt_middleware import BehavioralSignature, ComprehensiveDRTMiddleware
+    from ..middleware.unified_drt import BehavioralSignature
+    from ..middleware.unified_drt import UnifiedDRTMiddleware as ComprehensiveDRTMiddleware
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
@@ -182,7 +183,7 @@ async def mark_false_positive(
         if violation:
             # Extract signature from violation (simplified - in real implementation
             # you'd reconstruct the signature from violation metadata)
-            from ..middleware.drt_middleware import BehavioralSignature
+            from ..middleware.unified_drt import BehavioralSignature
 
             signature = BehavioralSignature(
                 path_pattern=violation[0]["request_path"],

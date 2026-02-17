@@ -1,34 +1,43 @@
 {
 	"folders": [
 		{
-			"path": "."
+			"path": ".",
+			"name": "GRID-CORE"
 		},
 		{
-			"path": "../work"
+			"path": "../work",
+			"name": "GRID-WORK"
 		}
 	],
 	"settings": {
+		"python.defaultInterpreterPath": ".venv/Scripts/python.exe",
+		"python.languageServer": "Default",
+		"python.analysis.extraPaths": [
+			"${workspaceFolder}/src"
+		],
+		"python.testing.pytestEnabled": true,
+		"python.testing.pytestArgs": [
+			"tests"
+		],
+		"editor.formatOnSave": true,
+		"editor.codeActionsOnSave": {
+			"source.fixAll.ruff": "explicit",
+			"source.organizeImports.ruff": "explicit"
+		},
+		"ruff.path": [
+			"${workspaceFolder}/.venv/Scripts/ruff.exe"
+		],
+		"ruff.importStrategy": "fromEnvironment",
 		"terminal.integrated.shellIntegration.enabled": false,
 		"terminal.integrated.shellIntegration.decorationsEnabled": "never",
-		"terminal.integrated.env.linux": {
-			"PROJECT_ROOT": "${workspaceFolder}",
-			"GRID_HOME": "${workspaceFolder}/grid",
-			"EUFLE_HOME": "${workspaceFolder}/projects/EUFLE",
-			"EUFLE_ROOT": "${workspaceFolder}/projects/EUFLE",
-			"ENV": "development",
-			"SAMPLE_RATE": "48000",
-			"BPM": "124",
-			"BIT_DEPTH": "32_float"
-		},
 		"terminal.integrated.env.windows": {
 			"PROJECT_ROOT": "${workspaceFolder}",
-			"GRID_HOME": "${workspaceFolder}\\grid",
-			"EUFLE_HOME": "${workspaceFolder}\\projects\\EUFLE",
-			"EUFLE_ROOT": "${workspaceFolder}\\projects\\EUFLE",
+			"PYTHONPATH": "${workspaceFolder}/src",
+			"GRID_HOME": "${workspaceFolder}/src/grid",
+			"COGNITIVE_HOME": "${workspaceFolder}/src/cognitive",
+			"RESONANCE_HOME": "${workspaceFolder}/src/application/resonance",
 			"ENV": "development",
-			"SAMPLE_RATE": "48000",
-			"BPM": "124",
-			"BIT_DEPTH": "32_float"
+			"PYTHON_VERSION": "3.13"
 		},
 		"workbench.editor.alwaysShowEditorActions": true,
 		"workbench.editor.autoLockGroups": {

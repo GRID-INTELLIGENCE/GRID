@@ -11,8 +11,8 @@ def _ollama_reachable() -> bool:
     try:
         import httpx
 
-        httpx.get(OLLAMA_URL, timeout=2.0)
-        return True
+        r = httpx.get(OLLAMA_URL, timeout=2.0)
+        return r.status_code == 200
     except Exception:
         return False
 

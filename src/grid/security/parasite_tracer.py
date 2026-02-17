@@ -21,6 +21,7 @@ import gc
 import inspect
 import os
 import sys
+import threading
 import uuid
 from collections import defaultdict
 from dataclasses import dataclass
@@ -479,15 +480,31 @@ class ParasiteCallTracer:
 
                         # Extract metadata
                         type_obj = type(obj)
-                        attrs = dict(
-                            list(
-                                {
-                                    k: repr(getattr(obj, k, None))[:100]
-                                    for k in dir(obj)
-                                    if not k.startswith("_") and not callable(getattr(obj, k, None))
-                                }.items()
-                            )[:10]
-                        )  # Limit to 10 attributes
+                        
+                        def _get_attr_safe(o: Any, name: str) -> str:
+                            try:
+                                # Starlette Request.auth/user raise AssertionError if empty
+                                return repr(getattr(o, name, None))[:100]
+                            except (AssertionError, Exception):
+                                return "<access_error>"
+
+                        attrs = {}
+                        count = 0
+                        for k in dir(obj):
+                            if k.startswith("_"):
+                                continue
+                            
+                            try:
+                                attr_val = getattr(obj, k, None)
+                                if callable(attr_val):
+                                    continue
+                                
+                                attrs[k] = _get_attr_safe(obj, k)
+                                count += 1
+                                if count >= 10:
+                                    break
+                            except (AssertionError, Exception):
+                                continue
 
                         # Check if singleton
                         is_singleton = sum(1 for o in gc.get_objects() if type(o) is type_obj) == 1
@@ -602,5 +619,3 @@ async def trace_async_function(func: Callable[..., Any]) -> Callable[..., Any]:
     return wrapper
 
 
-# Missing import
-import threading

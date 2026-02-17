@@ -178,8 +178,8 @@ class TestEnhancedRAGMCPServerWithDeps:
             pytest.skip("Enhanced RAG Server not available")
         try:
             return EnhancedRAGMCPServer()
-        except Exception as e:
-            pytest.skip(f"Failed to create server: {e}")
+        except (RuntimeError, Exception) as e:
+            pytest.skip(f"Enhanced RAG Server unavailable (Ollama might be down): {e}")
 
     @requires_mcp_server
     def test_server_instantiation(self, server):

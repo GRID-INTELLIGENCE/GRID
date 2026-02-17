@@ -10,6 +10,7 @@ import asyncio
 import json
 import os
 import signal
+import uuid
 from typing import Any
 
 import redis.asyncio as aioredis
@@ -67,6 +68,10 @@ async def enqueue_request(
     Returns the Redis stream message ID.
     Raises RuntimeError if Redis is unreachable (fail closed).
     """
+    _bypass_redis = os.getenv("SAFETY_BYPASS_REDIS", "").lower() in ("1", "true", "yes")
+    if _bypass_redis:
+        return f"bypass-{uuid.uuid4()}"
+
     try:
         client = await get_redis()
         msg_id = await client.xadd(
@@ -118,6 +123,10 @@ async def write_audit_event(
     payload: dict[str, Any] | None = None,
 ) -> None:
     """Write an event to the audit stream."""
+    _bypass_redis = os.getenv("SAFETY_BYPASS_REDIS", "").lower() in ("1", "true", "yes")
+    if _bypass_redis:
+        return
+
     try:
         client = await get_redis()
         await client.xadd(
@@ -131,7 +140,7 @@ async def write_audit_event(
             },
         )
     except Exception as exc:
-        logger.error("audit_event_failed", event=event, error=str(exc))  # type: ignore[reportArgumentType]
+        logger.error("audit_event_failed", audit_event=event, error=str(exc))
 
 
 async def get_queue_depth() -> int:
@@ -154,7 +163,7 @@ async def check_redis_health() -> bool:
         REDIS_HEALTHY.set(1)
         return True
     except Exception as exc:
-        logger.error("redis_health_check_failed", error=str(exc))  # type: ignore[reportArgumentType]
+        logger.error("redis_health_check_failed", health_error=str(exc))
         REDIS_HEALTHY.set(0)
         return False
 

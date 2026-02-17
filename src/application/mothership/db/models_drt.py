@@ -6,7 +6,7 @@ and escalation history.
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 
 from sqlalchemy import JSON, Boolean, DateTime, Float, ForeignKey, Index, Integer, String, Text
@@ -129,8 +129,8 @@ class DRTEscalatedEndpointRow(Base):
         String(64), ForeignKey("drt_attack_vectors.id"), nullable=True
     )
     escalation_count: Mapped[int] = mapped_column(Integer, default=1)
-    first_escalated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
-    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    last_violation_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=utcnow)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
     alert_sent: Mapped[bool] = mapped_column(Boolean, default=False)
     meta: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)

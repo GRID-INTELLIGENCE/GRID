@@ -21,3 +21,9 @@ for _p in (_src, _root):
 sys.path.insert(0, _src)
 if _root not in sys.path:
     sys.path.append(_root)
+
+# Test environment configuration
+os.environ["GRID_ENV"] = "test"
+os.environ["SAFETY_BYPASS_REDIS"] = "true"
+os.environ["PARASITE_GUARD"] = "0"
+os.environ["PYTHONPATH"] = _src

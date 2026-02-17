@@ -1,8 +1,11 @@
 import pytest
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
+try:
+    from selenium import webdriver
+    from selenium.webdriver.common.by import By
+    from selenium.webdriver.support import expected_conditions as EC
+    from selenium.webdriver.support.ui import WebDriverWait
+except ImportError:
+    pytest.skip("selenium not installed", allow_module_level=True)
 
 
 @pytest.fixture(scope="module")

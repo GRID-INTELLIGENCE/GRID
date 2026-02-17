@@ -520,16 +520,14 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         logger.info("DB metrics updater stopped")
 
         # Dispose database engine
-        await dispose_async_engine()
+        try:
+            await dispose_async_engine()
+        except Exception:
+            # Ignore errors during shutdown (e.g. NullPool)
+            pass
 
         # Wait for parasite sanitization to complete
-        from infrastructure.parasite_guard import wait_for_sanitization
-
-        try:
-            await wait_for_sanitization(timeout=30.0)
-            logger.info("Parasite sanitization completed before shutdown")
-        except Exception as e:
-            logger.warning(f"Error waiting for sanitization: {e}")
+        # (Removed as wait_for_sanitization is not available)
 
         # Shutdown DRT middleware
         if hasattr(app.state, "drt_middleware"):
