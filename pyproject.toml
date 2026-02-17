@@ -154,6 +154,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
+# Only these packages are shipped; exclude list pruned per docs/guides/DEPLOYMENT_PRUNE_REBUILD.md
 packages = [
     "src/grid",
     "src/application",
@@ -335,6 +336,7 @@ mypy_path = "src"
 # Exclude root-level directories that are also in src/ to avoid duplication errors
 exclude = ["^application/", "^grid/", "^tools/", "^cognitive/", "^tests/", "^integration/databricks/"]
 
+# Overrides: prune duplicates periodically (see docs/guides/DEPLOYMENT_PRUNE_REBUILD.md)
 [[tool.mypy.overrides]]
 module = [
     "sentence_transformers.*",
@@ -380,9 +382,6 @@ module = [
     "config.quality_gates",
     "src.grid.persistence.database",
     "EQ.integration",
-    "mistralai",
-    "application.mothership.ner_service",
-    "prometheus_client",
     ".event_bus.event_system",
     ".ai_ml.intelligence_system",
     ".api_gateway.gateway",
@@ -421,7 +420,6 @@ module = [
     "vection.workers.base",
     "gateway",
     "infrastructure.api_gateway.gateway",
-    "requests",
     "jsonschema",
     "openapi_spec_validator",
 ]

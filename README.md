@@ -136,7 +136,7 @@ GRID (Geometric Resonance Intelligence Driver) is a comprehensive framework for 
 
 - **Geometric Resonance Patterns**: Core intelligence engine with 9 cognition patterns (Flow, Spatial, Rhythm, Color, Repetition, Deviation, Cause, Time, Combination)
 - **Cognitive Decision Support**: Light of the Seven cognitive architecture for bounded rationality and human-centered AI
-- **Local-First RAG**: Retrieval-Augmented Generation with ChromaDB + Ollama (no external APIs)
+- **Local-First RAG**: Retrieval-Augmented Generation with ChromaDB + Ollama by default. **Optional / Cloud Hybrid:** External providers (OpenAI, Anthropic, Gemini) are supported only when explicitly configured via `RAG_LLM_MODE=external` and the corresponding API keys; see [Optional: External LLM / Cloud Hybrid](#optional-external-llm--cloud-hybrid) below. Default remains local; no data leaves your machine unless you opt in.
 - **Intelligent Skills Ecosystem**: Self-organizing framework with automated discovery, persistent intelligence, and performance guarding (Phases 1-4)
 - **Event-Driven Agentic System**: Complete case management workflow with continuous learning
 - **Domain-Driven Design**: Professional architectural patterns with service layer decoupling
@@ -248,6 +248,22 @@ Feb 2026 → 540+ files. 283+ tests. 100% core pass rate. Version 2.2+. Producti
 </div>
 
 </details>
+
+---
+
+## Optional: External LLM / Cloud Hybrid
+
+GRID is **local-first by default**: RAG uses Ollama and ChromaDB on your machine, and **no code or data is sent to external APIs** unless you explicitly opt in.
+
+If you want to use cloud LLM providers for RAG (OpenAI, Anthropic, or Google Gemini), you can enable **optional external LLM** via environment variables:
+
+| Variable | Purpose |
+|----------|---------|
+| `RAG_LLM_MODE=external` | Switch RAG from local (Ollama) to external API |
+| `RAG_LLM_PROVIDER` | `openai`, `anthropic`, or `gemini` |
+| `OPENAI_API_KEY` / `ANTHROPIC_API_KEY` / `GEMINI_API_KEY` | Provider API key (required when using that provider) |
+
+**Privacy:** When using external providers, prompts and responses are sent to the chosen provider. Use only when you accept that data flow. For maximum privacy, keep the default (`RAG_LLM_MODE` unset or `local`).
 
 ---
 

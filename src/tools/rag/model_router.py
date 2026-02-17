@@ -10,7 +10,7 @@ try:
 except ImportError:
     MultiModelOrchestrator = None
 
-from .config import RAGConfig
+from .config import ModelMode, RAGConfig
 from .utils import find_embedding_model, find_llm_model, list_ollama_models
 
 
@@ -48,13 +48,27 @@ def route_models(
     query_kind = _classify_query(query)
 
     llm_model = config.llm_model_local
+    llm_provider = "ollama-local"
     embedding_provider = config.embedding_provider
     embedding_model = config.embedding_model
 
     reason_parts: list[str] = [f"query_kind={query_kind}"]
     ollama_models: list[str] | None = None
 
-    if prefer_ollama:
+    # Check if external provider is configured
+    if config.llm_mode == ModelMode.EXTERNAL:
+        llm_provider = config.external_provider or "openai"
+        if llm_provider == "openai":
+            llm_model = config.openai_model
+        elif llm_provider == "anthropic":
+            llm_model = config.anthropic_model
+        elif llm_provider == "gemini":
+            llm_model = config.gemini_model
+        else:
+            llm_model = config.openai_model
+        reason_parts.append(f"external_provider={llm_provider}")
+        reason_parts.append(f"llm={llm_provider}:{llm_model}")
+    elif prefer_ollama:
         try:
             ollama_models = list_ollama_models(config.ollama_base_url)
             if ollama_models:
@@ -76,20 +90,20 @@ def route_models(
         except Exception:
             reason_parts.append("ollama_available=false")
 
-    # If query looks code-heavy, slightly bias to a larger/coding-ish model if present.
-    if prefer_ollama and ollama_models:
-        if query_kind in {"code", "debug"}:
-            for cand in ["qwen2.5-coder", "deepseek-coder", "codestral", "codellama", "llama3.1", "llama3"]:
-                hit = next((m for m in ollama_models if cand in m.lower()), None)
-                if hit:
-                    llm_model = hit
-                    reason_parts.append(f"llm_bias={hit}")
-                    break
+        # If query looks code-heavy, slightly bias to a larger/coding-ish model if present.
+        if ollama_models:
+            if query_kind in {"code", "debug"}:
+                for cand in ["qwen2.5-coder", "deepseek-coder", "codestral", "codellama", "llama3.1", "llama3"]:
+                    hit = next((m for m in ollama_models if cand in m.lower()), None)
+                    if hit:
+                        llm_model = hit
+                        reason_parts.append(f"llm_bias={hit}")
+                        break
 
     return ModelRoutingDecision(
         embedding_provider=embedding_provider,
         embedding_model=embedding_model,
-        llm_provider="ollama-local",
+        llm_provider=llm_provider,
         llm_model=llm_model,
         reason="; ".join(reason_parts),
     )
