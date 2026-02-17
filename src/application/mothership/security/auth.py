@@ -85,7 +85,7 @@ def _check_development_bypass(allow_development_bypass: bool, settings) -> dict[
     Raises:
         SecurityException: If bypass attempted in production
     """
-    from datetime import datetime
+    from datetime import UTC, datetime
 
     # CRITICAL SECURITY CHECK #1: NEVER allow in production
     if hasattr(settings, "environment") and settings.environment == "production":
@@ -124,12 +124,12 @@ def _check_development_bypass(allow_development_bypass: bool, settings) -> dict[
         if not dev_machine_id:
             missing.append("DEV_MACHINE_ID")
 
-        logger.warning(f"SECURITY: Development bypass incomplete - missing: {', '.join(missing)}")
+        logger.warning("SECURITY: Development bypass incomplete - missing: %s", ", ".join(missing))
         return None
 
     # EXTENSIVE SECURITY LOGGING
     # Log with maximum detail for audit trails
-    timestamp = datetime.now().isoformat()
+    timestamp = datetime.now(UTC).isoformat()
     logger.warning("=" * 80)
     logger.warning("SECURITY WARNING: DEVELOPMENT AUTHENTICATION BYPASS ACTIVE")
     logger.warning(f"Timestamp: {timestamp}")
@@ -243,7 +243,7 @@ async def verify_jwt_token(token: str | None, require_valid: bool = True) -> dic
         # Strict validation
         payload = jwt_manager.verify_token(token, expected_type="access")
     except Exception as e:
-        logger.warning(f"JWT verification failed: {str(e)}")
+        logger.warning("JWT verification failed: %s", e)
         if require_valid:
             raise AuthenticationError("Invalid or expired security token")
         return {
@@ -261,7 +261,7 @@ async def verify_jwt_token(token: str | None, require_valid: bool = True) -> dic
     payload_dict = payload.model_dump() if hasattr(payload, "model_dump") else {}
     is_valid, error = await get_token_validator().validate_token(payload_dict)
     if not is_valid:
-        logger.warning(f"JWT revocation check failed: {error}")
+        logger.warning("JWT revocation check failed: %s", error)
         if require_valid:
             raise AuthenticationError(f"Token invalid: {error}")
         return {
@@ -320,7 +320,11 @@ async def verify_authentication_required(
 
     # 3. Development bypass (HARDENED 2026-02-02: Multiple security checks)
     if allow_development_bypass and settings.is_development:
-        return _check_development_bypass(allow_development_bypass, settings)
+        bypass_result = _check_development_bypass(allow_development_bypass, settings)
+        if bypass_result is not None:
+            return bypass_result
 
-    # Deny by default
-    raise AuthenticationError("Active authentication required to access this resource")
+    # 4. Deny-by-default
+    raise AuthenticationError(
+        "Authentication required: provide either a valid API key or bearer token."
+    )

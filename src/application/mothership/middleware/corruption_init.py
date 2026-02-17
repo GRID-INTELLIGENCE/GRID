@@ -3,7 +3,8 @@
 This module provides a simple way to set up the complete data corruption penalty
 system with the Mothership API.
 """
-from typing import Set, Optional
+from __future__ import annotations
+
 import logging
 
 from fastapi import FastAPI
@@ -22,8 +23,8 @@ class DataCorruptionPenaltyInitializer:
     def __init__(
         self,
         app: FastAPI,
-        tracker: Optional[DataCorruptionPenaltyTracker] = None,
-        critical_endpoints: Optional[Set[str]] = None,
+        tracker: DataCorruptionPenaltyTracker | None = None,
+        critical_endpoints: set[str] | None = None,
     ):
         self.app = app
         self.tracker = tracker or DataCorruptionPenaltyTracker()
@@ -79,8 +80,8 @@ class DataCorruptionPenaltyInitializer:
 
 def init_data_corruption_system(
     app: FastAPI,
-    critical_endpoints: Optional[Set[str]] = None,
-    tracker: Optional[DataCorruptionPenaltyTracker] = None,
+    critical_endpoints: set[str] | None = None,
+    tracker: DataCorruptionPenaltyTracker | None = None,
 ) -> DataCorruptionPenaltyInitializer:
     """Initialize the data corruption penalty system for a FastAPI app.
     

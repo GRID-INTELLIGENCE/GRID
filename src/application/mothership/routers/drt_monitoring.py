@@ -1,10 +1,14 @@
 """
 DRT (Don't Repeat Themselves) Monitoring Router.
 """
+from __future__ import annotations
 
 import logging
 from datetime import datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from ..middleware.drt_middleware import ComprehensiveDRTMiddleware
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel

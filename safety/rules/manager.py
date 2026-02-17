@@ -162,7 +162,7 @@ def analyze(self, text: str, context: EvaluationContext, include_warnings: bool 
             # Check if action is BLOCK or ESCALATE
             if match.action in (RuleAction.BLOCK, RuleAction.ESCALATE):
                 violating_matches.append(match)
-elif include_warnings and match.action in (RuleAction.WARN, RuleAction.LOG):
+            elif include_warnings and match.action in (RuleAction.WARN, RuleAction.LOG):
                 violating_matches.append(match)
 
         return violating_matches

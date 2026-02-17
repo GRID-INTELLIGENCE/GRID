@@ -13,7 +13,7 @@ import logging
 import time
 from collections import defaultdict
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from ..middleware.drt_middleware import BehavioralSignature
 
@@ -26,9 +26,9 @@ class DRTMetrics:
 
     # Violation metrics
     violations_total: int = 0
-    violations_by_severity: Dict[str, int] = field(default_factory=lambda: defaultdict(int))
-    violations_by_path: Dict[str, int] = field(default_factory=lambda: defaultdict(int))
-    violations_by_method: Dict[str, int] = field(default_factory=lambda: defaultdict(int))
+    violations_by_severity: dict[str, int] = field(default_factory=lambda: defaultdict(int))
+    violations_by_path: dict[str, int] = field(default_factory=lambda: defaultdict(int))
+    violations_by_method: dict[str, int] = field(default_factory=lambda: defaultdict(int))
 
     # Escalation metrics
     escalations_total: int = 0
@@ -59,7 +59,7 @@ class DRTMetrics:
     escalations_last_24h: int = 0
 
     # Similarity score distribution
-    similarity_scores: List[float] = field(default_factory=list)
+    similarity_scores: list[float] = field(default_factory=list)
 
     # Timestamp tracking
     last_updated: float = field(default_factory=time.time)
@@ -79,7 +79,7 @@ class DRTMetricsCollector:
         request_path: str,
         request_method: str,
         was_blocked: bool = False,
-        processing_time: Optional[float] = None,
+        processing_time: float | None = None,
     ) -> None:
         """Record a violation detection."""
         self.metrics.violations_total += 1
@@ -106,7 +106,7 @@ class DRTMetricsCollector:
         self,
         path: str,
         similarity_score: float,
-        duration_minutes: Optional[int] = None,
+        duration_minutes: int | None = None,
     ) -> None:
         """Record an endpoint escalation."""
         self.metrics.escalations_total += 1
@@ -144,7 +144,7 @@ class DRTMetricsCollector:
         self._update_false_positive_rate()
         self.metrics.last_updated = time.time()
 
-    def record_cleanup_operation(self, duration: Optional[float] = None) -> None:
+    def record_cleanup_operation(self, duration: float | None = None) -> None:
         """Record a cleanup operation."""
         self.metrics.cleanup_operations += 1
 
@@ -187,7 +187,7 @@ class DRTMetricsCollector:
                 self.metrics.false_positives_marked / self.metrics.violations_total
             )
 
-    def get_metrics_dict(self) -> Dict[str, Any]:
+    def get_metrics_dict(self) -> dict[str, Any]:
         """Get all metrics as a dictionary for Prometheus-style export."""
         return {
             # Violation metrics
@@ -264,7 +264,7 @@ class DRTMetricsCollector:
 
 
 # Global metrics collector instance
-_metrics_collector: Optional[DRTMetricsCollector] = None
+_metrics_collector: DRTMetricsCollector | None = None
 
 
 def get_drt_metrics_collector() -> DRTMetricsCollector:
@@ -281,7 +281,7 @@ def record_drt_violation(
     request_path: str,
     request_method: str,
     was_blocked: bool = False,
-    processing_time: Optional[float] = None,
+    processing_time: float | None = None,
 ) -> None:
     """Convenience function to record a DRT violation."""
     collector = get_drt_metrics_collector()
@@ -298,7 +298,7 @@ def record_drt_violation(
 def record_drt_escalation(
     path: str,
     similarity_score: float,
-    duration_minutes: Optional[int] = None,
+    duration_minutes: int | None = None,
 ) -> None:
     """Convenience function to record a DRT escalation."""
     collector = get_drt_metrics_collector()

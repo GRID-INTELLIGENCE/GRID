@@ -1,5 +1,10 @@
-from pydantic import PostgresDsn
+import logging
+import os
+
+from pydantic import PostgresDsn, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+_logger = logging.getLogger(__name__)
 
 
 class Settings(BaseSettings):
@@ -51,6 +56,35 @@ class Settings(BaseSettings):
     SECRET_KEY: str = "your-secret-key-here-change-in-production"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30  # Reduced from 8 days (60*24*8) to 30 minutes
     ALGORITHM: str = "HS256"
+
+    @model_validator(mode="after")
+    def _validate_secret_key(self) -> "Settings":
+        """Validate SECRET_KEY strength — mirrors mothership secret_validation."""
+        environment = os.getenv("GRID_ENVIRONMENT", "development").lower()
+        weak_patterns = [
+            "your-secret-key",
+            "change-in-production",
+            "password",
+            "123456",
+            "insecure",
+            "default",
+        ]
+        key = self.SECRET_KEY
+        key_lower = key.lower()
+        is_weak = len(key) < 32 or any(p in key_lower for p in weak_patterns)
+        if is_weak and environment == "production":
+            raise ValueError(
+                "SECRET_KEY is too weak for production. "
+                "Set GRID_SECRET_KEY to a value >= 32 chars with good entropy."
+            )
+        if is_weak:
+            _logger.warning(
+                "SECURITY WARNING: SECRET_KEY appears weak (length=%d). "
+                "Set GRID_SECRET_KEY before deploying to production.",
+                len(key),
+            )
+        return self
+
     PASSWORD_MIN_LENGTH: int = 12
     PASSWORD_COMPLEXITY_SCORE: int = 3
 

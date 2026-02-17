@@ -1,13 +1,14 @@
 """
 DRT (Don't Repeat Themselves) Middleware for focused monitoring.
 """
+from __future__ import annotations
 
 import asyncio
 import logging
 import secrets
 import time
-from datetime import datetime, timedelta
-from typing import Any, Callable, Optional
+from datetime import UTC, datetime, timedelta
+from typing import Any, Callable
 
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -23,15 +24,15 @@ class BehavioralSignature:
         path_pattern: str,
         method: str,
         headers: tuple[str, ...],
-        body_pattern: Optional[str] = None,
-        query_pattern: Optional[str] = None,
+        body_pattern: str | None = None,
+        query_pattern: str | None = None,
     ):
         self.path_pattern = path_pattern
         self.method = method
         self.headers = headers
         self.body_pattern = body_pattern
         self.query_pattern = query_pattern
-        self.timestamp = datetime.utcnow()
+        self.timestamp = datetime.now(UTC)
         self.request_count = 0
     
     def to_dict(self) -> dict[str, Any]:
@@ -63,7 +64,7 @@ class ComprehensiveDRTMiddleware(BaseHTTPMiddleware):
         rate_limit_multiplier: float = 0.5,
         sampling_rate: float = 1.0,
         alert_on_escalation: bool = True,
-        db_session: Optional[Any] = None,
+        db_session: Any | None = None,
     ):
         super().__init__(app)
         self.enabled = enabled
@@ -88,7 +89,7 @@ class ComprehensiveDRTMiddleware(BaseHTTPMiddleware):
         self.behavioral_history: list[BehavioralSignature] = []
         self.attack_vectors: list[BehavioralSignature] = []
         self._attack_vector_ids: dict[str, str] = {}  # signature_id -> attack_vector_id
-        self._cleanup_task: Optional[asyncio.Task] = None
+        self._cleanup_task: asyncio.Task | None = None
         
         # Initialize from database
         self._initialized = False
@@ -106,11 +107,11 @@ class ComprehensiveDRTMiddleware(BaseHTTPMiddleware):
         if self._sig_repo is None:
             try:
                 from ..repositories.drt import (
-                    DRTBehavioralSignatureRepository,
                     DRTAttackVectorRepository,
-                    DRTViolationRepository,
-                    DRTEscalatedEndpointRepository,
+                    DRTBehavioralSignatureRepository,
                     DRTConfigurationRepository,
+                    DRTEscalatedEndpointRepository,
+                    DRTViolationRepository,
                 )
                 self._sig_repo = DRTBehavioralSignatureRepository(self._db_session)
                 self._attack_repo = DRTAttackVectorRepository(self._db_session)
@@ -229,7 +230,7 @@ class ComprehensiveDRTMiddleware(BaseHTTPMiddleware):
         params = urllib.parse.parse_qs(query)
         return '&'.join(sorted(params.keys()))
     
-    def _extract_body_pattern(self, request: Request) -> Optional[str]:
+    def _extract_body_pattern(self, request: Request) -> str | None:
         """Extract a pattern from the request body for behavioral analysis."""
         if request.method not in {"POST", "PUT", "PATCH"}:
             return None
@@ -249,7 +250,7 @@ class ComprehensiveDRTMiddleware(BaseHTTPMiddleware):
                 
         return None
     
-    def _check_similarity(self, signature: BehavioralSignature) -> tuple[float, Optional[BehavioralSignature]]:
+    def _check_similarity(self, signature: BehavioralSignature) -> tuple[float, BehavioralSignature | None]:
         max_similarity = 0.0
         matched_vector = None
         
@@ -289,11 +290,15 @@ class ComprehensiveDRTMiddleware(BaseHTTPMiddleware):
                 f"(timeout: {self.escalation_timeout_minutes} minutes)"
             )
         
-        # Record escalation metrics
+        # Record escalation metrics (local import to avoid circular dependency)
+        from .drt_metrics import record_drt_escalation
         record_drt_escalation(path=path, similarity_score=0.0, duration_minutes=self.escalation_timeout_minutes)
         
         # Persist escalation (fire and forget)
-        asyncio.create_task(self._persist_escalation(path, expires_at))
+        try:
+            asyncio.create_task(self._persist_escalation(path, expires_at))
+        except RuntimeError:
+            pass  # No running event loop (e.g. unit tests)
     
     def _apply_websocket_overhead(self, request: Request) -> None:
         """Apply WebSocket overhead to suspicious endpoints."""
@@ -375,7 +380,10 @@ class ComprehensiveDRTMiddleware(BaseHTTPMiddleware):
         self.behavioral_history.append(signature)
         
         # Persist to database (fire and forget for performance)
-        asyncio.create_task(self._persist_behavior(signature))
+        try:
+            asyncio.create_task(self._persist_behavior(signature))
+        except RuntimeError:
+            pass  # No running event loop (e.g. unit tests)
     
     async def _persist_behavior(self, signature: BehavioralSignature) -> None:
         """Persist behavioral signature to database."""
@@ -467,7 +475,10 @@ class ComprehensiveDRTMiddleware(BaseHTTPMiddleware):
         collector.record_attack_vector("medium")  # Default severity
         
         # Persist to database (fire and forget)
-        asyncio.create_task(self._persist_attack_vector(signature))
+        try:
+            asyncio.create_task(self._persist_attack_vector(signature))
+        except RuntimeError:
+            pass  # No running event loop (e.g. unit tests)
     
     async def _persist_attack_vector(self, signature: BehavioralSignature) -> None:
         """Persist attack vector to database."""

@@ -76,7 +76,8 @@ class OnDemandRAGEngine:
             self.hooks.on_route(query_text, routing)
 
         # Instantiate providers based on routing (strictly local)
-        routed_config = RAGConfig.from_env()
+        # Reuse self.config as base instead of re-parsing env vars
+        routed_config = self.config.copy() if hasattr(self.config, "copy") else RAGConfig.from_env()
         routed_config.ensure_local_only()
         routed_config.embedding_provider = routing.embedding_provider
         routed_config.embedding_model = routing.embedding_model
@@ -86,7 +87,7 @@ class OnDemandRAGEngine:
         embedding_fallback_provider = None
         try:
             # If Ollama embeddings fail (context/window issues), fall back to HF embeddings locally.
-            fallback_cfg = RAGConfig.from_env()
+            fallback_cfg = self.config.copy() if hasattr(self.config, "copy") else RAGConfig.from_env()
             fallback_cfg.ensure_local_only()
             fallback_cfg.embedding_provider = "huggingface"
             fallback_cfg.embedding_model = self.config.embedding_model
@@ -289,27 +290,24 @@ class OnDemandRAGEngine:
         }
 
         out: list[Path] = []
-        for p in root.rglob("*"):
-            try:
+        for dirpath, dirnames, filenames in os.walk(root):
+            # Prune excluded directories in-place to prevent traversal
+            dirnames[:] = [d for d in dirnames if d not in exclude_dirs]
+            for fname in filenames:
                 if len(out) >= limit:
-                    break
-                if p.is_dir():
-                    if p.name in exclude_dirs:
-                        continue
-                    continue
-                if not p.is_file():
-                    continue
-                if p.suffix.lower() not in allow_ext:
-                    continue
-                # Skip huge files
+                    return out
                 try:
-                    if p.stat().st_size > 1024 * 1024:
+                    p = Path(dirpath) / fname
+                    if p.suffix.lower() not in allow_ext:
                         continue
-                except OSError:
+                    try:
+                        if p.stat().st_size > 1024 * 1024:
+                            continue
+                    except OSError:
+                        continue
+                    out.append(p)
+                except (OSError, PermissionError):
                     continue
-                out.append(p)
-            except (OSError, PermissionError):
-                continue
         return out
 
     @staticmethod

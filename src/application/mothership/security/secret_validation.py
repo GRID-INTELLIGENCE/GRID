@@ -12,6 +12,7 @@ import logging
 import os
 import secrets
 import string
+from enum import StrEnum
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +28,7 @@ class SecretValidationError(Exception):
     pass
 
 
-class SecretStrength(str):
+class SecretStrength(StrEnum):
     """Secret strength classification."""
 
     WEAK = "weak"

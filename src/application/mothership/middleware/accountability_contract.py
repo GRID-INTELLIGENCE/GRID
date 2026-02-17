@@ -2,22 +2,22 @@
 Accountability Contract Middleware.
 Enforces accountability contracts with RBAC and claims support.
 """
+from __future__ import annotations
 
-import asyncio
 import logging
 import time
 from datetime import datetime
-from typing import Any, Callable, Optional
+from typing import Any, Callable
 
-from fastapi import Request, Response, HTTPException, status
+from fastapi import Request, Response, status
 from starlette.middleware.base import BaseHTTPMiddleware
+
+from grid.resilience.accountability.contracts import EnforcementResult
 
 # Import enhanced enforcer
 from grid.resilience.accountability.enforcer_enhanced import (
     get_enhanced_accountability_enforcer,
-    EnhancedAccountabilityEnforcer,
 )
-from grid.resilience.accountability.contracts import EnforcementResult
 
 logger = logging.getLogger(__name__)
 
@@ -29,8 +29,8 @@ class AccountabilityContractMiddleware(BaseHTTPMiddleware):
         self,
         app: Any,
         enforcement_mode: str = "monitor",  # monitor, enforce, disabled
-        contract_path: Optional[str] = None,
-        skip_paths: Optional[list[str]] = None,
+        contract_path: str | None = None,
+        skip_paths: list[str] | None = None,
     ):
         """Initialize accountability contract middleware.
         
@@ -140,7 +140,7 @@ class AccountabilityContractMiddleware(BaseHTTPMiddleware):
         
         return False
     
-    async def _extract_auth_context(self, request: Request) -> Optional[dict[str, Any]]:
+    async def _extract_auth_context(self, request: Request) -> dict[str, Any] | None:
         """Extract authentication context from request."""
         try:
             # Try to get auth context from request state (set by auth middleware)
@@ -179,7 +179,7 @@ class AccountabilityContractMiddleware(BaseHTTPMiddleware):
             logger.warning(f"Failed to extract auth context: {e}")
             return None
     
-    async def _extract_request_data(self, request: Request) -> Optional[dict[str, Any]]:
+    async def _extract_request_data(self, request: Request) -> dict[str, Any] | None:
         """Extract request data for validation."""
         try:
             # Only extract for methods that typically have bodies
@@ -203,7 +203,7 @@ class AccountabilityContractMiddleware(BaseHTTPMiddleware):
             logger.debug(f"Failed to extract request data: {e}")
             return None
     
-    async def _extract_response_data(self, response: Response) -> Optional[dict[str, Any]]:
+    async def _extract_response_data(self, response: Response) -> dict[str, Any] | None:
         """Extract response data for validation."""
         try:
             # Only attempt validation for JSON responses
@@ -220,7 +220,7 @@ class AccountabilityContractMiddleware(BaseHTTPMiddleware):
             logger.debug(f"Failed to extract response data: {e}")
             return None
     
-    def _get_client_ip(self, request: Request) -> Optional[str]:
+    def _get_client_ip(self, request: Request) -> str | None:
         """Extract client IP from request."""
         try:
             # Check for forwarded headers
@@ -248,7 +248,7 @@ class AccountabilityContractMiddleware(BaseHTTPMiddleware):
             status_code = status.HTTP_403_FORBIDDEN
             detail = "Access denied: Critical security violations"
         elif high_violations:
-            status_code = status.HTTP_403_FORBIDDEN  
+            status_code = status.HTTP_403_FORBIDDEN
             detail = "Access denied: Security policy violations"
         else:
             status_code = status.HTTP_400_BAD_REQUEST
@@ -350,7 +350,7 @@ class AccountabilityContractMiddleware(BaseHTTPMiddleware):
 
 
 # Global middleware instance for access
-_global_accountability_middleware: Optional[AccountabilityContractMiddleware] = None
+_global_accountability_middleware: AccountabilityContractMiddleware | None = None
 
 
 def get_accountability_middleware() -> AccountabilityContractMiddleware:

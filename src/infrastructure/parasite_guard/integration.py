@@ -97,15 +97,17 @@ def add_parasite_guard(
             )
         logger.info(f"Parasite Guard enabled components: {enable_components}")
 
-    # Create middleware
+    # Create middleware (initial app reference is temporary)
     middleware = ParasiteGuardMiddleware(app, config)
 
-    # Register as ASGI middleware
-    # FastAPI 0.100+ uses middleware as a callable
-    app.add_middleware(lambda app: middleware)
+    # Register as ASGI middleware.
+    # FastAPI rebuilds the middleware stack, so we must update
+    # middleware.app to the real inner app to avoid recursion.
+    def _install(inner_app: Any) -> ParasiteGuardMiddleware:
+        middleware.app = inner_app
+        return middleware
 
-    # Alternative: For older FastAPI, use add_asgi_middleware
-    # app.add_asgi_middleware(middleware)
+    app.add_middleware(_install)
 
     # Log configuration
     logger.info(
@@ -198,7 +200,7 @@ def create_middleware(
 
         guard_middleware = create_middleware(app)
 
-        # Register manually
+        # Register manually`
         app.add_middleware(guard_middleware)
     """
     if config is None:

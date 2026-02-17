@@ -479,11 +479,11 @@ class ParasiteCallTracer:
 
                         # Extract metadata
                         type_obj = type(obj)
-                        attrs = {
+                        attrs = dict(list({
                             k: repr(getattr(obj, k, None))[:100]
                             for k in dir(obj)
                             if not k.startswith("_") and not callable(getattr(obj, k, None))
-                        }[:10]  # Limit to 10 attributes
+                        }.items())[:10])  # Limit to 10 attributes
 
                         # Check if singleton
                         is_singleton = sum(1 for o in gc.get_objects() if type(o) == type_obj) == 1

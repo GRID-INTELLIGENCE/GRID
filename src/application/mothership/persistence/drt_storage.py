@@ -5,14 +5,14 @@ Provides persistent storage for behavioral history and attack vectors
 using JSON files. Data survives application restarts.
 """
 
+from __future__ import annotations
+
 import asyncio
 import json
 import logging
-import os
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable, Optional
-from dataclasses import dataclass, asdict
 
 logger = logging.getLogger(__name__)
 
@@ -23,13 +23,13 @@ class StoredBehavioralSignature:
     path_pattern: str
     method: str
     headers: tuple  # JSON converts tuple to list
-    body_pattern: Optional[str]
-    query_pattern: Optional[str]
+    body_pattern: str | None
+    query_pattern: str | None
     timestamp: str
     request_count: int
     
     @classmethod
-    def from_dict(cls, data: dict) -> "StoredBehavioralSignature":
+    def from_dict(cls, data: dict) -> StoredBehavioralSignature:
         """Create from dictionary."""
         return cls(
             path_pattern=data["path_pattern"],
@@ -60,13 +60,13 @@ class StoredAttackVector:
     path_pattern: str
     method: str
     headers: tuple
-    body_pattern: Optional[str]
-    query_pattern: Optional[str]
+    body_pattern: str | None
+    query_pattern: str | None
     timestamp: str
     description: str = ""
     
     @classmethod
-    def from_dict(cls, data: dict) -> "StoredAttackVector":
+    def from_dict(cls, data: dict) -> StoredAttackVector:
         """Create from dictionary."""
         return cls(
             path_pattern=data["path_pattern"],
@@ -100,7 +100,7 @@ class DRTStorage:
     
     def __init__(
         self,
-        storage_dir: Optional[str] = None,
+        storage_dir: str | None = None,
         max_history_entries: int = 10000,
         save_interval_seconds: int = 60
     ):
@@ -135,7 +135,7 @@ class DRTStorage:
         self._lock = asyncio.Lock()
         
         # Background save task
-        self._save_task: Optional[asyncio.Task] = None
+        self._save_task: asyncio.Task | None = None
         
         # Load existing data
         self._load_all()
@@ -172,7 +172,7 @@ class DRTStorage:
         """Load behavioral history from disk."""
         if self.behavioral_history_file.exists():
             try:
-                with open(self.behavioral_history_file, "r") as f:
+                with open(self.behavioral_history_file) as f:
                     data = json.load(f)
                     if isinstance(data, list):
                         self._behavioral_history = data[-self.max_history_entries:]
@@ -184,7 +184,7 @@ class DRTStorage:
         """Load attack vectors from disk."""
         if self.attack_vectors_file.exists():
             try:
-                with open(self.attack_vectors_file, "r") as f:
+                with open(self.attack_vectors_file) as f:
                     data = json.load(f)
                     if isinstance(data, list):
                         self._attack_vectors = data
@@ -253,7 +253,7 @@ class DRTStorage:
     async def get_behavioral_history(
         self,
         limit: int = 1000,
-        since: Optional[datetime] = None
+        since: datetime | None = None
     ) -> list[dict]:
         """
         Get behavioral history entries.
@@ -355,7 +355,7 @@ class DRTStorage:
 
 
 # Singleton instance
-_drt_storage: Optional[DRTStorage] = None
+_drt_storage: DRTStorage | None = None
 
 
 def get_drt_storage() -> DRTStorage:

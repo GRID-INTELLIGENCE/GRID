@@ -25,9 +25,11 @@ import logging
 import os
 import sys
 import time
+import uuid
 from collections.abc import AsyncIterator, Callable
 from contextlib import asynccontextmanager
 from datetime import UTC, datetime
+from pathlib import Path
 from typing import Any, cast
 
 from fastapi import FastAPI, HTTPException, Request, Response, status
@@ -118,7 +120,7 @@ class ValidationErrorDetail(BaseModel):
 async def mothership_error_handler(request: Request, exc: Exception) -> JSONResponse:
     """Handle custom Mothership exceptions."""
     exc = cast(MothershipError, exc)
-    logger.error(f"MothershipError: {exc.code} - {exc.message}")
+    logger.error("MothershipError: %s - %s", exc.code, exc.message)
 
     return JSONResponse(
         status_code=exc.status_code,
@@ -183,7 +185,7 @@ async def validation_error_handler(request: Request, exc: Exception) -> JSONResp
 
 async def generic_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     """Handle unexpected exceptions."""
-    logger.exception(f"Unexpected error: {exc}")
+    logger.exception("Unexpected error: %s", exc)
 
     # Don't expose internal errors in production
     settings = get_settings()
@@ -225,8 +227,6 @@ def _build_payment_gateway_for_scheduler(settings: MothershipSettings):
 
 async def request_id_middleware(request: Request, call_next: Callable) -> Response:
     """Add request ID to all requests."""
-    import uuid
-
     request_id = request.headers.get("X-Request-ID") or str(uuid.uuid4())
 
     # Store in request state for access in handlers
@@ -258,16 +258,18 @@ async def logging_middleware(request: Request, call_next: Callable) -> Response:
 
     # Log request
     logger.info(
-        f"Request: {request.method} {request.url.path} "
-        f"client={request.client.host if request.client else 'unknown'} "
-        f"request_id={getattr(request.state, 'request_id', 'unknown')}"
+        "Request: %s %s client=%s request_id=%s",
+        request.method,
+        request.url.path,
+        request.client.host if request.client else "unknown",
+        getattr(request.state, "request_id", "unknown"),
     )
 
     response = await call_next(request)
 
     # Log response
     duration = time.time() - start_time
-    logger.info(f"Response: {request.method} {request.url.path} status={response.status_code} duration={duration:.3f}s")
+    logger.info("Response: %s %s status=%s duration=%.3fs", request.method, request.url.path, response.status_code, duration)
 
     return response
 
@@ -290,6 +292,11 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     settings = get_settings()
     logger.info(f"Starting {settings.app_name} v{settings.app_version}")
     logger.info(f"Environment: {settings.environment.value}")
+
+    # Ensure safety directory is on sys.path once for all safety imports
+    _safety_dir = Path(__file__).parent.parent.parent.parent / "safety"
+    if str(_safety_dir) not in sys.path:
+        sys.path.insert(0, str(_safety_dir))
 
     # Harden environment before starting any services
     try:
@@ -429,14 +436,6 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
         # Initialize Safety Enforcement Infrastructure
         try:
-            import sys
-            from pathlib import Path
-
-            # Add safety directory to path
-            safety_dir = Path(__file__).parent.parent.parent.parent / "safety"
-            if str(safety_dir) not in sys.path:
-                sys.path.insert(0, str(safety_dir))
-
             from safety.audit.db import check_health as check_safety_db
             from safety.audit.db import init_db as init_safety_db
             from safety.workers.worker_utils import check_redis_health, ensure_consumer_group
@@ -544,14 +543,6 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
         # Shutdown safety enforcement infrastructure
         try:
-            import sys
-            from pathlib import Path
-
-            # Add safety directory to path
-            safety_dir = Path(__file__).parent.parent.parent.parent / "safety"
-            if str(safety_dir) not in sys.path:
-                sys.path.insert(0, str(safety_dir))
-
             from safety.api.rate_limiter import close_pool as close_rate_limiter_pool
             from safety.audit.db import close_db as close_safety_db
             from safety.workers.worker_utils import close_redis
@@ -744,8 +735,9 @@ The API supports multiple authentication methods:
     # Monitors endpoint behaviors for attack vector similarities and escalates protections
     try:
         # Create unified middleware instance with settings from SecuritySettings
-        drt_middleware = UnifiedDRTMiddleware(
-            app,
+        # Register DRT middleware via add_middleware (single instance)
+        app.add_middleware(
+            UnifiedDRTMiddleware,
             enabled=settings.security.drt_enabled,
             similarity_threshold=settings.security.drt_behavioral_similarity_threshold,
             retention_hours=settings.security.drt_retention_hours,
@@ -761,19 +753,10 @@ The API supports multiple authentication methods:
             rate_limit_multiplier=0.5,
             alert_on_escalation=True,
         )
-
-        # Add middleware to app
-        app.add_middleware(
-            UnifiedDRTMiddleware,
-            enabled=settings.security.drt_enabled,
-            similarity_threshold=settings.security.drt_behavioral_similarity_threshold,
-            retention_hours=settings.security.drt_retention_hours,
-            enforcement_mode=settings.security.drt_enforcement_mode,
-            websocket_monitoring_enabled=settings.security.drt_websocket_monitoring_enabled,
-            api_movement_logging_enabled=settings.security.drt_api_movement_logging_enabled,
-            penalty_points_enabled=settings.security.drt_penalty_points_enabled,
-        )
-        # Store middleware instance for shutdown handling and router access
+        # Store reference for shutdown handling and router access
+        # Note: Starlette wraps the middleware, so we retrieve the actual instance
+        # from the middleware stack after registration
+        drt_middleware = app.middleware_stack  # type: ignore[reportAttributeAccessIssue]
         app.state.drt_middleware = drt_middleware  # type: ignore[reportAttributeAccessIssue]
         set_unified_drt_middleware(drt_middleware)
         logger.info("Unified DRT behavioral monitoring middleware enabled")
@@ -784,19 +767,12 @@ The API supports multiple authentication methods:
     # Enforces accountability contracts with RBAC and claims support
     if settings.security.accountability_enabled:
         try:
-            accountability_middleware = AccountabilityContractMiddleware(
-                app,
-                enforcement_mode=settings.security.accountability_enforcement_mode,
-                contract_path=settings.security.accountability_contract_path,
-                skip_paths=["/health", "/metrics", "/docs", "/redoc", "/openapi.json"],
-            )
             app.add_middleware(
                 AccountabilityContractMiddleware,
                 enforcement_mode=settings.security.accountability_enforcement_mode,
                 contract_path=settings.security.accountability_contract_path,
                 skip_paths=["/health", "/metrics", "/docs", "/redoc", "/openapi.json"],
             )
-            app.state.accountability_middleware = accountability_middleware  # type: ignore[reportAttributeAccessIssue]
             logger.info(
                 f"Accountability contract enforcement middleware enabled: mode={settings.security.accountability_enforcement_mode}"
             )
@@ -807,14 +783,6 @@ The API supports multiple authentication methods:
     # This middleware MUST run before model inference endpoints
     # Enforces: auth → suspension → rate limit → pre-check → enqueue
     try:
-        import sys
-        from pathlib import Path
-
-        # Add safety directory to path
-        safety_dir = Path(__file__).parent.parent.parent.parent / "safety"
-        if str(safety_dir) not in sys.path:
-            sys.path.insert(0, str(safety_dir))
-
         from safety.api.middleware import SafetyMiddleware
 
         app.add_middleware(SafetyMiddleware)

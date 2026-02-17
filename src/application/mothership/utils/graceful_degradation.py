@@ -9,9 +9,10 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from collections.abc import AsyncIterator, Callable
 from contextlib import asynccontextmanager
 from enum import Enum
-from typing import Any, AsyncIterator, Callable, Dict, List, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +45,7 @@ class ServiceHealth:
         self.check_interval = check_interval_seconds
         self.failure_count = 0
         self.success_count = 0
-        self.metadata: Dict[str, Any] = {}
+        self.metadata: dict[str, Any] = {}
 
     def record_success(self) -> None:
         """Record successful health check."""
@@ -95,8 +96,8 @@ class DegradationManager:
 
     def __init__(self):
         self._degradation_level = DegradationLevel.NORMAL
-        self._services: Dict[str, ServiceHealth] = {}
-        self._fallback_strategies: Dict[str, List[Callable]] = {}
+        self._services: dict[str, ServiceHealth] = {}
+        self._fallback_strategies: dict[str, list[Callable]] = {}
         self._degradation_thresholds = {
             DegradationLevel.NORMAL: 0.8,  # 80% services healthy
             DegradationLevel.DEGRADED: 0.5,  # 50% services healthy
@@ -118,7 +119,7 @@ class DegradationManager:
                 self._services[name].record_failure()
             self._update_degradation_level()
 
-    def get_service_health(self, name: str) -> Optional[ServiceHealth]:
+    def get_service_health(self, name: str) -> ServiceHealth | None:
         """Get service health information."""
         return self._services.get(name)
 
@@ -218,7 +219,7 @@ class DegradationManager:
             self._fallback_strategies[service_name] = []
         self._fallback_strategies[service_name].append(fallback_func)
 
-    def get_system_status(self) -> Dict[str, Any]:
+    def get_system_status(self) -> dict[str, Any]:
         """Get comprehensive system status."""
         return {
             "degradation_level": self._degradation_level.value,
@@ -272,7 +273,7 @@ async def degraded_operation(
         yield use_fallback
         # Operation succeeded
         manager.update_service_health(service_name, True)
-    except Exception as e:
+    except Exception:
         # Operation failed
         manager.update_service_health(service_name, False)
         if use_fallback and fallback_result is not None:
@@ -291,7 +292,7 @@ async def cached_fallback(cache_key: str, ttl: int = 300) -> Any:
     return None
 
 
-async def degraded_fallback(message: str = "Service temporarily unavailable") -> Dict[str, Any]:
+async def degraded_fallback(message: str = "Service temporarily unavailable") -> dict[str, Any]:
     """Fallback that returns a degraded service response."""
     return {
         "status": "degraded",
@@ -300,7 +301,7 @@ async def degraded_fallback(message: str = "Service temporarily unavailable") ->
     }
 
 
-async def emergency_fallback() -> Dict[str, Any]:
+async def emergency_fallback() -> dict[str, Any]:
     """Emergency fallback for critical operations."""
     return {
         "status": "emergency",

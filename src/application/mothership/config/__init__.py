@@ -22,7 +22,7 @@ _quiet_mode = os.environ.get("GRID_QUIET", "").lower() in ("1", "true", "yes")
 from enum import Enum, StrEnum
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 try:
     from ..security.secret_validation import (  # type: ignore[import-not-found]

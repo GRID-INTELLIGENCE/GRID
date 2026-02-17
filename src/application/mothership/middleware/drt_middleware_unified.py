@@ -2,13 +2,14 @@
 Unified DRT (Don't Repeat Themselves) Middleware.
 Delegates to core DRTMonitor engine for single source of truth.
 """
+from __future__ import annotations
 
 import asyncio
 import logging
 import random
 import time
 from datetime import datetime, timedelta
-from typing import Any, Callable, Optional
+from typing import Any, Callable
 
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -63,7 +64,7 @@ class UnifiedDRTMiddleware(BaseHTTPMiddleware):
         
         # Local middleware state for escalation tracking
         self.escalated_endpoints: dict[str, datetime] = {}
-        self._cleanup_task: Optional[asyncio.Task] = None
+        self._cleanup_task: asyncio.Task | None = None
         
         logger.info(
             f"Unified DRT middleware initialized: enabled={enabled}, "
@@ -246,7 +247,7 @@ class UnifiedDRTMiddleware(BaseHTTPMiddleware):
 
 
 # Global middleware instance for router access
-_unified_drt_middleware: Optional[UnifiedDRTMiddleware] = None
+_unified_drt_middleware: UnifiedDRTMiddleware | None = None
 
 
 def get_unified_drt_middleware() -> UnifiedDRTMiddleware:

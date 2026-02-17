@@ -1,8 +1,9 @@
+from __future__ import annotations
+
 import asyncio
 import logging
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional
 from collections import defaultdict
+from datetime import datetime, timedelta
 
 logger = logging.getLogger(__name__)
 
@@ -12,10 +13,10 @@ class MovementMonitor:
 
     def __init__(self, retention_hours: int = 96):
         self.retention_hours = retention_hours
-        self.api_movements: Dict[str, List[dict]] = defaultdict(list)
-        self.websocket_connections: Dict[str, dict] = {}
+        self.api_movements: dict[str, list[dict]] = defaultdict(list)
+        self.websocket_connections: dict[str, dict] = {}
         self.cleanup_interval = 3600  # 1 hour in seconds
-        self._cleanup_task: Optional[asyncio.Task] = None
+        self._cleanup_task: asyncio.Task | None = None
 
     async def start(self) -> None:
         """Start the cleanup task."""
@@ -70,8 +71,8 @@ class MovementMonitor:
         method: str,
         status_code: int,
         client_ip: str,
-        user_id: Optional[str] = None,
-        metadata: Optional[dict] = None,
+        user_id: str | None = None,
+        metadata: dict | None = None,
     ) -> None:
         """Record an API request/response."""
         movement = {
@@ -91,8 +92,8 @@ class MovementMonitor:
         connection_id: str,
         path: str,
         client_ip: str,
-        user_id: Optional[str] = None,
-        metadata: Optional[dict] = None,
+        user_id: str | None = None,
+        metadata: dict | None = None,
     ) -> None:
         """Record a new WebSocket connection."""
         self.websocket_connections[connection_id] = {
@@ -113,7 +114,7 @@ class MovementMonitor:
         message_type: str,
         message_size: int,
         direction: str = "inbound",
-        metadata: Optional[dict] = None,
+        metadata: dict | None = None,
     ) -> None:
         """Record a WebSocket message."""
         if connection_id not in self.websocket_connections:
@@ -137,7 +138,7 @@ class MovementMonitor:
         self,
         connection_id: str,
         reason: str = "normal",
-        error: Optional[str] = None,
+        error: str | None = None,
     ) -> None:
         """Record a WebSocket disconnection."""
         if connection_id not in self.websocket_connections:
@@ -184,7 +185,7 @@ class MovementMonitor:
         # Convert to messages per minute
         return recent_messages / 60 if recent_messages > 0 else 0.0
 
-    def detect_anomalies(self) -> List[dict]:
+    def detect_anomalies(self) -> list[dict]:
         """Detect anomalous behavior in API and WebSocket traffic."""
         anomalies = []
 

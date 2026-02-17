@@ -4,19 +4,19 @@ This middleware automatically detects and reports data corruption events during
 request processing. It integrates with the DataCorruptionPenaltyTracker to apply
 penalties to endpoints that cause data or environment corruption.
 """
+from __future__ import annotations
+
 import logging
-from datetime import datetime, timezone
-from typing import Any, Callable, Dict, List, Optional, Set
+from datetime import UTC, datetime
+from typing import Any, Callable
 
 from fastapi import FastAPI, Request, Response
-from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp
 
-from .data_corruption_penalty import (
+from grid.resilience.data_corruption_penalty import (
     CorruptionSeverity,
     CorruptionType,
-    DataCorruptionEvent,
     DataCorruptionPenaltyTracker,
     record_corruption_event,
 )
@@ -29,9 +29,9 @@ class DataCorruptionDetectionMiddleware(BaseHTTPMiddleware):
     def __init__(
         self,
         app: ASGIApp,
-        tracker: Optional[DataCorruptionPenaltyTracker] = None,
-        critical_endpoints: Optional[Set[str]] = None,
-        corruption_indicators: Optional[Dict[str, Dict[str, Any]]] = None,
+        tracker: DataCorruptionPenaltyTracker | None = None,
+        critical_endpoints: set[str] | None = None,
+        corruption_indicators: dict[str, dict[str, Any]] | None = None,
     ):
         super().__init__(app)
         self.tracker = tracker or DataCorruptionPenaltyTracker()
@@ -68,19 +68,19 @@ class DataCorruptionDetectionMiddleware(BaseHTTPMiddleware):
                 "description": "Request timeout - potential resource issue",
             },
         }
-        self._tracked_requests: Dict[str, Dict[str, Any]] = {}
+        self._tracked_requests: dict[str, dict[str, Any]] = {}
     
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         """Process a request and detect any corruption events."""
         request_id = str(id(request))
-        correlation_id = request.headers.get("X-Correlation-ID", str(datetime.now(timezone.utc).timestamp()))
+        correlation_id = request.headers.get("X-Correlation-ID", str(datetime.now(UTC).timestamp()))
         endpoint = f"{request.method} {request.url.path}"
         
         # Track request metadata
         self._tracked_requests[request_id] = {
             "endpoint": endpoint,
             "correlation_id": correlation_id,
-            "start_time": datetime.now(timezone.utc),
+            "start_time": datetime.now(UTC),
             "metadata": {
                 "user_agent": request.headers.get("User-Agent"),
                 "content_type": request.headers.get("Content-Type"),
@@ -147,8 +147,8 @@ class DataCorruptionDetectionMiddleware(BaseHTTPMiddleware):
         self,
         endpoint: str,
         correlation_id: str,
-        indicator: Dict[str, Any],
-        request_data: Dict[str, Any],
+        indicator: dict[str, Any],
+        request_data: dict[str, Any],
     ) -> None:
         """Record a corruption event from a detected indicator."""
         severity = indicator.get("severity", CorruptionSeverity.LOW)
@@ -205,7 +205,7 @@ class DataCorruptionDetectionMiddleware(BaseHTTPMiddleware):
             exc_info=True
         )
     
-    def _classify_exception(self, exception: Exception) -> Dict[str, Any]:
+    def _classify_exception(self, exception: Exception) -> dict[str, Any]:
         """Classify an exception to determine corruption severity and type."""
         exception_name = type(exception).__name__.lower()
         exception_str = str(exception).lower()
@@ -257,11 +257,11 @@ class DataCorruptionDetectionMiddleware(BaseHTTPMiddleware):
             "description": "Unhandled exception detected",
         }
     
-    def get_endpoint_health_report(self, endpoint: str) -> Dict[str, Any]:
+    def get_endpoint_health_report(self, endpoint: str) -> dict[str, Any]:
         """Get a health report for a specific endpoint."""
         return self.tracker.get_endpoint_health(endpoint)
     
-    def get_critical_endpoints_report(self) -> List[Dict[str, Any]]:
+    def get_critical_endpoints_report(self) -> list[dict[str, Any]]:
         """Get a report of all critical endpoints."""
         critical = self.tracker.get_critical_endpoints()
         return [
@@ -290,8 +290,8 @@ class DataCorruptionDetectionMiddleware(BaseHTTPMiddleware):
 
 def create_data_corruption_middleware(
     app: FastAPI,
-    tracker: Optional[DataCorruptionPenaltyTracker] = None,
-    critical_endpoints: Optional[Set[str]] = None,
+    tracker: DataCorruptionPenaltyTracker | None = None,
+    critical_endpoints: set[str] | None = None,
 ) -> DataCorruptionDetectionMiddleware:
     """Create and attach the data corruption detection middleware to a FastAPI app.
     

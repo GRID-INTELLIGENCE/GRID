@@ -52,11 +52,12 @@ def route_models(
     embedding_model = config.embedding_model
 
     reason_parts: list[str] = [f"query_kind={query_kind}"]
+    ollama_models: list[str] | None = None
 
     if prefer_ollama:
         try:
-            models = list_ollama_models(config.ollama_base_url)
-            if models:
+            ollama_models = list_ollama_models(config.ollama_base_url)
+            if ollama_models:
                 reason_parts.append("ollama_available=true")
                 # Embeddings: prefer nomic embed if available
                 found_emb = find_embedding_model(preferred=config.embedding_model, base_url=config.ollama_base_url)
@@ -76,18 +77,14 @@ def route_models(
             reason_parts.append("ollama_available=false")
 
     # If query looks code-heavy, slightly bias to a larger/coding-ish model if present.
-    if prefer_ollama:
-        try:
-            models = list_ollama_models(config.ollama_base_url)
-            if query_kind in {"code", "debug"}:
-                for cand in ["qwen2.5-coder", "deepseek-coder", "codestral", "codellama", "llama3.1", "llama3"]:
-                    hit = next((m for m in models if cand in m.lower()), None)
-                    if hit:
-                        llm_model = hit
-                        reason_parts.append(f"llm_bias={hit}")
-                        break
-        except Exception:
-            pass
+    if prefer_ollama and ollama_models:
+        if query_kind in {"code", "debug"}:
+            for cand in ["qwen2.5-coder", "deepseek-coder", "codestral", "codellama", "llama3.1", "llama3"]:
+                hit = next((m for m in ollama_models if cand in m.lower()), None)
+                if hit:
+                    llm_model = hit
+                    reason_parts.append(f"llm_bias={hit}")
+                    break
 
     return ModelRoutingDecision(
         embedding_provider=embedding_provider,
@@ -106,7 +103,7 @@ async def route_ensemble_models(
     """
     Route to multi-model ensemble for complex queries requiring diverse perspectives.
     """
-    base_config or RAGConfig.from_env()
+    config = base_config or RAGConfig.from_env()
     query_kind = _classify_query(query)
 
     # Use ensemble for architecture, complex code, or strategic queries
@@ -115,7 +112,7 @@ async def route_ensemble_models(
             import grid.knowledge.multi_model_orchestrator
             from application.canvas.territory_map import get_grid_map
 
-            config = base_config or RAGConfig.from_env()
+            # Reuse config resolved above
             orchestrator = grid.knowledge.multi_model_orchestrator.MultiModelOrchestrator(
                 workspace_root=workspace_root,
                 grid_map_provider=get_grid_map,

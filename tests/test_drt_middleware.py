@@ -2,11 +2,10 @@
 Simplified tests for DRT (Don't Repeat Themselves) Middleware.
 """
 
-import asyncio
-import pytest
-from datetime import datetime, timedelta
-from unittest.mock import Mock
+from datetime import datetime
+from unittest.mock import AsyncMock, MagicMock
 
+import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
@@ -20,9 +19,9 @@ try:
     from application.mothership.middleware.drt_metrics import (
         DRTMetricsCollector,
         get_drt_metrics_collector,
-        record_drt_violation,
-        record_drt_escalation,
         record_drt_deescalation,
+        record_drt_escalation,
+        record_drt_violation,
     )
     METRICS_AVAILABLE = True
 except ImportError:
@@ -396,7 +395,7 @@ class TestDRTFalsePositiveTracking:
     @pytest.fixture
     async def mock_session(self):
         """Create a mock database session for testing."""
-        from unittest.mock import AsyncMock, MagicMock
+        from unittest.mock import MagicMock
         session = AsyncMock()
         session.add = MagicMock()
         session.flush = AsyncMock()
@@ -588,8 +587,7 @@ class TestDRTAPIIntegration:
     @pytest.fixture
     def test_app_with_drt(self):
         """Create a test FastAPI app with DRT middleware and endpoints."""
-        from fastapi import FastAPI, Request
-        from fastapi.testclient import TestClient
+        from fastapi import FastAPI
 
         app = FastAPI()
 
