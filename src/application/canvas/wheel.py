@@ -6,13 +6,13 @@ import math
 import time
 from dataclasses import dataclass, field
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 logger = None  # Will be set after import
 
 
-class WheelZone(str, Enum):
+class WheelZone(StrEnum):
     """Zones/sectors of the environment wheel."""
 
     CORE = "core"  # grid/ - Core intelligence layer
@@ -429,8 +429,7 @@ class EnvironmentWheel:
         lines.append(f"Agents: {len(self.state.agents)} | Updates: {self.state.update_count}")
         lines.append("-" * width)
 
-        for row in grid:
-            lines.append("".join(row))
+        lines.extend("".join(row) for row in grid)
 
         lines.append("-" * width)
 

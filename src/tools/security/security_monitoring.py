@@ -16,15 +16,15 @@ import re
 import time
 from collections import defaultdict, deque
 from dataclasses import asdict, dataclass
-from datetime import datetime, timedelta, timezone
-from enum import Enum
+from datetime import UTC, datetime
+from enum import StrEnum
 from pathlib import Path
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
-class ThreatLevel(str, Enum):
+class ThreatLevel(StrEnum):
     """Threat severity levels."""
 
     LOW = "low"
@@ -33,7 +33,7 @@ class ThreatLevel(str, Enum):
     CRITICAL = "critical"
 
 
-class ThreatType(str, Enum):
+class ThreatType(StrEnum):
     """Types of security threats."""
 
     SQL_INJECTION = "sql_injection"
@@ -276,7 +276,7 @@ class SecurityMonitor:
 
         report = VulnerabilityReport(
             scan_id=scan_id,
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
             scan_path=str(codebase_path),
             vulnerabilities=vulnerabilities,
             total_vulnerabilities=len(vulnerabilities),
@@ -377,7 +377,7 @@ class SecurityMonitor:
 
         audit_result = AuditResult(
             audit_id=audit_id,
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
             user_context=user_context,
             permissions_checked=permissions_checked,
             violations=violations,
@@ -657,7 +657,7 @@ class SecurityMonitor:
         evidence: dict[str, Any],
     ) -> ThreatAlert:
         """Create a threat alert."""
-        alert_id = f"alert_{int(time.time())}_{hashlib.md5(description.encode()).hexdigest()[:8]}"
+        alert_id = f"alert_{int(time.time())}_{hashlib.md5(description.encode()).hexdigest()[:8]}"  # noqa: S324 non-cryptographic use
 
         mitigations = self._get_mitigations(threat_type, threat_level)
 
@@ -668,7 +668,7 @@ class SecurityMonitor:
             description=description,
             source_ip=source_ip,
             user_id=request_data.get("user_id"),
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
             request_data={
                 "method": request_data.get("method", ""),
                 "path": request_data.get("path", ""),
@@ -883,8 +883,7 @@ class SecurityMonitor:
 
             for pattern, severity in secret_patterns:
                 matches = re.finditer(pattern, content, re.IGNORECASE)
-                for match in matches:
-                    vulnerabilities.append(
+                vulnerabilities.extend(
                         {
                             "type": "exposed_secret",
                             "severity": severity,
@@ -893,7 +892,8 @@ class SecurityMonitor:
                             "description": "Potential exposed secret in configuration",
                             "match": match.group()[:50],
                         }
-                    )
+                    for match in matches
+                )
 
             # Check for insecure configurations
             insecure_patterns = [

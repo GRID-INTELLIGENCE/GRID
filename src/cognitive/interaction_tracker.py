@@ -12,7 +12,7 @@ import logging
 from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
 from typing import Any
 
@@ -21,7 +21,7 @@ import aiofiles
 logger = logging.getLogger(__name__)
 
 
-class ActionType(str, Enum):
+class ActionType(StrEnum):
     """Types of user actions."""
 
     CASE_START = "case_start"
@@ -37,7 +37,7 @@ class ActionType(str, Enum):
     FEEDBACK = "feedback"
 
 
-class Sentiment(str, Enum):
+class Sentiment(StrEnum):
     """User sentiment indicators."""
 
     POSITIVE = "positive"
@@ -487,7 +487,7 @@ class InteractionTracker:
             async with aiofiles.open(user_log_path) as f:
                 async for line in f:
                     if line.strip():
-                        events.append(InteractionEvent.from_dict(json.loads(line)))
+                        events.append(InteractionEvent.from_dict(json.loads(line)))  # noqa: PERF401 async for precludes comprehension
         except Exception as e:
             logger.error(f"Error loading events for {user_id}: {e}")
 

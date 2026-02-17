@@ -29,7 +29,7 @@ import random
 from collections import deque
 from dataclasses import dataclass, field
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 import requests  # type: ignore[import-untyped]
@@ -37,7 +37,7 @@ import requests  # type: ignore[import-untyped]
 logger = logging.getLogger(__name__)
 
 
-class StaircaseState(str, Enum):
+class StaircaseState(StrEnum):
     """State of a staircase/route."""
 
     STABLE = "stable"  # Fixed route
@@ -46,7 +46,7 @@ class StaircaseState(str, Enum):
     LOCKED = "locked"  # Requires authentication
 
 
-class DayBehavior(str, Enum):
+class DayBehavior(StrEnum):
     """Special behaviors on certain days (like Friday staircases)."""
 
     NORMAL = "normal"
@@ -113,7 +113,7 @@ class Staircase:
 
     def maybe_move(self) -> bool:
         """Possibly move the staircase to a new destination."""
-        if random.random() < self.move_probability:
+        if random.random() < self.move_probability:  # noqa: S311 non-security random use
             self.state = StaircaseState.MOVING
             self.last_moved = datetime.now()
             return True
@@ -165,7 +165,7 @@ class GrandStaircase:
                 return path
 
             # Find connected staircases
-            for _stair_id, stair in self.staircases.items():
+            for stair in self.staircases.values():
                 if stair.origin == current and stair.state != StaircaseState.VANISHED:
                     effective_dest = stair.get_effective_destination()
                     if effective_dest not in visited:
@@ -202,8 +202,8 @@ class GrandStaircase:
             if stair.maybe_move():
                 moved.append(stair_id)
                 # Randomly reassign destination
-                all_destinations = list(set(s.destination for s in self.staircases.values()))
-                new_dest = random.choice(all_destinations)
+                all_destinations = list({s.destination for s in self.staircases.values()})
+                new_dest = random.choice(all_destinations)  # noqa: S311 non-security random use
 
                 self.movement_log.append(
                     {
@@ -333,17 +333,17 @@ def create_hogwarts_topology() -> GrandStaircase:
     # Create staircases (routes) between locations
     for i, origin in enumerate(locations):
         for j, dest in enumerate(locations):
-            if i != j and random.random() < 0.3:  # 30% connectivity
+            if i != j and random.random() < 0.3:  # 30% connectivity  # noqa: S311 non-security random use
                 stair_id = f"stair_{origin}_{dest}"
                 staircase.add_staircase(
                     Staircase(
                         id=stair_id,
                         origin=origin,
                         destination=dest,
-                        has_vanishing_step=random.random() < 0.15,  # 15% have traps
-                        requires_polite_request=random.random() < 0.1,  # 10% need politeness
-                        day_behavior=random.choice(list(DayBehavior)),
-                        move_probability=random.uniform(0.05, 0.2),
+                        has_vanishing_step=random.random() < 0.15,  # 15% have traps  # noqa: S311 non-security random use
+                        requires_polite_request=random.random() < 0.1,  # 10% need politeness  # noqa: S311 non-security random use
+                        day_behavior=random.choice(list(DayBehavior)),  # noqa: S311 non-security random use
+                        move_probability=random.uniform(0.05, 0.2),  # noqa: S311 non-security random use
                     )
                 )
 

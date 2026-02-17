@@ -9,7 +9,7 @@ Part of Phase 3: Reasoning Layer
 
 import logging
 from dataclasses import dataclass, field
-from enum import Enum, StrEnum
+from enum import StrEnum
 from typing import Any
 
 from .evidence_extractor import Evidence, EvidenceSet, EvidenceStrength, EvidenceType
@@ -106,8 +106,7 @@ class ReasoningChain:
 
         if self.warnings:
             lines.append("\n### ⚠️ Uncertainties\n")
-            for warning in self.warnings:
-                lines.append(f"- {warning}")
+            lines.extend(f"- {warning}" for warning in self.warnings)
 
         return "\n".join(lines)
 
@@ -218,7 +217,7 @@ class ReasoningEngine:
         overall_confidence = self._calculate_overall_confidence(evidence_set, steps)
 
         # Track which evidence was used
-        evidence_used = list(set([eid for step in steps for eid in step.supporting_evidence]))
+        evidence_used = list({eid for step in steps for eid in step.supporting_evidence})
         evidence_unused = [e.id for e in evidence_set.evidence if e.id not in evidence_used]
 
         chain = ReasoningChain(
@@ -248,7 +247,7 @@ class ReasoningEngine:
             confidence = 0.3
             evidence_ids = [e.id for e in evidence_set.evidence[:3]]
         else:
-            sources = set(e.source_file for e in strong_evidence)
+            sources = {e.source_file for e in strong_evidence}
             content = (
                 f"I found {len(strong_evidence)} highly relevant evidence pieces from {len(sources)} source file(s)."
             )
@@ -267,7 +266,7 @@ class ReasoningEngine:
         """Create validation step for checking contradictions."""
         contradictory = [e for e in evidence_set.evidence if e.strength == EvidenceStrength.CONTRADICTORY]
 
-        sources = set(e.source_file for e in contradictory)
+        sources = {e.source_file for e in contradictory}
         content = f"Warning: Found contradictory information across {len(sources)} sources. Will prioritize most recent/authoritative."
 
         return ReasoningStep(
@@ -304,8 +303,8 @@ class ReasoningEngine:
         if not implementations:
             return None
 
-        impl_files = set(e.source_file for e in implementations)
-        languages = set(e.code_language for e in implementations if e.code_language)
+        impl_files = {e.source_file for e in implementations}
+        languages = {e.code_language for e in implementations if e.code_language}
 
         content = (
             f"The implementation is found in {len(impl_files)} file(s) "
@@ -349,10 +348,7 @@ class ReasoningEngine:
         )
 
         # Use evidence from different sources
-        evidence_ids = []
-        for source_evs in list(by_source.values())[:3]:
-            if source_evs:
-                evidence_ids.append(source_evs[0].id)
+        evidence_ids = [source_evs[0].id for source_evs in list(by_source.values())[:3] if source_evs]
 
         return ReasoningStep(
             step_number=step_num,
@@ -422,7 +418,7 @@ class ReasoningEngine:
         else:
             final_answer = "\n\n".join(answer_parts)
             # Add source attribution
-            sources = list(set(e.source_file for e in strong_ev if e.id in evidence_ids))
+            sources = list({e.source_file for e in strong_ev if e.id in evidence_ids})
             final_answer += f"\n\n*Sources: {', '.join(s.split('/')[-1] for s in sources[:3])}*"
 
         content = f"Conclusion: Based on {len(evidence_ids)} pieces of evidence, I can answer the query."

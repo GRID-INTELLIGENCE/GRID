@@ -268,7 +268,7 @@ class XAIThreadPool:
         # For now, return None
         return None
 
-    async def wait_for_task(self, task_id: str, timeout: float = 30.0) -> Any | None:
+    async def wait_for_task(self, task_id: str, timeout: float = 30.0) -> Any | None:  # noqa: ASYNC109 timeout parameter is handled by caller
         """
         Wait for a specific task to complete.
 
@@ -283,7 +283,7 @@ class XAIThreadPool:
         # For now, simulate waiting
         start_time = datetime.now()
 
-        while (datetime.now() - start_time).total_seconds() < timeout:
+        while (datetime.now() - start_time).total_seconds() < timeout:  # noqa: ASYNC110 busy-wait is intentional for polling pattern
             # Check if task is completed (this would need task tracking)
             await asyncio.sleep(0.1)
 

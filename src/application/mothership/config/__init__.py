@@ -77,7 +77,7 @@ def _parse_list(value: str | None, separator: str = ",") -> list[str]:
 class ServerSettings:
     """HTTP server configuration."""
 
-    host: str = "0.0.0.0"
+    host: str = "0.0.0.0"  # noqa: S104 bind-all is intentional for container deployment
     port: int = 8080
     workers: int = 4
     reload: bool = False
@@ -90,7 +90,7 @@ class ServerSettings:
         """Load server settings from environment variables."""
         env = os.environ
         return cls(
-            host=env.get("MOTHERSHIP_HOST", "0.0.0.0"),
+            host=env.get("MOTHERSHIP_HOST", "0.0.0.0"),  # noqa: S104 bind-all is intentional for container deployment
             port=int(env.get("MOTHERSHIP_PORT", "8080")),
             workers=int(env.get("MOTHERSHIP_WORKERS", "4")),
             reload=_parse_bool(env.get("MOTHERSHIP_RELOAD")),

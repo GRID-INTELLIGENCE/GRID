@@ -10,14 +10,14 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
-class PathComplexity(str, Enum):
+class PathComplexity(StrEnum):
     """Complexity level of a path."""
 
     SIMPLE = "simple"  # Straightforward, minimal steps

@@ -1,13 +1,13 @@
 """User cognitive profile schema for personalization."""
 
-from datetime import datetime, timezone
-from enum import Enum
+from datetime import UTC, datetime
+from enum import StrEnum
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class ExpertiseLevel(str, Enum):
+class ExpertiseLevel(StrEnum):
     """User expertise levels."""
 
     NOVICE = "novice"
@@ -17,7 +17,7 @@ class ExpertiseLevel(str, Enum):
     EXPERT = "expert"
 
 
-class LearningStyle(str, Enum):
+class LearningStyle(StrEnum):
     """Preferred learning styles."""
 
     ANALOGIES = "analogies"
@@ -27,7 +27,7 @@ class LearningStyle(str, Enum):
     HANDS_ON = "hands_on"
 
 
-class DecisionStyle(str, Enum):
+class DecisionStyle(StrEnum):
     """User decision-making styles."""
 
     QUICK = "quick"  # Prefer fast decisions
@@ -138,4 +138,4 @@ class UserCognitiveProfile(BaseModel):
 
     def update_timestamp(self) -> None:
         """Update the updated_at timestamp."""
-        self.updated_at = datetime.now(timezone.utc)
+        self.updated_at = datetime.now(UTC)

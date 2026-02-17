@@ -61,7 +61,7 @@ def _build_curated_files(repo_path: str) -> list[str]:
                 for it in items:
                     if isinstance(it, dict) and it.get("rel_path"):
                         curated.add(str(it["rel_path"]))
-        except Exception:
+        except Exception:  # noqa: S110 intentional silent handling
             pass
 
     # Core project entry points + docs (kept intentionally small)

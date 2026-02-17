@@ -353,7 +353,7 @@ class PrecisionValidator:
         # Welch-Satterthwaite degrees of freedom
         num = (var_a / n_a + var_b / n_b) ** 2
         denom = (var_a / n_a) ** 2 / (n_a - 1) + (var_b / n_b) ** 2 / (n_b - 1)
-        df = num / denom if denom > 0 else 1
+        _df = num / denom if denom > 0 else 1  # noqa: F841 kept for future scipy integration
 
         # Approximate p-value using normal distribution
         # For a more accurate p-value, we'd need scipy

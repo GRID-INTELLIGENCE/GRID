@@ -80,7 +80,7 @@ TraceStore: Any = None
 
 try:  # pragma: no cover
     from .entry_points import APIEntryPoint, CLIEntryPoint, ServiceEntryPoint  # noqa: F401
-except Exception:
+except Exception:  # noqa: S110 intentional silent handling
     pass
 
 try:  # pragma: no cover
@@ -93,17 +93,17 @@ try:  # pragma: no cover
         UserRole,
         UserStatus,
     )
-except Exception:
+except Exception:  # noqa: S110 intentional silent handling
     pass
 
 try:  # pragma: no cover
     from .processing import EmergencyRealtimeProcessor, PeriodicProcessor, ProcessingMode, RealtimeFlow  # noqa: F401
-except Exception:
+except Exception:  # noqa: S110 intentional silent handling
     pass
 
 try:  # pragma: no cover
     from .prompts import Prompt, PromptContext, PromptManager, PromptPriority, PromptSource  # noqa: F401
-except Exception:
+except Exception:  # noqa: S110 intentional silent handling
     pass
 
 try:  # pragma: no cover
@@ -115,17 +115,17 @@ try:  # pragma: no cover
         Quantizer,
         QuantumEngine,
     )
-except Exception:
+except Exception:  # noqa: S110 intentional silent handling
     pass
 
 try:  # pragma: no cover
     from .senses import SensoryInput, SensoryProcessor, SensoryStore, SensoryType
-except Exception:
+except Exception:  # noqa: S110 intentional silent handling
     pass
 
 try:  # pragma: no cover
     from .tracing import ActionTrace, TraceContext, TraceManager, TraceOrigin, TraceStore
-except Exception:
+except Exception:  # noqa: S110 intentional silent handling
     pass
 
 # Environment sanitization startup hook

@@ -38,7 +38,7 @@ import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -93,7 +93,7 @@ class SessionBoundaryViolation(Exception):
         }
 
 
-class IsolationLevel(str, Enum):
+class IsolationLevel(StrEnum):
     """Session isolation levels."""
 
     # No isolation - all sessions can access each other (not recommended)
@@ -112,7 +112,7 @@ class IsolationLevel(str, Enum):
     MAXIMUM = "maximum"
 
 
-class AccessType(str, Enum):
+class AccessType(StrEnum):
     """Types of cross-session access."""
 
     READ = "read"
@@ -669,7 +669,7 @@ class SessionIsolator:
                     grants.extend(target_grants)
 
             # Grants where session is target
-            for _source_session, targets in self._grants.items():
+            for targets in self._grants.values():
                 if session_id in targets:
                     grants.extend(targets[session_id])
 
@@ -831,7 +831,7 @@ class SessionIsolator:
                     "isolation_level": self.config.isolation_level.value,
                 },
             )
-        except Exception:
+        except Exception:  # noqa: S110 intentional silent handling
             pass
 
     def _log_violation(self, violation: ViolationRecord) -> None:
@@ -849,7 +849,7 @@ class SessionIsolator:
                 session_id=violation.source_session,
                 details=violation.to_dict(),
             )
-        except Exception:
+        except Exception:  # noqa: S110 intentional silent handling
             pass
 
     def _log_grant_created(self, grant: SessionGrant) -> None:
@@ -873,7 +873,7 @@ class SessionIsolator:
                     "created_by": grant.created_by,
                 },
             )
-        except Exception:
+        except Exception:  # noqa: S110 intentional silent handling
             pass
 
 

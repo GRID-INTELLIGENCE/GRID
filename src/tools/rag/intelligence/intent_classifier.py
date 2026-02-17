@@ -8,7 +8,7 @@ user's goal (e.g., finding a definition vs. understanding an implementation).
 
 import logging
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 
 import torch
 from transformers import pipeline
@@ -17,7 +17,7 @@ from transformers import pipeline
 logger = logging.getLogger(__name__)
 
 
-class Intent(str, Enum):
+class Intent(StrEnum):
     """Supported query intents for the GRID RAG system."""
 
     DEFINITION = "definition"  # "What is X?", "Explain the concept of Y"

@@ -107,7 +107,7 @@ class AdvancedProtocolHandler:
                     data = json.load(f)
                     if isinstance(data, dict):
                         return data
-            except Exception:
+            except Exception:  # noqa: S110 intentional silent handling
                 pass
 
         return {"cases": [], "patterns": {}, "solutions": {}, "keywords": {}}
@@ -136,16 +136,16 @@ class AdvancedProtocolHandler:
             case for case in self.memory.get("cases", []) if case.get("category") == structure.category.value
         ]
 
-        for case in category_matches[:5]:  # Top 5
-            results.append(
-                {
-                    "case_id": case.get("case_id"),
-                    "similarity": 0.5,  # Category match
-                    "category": case.get("category"),
-                    "solution": case.get("solution_summary"),
-                    "type": "category_match",
-                }
-            )
+        results.extend(
+            {
+                "case_id": case.get("case_id"),
+                "similarity": 0.5,  # Category match
+                "category": case.get("category"),
+                "solution": case.get("solution_summary"),
+                "type": "category_match",
+            }
+            for case in category_matches[:5]
+        )
 
         return sorted(results, key=lambda x: x["similarity"], reverse=True)[:10]
 

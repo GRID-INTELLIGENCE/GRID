@@ -30,7 +30,7 @@ import uuid
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
 from typing import Any
 
@@ -40,7 +40,7 @@ from grid.events.types import EventType
 logger = logging.getLogger(__name__)
 
 
-class InputSource(str, Enum):
+class InputSource(StrEnum):
     """Enumeration of input sources."""
 
     CLI = "cli"
@@ -597,7 +597,7 @@ class FileWatcherGateway(InputGateway):
         """Compute hash of file content for change detection."""
         try:
             content = file_path.read_bytes()
-            return hashlib.md5(content).hexdigest()
+            return hashlib.md5(content).hexdigest()  # noqa: S324 non-cryptographic use
         except Exception:
             return ""
 

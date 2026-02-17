@@ -16,13 +16,13 @@ from collections import deque
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
-class AlertSeverity(str, Enum):
+class AlertSeverity(StrEnum):
     """Alert severity levels."""
 
     INFO = "info"
@@ -30,7 +30,7 @@ class AlertSeverity(str, Enum):
     CRITICAL = "critical"
 
 
-class InsightType(str, Enum):
+class InsightType(StrEnum):
     """Types of automated insights."""
 
     SPIKE_DETECTED = "spike_detected"

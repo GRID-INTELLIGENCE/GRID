@@ -125,7 +125,7 @@ class OnDemandRAGEngine:
 
         # 2) Recursive scope expansion based on query->retrieved->pattern search
         files = list(seed_files)
-        expanded: set[str] = set(str(p.resolve()) for p in files)
+        expanded: set[str] = {str(p.resolve()) for p in files}
 
         # Vector store is ephemeral (built from current file scope)
         store = InMemoryDenseVectorStore()

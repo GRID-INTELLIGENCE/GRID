@@ -112,19 +112,18 @@ async def create_navigation_plan(
         }
 
         # Mock alternatives
-        alternatives = []
-        for i in range(min(payload.max_alternatives - 1, 2)):
-            alternatives.append(
-                {
-                    "steps": [
-                        {"action": "start", "location": "current"},
-                        {"action": "alternative_path", "variant": i + 1},
-                        {"action": "arrive", "location": payload.goal},
-                    ],
-                    "estimated_time": 35.0 + i * 5,
-                    "confidence": 0.7 - i * 0.1,
-                }
-            )
+        alternatives = [
+            {
+                "steps": [
+                    {"action": "start", "location": "current"},
+                    {"action": "alternative_path", "variant": i + 1},
+                    {"action": "arrive", "location": payload.goal},
+                ],
+                "estimated_time": 35.0 + i * 5,
+                "confidence": 0.7 - i * 0.1,
+            }
+            for i in range(min(payload.max_alternatives - 1, 2))
+        ]
 
         processing_time_ms = (time.perf_counter() - processing_time) * 1000
 

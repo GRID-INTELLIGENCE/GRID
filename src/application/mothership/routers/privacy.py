@@ -177,7 +177,7 @@ async def batch_privacy_processing(request: PrivacyBatchRequest, auth: Auth = De
         results = []
         total_entities = 0
 
-        for text, pr in zip(request.texts, privacy_results):
+        for text, pr in zip(request.texts, privacy_results, strict=False):
             entities = [
                 DetectedEntity(
                     type=e.type,

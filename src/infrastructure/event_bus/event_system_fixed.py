@@ -506,8 +506,8 @@ class EventBus:
         """Get event bus metrics."""
         # Count active subscribers (exclude dead refs)
         active_subscribers = 0
-        for event_type, subs in self._subscribers.items():
-            for callback_id, (weak_ref, _) in subs.items():
+        for subs in self._subscribers.values():
+            for (weak_ref, _) in subs.values():
                 callback = weak_ref() if isinstance(weak_ref, ref) else weak_ref()
                 if callback is not None:
                     active_subscribers += 1
@@ -645,7 +645,7 @@ if __name__ == "__main__":
 
         try:
             # Keep running
-            while True:
+            while True:  # noqa: ASYNC110 busy-wait is intentional for polling pattern
                 await asyncio.sleep(1)
         except KeyboardInterrupt:
             await event_bus.stop()

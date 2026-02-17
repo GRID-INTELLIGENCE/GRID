@@ -39,7 +39,7 @@ router = APIRouter(tags=["health"])
 # =============================================================================
 
 
-async def _check_database_connectivity(db_url: str, timeout: float = 5.0) -> tuple[bool, str]:
+async def _check_database_connectivity(db_url: str, timeout: float = 5.0) -> tuple[bool, str]:  # noqa: ASYNC109 timeout parameter is handled by caller
     """
     Check database connectivity with actual connection test.
 
@@ -92,7 +92,7 @@ async def _db_ping(engine: Any) -> None:
         await conn.execute(text("SELECT 1"))
 
 
-async def _check_redis_connectivity(redis_url: str, timeout: float = 5.0) -> tuple[bool, str]:
+async def _check_redis_connectivity(redis_url: str, timeout: float = 5.0) -> tuple[bool, str]:  # noqa: ASYNC109 timeout parameter is handled by caller
     """
     Check Redis connectivity with actual ping.
 
@@ -127,7 +127,7 @@ async def _check_redis_connectivity(redis_url: str, timeout: float = 5.0) -> tup
         return False, f"Redis connection failed: {str(e)[:100]}"
 
 
-async def _check_gemini_connectivity(api_key: str, timeout: float = 5.0) -> tuple[bool, str]:
+async def _check_gemini_connectivity(api_key: str, timeout: float = 5.0) -> tuple[bool, str]:  # noqa: ASYNC109 timeout parameter is handled by caller
     """
     Check Gemini API connectivity.
 
@@ -165,7 +165,7 @@ async def _check_gemini_connectivity(api_key: str, timeout: float = 5.0) -> tupl
         return False, f"Gemini API check failed: {str(e)[:100]}"
 
 
-async def _check_webhook_endpoints(endpoints: list[str], timeout: float = 5.0) -> tuple[bool, str, dict[str, bool]]:
+async def _check_webhook_endpoints(endpoints: list[str], timeout: float = 5.0) -> tuple[bool, str, dict[str, bool]]:  # noqa: ASYNC109 timeout parameter is handled by caller
     """
     Check webhook endpoint reachability.
 
@@ -799,7 +799,7 @@ async def chaos_resilience_health() -> dict[str, Any]:
         # Get circuit breaker status from middleware
         circuit_status = {}
         try:
-            cb_manager = get_circuit_manager()
+            get_circuit_manager()
             # Circuit manager may have different interface, try to get status
             circuit_status = {"middleware_available": True}
         except Exception:

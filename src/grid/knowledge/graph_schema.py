@@ -34,13 +34,13 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
-class EntityType(str, Enum):
+class EntityType(StrEnum):
     """Core entity types in the knowledge graph."""
 
     AGENT = "Agent"
@@ -52,7 +52,7 @@ class EntityType(str, Enum):
     DECISION = "Decision"
 
 
-class RelationType(str, Enum):
+class RelationType(StrEnum):
     """Typed relationships (Neo4j-style naming)."""
 
     EXECUTED_BY = "EXECUTED_BY"
@@ -66,7 +66,7 @@ class RelationType(str, Enum):
     RELATED_TO = "RELATED_TO"
 
 
-class PropertyType(str, Enum):
+class PropertyType(StrEnum):
     """Property data types for validation."""
 
     STRING = "string"
@@ -301,9 +301,7 @@ class KnowledgeGraphSchema:
         errors = []
 
         # Check required properties
-        for prop in schema.properties:
-            if prop.required and prop.name not in data:
-                errors.append(f"Missing required property: {prop.name}")
+        errors.extend(f"Missing required property: {prop.name}" for prop in schema.properties if prop.required and prop.name not in data)
 
         # Validate property types
         for prop in schema.properties:

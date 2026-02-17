@@ -147,7 +147,7 @@ class SkillExtractionEngine:
         """Read source and compute hash."""
         with open(skill_file, encoding="utf-8") as f:
             source = f.read()
-        source_hash = hashlib.md5(source.encode()).hexdigest()[:12]
+        source_hash = hashlib.md5(source.encode()).hexdigest()[:12]  # noqa: S324 non-cryptographic use
         return source, source_hash
 
     def _get_ast(self, skill_file: Path, source: str) -> ast.AST:
@@ -157,13 +157,13 @@ class SkillExtractionEngine:
 
         if cache_key in self._ast_cache:
             cached_tree, cached_hash, cached_at = self._ast_cache[cache_key]
-            current_hash = hashlib.md5(source.encode()).hexdigest()[:12]
+            current_hash = hashlib.md5(source.encode()).hexdigest()[:12]  # noqa: S324 non-cryptographic use
 
             if cached_hash == current_hash and now - cached_at < self._CACHE_TTL:
                 return cached_tree
 
         tree = ast.parse(source)
-        source_hash = hashlib.md5(source.encode()).hexdigest()[:12]
+        source_hash = hashlib.md5(source.encode()).hexdigest()[:12]  # noqa: S324 non-cryptographic use
         self._ast_cache[cache_key] = (tree, source_hash, now)
 
         return tree

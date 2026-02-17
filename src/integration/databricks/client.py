@@ -93,9 +93,7 @@ class DatabricksClient:
         Returns:
             List of cluster information dictionaries
         """
-        clusters = []
-        for cluster in self.client.clusters.list():
-            clusters.append(
+        clusters = [
                 {
                     "cluster_id": cluster.cluster_id,
                     "cluster_name": cluster.cluster_name,
@@ -103,7 +101,8 @@ class DatabricksClient:
                     "num_workers": cluster.num_workers,
                     "spark_version": cluster.spark_version,
                 }
-            )
+            for cluster in self.client.clusters.list()
+        ]
         return clusters
 
     def get_cluster(self, cluster_id: str) -> dict[str, Any] | None:

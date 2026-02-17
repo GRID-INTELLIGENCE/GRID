@@ -12,14 +12,14 @@ import logging
 from collections import Counter, defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-from enum import Enum
+from enum import StrEnum
 from statistics import mean, stdev
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
-class TemporalPattern(str, Enum):
+class TemporalPattern(StrEnum):
     """Types of temporal patterns."""
 
     REGULAR = "regular"
@@ -31,7 +31,7 @@ class TemporalPattern(str, Enum):
     GAP = "gap"
 
 
-class EventFrequency(str, Enum):
+class EventFrequency(StrEnum):
     """Frequency levels for events."""
 
     CONSTANT = "constant"

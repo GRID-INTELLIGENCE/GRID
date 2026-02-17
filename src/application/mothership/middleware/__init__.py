@@ -167,7 +167,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
                 body = await request.body()
                 if body:
                     log_data["body_size"] = len(body)
-            except Exception:
+            except Exception:  # noqa: S110 intentional silent handling
                 pass
 
         logger.info(f"Incoming request: {json.dumps(log_data)}")

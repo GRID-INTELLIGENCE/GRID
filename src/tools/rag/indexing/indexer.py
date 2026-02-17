@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -49,7 +49,7 @@ class IndexingMetrics:
 
     def finalize(self) -> None:
         """Mark indexing as complete."""
-        self.end_time = datetime.now(timezone.utc)
+        self.end_time = datetime.now(UTC)
 
     def report(self) -> str:
         """Generate human-readable report."""
@@ -400,7 +400,7 @@ def index_repository(
             if file_path.stat().st_size > 1024 * 1024:
                 print(f"Skipping large file: {file_path}")
                 continue
-        except Exception:
+        except Exception:  # noqa: S112 intentional skip on error
             continue
 
         # Read file content
@@ -836,7 +836,7 @@ def update_index(
             try:
                 if file_path.stat().st_size > 1024 * 1024:
                     continue
-            except Exception:
+            except Exception:  # noqa: S112 intentional skip on error
                 continue
             current_files.append(file_path)
 
@@ -876,7 +876,7 @@ def update_index(
                 st = p.stat()
                 size = int(st.st_size)
                 mtime_ms = int(st.st_mtime * 1000)
-            except Exception:
+            except Exception:  # noqa: S112 intentional skip on error
                 continue
 
             prev = manifest.get(rel_path_str)
@@ -911,7 +911,7 @@ def update_index(
             try:
                 vector_store.delete(where={"path": rel_path})
                 vector_store.delete(where={"path": rel_path_str})
-            except Exception:
+            except Exception:  # noqa: S110 intentional silent handling
                 pass
 
             content = read_file_content(file_path)
@@ -1039,7 +1039,7 @@ def update_index(
         try:
             vector_store.delete(where={"path": rel_path})
             vector_store.delete(where={"path": rel_path_str})
-        except Exception:
+        except Exception:  # noqa: S110 intentional silent handling
             pass  # May not exist
 
         # Read and chunk file

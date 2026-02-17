@@ -40,7 +40,6 @@ from __future__ import annotations
 
 from typing import Any
 
-
 # ── Confidence tiers ─────────────────────────────────────────────────────
 # HIGH:   Token is almost never used in benign contexts.
 # MEDIUM: Token has legitimate uses but is a strong signal when combined
@@ -146,12 +145,12 @@ def check_content(text: str) -> list[dict[str, Any]]:
     Returns:
         List of dicts with 'token', 'category', 'confidence' per match
     """
-    matches = []
-    for token in ALL_TOKENS:
-        if token in text:
-            matches.append({
-                "token": token,
-                "category": TOKEN_CATEGORY[token],
-                "confidence": TOKEN_CONFIDENCE[token],
-            })
-    return matches
+    return [
+        {
+            "token": token,
+            "category": TOKEN_CATEGORY[token],
+            "confidence": TOKEN_CONFIDENCE[token],
+        }
+        for token in ALL_TOKENS
+        if token in text
+    ]

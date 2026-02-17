@@ -8,7 +8,7 @@ from __future__ import annotations
 import logging
 import os
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class SignalType(str, Enum):
+class SignalType(StrEnum):
     """Types of valid signals in GRID Skills."""
 
     VALID_EXECUTION = "valid_execution"
@@ -27,7 +27,7 @@ class SignalType(str, Enum):
     STABLE_BASELINE = "stable_baseline"
 
 
-class NoiseType(str, Enum):
+class NoiseType(StrEnum):
     """Types of noise to filter out."""
 
     TRANSIENT_ERROR = "transient_error"

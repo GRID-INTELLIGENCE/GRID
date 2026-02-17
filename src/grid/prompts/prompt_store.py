@@ -40,7 +40,7 @@ class PromptStore:
         try:
             with open(index_file, "w") as f:
                 json.dump(self._prompt_index, f, indent=2)
-        except Exception:
+        except Exception:  # noqa: S110 intentional silent handling
             pass  # Best effort
 
     def _get_prompt_file(self, prompt_id: str) -> Path:

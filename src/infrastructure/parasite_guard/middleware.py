@@ -334,5 +334,5 @@ class ParasiteGuardMiddleware:
                         "more_body": False,
                     }
                 )
-            except:
+            except Exception:  # noqa: S110 intentional silent handling
                 pass

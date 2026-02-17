@@ -253,7 +253,7 @@ class MothershipAuditService:
         if self._vection_logger is not None:
             try:
                 stats["vection_stats"] = self._vection_logger.get_stats()
-            except Exception:
+            except Exception:  # noqa: S110 intentional silent handling
                 pass
 
         return stats

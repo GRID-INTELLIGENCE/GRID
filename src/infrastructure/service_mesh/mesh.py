@@ -14,10 +14,9 @@ import uuid
 from collections import defaultdict
 from collections.abc import Callable
 from dataclasses import asdict, dataclass, field
-from enum import Enum, StrEnum
+from enum import StrEnum
 from typing import Any
 
-import aiofiles  # type: ignore[import-untyped]
 from aiohttp import ClientSession, ClientTimeout, web  # type: ignore[import-not-found]
 
 
@@ -279,7 +278,7 @@ class LoadBalancer:
         """Random selection."""
         import random
 
-        return random.choice(instances)
+        return random.choice(instances)  # noqa: S311 non-security random use
 
     def _least_connections_select(self, instances: list[ServiceInstance]) -> ServiceInstance:
         """Select instance with least connections (simulated)."""
@@ -424,7 +423,7 @@ class ServiceMesh:
             "service": service_name,
             "status": "degraded_mode",
             "message": "The service is currently unavailable. Returning simplified data.",
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
             "fallback": True
         }
 
@@ -491,7 +490,7 @@ class ServiceMesh:
         runner = web.AppRunner(app)
         await runner.setup()
 
-        site = web.TCPSite(runner, "0.0.0.0", self.registry_port)
+        site = web.TCPSite(runner, "0.0.0.0", self.registry_port)  # noqa: S104 bind-all is intentional for container deployment
         await site.start()
 
         logging.info(f"Service registry started on port {self.registry_port}")
@@ -602,7 +601,7 @@ if __name__ == "__main__":
 
         try:
             # Keep running
-            while True:
+            while True:  # noqa: ASYNC110 busy-wait is intentional for polling pattern
                 await asyncio.sleep(1)
         except KeyboardInterrupt:
             await mesh.stop()

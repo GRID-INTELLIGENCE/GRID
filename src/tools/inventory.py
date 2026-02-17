@@ -40,49 +40,45 @@ def find_manifests(repo_root: Path) -> list[str]:
 
 def parse_components_json(components_file: Path, repo_root: Path) -> list[dict[str, Any]]:
     """Parse components.json and extract module information."""
-    modules = []
     try:
         with open(components_file) as f:
             data = json.load(f)
-            for comp in data.get("components", []):
-                modules.append(
-                    {
-                        "name": comp.get("name", "unknown"),
-                        "path": str(components_file.relative_to(repo_root)),
-                        "interface_schema": comp.get("api_contract"),
-                        "version": comp.get("version"),
-                        "owner": comp.get("owner"),
-                        "type": comp.get("type", "module"),
-                    }
-                )
+            return [
+                {
+                    "name": comp.get("name", "unknown"),
+                    "path": str(components_file.relative_to(repo_root)),
+                    "interface_schema": comp.get("api_contract"),
+                    "version": comp.get("version"),
+                    "owner": comp.get("owner"),
+                    "type": comp.get("type", "module"),
+                }
+                for comp in data.get("components", [])
+            ]
     except (json.JSONDecodeError, FileNotFoundError):
-        pass
-    return modules
+        return []
 
 
 def parse_system_template(system_template_file: Path, repo_root: Path) -> list[dict[str, Any]]:
     """Parse system_template.json and extract module information."""
-    modules = []
     try:
         with open(system_template_file) as f:
             data = json.load(f)
             sys_template = data.get("system_template", {})
             module_names = sys_template.get("modules", [])
 
-            for module_name in module_names:
-                modules.append(
-                    {
-                        "name": module_name,
-                        "path": str(system_template_file.relative_to(repo_root)),
-                        "interface_schema": None,
-                        "version": None,
-                        "owner": sys_template.get("owner"),
-                        "type": "module",
-                    }
-                )
+            return [
+                {
+                    "name": module_name,
+                    "path": str(system_template_file.relative_to(repo_root)),
+                    "interface_schema": None,
+                    "version": None,
+                    "owner": sys_template.get("owner"),
+                    "type": "module",
+                }
+                for module_name in module_names
+            ]
     except (json.JSONDecodeError, FileNotFoundError):
-        pass
-    return modules
+        return []
 
 
 def find_modules(repo_root: Path) -> list[dict[str, Any]]:
@@ -154,24 +150,24 @@ def find_ci_configs(repo_root: Path) -> list[dict[str, Any]]:
     # GitHub Actions
     workflows_dir = repo_root / ".github" / "workflows"
     if workflows_dir.exists():
-        for yml_file in workflows_dir.glob("*.yml"):
-            ci_files.append(
-                {
-                    "path": str(yml_file.relative_to(repo_root)),
-                    "provider": "github_actions",
-                    "triggers": ["push", "pull_request"],  # Would parse YAML to get actual triggers
-                    "stages": ["lint", "unit_test", "contract_test"],  # Would parse to get actual stages
-                }
-            )
-        for yml_file in workflows_dir.glob("*.yaml"):
-            ci_files.append(
-                {
-                    "path": str(yml_file.relative_to(repo_root)),
-                    "provider": "github_actions",
-                    "triggers": ["push", "pull_request"],
-                    "stages": ["lint", "unit_test", "contract_test"],
-                }
-            )
+        ci_files.extend(
+            {
+                "path": str(yml_file.relative_to(repo_root)),
+                "provider": "github_actions",
+                "triggers": ["push", "pull_request"],
+                "stages": ["lint", "unit_test", "contract_test"],
+            }
+            for yml_file in workflows_dir.glob("*.yml")
+        )
+        ci_files.extend(
+            {
+                "path": str(yml_file.relative_to(repo_root)),
+                "provider": "github_actions",
+                "triggers": ["push", "pull_request"],
+                "stages": ["lint", "unit_test", "contract_test"],
+            }
+            for yml_file in workflows_dir.glob("*.yaml")
+        )
 
     # GitLab CI
     gitlab_ci = repo_root / ".gitlab-ci.yml"
@@ -241,7 +237,7 @@ def find_owners(repo_root: Path) -> dict[str, str]:
                             # Simple mapping - would need glob matching for full implementation
                             if "grid/" in path_pattern:
                                 owners["grid"] = owner
-        except Exception:
+        except Exception:  # noqa: S110 intentional silent handling
             pass
 
     # Extract owners from components.json
@@ -252,7 +248,7 @@ def find_owners(repo_root: Path) -> dict[str, str]:
                 for comp in data.get("components", []):
                     if comp.get("owner"):
                         owners[comp.get("name")] = comp.get("owner")
-        except Exception:
+        except Exception:  # noqa: S110 intentional silent handling
             pass
 
     return owners
@@ -268,8 +264,7 @@ def collect_evidence(repo_root: Path, modules: list[dict[str, Any]]) -> list[dic
             evidence.append({"file": module["path"], "line": 1, "type": "module_definition"})
 
     # Add manifest evidence
-    for manifest in find_manifests(repo_root):
-        evidence.append({"file": manifest, "line": 1, "type": "manifest"})
+    evidence.extend({"file": manifest, "line": 1, "type": "manifest"} for manifest in find_manifests(repo_root))
 
     return evidence
 

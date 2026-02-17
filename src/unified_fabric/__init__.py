@@ -190,7 +190,7 @@ class DynamicEventBus:
         else:
             await self._queue.put(event)
 
-    async def request_reply(self, event: Event, timeout: float = 5.0) -> EventResponse:
+    async def request_reply(self, event: Event, timeout: float = 5.0) -> EventResponse:  # noqa: ASYNC109 timeout parameter is handled by caller
         """
         Send event and wait for response (request-reply pattern).
 

@@ -66,7 +66,7 @@ class ContextStorage:
             Path.home() / ".grid" / "context",
             Path("E:/user_context"),
             Path("/var/grid/context"),
-            Path("/tmp/grid/context"),
+            Path("/tmp/grid/context"),  # noqa: S108 temp file path is intentional
         ]
 
         if not any(resolved_root.is_relative_to(allowed_root.resolve()) for allowed_root in allowed_roots):

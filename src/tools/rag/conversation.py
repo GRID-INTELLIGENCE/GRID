@@ -1,7 +1,7 @@
 """Conversational RAG components for maintaining conversation context."""
 
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 
@@ -12,7 +12,7 @@ class ConversationTurn:
     user_query: str
     system_response: str
     retrieved_sources: list[dict[str, Any]]
-    timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    timestamp: datetime = field(default_factory=lambda: datetime.now(UTC))
     query_embedding: list[float] | None = None
     response_embedding: list[float] | None = None
 
@@ -34,14 +34,14 @@ class ConversationSession:
 
     session_id: str
     turns: list[ConversationTurn] = field(default_factory=list)
-    created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
-    last_accessed: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = field(default_factory=lambda: datetime.now(UTC))
+    last_accessed: datetime = field(default_factory=lambda: datetime.now(UTC))
     metadata: dict[str, Any] = field(default_factory=dict)
 
     def add_turn(self, turn: ConversationTurn) -> None:
         """Add a new turn to the conversation."""
         self.turns.append(turn)
-        self.last_accessed = datetime.now(timezone.utc)
+        self.last_accessed = datetime.now(UTC)
 
     def get_recent_context(self, window_size: int = 5) -> str:
         """Get recent conversation context as text."""

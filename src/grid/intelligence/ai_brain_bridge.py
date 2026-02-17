@@ -7,7 +7,7 @@ import asyncio
 import logging
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from enum import Enum, StrEnum
+from enum import StrEnum
 from pathlib import Path
 from typing import Any
 
@@ -369,12 +369,7 @@ class KnowledgeGraphBridge:
         self, base_path: list[tuple[float, float]], context: dict[str, Any]
     ) -> list[tuple[float, float]]:
         """Apply spatial reasoning to enhance base path"""
-        enhanced_path: list[tuple[float, float]] = []
-
-        for point in base_path:
-            # Add some spatial reasoning-based modifications
-            # For now, keep the base path but this is where enhancement logic goes
-            enhanced_path.append(point)
+        enhanced_path: list[tuple[float, float]] = list(base_path)
 
         return enhanced_path
 

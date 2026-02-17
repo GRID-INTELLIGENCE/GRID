@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass, field
-from enum import Enum, StrEnum, auto
+from enum import StrEnum, auto
 from typing import Any
 
 

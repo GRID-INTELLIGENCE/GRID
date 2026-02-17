@@ -270,6 +270,7 @@ async def create_navigation_plan(
     request_id = _safe_request_id(request_context)
     # #region agent log
     import json
+
     import aiofiles
 
     try:
@@ -292,7 +293,7 @@ async def create_navigation_plan(
                 )
                 + "\n"
             )
-    except Exception:
+    except Exception:  # noqa: S110 intentional silent handling
         pass
     # #endregion
 

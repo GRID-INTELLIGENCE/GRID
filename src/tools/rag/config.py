@@ -2,7 +2,7 @@
 
 import os
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 
 # Load .env file if present, but respect GRID_QUIET mode which may have set env vars
 # that shouldn't be overridden (e.g., USE_DATABRICKS=false for quiet CLI operation)
@@ -17,7 +17,7 @@ if not _quiet_mode:
         pass  # dotenv not installed, rely on system env vars
 
 
-class ModelMode(str, Enum):
+class ModelMode(StrEnum):
     """Model execution mode."""
 
     LOCAL = "local"  # Use local Ollama models

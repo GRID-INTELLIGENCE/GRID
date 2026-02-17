@@ -10,7 +10,7 @@ import threading
 import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from datetime import datetime, timezone, timedelta
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -81,7 +81,7 @@ class PerformanceMonitor:
         """Save current configuration to file (Synchronous)."""
         if self.config_path:
             try:
-                config = {"thresholds": self.thresholds, "saved_at": datetime.now(timezone.utc).isoformat()}
+                config = {"thresholds": self.thresholds, "saved_at": datetime.now(UTC).isoformat()}
                 Path(self.config_path).parent.mkdir(parents=True, exist_ok=True)
                 with open(self.config_path, "w") as f:
                     json.dump(config, f, indent=2)
@@ -99,7 +99,7 @@ class PerformanceMonitor:
                 name="cpu_usage",
                 value=cpu_percent,
                 unit="percent",
-                timestamp=datetime.now(timezone.utc),
+                timestamp=datetime.now(UTC),
                 threshold=self.thresholds["cpu_usage"],
                 status=self._get_status(cpu_percent, self.thresholds["cpu_usage"]),
                 metadata={"cores": psutil.cpu_count()},
@@ -111,7 +111,7 @@ class PerformanceMonitor:
                 name="memory_usage",
                 value=memory.percent,
                 unit="percent",
-                timestamp=datetime.now(timezone.utc),
+                timestamp=datetime.now(UTC),
                 threshold=self.thresholds["memory_usage"],
                 status=self._get_status(memory.percent, self.thresholds["memory_usage"]),
                 metadata={
@@ -128,7 +128,7 @@ class PerformanceMonitor:
                 name="disk_usage",
                 value=disk_percent,
                 unit="percent",
-                timestamp=datetime.now(timezone.utc),
+                timestamp=datetime.now(UTC),
                 threshold=self.thresholds["disk_usage"],
                 status=self._get_status(disk_percent, self.thresholds["disk_usage"]),
                 metadata={
@@ -144,7 +144,7 @@ class PerformanceMonitor:
                 name="network_io",
                 value=net_io.bytes_sent + net_io.bytes_recv,
                 unit="bytes",
-                timestamp=datetime.now(timezone.utc),
+                timestamp=datetime.now(UTC),
                 metadata={
                     "bytes_sent": net_io.bytes_sent,
                     "bytes_recv": net_io.bytes_recv,
@@ -188,7 +188,7 @@ class PerformanceMonitor:
         op_metrics.avg_duration = op_metrics.total_duration / op_metrics.total_calls
         op_metrics.min_duration = min(op_metrics.min_duration, duration)
         op_metrics.max_duration = max(op_metrics.max_duration, duration)
-        op_metrics.last_called = datetime.now(timezone.utc)
+        op_metrics.last_called = datetime.now(UTC)
 
         if not success:
             op_metrics.error_count += 1
@@ -200,7 +200,7 @@ class PerformanceMonitor:
             name=f"{operation}_duration",
             value=duration,
             unit="seconds",
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
             threshold=self.thresholds.get("response_time"),
             status=self._get_status(duration, self.thresholds.get("response_time", 2.0)),
             metadata={"operation": operation, "success": success, "error": error, "call_id": call_id},
@@ -266,7 +266,7 @@ class PerformanceMonitor:
     def get_performance_summary(self) -> dict[str, Any]:
         """Generate performance summary for intelligence library"""
         summary = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "total_metrics": len(self.metrics),
             "total_operations": len(self.operations),
             "critical_alerts": 0,
@@ -310,7 +310,7 @@ class PerformanceMonitor:
 
         # System-level recommendations
         recent_alerts = [
-            a for a in self.alerts if datetime.fromisoformat(a["timestamp"]) > datetime.now(timezone.utc) - timedelta(hours=1)
+            a for a in self.alerts if datetime.fromisoformat(a["timestamp"]) > datetime.now(UTC) - timedelta(hours=1)
         ]
 
         if len(recent_alerts) > 10:
@@ -323,7 +323,7 @@ class PerformanceMonitor:
         if operation not in self.metrics:
             return {"error": f"No metrics found for operation: {operation}"}
 
-        cutoff_time = datetime.now(timezone.utc) - timedelta(hours=hours)
+        cutoff_time = datetime.now(UTC) - timedelta(hours=hours)
         recent_metrics = [m for m in self.metrics[operation] if m.timestamp > cutoff_time]
 
         if not recent_metrics:
@@ -402,7 +402,7 @@ class PerformanceMonitor:
     def export_metrics(self, filepath: str, format: str = "json"):
         """Export metrics to file (Synchronous)."""
         data = {
-            "export_timestamp": datetime.now(timezone.utc).isoformat(),
+            "export_timestamp": datetime.now(UTC).isoformat(),
             "metrics": {
                 name: [
                     {
@@ -470,7 +470,7 @@ def register_with_intelligence_library():
                 "trends": "get_operation_trends",
                 "export": "export_metrics",
             },
-            "registered_at": datetime.now(timezone.utc).isoformat(),
+            "registered_at": datetime.now(UTC).isoformat(),
         }
 
         logger.info(f"Registered performance monitoring library: {registration_info}")

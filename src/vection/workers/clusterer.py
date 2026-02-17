@@ -21,8 +21,8 @@ import time
 from collections import defaultdict, deque
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from enum import Enum
+from datetime import UTC, datetime
+from enum import StrEnum
 from typing import Any
 
 from vection.schemas.emergence_signal import EmergenceSignal, SignalType
@@ -30,7 +30,7 @@ from vection.schemas.emergence_signal import EmergenceSignal, SignalType
 logger = logging.getLogger(__name__)
 
 
-class ClusterType(str, Enum):
+class ClusterType(StrEnum):
     """Types of clusters detected."""
 
     FEATURE = "feature"  # Similar features
@@ -227,7 +227,7 @@ class Clusterer:
             return
 
         self._running = True
-        self._started_at = datetime.now(timezone.utc)
+        self._started_at = datetime.now(UTC)
         self._task = asyncio.create_task(self._processing_loop())
         logger.info("Clusterer worker started")
 
@@ -359,7 +359,7 @@ class Clusterer:
             "emitted_signals": len(self._emitted_signals),
             "feature_dimensions": len(self._feature_vocabulary),
             "similarity_threshold": self._similarity_threshold,
-            "uptime_seconds": ((datetime.now(timezone.utc) - self._started_at).total_seconds() if self._started_at else 0),
+            "uptime_seconds": ((datetime.now(UTC) - self._started_at).total_seconds() if self._started_at else 0),
         }
 
     def reset(self) -> None:
@@ -642,13 +642,13 @@ class Clusterer:
     def _generate_event_id(self) -> str:
         """Generate a unique event ID."""
         hash_input = f"{time.time()}:{self._total_observations}"
-        return hashlib.md5(hash_input.encode()).hexdigest()[:10]
+        return hashlib.md5(hash_input.encode()).hexdigest()[:10]  # noqa: S324 non-cryptographic use
 
     def _generate_cluster_id(self, features: dict[str, Any]) -> str:
         """Generate a cluster ID from features."""
         feature_str = str(sorted(features.items()))
         hash_input = f"{feature_str}:{time.time()}"
-        return f"cl_{hashlib.md5(hash_input.encode()).hexdigest()[:10]}"
+        return f"cl_{hashlib.md5(hash_input.encode()).hexdigest()[:10]}"  # noqa: S324 non-cryptographic use
 
     def _generate_cluster_label(self, features: dict[str, Any]) -> str:
         """Generate a human-readable cluster label."""
@@ -681,7 +681,7 @@ class Clusterer:
         description = f"Cluster detected: {cluster.label} ({cluster.size} members)"
 
         # Get unique sessions in cluster
-        sessions = set(m.session_id for m in cluster.members)
+        sessions = {m.session_id for m in cluster.members}
 
         return EmergenceSignal.create(
             signal_type=SignalType.CLUSTER,

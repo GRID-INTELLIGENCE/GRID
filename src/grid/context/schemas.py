@@ -1,13 +1,13 @@
 """Pydantic schemas for user context data structures."""
 
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from pydantic import BaseModel, Field
 
 
-class TimeOfDay(str, Enum):
+class TimeOfDay(StrEnum):
     """Time of day categories."""
 
     EARLY_MORNING = "early_morning"  # 5-8 AM

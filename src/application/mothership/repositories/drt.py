@@ -171,7 +171,7 @@ class DRTAttackVectorRepository:
         """Get all attack vectors with their IDs and severity."""
         query = select(DRTAttackVectorRow)
         if active_only:
-            query = query.where(DRTAttackVectorRow.active == True)
+            query = query.where(DRTAttackVectorRow.active)
 
         result = await self._db.execute(query)
         rows = result.scalars().all()
@@ -180,7 +180,7 @@ class DRTAttackVectorRepository:
     async def get_by_path(self, path_pattern: str, method: str | None = None) -> list[tuple[str, BehavioralSignature]]:
         """Get attack vectors by path pattern."""
         query = select(DRTAttackVectorRow).where(
-            DRTAttackVectorRow.path_pattern == path_pattern, DRTAttackVectorRow.active == True
+            DRTAttackVectorRow.path_pattern == path_pattern, DRTAttackVectorRow.active
         )
         if method:
             query = query.where(DRTAttackVectorRow.method == method)
@@ -207,7 +207,7 @@ class DRTAttackVectorRepository:
         """Get count of attack vectors."""
         query = select(func.count()).select_from(DRTAttackVectorRow)
         if active_only:
-            query = query.where(DRTAttackVectorRow.active == True)
+            query = query.where(DRTAttackVectorRow.active)
 
         result = await self._db.execute(query)
         return int(result.scalar_one())
@@ -340,7 +340,7 @@ class DRTEscalatedEndpointRepository:
         now = datetime.now(UTC)
         result = await self._db.execute(
             select(DRTEscalatedEndpointRow)
-            .where(DRTEscalatedEndpointRow.is_active == True)
+            .where(DRTEscalatedEndpointRow.is_active)
             .where(DRTEscalatedEndpointRow.expires_at > now)
             .order_by(DRTEscalatedEndpointRow.expires_at.desc())
         )
@@ -360,7 +360,7 @@ class DRTEscalatedEndpointRepository:
         result = await self._db.execute(
             update(DRTEscalatedEndpointRow)
             .where(DRTEscalatedEndpointRow.expires_at < now)
-            .where(DRTEscalatedEndpointRow.is_active == True)
+            .where(DRTEscalatedEndpointRow.is_active)
             .values(is_active=False)
         )
         return result.rowcount or 0
@@ -371,7 +371,7 @@ class DRTEscalatedEndpointRepository:
         result = await self._db.execute(
             select(func.count())
             .select_from(DRTEscalatedEndpointRow)
-            .where(DRTEscalatedEndpointRow.is_active == True)
+            .where(DRTEscalatedEndpointRow.is_active)
             .where(DRTEscalatedEndpointRow.expires_at > now)
         )
         return int(result.scalar_one())
@@ -540,7 +540,7 @@ class DRTFalsePositivePatternRepository:
             select(DRTFalsePositivePatternRow).where(
                 DRTFalsePositivePatternRow.path_pattern == signature.path_pattern,
                 DRTFalsePositivePatternRow.method == signature.method,
-                DRTFalsePositivePatternRow.active == True,
+                DRTFalsePositivePatternRow.active,
             )
         )
         pattern = result.scalar_one_or_none()
@@ -590,7 +590,7 @@ class DRTFalsePositivePatternRepository:
         """Get patterns with false positive rate above threshold."""
         query = select(DRTFalsePositivePatternRow).where(DRTFalsePositivePatternRow.false_positive_rate >= threshold)
         if active_only:
-            query = query.where(DRTFalsePositivePatternRow.active == True)
+            query = query.where(DRTFalsePositivePatternRow.active)
 
         result = await self._db.execute(query)
         rows = result.scalars().all()
@@ -624,7 +624,7 @@ class DRTFalsePositivePatternRepository:
         cutoff = datetime.now(UTC) - timedelta(days=days)
         result = await self._db.execute(
             delete(DRTFalsePositivePatternRow).where(
-                DRTFalsePositivePatternRow.last_updated < cutoff, DRTFalsePositivePatternRow.active == True
+                DRTFalsePositivePatternRow.last_updated < cutoff, DRTFalsePositivePatternRow.active
             )
         )
         return result.rowcount or 0

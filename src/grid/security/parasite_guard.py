@@ -33,7 +33,7 @@ from collections import defaultdict
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from enum import Enum, StrEnum
+from enum import StrEnum
 from pathlib import Path
 from typing import Any, Protocol, TypeVar, cast
 
@@ -608,7 +608,7 @@ class DummyResponseGenerator:
                 response_model: Any = getattr(endpoint, "response_model", None)
                 if response_model is not None and isinstance(response_model, type):
                     return cast(type, response_model)
-        except Exception:
+        except Exception:  # noqa: S110 intentional silent handling
             pass
 
         return None
@@ -749,8 +749,6 @@ class ParasiteProfiler:
     ) -> None:
         """Publish detection event to event bus."""
         try:
-            from infrastructure.event_bus.event_system import EventBus
-
             # Get or create event bus instance
             # This is a placeholder - actual implementation depends on DI setup
             log.debug("Event bus publication would occur here")

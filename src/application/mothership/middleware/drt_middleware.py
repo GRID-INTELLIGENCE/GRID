@@ -8,7 +8,7 @@ import asyncio
 import logging
 import secrets
 import time
-from datetime import datetime, timezone, timedelta
+from datetime import UTC, datetime, timedelta
 from typing import Any, Callable
 
 from fastapi import Request, Response
@@ -33,7 +33,7 @@ class BehavioralSignature:
         self.headers = headers
         self.body_pattern = body_pattern
         self.query_pattern = query_pattern
-        self.timestamp = datetime.now(timezone.utc)
+        self.timestamp = datetime.now(UTC)
         self.request_count = 0
 
     def to_dict(self) -> dict[str, Any]:
@@ -291,7 +291,7 @@ class ComprehensiveDRTMiddleware(BaseHTTPMiddleware):
         return header_similarity
 
     def _escalate_endpoint(self, path: str) -> None:
-        expires_at = datetime.now(timezone.utc) + timedelta(minutes=self.escalation_timeout_minutes)
+        expires_at = datetime.now(UTC) + timedelta(minutes=self.escalation_timeout_minutes)
         self.ESCALATED_ENDPOINTS[path] = expires_at
 
         if self.alert_on_escalation:
@@ -343,7 +343,7 @@ class ComprehensiveDRTMiddleware(BaseHTTPMiddleware):
                 if self._calculate_similarity(signature, vector_sig) >= self.similarity_threshold:
                     attack_vector_id = vector_id
                     # Try to get severity from attack vectors
-                    for attack_sig, attack_severity in zip(self.attack_vectors, ["medium"] * len(self.attack_vectors)):
+                    for attack_sig, attack_severity in zip(self.attack_vectors, ["medium"] * len(self.attack_vectors), strict=False):
                         if attack_sig == vector_sig:
                             severity = attack_severity
                             break
@@ -422,7 +422,7 @@ class ComprehensiveDRTMiddleware(BaseHTTPMiddleware):
             logger.error(f"Failed to persist escalated endpoint: {e}")
 
     def _cleanup_old_entries(self) -> None:
-        cutoff = datetime.now(timezone.utc) - timedelta(hours=self.retention_hours)
+        cutoff = datetime.now(UTC) - timedelta(hours=self.retention_hours)
         self.behavioral_history = [b for b in self.behavioral_history if b.timestamp >= cutoff]
 
     async def _periodic_cleanup(self) -> None:
@@ -439,7 +439,7 @@ class ComprehensiveDRTMiddleware(BaseHTTPMiddleware):
                 await self._escalated_repo.cleanup_expired()
 
                 # Clean up expired escalated endpoints in memory
-                now = datetime.now(timezone.utc)
+                now = datetime.now(UTC)
                 expired = [path for path, expiry in self.ESCALATED_ENDPOINTS.items() if expiry <= now]
                 for path in expired:
                     del self.ESCALATED_ENDPOINTS[path]

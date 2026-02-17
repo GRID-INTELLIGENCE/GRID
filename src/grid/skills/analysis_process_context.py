@@ -118,15 +118,15 @@ def _process_context(args: Mapping[str, Any]) -> dict[str, Any]:
         relationships = []
         if include_relationships and len(entities) > 1:
             # Simple: create relationships between consecutive entities
-            for i in range(len(entities) - 1):
-                relationships.append(
+            relationships.extend(
                     {
                         "source": entities[i]["text"],
                         "target": entities[i + 1]["text"],
                         "type": "RELATED",
                         "confidence": 0.70,
                     }
-                )
+                for i in range(len(entities) - 1)
+            )
         stage4_time = time.time()
 
         result = {

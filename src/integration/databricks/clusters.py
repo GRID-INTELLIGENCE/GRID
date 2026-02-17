@@ -83,9 +83,7 @@ class DatabricksClustersManager:
         Returns:
             List of cluster information
         """
-        clusters = []
-        for cluster in self.client.workspace.clusters.list():
-            clusters.append(
+        clusters = [
                 {
                     "cluster_id": cluster.cluster_id,
                     "cluster_name": cluster.cluster_name,
@@ -93,7 +91,8 @@ class DatabricksClustersManager:
                     "num_workers": cluster.num_workers,
                     "spark_version": cluster.spark_version,
                 }
-            )
+            for cluster in self.client.workspace.clusters.list()
+        ]
         return clusters
 
     def resize_cluster(self, cluster_id: str, num_workers: int) -> bool:

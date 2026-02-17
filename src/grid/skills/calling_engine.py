@@ -4,11 +4,11 @@ import asyncio
 import logging
 import time
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 
-class CallStrategy(str, Enum):
+class CallStrategy(StrEnum):
     SEQUENTIAL = "sequential"
     PARALLEL = "parallel"
     ADAPTIVE = "adaptive"
@@ -98,7 +98,7 @@ class SkillCallingEngine:
         elif strategy == CallStrategy.PARALLEL:
             tasks = [self.call_skill(skill_id, args) for skill_id in skill_ids]
             parallel_results: list[SkillCallResult] = await asyncio.gather(*tasks)
-            return {skill_id: result for skill_id, result in zip(skill_ids, parallel_results, strict=False)}
+            return dict(zip(skill_ids, parallel_results, strict=False))
 
         else:  # ADAPTIVE
             # Start with parallel, fall back to sequential if needed

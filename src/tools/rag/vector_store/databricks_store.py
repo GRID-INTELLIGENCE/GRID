@@ -537,9 +537,7 @@ class DatabricksVectorStore(BaseVectorStore):
             # Fallback to returning empty results instead of crashing
             return {"ids": [], "documents": [], "metadatas": [], "distances": []}
 
-        scored = []
-        for row in rows:
-            scored.append(
+        scored = [
                 {
                     "id": row[0],
                     "document_id": row[1],
@@ -549,7 +547,8 @@ class DatabricksVectorStore(BaseVectorStore):
                     "metadata": json.loads(row[5]) if row[5] else {},
                     "distance": float(row[6]),
                 }
-            )
+            for row in rows
+        ]
 
         ids = [item["id"] for item in scored]
         documents = [item["text"] for item in scored] if "documents" in include else []
@@ -592,7 +591,7 @@ class DatabricksVectorStore(BaseVectorStore):
                     batch_ids = ids[batch_start : batch_start + batch_size]
                     param_placeholders = ", ".join([f":id_{j}" for j in range(len(batch_ids))])
                     p = {f"id_{j}": doc_id for j, doc_id in enumerate(batch_ids)}
-                    sql = f"DELETE FROM {self.chunk_table} WHERE id IN ({param_placeholders})"
+                    sql = f"DELETE FROM {self.chunk_table} WHERE id IN ({param_placeholders})"  # noqa: S608 hardcoded SQL is for internal query building
 
                     with self._connect() as conn:
                         conn.execute(text(sql), p)
@@ -604,7 +603,7 @@ class DatabricksVectorStore(BaseVectorStore):
         if where and "path" in where:
             # Delete by path pattern
             path_pattern = where["path"]
-            sql = f"DELETE FROM {self.chunk_table} WHERE path LIKE :pattern"
+            sql = f"DELETE FROM {self.chunk_table} WHERE path LIKE :pattern"  # noqa: S608 hardcoded SQL is for internal query building
 
             try:
                 with self._connect() as conn:
@@ -621,7 +620,7 @@ class DatabricksVectorStore(BaseVectorStore):
         Returns:
             Number of chunks
         """
-        sql = f"SELECT COUNT(*) AS count FROM {self.chunk_table}"
+        sql = f"SELECT COUNT(*) AS count FROM {self.chunk_table}"  # noqa: S608 hardcoded SQL is for internal query building
 
         try:
             with self._connect() as conn:

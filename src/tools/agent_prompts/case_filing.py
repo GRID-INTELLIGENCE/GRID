@@ -10,7 +10,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 from datetime import datetime
-from enum import Enum, StrEnum
+from enum import StrEnum
 from typing import Any
 
 
@@ -287,9 +287,7 @@ class CaseFilingSystem:
             "deploy",
         }
 
-        for term in technical_terms:
-            if term in text_lower:
-                keywords.append(term)
+        keywords.extend(term for term in technical_terms if term in text_lower)
 
         # Extract entities (capitalized words, likely proper nouns)
         words = re.findall(r"\b[A-Z][a-z]+\b", text)
@@ -342,8 +340,7 @@ class CaseFilingSystem:
         labels.append(f"priority:{structure.priority}")
 
         # Add keyword-based labels
-        for keyword in structure.keywords[:5]:  # Top 5 keywords
-            labels.append(f"keyword:{keyword}")
+        labels.extend(f"keyword:{keyword}" for keyword in structure.keywords[:5])
 
         return {"iteration": 4, "labels": labels}
 
@@ -361,8 +358,7 @@ class CaseFilingSystem:
 
         for pattern, rel_type in relationship_patterns:
             matches = re.finditer(pattern, text, re.IGNORECASE)
-            for match in matches:
-                relationships.append({"source": match.group(1), "target": match.group(3), "type": rel_type})
+            relationships.extend({"source": match.group(1), "target": match.group(3), "type": rel_type} for match in matches)
 
         return {
             "iteration": 5,

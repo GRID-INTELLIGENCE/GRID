@@ -12,6 +12,7 @@ import logging
 import sys
 from abc import ABC, abstractmethod
 from datetime import UTC, datetime
+from typing import Any
 
 from .config import ParasiteGuardConfig
 from .models import (
@@ -193,7 +194,7 @@ class EventBusSanitizer(Sanitizer):
                                         if alive:
                                             alive_subs.append(sub)
                                             alive_count += 1
-                                except:
+                                except Exception:  # noqa: S110 intentional silent handling
                                     pass
 
                             # Replace with alive only
@@ -432,7 +433,7 @@ class DeferredSanitizer:
             # Clean up task reference
             self._active_tasks.pop(str(context.id), None)
 
-    async def wait_all(self, timeout: float | None = None) -> None:
+    async def wait_all(self, timeout: float | None = None) -> None:  # noqa: ASYNC109 timeout parameter is handled by caller
         """Wait for all active sanitization tasks to complete."""
         if not self._active_tasks:
             return

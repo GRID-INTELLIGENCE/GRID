@@ -78,11 +78,7 @@ def sanitize_environment() -> dict[str, list[str]]:
     changes that were made.
     """
     report: dict[str, list[str]] = {"removed": [], "warnings": []}
-    keys_to_remove: list[str] = []
-    for key in os.environ:
-        # Allow only alphanumeric, underscores, and dots in env-var names
-        if not key.replace("_", "").replace(".", "").isalnum():
-            keys_to_remove.append(key)
+    keys_to_remove: list[str] = [key for key in os.environ if not key.replace("_", "").replace(".", "").isalnum()]
 
     for key in keys_to_remove:
         logger.warning(f"Removing potentially unsafe environment key: {key}")

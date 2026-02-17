@@ -38,7 +38,7 @@ from collections import OrderedDict
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from grid.events.core import Event, EventBus, EventPriority
@@ -47,7 +47,7 @@ from grid.events.types import EventType
 logger = logging.getLogger(__name__)
 
 
-class OutputFormat(str, Enum):
+class OutputFormat(StrEnum):
     """Supported output formats."""
 
     JSON = "json"
@@ -59,7 +59,7 @@ class OutputFormat(str, Enum):
     RAW = "raw"
 
 
-class ResponseStatus(str, Enum):
+class ResponseStatus(StrEnum):
     """Response status values."""
 
     SUCCESS = "success"
@@ -286,8 +286,7 @@ class ResponseFormatter:
 
         if "categories" in result:
             lines.append("Categories:")
-            for category in result["categories"]:
-                lines.append(f"  - {category}")
+            lines.extend(f"  - {category}" for category in result["categories"])
 
         if "analysis" in result:
             lines.append("Analysis:")
@@ -337,8 +336,7 @@ class ResponseFormatter:
         if "categories" in result and result["categories"]:
             lines.append("## Categories")
             lines.append("")
-            for category in result["categories"]:
-                lines.append(f"- {category}")
+            lines.extend(f"- {category}" for category in result["categories"])
             lines.append("")
 
         # Analysis
@@ -374,8 +372,7 @@ class ResponseFormatter:
         # Handle categories
         if "categories" in result and result["categories"]:
             lines.append("category")
-            for category in result["categories"]:
-                lines.append(f'"{category}"')
+            lines.extend(f'"{category}"' for category in result["categories"])
             return "\n".join(lines)
 
         # Generic key-value
@@ -424,8 +421,7 @@ class ResponseFormatter:
         # Categories
         if "categories" in result and result["categories"]:
             parts.append("<h2>Categories</h2><ul>")
-            for category in result["categories"]:
-                parts.append(f"<li>{category}</li>")
+            parts.extend(f"<li>{category}</li>" for category in result["categories"])
             parts.append("</ul>")
 
         parts.append("</body></html>")

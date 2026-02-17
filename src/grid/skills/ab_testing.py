@@ -64,7 +64,7 @@ class ABTestManager:
                 with open(c_file) as f:
                     data = json.load(f)
                     configs[data["test_id"]] = ABTestConfig(**data)
-            except Exception:
+            except Exception:  # noqa: S110 intentional silent handling
                 pass
         return configs
 
@@ -101,7 +101,7 @@ class ABTestManager:
         if not active_test:
             return "baseline"
 
-        if random.random() < active_test.rollout_pct:
+        if random.random() < active_test.rollout_pct:  # noqa: S311 non-security random use
             return active_test.variant_b_id
         return active_test.variant_a_id
 

@@ -1,6 +1,6 @@
 import logging
 import os
-from datetime import datetime, timezone, timedelta
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import yaml
@@ -39,7 +39,7 @@ class ContractEnforcementResult:
                 "message": message,
                 "severity": severity,
                 "penalty_points": penalty_points,
-                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
             }
         )
         self.penalty_points += penalty_points
@@ -146,7 +146,7 @@ class AccountabilityEnforcer:
         if rate_limit:
             client_id = headers.get("X-Client-ID", client_ip or "unknown")
             rate_key = f"rate:{client_id}:{path}"
-            current_time = datetime.now(timezone.utc)
+            current_time = datetime.now(UTC)
 
             # Clean up old entries
             if rate_key in self.metrics_store:
@@ -234,7 +234,7 @@ class AccountabilityEnforcer:
 
         # Record performance metrics
         if hasattr(result, "request_start_time"):
-            latency_ms = (datetime.now(timezone.utc) - result.request_start_time).total_seconds() * 1000
+            latency_ms = (datetime.now(UTC) - result.request_start_time).total_seconds() * 1000
             result.metrics["latency_ms"] = latency_ms
 
             max_latency = contract.performance.max_latency_ms

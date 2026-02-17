@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from enum import Enum, StrEnum, auto
+from enum import StrEnum, auto
 
 
 class GuardState(StrEnum):

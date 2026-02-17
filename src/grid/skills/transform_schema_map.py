@@ -29,7 +29,7 @@ def _extract_json_object(text: str) -> Any:
         stripped = stripped.strip()
     try:
         return json.loads(stripped)
-    except Exception:
+    except Exception:  # noqa: S110 intentional silent handling
         pass
     start = stripped.find("{")
     end = stripped.rfind("}")
@@ -569,10 +569,7 @@ def _heuristic_custom_schema(schema_name: str, text: str) -> tuple[dict[str, Any
             if not vv:
                 continue
             parts = [p.strip().rstrip(".") for p in re.split(r"[,;]", vv) if p.strip()]
-            matched = []
-            for p in parts:
-                if any(rt in p.lower() for rt in recall_terms):
-                    matched.append(p)
+            matched = [p for p in parts if any(rt in p.lower() for rt in recall_terms)]
             if matched and len(matched) == len(parts):
                 recall_atoms.extend(matched)
             else:
@@ -798,8 +795,7 @@ def _render_markdown(schema_name: str, payload: Any) -> str:
             for kk, vv in v.items():
                 if isinstance(vv, list):
                     lines.append(f"- **{kk}**:")
-                    for sub in vv:
-                        lines.append(f"  - {sub}")
+                    lines.extend(f"  - {sub}" for sub in vv)
                 elif isinstance(vv, dict):
                     lines.append(f"- **{kk}**:")
                     for sk, sv in vv.items():

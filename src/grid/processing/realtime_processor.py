@@ -2,11 +2,11 @@
 
 from collections.abc import Callable
 from datetime import UTC, datetime, timedelta
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 
-class RealtimeFlow(str, Enum):
+class RealtimeFlow(StrEnum):
     """Types of real-time flows."""
 
     EMERGENCY = "emergency"  # Critical emergency processing

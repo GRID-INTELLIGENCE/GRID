@@ -58,8 +58,8 @@ class SecurePathManager:
 
     # Dangerous path patterns that should never be added
     DANGEROUS_PATTERNS: list[str] = [
-        "/tmp",
-        "/var/tmp",
+        "/tmp",  # noqa: S108 temp file path is intentional
+        "/var/tmp",  # noqa: S108 temp file path is intentional
         ";",
         "&&",
         "|",

@@ -33,7 +33,7 @@ def __getattr__(name: str) -> Any:
         bridge = get_tools_bridge()
         if bridge.is_rag_available():
             return getattr(__import__("tools.rag", fromlist=[name]), name)
-    except Exception:
+    except Exception:  # noqa: S110 intentional silent handling
         pass
 
     import importlib
@@ -80,7 +80,7 @@ def to_scored_chunk(
 ) -> ScoredChunk:
     """Factory function to create a ScoredChunk with auto-generated ID if needed."""
     if chunk_id is None:
-        chunk_id = hashlib.md5(text.encode()).hexdigest()[:12]
+        chunk_id = hashlib.md5(text.encode()).hexdigest()[:12]  # noqa: S324 non-cryptographic use
     return ScoredChunk(
         chunk_id=chunk_id,
         text=text,

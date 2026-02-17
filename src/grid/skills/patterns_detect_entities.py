@@ -29,8 +29,7 @@ def _simple_entity_detection(text: str, entity_types: list[str]) -> list[dict[st
     # PERSON patterns
     if "PERSON" in entity_types:
         person_pattern = r"\b[A-Z][a-z]+ [A-Z][a-z]+\b"
-        for match in re.finditer(person_pattern, text):
-            entities.append(
+        entities.extend(
                 {
                     "text": match.group(),
                     "type": "PERSON",
@@ -38,13 +37,13 @@ def _simple_entity_detection(text: str, entity_types: list[str]) -> list[dict[st
                     "end": match.end(),
                     "confidence": 0.75,  # Lower confidence for heuristic
                 }
-            )
+            for match in re.finditer(person_pattern, text)
+        )
 
     # ORG patterns (ALL CAPS or Title Case with Corp/Inc/LLC)
     if "ORG" in entity_types:
         org_pattern = r"\b[A-Z][a-zA-Z]*(?:\s+[A-Z][a-zA-Z]*)*\s+(?:Corp|Inc|LLC|Ltd|Co|Company|Organization)\b"
-        for match in re.finditer(org_pattern, text):
-            entities.append(
+        entities.extend(
                 {
                     "text": match.group(),
                     "type": "ORG",
@@ -52,13 +51,13 @@ def _simple_entity_detection(text: str, entity_types: list[str]) -> list[dict[st
                     "end": match.end(),
                     "confidence": 0.80,
                 }
-            )
+            for match in re.finditer(org_pattern, text)
+        )
 
     # DOMAIN patterns
     if "DOMAIN" in entity_types:
         domain_pattern = r"\b(?:machine learning|artificial intelligence|data science|software engineering|web development|cloud computing|devops|cybersecurity)\b"
-        for match in re.finditer(domain_pattern, text, re.IGNORECASE):
-            entities.append(
+        entities.extend(
                 {
                     "text": match.group(),
                     "type": "DOMAIN",
@@ -66,7 +65,8 @@ def _simple_entity_detection(text: str, entity_types: list[str]) -> list[dict[st
                     "end": match.end(),
                     "confidence": 0.85,
                 }
-            )
+            for match in re.finditer(domain_pattern, text, re.IGNORECASE)
+        )
 
     return entities
 

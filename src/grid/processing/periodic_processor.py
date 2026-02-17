@@ -3,13 +3,13 @@
 import asyncio
 from collections.abc import Callable
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from pydantic import BaseModel, Field
 
 
-class ProcessingMode(str, Enum):
+class ProcessingMode(StrEnum):
     """Processing modes."""
 
     PERIODIC = "periodic"  # Default: periodic processing

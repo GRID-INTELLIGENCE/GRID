@@ -1,13 +1,13 @@
 """Cognitive load estimator for assessing mental effort requirements."""
 
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from ..schemas.cognitive_state import CognitiveLoadType, CognitiveState
 from ..schemas.user_cognitive_profile import UserCognitiveProfile
 
 
-class LoadFactor(str, Enum):
+class LoadFactor(StrEnum):
     """Factors that contribute to cognitive load."""
 
     INFORMATION_DENSITY = "information_density"

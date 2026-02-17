@@ -108,15 +108,11 @@ def _analyze_semantics(original: str, compressed: str) -> dict[str, Any]:
 
     # Extract potential entities (capitalized words, numbers)
     words = original.split()
-    for word in words:
-        if word[0].isupper() and len(word) > 2:
-            entities.append(word.strip(".,!?"))
+    entities.extend(word.strip(".,!?") for word in words if word[0].isupper() and len(word) > 2)
 
     # Simple relationship detection (verbs connecting entities)
     verbs = ["exceeded", "driving", "increased", "decreased", "caused", "led to"]
-    for verb in verbs:
-        if verb in original.lower():
-            relationships.append({"type": "causal", "verb": verb})
+    relationships.extend({"type": "causal", "verb": verb} for verb in verbs if verb in original.lower())
 
     # Context detection (domain keywords)
     domains = {
@@ -144,8 +140,8 @@ def _calculate_semantic_preservation(original: str, compressed: str) -> float:
     Returns a score between 0.0 and 1.0 indicating semantic preservation.
     """
     # Simple heuristic: compare entity overlap
-    original_entities = set(word for word in original.split() if word[0].isupper() and len(word) > 2)
-    compressed_entities = set(word for word in compressed.split() if word[0].isupper() and len(word) > 2)
+    original_entities = {word for word in original.split() if word[0].isupper() and len(word) > 2}
+    compressed_entities = {word for word in compressed.split() if word[0].isupper() and len(word) > 2}
 
     if not original_entities:
         return 1.0  # No entities to preserve

@@ -10,13 +10,13 @@ import logging
 import time
 import uuid
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
-class ExecutionOutcome(str, Enum):
+class ExecutionOutcome(StrEnum):
     """Possible outcomes of an execution task."""
 
     SUCCESS = "success"

@@ -2,8 +2,8 @@
 
 import logging
 from dataclasses import dataclass
-from datetime import datetime, timezone
-from enum import Enum
+from datetime import UTC, datetime
+from enum import StrEnum
 from pathlib import Path
 
 import httpx
@@ -164,7 +164,7 @@ def get_agent_ignore_patterns(repo_path: str) -> list[str]:
                     line = line.strip()
                     if line and not line.startswith("#"):
                         patterns.append(line)
-        except Exception:
+        except Exception:  # noqa: S110 intentional silent handling
             pass
 
     return patterns
@@ -175,7 +175,7 @@ def get_agent_ignore_patterns(repo_path: str) -> list[str]:
 # =============================================================================
 
 
-class ModelHealthStatus(str, Enum):
+class ModelHealthStatus(StrEnum):
     """Health status of a model."""
 
     HEALTHY = "healthy"
@@ -243,7 +243,7 @@ def check_model_health(
     Returns:
         ModelHealthInfo with status and details
     """
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
 
     try:
         # First check if Ollama is accessible
@@ -335,7 +335,7 @@ def check_models_health(
         ModelHealthCheck with status for all models
     """
     ollama_accessible = check_ollama_connection(base_url)
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     models: dict[str, ModelHealthInfo] = {}
 
     for model_name in model_names:

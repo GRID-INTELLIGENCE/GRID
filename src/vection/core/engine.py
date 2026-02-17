@@ -297,7 +297,7 @@ class Vection:
                 result = event.to_dict()
                 if isinstance(result, dict):
                     data.update(result)
-            except Exception:
+            except Exception:  # noqa: S110 intentional silent handling
                 pass
 
         return data if data else {"raw_event": str(event)}

@@ -99,7 +99,7 @@ class SkillRetriever:
                     try:
                         with open(artifact_file, encoding="utf-8") as f:
                             artifacts[artifact_file.name] = f.read()
-                    except Exception:
+                    except Exception:  # noqa: S110 intentional silent handling
                         pass
 
         return artifacts

@@ -149,7 +149,7 @@ def validate_db_path(db_path: str) -> str:
     path = Path(db_path).resolve()
 
     # Restrict to known safe directories
-    allowed_dirs = [Path.cwd(), Path.home() / ".grid", Path("/tmp/grid"), Path("E:/grid")]
+    allowed_dirs = [Path.cwd(), Path.home() / ".grid", Path("/tmp/grid"), Path("E:/grid")]  # noqa: S108 temp file path is intentional
 
     if not any(path.is_relative_to(allowed_dir.resolve()) for allowed_dir in allowed_dirs):
         raise ValueError(f"Database path not allowed: {db_path}")

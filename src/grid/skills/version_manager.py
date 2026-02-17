@@ -71,8 +71,8 @@ class SkillVersionManager:
     def _get_git_sha(self, file_path: Path) -> str | None:
         """Get git SHA for a file (sync version)."""
         try:
-            result = subprocess.run(
-                ["git", "log", "-1", "--format=%H", str(file_path)],
+            result = subprocess.run(  # noqa: S603 subprocess call is intentional
+                ["git", "log", "-1", "--format=%H", str(file_path)],  # noqa: S607 partial path is intentional
                 capture_output=True,
                 text=True,
                 check=False,
@@ -82,7 +82,7 @@ class SkillVersionManager:
                 return result.stdout.strip()
         except subprocess.TimeoutExpired:
             self._logger.warning(f"Git SHA lookup timed out for {file_path}")
-        except Exception:
+        except Exception:  # noqa: S110 intentional silent handling
             pass
         return None
 

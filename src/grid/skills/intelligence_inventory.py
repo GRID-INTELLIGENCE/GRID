@@ -286,7 +286,7 @@ class IntelligenceInventory:
         import hashlib
 
         # Hash input args to avoid storing large data
-        args_hash = hashlib.md5(json.dumps(record.input_args, sort_keys=True, default=str).encode()).hexdigest()[:12]
+        args_hash = hashlib.md5(json.dumps(record.input_args, sort_keys=True, default=str).encode()).hexdigest()[:12]  # noqa: S324 non-cryptographic use
 
         self._pending_executions.append(
             {

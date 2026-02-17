@@ -688,11 +688,9 @@ class NLPChunker:
 
         if content_type == ContentType.CODE_PYTHON:
             # Classes
-            for match in self.python_class_pattern.finditer(text):
-                symbols.append(match.group(1))
+            symbols.extend(match.group(1) for match in self.python_class_pattern.finditer(text))
             # Functions
-            for match in self.python_func_pattern.finditer(text):
-                symbols.append(match.group(1))
+            symbols.extend(match.group(1) for match in self.python_func_pattern.finditer(text))
 
         return symbols[:10]  # Limit
 
@@ -707,12 +705,10 @@ class NLPChunker:
                 references.append(url)
 
         # Python imports (simplified)
-        for match in re.finditer(r"from\s+([\w.]+)\s+import", text):
-            references.append(match.group(1))
+        references.extend(match.group(1) for match in re.finditer(r"from\s+([\w.]+)\s+import", text))
 
         # File paths in quotes/backticks
-        for match in re.finditer(r'[`"\']([a-zA-Z0-9_/\\.-]+\.\w{1,4})[`"\']', text):
-            references.append(match.group(1))
+        references.extend(match.group(1) for match in re.finditer(r'[`"\']([a-zA-Z0-9_/\\.-]+\.\w{1,4})[`"\']', text))
 
         return list(set(references))[:10]
 
@@ -777,8 +773,8 @@ class NLPChunker:
 
     def _generate_chunk_id(self, file_path: str, start_line: int, content: str) -> str:
         """Generate unique chunk ID."""
-        content_hash = hashlib.md5(content.encode()).hexdigest()[:8]
-        return f"chunk_{hashlib.md5(file_path.encode()).hexdigest()[:8]}_{start_line}_{content_hash}"
+        content_hash = hashlib.md5(content.encode()).hexdigest()[:8]  # noqa: S324 non-cryptographic use
+        return f"chunk_{hashlib.md5(file_path.encode()).hexdigest()[:8]}_{start_line}_{content_hash}"  # noqa: S324 non-cryptographic use
 
 
 class HuggingFaceEmbedder:

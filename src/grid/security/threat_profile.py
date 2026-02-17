@@ -27,7 +27,7 @@ import threading
 from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
-from enum import Enum, IntEnum, StrEnum, auto
+from enum import IntEnum, StrEnum, auto
 from pathlib import Path
 from typing import Any, Callable, TypeVar
 

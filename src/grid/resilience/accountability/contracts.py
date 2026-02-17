@@ -11,13 +11,13 @@ Defines the contract schema for accountability enforcement, including:
 import re
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any, Literal, Optional
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 
-class ContractSeverity(str, Enum):
+class ContractSeverity(StrEnum):
     """Severity levels for contract violations."""
 
     LOW = "low"
@@ -26,7 +26,7 @@ class ContractSeverity(str, Enum):
     CRITICAL = "critical"
 
 
-class ViolationType(str, Enum):
+class ViolationType(StrEnum):
     """Types of contract violations."""
 
     AUTHENTICATION = "authentication"
@@ -309,7 +309,7 @@ class AccountabilityContract(BaseModel):
                     continue
 
                 match = True
-                for p, cp in zip(path_parts, contract_parts):
+                for p, cp in zip(path_parts, contract_parts, strict=False):
                     if cp == "*":
                         continue
                     if p != cp:
@@ -341,19 +341,19 @@ class AccountabilityContract(BaseModel):
         """Validate data against validation rules."""
         errors = []
 
-        for field, rule in rules.items():
-            if field not in data:
+        for field_name, rule in rules.items():
+            if field_name not in data:
                 if rule.required:
                     errors.append(
                         {
-                            "field": field,
+                            "field": field_name,
                             "error": "missing_required_field",
-                            "message": f"Required field '{field}' is missing",
+                            "message": f"Required field '{field_name}' is missing",
                         }
                     )
                 continue
 
-            value = data[field]
+            value = data[field_name]
 
             # Type checking
             expected_type = rule.type.lower()
@@ -373,9 +373,9 @@ class AccountabilityContract(BaseModel):
             if not type_ok:
                 errors.append(
                     {
-                        "field": field,
+                        "field": field_name,
                         "error": "invalid_type",
-                        "message": f"Field '{field}' must be of type {expected_type}, got {type(value).__name__}",
+                        "message": f"Field '{field_name}' must be of type {expected_type}, got {type(value).__name__}",
                     }
                 )
                 continue
@@ -385,27 +385,27 @@ class AccountabilityContract(BaseModel):
                 if rule.min_length is not None and len(value) < rule.min_length:
                     errors.append(
                         {
-                            "field": field,
+                            "field": field_name,
                             "error": "min_length",
-                            "message": f"Field '{field}' must be at least {rule.min_length} characters",
+                            "message": f"Field '{field_name}' must be at least {rule.min_length} characters",
                         }
                     )
 
                 if rule.max_length is not None and len(value) > rule.max_length:
                     errors.append(
                         {
-                            "field": field,
+                            "field": field_name,
                             "error": "max_length",
-                            "message": f"Field '{field}' must be at most {rule.max_length} characters",
+                            "message": f"Field '{field_name}' must be at most {rule.max_length} characters",
                         }
                     )
 
                 if rule.pattern and not re.match(rule.pattern, value):
                     errors.append(
                         {
-                            "field": field,
+                            "field": field_name,
                             "error": "pattern_mismatch",
-                            "message": f"Field '{field}' does not match required pattern",
+                            "message": f"Field '{field_name}' does not match required pattern",
                         }
                     )
 
@@ -413,27 +413,27 @@ class AccountabilityContract(BaseModel):
                 if rule.min_value is not None and value < rule.min_value:
                     errors.append(
                         {
-                            "field": field,
+                            "field": field_name,
                             "error": "min_value",
-                            "message": f"Field '{field}' must be at least {rule.min_value}",
+                            "message": f"Field '{field_name}' must be at least {rule.min_value}",
                         }
                     )
 
                 if rule.max_value is not None and value > rule.max_value:
                     errors.append(
                         {
-                            "field": field,
+                            "field": field_name,
                             "error": "max_value",
-                            "message": f"Field '{field}' must be at most {rule.max_value}",
+                            "message": f"Field '{field_name}' must be at most {rule.max_value}",
                         }
                     )
 
             if rule.enum and value not in rule.enum:
                 errors.append(
                     {
-                        "field": field,
+                        "field": field_name,
                         "error": "invalid_enum_value",
-                        "message": f"Field '{field}' must be one of {rule.enum}",
+                        "message": f"Field '{field_name}' must be one of {rule.enum}",
                     }
                 )
 

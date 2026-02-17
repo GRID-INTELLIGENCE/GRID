@@ -7,9 +7,8 @@ and headers for unified versioning across all services.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime
 from enum import StrEnum
-from typing import Any, Optional
 
 from fastapi import Response
 
@@ -36,9 +35,9 @@ class VersionMetadata:
         self,
         version: ApiVersion,
         status: VersionStatus = VersionStatus.STABLE,
-        deprecated_at: Optional[datetime] = None,
-        sunset_at: Optional[datetime] = None,
-        migration_guide_url: Optional[str] = None,
+        deprecated_at: datetime | None = None,
+        sunset_at: datetime | None = None,
+        migration_guide_url: str | None = None,
     ) -> None:
         self.version = version
         self.status = status
@@ -74,7 +73,7 @@ VERSION_REGISTRY: dict[ApiVersion, VersionMetadata] = {
 }
 
 
-def get_version_metadata(version: str | ApiVersion) -> Optional[VersionMetadata]:
+def get_version_metadata(version: str | ApiVersion) -> VersionMetadata | None:
     """Get metadata for a specific API version."""
     if isinstance(version, str):
         try:

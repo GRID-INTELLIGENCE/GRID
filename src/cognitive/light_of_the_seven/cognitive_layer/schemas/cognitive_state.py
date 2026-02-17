@@ -1,13 +1,13 @@
 """Cognitive state schema for tracking user cognitive factors."""
 
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class CognitiveLoadType(str, Enum):
+class CognitiveLoadType(StrEnum):
     """Types of cognitive load."""
 
     INTRINSIC = "intrinsic"  # Inherent difficulty
@@ -15,7 +15,7 @@ class CognitiveLoadType(str, Enum):
     GERMANE = "germane"  # Schema construction
 
 
-class ProcessingMode(str, Enum):
+class ProcessingMode(StrEnum):
     """Dual-process theory modes."""
 
     SYSTEM_1 = "system_1"  # Fast, automatic, intuitive

@@ -26,14 +26,14 @@ from __future__ import annotations
 import logging
 import os
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import Enum, StrEnum
 from pathlib import Path
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
-class TerritoryZone(str, Enum):
+class TerritoryZone(StrEnum):
     """Territory zones aligned with GRID's spatial structure."""
 
     CORE = "core"  # src/grid/

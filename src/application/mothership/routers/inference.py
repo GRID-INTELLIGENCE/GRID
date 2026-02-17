@@ -159,8 +159,8 @@ async def _log_inference_request(user_id: str, request: InferenceRequest, respon
 async def _process_queued_inference(task_id: str, request: InferenceRequest, user_id: str) -> None:
     """Background processor for queued inference tasks."""
     try:
-        from grid.services.inference import InferenceService as GridInferenceService
         from grid.models.inference import InferenceRequest as GridInferenceRequest
+        from grid.services.inference import InferenceService as GridInferenceService
 
         service = GridInferenceService()
         grid_request = GridInferenceRequest(

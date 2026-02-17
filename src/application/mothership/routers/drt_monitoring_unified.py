@@ -4,7 +4,7 @@ Uses core DRTMonitor engine as single source of truth.
 """
 
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -59,7 +59,7 @@ class EndpointSummaryResponse(BaseModel):
 async def get_drt_status(middleware: UnifiedDRTMiddleware = Depends(get_unified_drt_middleware)) -> StatusResponse:
     """Get unified DRT system status from core engine."""
     status = middleware.get_status()
-    return StatusResponse(timestamp=datetime.now(timezone.utc).isoformat(), **status)
+    return StatusResponse(timestamp=datetime.now(UTC).isoformat(), **status)
 
 
 @router.post("/attack-vectors")
@@ -83,7 +83,7 @@ async def get_escalated_endpoints(
     middleware: UnifiedDRTMiddleware = Depends(get_unified_drt_middleware),
 ) -> dict[str, Any]:
     """Get list of currently escalated endpoints."""
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     escalated = {path: expires.isoformat() for path, expires in middleware.escalated_endpoints.items() if expires > now}
     return {"escalated_endpoints": escalated}
 
@@ -170,5 +170,5 @@ async def get_system_overview(middleware: UnifiedDRTMiddleware = Depends(get_uni
     return {
         "system_status": status,
         "endpoint_summaries": endpoint_summaries,
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
     }

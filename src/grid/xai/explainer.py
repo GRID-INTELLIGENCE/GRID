@@ -592,11 +592,7 @@ class XAIExplainer:
 
         # Add pattern-specific explanations with coffee metaphors
         if detected_patterns:
-            pattern_explanations = []
-            for pattern in detected_patterns:
-                if pattern.get("detected"):
-                    pattern_explanations.append(self.explain_pattern_with_coffee_metaphor(pattern))
-            explanation["pattern_explanations"] = pattern_explanations
+            explanation["pattern_explanations"] = [self.explain_pattern_with_coffee_metaphor(pattern) for pattern in detected_patterns if pattern.get("detected")]
 
         # Add comprehensive narrative combining all elements
         narrative_parts = []

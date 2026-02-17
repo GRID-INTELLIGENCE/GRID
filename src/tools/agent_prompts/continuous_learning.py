@@ -115,16 +115,16 @@ class ContinuousLearningSystem:
         # Find similar cases
         similar_cases = self._find_similar_cases(structure)
 
-        for case in similar_cases[:5]:  # Top 5
-            recommendations.append(
-                {
-                    "case_id": case["case_id"],
-                    "similarity": case["similarity"],
-                    "recommended_solution": case.get("solution"),
-                    "expected_outcome": case.get("outcome"),
-                    "lessons_learned": case.get("agent_experience", {}).get("lessons", []),
-                }
-            )
+        recommendations.extend(
+            {
+                "case_id": case["case_id"],
+                "similarity": case["similarity"],
+                "recommended_solution": case.get("solution"),
+                "expected_outcome": case.get("outcome"),
+                "lessons_learned": case.get("agent_experience", {}).get("lessons", []),
+            }
+            for case in similar_cases[:5]
+        )
 
         return recommendations
 
@@ -135,7 +135,7 @@ class ContinuousLearningSystem:
             try:
                 with open(kb_file) as f:
                     return json.load(f)
-            except Exception:
+            except Exception:  # noqa: S110 intentional silent handling
                 pass
 
         return {"cases": [], "patterns": {}, "solutions": {}, "last_updated": datetime.now().isoformat()}
@@ -147,7 +147,7 @@ class ContinuousLearningSystem:
             try:
                 with open(tracker_file) as f:
                     return json.load(f)
-            except Exception:
+            except Exception:  # noqa: S110 intentional silent handling
                 pass
 
         return {

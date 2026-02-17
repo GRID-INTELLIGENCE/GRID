@@ -41,7 +41,7 @@ class TraceStore:
         try:
             with open(index_file, "w") as f:
                 json.dump(self._trace_index, f, indent=2)
-        except Exception:
+        except Exception:  # noqa: S110 intentional silent handling
             pass  # Best effort
 
     def _get_trace_file(self, trace_id: str) -> Path:
@@ -119,7 +119,7 @@ class TraceStore:
         count = 0
 
         # Search through index
-        for _trace_id, trace_file in self._trace_index.items():
+        for trace_file in self._trace_index.values():
             if count >= limit:
                 break
 
@@ -144,7 +144,7 @@ class TraceStore:
 
                     results.append(trace)
                     count += 1
-            except Exception:
+            except Exception:  # noqa: S112 intentional skip on error
                 continue
 
         return results
@@ -193,7 +193,7 @@ class TraceStore:
                     Path(trace_file).unlink(missing_ok=True)
                     del self._trace_index[trace_id]
                     cleaned += 1
-            except Exception:
+            except Exception:  # noqa: S112 intentional skip on error
                 continue
 
         self._save_index()

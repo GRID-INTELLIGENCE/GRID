@@ -629,10 +629,12 @@ class EventBus:
         stale_ids: list[uuid.UUID] = []
 
         async with self._state_lock:
-            for event_type, subs in self._subscribers.items():
-                for sub in subs:
-                    if now - sub.created_at > max_age_seconds:
-                        stale_ids.append(sub.id)
+            stale_ids.extend(
+                sub.id
+                for subs in self._subscribers.values()
+                for sub in subs
+                if now - sub.created_at > max_age_seconds
+            )
 
         # Unsubscribe stale subscriptions outside the lock
         cleared = 0
@@ -819,7 +821,7 @@ if __name__ == "__main__":
 
         try:
             # Keep running
-            while True:
+            while True:  # noqa: ASYNC110 busy-wait is intentional for polling pattern
                 await asyncio.sleep(1)
         except KeyboardInterrupt:
             await event_bus.stop()

@@ -337,11 +337,7 @@ class GridVectionBridge:
                 cognitive_velocity = velocity.to_dict()
 
         # Build session anchors
-        session_anchors = []
-        if vection_context:
-            for anchor in vection_context.get_dominant_anchors(limit=5):
-                if hasattr(anchor, "to_dict"):
-                    session_anchors.append(anchor.to_dict())
+        session_anchors = [anchor.to_dict() for anchor in (vection_context.get_dominant_anchors(limit=5) if vection_context else []) if hasattr(anchor, "to_dict")]
 
         return EnrichedCognitiveState(
             estimated_load=estimated_load,

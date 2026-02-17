@@ -1,6 +1,6 @@
 """Locomotion engine for state movement and transitions."""
 
-from enum import Enum
+from enum import StrEnum
 from typing import TYPE_CHECKING, Any, Optional
 
 if TYPE_CHECKING:
@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field
 from .quantizer import QuantizationLevel, QuantizedState
 
 
-class MovementDirection(str, Enum):
+class MovementDirection(StrEnum):
     """Movement directions in state space."""
 
     FORWARD = "forward"

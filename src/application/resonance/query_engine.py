@@ -2,7 +2,7 @@ import json
 import logging
 import sqlite3
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pandas as pd  # type: ignore[import-untyped]
@@ -68,7 +68,7 @@ class ResonanceQueryEngine:
                         event.get("type"),
                         event.get("impact", 0.5),
                         json.dumps(event.get("data", {})),
-                        event.get("timestamp", datetime.now(timezone.utc).isoformat()),
+                        event.get("timestamp", datetime.now(UTC).isoformat()),
                     ),
                 )
             conn.commit()

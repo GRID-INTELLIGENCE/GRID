@@ -72,8 +72,7 @@ class SynthesizedResponse:
         # Citations
         if include_citations and self.citations:
             lines.append("\n### 📚 Sources")
-            for citation in self.citations:
-                lines.append(f"- {citation}")
+            lines.extend(f"- {citation}" for citation in self.citations)
 
         # Reasoning transparency
         if include_reasoning:
@@ -260,7 +259,7 @@ class ResponseSynthesizer:
 
         # Add synthesis note
         if len(evidence) > 1:
-            sources_list = list(set(e.source_file.split("/")[-1] for e in evidence))
+            sources_list = list({e.source_file.split("/")[-1] for e in evidence})
             answer += f"\n\n*Synthesized from {len(sources_list)} source(s): {', '.join(sources_list[:3])}*"
 
         return answer
@@ -284,9 +283,7 @@ class ResponseSynthesizer:
 
         # Add reasoning steps (compressed)
         prompt_parts.append("**Reasoning Process:**")
-        for step in reasoning_chain.steps:
-            if step.step_type != ReasoningStepType.UNCERTAINTY:
-                prompt_parts.append(f"{step.step_number}. {step.content}")
+        prompt_parts.extend(f"{step.step_number}. {step.content}" for step in reasoning_chain.steps if step.step_type != ReasoningStepType.UNCERTAINTY)
         prompt_parts.append("")
 
         # Add evidence

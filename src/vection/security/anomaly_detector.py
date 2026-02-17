@@ -39,13 +39,13 @@ from collections import defaultdict, deque
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
-class AnomalyType(str, Enum):
+class AnomalyType(StrEnum):
     """Types of anomalies that can be detected."""
 
     # Reinforcement anomalies
@@ -81,7 +81,7 @@ class AnomalyType(str, Enum):
     CUSTOM = "custom"
 
 
-class AlertSeverity(str, Enum):
+class AlertSeverity(StrEnum):
     """Severity levels for anomaly alerts."""
 
     LOW = "low"
@@ -90,7 +90,7 @@ class AlertSeverity(str, Enum):
     CRITICAL = "critical"
 
 
-class AlertStatus(str, Enum):
+class AlertStatus(StrEnum):
     """Status of an anomaly alert."""
 
     ACTIVE = "active"
@@ -1045,7 +1045,7 @@ class AnomalyDetector:
                 description=alert.description,
                 metrics=alert.metrics,
             )
-        except Exception:
+        except Exception:  # noqa: S110 intentional silent handling
             pass
 
 

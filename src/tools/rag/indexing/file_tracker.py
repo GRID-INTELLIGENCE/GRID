@@ -9,7 +9,7 @@ import json
 import os
 import tempfile
 from dataclasses import asdict, dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -103,7 +103,7 @@ class FileTracker:
     def _save_atomic(self) -> None:
         """Save tracker state atomically (write to temp, then rename)."""
         self.persist_dir.mkdir(parents=True, exist_ok=True)
-        self.state.last_updated = datetime.now(timezone.utc).isoformat()
+        self.state.last_updated = datetime.now(UTC).isoformat()
 
         # Serialize state
         data = {
@@ -130,7 +130,7 @@ class FileTracker:
             # Clean up temp file on error
             try:
                 os.unlink(temp_path)
-            except Exception:
+            except Exception:  # noqa: S110 intentional silent handling
                 pass
             raise e
 
@@ -157,7 +157,7 @@ class FileTracker:
         self.state.files[path] = FileState(
             path=path,
             file_hash=file_hash,
-            indexed_at=datetime.now(timezone.utc).isoformat(),
+            indexed_at=datetime.now(UTC).isoformat(),
             file_size=file_size,
             chunk_count=chunk_count,
         )
@@ -211,7 +211,7 @@ class FileTracker:
             try:
                 rel_path = str(file_path.relative_to(repo_path))
                 current_paths.add(rel_path)
-            except Exception:
+            except Exception:  # noqa: S110 intentional silent handling
                 pass
 
         tracked_paths = set(self.state.files.keys())
@@ -235,7 +235,7 @@ class FileTracker:
         if self.tracker_file.exists():
             try:
                 self.tracker_file.unlink()
-            except Exception:
+            except Exception:  # noqa: S110 intentional silent handling
                 pass
 
     def get_stats(self) -> dict[str, Any]:

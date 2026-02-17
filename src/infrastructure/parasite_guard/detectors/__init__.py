@@ -255,7 +255,7 @@ class EventSubscriptionLeakDetector(Detector):
 
             # Check WeakSet-based subscribers (event_system_fixed.py)
             if hasattr(self._event_bus, "_subscribers"):
-                for event_type, subscribers in self._event_bus._subscribers.items():
+                for subscribers in self._event_bus._subscribers.values():
                     total_subs += len(subscribers)
 
             # Check active subscriptions gauge

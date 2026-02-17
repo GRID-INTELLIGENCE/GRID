@@ -1,6 +1,6 @@
 """Factory for creating LLM providers."""
 
-from enum import Enum
+from enum import StrEnum
 
 from ..config import ModelMode, RAGConfig
 from .base import BaseLLMProvider
@@ -8,7 +8,7 @@ from .ollama_cloud import OllamaCloudLLM
 from .ollama_local import OllamaLocalLLM
 
 
-class LLMProviderType(str, Enum):
+class LLMProviderType(StrEnum):
     """Types of LLM providers."""
 
     OLLAMA_LOCAL = "ollama-local"  # Local Ollama models (default)

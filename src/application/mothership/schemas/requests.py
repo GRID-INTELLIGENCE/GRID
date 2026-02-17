@@ -135,7 +135,7 @@ class SessionCreateRequest(BaseRequest):
     @classmethod
     def validate_permissions(cls, v: list[str]) -> list[str]:
         """Ensure permissions are lowercase and unique."""
-        return list(set(p.lower().strip() for p in v if p.strip()))
+        return list({p.lower().strip() for p in v if p.strip()})
 
     @field_validator("ip_address")
     @classmethod

@@ -12,13 +12,13 @@ import logging
 from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
-class FlowState(str, Enum):
+class FlowState(StrEnum):
     """States for cognitive flow."""
 
     BLOCKED = "blocked"
@@ -29,7 +29,7 @@ class FlowState(str, Enum):
     STUCK = "stuck"
 
 
-class TaskPriority(str, Enum):
+class TaskPriority(StrEnum):
     """Priority levels for tasks within flow."""
 
     CRITICAL = "critical"

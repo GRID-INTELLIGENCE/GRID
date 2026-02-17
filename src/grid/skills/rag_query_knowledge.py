@@ -75,14 +75,14 @@ def _query_knowledge(args: Mapping[str, Any]) -> dict[str, Any]:
         # Normalize output
         sources = []
         if result.get("sources"):
-            for source in result["sources"]:
-                sources.append(
+            sources.extend(
                     {
                         "path": source.get("metadata", {}).get("path", "unknown"),
                         "distance": source.get("distance", 0),
                         "confidence": 1.0 - (source.get("distance", 0) / 2.0),  # Convert distance to confidence
                     }
-                )
+                for source in result["sources"]
+            )
 
         return {
             "skill": "rag.query_knowledge",

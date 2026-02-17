@@ -8,7 +8,7 @@ from __future__ import annotations
 import logging
 import os
 from dataclasses import dataclass
-from enum import Enum, StrEnum
+from enum import StrEnum
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -140,14 +140,10 @@ class ProductionSecurityManager:
         warnings = []
 
         # Check required environment variables
-        for var in self.config.required_env_vars:
-            if not os.getenv(var):
-                issues.append(f"Missing required environment variable: {var}")
+        issues.extend(f"Missing required environment variable: {var}" for var in self.config.required_env_vars if not os.getenv(var))
 
         # Check for blocked environment variables
-        for var in self.config.blocked_env_vars:
-            if os.getenv(var):
-                issues.append(f"Blocked environment variable is set: {var}")
+        issues.extend(f"Blocked environment variable is set: {var}" for var in self.config.blocked_env_vars if os.getenv(var))
 
         # Check secrets management
         if self.config.use_secrets_manager:

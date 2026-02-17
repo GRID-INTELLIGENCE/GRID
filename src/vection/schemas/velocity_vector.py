@@ -8,11 +8,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 
-class DirectionCategory(str, Enum):
+class DirectionCategory(StrEnum):
     """High-level cognitive direction categories."""
 
     EXPLORATION = "exploration"  # Broad, discovery-oriented

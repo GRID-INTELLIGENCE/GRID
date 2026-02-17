@@ -139,7 +139,7 @@ class AsyncRouterIntegration:
         self._initialized = True
         logger.info("AsyncRouterIntegration initialized")
 
-    async def route_async(self, request: RouterRequest, timeout: float = 30.0) -> RouterResponse:
+    async def route_async(self, request: RouterRequest, timeout: float = 30.0) -> RouterResponse:  # noqa: ASYNC109 timeout parameter is handled by caller
         """
         Route request asynchronously with safety validation.
 

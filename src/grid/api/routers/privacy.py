@@ -97,7 +97,7 @@ async def batch_privacy_processing(request: PrivacyBatchRequest, current_user: U
         privacy_results = engine.batch_process(request.texts)
         results = []
         total_entities = 0
-        for text, pr in zip(request.texts, privacy_results):
+        for text, pr in zip(request.texts, privacy_results, strict=False):
             results.append({
                 "original_text": text,
                 "masked_text": pr.masked_text,

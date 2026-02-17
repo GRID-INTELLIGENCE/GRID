@@ -8,7 +8,7 @@ with comprehensive field validation and documentation.
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -44,7 +44,7 @@ class BaseResponse(BaseModel):
 # =============================================================================
 
 
-class ActivityType(str, Enum):
+class ActivityType(StrEnum):
     """Types of activities."""
 
     GENERAL = "general"
@@ -52,7 +52,7 @@ class ActivityType(str, Enum):
     CONFIG = "config"
 
 
-class ContextType(str, Enum):
+class ContextType(StrEnum):
     """Types of context."""
 
     GENERAL = "general"

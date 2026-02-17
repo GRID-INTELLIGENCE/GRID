@@ -2,14 +2,14 @@
 
 from collections.abc import Callable
 from datetime import UTC, datetime, timedelta
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer
 
 
-class PenaltyType(str, Enum):
+class PenaltyType(StrEnum):
     """Types of penalties."""
 
     WARNING = "warning"

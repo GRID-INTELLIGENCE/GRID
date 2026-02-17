@@ -4,14 +4,14 @@ from __future__ import annotations
 
 import builtins
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
 from typing import Any
 
 from pydantic import BaseModel, Field
 
 
-class RouteComplexity(str, Enum):
+class RouteComplexity(StrEnum):
     """Complexity level of a route."""
 
     SIMPLE = "simple"

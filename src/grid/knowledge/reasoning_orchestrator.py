@@ -13,7 +13,7 @@ import json
 import logging
 from dataclasses import dataclass
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from grid.services.llm.llm_client import LLMClient, LLMConfig, OllamaNativeClient
@@ -21,7 +21,7 @@ from grid.services.llm.llm_client import LLMClient, LLMConfig, OllamaNativeClien
 logger = logging.getLogger(__name__)
 
 
-class ReasoningMode(str, Enum):
+class ReasoningMode(StrEnum):
     """Kanye's reasoning modes."""
 
     SEQUENTIAL = "sequential"  # Jay's preferred: one after another

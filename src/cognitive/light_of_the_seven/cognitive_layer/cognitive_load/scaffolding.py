@@ -1,12 +1,12 @@
 """Scaffolding manager for progressive disclosure based on expertise."""
 
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from ..schemas.user_cognitive_profile import ExpertiseLevel, UserCognitiveProfile
 
 
-class ScaffoldingLevel(str, Enum):
+class ScaffoldingLevel(StrEnum):
     """Levels of scaffolding support."""
 
     FULL = "full"  # Maximum support

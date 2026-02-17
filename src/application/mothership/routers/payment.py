@@ -168,7 +168,7 @@ async def create_payment(
             amount_cents=request.amount_cents,
             currency=request.currency,
             status=PaymentStatus.PENDING,
-            gateway=PaymentGatewayEnum(gateway_name),
+            gateway=PaymentGatewayEnum(settings.payment.default_gateway.lower()),
             gateway_transaction_id=gateway_result.get("gateway_transaction_id"),
             gateway_response=gateway_result,
             description=request.description,
@@ -529,7 +529,7 @@ async def create_subscription(
             status=SubscriptionStatus.ACTIVE,
             current_period_start=now,
             current_period_end=period_end,
-            gateway=PaymentGatewayEnum(gateway_name),
+            gateway=PaymentGatewayEnum(settings.payment.default_gateway.lower()),
             gateway_subscription_id=gateway_result.get("gateway_subscription_id"),
             payment_method_id=request.payment_method_id,
             metadata={

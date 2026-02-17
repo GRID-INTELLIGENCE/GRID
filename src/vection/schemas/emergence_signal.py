@@ -10,7 +10,7 @@ from __future__ import annotations
 import hashlib
 import time
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import StrEnum
 from typing import Any
 
@@ -109,7 +109,7 @@ class EmergenceSignal:
         Returns:
             Seconds since first observation.
         """
-        return (datetime.now(timezone.utc) - self.first_observed).total_seconds()
+        return (datetime.now(UTC) - self.first_observed).total_seconds()
 
     @property
     def staleness(self) -> float:
@@ -118,7 +118,7 @@ class EmergenceSignal:
         Returns:
             Seconds since last observation.
         """
-        return (datetime.now(timezone.utc) - self.last_observed).total_seconds()
+        return (datetime.now(UTC) - self.last_observed).total_seconds()
 
     @property
     def effective_salience(self) -> float:
@@ -145,7 +145,7 @@ class EmergenceSignal:
         except ImportError:
             # Fallback to standard reinforcement if security module missing
             self.source_count += 1
-            self.last_observed = datetime.now(timezone.utc)
+            self.last_observed = datetime.now(UTC)
             self.salience = min(1.0, self.salience + boost)
             self.confidence = min(1.0, self.confidence + boost * 0.5)
 
@@ -298,7 +298,7 @@ class EmergenceSignal:
         """
         # Generate deterministic ID from type and description
         hash_input = f"{signal_type.value}:{description}:{time.time()}"
-        signal_id = hashlib.md5(hash_input.encode()).hexdigest()[:12]
+        signal_id = hashlib.md5(hash_input.encode()).hexdigest()[:12]  # noqa: S324 non-cryptographic use
 
         return cls(
             signal_id=signal_id,

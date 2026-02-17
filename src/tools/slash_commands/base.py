@@ -5,7 +5,7 @@ Base classes and interfaces for slash command implementations
 import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -82,7 +82,7 @@ class BaseCommand(ABC):
 
         # Add timestamp if not present
         if result.timestamp is None:
-            result.timestamp = datetime.now(timezone.utc)
+            result.timestamp = datetime.now(UTC)
 
         return result
 

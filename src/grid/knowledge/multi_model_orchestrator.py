@@ -202,11 +202,7 @@ class MultiModelOrchestrator(ReasoningOrchestrator):
 
     def _select_experts(self) -> list[ModelProfile]:
         """Matches available Ollama models to their profiles."""
-        selected = []
-        for profile in self.DEFAULT_PROFILES.values():
-            if profile.name in self.available_models:
-                selected.append(profile)
-        return selected
+        return [profile for profile in self.DEFAULT_PROFILES.values() if profile.name in self.available_models]
 
     def _tailor_question(self, query: str, expert: ModelProfile, nav: dict[str, Any]) -> str:
         """Formulates a precise question based on model architecture and standing."""

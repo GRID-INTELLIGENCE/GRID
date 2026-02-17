@@ -10,11 +10,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 
-class PermissionScope(str, Enum):
+class PermissionScope(StrEnum):
     """Permission scopes for boundary contracts."""
 
     READ = "read"
@@ -23,7 +23,7 @@ class PermissionScope(str, Enum):
     EXECUTE = "execute"
 
 
-class OwnerType(str, Enum):
+class OwnerType(StrEnum):
     """Types of owners in the safety system."""
 
     ENGINE = "engine"

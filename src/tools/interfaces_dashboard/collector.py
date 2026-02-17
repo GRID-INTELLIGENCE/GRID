@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import sqlite3
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -207,7 +207,7 @@ class DashboardCollector:
             "compression_metrics": self.get_compression_metrics(hours),
             "summary_stats": self.get_summary_stats(hours),
             "hours": hours,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
         }
 
     def close(self) -> None:

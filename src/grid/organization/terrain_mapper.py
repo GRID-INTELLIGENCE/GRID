@@ -31,7 +31,7 @@ class TerrainMapper:
                 # Extract imports to find dependencies
                 deps = self._extract_imports(p)
                 terrain["packages"][component]["dependencies"].update(deps)
-            except Exception:
+            except Exception:  # noqa: S112 intentional skip on error
                 continue
 
         # Convert sets to lists for JSON serialization
@@ -53,6 +53,6 @@ class TerrainMapper:
                             imports.add(name.name.split(".")[0])
                     elif isinstance(node, ast.ImportFrom) and node.module:
                         imports.add(node.module.split(".")[0])
-        except Exception:
+        except Exception:  # noqa: S110 intentional silent handling
             pass
         return imports

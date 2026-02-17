@@ -1,12 +1,15 @@
 """Trace manager for coordinating action tracing across the system."""
 
 import inspect
+import logging
 from collections.abc import Iterator
 from contextlib import contextmanager
 from typing import Any, Optional
 
 from .action_trace import ActionTrace, TraceContext, TraceOrigin
 from .trace_store import TraceStore
+
+logger = logging.getLogger(__name__)
 
 
 class TraceManager:

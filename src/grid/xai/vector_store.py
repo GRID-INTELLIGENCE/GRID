@@ -62,7 +62,7 @@ class SimpleEmbedding(BaseEmbedding):
         """Create a simple deterministic embedding from text hash."""
         import hashlib
 
-        hash_obj = hashlib.md5(text.encode())
+        hash_obj = hashlib.md5(text.encode())  # noqa: S324 non-cryptographic use
         hash_int = int(hash_obj.hexdigest(), 16)
 
         # Generate deterministic values based on hash

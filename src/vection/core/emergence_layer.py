@@ -311,16 +311,14 @@ class EmergenceLayer:
     def _generate_event_id(self) -> str:
         """Generate a unique event ID."""
         hash_input = f"{time.time()}:{self._total_observations}"
-        return hashlib.md5(hash_input.encode()).hexdigest()[:10]
+        return hashlib.md5(hash_input.encode()).hexdigest()[:10]  # noqa: S324 non-cryptographic use
 
     def _update_co_occurrence(self, data: dict[str, Any]) -> None:
         """Update co-occurrence matrix from observation."""
         # Extract feature keys
         features: list[str] = []
 
-        for key in ("action", "type", "intent", "topic"):
-            if key in data and data[key]:
-                features.append(f"{key}:{data[key]}")
+        features.extend(f"{key}:{data[key]}" for key in ("action", "type", "intent", "topic") if key in data and data[key])
 
         # Update pairwise co-occurrence
         for i, f1 in enumerate(features):
@@ -444,7 +442,7 @@ class EmergenceLayer:
     def _pattern_id(self, signal_type: SignalType, key: str) -> str:
         """Generate a deterministic pattern ID."""
         hash_input = f"{signal_type.value}:{key}"
-        return hashlib.md5(hash_input.encode()).hexdigest()[:12]
+        return hashlib.md5(hash_input.encode()).hexdigest()[:12]  # noqa: S324 non-cryptographic use
 
     def _get_or_create_candidate(self, pattern_id: str, pattern_type: SignalType, description: str) -> PatternCandidate:
         """Get existing candidate or create new one."""

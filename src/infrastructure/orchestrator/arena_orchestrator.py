@@ -11,7 +11,7 @@ import json
 import logging
 import time
 from dataclasses import dataclass, field
-from enum import Enum, StrEnum
+from enum import StrEnum
 from typing import Any
 
 from ..ai_ml.intelligence_system import (  # type: ignore[import-not-found]
@@ -429,7 +429,7 @@ if __name__ == "__main__":
 
         try:
             # Keep running
-            while True:
+            while True:  # noqa: ASYNC110 busy-wait is intentional for polling pattern
                 await asyncio.sleep(1)
         except KeyboardInterrupt:
             await orchestrator.stop()

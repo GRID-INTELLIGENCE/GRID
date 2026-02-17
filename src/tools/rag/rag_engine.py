@@ -72,7 +72,7 @@ class RAGEngine:
                         f"Info: Using available Ollama model '{available_embedding_model}' instead of '{config.embedding_model}'"
                     )
                     config.embedding_model = available_embedding_model
-            except Exception:
+            except Exception:  # noqa: S110 intentional silent handling
                 pass
 
         if config.llm_mode == ModelMode.LOCAL:
@@ -83,7 +83,7 @@ class RAGEngine:
                         f"Info: Using available Ollama LLM '{available_llm_model}' instead of '{config.llm_model_local}'"
                     )
                     config.llm_model_local = available_llm_model
-            except Exception:
+            except Exception:  # noqa: S110 intentional silent handling
                 pass
 
         self.config = config

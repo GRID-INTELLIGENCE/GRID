@@ -99,7 +99,7 @@ class XAICache:
     def _generate_key(self, prefix: str, **kwargs: Any) -> str:
         """Generate cache key from parameters."""
         key_data = json.dumps(kwargs, sort_keys=True, default=str)
-        return f"{prefix}:{hashlib.md5(key_data.encode()).hexdigest()}"
+        return f"{prefix}:{hashlib.md5(key_data.encode()).hexdigest()}"  # noqa: S324 non-cryptographic use
 
     def _estimate_size(self, value: Any) -> int:
         """Estimate memory size of a value."""

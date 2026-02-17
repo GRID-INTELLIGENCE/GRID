@@ -328,7 +328,7 @@ class HotReloadManager:
                 if inspect.isclass(obj):
                     try:
                         obj = obj()
-                    except Exception:
+                    except Exception:  # noqa: S112 intentional skip on error
                         continue
 
                 if getattr(obj, "id", None):

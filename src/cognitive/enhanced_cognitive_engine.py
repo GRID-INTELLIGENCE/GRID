@@ -27,8 +27,8 @@ import logging
 import os
 import time
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from enum import Enum
+from datetime import UTC, datetime
+from enum import StrEnum
 from pathlib import Path
 from typing import Any
 
@@ -49,7 +49,7 @@ logger = logging.getLogger(__name__)
 # ============================================================================
 
 
-class ProcessingTier(str, Enum):
+class ProcessingTier(StrEnum):
     """Processing tiers for tiered execution."""
 
     FAST = "fast"  # Quick checks only
@@ -351,7 +351,7 @@ class EnhancedCognitiveEngine:
             metrics.record_phase("xai_generation", time.time() - phase_start)
 
             # Cache state
-            self._state_cache[user_id] = (cognitive_state, datetime.now(timezone.utc))
+            self._state_cache[user_id] = (cognitive_state, datetime.now(UTC))
 
             # Build result
             result = {
@@ -404,7 +404,7 @@ class EnhancedCognitiveEngine:
         interaction = {
             "user_id": user_id,
             "action": action,
-            "timestamp": datetime.now(timezone.utc),
+            "timestamp": datetime.now(UTC),
             "case_id": case_id,
             "metadata": metadata or {},
         }
@@ -677,7 +677,7 @@ class EnhancedCognitiveEngine:
         temporal_route: dict[str, Any],
     ) -> dict[str, Any]:
         """Generate comprehensive XAI explanation with cognitive context."""
-        decision_id = f"{interaction['user_id']}_{interaction['action']}_{datetime.now(timezone.utc).isoformat()}"
+        decision_id = f"{interaction['user_id']}_{interaction['action']}_{datetime.now(UTC).isoformat()}"
 
         # Build cognitive context
         load_type = cognitive_state.load_type

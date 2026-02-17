@@ -38,8 +38,8 @@ class OllamaLLM(LLMProvider):
             Generated text or error message
         """
         try:
-            result = subprocess.run(
-                ["ollama", "run", self.model, prompt],
+            result = subprocess.run(  # noqa: S603 subprocess call is intentional
+                ["ollama", "run", self.model, prompt],  # noqa: S607 partial path is intentional
                 capture_output=True,
                 text=True,
                 check=True,

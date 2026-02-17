@@ -37,13 +37,13 @@ import time
 from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
-class ThreatAction(str, Enum):
+class ThreatAction(StrEnum):
     """Actions to take for detected threats."""
 
     ALLOW = "allow"
@@ -54,7 +54,7 @@ class ThreatAction(str, Enum):
     REPORT = "report"
 
 
-class ThreatCategory(str, Enum):
+class ThreatCategory(StrEnum):
     """Categories of security threats."""
 
     INJECTION = "injection"
@@ -71,7 +71,7 @@ class ThreatCategory(str, Enum):
     ANOMALY = "anomaly"
 
 
-class RiskLevel(str, Enum):
+class RiskLevel(StrEnum):
     """Risk levels for threat assessment."""
 
     NONE = "none"
@@ -496,7 +496,7 @@ class ThreatDetector:
 
         # Convert request data to string for analysis
         content_str = self._flatten_content(request_data)
-        content_hash = hashlib.md5(content_str.encode()).hexdigest()
+        content_hash = hashlib.md5(content_str.encode()).hexdigest()  # noqa: S324 non-cryptographic use
 
         with self._lock:
             # Check if IP is blocked

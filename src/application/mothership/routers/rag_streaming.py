@@ -3,6 +3,7 @@
 import asyncio
 import json
 import logging
+import time
 from collections.abc import AsyncGenerator
 from dataclasses import dataclass
 from typing import Any
@@ -10,6 +11,7 @@ from typing import Any
 from fastapi import APIRouter, HTTPException, status
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
+from starlette.websockets import WebSocketDisconnect
 
 from tools.rag.conversational_rag import ConversationalRAGEngine, create_conversational_rag_engine
 
@@ -364,20 +366,17 @@ async def get_rag_stats() -> dict[str, Any]:
 # Utility functions
 
 
-def chunk_text(text: str, chunk_size: int = CHUNK_SIZE) -> list[str]:
-    """Split text into chunks for streaming. Optimized for network efficiency."""
-    if not text:
-        return []
-    chunks = []
-    for i in range(0, len(text), chunk_size):
-        chunks.append(text[i : i + chunk_size])
-    return chunks
-
-
 # Optimized streaming constants for bandwidth efficiency
 CHUNK_SIZE = 200  # Increased from 50 to reduce packet overhead
 CHUNK_DELAY = 0.01  # Reduced from 0.05 for smoother streaming
 HEARTBEAT_INTERVAL = 30  # seconds
+
+
+def chunk_text(text: str, chunk_size: int = CHUNK_SIZE) -> list[str]:
+    """Split text into chunks for streaming. Optimized for network efficiency."""
+    if not text:
+        return []
+    return [text[i : i + chunk_size] for i in range(0, len(text), chunk_size)]
 
 
 @router.websocket("/ws/{session_id}")
@@ -469,7 +468,7 @@ async def rag_websocket_endpoint(websocket, session_id: str):
         logger.error(f"WebSocket error for session {session_id}: {e}")
         try:
             await websocket.send_text(json.dumps({"type": "error", "error": str(e)}))
-        except Exception:
+        except Exception:  # noqa: S110 intentional silent handling
             pass  # Client already gone
     finally:
         # Cancel heartbeat task

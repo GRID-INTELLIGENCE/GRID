@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import logging
 from datetime import UTC, datetime, timedelta
-from enum import Enum, StrEnum
+from enum import StrEnum
 from pathlib import Path
 from typing import Any
 
@@ -126,7 +126,7 @@ class JSONScanner:
                 if "trace_id" in data and "action_type" in data and "context" in data:
                     return JSONFileType.ACTION_TRACE
 
-        except Exception:
+        except Exception:  # noqa: S110 intentional silent handling
             pass  # Ignore parse errors during identification
 
         return JSONFileType.UNKNOWN
@@ -191,7 +191,6 @@ class JSONScanner:
                     continue
 
                 # Try recursive search
-                for found_file in search_dir.rglob(file_name):
-                    results.append((found_file, self.get_file_metadata(found_file)))
+                results.extend((found_file, self.get_file_metadata(found_file)) for found_file in search_dir.rglob(file_name))
 
         return results

@@ -110,7 +110,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
     try:
         # Initialize database
-        engine = get_async_engine()
+        _engine = get_async_engine()  # noqa: F841 side-effect: initializes connection pool
         logger.info("Database engine initialized")
 
         # Initialize services
@@ -313,7 +313,7 @@ def create_app() -> FastAPI:
     # =============================================================================
 
     # Apply factory defaults to all endpoints
-    security_config = apply_defaults(API_DEFAULTS, settings)
+    apply_defaults(API_DEFAULTS, settings)
 
     # Add security middleware (already handled in setup_middleware)
     # This ensures authentication runs before accountability enforcement
@@ -376,7 +376,7 @@ if __name__ == "__main__":
     app = main()
 
     # Get configuration from environment or defaults
-    host = os.getenv("MOTHERSHIP_HOST", "0.0.0.0")
+    host = os.getenv("MOTHERSHIP_HOST", "0.0.0.0")  # noqa: S104 bind-all is intentional for container deployment
     port = int(os.getenv("MOTHERSHIP_PORT", "8080"))
     reload = os.getenv("MOTHERSHIP_RELOAD", "false").lower() == "true"
     workers = int(os.getenv("MOTHERSHIP_WORKERS", "1"))

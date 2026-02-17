@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from pydantic import BaseModel, Field
@@ -18,7 +18,7 @@ from pydantic import BaseModel, Field
 # ---------------------------------------------------------------------------
 
 
-class PolicyDomain(str, Enum):
+class PolicyDomain(StrEnum):
     """Business domains a governance policy can target."""
 
     DATA_PRIVACY = "data_privacy"
@@ -31,7 +31,7 @@ class PolicyDomain(str, Enum):
     HEALTH_SAFETY = "health_safety"
 
 
-class PolicySeverity(str, Enum):
+class PolicySeverity(StrEnum):
     """Severity classification for policy violations."""
 
     INFO = "info"
@@ -41,7 +41,7 @@ class PolicySeverity(str, Enum):
     CRITICAL = "critical"
 
 
-class ComplianceStatus(str, Enum):
+class ComplianceStatus(StrEnum):
     """Overall compliance posture."""
 
     COMPLIANT = "compliant"
@@ -51,7 +51,7 @@ class ComplianceStatus(str, Enum):
     REMEDIATION_IN_PROGRESS = "remediation_in_progress"
 
 
-class UserRightType(str, Enum):
+class UserRightType(StrEnum):
     """Recognised user rights categories."""
 
     ACCESS = "access"
@@ -66,7 +66,7 @@ class UserRightType(str, Enum):
     TRANSPARENCY = "transparency"
 
 
-class UserRightRequestStatus(str, Enum):
+class UserRightRequestStatus(StrEnum):
     """Lifecycle of a user-right request."""
 
     PENDING = "pending"
@@ -77,7 +77,7 @@ class UserRightRequestStatus(str, Enum):
     ESCALATED = "escalated"
 
 
-class AccountingEventType(str, Enum):
+class AccountingEventType(StrEnum):
     """Types of events the legal agent exchanges with accounting."""
 
     COMPLIANCE_COST = "compliance_cost"
@@ -88,7 +88,7 @@ class AccountingEventType(str, Enum):
     TAX_OBLIGATION = "tax_obligation"
 
 
-class GovernanceAction(str, Enum):
+class GovernanceAction(StrEnum):
     """Actions the governance engine can prescribe."""
 
     APPROVE = "approve"

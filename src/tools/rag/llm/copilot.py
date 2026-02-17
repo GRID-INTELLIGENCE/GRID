@@ -33,7 +33,7 @@ class CopilotLLM(BaseLLMProvider):
     def _check_copilot_cli(self) -> bool:
         """Check if Copilot CLI is installed and available."""
         try:
-            result = subprocess.run(["copilot", "--version"], capture_output=True, timeout=5)
+            result = subprocess.run(["copilot", "--version"], capture_output=True, timeout=5)  # noqa: S607 partial path is intentional
             return result.returncode == 0
         except (FileNotFoundError, subprocess.TimeoutExpired):
             return False
@@ -117,8 +117,8 @@ class CopilotLLM(BaseLLMProvider):
         enhanced_prompt = self._enhance_prompt_with_web(prompt)
 
         try:
-            result = subprocess.run(
-                ["copilot", "chat", "--model", self.model, enhanced_prompt],
+            result = subprocess.run(  # noqa: S603 subprocess call is intentional
+                ["copilot", "chat", "--model", self.model, enhanced_prompt],  # noqa: S607 partial path is intentional
                 capture_output=True,
                 text=True,
                 timeout=self.timeout,

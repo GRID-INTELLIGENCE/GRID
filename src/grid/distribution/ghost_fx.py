@@ -24,7 +24,7 @@ class GhostProcessor:
         The cost of moving across the iron. Induces a deliberate delay
         proportional to the structural weight of the path.
         """
-        burn_time = (load_factor * 0.525) + (random.random() * 0.1)
+        burn_time = (load_factor * 0.525) + (random.random() * 0.1)  # noqa: S311 non-security random use
         logger.debug(f"Signal {signal_id} generating friction: {burn_time:.3f}s")
         await asyncio.sleep(burn_time)
 

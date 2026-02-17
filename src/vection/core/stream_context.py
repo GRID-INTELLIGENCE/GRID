@@ -707,13 +707,13 @@ class StreamContext:
     def _generate_session_id(self) -> str:
         """Generate a unique session ID."""
         hash_input = f"session:{time.time()}:{id(self)}"
-        return f"ses_{hashlib.md5(hash_input.encode()).hexdigest()[:12]}"
+        return f"ses_{hashlib.md5(hash_input.encode()).hexdigest()[:12]}"  # noqa: S324 non-cryptographic use
 
     def _generate_thread_id(self, session_id: str) -> str:
         """Generate a unique thread ID."""
         thread_count = len(self._threads.get(session_id, {}))
         hash_input = f"thread:{session_id}:{thread_count}:{time.time()}"
-        return f"thr_{hashlib.md5(hash_input.encode()).hexdigest()[:10]}"
+        return f"thr_{hashlib.md5(hash_input.encode()).hexdigest()[:10]}"  # noqa: S324 non-cryptographic use
 
     def _evict_oldest_session(self) -> None:
         """Evict the oldest session to make room."""

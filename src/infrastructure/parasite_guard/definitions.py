@@ -5,13 +5,13 @@ Contains data structures and types for the Parasite Guard system.
 """
 
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from enum import Enum
+from datetime import UTC, datetime
+from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
 
-class ParasiteRisk(str, Enum):
+class ParasiteRisk(StrEnum):
     """Risk levels for detected parasites."""
 
     CRITICAL = "critical"
@@ -20,7 +20,7 @@ class ParasiteRisk(str, Enum):
     LOW = "low"
 
 
-class ParasiteAction(str, Enum):
+class ParasiteAction(StrEnum):
     """Actions to take on detected parasites."""
 
     DETECT_ONLY = "detect_only"
@@ -62,7 +62,7 @@ class ParasiteContext:
     action: ParasiteAction
     source: SourceMap | None = None
     id: UUID = field(default_factory=uuid4)
-    start_ts: datetime = field(default_factory=datetime.now(timezone.utc))
+    start_ts: datetime = field(default_factory=datetime.now(UTC))
     subscription_id: UUID | None = None  # To be used for EventBus/Subscription tracking
     meta: dict[str, Any] = field(default_factory=dict)
 

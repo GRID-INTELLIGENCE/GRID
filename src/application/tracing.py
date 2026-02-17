@@ -87,7 +87,7 @@ def setup_tracing(
     # Instrument SQLAlchemy if available
     try:
         SQLAlchemyInstrumentor().instrument(engine_hook=lambda engine: True)
-    except Exception:
+    except Exception:  # noqa: S110 intentional silent handling
         pass  # SQLAlchemy not installed or already instrumented
 
     # Instrument logging

@@ -103,7 +103,7 @@ class SensoryStore:
 
                             results.append(input_data)
                             count += 1
-                    except Exception:
+                    except Exception:  # noqa: S112 intentional skip on error
                         continue
 
                 if count >= limit:

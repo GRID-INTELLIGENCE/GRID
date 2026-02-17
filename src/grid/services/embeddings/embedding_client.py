@@ -7,13 +7,13 @@ import logging
 import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from typing import Any, cast
 
 logger = logging.getLogger(__name__)
 
 
-class EmbeddingProvider(str, Enum):
+class EmbeddingProvider(StrEnum):
     OLLAMA = "ollama"
     OPENAI = "openai"
 

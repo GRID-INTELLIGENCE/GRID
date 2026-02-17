@@ -14,7 +14,7 @@ import logging
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import uuid4
 
@@ -27,7 +27,7 @@ from .analytics_service import (
 logger = logging.getLogger(__name__)
 
 
-class TuningParameter(str, Enum):
+class TuningParameter(StrEnum):
     """Tunable system parameters."""
 
     ATTACK_TIME = "attack_time"
@@ -41,7 +41,7 @@ class TuningParameter(str, Enum):
     IMPACT_THRESHOLD = "impact_threshold"
 
 
-class RecommendationStatus(str, Enum):
+class RecommendationStatus(StrEnum):
     """Status of a tuning recommendation."""
 
     PENDING = "pending"

@@ -8,13 +8,13 @@ import time
 from abc import ABC, abstractmethod
 from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from typing import Any, cast
 
 logger = logging.getLogger(__name__)
 
 
-class LLMProvider(str, Enum):
+class LLMProvider(StrEnum):
     OLLAMA = "ollama"
     OPENAI = "openai"
     ANTHROPIC = "anthropic"

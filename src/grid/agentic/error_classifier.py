@@ -7,11 +7,11 @@ recovery strategies and behavioral analysis.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 
-class ErrorCategory(str, Enum):
+class ErrorCategory(StrEnum):
     """Broad categories of errors encountered during agent execution."""
 
     TRANSIENT = "transient"  # Temporary network, timeout
@@ -24,7 +24,7 @@ class ErrorCategory(str, Enum):
     UNKNOWN = "unknown"
 
 
-class ErrorSeverity(str, Enum):
+class ErrorSeverity(StrEnum):
     """Severity levels for errors."""
 
     LOW = "low"  # Can be ignored or retried silently

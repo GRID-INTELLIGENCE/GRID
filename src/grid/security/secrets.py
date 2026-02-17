@@ -141,7 +141,7 @@ class EnvironmentProvider(SecretsProvider):
     async def list_secrets(self, prefix: str = "") -> list[str]:
         """List secrets from environment variables."""
         secrets = []
-        for key, _value in os.environ.items():
+        for key in os.environ.keys():
             if key.startswith(self.prefix):
                 secret_key = key[len(self.prefix) :].lower()
                 if not prefix or secret_key.startswith(prefix):

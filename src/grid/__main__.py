@@ -245,7 +245,7 @@ def _read_json_payload(value: str | None, file: str | None) -> dict[str, Any]:
             if not isinstance(parsed, dict):
                 raise SystemExit("Payload must decode to a JSON object/dict")
             return parsed
-        except Exception:
+        except Exception:  # noqa: S110 intentional silent handling
             pass
 
         # PowerShell / JS-style object literal fallback: {key:1, other_key:"x"}
@@ -265,7 +265,7 @@ def _read_json_payload(value: str | None, file: str | None) -> dict[str, Any]:
             )
             try:
                 return cast(dict[str, Any], json.loads(repaired))
-            except Exception:
+            except Exception:  # noqa: S110 intentional silent handling
                 pass
 
         raise SystemExit(

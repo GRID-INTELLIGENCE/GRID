@@ -15,10 +15,10 @@ Categories:
 
 from __future__ import annotations
 
-from enum import Enum
+from enum import StrEnum
 
 
-class EventCategory(str, Enum):
+class EventCategory(StrEnum):
     """High-level event categories for filtering and routing."""
 
     INPUT = "input"
@@ -31,7 +31,7 @@ class EventCategory(str, Enum):
     INTEGRATION = "integration"
 
 
-class EventType(str, Enum):
+class EventType(StrEnum):
     """
     Enumeration of all event types in GRID.
 

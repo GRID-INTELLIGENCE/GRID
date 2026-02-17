@@ -1,12 +1,12 @@
 """Quantizer for discrete state representation."""
 
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from pydantic import BaseModel, Field
 
 
-class QuantizationLevel(str, Enum):
+class QuantizationLevel(StrEnum):
     """Quantization granularity levels."""
 
     COARSE = "coarse"  # Large steps, low precision

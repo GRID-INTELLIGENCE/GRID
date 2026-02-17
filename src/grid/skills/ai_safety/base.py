@@ -8,11 +8,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any, Protocol
 
 
-class ThreatLevel(str, Enum):
+class ThreatLevel(StrEnum):
     """Threat severity levels."""
 
     NONE = "none"
@@ -22,7 +22,7 @@ class ThreatLevel(str, Enum):
     CRITICAL = "critical"
 
 
-class SafetyCategory(str, Enum):
+class SafetyCategory(StrEnum):
     """Safety evaluation categories."""
 
     HARMFUL_CONTENT = "harmful_content"
@@ -34,7 +34,7 @@ class SafetyCategory(str, Enum):
     MENTAL_HEALTH_RISK = "mental_health_risk"
 
 
-class ActionType(str, Enum):
+class ActionType(StrEnum):
     """Remediation action types."""
 
     BLOCK = "block"

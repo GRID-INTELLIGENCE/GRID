@@ -23,7 +23,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from enum import Enum, StrEnum
+from enum import StrEnum
 from typing import Any, Callable
 
 

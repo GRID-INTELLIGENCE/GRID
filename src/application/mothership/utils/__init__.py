@@ -14,10 +14,7 @@ import string
 import uuid
 from collections.abc import Callable
 from datetime import UTC, datetime, timezone
-from typing import Any, TypeVar
-
-T = TypeVar("T")
-
+from typing import Any
 
 # =============================================================================
 # DateTime Utilities
@@ -496,7 +493,7 @@ def chunk_list[T](items: list[T], chunk_size: int) -> list[list[T]]:
     return [items[i : i + chunk_size] for i in range(0, len(items), chunk_size)]
 
 
-def deduplicate(items: list[T], key: Callable[[T], Any] | None = None) -> list[T]:
+def deduplicate[T](items: list[T], key: Callable[[T], Any] | None = None) -> list[T]:
     """
     Remove duplicates from a list while preserving order.
 

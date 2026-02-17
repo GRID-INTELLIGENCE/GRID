@@ -79,7 +79,7 @@ if sys.platform == "win32":
     try:
         sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
         sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
-    except Exception:
+    except Exception:  # noqa: S110 intentional silent handling
         pass  # Already wrapped or not available
 
 # Ensure grid root is in path (but don't import anything yet)
@@ -375,8 +375,7 @@ Use the above context to answer the user's question. Cite specific files when re
         messages = [{"role": "system", "content": system_prompt}]
 
         # Add conversation history (last 6 exchanges max)
-        for msg in self.history[-12:]:
-            messages.append(msg)
+        messages.extend(self.history[-12:])
 
         messages.append({"role": "user", "content": query})
 
@@ -588,7 +587,7 @@ async def interactive_loop(config: ChatConfig) -> None:
 
     while True:
         try:
-            user_input = input(c("\n> ", Colors.CYAN + Colors.BOLD)).strip()
+            user_input = input(c("\n> ", Colors.CYAN + Colors.BOLD)).strip()  # noqa: ASYNC250 blocking input is intentional for CLI interface
 
             if not user_input:
                 continue

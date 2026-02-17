@@ -7,10 +7,9 @@ to keep momentum during the shift from 2nd → 3rd → 4th gear.
 
 import asyncio
 import json
-import subprocess
 import sys
 from dataclasses import asdict, dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -92,7 +91,7 @@ class MotivationEngine:
         rpm = self._calculate_rpm(test_pass_rate, import_errors, syntax_errors, mypy_errors, ruff_issues)
 
         return GearMetrics(
-            timestamp=datetime.now(timezone.utc).isoformat(),
+            timestamp=datetime.now(UTC).isoformat(),
             rpm=rpm,
             test_pass_rate=test_pass_rate,
             test_count=test_count,
@@ -105,7 +104,7 @@ class MotivationEngine:
             type_coverage=type_coverage,
         )
 
-    async def _run_cmd_async(self, cmd: list[str], timeout: int = 30) -> str:
+    async def _run_cmd_async(self, cmd: list[str], timeout: int = 30) -> str:  # noqa: ASYNC109 timeout parameter is handled by caller
         """Run a command asynchronously."""
         try:
             proc = await asyncio.create_subprocess_exec(
@@ -226,7 +225,7 @@ class MotivationEngine:
         # Build report
         report = []
         report.append("\n" + "=" * 70)
-        report.append(f"🏁 GRID MOTIVATOR - {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')}")
+        report.append(f"🏁 GRID MOTIVATOR - {datetime.now(UTC).strftime('%Y-%m-%d %H:%M:%S')}")
         report.append("=" * 70)
 
         # Current gear status

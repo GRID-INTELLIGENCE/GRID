@@ -110,7 +110,7 @@ class MultiHopRetriever:
 
         for doc in documents:
             # Try each pattern
-            for _p_type, pattern in self.reference_patterns.items():
+            for pattern in self.reference_patterns.values():
                 matches = re.findall(pattern, doc)
                 for m in matches:
                     # Handle groups (some regex have multiple groups)

@@ -32,7 +32,7 @@ from typing import Any, Callable
 CallStack = list["SourceLocation"]
 
 # Context var to track call chain across async boundaries
-_call_chain: contextvars.ContextVar[CallStack] = contextvars.ContextVar("call_chain", default=[])
+_call_chain: contextvars.ContextVar[CallStack] = contextvars.ContextVar("call_chain", default=None)
 _is_tracing: contextvars.ContextVar[bool] = contextvars.ContextVar("is_tracing", default=False)
 
 
@@ -466,7 +466,7 @@ class ParasiteCallTracer:
 
         # Walk all objects in local vars of each frame
         for loc in chain:
-            for var_name, var_repr in loc.local_variables.items():
+            for var_repr in loc.local_variables.values():
                 # Try to find the actual object (limited scan)
                 for obj in gc.get_objects():
                     obj_id = id(obj)
@@ -490,7 +490,7 @@ class ParasiteCallTracer:
                         )  # Limit to 10 attributes
 
                         # Check if singleton
-                        is_singleton = sum(1 for o in gc.get_objects() if type(o) == type_obj) == 1
+                        is_singleton = sum(1 for o in gc.get_objects() if type(o) is type_obj) == 1
 
                         instances.append(
                             InstanceInfo(

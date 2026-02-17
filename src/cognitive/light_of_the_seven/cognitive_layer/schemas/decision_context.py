@@ -1,13 +1,13 @@
 """Decision context schema for decision-making support."""
 
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class DecisionType(str, Enum):
+class DecisionType(StrEnum):
     """Types of decisions."""
 
     ROUTINE = "routine"  # Familiar, low-stakes
@@ -16,7 +16,7 @@ class DecisionType(str, Enum):
     EXPLORATORY = "exploratory"  # Novel, uncertain
 
 
-class DecisionUrgency(str, Enum):
+class DecisionUrgency(StrEnum):
     """Urgency levels for decisions."""
 
     LOW = "low"  # Can take time

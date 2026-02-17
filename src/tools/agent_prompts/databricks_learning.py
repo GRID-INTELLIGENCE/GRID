@@ -164,9 +164,7 @@ class DatabricksLearningSystem(ContinuousLearningSystem):
                 limit=5,
             )
 
-            recommendations = []
-            for case in similar_cases:
-                recommendations.append(
+            recommendations = [
                     {
                         "case_id": case.case_id,
                         "similarity": 0.5,  # Would calculate actual similarity
@@ -174,7 +172,8 @@ class DatabricksLearningSystem(ContinuousLearningSystem):
                         "expected_outcome": case.outcome,
                         "lessons_learned": case.agent_experience.get("lessons", []) if case.agent_experience else [],
                     }
-                )
+                for case in similar_cases
+            ]
 
             return recommendations
 

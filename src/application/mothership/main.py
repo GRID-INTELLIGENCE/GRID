@@ -160,15 +160,14 @@ async def http_exception_handler(request: Request, exc: Exception) -> JSONRespon
 async def validation_error_handler(request: Request, exc: Exception) -> JSONResponse:
     """Handle Pydantic validation errors."""
     exc = cast(RequestValidationError, exc)
-    errors = []
-    for error in exc.errors():
-        errors.append(
-            {
-                "loc": list(error.get("loc", [])),
-                "msg": error.get("msg", "Validation error"),
-                "type": error.get("type", "value_error"),
-            }
-        )
+    errors = [
+        {
+            "loc": list(error.get("loc", [])),
+            "msg": error.get("msg", "Validation error"),
+            "type": error.get("type", "value_error"),
+        }
+        for error in exc.errors()
+    ]
 
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,

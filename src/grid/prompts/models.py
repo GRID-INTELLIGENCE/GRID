@@ -1,14 +1,14 @@
 """Prompt models for custom user prompts."""
 
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer
 
 
-class PromptSource(str, Enum):
+class PromptSource(StrEnum):
     """Source of prompt."""
 
     USER_CUSTOM = "user_custom"  # Highest priority - user's custom prompts
@@ -18,7 +18,7 @@ class PromptSource(str, Enum):
     DERIVED = "derived"
 
 
-class PromptPriority(str, Enum):
+class PromptPriority(StrEnum):
     """Prompt priority levels."""
 
     CRITICAL = "critical"

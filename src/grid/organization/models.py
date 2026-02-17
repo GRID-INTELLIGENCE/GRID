@@ -1,14 +1,14 @@
 """Organization and user models."""
 
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer
 
 
-class OrganizationRole(str, Enum):
+class OrganizationRole(StrEnum):
     """Organization roles."""
 
     OPENAI = "openai"
@@ -19,7 +19,7 @@ class OrganizationRole(str, Enum):
     INTERNAL = "internal"
 
 
-class UserRole(str, Enum):
+class UserRole(StrEnum):
     """User roles within an organization."""
 
     ADMIN = "admin"
@@ -30,7 +30,7 @@ class UserRole(str, Enum):
     GUEST = "guest"
 
 
-class UserStatus(str, Enum):
+class UserStatus(StrEnum):
     """User account status."""
 
     ACTIVE = "active"

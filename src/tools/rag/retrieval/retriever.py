@@ -245,7 +245,7 @@ class Retriever(BaseRetriever if HAS_CONTRACTS else object):  # type: ignore[mis
         for meta in self.store.metadatas:
             if "path" in meta:
                 sources.add(meta["path"])
-        return sorted(list(sources))
+        return sorted(sources)
 
     def get_stats(self) -> dict[str, Any]:
         """Get statistics about the store.

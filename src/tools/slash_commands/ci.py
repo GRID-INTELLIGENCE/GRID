@@ -66,7 +66,7 @@ class CICommand(PipelineCommand):
     async def _run_subprocess(
         self,
         cmd: list[str],
-        timeout: float,
+        timeout: float,  # noqa: ASYNC109 timeout parameter is handled by caller
         cwd: str | Path | None = None,
     ) -> tuple[int, str, str]:
         """Run a subprocess asynchronously with timeout.
@@ -224,7 +224,7 @@ class CICommand(PipelineCommand):
                 if stdout.strip():
                     todo_count = len(stdout.strip().split("\n"))
                     quality_issues.append(f"Found {todo_count} TODO/FIXME comments")
-            except Exception:
+            except Exception:  # noqa: S110 intentional silent handling
                 pass
 
             # Check for print statements (should use logging)
@@ -236,7 +236,7 @@ class CICommand(PipelineCommand):
                 if stdout.strip():
                     print_count = len(stdout.strip().split("\n"))
                     quality_issues.append(f"Found {print_count} print statements (consider using logging)")
-            except Exception:
+            except Exception:  # noqa: S110 intentional silent handling
                 pass
 
             # Check for long lines
@@ -248,7 +248,7 @@ class CICommand(PipelineCommand):
                 if stdout.strip():
                     long_line_files = len(stdout.strip().split("\n"))
                     quality_issues.append(f"Found {long_line_files} files with lines > 120 chars")
-            except Exception:
+            except Exception:  # noqa: S110 intentional silent handling
                 pass
 
             return {
@@ -285,7 +285,7 @@ class CICommand(PipelineCommand):
                     if stdout.strip():
                         matches = len(stdout.strip().split("\n"))
                         security_issues.append(f"Found {matches} potential hardcoded secrets")
-                except Exception:
+                except Exception:  # noqa: S110 intentional silent handling
                     pass
 
             # Check for eval/exec usage
@@ -297,7 +297,7 @@ class CICommand(PipelineCommand):
                 if stdout.strip():
                     eval_count = len(stdout.strip().split("\n"))
                     security_issues.append(f"Found {eval_count} eval/exec statements (review needed)")
-            except Exception:
+            except Exception:  # noqa: S110 intentional silent handling
                 pass
 
             return {

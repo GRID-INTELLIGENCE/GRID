@@ -11,7 +11,7 @@ from __future__ import annotations
 import logging
 from collections import deque
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 import numpy as np
@@ -378,7 +378,7 @@ class StabilityAnalyzer:
             StabilityMetrics with all computed metrics
         """
         # Add to history for trend analysis
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         for v in vectors:
             self.vector_history.append((v, now))
 

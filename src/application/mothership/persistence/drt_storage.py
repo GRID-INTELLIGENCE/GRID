@@ -7,13 +7,14 @@ using JSON files. Data survives application restarts.
 
 from __future__ import annotations
 
-import aiofiles
 import asyncio
 import json
 import logging
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
+
+import aiofiles
 
 logger = logging.getLogger(__name__)
 

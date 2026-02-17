@@ -149,7 +149,7 @@ class ReferenceGenerator:
             try:
                 with open(self.agent_prompts_json) as f:
                     mappings["agent_prompts_data"] = json.load(f)
-            except Exception:
+            except Exception:  # noqa: S110 intentional silent handling
                 pass
 
         return mappings
@@ -185,10 +185,7 @@ class ReferenceGenerator:
             "safety": "/safety review",
         }
 
-        relevant_tasks = []
-        for keyword in structure.keywords:
-            if keyword in keyword_task_map:
-                relevant_tasks.append(keyword_task_map[keyword])
+        relevant_tasks = [keyword_task_map[keyword] for keyword in structure.keywords if keyword in keyword_task_map]
 
         relevant["keyword_mappings"]["tasks"] = relevant_tasks or ["/inventory", "/gapanalysis"]
 

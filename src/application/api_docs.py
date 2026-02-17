@@ -245,8 +245,9 @@ def export_openapi_spec(app: FastAPI, output_path: str | Path) -> None:
     openapi_schema = app.openapi()
 
     # Write to file
-    import aiofiles
     import asyncio
+
+    import aiofiles
 
     async def _async_export():
         async with aiofiles.open(output_path, "w", encoding="utf-8") as f:
@@ -319,8 +320,9 @@ def export_html_docs(app: FastAPI, output_path: str | Path) -> None:
     </html>
     """
 
-    import aiofiles
     import asyncio
+
+    import aiofiles
 
     async def _async_export_html():
         async with aiofiles.open(output_path, "w", encoding="utf-8") as f:

@@ -70,4 +70,4 @@ if __name__ == "__main__":
     import uvicorn
 
     # If run directly, start the app on port 8000
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8000)  # noqa: S104 bind-all is intentional for container deployment

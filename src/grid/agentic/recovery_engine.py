@@ -9,7 +9,7 @@ from __future__ import annotations
 import asyncio
 import logging
 from collections.abc import Callable
-from enum import Enum
+from enum import StrEnum
 from typing import Any, TypeVar
 
 from .error_classifier import ErrorClassifier
@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 T = TypeVar("T")
 
 
-class RecoveryStrategy(str, Enum):
+class RecoveryStrategy(StrEnum):
     """Available recovery strategies."""
 
     RETRY_WITH_BACKOFF = "retry_backoff"

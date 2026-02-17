@@ -12,7 +12,7 @@ import time
 import uuid
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
-from enum import Enum, StrEnum
+from enum import StrEnum
 from typing import Any
 
 import httpx
@@ -242,7 +242,7 @@ class APIGateway:
 
         import random
 
-        rand = random.uniform(0, total_weight)
+        rand = random.uniform(0, total_weight)  # noqa: S311 non-security random use
         current_weight = 0
 
         for endpoint in healthy_endpoints:
@@ -304,7 +304,7 @@ class APIGateway:
             "service": service_name,
             "status": "degraded_mode",
             "message": "The system is experiencing technical difficulties. Please try again later.",
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         }
 
         # Service-specific fallbacks
@@ -458,4 +458,4 @@ if __name__ == "__main__":
 
     app, _ = example_setup()
 
-    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")
+    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")  # noqa: S104 bind-all is intentional for container deployment

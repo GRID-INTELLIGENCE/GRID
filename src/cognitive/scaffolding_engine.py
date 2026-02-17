@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from cognitive.light_of_the_seven.cognitive_layer.cognitive_load.chunking import InformationChunker
@@ -23,7 +23,7 @@ from cognitive.light_of_the_seven.cognitive_layer.schemas.user_cognitive_profile
 logger = logging.getLogger(__name__)
 
 
-class ScaffoldingStrategy(str, Enum):
+class ScaffoldingStrategy(StrEnum):
     """Types of scaffolding strategies."""
 
     # Content-based strategies

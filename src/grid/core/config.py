@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
 
     # Server
-    SERVER_HOST: str = "0.0.0.0"
+    SERVER_HOST: str = "0.0.0.0"  # noqa: S104 bind-all is intentional for container deployment
     SERVER_PORT: int = 8000
     DEBUG: bool = False
 

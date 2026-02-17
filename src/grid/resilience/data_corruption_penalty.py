@@ -285,7 +285,7 @@ def record_corruption_event(
         # This ensures we have a unique ID even if none is provided
         ts = datetime.now(UTC).isoformat()
         hash_input = f"{endpoint}:{ts}:{description}"
-        correlation_id = hashlib.md5(hash_input.encode()).hexdigest()
+        correlation_id = hashlib.md5(hash_input.encode()).hexdigest()  # noqa: S324 non-cryptographic use
 
     event = DataCorruptionEvent(
         endpoint=endpoint,

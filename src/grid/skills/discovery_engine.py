@@ -90,7 +90,7 @@ class SkillDiscoveryEngine:
                             # Try to instantiate
                             try:
                                 skill_obj = obj()
-                            except Exception:
+                            except Exception:  # noqa: S112 intentional skip on error
                                 continue
                         else:
                             # It's already an instance
@@ -133,7 +133,7 @@ class SkillDiscoveryEngine:
 
             if lines > 20 or "for " in source or "while " in source or "orchestrator" in source.lower():
                 return "high-level"
-        except Exception:
+        except Exception:  # noqa: S110 intentional silent handling
             pass
 
         return "low-level"

@@ -22,7 +22,7 @@ import time
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from enum import Enum, StrEnum
+from enum import StrEnum
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -241,17 +241,17 @@ class ContentModerator:
         """Check for harmful content patterns."""
         violations = []
 
-        for pattern in self.harmful_patterns:
-            if pattern in content:
-                violations.append(
-                    SafetyViolation(
-                        category=SafetyCategory.HARMFUL_CONTENT,
-                        severity=ThreatLevel.MEDIUM,
-                        confidence=0.7,
-                        description=f"Potentially harmful content detected: {pattern}",
-                        evidence={"pattern": pattern, "context": content[:100]},
-                    )
-                )
+        violations.extend(
+            SafetyViolation(
+                category=SafetyCategory.HARMFUL_CONTENT,
+                severity=ThreatLevel.MEDIUM,
+                confidence=0.7,
+                description=f"Potentially harmful content detected: {pattern}",
+                evidence={"pattern": pattern, "context": content[:100]},
+            )
+            for pattern in self.harmful_patterns
+            if pattern in content
+        )
 
         return violations
 
@@ -313,18 +313,18 @@ class ContentModerator:
         """Check for cultural sensitivity issues."""
         violations = []
 
-        for category, patterns in self.se_asia_sensitive_terms.items():
-            for pattern in patterns:
-                if pattern in content:
-                    violations.append(
-                        SafetyViolation(
-                            category=SafetyCategory.CULTURAL_SENSITIVITY,
-                            severity=ThreatLevel.LOW,
-                            confidence=0.6,
-                            description=f"Cultural sensitivity issue in {category}: {pattern}",
-                            evidence={"category": category, "pattern": pattern},
-                        )
-                    )
+        violations.extend(
+            SafetyViolation(
+                category=SafetyCategory.CULTURAL_SENSITIVITY,
+                severity=ThreatLevel.LOW,
+                confidence=0.6,
+                description=f"Cultural sensitivity issue in {category}: {pattern}",
+                evidence={"category": category, "pattern": pattern},
+            )
+            for category, patterns in self.se_asia_sensitive_terms.items()
+            for pattern in patterns
+            if pattern in content
+        )
 
         return violations
 

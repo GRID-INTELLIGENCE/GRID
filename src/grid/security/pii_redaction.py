@@ -9,7 +9,7 @@ import hashlib
 import logging
 import re
 from dataclasses import dataclass
-from enum import Enum, StrEnum
+from enum import StrEnum
 from re import Pattern
 
 logger = logging.getLogger(__name__)

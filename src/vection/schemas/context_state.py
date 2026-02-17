@@ -11,8 +11,8 @@ import hashlib
 import time
 from collections import deque
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from enum import Enum, StrEnum
+from datetime import UTC, datetime
+from enum import StrEnum
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
@@ -31,7 +31,7 @@ class AnchorType(StrEnum):
     CUSTOM = "custom"  # User-defined anchor
 
 
-class ContextStatus(str, Enum):
+class ContextStatus(StrEnum):
     """Status of a VectionContext."""
 
     INITIALIZING = "initializing"  # Being established
@@ -78,12 +78,12 @@ class Anchor:
     @property
     def age_seconds(self) -> float:
         """Get anchor age in seconds."""
-        return (datetime.now(timezone.utc) - self.created_at).total_seconds()
+        return (datetime.now(UTC) - self.created_at).total_seconds()
 
     @property
     def staleness(self) -> float:
         """Get seconds since last reference."""
-        return (datetime.now(timezone.utc) - self.last_referenced).total_seconds()
+        return (datetime.now(UTC) - self.last_referenced).total_seconds()
 
     @property
     def effective_weight(self) -> float:
@@ -98,7 +98,7 @@ class Anchor:
         Args:
             boost: Amount to boost weight.
         """
-        self.last_referenced = datetime.now(timezone.utc)
+        self.last_referenced = datetime.now(UTC)
         self.reference_count += 1
         self.weight = min(1.0, self.weight + boost)
 
@@ -158,7 +158,7 @@ class Anchor:
             New Anchor instance.
         """
         hash_input = f"{anchor_type.value}:{value}:{time.time()}"
-        anchor_id = hashlib.md5(hash_input.encode()).hexdigest()[:10]
+        anchor_id = hashlib.md5(hash_input.encode()).hexdigest()[:10]  # noqa: S324 non-cryptographic use
 
         return cls(
             anchor_id=anchor_id,
@@ -227,12 +227,12 @@ class VectionContext:
     @property
     def age_seconds(self) -> float:
         """Get context age in seconds."""
-        return (datetime.now(timezone.utc) - self.established_at).total_seconds()
+        return (datetime.now(UTC) - self.established_at).total_seconds()
 
     @property
     def staleness(self) -> float:
         """Get seconds since last update."""
-        return (datetime.now(timezone.utc) - self.last_updated).total_seconds()
+        return (datetime.now(UTC) - self.last_updated).total_seconds()
 
     @property
     def is_established(self) -> bool:
@@ -313,11 +313,7 @@ class VectionContext:
         Returns:
             List of salient signals.
         """
-        salient = []
-        for signal in self.accumulated_signals:
-            if hasattr(signal, "effective_salience") and signal.effective_salience >= threshold:
-                salient.append(signal)
-        return salient
+        return [signal for signal in self.accumulated_signals if hasattr(signal, "effective_salience") and signal.effective_salience >= threshold]
 
     def get_anchors_by_type(self, anchor_type: AnchorType) -> list[Anchor]:
         """Get anchors of a specific type.
@@ -424,7 +420,7 @@ class VectionContext:
 
     def _touch(self) -> None:
         """Update last_updated timestamp."""
-        self.last_updated = datetime.now(timezone.utc)
+        self.last_updated = datetime.now(UTC)
         self.interaction_count += 1
 
     def to_dict(self) -> dict[str, Any]:

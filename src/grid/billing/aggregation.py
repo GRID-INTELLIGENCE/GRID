@@ -5,7 +5,7 @@ Handles tier definitions and periodic usage rollup.
 
 import logging
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 
 from grid.config.runtime_settings import BillingSettings
 from grid.infrastructure.database import DatabaseManager
@@ -13,7 +13,7 @@ from grid.infrastructure.database import DatabaseManager
 logger = logging.getLogger(__name__)
 
 
-class CostTier(str, Enum):
+class CostTier(StrEnum):
     """Subscription tier definitions."""
 
     FREE = "free"

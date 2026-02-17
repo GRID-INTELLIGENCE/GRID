@@ -27,8 +27,8 @@ class OllamaEmbedding(EmbeddingProvider):
     def embed(self, text: str) -> dict[str, float]:
         """Get embeddings using Ollama (sync version)."""
         try:
-            result = subprocess.run(
-                ["ollama", "run", self.model, text], capture_output=True, text=True, check=True, timeout=30
+            result = subprocess.run(  # noqa: S603 subprocess call is intentional
+                ["ollama", "run", self.model, text], capture_output=True, text=True, check=True, timeout=30  # noqa: S607 partial path is intentional
             )
             # Parse dense vector from output
             vector = json.loads(result.stdout)
@@ -92,9 +92,7 @@ class OllamaEmbedding(EmbeddingProvider):
             client = self._get_native_client()
             resp = await client.embed(texts, model=self.model)
 
-            results = []
-            for vector in resp.embeddings:
-                results.append({str(i): v for i, v in enumerate(vector) if abs(v) > 0.01})
+            results = [{str(i): v for i, v in enumerate(vector) if abs(v) > 0.01} for vector in resp.embeddings]
             return results
         except Exception as e:
             print(f"Ollama Native batch embedding error: {e}")
@@ -162,7 +160,7 @@ class SimpleEmbedding(EmbeddingProvider):
                 "could",
                 "should",
             }
-            self.doc_freqs = {word: 100 for word in common_words}
+            self.doc_freqs = dict.fromkeys(common_words, 100)
             self.num_docs = 1000
 
         # Calculate TF-IDF

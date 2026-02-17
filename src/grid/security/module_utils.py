@@ -36,17 +36,9 @@ def isolate_module(module_name: str) -> Iterator[None]:
     """
     # Store original module state
     original_module = sys.modules.get(module_name)
-    original_attrs = {}
-
     try:
         # Create a new module with a clean state
         if module_name in sys.modules:
-            # Save original attributes
-            if original_module is not None:
-                for name, attr in vars(original_module).items():
-                    if not name.startswith("__"):
-                        original_attrs[name] = attr
-
             # Remove from sys.modules to force re-import
             del sys.modules[module_name]
 

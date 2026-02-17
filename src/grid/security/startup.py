@@ -11,7 +11,7 @@ import logging
 import os
 import sys
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
 from typing import Any
 
@@ -21,7 +21,7 @@ from .path_manager import PathManagerReport, SecurePathManager
 logger = logging.getLogger(__name__)
 
 
-class HardeningLevel(str, Enum):
+class HardeningLevel(StrEnum):
     """Level of environment hardening to apply."""
 
     NONE = "none"

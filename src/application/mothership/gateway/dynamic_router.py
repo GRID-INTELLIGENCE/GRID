@@ -20,7 +20,7 @@ import time
 from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from enum import Enum, StrEnum
+from enum import StrEnum
 from typing import Any
 
 from fastapi import HTTPException, Request, Response

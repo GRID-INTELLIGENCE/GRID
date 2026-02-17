@@ -15,14 +15,14 @@ import os
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import uuid4
 
 logger = logging.getLogger(__name__)
 
 
-class CostTier(str, Enum):
+class CostTier(StrEnum):
     """Cost tiers for usage-based billing."""
 
     FREE = "free"

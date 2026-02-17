@@ -169,13 +169,9 @@ class DependencyValidator:
                         func = decorator.func
                         if isinstance(func, ast.Name) and func.id == "depends_on":
                             # Parse keyword arguments
-                            for kw in decorator.keywords:
-                                if kw.arg == "skill_id" and isinstance(kw.value, ast.Constant):
-                                    deps.append(kw.value.value)
+                            deps.extend(kw.value.value for kw in decorator.keywords if kw.arg == "skill_id" and isinstance(kw.value, ast.Constant))
                             # Parse positional arguments
-                            for arg in decorator.args:
-                                if isinstance(arg, ast.Constant):
-                                    deps.append(arg.value)
+                            deps.extend(arg.value for arg in decorator.args if isinstance(arg, ast.Constant))
 
         # Also check docstrings for @requires: skill_id pattern
         docstring = ast.get_docstring(tree)
@@ -244,7 +240,7 @@ class DependencyValidator:
         Returns:
             List of skill_ids in order they should be loaded
         """
-        in_degree: dict[str, int] = {s: 0 for s in self._skill_graph}
+        in_degree: dict[str, int] = dict.fromkeys(self._skill_graph, 0)
 
         for skill_id, deps in self._skill_graph.items():
             for dep in deps:

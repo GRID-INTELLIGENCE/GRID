@@ -12,7 +12,7 @@ import logging
 import os
 import time
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class DecisionType(str, Enum):
+class DecisionType(StrEnum):
     ROUTING = "routing"
     FALLBACK = "fallback"
     ADAPTATION = "adaptation"

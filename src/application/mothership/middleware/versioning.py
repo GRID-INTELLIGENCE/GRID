@@ -7,7 +7,6 @@ Injects version-specific headers into responses and handles deprecation signalin
 from __future__ import annotations
 
 import logging
-from typing import Any
 
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint

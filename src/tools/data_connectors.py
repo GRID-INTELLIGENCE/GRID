@@ -12,7 +12,7 @@ from abc import ABC, abstractmethod
 from collections import defaultdict
 from collections.abc import Callable
 from dataclasses import dataclass
-from enum import Enum, StrEnum
+from enum import StrEnum
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -199,7 +199,7 @@ class QueryInterface:
     def _hash_query(self, query: str, parameters: dict) -> str:
         """Create hash for query caching."""
         query_str = f"{query}:{json.dumps(parameters, sort_keys=True)}"
-        return hashlib.md5(query_str.encode()).hexdigest()
+        return hashlib.md5(query_str.encode()).hexdigest()  # noqa: S324 non-cryptographic use
 
     def _should_cache(self, query: str) -> bool:
         """Determine if query result should be cached."""

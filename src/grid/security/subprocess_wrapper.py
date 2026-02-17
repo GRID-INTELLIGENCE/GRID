@@ -306,7 +306,7 @@ class SecureSubprocess:
 
         try:
             # Execute command
-            result = subprocess.run(
+            result = subprocess.run(  # noqa: S603 subprocess call is intentional
                 cmd_list,
                 cwd=str(cwd) if cwd else None,
                 timeout=timeout,
@@ -390,7 +390,7 @@ class SecureSubprocess:
         self,
         command: str | list[str],
         cwd: str | Path | None = None,
-        timeout: int | None = None,
+        timeout: int | None = None,  # noqa: ASYNC109 timeout parameter is handled by caller
         check: bool = False,
         capture_output: bool = True,
         text: bool = True,

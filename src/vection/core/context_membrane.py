@@ -20,7 +20,7 @@ import math
 from collections import deque
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from typing import Any, TypeVar
 
 from vection.schemas.context_state import Anchor, AnchorType, VectionContext
@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 T = TypeVar("T")
 
 
-class RetentionDecision(str, Enum):
+class RetentionDecision(StrEnum):
     """Retention decision outcomes."""
 
     RETAIN = "retain"  # Keep in active context
@@ -41,7 +41,7 @@ class RetentionDecision(str, Enum):
     DISCARD = "discard"  # Remove immediately
 
 
-class MembranePermeability(str, Enum):
+class MembranePermeability(StrEnum):
     """Membrane permeability levels."""
 
     CLOSED = "closed"  # Block all new context

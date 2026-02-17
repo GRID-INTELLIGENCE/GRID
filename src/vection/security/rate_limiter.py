@@ -40,7 +40,7 @@ import time
 from collections import defaultdict
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from typing import Any, TypeVar
 
 F = TypeVar("F", bound=Callable[..., Any])
@@ -104,7 +104,7 @@ class RateLimitExceeded(Exception):
         }
 
 
-class OperationType(str, Enum):
+class OperationType(StrEnum):
     """Standard operation types for rate limiting."""
 
     # Signal operations
@@ -687,7 +687,7 @@ class RateLimiter:
                 limit=limit,
                 window_seconds=window,
             )
-        except Exception:
+        except Exception:  # noqa: S110 intentional silent handling
             # Don't let logging failures break rate limiting
             pass
 

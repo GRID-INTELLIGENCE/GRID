@@ -256,9 +256,7 @@ class EventVersionRegistry:
 
         # Check required fields
         required_fields = schema.get("required", [])
-        for field in required_fields:
-            if field not in event_data:
-                errors.append(f"Missing required field: {field}")
+        errors.extend(f"Missing required field: {field}" for field in required_fields if field not in event_data)
 
         # Check field types
         properties = schema.get("properties", {})

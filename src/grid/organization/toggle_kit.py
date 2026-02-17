@@ -203,11 +203,7 @@ class ToggleKit:
             return True, []  # Unknown features don't have tracked dependencies
 
         deps = self.feature_definitions[feature_name].dependencies
-        missing = []
-
-        for dep in deps:
-            if not self.is_enabled(dep):
-                missing.append(dep)
+        missing = [dep for dep in deps if not self.is_enabled(dep)]
 
         return len(missing) == 0, missing
 
@@ -248,12 +244,12 @@ class ToggleKit:
         if not identifier:
             import hashlib
 
-            identifier = hashlib.md5(str(id(context)).encode()).hexdigest()[:8]
+            identifier = hashlib.md5(str(id(context)).encode()).hexdigest()[:8]  # noqa: S324 non-cryptographic use
 
         # Simple hash-based rollout
         import hashlib
 
-        hash_value = int(hashlib.md5(f"{feature_name}:{identifier}".encode()).hexdigest()[:8], 16)
+        hash_value = int(hashlib.md5(f"{feature_name}:{identifier}".encode()).hexdigest()[:8], 16)  # noqa: S324 non-cryptographic use
         rollout_threshold = int(
             (feature_name in self.feature_definitions and self.feature_definitions[feature_name].rollout_percentage)
             * 655.35
@@ -360,10 +356,12 @@ class ToggleKit:
                 errors.append(f"Circular dependency detected for {feature_name}")
 
         # Check for missing dependencies
-        for name, feature in self.feature_definitions.items():
-            for dep in feature.dependencies:
-                if dep not in self.feature_definitions:
-                    warnings.append(f"Feature {name} depends on unknown feature {dep}")
+        warnings.extend(
+            f"Feature {name} depends on unknown feature {dep}"
+            for name, feature in self.feature_definitions.items()
+            for dep in feature.dependencies
+            if dep not in self.feature_definitions
+        )
 
         # Check rollout percentages
         for name, feature in self.feature_definitions.items():

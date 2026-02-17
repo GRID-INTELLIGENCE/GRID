@@ -37,8 +37,7 @@ def validate_json_schema(data: dict[str, Any], schema_path: Path) -> list[str]:
             schema = json.load(f)
 
         validator = jsonschema.Draft7Validator(schema)
-        for error in validator.iter_errors(data):
-            errors.append(f"{error.json_path}: {error.message}")
+        errors.extend(f"{error.json_path}: {error.message}" for error in validator.iter_errors(data))
     except FileNotFoundError:
         errors.append(f"Schema file not found: {schema_path}")
     except json.JSONDecodeError as e:
@@ -66,9 +65,7 @@ def validate_agent_output(output_json: dict[str, Any]) -> dict[str, Any]:
             errors.append(f"Invalid file action: {file.get('action')}")
 
     # Validate test entries
-    for test in output_json.get("tests", []):
-        if "path" not in test or "content" not in test:
-            errors.append(f"Invalid test entry: {test}")
+    errors.extend(f"Invalid test entry: {test}" for test in output_json.get("tests", []) if "path" not in test or "content" not in test)
 
     return {"valid": len(errors) == 0, "errors": errors}
 

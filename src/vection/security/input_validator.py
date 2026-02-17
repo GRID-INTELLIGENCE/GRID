@@ -40,14 +40,14 @@ import re
 import threading
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from re import Pattern
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
-class ValidationErrorType(str, Enum):
+class ValidationErrorType(StrEnum):
     """Types of validation errors."""
 
     INVALID_TYPE = "invalid_type"
@@ -841,7 +841,7 @@ class InputValidator:
                 reason=reason,
                 original_value=value_preview[:100] if value_preview else None,
             )
-        except Exception:
+        except Exception:  # noqa: S110 intentional silent handling
             # Don't let logging failures break validation
             pass
 

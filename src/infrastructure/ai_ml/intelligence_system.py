@@ -649,7 +649,7 @@ if __name__ == "__main__":
 
         try:
             # Keep running
-            while True:
+            while True:  # noqa: ASYNC110 busy-wait is intentional for polling pattern
                 await asyncio.sleep(1)
         except KeyboardInterrupt:
             await intelligence.stop()

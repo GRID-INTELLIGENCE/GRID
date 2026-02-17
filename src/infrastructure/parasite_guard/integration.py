@@ -159,7 +159,7 @@ def add_parasite_guard_to_lifespan(
 
 async def wait_for_sanitization(
     middleware: ParasiteGuardMiddleware,
-    timeout: float | None = 30.0,
+    timeout: float | None = 30.0,  # noqa: ASYNC109 timeout parameter is handled by caller
 ) -> None:
     """
     Wait for all active sanitization tasks to complete.

@@ -3,11 +3,11 @@
 import logging
 import statistics
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 
-class BehavioralPattern(str, Enum):
+class BehavioralPattern(StrEnum):
     ALWAYS_SUCCEEDS = "always_succeeds"
     ALWAYS_FAILS = "always_fails"
     SLOW_PERFORMANCE = "slow_performance"

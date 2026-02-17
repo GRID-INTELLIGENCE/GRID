@@ -1,12 +1,12 @@
 """Factory for creating embedding providers."""
 
-from enum import Enum
+from enum import StrEnum
 
 from ..config import RAGConfig
 from .base import BaseEmbeddingProvider
 
 
-class EmbeddingProviderType(str, Enum):
+class EmbeddingProviderType(StrEnum):
     """Types of embedding providers."""
 
     OLLAMA = "ollama"  # Ollama-based models (Nomic, etc.)

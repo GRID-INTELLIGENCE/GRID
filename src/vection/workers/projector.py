@@ -21,8 +21,8 @@ import time
 from collections import deque
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from enum import Enum
+from datetime import UTC, datetime
+from enum import StrEnum
 from typing import Any
 
 from vection.schemas.velocity_vector import DirectionCategory, VelocityVector
@@ -30,7 +30,7 @@ from vection.schemas.velocity_vector import DirectionCategory, VelocityVector
 logger = logging.getLogger(__name__)
 
 
-class ProjectionType(str, Enum):
+class ProjectionType(StrEnum):
     """Types of projections."""
 
     VELOCITY = "velocity"  # Based on current velocity
@@ -222,7 +222,7 @@ class Projector:
             return
 
         self._running = True
-        self._started_at = datetime.now(timezone.utc)
+        self._started_at = datetime.now(UTC)
         self._task = asyncio.create_task(self._processing_loop())
         logger.info("Projector worker started")
 
@@ -398,7 +398,7 @@ class Projector:
             "tracked_sessions": len(self._session_inputs),
             "default_horizon": self._default_horizon,
             "confidence_threshold": self._confidence_threshold,
-            "uptime_seconds": ((datetime.now(timezone.utc) - self._started_at).total_seconds() if self._started_at else 0),
+            "uptime_seconds": ((datetime.now(UTC) - self._started_at).total_seconds() if self._started_at else 0),
         }
 
     def reset(self) -> None:
@@ -678,7 +678,7 @@ class Projector:
     def _generate_projection_id(self) -> str:
         """Generate a unique projection ID."""
         hash_input = f"{time.time()}:{self._total_projections}"
-        return f"proj_{hashlib.md5(hash_input.encode()).hexdigest()[:10]}"
+        return f"proj_{hashlib.md5(hash_input.encode()).hexdigest()[:10]}"  # noqa: S324 non-cryptographic use
 
 
 # Module-level singleton

@@ -33,7 +33,7 @@ class SignalProcessor:
                 return result
             except Exception:
                 # The delay represents the signal 'fading' and repeating
-                wait_time = (decay**i) + (random.random() * 0.2)
+                wait_time = (decay**i) + (random.random() * 0.2)  # noqa: S311 non-security random use
                 logger.warning(f"Signal {signal_id} jittered at {i}. Re-emitting in {wait_time:.2f}s...")
                 await asyncio.sleep(wait_time)
 
@@ -53,7 +53,7 @@ class SignalProcessor:
         """
         aura = structure_context.get("spatial_metadata", {})
         # Scale the reverb effect based on the provided size
-        scaled_aura = {k: v for k, v in aura.items()}
+        scaled_aura = dict(aura.items())
         scaled_aura["reverb_scale"] = size
 
         if eq_aura:

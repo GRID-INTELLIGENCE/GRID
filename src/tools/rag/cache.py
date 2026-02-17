@@ -6,7 +6,7 @@ Detects index changes via context hashing to avoid stale answers.
 
 import hashlib
 from dataclasses import dataclass
-from datetime import datetime, timezone, timedelta
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 
@@ -62,7 +62,7 @@ class QueryCache:
         """
         sorted_ids = "|".join(sorted(source_ids))
         data = f"{self.collection_name}:{sorted_ids}:{chunk_count}"
-        return hashlib.md5(data.encode()).hexdigest()[:12]
+        return hashlib.md5(data.encode()).hexdigest()[:12]  # noqa: S324 non-cryptographic use
 
     def _make_cache_key(self, query: str, top_k: int, context_hash: str) -> str:
         """Create a unique cache key for a query.
@@ -76,7 +76,7 @@ class QueryCache:
             Cache key string
         """
         data = f"{query}:{top_k}:{context_hash}"
-        return hashlib.md5(data.encode()).hexdigest()
+        return hashlib.md5(data.encode()).hexdigest()  # noqa: S324 non-cryptographic use
 
     def get(self, query: str, top_k: int, source_ids: list[str], chunk_count: int) -> dict[str, Any] | None:
         """Get a cached response if available and not expired.
@@ -96,7 +96,7 @@ class QueryCache:
 
         if key in self.cache:
             entry = self.cache[key]
-            now = datetime.now(timezone.utc)
+            now = datetime.now(UTC)
             age = now - entry.created_at
 
             # Check TTL
@@ -144,7 +144,7 @@ class QueryCache:
         key = self._make_cache_key(query, top_k, context_hash)
 
         self.cache[key] = CacheEntry(
-            answer=answer, sources=sources, created_at=datetime.now(timezone.utc), context_hash=context_hash
+            answer=answer, sources=sources, created_at=datetime.now(UTC), context_hash=context_hash
         )
 
     def invalidate(self) -> None:

@@ -165,9 +165,7 @@ class AgenticRepository:
         if keywords:
             # This is a simplified implementation
             # In production, you might want to use full-text search or vector similarity
-            conditions = []
-            for keyword in keywords:
-                conditions.append(AgenticCase.raw_input.contains(keyword))
+            conditions = [AgenticCase.raw_input.contains(keyword) for keyword in keywords]
             if conditions:
                 query = query.where(and_(*conditions))
 

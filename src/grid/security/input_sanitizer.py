@@ -35,13 +35,13 @@ import logging
 import re
 import unicodedata
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
-class ThreatSeverity(str, Enum):
+class ThreatSeverity(StrEnum):
     """Severity levels for detected threats."""
 
     NONE = "none"
@@ -51,7 +51,7 @@ class ThreatSeverity(str, Enum):
     CRITICAL = "critical"
 
 
-class ThreatType(str, Enum):
+class ThreatType(StrEnum):
     """Types of security threats."""
 
     XSS = "xss"

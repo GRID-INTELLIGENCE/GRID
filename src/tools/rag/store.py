@@ -159,8 +159,7 @@ Answer:"""
             )
         ]
 
-        for i in range(len(self.ids)):
-            lines.append(
+        lines.extend(
                 json.dumps(
                     {
                         "type": "document",
@@ -170,7 +169,8 @@ Answer:"""
                         "metadata": self.metadatas[i],
                     }
                 )
-            )
+            for i in range(len(self.ids))
+        )
         with open(path, "w") as f:
             f.write("\n".join(lines))
 
@@ -215,9 +215,7 @@ Answer:"""
 
     def to_ndjson(self) -> list[str]:
         """Convert to NDJSON format."""
-        lines = []
-        for i in range(len(self.ids)):
-            lines.append(
+        lines = [
                 json.dumps(
                     {
                         "id": self.ids[i],
@@ -226,7 +224,8 @@ Answer:"""
                         "metadata": self.metadatas[i],
                     }
                 )
-            )
+            for i in range(len(self.ids))
+        ]
         return lines
 
     @classmethod

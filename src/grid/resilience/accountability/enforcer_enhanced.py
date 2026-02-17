@@ -267,10 +267,7 @@ class EnhancedAccountabilityEnforcer:
         # Check required roles
         required_roles = endpoint_contract.security.required_roles
         if required_roles:
-            missing_roles = []
-            for role in required_roles:
-                if role not in user_roles:
-                    missing_roles.append(role)
+            missing_roles = [role for role in required_roles if role not in user_roles]
 
             if missing_roles:
                 violations.append(
@@ -298,10 +295,7 @@ class EnhancedAccountabilityEnforcer:
             # Add explicit permissions
             effective_permissions.update(user_permissions)
 
-            missing_permissions = []
-            for permission in required_permissions:
-                if permission not in effective_permissions:
-                    missing_permissions.append(permission)
+            missing_permissions = [permission for permission in required_permissions if permission not in effective_permissions]
 
             if missing_permissions:
                 violations.append(
@@ -403,18 +397,18 @@ class EnhancedAccountabilityEnforcer:
             endpoint_contract.path, endpoint_contract.methods[0] if endpoint_contract.methods else "GET", request_data
         )
 
-        for error in validation_errors:
-            violations.append(
-                ContractViolation(
-                    type=ViolationType.DATA_VALIDATION,
-                    severity=ContractSeverity.MEDIUM,
-                    message=error.get("message", "Validation error"),
-                    field=error.get("field", "unknown"),
-                    actual_value=error.get("actual_value"),
-                    expected_value=error.get("expected_value"),
-                    penalty_points=10,
-                )
+        violations.extend(
+            ContractViolation(
+                type=ViolationType.DATA_VALIDATION,
+                severity=ContractSeverity.MEDIUM,
+                message=error.get("message", "Validation error"),
+                field=error.get("field", "unknown"),
+                actual_value=error.get("actual_value"),
+                expected_value=error.get("expected_value"),
+                penalty_points=10,
             )
+            for error in validation_errors
+        )
 
         return violations
 
@@ -432,18 +426,18 @@ class EnhancedAccountabilityEnforcer:
             endpoint_contract.path, endpoint_contract.methods[0] if endpoint_contract.methods else "GET", response_data
         )
 
-        for error in validation_errors:
-            violations.append(
-                ContractViolation(
-                    type=ViolationType.DATA_VALIDATION,
-                    severity=ContractSeverity.MEDIUM,
-                    message=error.get("message", "Response validation error"),
-                    field=error.get("field", "unknown"),
-                    actual_value=error.get("actual_value"),
-                    expected_value=error.get("expected_value"),
-                    penalty_points=5,
-                )
+        violations.extend(
+            ContractViolation(
+                type=ViolationType.DATA_VALIDATION,
+                severity=ContractSeverity.MEDIUM,
+                message=error.get("message", "Response validation error"),
+                field=error.get("field", "unknown"),
+                actual_value=error.get("actual_value"),
+                expected_value=error.get("expected_value"),
+                penalty_points=5,
             )
+            for error in validation_errors
+        )
 
         return violations
 

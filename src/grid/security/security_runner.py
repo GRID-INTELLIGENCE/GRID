@@ -24,7 +24,7 @@ import subprocess
 import sys
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from enum import Enum, auto, StrEnum
+from enum import StrEnum, auto
 from pathlib import Path
 from typing import Any, Callable
 
@@ -167,7 +167,7 @@ class SecurityValidator:
                 # Add timeout to prevent indefinite blocking on slow checks
                 result = await asyncio.wait_for(asyncio.to_thread(check), timeout=60.0)
                 result.duration_ms = (time.monotonic() - check_start) * 1000
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 result = ValidationResult(
                     name=name,
                     status=ValidationStatus.ERROR,
@@ -409,10 +409,12 @@ class SecurityValidator:
         for py_file in src_path.rglob("*.py"):
             try:
                 content = py_file.read_text(encoding="utf-8", errors="ignore")
-                for imp in dangerous:
-                    if f"import {imp}" in content or f"from {imp}" in content:
-                        found.append({"file": str(py_file.relative_to(self._project_root)), "import": imp})
-            except Exception:
+                found.extend(
+                    {"file": str(py_file.relative_to(self._project_root)), "import": imp}
+                    for imp in dangerous
+                    if f"import {imp}" in content or f"from {imp}" in content
+                )
+            except Exception:  # noqa: S110 intentional silent handling
                 pass
 
         if found:
@@ -463,7 +465,7 @@ class SecurityValidator:
                                 "type": secret_type,
                             }
                         )
-            except Exception:
+            except Exception:  # noqa: S110 intentional silent handling
                 pass
 
         if found:
@@ -514,7 +516,7 @@ class SecurityValidator:
                                 "count": len(matches),
                             }
                         )
-            except Exception:
+            except Exception:  # noqa: S110 intentional silent handling
                 pass
 
         if found:
@@ -541,7 +543,7 @@ class SecurityValidator:
         """Check for known vulnerabilities in dependencies."""
         try:
             # Try to run pip-audit or safety
-            result = subprocess.run(
+            result = subprocess.run(  # noqa: S603 subprocess call is intentional
                 [sys.executable, "-m", "pip", "list", "--outdated", "--format=json"],
                 capture_output=True,
                 text=True,
@@ -578,7 +580,7 @@ class SecurityValidator:
     def _check_outdated_packages(self) -> ValidationResult:
         """Check for outdated packages."""
         try:
-            result = subprocess.run(
+            result = subprocess.run(  # noqa: S603 subprocess call is intentional
                 [sys.executable, "-m", "pip", "list", "--outdated", "--format=json"],
                 capture_output=True,
                 text=True,
@@ -630,10 +632,7 @@ class SecurityValidator:
             "hardened_middleware.py",
         ]
 
-        missing = []
-        for filename in critical_files:
-            if not (security_path / filename).exists():
-                missing.append(filename)
+        missing = [filename for filename in critical_files if not (security_path / filename).exists()]
 
         if missing:
             return ValidationResult(
@@ -668,7 +667,7 @@ class SecurityValidator:
                         if mode & 0o004:  # World-readable
                             if config == ".env":
                                 issues.append(f"{config} is world-readable")
-                    except Exception:
+                    except Exception:  # noqa: S110 intentional silent handling
                         pass
 
         if issues:
@@ -709,9 +708,7 @@ class SecurityValidator:
                 ]
             )
 
-        for path in system_paths:
-            if path.exists() and os.access(path, os.W_OK):
-                writable_system.append(str(path))
+        writable_system.extend(str(path) for path in system_paths if path.exists() and os.access(path, os.W_OK))
 
         if writable_system:
             return ValidationResult(

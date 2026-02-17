@@ -48,13 +48,13 @@ def _try_enable_mlflow() -> None:
         try:
             mlflow.openai.autolog()
             logger.info("MLflow OpenAI autologging enabled")
-        except Exception:
+        except Exception:  # noqa: S110 intentional silent handling
             pass
 
         try:
             mlflow.langchain.autolog()
             logger.info("MLflow LangChain autologging enabled")
-        except Exception:
+        except Exception:  # noqa: S110 intentional silent handling
             pass
 
         _MLFLOW_ENABLED = True

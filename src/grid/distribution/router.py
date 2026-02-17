@@ -38,7 +38,7 @@ class HighwayRouter:
         """
         lanes = self.partitions.get(category.upper(), self.partitions["DEFAULT"])
         # Deterministic clustering within the partition
-        idx = int(hashlib.md5(affinity_key.encode()).hexdigest(), 16) % len(lanes)
+        idx = int(hashlib.md5(affinity_key.encode()).hexdigest(), 16) % len(lanes)  # noqa: S324 non-cryptographic use
         target = lanes[idx]
         logger.info(f"Signal [PARTITION:{category}] clustered to: {target}")
         return target
@@ -71,6 +71,6 @@ class HighwayRouter:
         Distributes signals across available lanes to maximize spatial throughput.
         """
         # Simple load-aware or random distribution across the structure
-        target = random.choice(self.freeway_lanes)
+        target = random.choice(self.freeway_lanes)  # noqa: S311 non-security random use
         logger.info(f"Signal [STRUCTURE] merged into Freeway lane: {target}")
         return target

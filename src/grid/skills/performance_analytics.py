@@ -15,7 +15,7 @@ import statistics
 from collections import defaultdict, deque
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from enum import Enum, StrEnum
+from enum import StrEnum
 from pathlib import Path
 from typing import Any
 from uuid import uuid4
@@ -596,17 +596,17 @@ class SkillsPerformanceAnalytics:
             lower_bound = q1 - 1.5 * iqr
             upper_bound = q3 + 1.5 * iqr
 
-            for metric in metrics:
-                if metric.value < lower_bound or metric.value > upper_bound:
-                    anomalies.append(
-                        {
-                            "metric_type": metric_type.value,
-                            "timestamp": metric.timestamp.isoformat(),
-                            "value": metric.value,
-                            "expected_range": [lower_bound, upper_bound],
-                            "severity": "high" if abs(metric.value - statistics.mean(values)) > 2 * iqr else "medium",
-                        }
-                    )
+            anomalies.extend(
+                {
+                    "metric_type": metric_type.value,
+                    "timestamp": metric.timestamp.isoformat(),
+                    "value": metric.value,
+                    "expected_range": [lower_bound, upper_bound],
+                    "severity": "high" if abs(metric.value - statistics.mean(values)) > 2 * iqr else "medium",
+                }
+                for metric in metrics
+                if metric.value < lower_bound or metric.value > upper_bound
+            )
 
         return anomalies
 
@@ -726,7 +726,7 @@ class SkillsPerformanceAnalytics:
         # Clean old metrics from cache
         cutoff_time = datetime.now() - timedelta(hours=24)
 
-        for _cache_key, metrics_deque in self._metrics_cache.items():
+        for metrics_deque in self._metrics_cache.values():
             while metrics_deque and metrics_deque[0].timestamp < cutoff_time:
                 metrics_deque.popleft()
 

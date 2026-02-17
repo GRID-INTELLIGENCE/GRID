@@ -82,10 +82,7 @@ class MetricsWriter:
 
         for i in range(0, len(metrics), batch_size):
             batch = metrics[i : i + batch_size]
-            params = []
-
-            for m in batch:
-                params.append(
+            params = [
                     {
                         "ts": m.timestamp.isoformat(),
                         "tid": m.trace_id,
@@ -100,7 +97,8 @@ class MetricsWriter:
                         "src": m.source_module,
                         "meta": json.dumps(m.metadata),
                     }
-                )
+                for m in batch
+            ]
 
             sql = f"""
             INSERT INTO {table_name} (
@@ -145,10 +143,7 @@ class MetricsWriter:
 
         for i in range(0, len(metrics), batch_size):
             batch = metrics[i : i + batch_size]
-            params = []
-
-            for m in batch:
-                params.append(
+            params = [
                     {
                         "ts": m.timestamp.isoformat(),
                         "tid": m.trace_id,
@@ -161,7 +156,8 @@ class MetricsWriter:
                         "err": m.error_message,
                         "meta": json.dumps(m.metadata),
                     }
-                )
+                for m in batch
+            ]
 
             sql = f"""
             INSERT INTO {table_name} (

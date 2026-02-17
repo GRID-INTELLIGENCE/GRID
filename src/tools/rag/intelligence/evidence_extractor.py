@@ -11,7 +11,7 @@ import hashlib
 import logging
 import re
 from dataclasses import dataclass, field
-from enum import Enum, StrEnum
+from enum import StrEnum
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -284,7 +284,7 @@ class EvidenceExtractor:
             total_chunks_processed=len(documents),
             extraction_metadata={
                 "query_terms": query_terms,
-                "evidence_types_found": list(set(e.evidence_type.value for e in deduplicated)),
+                "evidence_types_found": list({e.evidence_type.value for e in deduplicated}),
             },
         )
 
@@ -523,10 +523,7 @@ class EvidenceExtractor:
 
         # Python imports
         imports = re.findall(r"from\s+([\w.]+)\s+import|import\s+([\w.]+)", text)
-        for groups in imports:
-            for g in groups:
-                if g:
-                    references.append(g)
+        references.extend(g for groups in imports for g in groups if g)
 
         # File paths (common patterns)
         paths = re.findall(r"[`'\"]([a-zA-Z0-9_/\\.-]+\.\w{1,4})[`'\"]", text)
@@ -540,7 +537,7 @@ class EvidenceExtractor:
 
     def _generate_evidence_id(self, chunk_id: str, segment_idx: int, content: str) -> str:
         """Generate a unique ID for an evidence piece."""
-        content_hash = hashlib.md5(content.encode()).hexdigest()[:8]
+        content_hash = hashlib.md5(content.encode()).hexdigest()[:8]  # noqa: S324 non-cryptographic use
         return f"ev_{chunk_id}_{segment_idx}_{content_hash}"
 
     def _deduplicate_evidence(self, evidence_list: list[Evidence]) -> list[Evidence]:
@@ -555,7 +552,7 @@ class EvidenceExtractor:
         for ev in evidence_list:
             # Normalize content for comparison
             normalized = " ".join(ev.content.lower().split())
-            content_hash = hashlib.md5(normalized.encode()).hexdigest()
+            content_hash = hashlib.md5(normalized.encode()).hexdigest()  # noqa: S324 non-cryptographic use
 
             if content_hash not in seen_hashes:
                 seen_hashes.add(content_hash)

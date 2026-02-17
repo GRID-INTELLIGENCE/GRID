@@ -16,7 +16,7 @@ import threading
 import time
 from collections.abc import Callable
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from .adsr_envelope import ADSREnvelope, EnvelopeMetrics, EnvelopePhase
@@ -26,7 +26,7 @@ from .path_visualizer import PathTriage, PathVisualizer
 logger = logging.getLogger(__name__)
 
 
-class ResonanceState(str, Enum):
+class ResonanceState(StrEnum):
     """State of the activity resonance system."""
 
     IDLE = "idle"

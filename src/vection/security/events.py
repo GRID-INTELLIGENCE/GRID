@@ -41,13 +41,13 @@ import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
-class EventCategory(str, Enum):
+class EventCategory(StrEnum):
     """Categories of security events."""
 
     # Rate limiting events
@@ -78,7 +78,7 @@ class EventCategory(str, Enum):
     CUSTOM = "custom"
 
 
-class EventAction(str, Enum):
+class EventAction(StrEnum):
     """Common event actions."""
 
     # Generic actions
@@ -118,7 +118,7 @@ class EventAction(str, Enum):
     SUPPRESSED = "suppressed"
 
 
-class EventPriority(str, Enum):
+class EventPriority(StrEnum):
     """Priority levels for events."""
 
     LOW = "low"

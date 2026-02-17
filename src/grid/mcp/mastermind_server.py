@@ -360,7 +360,7 @@ async def analyze_codebase() -> dict[str, Any]:
                     for line in lines:
                         if line.strip().startswith("import ") or line.strip().startswith("from "):
                             imports.add(line.strip())
-            except Exception:
+            except Exception:  # noqa: S112 intentional skip on error
                 continue
 
         # Calculate metrics
@@ -416,7 +416,7 @@ async def analyze_dependencies() -> dict[str, Any]:
                             data = tomllib.loads(content.decode("utf-8"))
                             project_deps = data.get("project", {}).get("dependencies", [])
                             deps["external"].extend(project_deps)
-                    except Exception:
+                    except Exception:  # noqa: S110 intentional silent handling
                         pass
 
         # Find internal modules
@@ -451,7 +451,7 @@ async def analyze_test_coverage() -> dict[str, Any]:
         test_dirs = set()
         for test_file in test_files:
             test_dirs.add(str(test_file.parent.relative_to(session.project_root)))
-        coverage["test_directories"] = sorted(list(test_dirs))
+        coverage["test_directories"] = sorted(test_dirs)
 
         # Calculate coverage percentage
         if source_files:
@@ -556,7 +556,7 @@ async def search_code(pattern: str, file_pattern: str = "*") -> dict[str, Any]:
                             results["matches"].append(
                                 {"file": str(file_path.relative_to(session.project_root)), "matches": file_matches}
                             )
-                except Exception:
+                except Exception:  # noqa: S112 intentional skip on error
                     continue
 
         results["total_matches"] = len(results["matches"])
@@ -610,7 +610,7 @@ async def find_dependencies(target: str) -> dict[str, Any]:
                         content = await f.read()
                         if target_name in content:
                             deps["imported_by"].append(str(py_file.relative_to(session.project_root)))
-                except Exception:
+                except Exception:  # noqa: S112 intentional skip on error
                     continue
 
     except Exception as e:
@@ -643,7 +643,7 @@ async def get_project_structure(max_depth: int = 3) -> dict[str, Any]:
                     }
                 elif item.is_dir() and current_depth < max_depth:
                     node["children"][item.name] = build_tree(item, current_depth + 1)
-        except Exception:
+        except Exception:  # noqa: S110 intentional silent handling
             pass
 
         return node

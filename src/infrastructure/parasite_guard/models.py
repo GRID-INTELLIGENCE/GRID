@@ -7,7 +7,7 @@ from __future__ import annotations
 import uuid
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from enum import Enum, StrEnum, auto
+from enum import StrEnum, auto
 from typing import Any
 
 

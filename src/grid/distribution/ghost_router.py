@@ -36,7 +36,7 @@ class GhostRouter:
         else:
             # Route via the Time Drift (Temporal pace)
             # Low weight allows the signal to be carried by the current wave of time.
-            node = random.choice(self.time_drift)
+            node = random.choice(self.time_drift)  # noqa: S311 non-security random use
             logger.info(f"Signal [DRIFT] caught in Time Flux: {node}")
             return node
 
@@ -45,5 +45,5 @@ class GhostRouter:
         Calculates the friction of the iron.
         """
         # Railway tracks have constant friction based on their structural complexity.
-        base_friction = float(int(hashlib.md5(node.encode()).hexdigest(), 16) % 10) / 10.0
+        base_friction = float(int(hashlib.md5(node.encode()).hexdigest(), 16) % 10) / 10.0  # noqa: S324 non-cryptographic use
         return base_friction * system_load

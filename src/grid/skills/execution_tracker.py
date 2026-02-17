@@ -16,7 +16,7 @@ import threading
 import time
 from collections import deque
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class ExecutionStatus(str, Enum):
+class ExecutionStatus(StrEnum):
     SUCCESS = "success"
     FAILURE = "failure"
     TIMEOUT = "timeout"
@@ -272,7 +272,7 @@ class SkillExecutionTracker:
                 # Use print instead of logger if handles might be closed
                 print(f"SkillExecutionTracker: Shutdown flush of {len(self._batch_buffer)} records...")
                 self._flush_batch()
-        except Exception:
+        except Exception:  # noqa: S110 intentional silent handling
             # Silent fail on shutdown to avoid I/O errors on closed loggers
             pass
 

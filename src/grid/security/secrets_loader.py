@@ -26,7 +26,7 @@ import logging
 import os
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from enum import Enum, StrEnum
+from enum import StrEnum
 from pathlib import Path
 from typing import Any
 
@@ -288,9 +288,7 @@ class SecretManager:
 
         # Check for weak patterns
         value_lower = value.lower()
-        for weak_pattern in self.config.reject_weak_patterns:
-            if weak_pattern in value_lower:
-                errors.append(f"Secret contains weak pattern: '{weak_pattern}'")
+        errors.extend(f"Secret contains weak pattern: '{weak_pattern}'" for weak_pattern in self.config.reject_weak_patterns if weak_pattern in value_lower)
 
         # Check entropy (basic check - at least some variety)
         if len(set(value)) < min(8, len(value) // 2):

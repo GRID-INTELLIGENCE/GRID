@@ -1,14 +1,14 @@
 """Action trace models for source tracking."""
 
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer
 
 
-class TraceOrigin(str, Enum):
+class TraceOrigin(StrEnum):
     """Origin types for action traces."""
 
     USER_INPUT = "user_input"

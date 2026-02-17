@@ -459,7 +459,7 @@ class ToolRegistry:
         self,
         name: str,
         arguments: dict[str, Any] | None = None,
-        timeout: float | None = None,
+        timeout: float | None = None,  # noqa: ASYNC109 timeout parameter is handled by caller
     ) -> ToolCallResult:
         """
         Call a tool with the given arguments.

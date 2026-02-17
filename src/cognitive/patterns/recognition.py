@@ -24,14 +24,14 @@ import math
 from abc import ABC, abstractmethod
 from collections import Counter, deque
 from dataclasses import dataclass
-from datetime import datetime, timezone
-from enum import Enum
+from datetime import UTC, datetime
+from enum import StrEnum
 from typing import Any, TypeVar
 
 logger = logging.getLogger(__name__)
 
 
-class PatternConfidence(str, Enum):
+class PatternConfidence(StrEnum):
     """Confidence levels for pattern detection."""
 
     LOW = "low"  # 0.0 - 0.3
@@ -1750,7 +1750,7 @@ class TimePattern(PatternRecognizer):
         """
         # Extract document temporal information
         doc_year = document_metadata.get("year")
-        current_year = datetime.now(timezone.utc).year
+        current_year = datetime.now(UTC).year
 
         if temporal_intent.era_type == "none" or doc_year is None:
             return TemporalResonance(
@@ -1958,7 +1958,7 @@ class CombinationPattern(PatternRecognizer):
         base_score = min(1.0, len(patterns) / 5.0)
 
         # Check for diverse pattern types
-        pattern_types = set(p.split("_")[0] for p in patterns if "_" in p)
+        pattern_types = {p.split("_")[0] for p in patterns if "_" in p}
         diversity = len(pattern_types) / 9.0  # 9 total patterns
 
         return (base_score + diversity) / 2.0
@@ -1986,9 +1986,7 @@ class CombinationPattern(PatternRecognizer):
         if patterns:
             from collections import Counter
 
-            pairs = []
-            for i in range(len(patterns) - 1):
-                pairs.append((patterns[i], patterns[i + 1]))
+            pairs = [(patterns[i], patterns[i + 1]) for i in range(len(patterns) - 1)]
 
             pair_counts = Counter(pairs)
             for (p1, p2), count in pair_counts.most_common(5):

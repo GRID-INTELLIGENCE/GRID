@@ -21,8 +21,8 @@ import time
 from collections import defaultdict, deque
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from enum import Enum
+from datetime import UTC, datetime
+from enum import StrEnum
 from typing import Any
 
 from vection.schemas.emergence_signal import EmergenceSignal, SignalType
@@ -30,7 +30,7 @@ from vection.schemas.emergence_signal import EmergenceSignal, SignalType
 logger = logging.getLogger(__name__)
 
 
-class CorrelationType(str, Enum):
+class CorrelationType(StrEnum):
     """Types of correlation detected."""
 
     TEMPORAL = "temporal"  # Events close in time
@@ -170,7 +170,7 @@ class Correlator:
             return
 
         self._running = True
-        self._started_at = datetime.now(timezone.utc)
+        self._started_at = datetime.now(UTC)
         self._task = asyncio.create_task(self._processing_loop())
         logger.info("Correlator worker started")
 
@@ -282,7 +282,7 @@ class Correlator:
             "emitted_signals": len(self._emitted_signals),
             "temporal_window": self._temporal_window,
             "confidence_threshold": self._confidence_threshold,
-            "uptime_seconds": ((datetime.now(timezone.utc) - self._started_at).total_seconds() if self._started_at else 0),
+            "uptime_seconds": ((datetime.now(UTC) - self._started_at).total_seconds() if self._started_at else 0),
         }
 
     def reset(self) -> None:
@@ -363,7 +363,7 @@ class Correlator:
 
     async def _detect_sequence_correlations(self) -> None:
         """Detect sequence patterns in sessions."""
-        for _session_id, sequence in self._sequence_tracker.items():
+        for sequence in self._sequence_tracker.values():
             if len(sequence) < 3:
                 continue
 
@@ -438,15 +438,13 @@ class Correlator:
     def _generate_event_id(self) -> str:
         """Generate a unique event ID."""
         hash_input = f"{time.time()}:{self._total_observations}"
-        return hashlib.md5(hash_input.encode()).hexdigest()[:10]
+        return hashlib.md5(hash_input.encode()).hexdigest()[:10]  # noqa: S324 non-cryptographic use
 
     def _extract_keys(self, event_data: dict[str, Any]) -> list[str]:
         """Extract correlation keys from event data."""
         keys: list[str] = []
 
-        for key in ("action", "type", "intent", "topic", "category"):
-            if key in event_data and event_data[key]:
-                keys.append(f"{key}:{event_data[key]}")
+        keys.extend(f"{key}:{event_data[key]}" for key in ("action", "type", "intent", "topic", "category") if key in event_data and event_data[key])
 
         return keys
 
@@ -468,7 +466,7 @@ class Correlator:
         # Normalize order for consistency
         items = sorted([item_a, item_b])
         hash_input = f"{correlation_type.value}:{items[0]}:{items[1]}"
-        return hashlib.md5(hash_input.encode()).hexdigest()[:12]
+        return hashlib.md5(hash_input.encode()).hexdigest()[:12]  # noqa: S324 non-cryptographic use
 
     def _get_or_create_candidate(
         self,

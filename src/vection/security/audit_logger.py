@@ -34,13 +34,13 @@ import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 from typing import Any
 
 
-class SecurityEventType(str, Enum):
+class SecurityEventType(StrEnum):
     """Types of security events that are logged.
 
     All security-relevant events are categorized for easy filtering
@@ -104,7 +104,7 @@ class SecurityEventType(str, Enum):
     SECURITY_WARNING = "security.warning"
 
 
-class EventSeverity(str, Enum):
+class EventSeverity(StrEnum):
     """Severity levels for security events."""
 
     DEBUG = "debug"
