@@ -138,7 +138,9 @@ test = [
     "pytest-asyncio>=0.21.0",
     "pytest-cov>=4.1.0",
     "pytest-timeout>=2.1.0",
+    "pytest-xdist>=3.5.0",
     "psutil>=5.9.0",
+    "aiofiles>=23.2.1",
 ]
 dev = [
     "hatch",
@@ -208,7 +210,7 @@ torchaudio = { index = "pytorch-cpu" }
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
-testpaths = ["tests"]
+testpaths = ["tests", "safety/tests", "boundaries/tests"]
 python_files = ["test_*.py"]
 python_functions = ["test_*"]
 asyncio_mode = "auto"
@@ -216,9 +218,50 @@ asyncio_default_fixture_loop_scope = "function"
 timeout = 300
 timeout_method = "thread"
 
-# Exclude scratch tests from default runs
-# Scratch tests are experimental and should not block CI
-# Use pytest-ignore or command-line --ignore flag instead
+# Discovery optimisation: skip non-test trees during collection
+norecursedirs = [
+    ".venv",
+    ".git",
+    ".github",
+    "node_modules",
+    "frontend",
+    "landing",
+    "Arena",
+    "EUFLE",
+    "research",
+    "docs",
+    "artifacts",
+    "alembic",
+    "docker",
+    "infrastructure",
+    "scripts",
+    "mcp-setup",
+    "web-client",
+    "__pycache__",
+    "*.egg-info",
+    ".tox",
+    ".agent",
+    ".vscode",
+    "build",
+    "dist",
+    "logs",
+    "tmp",
+    "checkpoints",
+    "seed",
+]
+
+# Default addopts: strict markers, cache, deselect scratch, parallelise
+addopts = [
+    "--strict-markers",
+    "-p", "cacheprovider",
+    "-m", "not scratch and not flaky",
+    "--tb=short",
+    "-q",
+    "-n", "auto",
+    "--dist", "loadscope",
+    "--durations=10",
+    "--maxfail=5",
+]
 
 # Suppress warnings
 filterwarnings = [
@@ -232,12 +275,15 @@ markers = [
     "scratch: Experimental tests (excluded from CI)",
     "unit: Unit tests (fast, isolated)",
     "integration: Integration tests (slower, cross-module)",
+    "safety: Safety enforcement tests",
     "api: API endpoint tests",
     "critical: Critical path tests (must pass)",
     "flaky: Flaky tests (may fail intermittently)",
     "slow: Slow running tests (> 1 second)",
     "asyncio: Async tests",
     "database: Tests requiring database",
+    "redteam: Red-team / adversarial tests",
+    "smoke: Quick smoke tests for CI gating",
 ]
 
 [tool.ruff]

@@ -16,6 +16,46 @@ def pytest_configure(config):
         sys.path.append(root)
 
 
+# ---------------------------------------------------------------------------
+# Auto-marker: apply markers based on directory structure so selective runs
+# work even when individual tests are not explicitly decorated.
+# Usage: uv run pytest -m unit          (only fast unit tests)
+#        uv run pytest -m safety        (safety enforcement)
+#        uv run pytest -m "not slow"    (skip slow tests)
+#        uv run pytest --lf             (last-failed only — incremental)
+#        uv run pytest -n auto          (parallel via xdist)
+# ---------------------------------------------------------------------------
+_DIR_MARKER_MAP = {
+    "unit": "unit",
+    "integration": "integration",
+    "api": "api",
+    "e2e": "integration",
+    "chaos": "slow",
+    "smoke": "smoke",
+    "skills": "unit",
+    "redteam": "redteam",
+    "performance": "slow",
+    "load": "slow",
+}
+
+
+def pytest_collection_modifyitems(config, items):
+    """Auto-apply markers based on test file path."""
+    for item in items:
+        rel = str(item.fspath)
+        # Safety subtree
+        if "safety" + os.sep + "tests" in rel:
+            item.add_marker(pytest.mark.safety)
+        # Boundaries subtree
+        if "boundaries" + os.sep + "tests" in rel:
+            item.add_marker(pytest.mark.safety)
+        # Directory-based markers
+        for dirname, marker_name in _DIR_MARKER_MAP.items():
+            if os.sep + dirname + os.sep in rel:
+                item.add_marker(getattr(pytest.mark, marker_name))
+                break
+
+
 # Additional paths needed for legacy modules (appended so src stays first)
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 LOTS_OUTER_DIR = os.path.join(ROOT_DIR, "light_of_the_seven")
@@ -71,26 +111,24 @@ def setup_env():
     # Settings will be loaded lazily when needed with test environment
 
 
+try:
+    from application.resonance.api.dependencies import reset_resonance_service
+except ImportError:
+    reset_resonance_service = None
+
+
 @pytest.fixture(autouse=True)
 def reset_services():
     """Reset singleton services before and after each test for isolation."""
     # Reset before test
-    try:
-        from application.resonance.api.dependencies import reset_resonance_service
-
+    if reset_resonance_service:
         reset_resonance_service()
-    except ImportError:
-        pass
 
     yield
 
     # Reset after test
-    try:
-        from application.resonance.api.dependencies import reset_resonance_service
-
+    if reset_resonance_service:
         reset_resonance_service()
-    except ImportError:
-        pass
 
 
 from unittest.mock import AsyncMock, Mock

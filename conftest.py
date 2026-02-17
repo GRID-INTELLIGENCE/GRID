@@ -27,3 +27,19 @@ os.environ["GRID_ENV"] = "test"
 os.environ["SAFETY_BYPASS_REDIS"] = "true"
 os.environ["PARASITE_GUARD"] = "0"
 os.environ["PYTHONPATH"] = _src
+
+# ---------------------------------------------------------------------------
+# Collection-time ignore list: prevent stray test files from being collected
+# ---------------------------------------------------------------------------
+collect_ignore = [
+    "scripts/test_drt_functional.py",
+    "scripts/test_timeout.py",
+    "security/test_security.py",
+    "src/test_semantic_chunking.py",
+    "Arena",
+    "examples",
+    "research",
+    "frontend",
+    "landing",
+    "web-client",
+]

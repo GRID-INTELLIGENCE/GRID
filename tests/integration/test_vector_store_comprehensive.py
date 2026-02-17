@@ -5,7 +5,6 @@ Tests CRUD operations, performance, accuracy, and error handling.
 
 import time
 
-import numpy as np
 import pytest
 
 from tools.rag.types import Document
@@ -254,6 +253,7 @@ class TestVectorStorePerformance:
             search_times.append(search_time)
             results_counts.append(len(results))
 
+        import numpy as np
         avg_search_time = np.mean(search_times)
         max_search_time = max(search_times)
 

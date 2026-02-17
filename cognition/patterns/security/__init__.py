@@ -12,10 +12,10 @@ from cognition.patterns.security.cognitive_fingerprint import (
     ReinforcementSignature,
     get_cognitive_fingerprint,
 )
-from cognition.patterns.security.null_wrapper import (
-    _wrapped_reinforce,
-    _wrapped_signal_create,
-)
+# from cognition.patterns.security.null_wrapper import (
+#     _wrapped_reinforce,
+#     _wrapped_signal_create,
+# )
 from cognition.patterns.security.pattern_deviation import (
     PatternDeviationMonitor,
     get_pattern_deviation_monitor,
@@ -35,8 +35,8 @@ from cognition.patterns.security.velocity_anomaly import (
 
 __all__ = [
     # Deception layer (null wrappers)
-    "_wrapped_reinforce",
-    "_wrapped_signal_create",
+    # "_wrapped_reinforce",
+    # "_wrapped_signal_create",
     # Cognitive fingerprinting
     "get_cognitive_fingerprint",
     "ReinforcementSignature",

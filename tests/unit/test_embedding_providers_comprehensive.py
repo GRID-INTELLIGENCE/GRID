@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import time
 
-import numpy as np
 import pytest
 
 # Skip entire module if sklearn is not available
@@ -21,6 +20,8 @@ except ImportError:
         "sklearn not available - skipping embedding provider tests",
         allow_module_level=True,
     )
+
+import numpy as np
 
 from tools.rag.embeddings.huggingface import HuggingFaceEmbeddingProvider
 from tools.rag.embeddings.nomic_v2 import OllamaEmbeddingProvider

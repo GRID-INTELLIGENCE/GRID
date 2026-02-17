@@ -10,7 +10,6 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-import numpy as np
 import pytest
 
 # Add motion module to path
@@ -33,6 +32,8 @@ except ImportError:
         "motion.trajectory_diffusion module not available - skipping tests",
         allow_module_level=True,
     )
+
+import numpy as np
 
 
 class TestTrajectoryConfig:
