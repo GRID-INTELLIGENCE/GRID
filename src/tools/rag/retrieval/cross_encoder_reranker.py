@@ -63,8 +63,7 @@ class CrossEncoderReranker(BaseReranker):
         """Async wrapper - cross-encoder is CPU-bound, so we run in executor."""
         import asyncio
 
-        loop = asyncio.get_event_loop()
-        return await loop.run_in_executor(None, self.rerank, query, documents, top_k)
+        return await asyncio.to_thread(self.rerank, query, documents, top_k)
 
 
 def create_cross_encoder_reranker(

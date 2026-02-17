@@ -36,16 +36,13 @@ class StripeService:
             return f"cus_mock_{user_id}"
 
         try:
-            loop = asyncio.get_running_loop()
-
-            # Use metadata to link back to our user_id
             def _create_customer():
                 params: dict[str, Any] = {"email": email, "metadata": {"user_id": user_id}}
                 if name is not None:
                     params["name"] = name
                 return stripe.Customer.create(**params)
 
-            customer = await loop.run_in_executor(None, _create_customer)
+            customer = await asyncio.to_thread(_create_customer)
             return customer.id
         except Exception as e:
             logger.error(f"Stripe create_customer failed: {e}")
@@ -57,9 +54,7 @@ class StripeService:
             return {"id": "sub_mock", "status": "active", "current_period_end": int(time.time() + 86400 * 30)}
 
         try:
-            loop = asyncio.get_running_loop()
-            subscription = await loop.run_in_executor(
-                None,
+            subscription = await asyncio.to_thread(
                 lambda: stripe.Subscription.create(
                     customer=customer_id,
                     items=[{"price": price_id}],
@@ -77,9 +72,7 @@ class StripeService:
             return True
 
         try:
-            loop = asyncio.get_running_loop()
-            await loop.run_in_executor(
-                None,
+            await asyncio.to_thread(
                 lambda: stripe.SubscriptionItem.create_usage_record(  # type: ignore[attr-defined]
                     subscription_item_id, quantity=quantity, timestamp=int(time.time()), action="increment"
                 ),

@@ -16,7 +16,7 @@ from collections.abc import Callable, ContextManager
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class SparkPhase(str, Enum):
+class SparkPhase(StrEnum):
     """Spark lifecycle phases (ADSR-inspired)."""
 
     IDLE = "idle"
@@ -190,8 +190,7 @@ class Spark:
 
         # Parallel execution (Kanye mode!)
         async def invoke_async(req: str) -> SparkResult:
-            loop = asyncio.get_event_loop()
-            return await loop.run_in_executor(None, lambda: self.invoke(req, persona=persona))
+            return await asyncio.to_thread(self.invoke, req, persona=persona)
 
         tasks = [invoke_async(req) for req in requests]
         return await asyncio.gather(*tasks)
@@ -261,4 +260,4 @@ class Spark:
         """Get list of available personas."""
         if not self._persona_classes:
             self._register_default_personas()
-        return sorted(list(set(self._personas.keys()) | set(self._persona_classes.keys())))
+        return sorted(set(self._personas.keys()) | set(self._persona_classes.keys()))

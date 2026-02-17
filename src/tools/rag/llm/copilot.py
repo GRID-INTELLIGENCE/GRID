@@ -154,9 +154,8 @@ class CopilotLLM(BaseLLMProvider):
         **kwargs: Any,
     ) -> str:
         """Generate text completion asynchronously."""
-        loop = asyncio.get_event_loop()
-        return await loop.run_in_executor(
-            None, lambda: self.generate(prompt, system, temperature, max_tokens, **kwargs)
+        return await asyncio.to_thread(
+            lambda: self.generate(prompt, system, temperature, max_tokens, **kwargs)
         )
 
     async def async_stream(

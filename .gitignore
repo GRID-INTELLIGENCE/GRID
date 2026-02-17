@@ -681,3 +681,7 @@ environment_accountability_report.json
 .cascade_context.json
 codeq.txt
 codequality.txt
+tmpclaude-*
+diff_ac.txt
+pytest_out*.txt
+nul

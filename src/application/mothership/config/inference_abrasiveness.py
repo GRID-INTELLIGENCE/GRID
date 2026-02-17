@@ -217,7 +217,7 @@ class InferenceAbrasivenessConfig:
         Returns:
             InferenceAbrasivenessConfig instance
         """
-        from enum import Enum, IntEnum, StrEnum
+        from enum import Enum
 
         # Extract thresholds
         thresholds_data = data.get("thresholds", {})
@@ -230,6 +230,8 @@ class InferenceAbrasivenessConfig:
         # Extract enums
         global_cadence_str = data.get("global_cadence")
         if isinstance(global_cadence_str, str):
+            global_cadence = AbrasivenessCadence(int(global_cadence_str))
+        elif isinstance(global_cadence_str, int):
             global_cadence = AbrasivenessCadence(global_cadence_str)
         elif isinstance(global_cadence_str, Enum):
             global_cadence = global_cadence_str
@@ -246,8 +248,10 @@ class InferenceAbrasivenessConfig:
 
         cadence_override_str = data.get("cadence_override")
         cadence_override = None
-        if cadence_override_str:
+        if cadence_override_str is not None:
             if isinstance(cadence_override_str, str):
+                cadence_override = AbrasivenessCadence(int(cadence_override_str))
+            elif isinstance(cadence_override_str, int):
                 cadence_override = AbrasivenessCadence(cadence_override_str)
             elif isinstance(cadence_override_str, Enum):
                 cadence_override = cadence_override_str
@@ -292,7 +296,7 @@ class InferenceAbrasivenessConfig:
 
         # Global Control
         enabled = env.get("INFERENCE_ABRASIVENESS_ENABLED", "true").lower() in {"true", "1", "yes"}
-        global_cadence = AbrasivenessCadence(env.get("INFERENCE_ABRASIVENESS_GLOBAL_CADENCE", "1"))
+        global_cadence = AbrasivenessCadence(int(env.get("INFERENCE_ABRASIVENESS_GLOBAL_CADENCE", "1")))
         abrasiveness_level = InferenceAbrasivenessLevel(env.get("INFERENCE_ABRASIVENESS_LEVEL", "balanced").lower())
 
         # Thresholds
@@ -347,7 +351,7 @@ class InferenceAbrasivenessConfig:
 
         # Cadence
         cadence_override_str = env.get("INFERENCE_CADENCE_OVERRIDE", "")
-        cadence_override = AbrasivenessCadence(cadence_override_str) if cadence_override_str.isdigit() else None
+        cadence_override = AbrasivenessCadence(int(cadence_override_str)) if cadence_override_str.isdigit() else None
         cadence_scheduling = env.get("INFERENCE_CADENCE_SCHEDULING", "true").lower() in {"true", "1", "yes"}
         cadence_adaptive = env.get("INFERENCE_CADENCE_ADAPTIVE", "true").lower() in {"true", "1", "yes"}
 

@@ -24,7 +24,6 @@ Usage:
 from __future__ import annotations
 
 import asyncio
-import functools
 import importlib
 import logging
 import time
@@ -602,9 +601,8 @@ async def summon_handler(
             if asyncio.iscoroutinefunction(handler.handler):
                 result = await handler.handler(*args, **kwargs)
             else:
-                # Run sync handler in executor to not block
-                loop = asyncio.get_event_loop()
-                result = await loop.run_in_executor(None, functools.partial(handler.handler, *args, **kwargs))
+                # Run sync handler in thread to not block
+                result = await asyncio.to_thread(handler.handler, *args, **kwargs)
 
         latency_ms = (time.perf_counter() - start_time) * 1000
         handler.metrics.record_success(latency_ms)

@@ -570,8 +570,7 @@ class EventBus:
         Args:
             event: Event to emit
         """
-        loop = asyncio.get_event_loop()
-        await loop.run_in_executor(None, self.emit, event)
+        await asyncio.to_thread(self.emit, event)
 
     def _apply_middleware(self, event: Event) -> Event:
         """Apply middleware pipeline to event."""
@@ -585,7 +584,7 @@ class EventBus:
         matching = []
 
         with self._lock:
-            for _pattern, sub_ids in self._pattern_subscriptions.items():
+            for sub_ids in self._pattern_subscriptions.values():
                 for sub_id in sub_ids:
                     subscription = self._subscriptions.get(sub_id)
                     if subscription and subscription.matches(event.type):

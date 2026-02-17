@@ -28,7 +28,7 @@ import re
 import sys
 from collections.abc import Generator
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from enum import Enum, StrEnum
 from pathlib import Path
 from typing import Any
@@ -111,7 +111,7 @@ class ChunkMetadata:
     code_ratio: float = 0.0  # % that is code vs comments
 
     # Timestamps
-    indexed_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    indexed_at: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for storage (ChromaDB compatible)."""
@@ -172,7 +172,7 @@ class IndexingStats:
     @property
     def duration(self) -> timedelta:
         """Calculate total duration."""
-        end = self.end_time or datetime.now(timezone.utc)
+        end = self.end_time or datetime.now(UTC)
         return end - self.start_time
 
     @property
@@ -188,7 +188,7 @@ class IndexingStats:
 
     def finalize(self) -> None:
         """Mark indexing complete."""
-        self.end_time = datetime.now(timezone.utc)
+        self.end_time = datetime.now(UTC)
         if self.total_chunks > 0:
             # These would be calculated from actual chunks
             pass
@@ -853,15 +853,13 @@ class HuggingFaceEmbedder:
         """Async embed (runs sync in executor)."""
         import asyncio
 
-        loop = asyncio.get_event_loop()
-        return await loop.run_in_executor(None, self.embed, text)
+        return await asyncio.to_thread(self.embed, text)
 
     async def async_embed_batch(self, texts: list[str]) -> list[list[float]]:
         """Async batch embed."""
         import asyncio
 
-        loop = asyncio.get_event_loop()
-        return await loop.run_in_executor(None, self.embed_batch, texts)
+        return await asyncio.to_thread(self.embed_batch, texts)
 
 
 class RichProgressDisplay:
@@ -1071,9 +1069,13 @@ async def comprehensive_index(
     Returns:
         IndexingStats with complete indexing metrics
     """
-    repo = Path(repo_path).resolve()
-    if not repo.exists():
-        raise ValueError(f"Repository path does not exist: {repo_path}")
+    def _resolve_and_check(rp: str) -> Path:
+        p = Path(rp).resolve()
+        if not p.exists():
+            raise ValueError(f"Repository path does not exist: {rp}")
+        return p
+
+    repo = await asyncio.to_thread(_resolve_and_check, repo_path)
 
     # Initialize components
     chunker = NLPChunker()
@@ -1125,7 +1127,7 @@ async def comprehensive_index(
 
         try:
             # Read file
-            content = file_path.read_text(encoding="utf-8", errors="ignore")
+            content = await asyncio.to_thread(file_path.read_text, encoding="utf-8", errors="ignore")
 
             if len(content) < 50:  # Skip tiny files
                 if display:
