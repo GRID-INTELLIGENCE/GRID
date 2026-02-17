@@ -1,0 +1,223 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": "1.0.0",
+  "description": "GRID MCP Server Configuration",
+  "servers": [
+    {
+      "name": "grid-rag",
+      "description": "RAG-powered knowledge base and document search",
+      "enabled": true,
+      "command": "e:\\grid\\.venv\\Scripts\\python.exe",
+      "args": [
+        "mcp-setup/server/grid_rag_mcp_server.py"
+      ],
+      "cwd": "e:\\grid",
+      "env": {
+        "PYTHONPATH": "e:\\grid\\src;e:\\grid",
+        "RAG_EMBEDDING_PROVIDER": "ollama",
+        "RAG_EMBEDDING_MODEL": "nomic-embed-text-v2-moe:latest",
+        "RAG_LLM_MODE": "ollama",
+        "RAG_LLM_MODEL_OLLAMA": "ministral:latest",
+        "RAG_VECTOR_STORE_PROVIDER": "chromadb",
+        "RAG_VECTOR_STORE_PATH": ".rag_db",
+        "OLLAMA_BASE_URL": "http://localhost:11434"
+      },
+      "port": 8000,
+      "health_check": {
+        "endpoint": "/health",
+        "interval_seconds": 30,
+        "timeout_seconds": 5
+      }
+    },
+    {
+      "name": "grid-agentic",
+      "description": "Agentic system for enhanced workflows with cognitive awareness",
+      "enabled": false,
+      "command": "e:\\grid\\.venv\\Scripts\\python.exe",
+      "args": [
+        "workspace/mcp/servers/agentic/server.py"
+      ],
+      "cwd": "e:\\grid",
+      "env": {
+        "PYTHONPATH": "e:\\grid\\src;e:\\grid"
+      },
+      "port": 8004,
+      "health_check": {
+        "endpoint": "/health",
+        "interval_seconds": 30,
+        "timeout_seconds": 5
+      }
+    },
+    {
+      "name": "memory",
+      "description": "In-memory data storage and retrieval",
+      "enabled": false,
+      "command": "e:\\grid\\.venv\\Scripts\\python.exe",
+      "args": [
+        "workspace/mcp/servers/memory/server.py"
+      ],
+      "cwd": "e:\\grid",
+      "env": {
+        "PYTHONPATH": "e:\\grid\\src;e:\\grid"
+      },
+      "port": 8003,
+      "health_check": {
+        "endpoint": "/health",
+        "interval_seconds": 30,
+        "timeout_seconds": 5
+      }
+    },
+    {
+      "name": "filesystem",
+      "description": "Filesystem MCP server for controlled local file operations",
+      "enabled": false,
+      "command": "e:\\grid\\.venv\\Scripts\\python.exe",
+      "args": [
+        "workspace/mcp/servers/filesystem/server.py"
+      ],
+      "cwd": "e:\\grid",
+      "env": {
+        "PYTHONPATH": "e:\\grid\\src;e:\\grid"
+      },
+      "port": 8006,
+      "health_check": {
+        "endpoint": "/health",
+        "interval_seconds": 30,
+        "timeout_seconds": 5
+      }
+    },
+    {
+      "name": "database",
+      "description": "SQLite database MCP server (local-only)",
+      "enabled": false,
+      "command": "e:\\grid\\.venv\\Scripts\\python.exe",
+      "args": [
+        "workspace/mcp/servers/database/server.py"
+      ],
+      "cwd": "e:\\grid",
+      "env": {
+        "PYTHONPATH": "e:\\grid\\src;e:\\grid",
+        "DATABASE_URL": "sqlite:///e:/grid/.db/grid.db"
+      },
+      "port": 8007,
+      "health_check": {
+        "endpoint": "/health",
+        "interval_seconds": 30,
+        "timeout_seconds": 5
+      }
+    },
+    {
+      "name": "grid-rag-enhanced",
+      "description": "Enhanced RAG with conversation memory and multi-hop reasoning",
+      "enabled": true,
+      "command": "e:\\grid\\.venv\\Scripts\\python.exe",
+      "args": [
+        "-m",
+        "grid.mcp.enhanced_rag_server"
+      ],
+      "cwd": "e:\\grid",
+      "env": {
+        "PYTHONPATH": "e:\\grid\\src;e:\\grid",
+        "RAG_EMBEDDING_PROVIDER": "ollama",
+        "RAG_EMBEDDING_MODEL": "nomic-embed-text-v2-moe:latest",
+        "RAG_LLM_MODE": "ollama",
+        "RAG_LLM_MODEL_OLLAMA": "ministral:latest",
+        "RAG_VECTOR_STORE_PROVIDER": "chromadb",
+        "RAG_VECTOR_STORE_PATH": ".rag_db",
+        "OLLAMA_BASE_URL": "http://localhost:11434"
+      },
+      "port": 8002,
+      "health_check": {
+        "endpoint": "/health",
+        "interval_seconds": 30,
+        "timeout_seconds": 5
+      }
+    },
+    {
+      "name": "grid-enhanced-tools",
+      "description": "Enhanced development tools (profiling, security, docs, quality)",
+      "enabled": true,
+      "command": "e:\\grid\\.venv\\Scripts\\python.exe",
+      "args": [
+        "mcp-setup/server/enhanced_tools_mcp_server.py"
+      ],
+      "cwd": "e:\\grid",
+      "env": {
+        "PYTHONPATH": "e:\\grid\\src;e:\\grid"
+      },
+      "port": 8001,
+      "health_check": {
+        "endpoint": "/health",
+        "interval_seconds": 30,
+        "timeout_seconds": 5
+      }
+    },
+    {
+      "name": "portfolio-safety-lens",
+      "description": "Portfolio Safety Lens - Context-aware secure portfolio analytics with full guardrails",
+      "enabled": true,
+      "command": "e:\\grid\\.venv\\Scripts\\python.exe",
+      "args": [
+        "mcp-setup/server/portfolio_safety_mcp_server.py"
+      ],
+      "cwd": "e:\\grid",
+      "env": {
+        "PYTHONPATH": "e:\\grid\\src;e:\\grid;e:\\Coinbase"
+      },
+      "port": 8005,
+      "health_check": {
+        "endpoint": "/health",
+        "interval_seconds": 30,
+        "timeout_seconds": 5
+      }
+    },
+    {
+      "name": "code-analysis",
+      "description": "Static analysis, code quality checks, and security scanning",
+      "enabled": true,
+      "command": "e:\\grid\\.venv\\Scripts\\python.exe",
+      "args": [
+        "mcp-setup/server/code_analysis_mcp_server.py"
+      ],
+      "cwd": "e:\\grid",
+      "env": {
+        "PYTHONPATH": "e:\\grid\\src;e:\\grid"
+      },
+      "port": 8006,
+      "health_check": {
+        "endpoint": "/health",
+        "interval_seconds": 30,
+        "timeout_seconds": 5
+      }
+    },
+    {
+      "name": "test-runner",
+      "description": "Test execution, coverage analysis, and test discovery",
+      "enabled": true,
+      "command": "e:\\grid\\.venv\\Scripts\\python.exe",
+      "args": [
+        "mcp-setup/server/test_runner_mcp_server.py"
+      ],
+      "cwd": "e:\\grid",
+      "env": {
+        "PYTHONPATH": "e:\\grid\\src;e:\\grid"
+      },
+      "port": 8007,
+      "health_check": {
+        "endpoint": "/health",
+        "interval_seconds": 30,
+        "timeout_seconds": 5
+      }
+    }
+  ],
+  "defaults": {
+    "timeout_seconds": 60,
+    "retry_attempts": 3,
+    "retry_delay_seconds": 2
+  },
+  "logging": {
+    "level": "INFO",
+    "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    "file": "logs/mcp_servers.log"
+  }
+}

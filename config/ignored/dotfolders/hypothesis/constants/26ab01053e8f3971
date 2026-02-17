@@ -1,0 +1,4 @@
+# file: E:\grid\grid\tracing\trace_store.py
+# hypothesis_version: 6.150.0
+
+[100, '%Y-%m-%d', 'grid/logs/traces', 'index.json', 'json', 'r', 'w']

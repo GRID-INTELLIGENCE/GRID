@@ -1,0 +1,329 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://grid.local/schemas/exhibit_manifest_schema.json",
+  "title": "Museum Exhibit Manifest",
+  "description": "Schema defining a research exhibit within the Grid workspace. Exhibits are curated collections that separate canon (documentation) from tooling (code) while providing clear entry points for exploration, demonstration, and integration with Grid's sensory layers.",
+  "type": "object",
+  "required": ["exhibit_id", "version", "title", "canon_policy", "paths"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Reference to this schema."
+    },
+    "exhibit_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_-]*$",
+      "description": "Unique identifier for this exhibit (lowercase, alphanumeric with underscores/hyphens).",
+      "examples": ["hogwarts", "sound_layer", "vision_layer", "zoology_wing"]
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Semantic version of the exhibit manifest.",
+      "examples": ["1.0.0", "2.1.3"]
+    },
+    "title": {
+      "type": "string",
+      "description": "Human-readable display title for the exhibit.",
+      "examples": ["Hogwarts Temporal Magic Lab", "Sound Layer Research Wing"]
+    },
+    "description": {
+      "type": "string",
+      "description": "Brief description of the exhibit's purpose and contents."
+    },
+    "icon": {
+      "type": "string",
+      "description": "Emoji or icon identifier for UI display.",
+      "examples": ["🏛️", "🔊", "👁️", "🦁"]
+    },
+    "canon_policy": {
+      "type": "object",
+      "description": "Policy governing how canonical (authoritative) content is managed.",
+      "required": ["level", "description"],
+      "additionalProperties": false,
+      "properties": {
+        "level": {
+          "type": "string",
+          "enum": ["strict", "moderate", "loose"],
+          "description": "Strictness level: 'strict' = only verified sources, 'moderate' = curated with annotations, 'loose' = exploratory/speculative allowed."
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable explanation of what this policy means for this exhibit."
+        },
+        "sources_required": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether canon documents must cite sources."
+        },
+        "allow_speculation": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether speculative content is permitted (must be clearly labeled)."
+        },
+        "citation_format": {
+          "type": "string",
+          "description": "Preferred citation format for sources.",
+          "examples": ["markdown_footnotes", "inline_links", "bibliography"]
+        }
+      }
+    },
+    "paths": {
+      "type": "object",
+      "description": "Filesystem paths relative to the exhibit root.",
+      "required": ["root"],
+      "additionalProperties": false,
+      "properties": {
+        "root": {
+          "type": "string",
+          "description": "Root directory path relative to workspace.",
+          "examples": ["light_of_the_seven/full_datakit/visualizations/Hogwarts"]
+        },
+        "canon_docs": {
+          "type": "array",
+          "description": "Paths to canonical documentation directories/files.",
+          "items": {
+            "type": "object",
+            "required": ["path", "label"],
+            "properties": {
+              "path": { "type": "string" },
+              "label": { "type": "string" },
+              "description": { "type": "string" }
+            }
+          }
+        },
+        "tools": {
+          "type": "array",
+          "description": "Paths to non-canon tooling directories/files.",
+          "items": {
+            "type": "object",
+            "required": ["path", "label"],
+            "properties": {
+              "path": { "type": "string" },
+              "label": { "type": "string" },
+              "description": { "type": "string" },
+              "entrypoint": { "type": "string", "description": "Main executable or module." }
+            }
+          }
+        },
+        "tests": {
+          "type": "array",
+          "description": "Paths to test files/directories.",
+          "items": {
+            "type": "object",
+            "required": ["path"],
+            "properties": {
+              "path": { "type": "string" },
+              "framework": { "type": "string", "examples": ["pytest", "unittest", "jest"] }
+            }
+          }
+        },
+        "visualizations": {
+          "type": "array",
+          "description": "Paths to visualization entry points.",
+          "items": {
+            "type": "object",
+            "required": ["path", "label"],
+            "properties": {
+              "path": { "type": "string" },
+              "label": { "type": "string" },
+              "type": {
+                "type": "string",
+                "enum": ["static", "interactive", "animated", "dashboard"],
+                "description": "Type of visualization."
+              }
+            }
+          }
+        }
+      }
+    },
+    "entrypoints": {
+      "type": "object",
+      "description": "Executable entry points for the exhibit.",
+      "additionalProperties": false,
+      "properties": {
+        "cli": {
+          "type": "array",
+          "description": "Command-line interface tools.",
+          "items": {
+            "type": "object",
+            "required": ["name", "module"],
+            "properties": {
+              "name": { "type": "string", "description": "Display name of the CLI." },
+              "module": { "type": "string", "description": "Python module path.", "examples": ["parseltongue_cli"] },
+              "description": { "type": "string" },
+              "args": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Default arguments."
+              }
+            }
+          }
+        },
+        "api": {
+          "type": "array",
+          "description": "API endpoints exposed by this exhibit.",
+          "items": {
+            "type": "object",
+            "required": ["name", "module"],
+            "properties": {
+              "name": { "type": "string" },
+              "module": { "type": "string" },
+              "mount_path": { "type": "string", "examples": ["/hogwarts", "/exhibit/hogwarts"] }
+            }
+          }
+        },
+        "launcher": {
+          "type": "object",
+          "description": "One-click launcher configuration for guided experience.",
+          "properties": {
+            "script": { "type": "string", "description": "Launch script path." },
+            "demo_mode": { "type": "boolean", "default": true },
+            "requires": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Required services/dependencies."
+            }
+          }
+        }
+      }
+    },
+    "sensory_integration": {
+      "type": "object",
+      "description": "Integration points with Grid's Sound and Vision layers.",
+      "additionalProperties": false,
+      "properties": {
+        "sound_layer": {
+          "type": "object",
+          "description": "Sound layer mapping for this exhibit.",
+          "properties": {
+            "enabled": { "type": "boolean", "default": false },
+            "mappings": {
+              "type": "array",
+              "description": "Entity-to-sound mappings for sonification.",
+              "items": {
+                "type": "object",
+                "required": ["entity_type", "parameter"],
+                "properties": {
+                  "entity_type": { "type": "string", "examples": ["emotion", "patronus_form", "intensity"] },
+                  "parameter": { "type": "string", "enum": ["pitch", "loudness", "timbre", "rhythm"] },
+                  "mapping_function": { "type": "string", "enum": ["linear", "logarithmic", "discrete", "custom"] },
+                  "notes": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "vision_layer": {
+          "type": "object",
+          "description": "Vision layer mapping for this exhibit.",
+          "properties": {
+            "enabled": { "type": "boolean", "default": false },
+            "graph_type": {
+              "type": "string",
+              "enum": ["directed", "undirected", "tree", "dag"],
+              "description": "Primary graph structure for visualization."
+            },
+            "node_mappings": {
+              "type": "array",
+              "description": "Entity-to-node visual mappings.",
+              "items": {
+                "type": "object",
+                "required": ["entity_type"],
+                "properties": {
+                  "entity_type": { "type": "string" },
+                  "shape": { "type": "string", "examples": ["circle", "square", "diamond", "star"] },
+                  "color_source": { "type": "string", "description": "Field to derive color from." },
+                  "size_source": { "type": "string", "description": "Field to derive size from." }
+                }
+              }
+            },
+            "edge_mappings": {
+              "type": "array",
+              "description": "Relationship-to-edge visual mappings.",
+              "items": {
+                "type": "object",
+                "required": ["relationship_type"],
+                "properties": {
+                  "relationship_type": { "type": "string" },
+                  "style": { "type": "string", "enum": ["solid", "dashed", "dotted", "animated"] },
+                  "weight_source": { "type": "string" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "data_contracts": {
+      "type": "object",
+      "description": "Data schemas and contracts this exhibit produces or consumes.",
+      "properties": {
+        "produces": {
+          "type": "array",
+          "description": "Data formats this exhibit outputs.",
+          "items": {
+            "type": "object",
+            "required": ["name", "format"],
+            "properties": {
+              "name": { "type": "string" },
+              "format": { "type": "string", "enum": ["json", "csv", "jsonl", "markdown", "html"] },
+              "schema_ref": { "type": "string", "description": "Reference to JSON schema if applicable." }
+            }
+          }
+        },
+        "consumes": {
+          "type": "array",
+          "description": "Data formats this exhibit accepts as input.",
+          "items": {
+            "type": "object",
+            "required": ["name", "format"],
+            "properties": {
+              "name": { "type": "string" },
+              "format": { "type": "string" },
+              "schema_ref": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional exhibit metadata.",
+      "properties": {
+        "created": {
+          "type": "string",
+          "format": "date",
+          "description": "Date exhibit was created."
+        },
+        "updated": {
+          "type": "string",
+          "format": "date",
+          "description": "Date exhibit was last updated."
+        },
+        "maintainers": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "List of maintainers."
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Searchable tags for the exhibit.",
+          "examples": [["lore", "visualization", "temporal", "magic"]]
+        },
+        "status": {
+          "type": "string",
+          "enum": ["draft", "active", "archived", "deprecated"],
+          "default": "active"
+        },
+        "related_exhibits": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "IDs of related exhibits."
+        }
+      }
+    }
+  }
+}

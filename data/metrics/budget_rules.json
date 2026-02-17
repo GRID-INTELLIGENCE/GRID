@@ -1,0 +1,61 @@
+{
+    "limits": {
+        "tokens": {
+            "daily_limit": 1000000,
+            "per_request_max": 4096,
+            "warning_threshold": 800000
+        },
+        "cache": {
+            "max_size_mb": 1500,
+            "warning_threshold_mb": 1200,
+            "directories": [
+                ".rag_db",
+                ".rag_logs",
+                ".cache",
+                "models",
+                "__pycache__"
+            ],
+            "auto_cleanup_enabled": true,
+            "cleanup_threshold_mb": 1400
+        },
+        "memory": {
+            "max_ram_mb": 4096,
+            "warning_threshold_mb": 3500
+        },
+        "compute": {
+            "max_concurrent_requests": 10,
+            "max_request_duration_seconds": 300,
+            "gpu_memory_mb": 0,
+            "gpu_enabled": false
+        },
+        "storage": {
+            "max_database_size_mb": 2048,
+            "max_log_retention_days": 90,
+            "max_session_retention_days": 30
+        }
+    },
+    "metrics": {
+        "min_output_clarity_score": 0.7,
+        "min_resonance_score": 0.7,
+        "max_response_latency_ms": 5000,
+        "target_api_uptime_percent": 99.5
+    },
+    "monitoring": {
+        "enabled": true,
+        "alert_on_threshold_breach": true,
+        "metrics_retention_days": 365,
+        "performance_sampling_rate": 0.1
+    },
+    "enforcement": {
+        "strict_mode": false,
+        "auto_throttle_on_limit": true,
+        "reject_over_limit_requests": false,
+        "budget_reset_schedule": "daily_at_midnight_utc"
+    },
+    "metadata": {
+        "version": "1.1",
+        "last_updated": "2026-01-06",
+        "updated_by": "system_audit",
+        "notes": "Updated cache limits based on actual usage patterns (~1.25GB typical). Added monitoring thresholds and compute constraints."
+    }
+}

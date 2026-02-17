@@ -1,0 +1,4 @@
+# file: E:\grid\application\mothership\models\api_key.py
+# hypothesis_version: 6.150.0
+
+['-', 'created_at', 'expires_at', 'grid', 'id', 'is_active', 'key', 'key_hash', 'key_prefix', 'last_used_at', 'metadata', 'name', 'tier', 'updated_at', 'user_id']

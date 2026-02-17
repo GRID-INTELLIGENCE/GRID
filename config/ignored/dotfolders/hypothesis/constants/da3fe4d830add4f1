@@ -1,0 +1,4 @@
+# file: E:\grid\application\mothership\security\cors.py
+# hypothesis_version: 6.150.0
+
+[3600, '*', 'Authorization', 'Content-Type', 'DELETE', 'GET', 'HEAD', 'OPTIONS', 'PATCH', 'POST', 'PUT', 'X-API-Key', 'X-Correlation-ID', 'X-Process-Time', 'X-Request-ID', 'allow_credentials', 'allow_headers', 'allow_methods', 'allow_origins', 'expose_headers', 'http://', 'https://', 'max_age', 'production']

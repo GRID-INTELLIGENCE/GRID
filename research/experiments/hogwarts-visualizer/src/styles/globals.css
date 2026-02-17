@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Gryffindor */
+  --gryffindor-primary: #ae0001;
+  --gryffindor-secondary: #d3a625;
+  --gryffindor-accent: #740001;
+
+  /* Slytherin */
+  --slytherin-primary: #2a623d;
+  --slytherin-secondary: #5d5d5d;
+  --slytherin-accent: #1a472a;
+
+  /* Hufflepuff */
+  --hufflepuff-primary: #ecb939;
+  --hufflepuff-secondary: #000000;
+  --hufflepuff-accent: #372e29;
+
+  /* Ravenclaw */
+  --ravenclaw-primary: #0e4a99;
+  --ravenclaw-secondary: #946b2d;
+  --ravenclaw-accent: #222f5b;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  @apply bg-gray-900 text-gray-100;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-800;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-600 rounded;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-500;
+}
+
+/* House-themed gradients */
+.bg-gryffindor-gradient {
+  background: linear-gradient(135deg, var(--gryffindor-primary), var(--gryffindor-secondary));
+}
+
+.bg-slytherin-gradient {
+  background: linear-gradient(135deg, var(--slytherin-primary), var(--slytherin-secondary));
+}
+
+.bg-hufflepuff-gradient {
+  background: linear-gradient(135deg, var(--hufflepuff-primary), var(--hufflepuff-secondary));
+}
+
+.bg-ravenclaw-gradient {
+  background: linear-gradient(135deg, var(--ravenclaw-primary), var(--ravenclaw-secondary));
+}
+
+/* Transitions for house theme switching */
+.transition-house {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}

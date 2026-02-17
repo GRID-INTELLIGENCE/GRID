@@ -1,0 +1,43 @@
+# EditorConfig Configuration for GRID Project
+# Updated Jan 1, 2026 - Post-Reorganization
+# See: https://EditorConfig.org
+# Ensures consistent code formatting across all editors
+
+root = true
+
+[*]
+# All files
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.py]
+# Python files
+indent_style = space
+indent_size = 4
+max_line_length = 120
+
+[*.{json,jsonc}]
+# JSON and JSON with Comments
+indent_style = space
+indent_size = 2
+
+[*.{yml,yaml}]
+# YAML files
+indent_style = space
+indent_size = 2
+
+[*.md]
+# Markdown files - special handling
+trim_trailing_whitespace = false
+max_line_length = off
+
+[*.{toml,ini}]
+# Configuration files
+indent_style = space
+indent_size = 2
+
+[Makefile]
+# Makefile requires tabs
+indent_style = tab

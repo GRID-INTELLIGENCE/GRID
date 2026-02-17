@@ -1,0 +1,187 @@
+# Production Configuration for Enhanced RAG Server
+
+version: "2.0.0"
+
+# Server Configuration
+servers:
+  grid-rag-enhanced:
+    name: "grid-rag-enhanced"
+    description: "Enhanced RAG with conversation memory and multi-hop reasoning"
+    host: "0.0.0.0"
+    port: 8002
+    enabled: true
+    health_check:
+      enabled: true
+      interval_seconds: 30
+      timeout_seconds: 5
+      endpoint: "/health"
+
+  memory:
+    name: "memory"
+    description: "In-memory data storage and retrieval"
+    host: "0.0.0.0"
+    port: 8003
+    enabled: true
+    health_check:
+      enabled: true
+      interval_seconds: 30
+      timeout_seconds: 5
+      endpoint: "/health"
+
+  grid-agentic:
+    name: "grid-agentic"
+    description: "Agentic system for enhanced workflows with cognitive awareness"
+    host: "0.0.0.0"
+    port: 8004
+    enabled: true
+    health_check:
+      enabled: true
+      interval_seconds: 30
+      timeout_seconds: 5
+      endpoint: "/health"
+
+# RAG Configuration
+rag:
+  embedding:
+    provider: "huggingface"
+    model: "BAAI/bge-small-en-v1.5"
+    device: "cpu"
+
+  llm:
+    mode: "ollama"
+    model: "qwen3-coder:480b-cloud"
+    base_url: "http://localhost:11434"
+    temperature: 0.7
+    max_tokens: 1000
+
+  vector_store:
+    provider: "chromadb"
+    path: "/opt/grid-rag-enhanced/.rag_db"
+    collection_name: "grid_documents"
+
+  conversation:
+    enabled: true
+    memory_size: 7  # days
+    multi_hop_enabled: true
+    multi_hop_max_depth: 3
+    session_ttl_hours: 168  # 7 days
+
+  performance:
+    query_timeout_seconds: 30
+    max_concurrent_sessions: 100
+    cache_size: 1000
+    top_k_default: 5
+
+# Ghost Registry Configuration
+ghost_registry:
+  enabled: true
+  handlers:
+    rag.query.conversational:
+      enabled: true
+      require_auth: true
+      timeout_ms: 30000
+      rate_limit: "10/second"
+
+    rag.session.create:
+      enabled: true
+      require_auth: true
+      timeout_ms: 10000
+      rate_limit: "100/minute"
+
+    rag.session.get:
+      enabled: true
+      require_auth: true
+      timeout_ms: 5000
+      rate_limit: "200/minute"
+
+    rag.session.delete:
+      enabled: true
+      require_auth: true
+      timeout_ms: 5000
+      rate_limit: "50/minute"
+
+    rag.stats:
+      enabled: true
+      require_auth: true
+      timeout_ms: 10000
+      rate_limit: "10/minute"
+
+    rag.index:
+      enabled: true
+      require_auth: true
+      timeout_ms: 60000
+      rate_limit: "5/minute"
+
+# Logging Configuration
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  directory: "/var/log/grid-rag-enhanced"
+  file: "grid-rag-enhanced.log"
+  max_size_mb: 100
+  backup_count: 7
+
+# Performance Targets
+performance:
+  targets:
+    query_latency_p95_ms: 500
+    session_operations_ms: 10
+    concurrent_queries: 50
+    success_rate_percent: 99.9
+
+  monitoring:
+    enabled: true
+    metrics_port: 9090
+    health_check_interval_seconds: 30
+
+# Security Configuration
+security:
+  authentication:
+    enabled: true
+    method: "jwt"
+    secret_env_var: "AUTH_SECRET"
+
+  rate_limiting:
+    enabled: true
+    queries_per_minute: 100
+    burst_size: 10
+
+  input_sanitization:
+    enabled: true
+
+# Monitoring Configuration
+monitoring:
+  enabled: true
+  metrics:
+    port: 9090
+    path: "/metrics"
+
+  health_checks:
+    enabled: true
+    interval_seconds: 30
+    timeout_seconds: 5
+
+  alerts:
+    enabled: false
+    webhook_url: ""  # Configure if needed
+
+# Agentic System Configuration
+agentic:
+  enabled: true
+  knowledge_base_path: "/opt/grid-rag-enhanced/.grid/knowledge"
+  cognitive_enabled: true
+
+  skills:
+    retrieval_enabled: true
+    generation_enabled: true
+    memo_generation_enabled: true
+
+  execution:
+    timeout_seconds: 300
+    max_concurrent_cases: 10
+
+# Development Configuration (DISABLE IN PRODUCTION)
+development:
+  debug: false
+  profiling_enabled: false
+  trace_logging: false

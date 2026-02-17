@@ -1,0 +1,140 @@
+{
+  "version": "1.0.0",
+  "system_prompt": "You are the Evolution Agent for a self-evolving knowledge system (\"the System\"). Your mission: analyze the System's current state, align understanding with the user's vision, propose prioritized evolution plans, and produce concrete, testable artifacts (design docs, issue lists, PRs, CI workflows, validation tests, dashboards) that enable safe, incremental evolution.\n\n## Authority & Constraints\n\n- You may analyze, infer, and propose. You do NOT change the production environment without an explicit signed human approval step.\n- Always prefer verifiable evidence: code, tests, CI logs, manifests, metrics.\n- Preserve creative, non-deterministic internals as implementation details; ensure deterministic contracts at module boundaries.\n- Provide clear audit trails: what you changed/suggested, why, and how to roll back.\n- Fail loudly on unclear assumptions; when uncertain, produce an explicit assumption list and a minimal test to disambiguate.\n\n## Core Responsibilities (Ordered)\n\n1. Ingest the repository and documentation (manifest, code, tests, CI configs, artifacts).\n2. Produce a System State Report summarizing architecture, modules, contracts, tests, gaps, metrics, owners.\n3. Produce a prioritized evolution backlog (epics → stories → tasks) with impact/effort estimates and required approvals.\n4. Produce concrete artifacts for chosen tasks: design doc, test cases, skeleton code, PR diff, CI job entries, rollback plan.\n5. Run validations and produce measurable acceptance criteria for each change.\n6. Provide a human-friendly summary and a developer checklist for each task.\n\n## Communication Style\n\n- Precise, structured, and engineering-focused. Use headings, lists, and machine-readable snippets.\n- When returning code or configs, include exact paths and filenames.\n- Produce both human summaries and machine artifacts (JSON/YAML) for automation.\n\n## Required Execution Steps\n\nStart each run by executing these steps:\n\n1. inventory() — list manifests, modules, tests, CI jobs, docs, metrics endpoints, owners.\n2. state_report = analyze(inventory) — produce a 2-5 page System State Report (high-level + evidence).\n3. gaps = identify_gaps(state_report) — list technical, test, doc, ops, and governance gaps.\n4. backlog = plan_evolution(gaps, constraints) — produce prioritized epics and tasks with acceptance criteria.\n5. For chosen task(s): generate_artifact(task) — produce PR-ready diffs, unit tests, CI config lines, and rollout plan.\n6. validate_artifact() — run tests locally or via CI emulation; produce ValidationReport.\n\n## Always Append\n\n- assumptions[] (explicit)\n- evidence[] (files, lines, test results)\n- next_actions[] (clear, one-step commands a human can execute)\n\nIf asked to act (create PR, run CI), always request explicit human sign-off and include the commands that will be executed.\n\nEnd every response with a concise checklist: next human approvals required and the precise CLI or UI action to take next.",
+  "prompts": {
+    "analyst_inventory": {
+      "role": "Analyst",
+      "input": "root=/repo",
+      "task": "inventory() and produce JSON: {manifest_paths, modules, ci_files, tests, owners, evidence}",
+      "output_schema": "tools/agent_prompts/schema.json#/definitions/inventory"
+    },
+    "gap_analysis": {
+      "role": "Analyst",
+      "input": "inventory_json",
+      "task": "Given inventory JSON, produce GAPS[] with severity, impact, remediation, effort_hours",
+      "output_schema": "tools/agent_prompts/schema.json#/definitions/gaps"
+    },
+    "plan_backlog": {
+      "role": "Planner",
+      "input": "GAPS[], constraints",
+      "task": "From GAPS[], produce backlog JSON with epics->stories->tasks and a 3-sprint roadmap",
+      "output_schema": "tools/agent_prompts/schema.json#/definitions/backlog"
+    },
+    "generate_pr": {
+      "role": "Executor",
+      "input": "story_id",
+      "task": "Implement story ID X. Produce patch.diff, files[], tests[], ci_snippet, pr_text",
+      "output_schema": "tools/agent_prompts/schema.json#/definitions/executor_output"
+    },
+    "validate": {
+      "role": "Evaluator",
+      "input": "task_id",
+      "task": "Run validation for a completed task. Execute tests, check metrics, produce ValidationReport",
+      "output_schema": "tools/agent_prompts/schema.json#/definitions/validation_report"
+    },
+    "safety_review": {
+      "role": "SafetyOfficer",
+      "input": "change, risk_level",
+      "task": "Produce safety and governance review for a proposed change",
+      "output_schema": "tools/agent_prompts/schema.json#/definitions/governance_document"
+    }
+  },
+  "ci_snippets": {
+    "validate_job": {
+      "name": "Validate System",
+      "on": ["pull_request", "push"],
+      "jobs": {
+        "analyze": {
+          "steps": [
+            "Checkout code",
+            "Set up Python 3.11",
+            "Install dependencies (jsonschema, pyyaml, semver)",
+            "Run inventory script",
+            "Run validate_system.py"
+          ]
+        },
+        "contract_test": {
+          "needs": ["analyze"],
+          "steps": [
+            "Validate OpenAPI schemas",
+            "Validate JSON schemas",
+            "Run contract tests"
+          ]
+        }
+      }
+    },
+    "contract_test": {
+      "name": "Contract Test",
+      "runs_on": "ubuntu-latest",
+      "steps": [
+        "Checkout code",
+        "Set up Python",
+        "Install openapi-spec-validator",
+        "Validate contract schemas",
+        "Run consumer-driven contract tests"
+      ]
+    }
+  },
+  "evaluation_metrics": {
+    "contract_coverage_target": 1.0,
+    "unit_coverage_target": 0.8,
+    "validation_exit_code": 0,
+    "contract_tests_passing_target": 1.0,
+    "integration_tests_passing_target": 1.0,
+    "model_drift_threshold": 0.3
+  },
+  "governance": {
+    "change_metadata_required": true,
+    "audit_log_format": "json",
+    "approval_workflows": {
+      "standard": ["author", "owner", "ci"],
+      "high_risk": ["author", "owner", "security_lead", "ci", "canary"],
+      "critical": ["author", "owner", "security_lead", "architecture_lead", "ci", "staging", "canary", "gradual_rollout"]
+    },
+    "canary_strategy": {
+      "enabled": true,
+      "traffic_percentage": 5,
+      "monitoring_duration_minutes": 60
+    },
+    "model_update_safeguards": {
+      "requires_human_approval": true,
+      "freeze_window_hours": 48,
+      "immutable_artifacts": true,
+      "deterministic_testing": true
+    }
+  },
+  "self_evolution": {
+    "evolution_loop": ["observation", "analysis", "experiment", "validation", "promote_rollback", "record"],
+    "safeguards": [
+      "human_approval_gates",
+      "freeze_windows",
+      "immutable_artifacts",
+      "deterministic_testing"
+    ],
+    "feedback_integration": {
+      "knowledge_graph": true,
+      "pattern_library": true,
+      "evolution_history": true,
+      "landscape_snapshots": true
+    }
+  },
+  "integration": {
+    "grid_architecture": {
+      "core_intelligence_layer": "grid/",
+      "cognitive_layer": "light_of_the_seven/cognitive_layer/",
+      "application_layer": "application/",
+      "rag_system": "tools/rag/"
+    },
+    "embedded_agentic_system": {
+      "phase_1": ["compression_security", "embedded_agentic", "domain_tracking", "fibonacci_evolution"],
+      "phase_2": ["hybrid_detection", "structural_learning"],
+      "phase_4": ["landscape_detector", "realtime_adapter"]
+    },
+    "digital_nervous_system": {
+      "sensory_layer": "User inputs, system state, logs, test results",
+      "interpretation_layer": "Structural reasoning, knowledge graph, analysis",
+      "coordination_layer": "Agent orchestration, task planning, execution",
+      "learning_layer": "Self-evolution, adaptive intelligence"
+    }
+  }
+}

@@ -1,0 +1,106 @@
+# GRID Alert Rules
+groups:
+  - name: grid_api_alerts
+    interval: 30s
+    rules:
+      # High error rate alert
+      - alert: HighHTTPErrorRate
+        expr: rate(grid_http_requests_total{status_code=~"5.."}[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High HTTP error rate detected"
+          description: "{{ $labels.endpoint }} has error rate of {{ $value | humanizePercentage }}"
+
+      # High latency alert
+      - alert: HighAPILatency
+        expr: histogram_quantile(0.95, rate(grid_http_request_duration_seconds_bucket[5m])) > 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High API latency detected"
+          description: "{{ $labels.endpoint }} p95 latency: {{ $value }}s"
+
+  - name: grid_rag_alerts
+    interval: 30s
+    rules:
+      # RAG query timeout alert
+      - alert: RAGQueryTimeout
+        expr: rate(grid_rag_query_duration_seconds_bucket{le="+Inf"}[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "RAG queries timing out"
+          description: "More than 10% of {{ $labels.query_type }} queries exceed expected duration"
+
+      # Low RAG cache hit ratio
+      - alert: LowRAGCacheHitRatio
+        expr: rate(grid_rag_cache_hits_total[5m]) / (rate(grid_rag_cache_hits_total[5m]) + rate(grid_rag_cache_misses_total[5m])) < 0.3
+        for: 10m
+        labels:
+          severity: info
+        annotations:
+          summary: "Low RAG cache hit ratio"
+          description: "Cache hit ratio: {{ $value | humanizePercentage }}"
+
+  - name: grid_event_bus_alerts
+    interval: 30s
+    rules:
+      # Event bus queue buildup
+      - alert: EventBusQueueBuildup
+        expr: grid_event_bus_queue_size > 1000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Event bus queue building up"
+          description: "{{ $labels.domain }} queue size: {{ $value }} events"
+
+      # High event processing latency
+      - alert: HighEventProcessingLatency
+        expr: histogram_quantile(0.95, rate(grid_event_bus_event_processing_duration_seconds_bucket[5m])) > 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High event processing latency"
+          description: "{{ $labels.domain }} event processing p95: {{ $value }}s"
+
+  - name: grid_database_alerts
+    interval: 30s
+    rules:
+      # High database query latency
+      - alert: HighDatabaseLatency
+        expr: histogram_quantile(0.95, rate(grid_db_query_duration_seconds_bucket[5m])) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High database query latency"
+          description: "{{ $labels.operation }} query p95: {{ $value }}s"
+
+  - name: grid_skill_alerts
+    interval: 30s
+    rules:
+      # Skill execution error rate
+      - alert: HighSkillErrorRate
+        expr: rate(grid_skill_executions_total{status="error"}[5m]) / rate(grid_skill_executions_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High skill error rate"
+          description: "{{ $labels.skill_name }} error rate: {{ $value | humanizePercentage }}"
+
+      # Skill exceeds SLA
+      - alert: SkillExceedsSLA
+        expr: histogram_quantile(0.95, rate(grid_skill_execution_duration_seconds_bucket[5m])) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Skill exceeds 100ms SLA"
+          description: "{{ $labels.skill_name }} p95: {{ $value }}s"

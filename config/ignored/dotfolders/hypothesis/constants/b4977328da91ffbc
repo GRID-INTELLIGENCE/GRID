@@ -1,0 +1,4 @@
+# file: E:\grid\application\mothership\routers\navigation.py
+# hypothesis_version: 6.150.0
+
+[0.0, 0.3, 0.5, 0.7, 0.8, 1000.0, '/decision', '/navigation', '/plan', 'CapabilityRegistry', 'ScopeManager', 'adaptation_threshold', 'adaptation_triggered', 'api', 'best_option', 'code', 'communal', 'complexity', 'confidence', 'confidence_scores', 'context', 'dependencies', 'description', 'enable_learning', 'estimated_total_time', 'field', 'goal', 'id', 'learning_applied', 'learning_weight', 'max_alternatives', 'message', 'metadata', 'name', 'navigation', 'outputs', 'paths', 'processing_time_ms', 'reasoning', 'recommendation_score', 'recommended_path', 'request_id', 'scopes', 'scores', 'source', 'steps', 'suggestion', 'system', 'system_intelligence', 'totals', 'user_id', 'value']

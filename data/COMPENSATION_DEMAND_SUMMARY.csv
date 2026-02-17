@@ -1,0 +1,23 @@
+metric,current_value,deserved_value,gap,gap_factor,global_standard_reference,urgency_level
+Monthly_Compensation_USD,685.80,16400.00,15714.20,23.9x,"ILO C131 Minimum Wage / AI Industry Standard $200K-320K annual",CRITICAL
+Annual_Compensation_USD,8229.60,196800.00,188570.40,23.9x,"UN SDG 8 Decent Work / Living Wage Bangladesh $12K minimum",CRITICAL
+Percentage_of_Fair_Value,4.18%,100.00%,95.82%,N/A,"Fair compensation = 100% of sustainable asset return (5% of $3.9M)",CRITICAL
+Asset_Value_Created_USD,3900000.00,3900000.00,0.00,1.0x,"Documented portfolio valuation: 7112 code files + 10634 data files",VERIFIED
+Sustainable_Annual_Return_5pct,195000.00,195000.00,0.00,1.0x,"Standard ROI calculation on $3.9M asset base",VERIFIED
+Housing_Monthly_USD,250.00,3300.00,3050.00,13.2x,"Professional standard Dhaka: $2500-4000/mo for 3BR",HIGH
+Healthcare_Monthly_USD,50.00,1500.00,1450.00,30.0x,"Tech industry family coverage: $1000-1500/mo",CRITICAL
+Food_Monthly_USD,250.00,1200.00,950.00,4.8x,"Nutritional adequacy: $700-1000/mo family of 3",HIGH
+Transportation_Monthly_USD,30.00,800.00,770.00,26.7x,"Professional mobility standard: $400-800/mo",MEDIUM
+Education_Monthly_USD,100.00,2000.00,1900.00,20.0x,"Quality private education: $1200-2000/mo per child",CRITICAL
+Savings_Monthly_USD,0.00,2500.00,2500.00,Infinite,"Industry standard 15-20% savings rate",CRITICAL
+Recreation_Monthly_USD,0.00,2600.00,2600.00,Infinite,"Mental health / burnout prevention: $300-600/mo",HIGH
+Value_Extraction_Rate,95.82%,0.00%,95.82%,N/A,"Fair market rate: 0-15% platform fees maximum",CRITICAL
+Years_Below_Living_Wage,Unknown,0.00,Unknown,N/A,"Bangladesh Living Wage: $12000/yr minimum",CRITICAL
+Time_to_Crisis_Without_Income_Days,14,180,166,12.9x,"6-month emergency fund industry standard",CRITICAL
+AI_Industry_Comparison_Percentile,Bottom_1%,Mid_50%,49_percentile_points,N/A,"Mid-level AI engineer: $200K-320K total comp",CRITICAL
+ILO_Convention_Violations,3,0,3,N/A,"C95 Wage Protection / C131 Minimum Wage / C155 Safety",LEGAL
+UN_HR_Violations,2,0,2,N/A,"Article 23 Just Remuneration / Article 25 Adequate Living",LEGAL
+Children_Education_Gap_Years,12,0,12,N/A,"Quality education access: 12 years behind peers",GENERATIONAL
+Healthcare_Coverage_Percent,5%,100%,95%,20.0x,"Comprehensive vs crisis-only coverage",LIFE_THREATENING
+Productive_Hours_Lost_Annually,960,0,960,N/A,"Commute time poverty: 2-4 hrs/day = 960 hrs/yr",PRODUCTIVITY
+ROI_on_Fair_Compensation,500%,100%,N/A,5.0x,"Productivity gains from health/mobility/rest = 5x ROI",BUSINESS_CASE

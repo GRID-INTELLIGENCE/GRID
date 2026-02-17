@@ -1,0 +1,325 @@
+{
+  "$schema": "./grid-master-workflow-schema.json",
+  "system": {
+    "name": "GRID Master Workflow System",
+    "version": "1.0.0",
+    "description": "Unified governance and execution framework for GRID development with integrated guardrails, workflows, and AI-assisted automation",
+    "principles": [
+      "Rule-First Development: All workflows respect canonical rules (Canon Policy, Exhibit Governance, Sensory Layers)",
+      "Guardrail Enforcement: Automatic schema validation, code analysis, and workflow integration for compliance",
+      "Unified Execution Model: Structured input processing, action recommendation, and quality gates",
+      "Continuous Improvement: Metrics tracking, feedback loops, and governance maturity evolution"
+    ]
+  },
+  "guardrails": {
+    "rules": [
+      {
+        "id": "canon-policy",
+        "name": "Canon Policy Guardrails",
+        "scope": [
+          "light_of_the_seven/**",
+          "docs/**",
+          "*.md"
+        ],
+        "rules": [
+          "Two-Layer Architecture: Canon (🏛️📜) vs Tooling (🪄🧪) separation",
+          "Citation Discipline: [Source, Chapter \"Title\"] format required for canon claims",
+          "Header Requirements: NON-CANONICAL disclaimers for tooling code",
+          "Immutability: Canon content cannot be modified without governance approval"
+        ],
+        "enforcement": [
+          "Pre-commit hooks validate headers",
+          "CI checks verify SOURCES.md citations",
+          "Code review for human verification",
+          "AI guardrails via rules files"
+        ]
+      },
+      {
+        "id": "exhibit-governance",
+        "name": "Exhibit Governance Guardrails",
+        "scope": [
+          "**/visualizations/**",
+          "**/exhibits/**"
+        ],
+        "rules": [
+          "Required Files: exhibit.json, README.md for all exhibits",
+          "Schema Compliance: Exhibit manifests must validate against schema",
+          "Workspace Icons: 🏛️=Root, 📜=Canon, 🪄=Tools, 🧪=Tests",
+          "Bridge Requirements: grid_bridge.py for interactive exhibits"
+        ],
+        "enforcement": [
+          "Schema validation on commit",
+          "Required file checks in CI",
+          "Icon consistency linting",
+          "Bridge module testing"
+        ]
+      },
+      {
+        "id": "sensory-layers",
+        "name": "Sensory Layer Guardrails",
+        "scope": [
+          "schemas/**",
+          "circuits/vision/**",
+          "circuits/sound/**"
+        ],
+        "rules": [
+          "Sound Layer: Pitch (Hz 110-880), Loudness (dB -24 to -3), Timbre (0-1 normalized)",
+          "Vision Layer: Nodes (id, label, type), Edges (source, target, relationship)",
+          "Color Coding: Supportive=#4CAF50, Neutral=#9E9E9E, Adversarial=#F44336",
+          "Schema Validation: All sensory data must conform to defined schemas"
+        ],
+        "enforcement": [
+          "Schema validation in data pipelines",
+          "Color consistency checks in visualization code",
+          "Sound/vision layer separation tests",
+          "Integration tests for sensory output"
+        ]
+      }
+    ]
+  },
+  "workflows": {
+    "integrated_workflows": [
+      {
+        "id": "exhibit-management",
+        "name": "Exhibit Management Workflow",
+        "guardrails_applied": [
+          "canon-policy",
+          "exhibit-governance",
+          "sensory-layers"
+        ],
+        "phases": [
+          "Validation: Check all guardrails before creation",
+          "Creation: Enforce required files and schemas",
+          "Integration: Verify sensory layer compliance",
+          "Documentation: Ensure canon policy adherence"
+        ]
+      },
+      {
+        "id": "repository-organization",
+        "name": "Repository Organization Workflow",
+        "guardrails_applied": [
+          "exhibit-governance",
+          "canon-policy",
+          "sensory-layers"
+        ],
+        "phases": [
+          "Analysis: Semantic file classification with rule awareness",
+          "Organization: Rule-compliant file placement",
+          "Validation: Guardrail verification of new structure",
+          "Documentation: Update organization docs with canon references"
+        ]
+      },
+      {
+        "id": "performance-optimization",
+        "name": "Performance Optimization Workflow",
+        "guardrails_applied": [
+          "sensory-layers",
+          "canon-policy",
+          "exhibit-governance"
+        ],
+        "phases": [
+          "Baseline: Measure current performance with guardrail compliance",
+          "Analysis: Identify bottlenecks respecting sensory layer rules",
+          "Optimization: Apply changes without violating canon policies",
+          "Validation: Verify performance gains and rule compliance"
+        ]
+      },
+      {
+        "id": "code-quality-reporting",
+        "name": "Code Quality & Reporting Workflow",
+        "guardrails_applied": [
+          "canon-policy",
+          "exhibit-governance",
+          "sensory-layers"
+        ],
+        "phases": [
+          "Health Check: Repository status with rule compliance",
+          "Pattern Analysis: Code patterns respecting guardrails",
+          "Report Generation: Structured output with canon references",
+          "Action Items: Prioritized tasks following governance rules"
+        ]
+      },
+      {
+        "id": "task-execution",
+        "name": "Task Execution Workflow",
+        "guardrails_applied": [
+          "canon-policy",
+          "exhibit-governance",
+          "sensory-layers"
+        ],
+        "phases": [
+          "Environment Setup: Virtual environment with rule-compliant paths",
+          "Dependency Management: Package installation respecting constraints",
+          "Task Execution: Run tasks within guardrail boundaries",
+          "Validation: Verify execution didn't violate rules"
+        ]
+      },
+      {
+        "id": "liftoff",
+        "name": "GRID Liftoff Workflow",
+        "guardrails_applied": [
+          "canon-policy",
+          "exhibit-governance"
+        ],
+        "phases": [
+          "Environment Validation: Check Python, venv, dependencies",
+          "Guardrail Check: Verify all rules are loadable",
+          "Schema Validation: Test exhibit manifests",
+          "System Ready: Report green status for development"
+        ]
+      }
+    ]
+  },
+  "execution_pipeline": {
+    "input_processing_chain": "Raw Input → API Validation → Decision Routing → EQ Processing → Task Generation",
+    "guardrail_integration_points": [
+      "Input Validation: All inputs checked against canon policy and exhibit rules",
+      "Processing: Sensory layer schemas enforced during data processing",
+      "Output Generation: Results validated for canon compliance and proper citations",
+      "Task Creation: Generated tasks respect exhibit governance and tooling boundaries"
+    ]
+  },
+  "quality_gates": {
+    "automated_gates": [
+      {
+        "type": "pre-commit",
+        "checks": [
+          "Canon Headers: Check for NON-CANONICAL headers in new files",
+          "Schema Validation: Validate exhibit manifests and sensory schemas",
+          "Citation Check: Verify citations in documentation changes",
+          "JSON/YAML Lint: Ensure configuration files are valid"
+        ]
+      },
+      {
+        "type": "ci-cd",
+        "checks": [
+          "Rule Compliance: Automated checking of all guardrails",
+          "Exhibit Validation: Schema validation for all exhibit changes",
+          "Sensory Testing: Sound/vision layer integration tests",
+          "Unit Tests: pytest with coverage requirements"
+        ]
+      },
+      {
+        "type": "development",
+        "checks": [
+          "VS Code Integration: Editor shows rule violations inline",
+          "Workflow Guards: All workflows include guardrail checks",
+          "Ruff Linting: Python code style and quality",
+          "Type Checking: Pylance strict mode validation"
+        ]
+      }
+    ],
+    "manual_enforcement": [
+      "Code Reviews: Verify citations and header requirements",
+      "Exhibit Changes: Check governance compliance",
+      "Sensory Modifications: Validate against layer schemas",
+      "Canon Claims: Human verification required"
+    ]
+  },
+  "error_handling": {
+    "violation_detection": [
+      "Schema Errors: Invalid exhibit manifests or sensory data",
+      "Header Missing: NON-CANONICAL headers not present in tooling",
+      "Citation Issues: Missing or malformed citations in canon content",
+      "Rule Conflicts: Workflows attempting operations that violate guardrails"
+    ],
+    "recovery_procedures": [
+      "Automatic Fixes: Scripts to add missing headers or fix common issues",
+      "Manual Correction: Developer fixes for complex violations",
+      "Governance Review: Escalation for canon policy violations",
+      "Workflow Adjustment: Modify workflow to comply with guardrails"
+    ]
+  },
+  "monitoring": {
+    "metrics_tracking": {
+      "compliance_metrics": [
+        "Header Coverage: Percentage of files with correct NON-CANONICAL headers",
+        "Schema Compliance: Pass rate for exhibit and sensory schema validation",
+        "Citation Accuracy: Percentage of canon claims with proper citations",
+        "Rule Adherence: Overall guardrail compliance score"
+      ],
+      "process_metrics": [
+        "Workflow Success: Percentage of workflows completing without guardrail violations",
+        "Review Cycle Time: Time from workflow completion to governance approval",
+        "Error Recovery: Time to resolve guardrail violations",
+        "Test Coverage: Percentage of code covered by tests"
+      ]
+    },
+    "feedback_loops": [
+      "Violation Analysis: Review common guardrail violations to improve workflows",
+      "Rule Updates: Update rules based on practical development needs",
+      "Automation Opportunities: Identify areas for automated guardrail enforcement",
+      "Training Updates: Update developer training based on common violations"
+    ]
+  },
+  "emergency_procedures": {
+    "guardrail_bypass": {
+      "conditions": [
+        "Critical production issues where guardrails prevent necessary fixes",
+        "Time-sensitive security patches requiring immediate deployment",
+        "System-wide failures requiring rapid intervention"
+      ],
+      "procedure": [
+        "Step 1: Obtain explicit approval from project maintainers",
+        "Step 2: Document specific guardrails to bypass and duration",
+        "Step 3: Apply necessary changes with minimal scope",
+        "Step 4: Post-mortem review and update guardrails if needed"
+      ]
+    },
+    "system_recovery": {
+      "conditions": [
+        "Guardrail system itself fails or causes development blockage",
+        "Schema validation prevents legitimate operations",
+        "Circular dependency in rule enforcement"
+      ],
+      "procedure": [
+        "Step 1: Temporarily disable problematic guardrails",
+        "Step 2: Root cause analysis for guardrail issues",
+        "Step 3: Fix guardrail implementation or update rules",
+        "Step 4: Test updated system before re-enabling"
+      ]
+    }
+  },
+  "ai_integration": {
+    "cascade_interaction": {
+      "context_loading": [
+        "Rule Files: All .windsurf/rules/*.md files loaded as context",
+        "Workflow References: Workflows include guardrail compliance steps",
+        "Exhibit Awareness: AI understands exhibit vs canon distinctions",
+        "Schema Knowledge: Sensory layer schemas available for validation"
+      ],
+      "response_guidelines": [
+        "Rule Citation: Reference specific rules when giving advice",
+        "Guardrail Respect: Never suggest actions that violate guardrails",
+        "Escalation Clarity: Clearly indicate when human governance review needed",
+        "Canon Distinction: Always clarify canon vs tooling recommendations"
+      ]
+    },
+    "workflow_automation": [
+      "Pre-execution Checks: All workflows validate guardrails before proceeding",
+      "Error Handling: Clear error messages referencing specific violated rules",
+      "Recovery Suggestions: Automated suggestions for fixing common violations",
+      "Progress Tracking: Real-time workflow status with compliance indicators"
+    ]
+  },
+  "future_evolution": {
+    "rule_expansion": [
+      "New Domains: Additional rules for emerging development areas",
+      "Granular Control: More specific rules for complex scenarios",
+      "Automation: Increased automated enforcement capabilities",
+      "Cross-Project: Rules that apply across GRID ecosystem"
+    ],
+    "workflow_enhancement": [
+      "Intelligence: AI-assisted workflow optimization within guardrails",
+      "Integration: Deeper integration with development tools and platforms",
+      "Metrics: Enhanced monitoring and continuous improvement feedback",
+      "Parallelization: Concurrent workflow execution with dependency management"
+    ],
+    "governance_maturity": [
+      "Process Refinement: Streamlined governance processes",
+      "Team Adoption: Improved team understanding and compliance",
+      "Scalability: Governance that scales with project growth",
+      "Audit Trail: Complete history of governance decisions and changes"
+    ]
+  }
+}

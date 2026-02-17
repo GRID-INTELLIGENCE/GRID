@@ -1,0 +1,4 @@
+# file: E:\grid\application\mothership\routers\auth.py
+# hypothesis_version: 6.150.0
+
+[255, '/auth', '/login', '/logout', '/refresh', '/validate', '@', 'Bearer', 'Email from token', 'Granted scopes', 'JWT access token', 'JWT refresh token', 'New access token', 'Requested scopes', 'Token scopes', 'Token type', 'User ID from token', 'User password', 'Username or email', 'Valid refresh token', 'WWW-Authenticate', 'admin', 'authenticated', 'authentication', 'bearer', 'email', 'exp', 'login_method', 'message', 'password', 'permissions', 'read', 'request_id', 'token_payload', 'unknown', 'user_id', 'write']

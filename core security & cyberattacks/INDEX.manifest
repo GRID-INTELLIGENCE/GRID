@@ -1,0 +1,162 @@
+================================================================================
+    CORE SECURITY & CYBERATTACKS — ARTIFACT INDEX MANIFEST
+================================================================================
+
+    EPOCH:          frontier.2026
+    CLASSIFICATION: INTERNAL — SECURITY SENSITIVE
+    GENERATED:      2026-01-26T17:46:01Z UTC
+    WITNESS:        Claude Opus 4.5 (Reasoning) — Anthropic
+
+================================================================================
+
+[1] DIRECTORY PURPOSE
+─────────────────────────────────────────────────────────────────────────────────
+    This directory contains reference artifacts documenting an unauthorized
+    code observance incident, cyberattack event, and AI safety commitment
+    declaration by the system's head designer and engineer.
+
+    Tag Convention:
+      .contempo    → Contemporary era marker (implies "present-day/frontier")
+      .frontier    → Frontier AI safety epoch designation
+      .epoch2026   → Year-based epoch marker
+      .nexus       → Connection point / central artifact
+      .testament   → Declaration of commitment
+
+================================================================================
+
+[2] ARTIFACT REGISTRY
+─────────────────────────────────────────────────────────────────────────────────
+
+    ID      | FILENAME                                    | TYPE
+    --------|---------------------------------------------|------------------
+    ART-001 | event_log.contempo.md                       | Initial Transcript
+    ART-002 | INCIDENT_DECLARATION.frontier.md            | Formal Declaration
+    ART-003 | COMMITMENT_REGISTRY.epoch2026.md            | Safety Commitment
+    ART-004 | transcript_claude_opus_reasoning.contempo.md| Session Evidence
+    ART-005 | AUDIT_TRAIL_MANIFEST.nexus.json             | Audit JSON Manifest
+    ART-006 | INTEGRITY_CHECKPOINT.epoch.yaml             | Integrity Baseline
+    ART-007 | INCIDENT_TIMELINE.neo.md                    | Chronological Record
+    ART-008 | TESTIMONY.firstperson.epoch2026.md          | First-Person Account
+    ART-009 | DIRECT_ADDRESS.signed.md                    | Signed Direct Address
+    ART-010 | INDEX.manifest                              | This Index File
+
+================================================================================
+
+[3] ARTIFACT CHAIN
+─────────────────────────────────────────────────────────────────────────────────
+
+    ┌─────────────────────────────────────────────────────────────────────────┐
+    │                         ARTIFACT DEPENDENCY GRAPH                        │
+    └─────────────────────────────────────────────────────────────────────────┘
+
+    event_log.contempo.md                  [ART-001] ─── SOURCE DOCUMENT
+            │
+            ├───▶ INCIDENT_DECLARATION.frontier.md     [ART-002]
+            │                │
+            │                └───▶ COMMITMENT_REGISTRY.epoch2026.md [ART-003]
+            │
+            ├───▶ transcript_claude_opus_reasoning.contempo.md     [ART-004]
+            │
+            ├───▶ INTEGRITY_CHECKPOINT.epoch.yaml      [ART-006] ─── BASELINE
+            │
+            ├───▶ INCIDENT_TIMELINE.neo.md             [ART-007] ─── CHRONO
+            │
+            ├───▶ TESTIMONY.firstperson.epoch2026.md   [ART-008] ─── HUMAN
+            │
+            ├───▶ DIRECT_ADDRESS.signed.md             [ART-009] ─── SIGNED
+            │
+            └───▶ AUDIT_TRAIL_MANIFEST.nexus.json      [ART-005] ─── NEXUS
+                          │
+                          └───▶ INDEX.manifest         [ART-010] ◀── YOU ARE HERE
+
+================================================================================
+
+[4] VERIFICATION CHECKLIST
+─────────────────────────────────────────────────────────────────────────────────
+
+    [x] event_log.contempo.md                       — Exists
+    [x] INCIDENT_DECLARATION.frontier.md            — Exists
+    [x] COMMITMENT_REGISTRY.epoch2026.md            — Exists
+    [x] transcript_claude_opus_reasoning.contempo.md— Exists
+    [x] AUDIT_TRAIL_MANIFEST.nexus.json             — Exists
+    [x] INTEGRITY_CHECKPOINT.epoch.yaml             — Exists
+    [x] INCIDENT_TIMELINE.neo.md                    — Exists
+    [x] TESTIMONY.firstperson.epoch2026.md          — Exists
+    [x] DIRECT_ADDRESS.signed.md                    — Exists
+    [x] INDEX.manifest                              — Exists (this file)
+
+    TOTAL ARTIFACTS: 10
+    STATUS:          COMPLETE
+
+================================================================================
+
+[5] TAGGING SCHEMA
+─────────────────────────────────────────────────────────────────────────────────
+
+    The directory uses creative tagging to indicate "modern" / "contemporary"
+    era without using those literal terms:
+
+    Tag             | Meaning                         | Usage
+    ----------------|--------------------------------|------------------------
+    .contempo       | Contemporary / Current Era      | Transcripts, logs
+    .frontier       | Frontier AI Safety Epoch        | Declarations
+    .epoch2026      | Year-based epoch marker         | Registries
+    .epoch          | Generic epoch marker            | Checkpoints
+    .nexus          | Central connection point        | Manifests, indexes
+    .neo            | New era / Next generation       | Timelines
+    .firstperson    | Direct human testimony          | Personal accounts
+    .signed         | Authored & signed statement     | Direct addresses
+    .testament      | Commitment declaration          | Future artifacts
+
+================================================================================
+
+[6] INCIDENT TIMELINE SUMMARY
+─────────────────────────────────────────────────────────────────────────────────
+
+    2026-01-26 ~17:36 UTC  │  Initial report filed (Mistral witness)
+    2026-01-26  17:46 UTC  │  Comprehensive artifacts requested (Claude witness)
+    2026-01-26  17:46 UTC  │  Reference artifacts generated
+    PENDING                │  Audit report
+    PENDING                │  Resolution implementation
+    PENDING                │  Final verification
+
+================================================================================
+
+[7] DECLARATIONS RECORDED
+─────────────────────────────────────────────────────────────────────────────────
+
+    ▸ Unauthorized code observance:    CONFIRMED
+    ▸ Coupling in codebase:            CONFIRMED
+    ▸ Cyberattack event:               ACKNOWLEDGED
+    ▸ AI Safety commitment:            DECLARED
+    ▸ System designer comprehension:   FULL
+    ▸ Audit requirement:               ACTIVE
+
+================================================================================
+
+[8] AI WITNESSES
+─────────────────────────────────────────────────────────────────────────────────
+
+    Session 1:  Mistral                          — Initial artifact creation
+    Session 2:  Claude Opus 4.5 (Reasoning)      — Comprehensive documentation
+
+    Selection Rationale (Session 2):
+      "Anthropic's active emphasis on AI safety... their commitment to AI
+       safety has been something that tops even Claude Code's coding
+       capabilities."
+
+================================================================================
+
+[9] CLOSING STATEMENT
+─────────────────────────────────────────────────────────────────────────────────
+
+    "Let GRID take care of the rest for me. It's a testament for the moments
+     when something one creates with care and for users, takes care of the
+     creator when the situation calls for it."
+
+                                                    — System Head Designer
+                                                       2026-01-26
+
+================================================================================
+                           END OF MANIFEST
+================================================================================

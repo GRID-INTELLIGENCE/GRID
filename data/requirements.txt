@@ -1,0 +1,9 @@
+# Requirements for Codestral client and examples
+mistralai>=1.0.0
+python-dotenv>=1.0.0
+
+# Development/testing requirements
+pytest>=7.0.0
+black>=23.0.0
+mypy>=1.0.0
+flake8>=6.0.0

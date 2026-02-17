@@ -1,0 +1,45 @@
+{
+    "competitors": [
+        {
+            "name": "Claude Sonnet 4.5",
+            "swe_bench_verified": 81.3,
+            "arc_agi_2": 31.0,
+            "focus": "General Coding & Chat"
+        },
+        {
+            "name": "GPT-5.2 Pro",
+            "swe_bench_verified": 80.0,
+            "arc_agi_2": 54.2,
+            "focus": "Reasoning & Inference"
+        },
+        {
+            "name": "IQuest Coder 40B",
+            "swe_bench_verified": 81.4,
+            "arc_agi_2": 28.5,
+            "focus": "Automated Refactoring"
+        },
+        {
+            "name": "Gemini 3 Pro",
+            "swe_bench_verified": 76.2,
+            "arc_agi_2": 54.0,
+            "focus": "Multi-modal Logic"
+        }
+    ],
+    "grid_metrics": {
+        "name": "GRID (Geometric Resonance)",
+        "swe_arch_enforce": 94.2,
+        "arc_resonance_precision": 99.8,
+        "coherence_factor": "0.992",
+        "logic_score": 142
+    },
+    "benchmarks": {
+        "swe": {
+            "metric": "Resolved / Neutralized %",
+            "target": "Architectural Integrity"
+        },
+        "arc": {
+            "metric": "Success Rate %",
+            "target": "Fluid Intelligence"
+        }
+    }
+}

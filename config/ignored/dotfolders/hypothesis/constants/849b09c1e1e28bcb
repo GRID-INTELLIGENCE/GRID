@@ -1,0 +1,4 @@
+# file: E:\grid\application\mothership\routers\__init__.py
+# hypothesis_version: 6.150.0
+
+['/api/v1', '/auth', '/intelligence', '/navigation', '/resonance', 'auth', 'authentication', 'create_api_router', 'navigation', 'resonance']

@@ -1,0 +1,33 @@
+{
+  "case_id": "CASE-c08893dfe1f1",
+  "timestamp": "2026-01-09T00:30:07.902042",
+  "raw_input": "I need to add contract testing to the CI pipeline",
+  "structured_data": {
+    "timestamp": "2026-01-09T00:30:07.902042",
+    "labels": [
+      "category:testing",
+      "priority:medium",
+      "keyword:test",
+      "keyword:ci"
+    ],
+    "category": "testing",
+    "priority": "medium",
+    "keywords": [
+      "test",
+      "ci"
+    ],
+    "entities": [],
+    "relationships": [],
+    "confidence": 0.25,
+    "logging_iterations": [
+      {
+        "iteration": 1,
+        "keywords": [
+          "test",
+          "ci"
+        ],
+        "entities": []
+      },
+      {
+        "iteration": 2,
+        "category":

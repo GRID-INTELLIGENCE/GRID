@@ -1,0 +1,91 @@
+{
+  "id": "TranslatorAssistantRequest",
+  "type": "form",
+  "title": "Translator Assistant – Request",
+  "fields": [
+    {
+      "name": "source_text",
+      "label": "Source Text",
+      "type": "textarea",
+      "required": true,
+      "help": "Main text to translate / transform / explain."
+    },
+    {
+      "name": "source_language",
+      "label": "Source Language",
+      "type": "text",
+      "required": false,
+      "default": "auto",
+      "help": "Language code or 'auto' for automatic detection."
+    },
+    {
+      "name": "target_language",
+      "label": "Target Language(s)",
+      "type": "text",
+      "required": true,
+      "help": "Single code or comma-separated list (e.g. 'en' or 'en,fr,es')."
+    },
+    {
+      "name": "mode",
+      "label": "Mode",
+      "type": "select",
+      "required": true,
+      "options": ["translate", "generate", "bridge"],
+      "default": "bridge",
+      "help": "translate = MT stub, generate = draft wrapper, bridge = structured explanation."
+    },
+    {
+      "name": "domain",
+      "label": "Domain",
+      "type": "select",
+      "required": true,
+      "options": [
+        "general",
+        "design_development",
+        "scientific_research",
+        "archeology",
+        "biology",
+        "animals",
+        "plants",
+        "homosapiens"
+      ],
+      "default": "general",
+      "help": "Semantic lens shaping the output structure."
+    },
+    {
+      "name": "code_context",
+      "label": "Code / Document Context",
+      "type": "textarea",
+      "required": false,
+      "help": "Optional snippet or file reference (e.g. src/services/ner_service.py)."
+    },
+    {
+      "name": "context_tags",
+      "label": "Context Tags",
+      "type": "chips",
+      "required": false,
+      "help": "Tags like 'python', 'fastapi', 'ner', 'grid'."
+    },
+    {
+      "name": "constraints",
+      "label": "Constraints",
+      "type": "textarea",
+      "required": false,
+      "help": "Style/length/tone/format constraints for the output."
+    },
+    {
+      "name": "bridge_from",
+      "label": "Bridge From",
+      "type": "text",
+      "required": false,
+      "help": "Representation to bridge from (e.g. 'code', 'research_paper')."
+    },
+    {
+      "name": "bridge_to",
+      "label": "Bridge To",
+      "type": "text",
+      "required": false,
+      "help": "Representation to bridge to (e.g. 'design_spec', 'layperson')."
+    }
+  ]
+}

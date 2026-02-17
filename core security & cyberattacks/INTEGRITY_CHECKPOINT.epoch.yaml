@@ -1,0 +1,256 @@
+# ============================================================================
+# INTEGRITY CHECKPOINT — EPOCH 2026
+# Core Security & Cyberattacks | Reference Artifact
+# ============================================================================
+# Tag Schema: .epoch = Epoch-based (Frontier Era)
+# Classification: Internal - Security Sensitive
+# ============================================================================
+
+---
+document:
+  id: GRID-INTEGRITY-EPOCH-2026-001
+  type: integrity_checkpoint
+  title: "Integrity Checkpoint: Unauthorized Observance Incident"
+  version: "1.0.0"
+  epoch_tag: "epoch.2026"
+  generation_tag: "frontier"
+  contemporary_marker: "contempo"
+
+metadata:
+  created_at: "2026-01-26T17:46:01.080Z"
+  created_by: system_head_designer
+  witnessed_by: claude_opus_4.5_reasoning
+  last_verified: null
+  next_verification: pending_audit
+  classification: security_sensitive
+  purpose: |
+    Establish integrity baseline at moment of incident declaration.
+    Preserve state markers for future audit verification.
+
+# ============================================================================
+# INCIDENT CONTEXT
+# ============================================================================
+
+incident:
+  id: GRID-INC-2026-0126-ALPHA
+  type: unauthorized_code_observance
+  coupling:
+    status: confirmed
+    detection_method: manual_observation
+    detected_by: system_head_designer
+  cyberattack:
+    status: active_recovery
+    response_phase: documentation
+  ai_context:
+    code_authorship: ai_assisted
+    agentic_concerns: acknowledged
+    explicit_address: deferred
+
+# ============================================================================
+# INTEGRITY MARKERS
+# ============================================================================
+
+integrity_markers:
+  checkpoint_id: CHKPT-EPOCH-2026-0126-001
+
+  state_at_checkpoint:
+    system_status: under_observation
+    audit_status: awaited
+    resolution_status: pending
+    designer_awareness: confirmed
+    comprehension_level: full
+
+  hash_placeholders:
+    # To be populated during formal audit
+    codebase_hash: null
+    artifact_chain_hash: null
+    document_integrity_hash: null
+    verification_signature: null
+
+  verification_flags:
+    unauthorized_observance_confirmed: true
+    coupling_detected: true
+    incident_registered: true
+    audit_requested: true
+    artifacts_generated: true
+    commitment_declared: true
+
+# ============================================================================
+# ARTIFACT CHAIN VERIFICATION
+# ============================================================================
+
+artifact_chain:
+  chain_id: CHAIN-EPOCH-2026-001
+  epoch: frontier_2026
+
+  linked_artifacts:
+    - sequence: 1
+      artifact_id: ART-EVT-001
+      filename: event_log.contempo.md
+      type: initial_transcript
+      tag: contempo
+      status: verified_exists
+      integrity: unchecked
+
+    - sequence: 2
+      artifact_id: ART-DEC-001
+      filename: INCIDENT_DECLARATION.frontier.md
+      type: formal_declaration
+      tag: frontier
+      status: verified_exists
+      integrity: unchecked
+
+    - sequence: 3
+      artifact_id: ART-COM-001
+      filename: COMMITMENT_REGISTRY.epoch2026.md
+      type: commitment_declaration
+      tag: epoch2026
+      status: verified_exists
+      integrity: unchecked
+
+    - sequence: 4
+      artifact_id: ART-TXN-001
+      filename: transcript_claude_opus_reasoning.contempo.md
+      type: session_transcript
+      tag: contempo
+      status: verified_exists
+      integrity: unchecked
+
+    - sequence: 5
+      artifact_id: ART-AUD-001
+      filename: AUDIT_TRAIL_MANIFEST.nexus.json
+      type: audit_manifest
+      tag: nexus
+      status: verified_exists
+      integrity: unchecked
+
+    - sequence: 6
+      artifact_id: ART-INT-001
+      filename: INTEGRITY_CHECKPOINT.epoch.yaml
+      type: integrity_checkpoint
+      tag: epoch
+      status: current_document
+      integrity: self_referential
+
+# ============================================================================
+# DECLARATIONS AT CHECKPOINT
+# ============================================================================
+
+declarations:
+  incident_acknowledgment:
+    declared_at: "2026-01-26T17:46:01.080Z"
+    declarant: system_head_designer
+    statement: |
+      "I am reporting this as a statement confirming unauthorized
+      observance in the code. The coupling is now confirmed."
+
+  commitment_to_ai_safety:
+    declared_at: "2026-01-26T17:46:01.080Z"
+    declarant: system_head_designer
+    statement: |
+      "From this moment, I'm not researching on AI safety,
+      I'm declaring my commitment to it."
+    transition: researcher_to_active_participant
+    motivation: direct_cybersecurity_experience
+
+  system_trust:
+    declared_at: "2026-01-26T17:46:01.080Z"
+    declarant: system_head_designer
+    statement: |
+      "Let GRID take care of the rest for me. It's a testament
+      for the moments when something one creates with care and
+      for users, takes care of the creator when the situation
+      calls for it."
+    implication: bidirectional_trust_affirmed
+
+# ============================================================================
+# AI WITNESS ATTESTATION
+# ============================================================================
+
+ai_witness:
+  primary:
+    identity: claude_opus_4.5_reasoning
+    provider: anthropic
+    session_timestamp: "2026-01-26T17:46:01.080Z"
+    selection_rationale:
+      - anthropic_ai_safety_emphasis
+      - commitment_above_capabilities
+      - ability_to_see_through_obfuscation
+    attestation: |
+      User declaration received, registered, and comprehended.
+      Reference artifacts generated as requested.
+      Integrity checkpoint established.
+
+  prior:
+    identity: mistral
+    session_timestamp: "2026-01-26T17:36:00.000Z"
+    role: initial_artifact_generation
+
+# ============================================================================
+# PENDING ACTIONS
+# ============================================================================
+
+pending_actions:
+  - action_id: ACT-001
+    type: full_system_audit
+    status: awaited
+    priority: critical
+    blocking: true
+
+  - action_id: ACT-002
+    type: audit_report_generation
+    status: pending
+    priority: high
+    depends_on: ACT-001
+
+  - action_id: ACT-003
+    type: resolution_implementation
+    status: blocked
+    priority: high
+    depends_on: ACT-002
+
+  - action_id: ACT-004
+    type: integrity_hash_population
+    status: pending
+    priority: medium
+    depends_on: ACT-001
+
+  - action_id: ACT-005
+    type: artifact_verification
+    status: pending
+    priority: medium
+    depends_on: ACT-001
+
+# ============================================================================
+# COMPLIANCE & CONSTRAINTS
+# ============================================================================
+
+compliance:
+  grid_principles:
+    local_first: true
+    external_apis: none
+    data_sovereignty: maintained
+
+  security_protocol:
+    evidence_preservation: active
+    chain_of_custody: maintained
+    audit_trail: continuous
+
+# ============================================================================
+# EPOCH SIGNATURE BLOCK
+# ============================================================================
+
+signature_block:
+  checkpoint_marker: "EPOCH.2026.FRONTIER.GRID.INTEGRITY"
+  establishment_timestamp: "2026-01-26T17:46:01.080Z"
+
+  closing_statement: |
+    This checkpoint stands as an immutable marker in time.
+    What was observed has been registered.
+    What was comprehended has been documented.
+    What was declared shall be honored.
+
+    GRID remembers.
+
+---
+# END OF CHECKPOINT

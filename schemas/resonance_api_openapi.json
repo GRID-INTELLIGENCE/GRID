@@ -1,0 +1,4349 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Mothership Cockpit",
+    "description": "\n# Mothership Cockpit API\n\nLocal integration backend for the Mothership Cockpit system.\n\n## Features\n\n- **Session Management**: Create and manage user sessions\n- **Operation Tracking**: Track long-running operations with progress\n- **Component Health**: Monitor system component health\n- **Alert System**: Create, acknowledge, and resolve alerts\n- **Real-time Updates**: WebSocket support for live updates\n- **Cloud Integration**: Seamless Gemini Studio integration\n\n## Authentication\n\nThe API supports multiple authentication methods:\n- API Key (X-API-Key header)\n- JWT Bearer Token (Authorization header)\n\nDevelopment mode allows unauthenticated access.\n        ",
+    "version": "1.0.0",
+    "x-resonance-api-version": "1.0.0"
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Health Check",
+        "description": "Comprehensive health check endpoint for monitoring",
+        "operationId": "health_check_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_HealthCheckResponse_"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health/live": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Liveness Probe",
+        "description": "Kubernetes liveness probe endpoint",
+        "operationId": "liveness_health_live_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LivenessResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health/ready": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Readiness Probe",
+        "description": "Kubernetes readiness probe endpoint",
+        "operationId": "readiness_health_ready_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadinessResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health/startup": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Startup Probe",
+        "description": "Kubernetes startup probe endpoint",
+        "operationId": "startup_health_startup_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Startup Health Startup Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/version": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Version Information",
+        "description": "Get service version and build information",
+        "operationId": "version_version_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Version Version Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/metrics": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Basic Metrics",
+        "description": "Get basic system metrics",
+        "operationId": "metrics_metrics_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Metrics Metrics Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/payment/create": {
+      "post": {
+        "tags": [
+          "payment"
+        ],
+        "summary": "Create Payment",
+        "description": "Create a payment transaction.\n\nCreates a payment intent with the configured payment gateway.",
+        "operationId": "create_payment_api_v1_payment_create_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_create_payment_api_v1_payment_create_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatePaymentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/payment/webhook": {
+      "post": {
+        "tags": [
+          "payment"
+        ],
+        "summary": "Payment Webhook",
+        "description": "Handle payment webhook events from payment gateway.\n\nVerifies webhook signature and processes payment status updates.",
+        "operationId": "payment_webhook_api_v1_payment_webhook_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/payment/transaction/{transaction_id}": {
+      "get": {
+        "tags": [
+          "payment"
+        ],
+        "summary": "Get Transaction",
+        "description": "Get payment transaction details.",
+        "operationId": "get_transaction_api_v1_payment_transaction__transaction_id__get",
+        "parameters": [
+          {
+            "name": "transaction_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Transaction Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "title": "Auth"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentTransactionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/payment/refund": {
+      "post": {
+        "tags": [
+          "payment"
+        ],
+        "summary": "Refund Payment",
+        "description": "Refund a payment (full or partial).",
+        "operationId": "refund_payment_api_v1_payment_refund_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_refund_payment_api_v1_payment_refund_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefundResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/payment/subscription/create": {
+      "post": {
+        "tags": [
+          "payment"
+        ],
+        "summary": "Create Subscription",
+        "description": "Create a subscription.",
+        "operationId": "create_subscription_api_v1_payment_subscription_create_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_create_subscription_api_v1_payment_subscription_create_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscriptionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/payment/subscription/cancel": {
+      "post": {
+        "tags": [
+          "payment"
+        ],
+        "summary": "Cancel Subscription",
+        "description": "Cancel a subscription.",
+        "operationId": "cancel_subscription_api_v1_payment_subscription_cancel_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_cancel_subscription_api_v1_payment_subscription_cancel_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscriptionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/payment/subscription/{subscription_id}": {
+      "get": {
+        "tags": [
+          "payment"
+        ],
+        "summary": "Get Subscription",
+        "description": "Get subscription details.",
+        "operationId": "get_subscription_api_v1_payment_subscription__subscription_id__get",
+        "parameters": [
+          {
+            "name": "subscription_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Subscription Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "title": "Auth"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscriptionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/payment/subscriptions": {
+      "get": {
+        "tags": [
+          "payment"
+        ],
+        "summary": "List Subscriptions",
+        "description": "List all subscriptions for the current user.",
+        "operationId": "list_subscriptions_api_v1_payment_subscriptions_get",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "type": "object",
+                "title": "Auth"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SubscriptionResponse"
+                  },
+                  "type": "array",
+                  "title": "Response List Subscriptions Api V1 Payment Subscriptions Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/api-keys/": {
+      "get": {
+        "tags": [
+          "api-keys"
+        ],
+        "summary": "List Api Keys",
+        "description": "List all API keys for the current user.",
+        "operationId": "list_api_keys_api_v1_api_keys__get",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "type": "object",
+                "title": "Auth"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/APIKeyResponse"
+                  },
+                  "type": "array",
+                  "title": "Response List Api Keys Api V1 Api Keys  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "api-keys"
+        ],
+        "summary": "Create Api Key",
+        "description": "Create a new API key.\n\nThe plaintext key is only shown once - make sure to store it securely.",
+        "operationId": "create_api_key_api_v1_api_keys__post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_create_api_key_api_v1_api_keys__post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIKeyCreatedResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/api-keys/{key_id}": {
+      "get": {
+        "tags": [
+          "api-keys"
+        ],
+        "summary": "Get Api Key",
+        "description": "Get API key details.",
+        "operationId": "get_api_key_api_v1_api_keys__key_id__get",
+        "parameters": [
+          {
+            "name": "key_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Key Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "title": "Auth"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIKeyResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "api-keys"
+        ],
+        "summary": "Update Api Key",
+        "description": "Update an API key (name or active status).",
+        "operationId": "update_api_key_api_v1_api_keys__key_id__patch",
+        "parameters": [
+          {
+            "name": "key_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Key Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_update_api_key_api_v1_api_keys__key_id__patch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIKeyResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "api-keys"
+        ],
+        "summary": "Delete Api Key",
+        "description": "Delete an API key.",
+        "operationId": "delete_api_key_api_v1_api_keys__key_id__delete",
+        "parameters": [
+          {
+            "name": "key_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Key Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "title": "Auth"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/billing/usage": {
+      "get": {
+        "tags": [
+          "billing"
+        ],
+        "summary": "Get Usage Summary",
+        "description": "Get usage summary for the current user.\n\nReturns usage statistics, tier limits, and current consumption.",
+        "operationId": "get_usage_summary_api_v1_billing_usage_get",
+        "parameters": [
+          {
+            "name": "period_days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 365,
+              "minimum": 1,
+              "description": "Period in days",
+              "default": 30,
+              "title": "Period Days"
+            },
+            "description": "Period in days"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "title": "Auth"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/billing/invoices": {
+      "get": {
+        "tags": [
+          "billing"
+        ],
+        "summary": "List Invoices",
+        "description": "List all invoices for the current user.",
+        "operationId": "list_invoices_api_v1_billing_invoices_get",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "type": "object",
+                "title": "Auth"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/InvoiceResponse"
+                  },
+                  "type": "array",
+                  "title": "Response List Invoices Api V1 Billing Invoices Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/billing/invoices/{invoice_id}": {
+      "get": {
+        "tags": [
+          "billing"
+        ],
+        "summary": "Get Invoice",
+        "description": "Get invoice details.",
+        "operationId": "get_invoice_api_v1_billing_invoices__invoice_id__get",
+        "parameters": [
+          {
+            "name": "invoice_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Invoice Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "title": "Auth"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/resonance/performance/sales": {
+      "get": {
+        "tags": [
+          "resonance",
+          "performance"
+        ],
+        "summary": "Get Sales Data",
+        "operationId": "get_sales_data_api_v1_resonance_performance_sales_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/resonance/performance/user-behavior": {
+      "get": {
+        "tags": [
+          "resonance",
+          "performance"
+        ],
+        "summary": "Get User Behavior",
+        "operationId": "get_user_behavior_api_v1_resonance_performance_user_behavior_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/resonance/performance/product-data": {
+      "get": {
+        "tags": [
+          "resonance",
+          "performance"
+        ],
+        "summary": "Get Product Data",
+        "operationId": "get_product_data_api_v1_resonance_performance_product_data_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/resonance/performance/development-data": {
+      "get": {
+        "tags": [
+          "resonance",
+          "performance"
+        ],
+        "summary": "Get Development Data",
+        "operationId": "get_development_data_api_v1_resonance_performance_development_data_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/resonance/process": {
+      "post": {
+        "tags": [
+          "resonance",
+          "resonance"
+        ],
+        "summary": "Process Activity",
+        "description": "Process an activity with left-to-right communication. Returns context snapshot, path triage, and envelope metrics.",
+        "operationId": "process_activity_api_v1_resonance_process_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActivityProcessRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResonanceResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/resonance/context": {
+      "get": {
+        "tags": [
+          "resonance",
+          "resonance"
+        ],
+        "summary": "Get Fast Context",
+        "description": "Get fast, concise context for a query (left side - application/).",
+        "operationId": "get_context_api_v1_resonance_context_get",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1000,
+              "description": "The query to get context for",
+              "title": "Query"
+            },
+            "description": "The query to get context for"
+          },
+          {
+            "name": "context_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Type of context (general, code, config)",
+              "default": "general",
+              "title": "Context Type"
+            },
+            "description": "Type of context (general, code, config)"
+          },
+          {
+            "name": "max_length",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 2000,
+              "minimum": 50,
+              "description": "Maximum context length",
+              "default": 200,
+              "title": "Max Length"
+            },
+            "description": "Maximum context length"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContextResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/resonance/paths": {
+      "get": {
+        "tags": [
+          "resonance",
+          "resonance"
+        ],
+        "summary": "Get Path Triage",
+        "description": "Get path triage for a goal (right side - light_of_the_seven/).",
+        "operationId": "get_paths_api_v1_resonance_paths_get",
+        "parameters": [
+          {
+            "name": "goal",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1000,
+              "description": "The goal or task",
+              "title": "Goal"
+            },
+            "description": "The goal or task"
+          },
+          {
+            "name": "max_options",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 10,
+              "minimum": 1,
+              "description": "Maximum number of path options",
+              "default": 4,
+              "title": "Max Options"
+            },
+            "description": "Maximum number of path options"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PathTriageResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/resonance/envelope/{activity_id}": {
+      "get": {
+        "tags": [
+          "resonance",
+          "resonance"
+        ],
+        "summary": "Get Envelope Metrics",
+        "description": "Get current ADSR envelope metrics for an activity.",
+        "operationId": "get_envelope_api_v1_resonance_envelope__activity_id__get",
+        "parameters": [
+          {
+            "name": "activity_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Activity ID",
+              "title": "Activity Id"
+            },
+            "description": "Activity ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeMetricsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/resonance/complete/{activity_id}": {
+      "post": {
+        "tags": [
+          "resonance",
+          "resonance"
+        ],
+        "summary": "Complete Activity",
+        "description": "Complete an activity (trigger release phase).",
+        "operationId": "complete_activity_api_v1_resonance_complete__activity_id__post",
+        "parameters": [
+          {
+            "name": "activity_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Activity ID",
+              "title": "Activity Id"
+            },
+            "description": "Activity ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActivityCompleteResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/resonance/events/{activity_id}": {
+      "get": {
+        "tags": [
+          "resonance",
+          "resonance"
+        ],
+        "summary": "Get Activity Events",
+        "description": "Get activity events history.",
+        "operationId": "get_events_api_v1_resonance_events__activity_id__get",
+        "parameters": [
+          {
+            "name": "activity_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Activity ID",
+              "title": "Activity Id"
+            },
+            "description": "Activity ID"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 1000,
+              "minimum": 1,
+              "description": "Maximum number of events to return",
+              "default": 100,
+              "title": "Limit"
+            },
+            "description": "Maximum number of events to return"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActivityEventsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/resonance/definitive": {
+      "post": {
+        "tags": [
+          "resonance",
+          "resonance"
+        ],
+        "summary": "Definitive (Canvas Flip) Step",
+        "description": "A mid-process checkpoint (~65%) that flips a chaotic/free-form view into a coherent, audience-aligned explanation. Combines Resonance context + path triage with Skills (schema transform, compression, optional cross-reference) and optional local-first RAG.",
+        "operationId": "definitive_step_api_v1_resonance_definitive_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DefinitiveStepRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefinitiveStepResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/resonance/debug/config": {
+      "get": {
+        "tags": [
+          "resonance",
+          "debug"
+        ],
+        "summary": "Get Debug Config",
+        "description": "Get current debug configuration.",
+        "operationId": "get_debug_config_api_v1_resonance_debug_config_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Get Debug Config Api V1 Resonance Debug Config Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/intelligence/process": {
+      "post": {
+        "tags": [
+          "intelligence"
+        ],
+        "summary": "Process Intelligence",
+        "operationId": "process_intelligence_api_v1_intelligence_process_post",
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Session Id"
+            }
+          },
+          {
+            "name": "X-Session-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Session-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IntelligenceProcessRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_Dict_str__Any__"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cockpit/health": {
+      "get": {
+        "tags": [
+          "cockpit",
+          "health"
+        ],
+        "summary": "Health Check",
+        "description": "Check the health status of the cockpit system.",
+        "operationId": "health_check_api_v1_cockpit_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthCheckResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cockpit/ready": {
+      "get": {
+        "tags": [
+          "cockpit",
+          "health"
+        ],
+        "summary": "Readiness Probe",
+        "description": "Check if the system is ready to accept requests.",
+        "operationId": "readiness_check_api_v1_cockpit_ready_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadinessResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cockpit/live": {
+      "get": {
+        "tags": [
+          "cockpit",
+          "health"
+        ],
+        "summary": "Liveness Probe",
+        "description": "Check if the system is alive.",
+        "operationId": "liveness_check_api_v1_cockpit_live_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LivenessResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cockpit/state": {
+      "get": {
+        "tags": [
+          "cockpit"
+        ],
+        "summary": "Get Cockpit State",
+        "description": "Get the current state of the cockpit system.",
+        "operationId": "get_state_api_v1_cockpit_state_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_CockpitStateResponse_"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/cockpit/state/full": {
+      "get": {
+        "tags": [
+          "cockpit"
+        ],
+        "summary": "Get Full Cockpit State",
+        "description": "Get complete state including all entities.",
+        "operationId": "get_full_state_api_v1_cockpit_state_full_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_Dict_str__Any__"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/cockpit/info": {
+      "get": {
+        "tags": [
+          "cockpit"
+        ],
+        "summary": "Get System Information",
+        "description": "Get system and application information.",
+        "operationId": "get_system_info_api_v1_cockpit_info_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_SystemInfoResponse_"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cockpit/mode": {
+      "get": {
+        "tags": [
+          "cockpit"
+        ],
+        "summary": "Get Operation Mode",
+        "description": "Get the current operation mode.",
+        "operationId": "get_mode_api_v1_cockpit_mode_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_Dict_str__str__"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "cockpit"
+        ],
+        "summary": "Change Operation Mode",
+        "description": "Change the cockpit operation mode.",
+        "operationId": "change_mode_api_v1_cockpit_mode_put",
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Session Id"
+            }
+          },
+          {
+            "name": "X-Session-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Session-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CockpitModeUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_ModeChangeResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cockpit/diagnostics": {
+      "post": {
+        "tags": [
+          "cockpit"
+        ],
+        "summary": "Run Diagnostics",
+        "description": "Run system diagnostics.",
+        "operationId": "run_diagnostics_api_v1_cockpit_diagnostics_post",
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "include_details",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Include detailed results",
+              "default": true,
+              "title": "Include Details"
+            },
+            "description": "Include detailed results"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_DiagnosticsResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cockpit/shutdown": {
+      "post": {
+        "tags": [
+          "cockpit"
+        ],
+        "summary": "Initiate Shutdown",
+        "description": "Initiate graceful system shutdown.",
+        "operationId": "initiate_shutdown_api_v1_cockpit_shutdown_post",
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Force immediate shutdown",
+              "default": false,
+              "title": "Force"
+            },
+            "description": "Force immediate shutdown"
+          },
+          {
+            "name": "session_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Session Id"
+            }
+          },
+          {
+            "name": "X-Session-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Session-Id"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_Dict_str__Any__"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cockpit/restart": {
+      "post": {
+        "tags": [
+          "cockpit"
+        ],
+        "summary": "Restart System",
+        "description": "Restart the cockpit system.",
+        "operationId": "restart_system_api_v1_cockpit_restart_post",
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Session Id"
+            }
+          },
+          {
+            "name": "X-Session-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Session-Id"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_Dict_str__Any__"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cockpit/stats": {
+      "get": {
+        "tags": [
+          "cockpit"
+        ],
+        "summary": "Get Statistics",
+        "description": "Get cockpit statistics and metrics.",
+        "operationId": "get_statistics_api_v1_cockpit_stats_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_Dict_str__Any__"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/": {
+      "get": {
+        "tags": [
+          "root"
+        ],
+        "summary": "Root",
+        "description": "Root endpoint with API information.",
+        "operationId": "root__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Root  Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ping": {
+      "get": {
+        "tags": [
+          "root"
+        ],
+        "summary": "Ping",
+        "description": "Simple ping endpoint for basic connectivity check.",
+        "operationId": "ping_ping_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object",
+                  "title": "Response Ping Ping Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "APIKeyCreatedResponse": {
+        "properties": {
+          "api_key": {
+            "$ref": "#/components/schemas/APIKeyResponse"
+          },
+          "key": {
+            "type": "string",
+            "title": "Key",
+            "description": "The actual API key (only shown once, store securely)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "api_key",
+          "key"
+        ],
+        "title": "APIKeyCreatedResponse",
+        "description": "Response after creating an API key (includes the key itself - only shown once)."
+      },
+      "APIKeyResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id"
+          },
+          "key_prefix": {
+            "type": "string",
+            "title": "Key Prefix"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "tier": {
+            "type": "string",
+            "title": "Tier"
+          },
+          "last_used_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Used At"
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "user_id",
+          "key_prefix",
+          "name",
+          "tier",
+          "is_active",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "APIKeyResponse",
+        "description": "API key response (without sensitive hash)."
+      },
+      "ActivityCompleteResponse": {
+        "properties": {
+          "activity_id": {
+            "type": "string",
+            "title": "Activity Id",
+            "description": "Activity ID"
+          },
+          "completed": {
+            "type": "boolean",
+            "title": "Completed",
+            "description": "Whether activity was completed"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Completion message"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Timestamp",
+            "description": "Completion timestamp"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "activity_id",
+          "completed",
+          "message"
+        ],
+        "title": "ActivityCompleteResponse",
+        "description": "Response for activity completion."
+      },
+      "ActivityEventResponse": {
+        "properties": {
+          "event_id": {
+            "type": "string",
+            "title": "Event Id",
+            "description": "Event ID"
+          },
+          "timestamp": {
+            "type": "number",
+            "title": "Timestamp",
+            "description": "Event timestamp"
+          },
+          "activity_type": {
+            "type": "string",
+            "title": "Activity Type",
+            "description": "Activity type"
+          },
+          "payload": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Payload",
+            "description": "Event payload"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "event_id",
+          "timestamp",
+          "activity_type",
+          "payload"
+        ],
+        "title": "ActivityEventResponse",
+        "description": "A single activity event."
+      },
+      "ActivityEventsResponse": {
+        "properties": {
+          "activity_id": {
+            "type": "string",
+            "title": "Activity Id",
+            "description": "Activity ID"
+          },
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/ActivityEventResponse"
+            },
+            "type": "array",
+            "title": "Events",
+            "description": "List of events"
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Total",
+            "description": "Total number of events"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "activity_id",
+          "events",
+          "total"
+        ],
+        "title": "ActivityEventsResponse",
+        "description": "Response with activity events history."
+      },
+      "ActivityProcessRequest": {
+        "properties": {
+          "query": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 1,
+            "title": "Query",
+            "description": "The query or goal to process",
+            "examples": [
+              "create a new service"
+            ]
+          },
+          "activity_type": {
+            "$ref": "#/components/schemas/ActivityType",
+            "description": "Type of activity",
+            "default": "general"
+          },
+          "context": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Context",
+            "description": "Additional context for processing"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "query"
+        ],
+        "title": "ActivityProcessRequest",
+        "description": "Request to process an activity with left-to-right communication."
+      },
+      "ActivityType": {
+        "type": "string",
+        "enum": [
+          "general",
+          "code",
+          "config"
+        ],
+        "title": "ActivityType",
+        "description": "Types of activities."
+      },
+      "ApiResponse_CockpitStateResponse_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CockpitStateResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/ResponseMeta"
+          }
+        },
+        "type": "object",
+        "title": "ApiResponse[CockpitStateResponse]"
+      },
+      "ApiResponse_DiagnosticsResponse_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DiagnosticsResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/ResponseMeta"
+          }
+        },
+        "type": "object",
+        "title": "ApiResponse[DiagnosticsResponse]"
+      },
+      "ApiResponse_Dict_str__Any__": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/ResponseMeta"
+          }
+        },
+        "type": "object",
+        "title": "ApiResponse[Dict[str, Any]]"
+      },
+      "ApiResponse_Dict_str__str__": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/ResponseMeta"
+          }
+        },
+        "type": "object",
+        "title": "ApiResponse[Dict[str, str]]"
+      },
+      "ApiResponse_HealthCheckResponse_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HealthCheckResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/ResponseMeta"
+          }
+        },
+        "type": "object",
+        "title": "ApiResponse[HealthCheckResponse]"
+      },
+      "ApiResponse_ModeChangeResponse_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ModeChangeResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/ResponseMeta"
+          }
+        },
+        "type": "object",
+        "title": "ApiResponse[ModeChangeResponse]"
+      },
+      "ApiResponse_SystemInfoResponse_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SystemInfoResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/ResponseMeta"
+          }
+        },
+        "type": "object",
+        "title": "ApiResponse[SystemInfoResponse]"
+      },
+      "Body_cancel_subscription_api_v1_payment_subscription_cancel_post": {
+        "properties": {
+          "request": {
+            "$ref": "#/components/schemas/CancelSubscriptionRequest"
+          },
+          "auth": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Auth"
+          }
+        },
+        "type": "object",
+        "required": [
+          "request"
+        ],
+        "title": "Body_cancel_subscription_api_v1_payment_subscription_cancel_post"
+      },
+      "Body_create_api_key_api_v1_api_keys__post": {
+        "properties": {
+          "request": {
+            "$ref": "#/components/schemas/CreateAPIKeyRequest"
+          },
+          "auth": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Auth"
+          }
+        },
+        "type": "object",
+        "required": [
+          "request"
+        ],
+        "title": "Body_create_api_key_api_v1_api_keys__post"
+      },
+      "Body_create_payment_api_v1_payment_create_post": {
+        "properties": {
+          "request": {
+            "$ref": "#/components/schemas/CreatePaymentRequest"
+          },
+          "auth": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Auth"
+          }
+        },
+        "type": "object",
+        "required": [
+          "request"
+        ],
+        "title": "Body_create_payment_api_v1_payment_create_post"
+      },
+      "Body_create_subscription_api_v1_payment_subscription_create_post": {
+        "properties": {
+          "request": {
+            "$ref": "#/components/schemas/CreateSubscriptionRequest"
+          },
+          "auth": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Auth"
+          }
+        },
+        "type": "object",
+        "required": [
+          "request"
+        ],
+        "title": "Body_create_subscription_api_v1_payment_subscription_create_post"
+      },
+      "Body_refund_payment_api_v1_payment_refund_post": {
+        "properties": {
+          "request": {
+            "$ref": "#/components/schemas/RefundPaymentRequest"
+          },
+          "auth": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Auth"
+          }
+        },
+        "type": "object",
+        "required": [
+          "request"
+        ],
+        "title": "Body_refund_payment_api_v1_payment_refund_post"
+      },
+      "Body_update_api_key_api_v1_api_keys__key_id__patch": {
+        "properties": {
+          "request": {
+            "$ref": "#/components/schemas/UpdateAPIKeyRequest"
+          },
+          "auth": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Auth"
+          }
+        },
+        "type": "object",
+        "required": [
+          "request"
+        ],
+        "title": "Body_update_api_key_api_v1_api_keys__key_id__patch"
+      },
+      "CancelSubscriptionRequest": {
+        "properties": {
+          "subscription_id": {
+            "type": "string",
+            "title": "Subscription Id",
+            "description": "Subscription ID to cancel"
+          },
+          "immediately": {
+            "type": "boolean",
+            "title": "Immediately",
+            "description": "Cancel immediately or at period end",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "subscription_id"
+        ],
+        "title": "CancelSubscriptionRequest",
+        "description": "Request to cancel a subscription."
+      },
+      "CockpitModeUpdateRequest": {
+        "properties": {
+          "mode": {
+            "$ref": "#/components/schemas/OperationModeSchema"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 500,
+            "title": "Reason",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "mode"
+        ],
+        "title": "CockpitModeUpdateRequest",
+        "description": "Request schema for updating cockpit operation mode."
+      },
+      "CockpitStateResponse": {
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/SystemStatusSchema"
+          },
+          "mode": {
+            "$ref": "#/components/schemas/OperationModeSchema"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version"
+          },
+          "uptime_seconds": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Uptime Seconds"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Started At"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/CockpitSummarySchema"
+          },
+          "is_healthy": {
+            "type": "boolean",
+            "title": "Is Healthy",
+            "default": true
+          },
+          "metadata": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Metadata"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "mode",
+          "version",
+          "uptime_seconds",
+          "started_at",
+          "summary"
+        ],
+        "title": "CockpitStateResponse",
+        "description": "Cockpit state response schema."
+      },
+      "CockpitSummarySchema": {
+        "properties": {
+          "total_components": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Total Components",
+            "default": 0
+          },
+          "healthy_components": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Healthy Components",
+            "default": 0
+          },
+          "active_tasks": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Active Tasks",
+            "default": 0
+          },
+          "pending_tasks": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Pending Tasks",
+            "default": 0
+          },
+          "active_alerts": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Active Alerts",
+            "default": 0
+          },
+          "critical_alerts": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Critical Alerts",
+            "default": 0
+          },
+          "active_sessions": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Active Sessions",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "title": "CockpitSummarySchema",
+        "description": "Summary statistics for cockpit state."
+      },
+      "ContextMetricsResponse": {
+        "properties": {
+          "sparsity": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Sparsity",
+            "description": "Context sparsity (0.0=dense, 1.0=sparse)"
+          },
+          "attention_tension": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Attention Tension",
+            "description": "Attention tension (0.0=relaxed, 1.0=tense)"
+          },
+          "decision_pressure": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Decision Pressure",
+            "description": "Decision pressure (0.0=low, 1.0=high)"
+          },
+          "clarity": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Clarity",
+            "description": "Query clarity (0.0=unclear, 1.0=clear)"
+          },
+          "confidence": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Confidence",
+            "description": "System confidence (0.0=uncertain, 1.0=confident)"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "sparsity",
+          "attention_tension",
+          "decision_pressure",
+          "clarity",
+          "confidence"
+        ],
+        "title": "ContextMetricsResponse",
+        "description": "Context quality and decision tension metrics."
+      },
+      "ContextResponse": {
+        "properties": {
+          "content": {
+            "type": "string",
+            "title": "Content",
+            "description": "Context content"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Context source"
+          },
+          "metrics": {
+            "$ref": "#/components/schemas/ContextMetricsResponse",
+            "description": "Context metrics"
+          },
+          "timestamp": {
+            "type": "number",
+            "title": "Timestamp",
+            "description": "Timestamp when context was generated"
+          },
+          "relevance_score": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Relevance Score",
+            "description": "Relevance score"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "content",
+          "source",
+          "metrics",
+          "timestamp",
+          "relevance_score"
+        ],
+        "title": "ContextResponse",
+        "description": "Response with context snapshot."
+      },
+      "CreateAPIKeyRequest": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Name",
+            "description": "User-friendly name for the API key"
+          },
+          "expires_in_days": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires In Days",
+            "description": "Number of days until expiration (None for no expiration)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "CreateAPIKeyRequest",
+        "description": "Request to create an API key."
+      },
+      "CreatePaymentRequest": {
+        "properties": {
+          "amount_cents": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Amount Cents",
+            "description": "Amount in cents"
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency",
+            "description": "Currency code",
+            "default": "USD"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "description": "Payment description"
+          },
+          "gateway": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PaymentGatewaySchema"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Payment gateway (defaults to configured gateway)"
+          },
+          "metadata": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metadata",
+            "description": "Additional metadata"
+          }
+        },
+        "type": "object",
+        "required": [
+          "amount_cents",
+          "description"
+        ],
+        "title": "CreatePaymentRequest",
+        "description": "Request to create a payment."
+      },
+      "CreatePaymentResponse": {
+        "properties": {
+          "transaction": {
+            "$ref": "#/components/schemas/PaymentTransactionResponse"
+          },
+          "client_secret": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Client Secret",
+            "description": "Client secret for payment confirmation (Stripe)"
+          },
+          "payment_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Payment Url",
+            "description": "Payment URL for redirect (bKash)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "transaction"
+        ],
+        "title": "CreatePaymentResponse",
+        "description": "Response after creating a payment."
+      },
+      "CreateSubscriptionRequest": {
+        "properties": {
+          "tier": {
+            "$ref": "#/components/schemas/SubscriptionTierSchema",
+            "description": "Subscription tier"
+          },
+          "payment_method_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Payment Method Id",
+            "description": "Payment method ID from gateway"
+          },
+          "gateway": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PaymentGatewaySchema"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Payment gateway (defaults to configured gateway)"
+          },
+          "metadata": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metadata",
+            "description": "Additional metadata"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tier"
+        ],
+        "title": "CreateSubscriptionRequest",
+        "description": "Request to create a subscription."
+      },
+      "DefinitiveChoiceResponse": {
+        "properties": {
+          "direction": {
+            "type": "string",
+            "title": "Direction",
+            "description": "Metaphor direction: left | right | straight"
+          },
+          "option": {
+            "$ref": "#/components/schemas/PathOptionResponse",
+            "description": "Path option"
+          },
+          "why": {
+            "type": "string",
+            "title": "Why",
+            "description": "When to choose this path"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "direction",
+          "option",
+          "why"
+        ],
+        "title": "DefinitiveChoiceResponse",
+        "description": "A metaphor-labeled path option (left/right/straight)."
+      },
+      "DefinitiveStepRequest": {
+        "properties": {
+          "query": {
+            "type": "string",
+            "maxLength": 4000,
+            "minLength": 1,
+            "title": "Query",
+            "description": "The query, goal, or freeform narrative to align"
+          },
+          "activity_type": {
+            "$ref": "#/components/schemas/ActivityType",
+            "description": "Type of activity",
+            "default": "general"
+          },
+          "context": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Context",
+            "description": "Optional context for processing"
+          },
+          "progress": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Progress",
+            "description": "Progress ratio hint (0..1). 0.65 represents the 'red light' checkpoint",
+            "default": 0.65
+          },
+          "target_schema": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Target Schema",
+            "description": "Schema name for transform.schema_map (e.g., context_engineering, resonance, knowledgebase)",
+            "default": "context_engineering"
+          },
+          "use_rag": {
+            "type": "boolean",
+            "title": "Use Rag",
+            "description": "If true, enrich the response with a local-first RAG query (requires an existing index)",
+            "default": false
+          },
+          "use_llm": {
+            "type": "boolean",
+            "title": "Use Llm",
+            "description": "If true, allow LLM-backed behavior (local Ollama only). Heuristic-only by default.",
+            "default": false
+          },
+          "max_chars": {
+            "type": "integer",
+            "maximum": 2000.0,
+            "minimum": 20.0,
+            "title": "Max Chars",
+            "description": "Character budget for the compressed 'one-line' summary",
+            "default": 280
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "query"
+        ],
+        "title": "DefinitiveStepRequest",
+        "description": "Request to run the 'definitive' (canvas-flip) step.",
+        "examples": [
+          {
+            "activity_type": "general",
+            "context": {},
+            "max_chars": 200,
+            "progress": 0.65,
+            "query": "Where do these features connect and what is the main function of this update?",
+            "target_schema": "context_engineering",
+            "use_llm": false,
+            "use_rag": false
+          }
+        ]
+      },
+      "DefinitiveStepResponse": {
+        "properties": {
+          "activity_id": {
+            "type": "string",
+            "title": "Activity Id",
+            "description": "Activity ID"
+          },
+          "progress": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Progress",
+            "description": "Progress ratio hint (0..1)"
+          },
+          "canvas_before": {
+            "type": "string",
+            "title": "Canvas Before",
+            "description": "Pre-checkpoint view state"
+          },
+          "canvas_after": {
+            "type": "string",
+            "title": "Canvas After",
+            "description": "Post-checkpoint view state"
+          },
+          "summary": {
+            "type": "string",
+            "title": "Summary",
+            "description": "One-line compressed explanation"
+          },
+          "faq": {
+            "items": {
+              "$ref": "#/components/schemas/FAQItemResponse"
+            },
+            "type": "array",
+            "title": "Faq",
+            "description": "Audience-facing FAQ"
+          },
+          "use_cases": {
+            "items": {
+              "$ref": "#/components/schemas/UseCaseResponse"
+            },
+            "type": "array",
+            "title": "Use Cases",
+            "description": "Use-case scenarios"
+          },
+          "api_mechanics": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Api Mechanics",
+            "description": "Key entry points and mechanics"
+          },
+          "structured": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Structured",
+            "description": "Structured schema transform output"
+          },
+          "context": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ContextResponse"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Context snapshot"
+          },
+          "paths": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PathTriageResponse"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Path triage"
+          },
+          "choices": {
+            "items": {
+              "$ref": "#/components/schemas/DefinitiveChoiceResponse"
+            },
+            "type": "array",
+            "title": "Choices",
+            "description": "Metaphor-labeled path choices"
+          },
+          "skills": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Skills",
+            "description": "Raw skill outputs (for debugging/inspection)"
+          },
+          "rag": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rag",
+            "description": "Optional RAG enrichment payload"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "activity_id",
+          "progress",
+          "canvas_before",
+          "canvas_after",
+          "summary"
+        ],
+        "title": "DefinitiveStepResponse",
+        "description": "Response for the 'definitive' (canvas-flip) step.",
+        "examples": [
+          {
+            "activity_id": "550e8400-e29b-41d4-a716-446655440000",
+            "api_mechanics": [
+              "POST /api/v1/resonance/definitive"
+            ],
+            "canvas_after": "Canvas flipped: context, options, and structured intent become visible.",
+            "canvas_before": "Canvas inverted: free-form work looks chaotic because the viewing frame is flipped.",
+            "choices": [],
+            "faq": [
+              {
+                "answer": "A mid-process checkpoint.",
+                "question": "What is this?"
+              }
+            ],
+            "progress": 0.65,
+            "skills": {},
+            "structured": {},
+            "summary": "At the ~65% checkpoint, Resonance aligns the view and produces structured output.",
+            "use_cases": [
+              {
+                "audience": "Builders",
+                "entrypoint": "POST /api/v1/resonance/definitive",
+                "output": "Structured schema + path choices",
+                "scenario": "Convert a vague goal into structured plan."
+              }
+            ]
+          }
+        ]
+      },
+      "DiagnosticResult": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": ""
+          },
+          "duration_ms": {
+            "type": "number",
+            "title": "Duration Ms",
+            "default": 0.0
+          },
+          "details": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Details"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "status"
+        ],
+        "title": "DiagnosticResult",
+        "description": "Single diagnostic check result."
+      },
+      "DiagnosticsResponse": {
+        "properties": {
+          "overall_status": {
+            "type": "string",
+            "title": "Overall Status"
+          },
+          "checks": {
+            "items": {
+              "$ref": "#/components/schemas/DiagnosticResult"
+            },
+            "type": "array",
+            "title": "Checks"
+          },
+          "total_duration_ms": {
+            "type": "number",
+            "title": "Total Duration Ms"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Timestamp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "overall_status",
+          "checks",
+          "total_duration_ms",
+          "timestamp"
+        ],
+        "title": "DiagnosticsResponse",
+        "description": "Full diagnostics response."
+      },
+      "EnvelopeMetricsResponse": {
+        "properties": {
+          "phase": {
+            "type": "string",
+            "title": "Phase",
+            "description": "Current envelope phase"
+          },
+          "amplitude": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Amplitude",
+            "description": "Current amplitude"
+          },
+          "velocity": {
+            "type": "number",
+            "title": "Velocity",
+            "description": "Rate of change"
+          },
+          "time_in_phase": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Time In Phase",
+            "description": "Time in current phase (seconds)"
+          },
+          "total_time": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Total Time",
+            "description": "Total envelope time (seconds)"
+          },
+          "peak_amplitude": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Peak Amplitude",
+            "description": "Peak amplitude reached"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "phase",
+          "amplitude",
+          "velocity",
+          "time_in_phase",
+          "total_time",
+          "peak_amplitude"
+        ],
+        "title": "EnvelopeMetricsResponse",
+        "description": "ADSR envelope metrics."
+      },
+      "FAQItemResponse": {
+        "properties": {
+          "question": {
+            "type": "string",
+            "title": "Question",
+            "description": "FAQ question"
+          },
+          "answer": {
+            "type": "string",
+            "title": "Answer",
+            "description": "FAQ answer"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "question",
+          "answer"
+        ],
+        "title": "FAQItemResponse",
+        "description": "FAQ item for audience-facing explanations."
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HealthCheckResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "default": "healthy"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version"
+          },
+          "uptime_seconds": {
+            "type": "number",
+            "title": "Uptime Seconds"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Timestamp"
+          },
+          "checks": {
+            "additionalProperties": {
+              "type": "boolean"
+            },
+            "type": "object",
+            "title": "Checks"
+          }
+        },
+        "type": "object",
+        "required": [
+          "version",
+          "uptime_seconds"
+        ],
+        "title": "HealthCheckResponse",
+        "description": "Health check response schema."
+      },
+      "IntelligenceProcessRequest": {
+        "properties": {
+          "data": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Data"
+          },
+          "context": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Context"
+          },
+          "include_evidence": {
+            "type": "boolean",
+            "title": "Include Evidence",
+            "default": true
+          },
+          "reset_session": {
+            "type": "boolean",
+            "title": "Reset Session",
+            "default": false
+          }
+        },
+        "type": "object",
+        "title": "IntelligenceProcessRequest"
+      },
+      "InvoiceResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id"
+          },
+          "subscription_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subscription Id"
+          },
+          "amount_cents": {
+            "type": "integer",
+            "title": "Amount Cents"
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "period_start": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Period Start"
+          },
+          "period_end": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Period End"
+          },
+          "due_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Due Date"
+          },
+          "paid_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Paid At"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "user_id",
+          "amount_cents",
+          "currency",
+          "status",
+          "period_start",
+          "period_end",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "InvoiceResponse",
+        "description": "Invoice response."
+      },
+      "LivenessResponse": {
+        "properties": {
+          "alive": {
+            "type": "boolean",
+            "title": "Alive",
+            "default": true
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Timestamp"
+          }
+        },
+        "type": "object",
+        "title": "LivenessResponse",
+        "description": "Liveness probe response schema."
+      },
+      "ModeChangeResponse": {
+        "properties": {
+          "previous_mode": {
+            "type": "string",
+            "title": "Previous Mode"
+          },
+          "current_mode": {
+            "type": "string",
+            "title": "Current Mode"
+          },
+          "changed_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Changed At"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "previous_mode",
+          "current_mode",
+          "changed_at"
+        ],
+        "title": "ModeChangeResponse",
+        "description": "Response for mode change operations."
+      },
+      "OperationModeSchema": {
+        "type": "string",
+        "enum": [
+          "normal",
+          "maintenance",
+          "emergency",
+          "readonly",
+          "recovery"
+        ],
+        "title": "OperationModeSchema",
+        "description": "Operation mode for API responses."
+      },
+      "PathOptionResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "Path option ID"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Path name"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "description": "Path description"
+          },
+          "complexity": {
+            "type": "string",
+            "title": "Complexity",
+            "description": "Complexity level"
+          },
+          "steps": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Steps",
+            "description": "Step-by-step breakdown"
+          },
+          "input_scenario": {
+            "type": "string",
+            "title": "Input Scenario",
+            "description": "Input scenario"
+          },
+          "output_scenario": {
+            "type": "string",
+            "title": "Output Scenario",
+            "description": "Output scenario"
+          },
+          "estimated_time": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Estimated Time",
+            "description": "Estimated time in seconds"
+          },
+          "confidence": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Confidence",
+            "description": "Confidence score"
+          },
+          "recommendation_score": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Recommendation Score",
+            "description": "Recommendation score"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "description",
+          "complexity",
+          "steps",
+          "input_scenario",
+          "output_scenario",
+          "estimated_time",
+          "confidence",
+          "recommendation_score"
+        ],
+        "title": "PathOptionResponse",
+        "description": "A single path option."
+      },
+      "PathTriageResponse": {
+        "properties": {
+          "goal": {
+            "type": "string",
+            "title": "Goal",
+            "description": "The goal or task"
+          },
+          "options": {
+            "items": {
+              "$ref": "#/components/schemas/PathOptionResponse"
+            },
+            "type": "array",
+            "title": "Options",
+            "description": "Path options"
+          },
+          "recommended": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PathOptionResponse"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Recommended path option"
+          },
+          "glimpse_summary": {
+            "type": "string",
+            "title": "Glimpse Summary",
+            "description": "Quick glimpse summary"
+          },
+          "total_options": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Total Options",
+            "description": "Total number of options"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "goal",
+          "options",
+          "glimpse_summary",
+          "total_options"
+        ],
+        "title": "PathTriageResponse",
+        "description": "Response with path triage options."
+      },
+      "PaymentGatewaySchema": {
+        "type": "string",
+        "enum": [
+          "stripe",
+          "bkash"
+        ],
+        "title": "PaymentGatewaySchema",
+        "description": "Payment gateway types."
+      },
+      "PaymentStatusSchema": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "processing",
+          "completed",
+          "failed",
+          "cancelled",
+          "refunded",
+          "partially_refunded"
+        ],
+        "title": "PaymentStatusSchema",
+        "description": "Payment status for API responses."
+      },
+      "PaymentTransactionResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id"
+          },
+          "amount_cents": {
+            "type": "integer",
+            "title": "Amount Cents"
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency"
+          },
+          "status": {
+            "$ref": "#/components/schemas/PaymentStatusSchema"
+          },
+          "gateway": {
+            "$ref": "#/components/schemas/PaymentGatewaySchema"
+          },
+          "gateway_transaction_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gateway Transaction Id"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "failure_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Failure Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "user_id",
+          "amount_cents",
+          "currency",
+          "status",
+          "gateway",
+          "description",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "PaymentTransactionResponse",
+        "description": "Payment transaction response."
+      },
+      "ReadinessResponse": {
+        "properties": {
+          "ready": {
+            "type": "boolean",
+            "title": "Ready",
+            "default": true
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": ""
+          },
+          "dependencies": {
+            "additionalProperties": {
+              "type": "boolean"
+            },
+            "type": "object",
+            "title": "Dependencies"
+          }
+        },
+        "type": "object",
+        "title": "ReadinessResponse",
+        "description": "Readiness probe response schema."
+      },
+      "RefundPaymentRequest": {
+        "properties": {
+          "transaction_id": {
+            "type": "string",
+            "title": "Transaction Id",
+            "description": "Transaction ID to refund"
+          },
+          "amount_cents": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Amount Cents",
+            "description": "Amount to refund in cents (None for full refund)"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason",
+            "description": "Reason for refund"
+          }
+        },
+        "type": "object",
+        "required": [
+          "transaction_id"
+        ],
+        "title": "RefundPaymentRequest",
+        "description": "Request to refund a payment."
+      },
+      "RefundResponse": {
+        "properties": {
+          "refund_id": {
+            "type": "string",
+            "title": "Refund Id"
+          },
+          "transaction_id": {
+            "type": "string",
+            "title": "Transaction Id"
+          },
+          "amount_cents": {
+            "type": "integer",
+            "title": "Amount Cents"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "refund_id",
+          "transaction_id",
+          "amount_cents",
+          "status",
+          "created_at"
+        ],
+        "title": "RefundResponse",
+        "description": "Response after creating a refund."
+      },
+      "ResonanceResponse": {
+        "properties": {
+          "activity_id": {
+            "type": "string",
+            "title": "Activity Id",
+            "description": "Activity ID"
+          },
+          "state": {
+            "type": "string",
+            "title": "State",
+            "description": "Current resonance state"
+          },
+          "urgency": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Urgency",
+            "description": "Urgency level"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Status message"
+          },
+          "context": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ContextResponse"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Context snapshot"
+          },
+          "paths": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PathTriageResponse"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Path triage"
+          },
+          "envelope": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EnvelopeMetricsResponse"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Envelope metrics"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Timestamp",
+            "description": "Response timestamp"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "activity_id",
+          "state",
+          "urgency",
+          "message"
+        ],
+        "title": "ResonanceResponse",
+        "description": "Full resonance response with context, paths, and envelope."
+      },
+      "ResponseMeta": {
+        "properties": {
+          "request_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Request Id"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Timestamp"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version",
+            "default": "1.0.0"
+          }
+        },
+        "type": "object",
+        "title": "ResponseMeta",
+        "description": "Metadata for API responses."
+      },
+      "SubscriptionResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id"
+          },
+          "tier": {
+            "$ref": "#/components/schemas/SubscriptionTierSchema"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SubscriptionStatusSchema"
+          },
+          "current_period_start": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Current Period Start"
+          },
+          "current_period_end": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Current Period End"
+          },
+          "cancel_at_period_end": {
+            "type": "boolean",
+            "title": "Cancel At Period End"
+          },
+          "cancelled_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cancelled At"
+          },
+          "gateway": {
+            "$ref": "#/components/schemas/PaymentGatewaySchema"
+          },
+          "gateway_subscription_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gateway Subscription Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "user_id",
+          "tier",
+          "status",
+          "current_period_start",
+          "current_period_end",
+          "cancel_at_period_end",
+          "gateway",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "SubscriptionResponse",
+        "description": "Subscription response."
+      },
+      "SubscriptionStatusSchema": {
+        "type": "string",
+        "enum": [
+          "active",
+          "cancelled",
+          "past_due",
+          "unpaid",
+          "trialing",
+          "expired"
+        ],
+        "title": "SubscriptionStatusSchema",
+        "description": "Subscription status."
+      },
+      "SubscriptionTierSchema": {
+        "type": "string",
+        "enum": [
+          "free",
+          "starter",
+          "professional",
+          "enterprise"
+        ],
+        "title": "SubscriptionTierSchema",
+        "description": "Subscription tier levels."
+      },
+      "SystemInfoResponse": {
+        "properties": {
+          "app_name": {
+            "type": "string",
+            "title": "App Name"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version"
+          },
+          "environment": {
+            "type": "string",
+            "title": "Environment"
+          },
+          "uptime_seconds": {
+            "type": "number",
+            "title": "Uptime Seconds"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "python_version": {
+            "type": "string",
+            "title": "Python Version",
+            "default": ""
+          },
+          "host": {
+            "type": "string",
+            "title": "Host",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "app_name",
+          "version",
+          "environment",
+          "uptime_seconds"
+        ],
+        "title": "SystemInfoResponse",
+        "description": "System information response."
+      },
+      "SystemStatusSchema": {
+        "type": "string",
+        "enum": [
+          "operational",
+          "degraded",
+          "maintenance",
+          "offline",
+          "initializing",
+          "error"
+        ],
+        "title": "SystemStatusSchema",
+        "description": "System status for API responses."
+      },
+      "UpdateAPIKeyRequest": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name",
+            "description": "Update the name"
+          },
+          "is_active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Active",
+            "description": "Activate or deactivate the key"
+          }
+        },
+        "type": "object",
+        "title": "UpdateAPIKeyRequest",
+        "description": "Request to update an API key."
+      },
+      "UseCaseResponse": {
+        "properties": {
+          "audience": {
+            "type": "string",
+            "title": "Audience",
+            "description": "Audience segment"
+          },
+          "scenario": {
+            "type": "string",
+            "title": "Scenario",
+            "description": "Use-case scenario"
+          },
+          "entrypoint": {
+            "type": "string",
+            "title": "Entrypoint",
+            "description": "How to trigger (CLI or API)"
+          },
+          "output": {
+            "type": "string",
+            "title": "Output",
+            "description": "Expected output"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "audience",
+          "scenario",
+          "entrypoint",
+          "output"
+        ],
+        "title": "UseCaseResponse",
+        "description": "A short use-case scenario."
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "APIKeyHeader": {
+        "type": "apiKey",
+        "description": "API key for authentication",
+        "in": "header",
+        "name": "X-API-Key"
+      },
+      "HTTPBearer": {
+        "type": "http",
+        "description": "JWT Bearer token",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

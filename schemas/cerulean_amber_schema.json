@@ -1,0 +1,121 @@
+{
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "CeruleanAmberWorkspaceAesthetics",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "editor": {
+        "type": "object",
+        "properties": {
+          "background": {
+            "type": "string",
+            "pattern": "^#(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$"
+          },
+          "cursor": {
+            "type": "string",
+            "pattern": "^#(?:[0-9a-fA-F]{6})$"
+          },
+          "selection": {
+            "type": "string",
+            "pattern": "^#(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$"
+          }
+        },
+        "required": [
+          "background",
+          "cursor",
+          "selection"
+        ],
+        "additionalProperties": false
+      },
+      "aiChatPanel": {
+        "type": "object",
+        "properties": {
+          "background": {
+            "type": "string",
+            "pattern": "^#(?:[0-9a-fA-F]{6})$"
+          },
+          "headerAccent": {
+            "type": "string",
+            "pattern": "^#(?:[0-9a-fA-F]{6})$"
+          },
+          "terminalBackground": {
+            "type": "string",
+            "pattern": "^#(?:[0-9a-fA-F]{6})$"
+          }
+        },
+        "required": [
+          "background",
+          "headerAccent"
+        ],
+        "additionalProperties": false
+      },
+      "structure": {
+        "type": "object",
+        "properties": {
+          "borderColor": {
+            "type": "string",
+            "pattern": "^#(?:[0-9a-fA-F]{6})$"
+          },
+          "foldersUseDefaults": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "borderColor",
+          "foldersUseDefaults"
+        ],
+        "additionalProperties": false
+      },
+      "verification": {
+        "type": "object",
+        "properties": {
+          "automatedCheckCommand": {
+            "type": "string"
+          },
+          "manualChecks": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "automatedCheckCommand",
+          "manualChecks"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "required": [
+      "editor",
+      "aiChatPanel",
+      "structure",
+      "verification"
+    ]
+  },
+  "example": {
+    "editor": {
+      "background": "#0b0e14",
+      "cursor": "#ffeb3b",
+      "selection": "#ffd54f33"
+    },
+    "aiChatPanel": {
+      "background": "#11141b",
+      "headerAccent": "#ffeb3b",
+      "terminalBackground": "#151921"
+    },
+    "structure": {
+      "borderColor": "#1b1f27",
+      "foldersUseDefaults": true
+    },
+    "verification": {
+      "automatedCheckCommand": "cat e:\\grid\\grid.code-workspace",
+      "manualChecks": [
+        "Explorer shows default folder coloring",
+        "Editor background and text contrast are readable",
+        "AI Chat side panel uses proposed accents"
+      ]
+    }
+  }
+}

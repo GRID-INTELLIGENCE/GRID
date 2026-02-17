@@ -1,0 +1,4 @@
+# file: E:\grid\application\mothership\routers\health.py
+# hypothesis_version: 6.150.0
+
+[0.0, '/health', '/health/live', '/health/ready', '/health/startup', '/metrics', '/version', 'Basic Metrics', 'Cockpit check failed', 'Cockpit not started', 'Health Check', 'Liveness Probe', 'Readiness Probe', 'Service is ready', 'Startup Probe', 'State not accessible', 'System has issues', 'System is healthy', 'Version Information', 'active', 'alerts', 'app_name', 'cockpit', 'components', 'critical', 'debug', 'environment', 'gemini', 'health', 'healthy', 'no_critical_alerts', 'operations', 'python_version', 'router', 'running', 'sessions', 'started', 'state', 'state_store', 'timestamp', 'total', 'unhealthy', 'unresolved', 'uptime_seconds', 'version', 'webhooks']

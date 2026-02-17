@@ -1,0 +1,475 @@
+[project]
+name = "grid-intelligence"
+version = "2.2.2"
+description = "GRID - Geometric Resonance Intelligence Driver: A comprehensive framework for exploring complex systems through geometric resonance patterns, cognitive decision support, local-first AI, and event-driven agentic systems"
+authors = [{ name = "Irfan Kabir", email = "irfankabir02@gmail.com" }]
+requires-python = ">=3.13,<3.14"
+readme = "README.md"
+license = { file = "LICENSE" }
+keywords = [
+    "ai",
+    "machine-learning",
+    "cognitive-architecture",
+    "rag",
+    "agentic",
+    "ddd",
+    "geometric-resonance",
+    "event-driven",
+]
+
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: Other/Proprietary License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+]
+
+dependencies = [
+    # Core Framework
+    "fastapi>=0.104.0",
+    "httpx>=0.25.0",
+    "uvicorn[standard]>=0.24.0",
+    "pydantic>=2.4.0",
+    "pydantic-core>=2.14.0",
+    "pydantic-settings>=2.0.0",
+    "annotated-types>=0.6.0",
+    "annotated-doc>=0.0.2",
+    "python-dotenv>=1.0.0",
+    # Data Science & ML
+    "numpy>=1.24.0",
+    "scikit-learn==1.8.0",
+    "tiktoken>=0.12.0",
+    "networkx>=3.0",
+    # Database & Storage
+    "asyncpg>=0.29.0",
+    "sqlalchemy[asyncio]>=2.0.0",
+    "alembic>=1.13.0",
+    "redis>=5.0.0",
+    "aiosqlite>=0.19.0",
+    # Task Queue & Background Processing
+    "celery>=5.3.0",
+    "schedule>=1.2.2",
+    "aio-pika>=9.0.0",
+    # Safety (Cognitive Privacy Shield)
+    "grid-safety>=1.0.0",
+    # Security & Authentication
+    "python-jose[cryptography]>=3.3.0",
+    "bcrypt>=4.1.0",
+    "email-validator>=2.1.0.post1",
+    "stripe>=14.0.1",
+    # External Services
+    "databricks-sql-connector>=4.2.4",
+    "databricks-sdk>=0.40.0",
+    # Document Ingestion
+    "pyyaml>=6.0.0",
+    "nbformat>=5.9.0",
+    "pypdf2>=3.0.0",
+    "python-docx>=0.8.11",
+    "beautifulsoup4>=4.12.0",
+    "detect-secrets>=1.4.0",
+    # Logging & Observability
+    "structlog>=23.1.0",
+    "prometheus-client>=0.19.0",
+    "prometheus-fastapi-instrumentator>=7.0.0",
+    "opentelemetry-api>=1.21.0",
+    "opentelemetry-sdk>=1.21.0",
+    "opentelemetry-exporter-jaeger>=1.21.0",
+    "opentelemetry-exporter-otlp>=0.42.0",
+    "opentelemetry-instrumentation-fastapi>=0.42b0",
+    "opentelemetry-instrumentation-sqlalchemy>=0.42b0",
+    "opentelemetry-instrumentation-requests>=0.42b0",
+    "opentelemetry-instrumentation-httpx>=0.42b0",
+    "opentelemetry-instrumentation-logging>=0.42b0",
+    # Testing (core dependencies)
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "mcp[cli]>=1.25.0",
+    "rank-bm25>=0.2.2",
+    "sentence-transformers>=5.2.0",
+    "chromadb>=1.4.1",
+    "ollama>=0.6.1",
+    "huggingface-hub>=1.0",
+    "pytest-cov>=4.1.0",
+    "pytest-timeout>=2.1.0",
+    "psutil>=5.9.0",
+    "ruff>=0.0.291",
+    "mypy>=1.5.1",
+    "hatch>=1.16.2",
+    "hatchling>=1.28.0",
+    "anyio>=4.0.0",
+    "click>=8.0.0",
+    "jinja2>=3.1.0",
+    "markupsafe>=2.0.0",
+    "requests>=2.28.0",
+    "rich>=13.0.0",
+    "tqdm>=4.65.0",
+    "typing-extensions>=4.5.0",
+    "setuptools<81",
+]
+
+[project.urls]
+Homepage = "https://github.com/caraxesthebloodwyrm02/GRID"
+Repository = "https://github.com/caraxesthebloodwyrm02/GRID"
+Issues = "https://github.com/caraxesthebloodwyrm02/GRID/issues"
+
+[project.scripts]
+# Core CLI commands
+grid = "grid.__main__:main"
+grid-api = "grid.entry_points.api_entry:main"
+grid-cli = "grid.entry_points.cli_entry:main"
+grid-service = "grid.entry_points.service_entry:main"
+
+# New system commands
+grid-agentic = "grid.agentic.__main__:main"
+grid-workflow = "grid.workflow.__main__:main"
+grid-context = "grid.context.__main__:main"
+
+# Development tools
+rag-query = "tools.rag.cli:query"
+rag-index = "tools.rag.cli:index"
+rag-stats = "tools.rag.cli:stats"
+rag-chat = "tools.rag.chat:main"
+
+# Databricks integration
+databricks-cli = "integration.databricks.cli:main"
+
+[project.optional-dependencies]
+test = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.1.0",
+    "psutil>=5.9.0",
+]
+dev = ["ruff>=0.0.291", "mypy>=1.5.1"]
+ai = ["mistralai>=0.1.0", "openai>=1.0.0"]
+
+[dependency-groups]
+test = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.1.0",
+    "pytest-timeout>=2.1.0",
+    "psutil>=5.9.0",
+]
+dev = [
+    "hatch",
+    "hatchling",
+    "ruff>=0.0.291",
+    "mypy>=1.5.1",
+    "asyncpg-stubs>=0.31.1",
+    "pre-commit>=4.5.1",
+]
+ai = ["mistralai>=0.1.0", "openai>=1.0.0"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = [
+    "src/grid",
+    "src/application",
+    "src/cognitive",
+    "src/tools",
+]
+exclude = [
+    "src/api/**",
+    "src/cli/**",
+    "src/core/**",
+    "src/database/**",
+    "src/kernel/**",
+    "src/nl_dev/**",
+    "src/physics/**",
+    "src/plugins/**",
+    "src/throughput_engine/**",
+    "src/utils/**",
+    "src/valuation/**",
+    "**/__pycache__/**",
+    "**/*.pyc",
+    "dev/**",
+    "reports/**",
+    "docs-ext/**",
+    "docs/completion_reports/**",
+    "docs/reports/analysis/analysis_report/**",
+    "artifacts/debug_logs/**",
+    "light_of_the_seven/**",
+    "datakit/**",
+    "archival/**",
+    "core/**",
+    "SEGA/**",
+    "Arena/**",
+    "frontend/**",
+    "grid_exercises/**",
+    ".case_references/**",
+    ".case_memory/**",
+    "EUFLE/**",
+]
+
+# UV config is managed at workspace root (../../../pyproject.toml)
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+# Note: pytest-timeout timeout is set via command-line --timeout flag or @pytest.mark.timeout()
+# Default timeout can be set via: pytest --timeout=300 --timeout-method=thread
+
+# Exclude scratch tests from default runs
+# Scratch tests are experimental and should not block CI
+# Use pytest-ignore or command-line --ignore flag instead
+
+# Suppress warnings
+filterwarnings = [
+    "ignore::DeprecationWarning:pkg_resources",
+    "ignore::DeprecationWarning:sqlalchemy.*",
+    "ignore::DeprecationWarning:pydantic.*",
+]
+
+# Test markers
+markers = [
+    "scratch: Experimental tests (excluded from CI)",
+    "unit: Unit tests (fast, isolated)",
+    "integration: Integration tests (slower, cross-module)",
+    "api: API endpoint tests",
+    "critical: Critical path tests (must pass)",
+    "flaky: Flaky tests (may fail intermittently)",
+    "slow: Slow running tests (> 1 second)",
+    "asyncio: Async tests",
+    "database: Tests requiring database",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py313"
+# Inherit workspace rules; project-specific excludes below
+exclude = [
+    "light_of_the_seven/",
+    "datakit/",
+    "archival/",
+    "core/",
+    "SEGA/",
+    "data/",
+    "logs/",
+    "analysis_report/",
+    "artifacts/",
+    "artifacts/debug_logs/",
+    "docs/completion_reports/",
+    "docs/reports/analysis/analysis_report/",
+    "research_snapshots/",
+    "venv/",
+    ".venv/",
+    ".venv_locked/",
+    "__pycache__/",
+    "*.pyc",
+    "Arena/",
+    "frontend/",
+    "grid_exercises/",
+    ".case_references/",
+    ".case_memory/",
+    "archive/",
+    "EUFLE/",
+    "research/",
+    "examples/*.ipynb",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "B", "I", "W", "UP", "ASYNC"]
+extend-ignore = [
+    "B007", # Unused loop control variable (stylistic)
+    "B008", # Allow FastAPI Depends()
+    "B018", # Useless attribute access (stylistic)
+    "B904", # Exception chaining is stylistic preference
+    "E501", # Allow longer lines
+    "E402", # Allow imports not at top of file
+    "E741", # Ambiguous variable name (contextual)
+    "W293", # Whitespace in blank lines (docstrings)
+    "UP035", # Deprecated typing imports (widespread, auto-fixable later)
+    "ASYNC101", # Allow async functions without await (contextual - some are wrappers)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]  # Public API re-exports are intentional
+"__main__.py" = ["F401"]  # Optional imports checked at runtime
+"**/demo*.py" = ["F401", "F841"]  # Demo files often have unused imports
+"**/routers/*.py" = ["B904", "F401"]  # HTTP exception re-raising + optional imports
+"**/security/*.py" = ["B904"]  # Security exception re-raising pattern
+"**/db/*.py" = ["F401"]  # Optional database imports
+"**/*_connector.py" = ["F401"]  # Connector availability checks
+"**/integration*.py" = ["F401"]  # Optional integrations
+"**/indexing/*.py" = ["F401"]  # Optional rich/CLI imports
+"**/hot_reload*.py" = ["F401"]  # Optional watchdog imports
+"**/mcp/*.py" = ["F401"]  # Optional RAG imports
+"**/audit_logger.py" = ["F401"]  # Optional cloud logging
+"**/*learning*.py" = ["F401"]  # Optional learning imports
+
+[tool.ruff.lint.isort]
+known-first-party = ["grid", "application", "cognitive", "tools"]
+
+[tool.mypy]
+python_version = "3.13"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+explicit_package_bases = true
+namespace_packages = true
+mypy_path = "src"
+# Exclude root-level directories that are also in src/ to avoid duplication errors
+exclude = ["^application/", "^grid/", "^tools/", "^cognitive/", "^tests/", "^integration/databricks/"]
+
+[[tool.mypy.overrides]]
+module = [
+    "sentence_transformers.*",
+    "rank_bm25.*",
+    "scikit_learn.*",
+    "sklearn.*",
+    "chromadb.*",
+    "huggingface_hub.*",
+    "networkx.*",
+    "scipy.*",
+    "numpy.*",
+    "ollama.*",
+    "prometheus_client.*",
+    "databricks.*",
+    "celery.*",
+    "stripe.*",
+    "bcrypt.*",
+    "jose.*",
+    "asyncpg.*",
+    "sqlalchemy.*",
+    "alembic.*",
+    "yaml.*",
+    "psutil.*",
+    "google.cloud.*",
+    "requests.*",
+    "aiohttp.*",
+    "mistralai.*",
+    "watchdog.*",
+    "structlog.*",
+    "prometheus_fastapi_instrumentator.*",
+    "neo4j.*",
+    "EQ.*",
+    "backend.*",
+    "pandas.*",
+    "aiofiles.*",
+    "aio_pika.*",
+    "light_of_the_seven.*",
+    "application.mothership.ner_service",
+    "application.mothership.config.security.secret_validation",
+    "application.mothership.config.utils",
+    "grid.cognitive.engine",
+    "config.cognitive_settings",
+    "config.quality_gates",
+    "src.grid.persistence.database",
+    "EQ.integration",
+    "mistralai",
+    "application.mothership.ner_service",
+    "prometheus_client",
+    ".event_bus.event_system",
+    ".ai_ml.intelligence_system",
+    ".api_gateway.gateway",
+    ".service_mesh.mesh",
+    "case_filing",
+    "continuous_learning",
+    "processing_unit",
+    "advanced_protocols",
+    "reference_generator",
+    "tools.rag.core.config",
+    "tools.rag.core.embeddings.factory",
+    "tools.rag.core.indexer",
+    "tools.rag.core.llm.factory",
+    "tools.rag.core.utils",
+    "tools.rag.core.vector_store.base",
+    "tools.rag.core.vector_store.chromadb_store",
+    "tools.rag.core.vector_store.databricks_store",
+    "tools.rag.core.vector_store.registry",
+    "tools.rag.core.vector_store",
+    "tools.rag.retrieval.types",
+    "tools.rag.retrieval.config",
+    "tools.rag.retrieval.store",
+    "tools.rag.retrieval.embeddings.simple",
+    "tools.rag.file_tracker",
+    "tools.rag.retrieval.reranker",
+    "nest_asyncio",
+    "openai",
+    "faiss",
+    "mlflow",
+    "cognitive_layer.navigation.input_processor",
+    "datakit.tool.semantic_grep",
+    "EQ",
+    "vection.interfaces.context_interface",
+    "audit_logger",
+    "vection.workers.pool",
+    "vection.workers.base",
+    "gateway",
+    "infrastructure.api_gateway.gateway",
+    "requests",
+    "jsonschema",
+    "openapi_spec_validator",
+]
+ignore_missing_imports = true
+follow_imports = "skip"
+
+[[tool.mypy.overrides]]
+module = [
+    "src.application.mothership.ner_service",
+    "src.tools.pulse_monitor",
+    "src.tools.ambient_sound",
+    "src.tools.zoology_mapper",
+    "application.mothership.ner_service",
+    "tools.pulse_monitor",
+    "tools.ambient_sound",
+    "tools.zoology_mapper",
+]
+ignore_missing_imports = true
+
+[tool.coverage.run]
+source = ["src"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "*/__pycache__/*",
+    "*/venv/*",
+    "*/.venv/*",
+    "*/site-packages/*",
+    "*/dist-packages/*",
+    "*/migrations/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "def __str__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+    "pass",
+    "\\.\\.\\.",
+]
+fail_under = 75
+precision = 2
+show_missing = true
+skip_covered = false
+sort = "Miss"
+
+[tool.coverage.html]
+directory = "htmlcov"

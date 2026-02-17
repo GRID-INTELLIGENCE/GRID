@@ -1,0 +1,163 @@
+{
+  "cases": [
+    {
+      "case_id": "CASE-85a2eb52cf14",
+      "timestamp": "2026-01-09T07:39:04.624396",
+      "category": "testing",
+      "keywords": [
+        "unit"
+      ],
+      "priority": "medium",
+      "confidence": 0.125,
+      "solution_summary": null,
+      "metadata": {
+        "protocol": "advanced",
+        "web_search_performed": true,
+        "memory_searches": [],
+        "generated_queries": [
+          {
+            "question": "Is this case primarily about testing?",
+            "type": "multiple_choice",
+            "options": [
+              "Yes, it's about testing",
+              "No, it's about something else",
+              "Partially, but also involves other aspects"
+            ],
+            "purpose": "Confirm category classification"
+          },
+          {
+            "question": "What is the priority level for this case?",
+            "type": "multiple_choice",
+            "options": [
+              "Critical",
+              "High",
+              "Medium",
+              "Low"
+            ],
+            "purpose": "Confirm priority level"
+          },
+          {
+            "question": "What is the scope of this case?",
+            "type": "multiple_choice",
+            "options": [
+              "Single module/component",
+              "Multiple modules/components",
+              "System-wide change",
+              "Architectural change"
+            ],
+            "purpose": "Clarify scope"
+          }
+        ],
+        "nuances": [
+          "Low category confidence (0.12) - case may require manual review or additional context"
+        ],
+        "insights": [],
+        "web_search_results": {
+          "queries": [
+            "testing unit"
+          ],
+          "results": [
+            {
+              "title": "Example result for testing",
+              "snippet": "Relevant information about the case category",
+              "url": "https://example.com"
+            }
+          ],
+          "note": "Web search integration required - use local RAG or external API"
+        }
+      }
+    },
+    {
+      "case_id": "CASE-a70e212f591a",
+      "timestamp": "2026-01-09T07:40:10.584475",
+      "category": "testing",
+      "keywords": [
+        "unit"
+      ],
+      "priority": "medium",
+      "confidence": 0.125,
+      "solution_summary": null,
+      "metadata": {
+        "protocol": "advanced",
+        "web_search_performed": true,
+        "memory_searches": [
+          {
+            "case_id": "CASE-85a2eb52cf14",
+            "similarity": 1.0,
+            "category": "testing",
+            "solution": null,
+            "type": "keyword_match"
+          },
+          {
+            "case_id": "CASE-85a2eb52cf14",
+            "similarity": 0.5,
+            "category": "testing",
+            "solution": null,
+            "type": "category_match"
+          }
+        ],
+        "generated_queries": [
+          {
+            "question": "Is this case primarily about testing?",
+            "type": "multiple_choice",
+            "options": [
+              "Yes, it's about testing",
+              "No, it's about something else",
+              "Partially, but also involves other aspects"
+            ],
+            "purpose": "Confirm category classification"
+          },
+          {
+            "question": "What is the priority level for this case?",
+            "type": "multiple_choice",
+            "options": [
+              "Critical",
+              "High",
+              "Medium",
+              "Low"
+            ],
+            "purpose": "Confirm priority level"
+          },
+          {
+            "question": "What is the scope of this case?",
+            "type": "multiple_choice",
+            "options": [
+              "Single module/component",
+              "Multiple modules/components",
+              "System-wide change",
+              "Architectural change"
+            ],
+            "purpose": "Clarify scope"
+          }
+        ],
+        "nuances": [
+          "Low category confidence (0.12) - case may require manual review or additional context"
+        ],
+        "insights": [
+          "Found 2 similar cases in memory - review solutions for patterns"
+        ],
+        "web_search_results": {
+          "queries": [
+            "testing unit"
+          ],
+          "results": [
+            {
+              "title": "Example result for testing",
+              "snippet": "Relevant information about the case category",
+              "url": "https://example.com"
+            }
+          ],
+          "note": "Web search integration required - use local RAG or external API"
+        }
+      }
+    }
+  ],
+  "patterns": {},
+  "solutions": {},
+  "keywords": {
+    "unit": [
+      "CASE-85a2eb52cf14",
+      "CASE-a70e212f591a"
+    ]
+  }
+}

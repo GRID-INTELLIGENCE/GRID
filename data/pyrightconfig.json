@@ -1,0 +1,9 @@
+{
+    "exclude": [
+        "**/_mirror/**",
+        "**/light_of_the_seven/light_of_the_seven/**",
+        "**/light_of_the_seven/src/**",
+        "**/archival/**"
+    ],
+    "typeCheckingMode": "strict"
+}

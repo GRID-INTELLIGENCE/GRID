@@ -1,0 +1,16 @@
+{
+  "alert_id": "1a520372-b455-4beb-b6a7-c5376735ec83",
+  "rule_id": "01f21daf-ae82-492d-9675-0d608a0cfa9f",
+  "status": "firing",
+  "severity": "warning",
+  "message": "Test alert",
+  "labels": {
+    "service": "test"
+  },
+  "annotations": {},
+  "starts_at": "2026-01-25T16:07:50.025718",
+  "ends_at": null,
+  "updated_at": "2026-01-25T16:07:50.025719",
+  "fingerprint": "d13121e8e2e27f7ff068f4f234045c42",
+  "notification_sent": {}
+}

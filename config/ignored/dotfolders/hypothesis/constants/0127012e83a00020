@@ -1,0 +1,4 @@
+# file: E:\grid\application\mothership\db\engine.py
+# hypothesis_version: 6.150.0
+
+['+aiosqlite', '+asyncpg', 'echo', 'max_overflow', 'pool_size', 'pool_timeout', 'poolclass', 'postgres://', 'postgresql://', 'sqlite+', 'sqlite+aiosqlite:///', 'sqlite://', 'sqlite:///']

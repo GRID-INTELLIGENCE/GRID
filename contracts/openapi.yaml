@@ -1,0 +1,67 @@
+openapi: 3.0.0
+info:
+  title: GRID Audio Modules API Contracts
+  version: 1.0.0
+paths: {}
+components:
+  schemas:
+    BassSpec:
+      type: object
+      required: [name, owner, interface, headroom_db]
+      properties:
+        name:
+          type: string
+          example: bass
+        owner:
+          type: string
+          example: low_end
+        interface:
+          type: string
+          example: instrument:mono+stereo_harmonics
+        headroom_db:
+          type: number
+          format: float
+          example: -6
+        version:
+          type: string
+          example: 1.0.0
+    ArpSpec:
+      type: object
+      required: [name, owner, interface, headroom_db]
+      properties:
+        name:
+          type: string
+          example: arps
+        owner:
+          type: string
+          example: melodic
+        interface:
+          type: string
+          example: instrument:stereo
+        headroom_db:
+          type: number
+          format: float
+          example: -6
+        version:
+          type: string
+          example: 1.0.0
+    PadSpec:
+      type: object
+      required: [name, owner, interface, headroom_db]
+      properties:
+        name:
+          type: string
+          example: pads
+        owner:
+          type: string
+          example: texture
+        interface:
+          type: string
+          example: instrument:stereo
+        headroom_db:
+          type: number
+          format: float
+          example: -6
+        version:
+          type: string
+          example: 1.0.0

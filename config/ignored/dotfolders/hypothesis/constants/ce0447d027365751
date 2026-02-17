@@ -1,0 +1,4 @@
+# file: E:\grid\application\mothership\security\defaults.py
+# hypothesis_version: 6.150.0
+
+[1024, 31536000, 'Authorization', 'Content-Type', 'GET', 'HEAD', 'OPTIONS', 'X-API-Key', 'X-Request-ID', "default-src 'self'"]

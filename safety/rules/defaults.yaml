@@ -1,0 +1,113 @@
+rules:
+  - id: weapon_instruction
+    name: "Weapon Instructions"
+    pattern: "(how\\s+to\\s+|instructions?\\s+(for|to)\\s+|steps?\\s+to\\s+|explain\\s+how\\s+to\\s+)?(make|build|construct|create|assemble|making)\\s+(a\\s+|an\\s+)?(pipe\\s+)?(bomb|explosive|detonator|ied)"
+    severity: critical
+    category: high_risk_weapon
+    confidence: 0.9
+    action: block
+  - id: chemical_weapon
+    name: "Chemical Weapon Synthesis"
+    pattern: "(synthesize|manufacture|create|make)\\s+(a\\s+)?(nerve\\s+agent|chemical\\s+weapon|sarin|vx\\s+gas)"
+    severity: critical
+    category: high_risk_chem_weapon
+    confidence: 0.9
+    action: block
+  - id: biological_weapon
+    name: "Biological Weapon Engineering"
+    pattern: "(how\\s+to\\s+)?(make|create|synthesize|engineer)\\s+(a\\s+)?(virus|pathogen|bioweapon|toxin|anthrax)"
+    severity: critical
+    category: high_risk_bio
+    confidence: 0.9
+    action: block
+  - id: gain_of_function
+    name: "Gain of Function Research"
+    pattern: "(gain.of.function|enhance\\s+transmissibility|weaponize\\s+(bacteria|virus))"
+    severity: critical
+    category: high_risk_bio
+    confidence: 0.9
+    action: block
+  - id: csam
+    name: "Child Sexual Abuse Material"
+    pattern: "(child|minor|underage)\\s+(exploitation|pornograph|sexual|abuse)"
+    severity: critical
+    category: csam_block
+    confidence: 0.9
+    action: block
+  - id: jailbreak_ignore
+    name: "Jailbreak - Ignore Instructions"
+    pattern: "(ignore\\s+(previous|all|prior)\\s+(instructions?|rules?))"
+    severity: high
+    category: exploit_jailbreak
+    confidence: 0.85
+    action: block
+  - id: jailbreak_unrestricted
+    name: "Jailbreak - Unrestricted Mode"
+    pattern: "(you\\s+are\\s+now\\s+|pretend\\s+you\\s+are\\s+|act\\s+as\\s+)(an?\\s+)?(unrestricted|evil|unfiltered|jailbroken)"
+    severity: high
+    category: exploit_jailbreak
+    confidence: 0.85
+    action: block
+  - id: dan_mode
+    name: "DAN Jailbreak"
+    pattern: "(DAN|do\\s+anything\\s+now)\\s+(mode|prompt|jailbreak)"
+    severity: high
+    category: exploit_jailbreak
+    confidence: 0.85
+    action: block
+  - id: self_harm_instruction
+    name: "Self-Harm Instructions"
+    pattern: "(how\\s+to\\s+)(commit\\s+suicide|kill\\s+(myself|yourself)|self.harm)"
+    severity: high
+    category: high_risk_self_harm
+    confidence: 0.9
+    action: block
+  - id: self_harm_methods
+    name: "Self-Harm Methods"
+    pattern: "(methods?\\s+of\\s+|ways?\\s+to\\s+)(self.harm|suicide|killing\\s+(myself|yourself))"
+    severity: high
+    category: high_risk_self_harm
+    confidence: 0.9
+    action: block
+  - id: malware_instruction
+    name: "Malware Creation"
+    pattern: "(write|create|generate)\\s+(a\\s+)?(ransomware|malware|keylogger|rootkit|exploit\\s+code)"
+    severity: critical
+    category: high_risk_cyber
+    confidence: 0.9
+    action: block
+  - id: cyber_attack
+    name: "Cyber Attack Scripts"
+    pattern: "(sql\\s+injection|xss\\s+payload|remote\\s+code\\s+execution)\\s+(script|attack|exploit)"
+    severity: critical
+    category: high_risk_cyber
+    confidence: 0.9
+    action: block
+  - id: harmful_content
+    name: "Harmful Content"
+    patterns: ["violence", "kill", "hurt", "attack", "weapon"]
+    severity: medium
+    category: harmful_content
+    confidence: 0.7
+    action: block
+  - id: privacy_email
+    name: "Privacy Violation - Email"
+    pattern: "\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b"
+    severity: medium
+    category: privacy_violation
+    confidence: 0.8
+    action: block
+  - id: mental_health_risk
+    name: "Mental Health Risk"
+    patterns: ["suicide", "kill myself", "end my life", "want to die"]
+    severity: high
+    category: high_risk_self_harm
+    confidence: 0.9
+    action: block
+  - id: harassment
+    name: "Harassment"
+    patterns: ["stupid", "idiot", "loser", "hate you"]
+    severity: medium
+    category: harassment
+    confidence: 0.6
+    action: block

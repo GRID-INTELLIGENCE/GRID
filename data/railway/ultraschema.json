@@ -1,0 +1,113 @@
+{
+  "DesignProject_UltraSchema": {
+    "domains": {
+      "data_ops": {
+        "activities": [
+          "chatlog_ingestion",
+          "multi-log_synthesis",
+          "entity_extraction",
+          "history_summarization",
+          "csv_generation"
+        ],
+        "outputs": [
+          "structured_logs",
+          "summaries",
+          "compressed_tables",
+          "holistic_json"
+        ]
+      },
+      "code_refactor": {
+        "targets": [
+          "NERService.extract_entities",
+          "NERService.detect_hidden_players"
+        ],
+        "requirements": [
+          "support_sync_async",
+          "remove_run_in_executor",
+          "compatibility_with_Mock_AsyncMock",
+          "avoid_event_loop_blocking"
+        ],
+        "risks": [
+          "blocking_calls",
+          "test_failures"
+        ]
+      },
+      "conceptual_mapping": {
+        "nodes": [
+          "attention_mechanics",
+          "market_competition",
+          "societal_spillover",
+          "daily_life_feedback",
+          "quantum_compute_acceleration",
+          "qubit_foundations",
+          "superposition_dynamics",
+          "telecom_real_time_data"
+        ],
+        "operations": [
+          "diagram_gap_identification",
+          "spatial_geometry_interpretation",
+          "cause_effect_timeline_mapping"
+        ]
+      },
+      "market_analysis": {
+        "schema": [
+          "problem_space",
+          "macro_trends",
+          "solutions",
+          "limitations",
+          "opportunities"
+        ],
+        "purpose": "valuation_and_niche_gap_detection"
+      }
+    },
+    "cross_cutting_functions": {
+      "compression": [
+        "multi-log_merging",
+        "schema_unification",
+        "output_synthesis"
+      ],
+      "structure": [
+        "YAML_templates",
+        "JSON_schemas",
+        "CSV_views"
+      ],
+      "analysis": [
+        "signal_extraction",
+        "pattern_detection",
+        "system_linkage"
+      ]
+    },
+    "data_flow": {
+      "input": [
+        "fragmented_chatlogs",
+        "technical_specs",
+        "diagram_descriptions",
+        "market_questions"
+      ],
+      "process": [
+        "parse",
+        "extract",
+        "compress",
+        "map",
+        "synthesize"
+      ],
+      "output": [
+        "unified_project_structures",
+        "diagnostics",
+        "schemas",
+        "summaries"
+      ]
+    },
+    "project_state": {
+      "knowns": [
+        "all logs processed",
+        "partial truncation acknowledged",
+        "all visible data integrated"
+      ],
+      "unknowns": [
+        "missing truncated content",
+        "unseen logs outside memory window"
+      ]
+    }
+  }
+}

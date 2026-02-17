@@ -1,0 +1,39 @@
+================================================================================
+NER SERVICE → SYSTEM COMPONENT UPGRADE PLAN
+================================================================================
+
+Phase 1: Analysis & Design
+--------------------------------------------------------------------------------
+⚪ [NER-001] Audit Current NER Service
+   Priority: CRITICAL | Map existing endpoints, dependencies, and data flow
+⚪ [NER-002] Define System Component Interface
+   Priority: CRITICAL | Create abstract base class with lifecycle methods (depends: NER-001)
+⚪ [NER-003] Design Event Bus Integration
+   Priority: HIGH | Define events: EntityExtracted, RelationshipMapped, etc. (depends: NER-002)
+
+Phase 2: Core Implementation
+--------------------------------------------------------------------------------
+⚪ [NER-004] Implement NERComponent Class
+   Priority: CRITICAL | Inherit from BaseSystemComponent, add start/stop/health (depends: NER-002)
+⚪ [NER-005] Build Entity Extraction Pipeline
+   Priority: HIGH | Refactor extraction logic into pipeline pattern (depends: NER-004)
+⚪ [NER-006] Add Relationship Mapping
+   Priority: HIGH | Graph-based relationship detection and storage (depends: NER-005)
+
+Phase 3: Integration
+--------------------------------------------------------------------------------
+⚪ [NER-007] Create Configuration Schema
+   Priority: MEDIUM | YAML/JSON config for models, thresholds, features (depends: NER-004)
+⚪ [NER-008] Integrate with Grid System
+   Priority: CRITICAL | Register component, wire event handlers (depends: NER-004, NER-003)
+
+Phase 4: Testing & Documentation
+--------------------------------------------------------------------------------
+⚪ [NER-009] Write Unit Tests
+   Priority: HIGH | Test extraction, relationships, lifecycle (depends: NER-006)
+⚪ [NER-010] Write Integration Tests
+   Priority: HIGH | Test event flow, Grid integration (depends: NER-008)
+⚪ [NER-011] Create API Documentation
+   Priority: MEDIUM | Document component interface, events, config (depends: NER-008)
+
+================================================================================

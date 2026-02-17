@@ -1,0 +1,66 @@
+{
+  "ner_schema": {
+    "LIFESTYLE": {
+      "keywords": ["lifestyle", "healthy environment", "relaxed", "living", "environment", "work-life balance"],
+      "description": "References to personal lifestyle choices and living conditions"
+    },
+    "PERSONALIZATION": {
+      "keywords": ["your", "you", "personal", "individual", "perspective", "concerns"],
+      "description": "Direct personal targeting and individual framing"
+    },
+    "COMPENSATION": {
+      "keywords": ["compensated", "compensation", "wage", "salary", "resources", "pay", "income"],
+      "description": "Compensation and financial remuneration topics"
+    },
+    "METAPHORICAL": {
+      "keywords": ["metaphor", "translate", "analogy", "frame", "perspective"],
+      "description": "Metaphorical language and reframing techniques"
+    },
+    "PROCEDURAL": {
+      "keywords": ["process", "procedure", "guidelines", "channels", "formal", "policy"],
+      "description": "Procedural and bureaucratic language"
+    },
+    "DEFLECTION": {
+      "keywords": ["focus on", "revisit", "postpone", "redirect", "let's", "we'll"],
+      "description": "Deflection and redirection language patterns"
+    },
+    "ACKNOWLEDGMENT": {
+      "keywords": ["understand", "acknowledge", "valid", "hear", "recognize"],
+      "description": "Direct acknowledgment language"
+    },
+    "NEUTRAL": {
+      "keywords": ["discuss", "open", "consider", "review", "address"],
+      "description": "Neutral, non-targeted language"
+    }
+  },
+  "anomaly_patterns": {
+    "personalized_deflection": {
+      "description": "Combination of personalization + lifestyle + compensation topics",
+      "threshold": 0.7,
+      "indicators": ["LIFESTYLE", "PERSONALIZATION", "COMPENSATION"],
+      "severity": "high"
+    },
+    "procedural_deflection": {
+      "description": "Procedural language used to deflect compensation requests",
+      "threshold": 0.4,
+      "indicators": ["PROCEDURAL", "DEFLECTION", "COMPENSATION"],
+      "severity": "medium"
+    },
+    "metaphorical_reframing": {
+      "description": "Using metaphors to reframe compensation issues",
+      "threshold": 0.6,
+      "indicators": ["METAPHORICAL", "COMPENSATION", "PERSONALIZATION"],
+      "severity": "high"
+    }
+  },
+  "detection_rules": {
+    "co_occurrence_weight": 0.3,
+    "context_proximity": 50,
+    "minimum_confidence": 0.5,
+    "severity_multipliers": {
+      "high": 1.5,
+      "medium": 1.0,
+      "low": 0.5
+    }
+  }
+}

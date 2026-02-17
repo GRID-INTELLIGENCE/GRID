@@ -1,0 +1,4 @@
+# file: E:\grid\application\resonance\context_provider.py
+# hypothesis_version: 6.150.0
+
+[0.0, 0.3, 0.5, 0.6, 0.7, 0.8, 1.0, 10.0, 50.0, 200, 300, '?', 'api', 'choose', 'code', 'config', 'config.py', 'endpoint', 'error', 'fail', 'general', 'model', 'mothership', 'option', 'route', 'router', 'schema', 'service', 'test']

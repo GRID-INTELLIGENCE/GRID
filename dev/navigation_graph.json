@@ -1,0 +1,161 @@
+{
+  "entities": {
+    "nav_2.0_3.0": {
+      "entity_id": "nav_2.0_3.0",
+      "entity_type": "Context",
+      "properties": {
+        "id": "nav_2.0_3.0",
+        "name": "Navigation Point at (2.0, 3.0)",
+        "coords": [
+          2.0,
+          3.0,
+          0.0
+        ],
+        "attributes": {
+          "terrain": "urban",
+          "obstacles": [
+            "building",
+            "park"
+          ],
+          "traffic_level": "medium",
+          "visibility": "good"
+        },
+        "confidence": 1.0
+      },
+      "created_at": "2026-02-12T14:15:10.289523+00:00",
+      "updated_at": "2026-02-12T14:15:10.289523+00:00",
+      "labels": []
+    },
+    "nav_1.0_2.0": {
+      "entity_id": "nav_1.0_2.0",
+      "entity_type": "Context",
+      "properties": {
+        "id": "nav_1.0_2.0",
+        "name": "Navigation Point at (1.0, 2.0)",
+        "coords": [
+          1.0,
+          2.0,
+          0.0
+        ],
+        "attributes": {
+          "terrain": "urban",
+          "obstacles": [
+            "building",
+            "park"
+          ],
+          "traffic_level": "medium",
+          "visibility": "good"
+        },
+        "confidence": 0.8
+      },
+      "created_at": "2026-02-12T14:15:10.301014+00:00",
+      "updated_at": "2026-02-12T14:15:10.301014+00:00",
+      "labels": []
+    },
+    "nav_1.0_1.0": {
+      "entity_id": "nav_1.0_1.0",
+      "entity_type": "Context",
+      "properties": {
+        "id": "nav_1.0_1.0",
+        "name": "Navigation Point at (1.0, 1.0)",
+        "coords": [
+          1.0,
+          1.0,
+          0.0
+        ],
+        "attributes": {
+          "terrain": "urban",
+          "traffic": "light"
+        },
+        "confidence": 1.0
+      },
+      "created_at": "2026-02-12T14:15:10.370464+00:00",
+      "updated_at": "2026-02-12T14:15:10.370464+00:00",
+      "labels": []
+    },
+    "nav_1.5_1.2": {
+      "entity_id": "nav_1.5_1.2",
+      "entity_type": "Context",
+      "properties": {
+        "id": "nav_1.5_1.2",
+        "name": "Navigation Point at (1.5, 1.2)",
+        "coords": [
+          1.5,
+          1.2,
+          0.0
+        ],
+        "attributes": {
+          "type": "road"
+        },
+        "confidence": 1.0
+      },
+      "created_at": "2026-02-12T14:15:10.313891+00:00",
+      "updated_at": "2026-02-12T14:15:10.313891+00:00",
+      "labels": []
+    },
+    "nav_2.0_1.4": {
+      "entity_id": "nav_2.0_1.4",
+      "entity_type": "Context",
+      "properties": {
+        "id": "nav_2.0_1.4",
+        "name": "Navigation Point at (2.0, 1.4)",
+        "coords": [
+          2.0,
+          1.4,
+          0.0
+        ],
+        "attributes": {
+          "type": "intersection"
+        },
+        "confidence": 1.0
+      },
+      "created_at": "2026-02-12T14:15:10.314407+00:00",
+      "updated_at": "2026-02-12T14:15:10.314407+00:00",
+      "labels": []
+    },
+    "nav_2.0_2.0": {
+      "entity_id": "nav_2.0_2.0",
+      "entity_type": "Context",
+      "properties": {
+        "id": "nav_2.0_2.0",
+        "name": "Navigation Point at (2.0, 2.0)",
+        "coords": [
+          2.0,
+          2.0,
+          0.0
+        ],
+        "attributes": {
+          "terrain": "urban",
+          "traffic": "medium"
+        },
+        "confidence": 1.0
+      },
+      "created_at": "2026-02-12T14:15:10.371063+00:00",
+      "updated_at": "2026-02-12T14:15:10.371063+00:00",
+      "labels": []
+    },
+    "nav_3.0_3.0": {
+      "entity_id": "nav_3.0_3.0",
+      "entity_type": "Context",
+      "properties": {
+        "id": "nav_3.0_3.0",
+        "name": "Navigation Point at (3.0, 3.0)",
+        "coords": [
+          3.0,
+          3.0,
+          0.0
+        ],
+        "attributes": {
+          "terrain": "park",
+          "traffic": "none"
+        },
+        "confidence": 1.0
+      },
+      "created_at": "2026-02-12T14:15:10.371532+00:00",
+      "updated_at": "2026-02-12T14:15:10.371532+00:00",
+      "labels": []
+    }
+  },
+  "relationships": {},
+  "last_updated": "2026-02-12T20:15:10.371575"
+}

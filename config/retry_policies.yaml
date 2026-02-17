@@ -1,0 +1,74 @@
+# Retry Policy Overrides for GRID
+# 
+# This configuration file allows runtime tuning of retry policies without code changes.
+# All values are optional; missing values fall back to built-in defaults.
+#
+# Environment variables can also override policies:
+#   GRID_POLICY_NETWORK_MAX_ATTEMPTS=5
+#   GRID_POLICY_NETWORK_BACKOFF_FACTOR=1.5
+#   GRID_POLICY_LLM_TIMEOUT_SECONDS=300
+
+# Network operations (HTTP calls, socket connections)
+network:
+  max_attempts: 4
+  backoff_factor: 2.0
+  initial_delay: 1.0
+  max_delay: 60.0
+  timeout_seconds: 120
+
+# File I/O operations (read/write/delete)
+file_io:
+  max_attempts: 3
+  backoff_factor: 2.0
+  initial_delay: 0.1
+  max_delay: 10.0
+  timeout_seconds: 30
+
+# Database operations (queries, transactions)
+database:
+  max_attempts: 3
+  backoff_factor: 2.0
+  initial_delay: 0.5
+  max_delay: 30.0
+  timeout_seconds: 60
+
+# LLM model operations (inference, embeddings)
+llm:
+  max_attempts: 3
+  backoff_factor: 2.0
+  initial_delay: 2.0
+  max_delay: 60.0
+  timeout_seconds: 180
+
+# RAG operations (vectorization, retrieval)
+rag:
+  max_attempts: 3
+  backoff_factor: 2.0
+  initial_delay: 1.0
+  max_delay: 30.0
+  timeout_seconds: 120
+
+# Skill execution (domain transformations)
+skill:
+  max_attempts: 2
+  backoff_factor: 2.0
+  initial_delay: 1.0
+  max_delay: 20.0
+  timeout_seconds: 60
+
+# CLI/Command operations (immediate feedback)
+command:
+  max_attempts: 1
+  backoff_factor: 1.0
+  initial_delay: 0.0
+  max_delay: 0.0
+  timeout_seconds: 300
+
+# Custom operation type example (not pre-defined)
+# Add any custom operation types that your system uses
+# custom_operation:
+#   max_attempts: 3
+#   backoff_factor: 1.5
+#   initial_delay: 0.5
+#   max_delay: 20.0
+#   timeout_seconds: 60

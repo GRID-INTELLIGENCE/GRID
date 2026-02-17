@@ -1,0 +1,248 @@
+# The Chase — Arena Configuration
+# Configuration file for Arena/the_chase penalty system and rule engine
+#
+# This file defines:
+# - Rules for behavioral evaluation and penalty escalation
+# - Environment-specific configurations (city, village, tournament, casual)
+# - Settings for penalty multipliers, thresholds, and IO output
+
+version: "1.0"
+
+metadata:
+  author: "Arena Team"
+  description: "Arena penalty system and rule engine configuration"
+  created: "2024"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# RULES
+# Rules define conditions and actions for the penalty system.
+# Rules are evaluated in priority order (lower numbers = higher priority).
+# ═══════════════════════════════════════════════════════════════════════════════
+
+rules:
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Escalation Rules (High Priority)
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  - id: repeated_violation
+    name: "Repeated Violation Escalation"
+    condition: "violation_count >= 3"
+    action: escalate_penalty
+    priority: 10
+    category: escalation
+    description: "Escalate penalty level when violations reach threshold (3+)"
+    enabled: true
+
+  - id: severe_violation
+    name: "Severe Violation Handler"
+    condition: "violation_count >= 5"
+    action: escalate_penalty
+    priority: 5
+    category: escalation
+    description: "Immediate escalation for severe violation patterns"
+    enabled: true
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Reputation Rules
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  - id: low_reputation_warning
+    name: "Low Reputation Warning"
+    condition: "reputation < 0.3"
+    action: warn
+    priority: 20
+    category: reputation
+    description: "Issue warning when reputation drops critically low"
+    enabled: true
+
+  - id: critical_reputation
+    name: "Critical Reputation Alert"
+    condition: "reputation < 0.1"
+    action: escalate_penalty
+    priority: 15
+    category: reputation
+    description: "Escalate when reputation is critically low"
+    enabled: true
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Rate-Based Rules
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  - id: high_violation_rate
+    name: "High Violation Rate Penalty"
+    condition: "violation_count >= 2"
+    action: fine
+    priority: 25
+    category: rate
+    description: "Penalize high frequency of violations"
+    enabled: true
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Environment-Specific Rules
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  # City Environment Rules
+  - id: strict_traffic
+    name: "Strict Traffic Rules"
+    condition: "violation_count >= 2"
+    action: fine
+    priority: 15
+    category: city
+    description: "City environment has stricter traffic rules"
+    enabled: true
+
+  - id: noise_ordinance
+    name: "Noise Ordinance"
+    condition: "penalty_level == 'warned'"
+    action: fine
+    priority: 25
+    category: city
+    description: "Escalate to fine after warning in city"
+    enabled: true
+
+  # Village Environment Rules
+  - id: community_norms
+    name: "Community Norms"
+    condition: "violation_count >= 5"
+    action: warn
+    priority: 30
+    category: village
+    description: "Village is more lenient with violations"
+    enabled: true
+
+  - id: harvest_season
+    name: "Harvest Season Leniency"
+    condition: "reputation < 0.5"
+    action: log
+    priority: 40
+    category: village
+    description: "During harvest, just log low reputation"
+    enabled: true
+
+  # Tournament Environment Rules
+  - id: tournament_strict
+    name: "Tournament Strict Enforcement"
+    condition: "violation_count >= 1"
+    action: warn
+    priority: 10
+    category: tournament
+    description: "Tournament has zero-tolerance policy"
+    enabled: true
+
+  - id: tournament_escalation
+    name: "Tournament Rapid Escalation"
+    condition: "violation_count >= 2"
+    action: escalate_penalty
+    priority: 8
+    category: tournament
+    description: "Rapid escalation in tournament mode"
+    enabled: true
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ENVIRONMENTS
+# Environments define rule sets and settings for different contexts.
+# Each environment can have different penalty thresholds and multipliers.
+# ═══════════════════════════════════════════════════════════════════════════════
+
+environments:
+  # ─────────────────────────────────────────────────────────────────────────────
+  # City Environment
+  # ─────────────────────────────────────────────────────────────────────────────
+  city:
+    description: "Urban environment with strict rules and enforcement"
+    rules:
+      - repeated_violation
+      - severe_violation
+      - low_reputation_warning
+      - high_violation_rate
+      - strict_traffic
+      - noise_ordinance
+    settings:
+      penalty_multiplier: 1.5
+      reputation_decay_rate: 0.15
+      warning_threshold: 1
+      fine_threshold: 2
+      ban_threshold: 4
+      auto_de_escalation: true
+      de_escalation_time_seconds: 300  # 5 minutes
+    io_output: json
+    io_path: logs/city_penalties.jsonl
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Village Environment
+  # ─────────────────────────────────────────────────────────────────────────────
+  village:
+    description: "Rural environment with lenient, community-based rules"
+    rules:
+      - repeated_violation
+      - community_norms
+      - harvest_season
+    settings:
+      penalty_multiplier: 0.8
+      reputation_decay_rate: 0.05
+      warning_threshold: 3
+      fine_threshold: 6
+      ban_threshold: 10
+      auto_de_escalation: true
+      de_escalation_time_seconds: 900  # 15 minutes
+    io_output: csv
+    io_path: logs/village_penalties.csv
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Tournament Environment
+  # ─────────────────────────────────────────────────────────────────────────────
+  tournament:
+    description: "Competitive tournament environment with zero-tolerance policy"
+    rules:
+      - repeated_violation
+      - severe_violation
+      - low_reputation_warning
+      - critical_reputation
+      - tournament_strict
+      - tournament_escalation
+    settings:
+      penalty_multiplier: 2.0
+      reputation_decay_rate: 0.2
+      warning_threshold: 1
+      fine_threshold: 2
+      ban_threshold: 3
+      auto_de_escalation: false  # No auto de-escalation in tournaments
+    io_output: json
+    io_path: logs/tournament_penalties.jsonl
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Casual Environment
+  # ─────────────────────────────────────────────────────────────────────────────
+  casual:
+    description: "Casual play environment with relaxed rules"
+    rules:
+      - community_norms
+    settings:
+      penalty_multiplier: 0.5
+      reputation_decay_rate: 0.02
+      warning_threshold: 5
+      fine_threshold: 10
+      ban_threshold: 20
+      auto_de_escalation: true
+      de_escalation_time_seconds: 60  # 1 minute
+    io_output: none  # No logging for casual play
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Default Environment
+  # ─────────────────────────────────────────────────────────────────────────────
+  default:
+    description: "Default environment with standard rules"
+    rules:
+      - repeated_violation
+      - low_reputation_warning
+      - high_violation_rate
+    settings:
+      penalty_multiplier: 1.0
+      reputation_decay_rate: 0.1
+      warning_threshold: 2
+      fine_threshold: 4
+      ban_threshold: 8
+      auto_de_escalation: true
+      de_escalation_time_seconds: 600  # 10 minutes
+    io_output: json
+    io_path: logs/default_penalties.jsonl

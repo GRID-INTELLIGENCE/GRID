@@ -1,0 +1,4 @@
+# file: E:\grid\grid\senses\sensory_store.py
+# hypothesis_version: 6.150.0
+
+[100, '%Y-%m-%d', '*.json', 'grid/data/senses', 'json', 'r', 'w']

@@ -1,0 +1,41 @@
+{
+    "project_name": "GRID Benchmark Evaluation",
+    "objective": "Evaluate system performance against industry-standard AI benchmarks (SWE-bench) and architectural reasoning metrics (ARC).",
+    "status_summary": "System is currently optimized for background architectural enforcement. We need a formal assessment of its 'reasoning' and 'fixing' capabilities.",
+    "recommended_roles": [
+        "Architect",
+        "Analyst"
+    ],
+    "recommended_tasks": [
+        "/validate",
+        "/plan"
+    ],
+    "metadata": {
+        "category": "BENCHMARK_EVALUATION",
+        "priority": "CRITICAL"
+    },
+    "structured_data": {
+        "benchmarks": [
+            {
+                "id": "SWE-GRID-001",
+                "name": "Software Engineering (SWE) Integrity",
+                "description": "Ability to autonomously detect and neutralize architectural entropy.",
+                "metrics": [
+                    "Decoupling Speed",
+                    "Dependency Accuracy",
+                    "Self-Healing Latency"
+                ]
+            },
+            {
+                "id": "ARC-GRID-002",
+                "name": "Architectural Reasoning Capability (ARC)",
+                "description": "Ability to reason about geometric resonance and cross-component boundaries.",
+                "metrics": [
+                    "Resonance Score",
+                    "Boundary Precision",
+                    "Entanglement Detection"
+                ]
+            }
+        ]
+    }
+}

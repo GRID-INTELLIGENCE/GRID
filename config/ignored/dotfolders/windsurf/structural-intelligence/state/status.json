@@ -1,0 +1,75 @@
+{
+  "generated_at": "2025-12-17T12:50:08.276766+00:00",
+  "health": "healthy",
+  "mothership": {
+    "health_summary": {
+      "state": "online",
+      "healthy_components": 0,
+      "total_components": 0,
+      "health_percentage": 100,
+      "active_sessions": 0,
+      "running_operations": 0,
+      "unresolved_alerts": 0,
+      "critical_alerts": 0
+    },
+    "state": {
+      "id": "state_bca983094baa",
+      "state": "online",
+      "version": "1.0.0",
+      "started_at": "2025-12-17T12:50:08.276137+00:00",
+      "updated_at": "2025-12-17T12:50:08.276137+00:00",
+      "uptime_seconds": 1.7e-05,
+      "metrics": {
+        "total_sessions": 0,
+        "active_sessions": 0,
+        "total_operations": 0,
+        "running_operations": 0
+      },
+      "health_summary": {
+        "state": "online",
+        "healthy_components": 0,
+        "total_components": 0,
+        "health_percentage": 100,
+        "active_sessions": 0,
+        "running_operations": 0,
+        "unresolved_alerts": 0,
+        "critical_alerts": 0
+      }
+    }
+  },
+  "integration_inbox": {
+    "inbox_meta": {
+      "date": "2025-12-17",
+      "version": "1.0.0",
+      "generated_at": "2025-12-17T12:50:08.276743+00:00",
+      "workspace_version": "3.2.0",
+      "total_integrations": 5,
+      "total_mismatches": 0,
+      "resolution_status": "resolved"
+    },
+    "daily_summary": {
+      "total_handshakes": 0,
+      "successful_handshakes": 0,
+      "failed_handshakes": 0,
+      "success_rate": 100,
+      "new_mismatches": 0,
+      "resolved_mismatches": 0,
+      "integrations_by_status": {
+        "active": 5,
+        "inactive": 0,
+        "degraded": 0,
+        "error": 0
+      },
+      "top_mismatch_types": [],
+      "average_eq_score": 0,
+      "recommendations": []
+    }
+  },
+  "master_workflow": {
+    "schema_path": "E:\\grid\\.windsurf\\grid-master-workflow-schema.json",
+    "instance_path": "E:\\grid\\.windsurf\\grid-master-workflow-instance.json",
+    "schema_exists": true,
+    "instance_exists": true,
+    "rules_count": 4
+  }
+}

@@ -1,0 +1,207 @@
+{
+  "timestamp": "2026-01-01T15:01:37.512507",
+  "root_dir": "E:\\grid",
+  "files_moved": {
+    "check_db.py": {
+      "status": "moved",
+      "source": "E:\\grid\\check_db.py",
+      "destination": "E:\\grid\\scripts\\check_db.py",
+      "timestamp": "2026-01-01T15:01:37.485885"
+    },
+    "create_grid_structure.py": {
+      "status": "moved",
+      "source": "E:\\grid\\create_grid_structure.py",
+      "destination": "E:\\grid\\scripts\\create_grid_structure.py",
+      "timestamp": "2026-01-01T15:01:37.486271"
+    },
+    "ENHANCEMENT_SUMMARY.py": {
+      "status": "moved",
+      "source": "E:\\grid\\ENHANCEMENT_SUMMARY.py",
+      "destination": "E:\\grid\\scripts\\ENHANCEMENT_SUMMARY.py",
+      "timestamp": "2026-01-01T15:01:37.486529"
+    },
+    "setup_terminal.ps1": {
+      "status": "moved",
+      "source": "E:\\grid\\setup_terminal.ps1",
+      "destination": "E:\\grid\\scripts\\setup_terminal.ps1",
+      "timestamp": "2026-01-01T15:01:37.486844"
+    },
+    "setup_venv.sh": {
+      "status": "moved",
+      "source": "E:\\grid\\setup_venv.sh",
+      "destination": "E:\\grid\\scripts\\setup_venv.sh",
+      "timestamp": "2026-01-01T15:01:37.487072"
+    },
+      "status": "moved",
+      "timestamp": "2026-01-01T15:01:37.487321"
+    },
+      "status": "moved",
+      "timestamp": "2026-01-01T15:01:37.487563"
+    },
+    "async_stress_harness.py": {
+      "status": "moved",
+      "source": "E:\\grid\\async_stress_harness.py",
+      "destination": "E:\\grid\\tests\\async_stress_harness.py",
+      "timestamp": "2026-01-01T15:01:37.487790"
+    },
+    "test_retry_limit.py": {
+      "status": "moved",
+      "source": "E:\\grid\\test_retry_limit.py",
+      "destination": "E:\\grid\\tests\\test_retry_limit.py",
+      "timestamp": "2026-01-01T15:01:37.488028"
+    },
+    "all_development_data.json": {
+      "status": "moved",
+      "source": "E:\\grid\\all_development_data.json",
+      "destination": "E:\\grid\\data\\all_development_data.json",
+      "timestamp": "2026-01-01T15:01:37.488262"
+    },
+    "all_product_data.json": {
+      "status": "moved",
+      "source": "E:\\grid\\all_product_data.json",
+      "destination": "E:\\grid\\data\\all_product_data.json",
+      "timestamp": "2026-01-01T15:01:37.488506"
+    },
+    "all_sales_data.csv": {
+      "status": "moved",
+      "source": "E:\\grid\\all_sales_data.csv",
+      "destination": "E:\\grid\\data\\all_sales_data.csv",
+      "timestamp": "2026-01-01T15:01:37.505679"
+    },
+    "all_user_behavior.json": {
+      "status": "moved",
+      "source": "E:\\grid\\all_user_behavior.json",
+      "destination": "E:\\grid\\data\\all_user_behavior.json",
+      "timestamp": "2026-01-01T15:01:37.506077"
+    },
+    "project_data_export.json": {
+      "status": "moved",
+      "source": "E:\\grid\\project_data_export.json",
+      "destination": "E:\\grid\\data\\project_data_export.json",
+      "timestamp": "2026-01-01T15:01:37.506426"
+    },
+    "benchmark_metrics.json": {
+      "status": "moved",
+      "source": "E:\\grid\\benchmark_metrics.json",
+      "destination": "E:\\grid\\data\\benchmark_metrics.json",
+      "timestamp": "2026-01-01T15:01:37.506764"
+    },
+    "benchmark_results.json": {
+      "status": "moved",
+      "source": "E:\\grid\\benchmark_results.json",
+      "destination": "E:\\grid\\data\\benchmark_results.json",
+      "timestamp": "2026-01-01T15:01:37.507078"
+    },
+    "stress_metrics.json": {
+      "status": "moved",
+      "source": "E:\\grid\\stress_metrics.json",
+      "destination": "E:\\grid\\data\\stress_metrics.json",
+      "timestamp": "2026-01-01T15:01:37.507381"
+    },
+    "color_analysis_report.txt": {
+      "status": "moved",
+      "source": "E:\\grid\\color_analysis_report.txt",
+      "destination": "E:\\grid\\analysis_report\\color_analysis_report.txt",
+      "timestamp": "2026-01-01T15:01:37.507705"
+    },
+    "cerulean_amber_light_workspace_reference.json": {
+      "status": "moved",
+      "source": "E:\\grid\\cerulean_amber_light_workspace_reference.json",
+      "destination": "E:\\grid\\schemas\\cerulean_amber_light_workspace_reference.json",
+      "timestamp": "2026-01-01T15:01:37.508022"
+    },
+    "cerulean_amber_schema.json": {
+      "status": "moved",
+      "source": "E:\\grid\\cerulean_amber_schema.json",
+      "destination": "E:\\grid\\schemas\\cerulean_amber_schema.json",
+      "timestamp": "2026-01-01T15:01:37.508325"
+    },
+    "artifact.json": {
+      "status": "moved",
+      "source": "E:\\grid\\artifact.json",
+      "destination": "E:\\grid\\artifacts\\artifact.json",
+      "timestamp": "2026-01-01T15:01:37.508649"
+    },
+    "important_files.json": {
+      "status": "moved",
+      "source": "E:\\grid\\important_files.json",
+      "destination": "E:\\grid\\docs\\important_files.json",
+      "timestamp": "2026-01-01T15:01:37.508903"
+    },
+    "AI safety.md": {
+      "status": "moved",
+      "source": "E:\\grid\\AI safety.md",
+      "destination": "E:\\grid\\docs\\AI safety.md",
+      "timestamp": "2026-01-01T15:01:37.509191"
+    },
+    "REORGANIZATION_INVENTORY.md": {
+      "status": "moved",
+      "source": "E:\\grid\\REORGANIZATION_INVENTORY.md",
+      "destination": "E:\\grid\\docs\\REORGANIZATION_INVENTORY.md",
+      "timestamp": "2026-01-01T15:01:37.509441"
+    },
+    "REORGANIZATION_SUMMARY.md": {
+      "status": "moved",
+      "source": "E:\\grid\\REORGANIZATION_SUMMARY.md",
+      "destination": "E:\\grid\\docs\\REORGANIZATION_SUMMARY.md",
+      "timestamp": "2026-01-01T15:01:37.509746"
+    },
+    "RESEARCH_ALIGNMENT.md": {
+      "status": "moved",
+      "source": "E:\\grid\\RESEARCH_ALIGNMENT.md",
+      "destination": "E:\\grid\\docs\\RESEARCH_ALIGNMENT.md",
+      "timestamp": "2026-01-01T15:01:37.509968"
+    },
+    "RESONANCE_OPTIMIZATION_PLAN.md": {
+      "status": "moved",
+      "source": "E:\\grid\\RESONANCE_OPTIMIZATION_PLAN.md",
+      "destination": "E:\\grid\\docs\\RESONANCE_OPTIMIZATION_PLAN.md",
+      "timestamp": "2026-01-01T15:01:37.510254"
+    },
+    "STABILIZATION_REPORT.md": {
+      "status": "moved",
+      "source": "E:\\grid\\STABILIZATION_REPORT.md",
+      "destination": "E:\\grid\\docs\\STABILIZATION_REPORT.md",
+      "timestamp": "2026-01-01T15:01:37.510524"
+    },
+    "FINAL_SESSION_SUMMARY.md": {
+      "status": "moved",
+      "source": "E:\\grid\\FINAL_SESSION_SUMMARY.md",
+      "destination": "E:\\grid\\docs\\FINAL_SESSION_SUMMARY.md",
+      "timestamp": "2026-01-01T15:01:37.510812"
+    },
+      "status": "moved",
+      "timestamp": "2026-01-01T15:01:37.511095"
+    },
+    "full_test_run.txt": {
+      "status": "moved",
+      "source": "E:\\grid\\full_test_run.txt",
+      "destination": "E:\\grid\\logs\\full_test_run.txt",
+      "timestamp": "2026-01-01T15:01:37.511395"
+    },
+    "full_test_run_2.txt": {
+      "status": "moved",
+      "source": "E:\\grid\\full_test_run_2.txt",
+      "destination": "E:\\grid\\logs\\full_test_run_2.txt",
+      "timestamp": "2026-01-01T15:01:37.511717"
+    },
+    "collect_output.txt": {
+      "status": "moved",
+      "source": "E:\\grid\\collect_output.txt",
+      "destination": "E:\\grid\\logs\\collect_output.txt",
+      "timestamp": "2026-01-01T15:01:37.512043"
+    },
+    "sysinfo.txt": {
+      "status": "moved",
+      "source": "E:\\grid\\sysinfo.txt",
+      "destination": "E:\\grid\\logs\\sysinfo.txt",
+      "timestamp": "2026-01-01T15:01:37.512501"
+    }
+  },
+  "summary": {
+    "total": 34,
+    "moved": 34,
+    "skipped": 0,
+    "failed": 0
+  }
+}

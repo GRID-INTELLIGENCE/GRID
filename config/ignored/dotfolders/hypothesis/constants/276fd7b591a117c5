@@ -1,0 +1,4 @@
+# file: E:\grid\application\mothership\models\payment.py
+# hypothesis_version: 6.150.0
+
+['-', 'USD', 'active', 'amount_cents', 'cancel_at_period_end', 'cancelled', 'cancelled_at', 'completed', 'completed_at', 'created_at', 'currency', 'current_period_end', 'current_period_start', 'description', 'draft', 'due_date', 'enterprise', 'expired', 'failed', 'failure_reason', 'free', 'gateway', 'gateway_invoice_id', 'id', 'idempotency_key', 'inv', 'line_items', 'metadata', 'paid_at', 'partially_refunded', 'past_due', 'pay', 'pending', 'period_end', 'period_start', 'processing', 'professional', 'refunded', 'starter', 'status', 'stripe', 'sub', 'subscription_id', 'tier', 'trialing', 'unpaid', 'updated_at', 'user_id']

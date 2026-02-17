@@ -1,0 +1,656 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://grid-project.io/schemas/knowledge-graph-schema.json",
+    "title": "GRID Knowledge Graph Schema",
+    "description": "Ontology-driven schema for knowledge graph entities and relationships. Aligned with progress_compass_schema and batch_validation_schema patterns.",
+    "version": "1.0.0",
+    "type": "object",
+    "definitions": {
+        "entityType": {
+            "type": "string",
+            "enum": [
+                "Agent",
+                "Skill",
+                "Event",
+                "Context",
+                "Artifact",
+                "Task",
+                "Decision"
+            ],
+            "description": "Core entity types in the knowledge graph"
+        },
+        "relationType": {
+            "type": "string",
+            "enum": [
+                "EXECUTED_BY",
+                "DEPENDS_ON",
+                "GENERATED",
+                "OCCURRED_AT",
+                "HAS_PARENT",
+                "REFERENCES",
+                "REQUIRES",
+                "PRODUCES",
+                "RELATED_TO"
+            ],
+            "description": "Typed relationships (Neo4j-style naming)"
+        },
+        "propertyType": {
+            "type": "string",
+            "enum": [
+                "string",
+                "integer",
+                "float",
+                "boolean",
+                "datetime",
+                "list",
+                "dict"
+            ],
+            "description": "Property data types for validation"
+        },
+        "severity": {
+            "$ref": "batch_validation_schema.json#/definitions/severity"
+        },
+        "agent": {
+            "type": "object",
+            "description": "Agentic system or processor entity",
+            "required": [
+                "id",
+                "name",
+                "created_at"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "description": "Unique agent identifier",
+                    "minLength": 1
+                },
+                "name": {
+                    "type": "string",
+                    "description": "Human-readable agent name",
+                    "minLength": 1
+                },
+                "type": {
+                    "type": "string",
+                    "description": "Agent type (agentic, resonance, autonomous, etc.)",
+                    "enum": [
+                        "agentic",
+                        "resonance",
+                        "autonomous",
+                        "delegated",
+                        "hybrid"
+                    ]
+                },
+                "status": {
+                    "type": "string",
+                    "description": "Current operational status",
+                    "enum": [
+                        "active",
+                        "idle",
+                        "processing",
+                        "stopped",
+                        "error"
+                    ]
+                },
+                "created_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "ISO-8601 timestamp of agent creation"
+                },
+                "parent_id": {
+                    "type": [
+                        "string",
+                        "null"
+                    ],
+                    "description": "Parent agent ID for hierarchical relationships"
+                },
+                "metadata": {
+                    "type": "object",
+                    "description": "Additional agent metadata",
+                    "additionalProperties": true
+                }
+            },
+            "additionalProperties": false
+        },
+        "skill": {
+            "type": "object",
+            "description": "Executable capability with defined I/O",
+            "required": [
+                "id",
+                "name",
+                "created_at"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "description": "Unique skill identifier",
+                    "minLength": 1
+                },
+                "name": {
+                    "type": "string",
+                    "description": "Skill name",
+                    "minLength": 1
+                },
+                "description": {
+                    "type": "string",
+                    "description": "What this skill does",
+                    "default": ""
+                },
+                "input_schema": {
+                    "type": "object",
+                    "description": "JSON Schema for expected inputs",
+                    "additionalProperties": true
+                },
+                "output_schema": {
+                    "type": "object",
+                    "description": "JSON Schema for expected outputs",
+                    "additionalProperties": true
+                },
+                "version": {
+                    "type": "string",
+                    "pattern": "^\\d+\\.\\d+\\.\\d+$",
+                    "description": "Semantic version of the skill"
+                },
+                "created_at": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "dependencies": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "Skill IDs this skill depends on",
+                    "default": []
+                }
+            },
+            "additionalProperties": false
+        },
+        "artifact": {
+            "type": "object",
+            "description": "Generated output or file (aligned with batch_validation metrics)",
+            "required": [
+                "id",
+                "name",
+                "type",
+                "created_at"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "name": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "code",
+                        "document",
+                        "model",
+                        "data",
+                        "config",
+                        "other"
+                    ],
+                    "description": "Artifact type"
+                },
+                "content_hash": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{32,64}$",
+                    "description": "MD5 or SHA256 hash for deduplication"
+                },
+                "file_path": {
+                    "type": "string",
+                    "description": "Relative path to the artifact file"
+                },
+                "size_bytes": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "created_at": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "created_by": {
+                    "type": "string",
+                    "description": "Agent ID that created this artifact"
+                },
+                "metadata": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
+            },
+            "additionalProperties": false
+        },
+        "event": {
+            "type": "object",
+            "description": "Temporal occurrence in the system",
+            "required": [
+                "id",
+                "event_type",
+                "timestamp"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "event_type": {
+                    "type": "string",
+                    "description": "Type of event",
+                    "minLength": 1
+                },
+                "timestamp": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "When the event occurred"
+                },
+                "source": {
+                    "type": "string",
+                    "description": "Event source (agent, system, user)"
+                },
+                "correlation_id": {
+                    "type": "string",
+                    "description": "For tracing related events"
+                },
+                "payload": {
+                    "type": "object",
+                    "description": "Event-specific data",
+                    "additionalProperties": true
+                }
+            },
+            "additionalProperties": false
+        },
+        "context": {
+            "type": "object",
+            "description": "Environmental or state context (aligned with progress_compass checkpoint)",
+            "required": [
+                "id",
+                "name",
+                "scope"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "name": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "scope": {
+                    "type": "string",
+                    "enum": [
+                        "global",
+                        "session",
+                        "task",
+                        "local"
+                    ],
+                    "description": "Context scope level"
+                },
+                "phase": {
+                    "type": "string",
+                    "enum": [
+                        "exploration",
+                        "design",
+                        "implementation",
+                        "stabilization",
+                        "hardening",
+                        "release",
+                        "maintenance"
+                    ],
+                    "description": "Journey phase (from progress_compass)"
+                },
+                "momentum": {
+                    "type": "string",
+                    "enum": [
+                        "stalled",
+                        "slow",
+                        "steady",
+                        "fast"
+                    ],
+                    "description": "Qualitative progress velocity"
+                },
+                "state": {
+                    "type": "object",
+                    "description": "Current context state",
+                    "additionalProperties": true
+                },
+                "valid_from": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "valid_to": {
+                    "type": [
+                        "string",
+                        "null"
+                    ],
+                    "format": "date-time"
+                }
+            },
+            "additionalProperties": false
+        },
+        "task": {
+            "type": "object",
+            "description": "Delegatable task (aligned with delegation_task.py)",
+            "required": [
+                "id",
+                "title",
+                "status"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "title": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "description": {
+                    "type": "string",
+                    "default": ""
+                },
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "not-started",
+                        "in-progress",
+                        "completed",
+                        "blocked"
+                    ]
+                },
+                "assignee": {
+                    "type": [
+                        "string",
+                        "null"
+                    ],
+                    "description": "Agent ID assigned to this task"
+                },
+                "priority": {
+                    "type": "string",
+                    "enum": [
+                        "low",
+                        "medium",
+                        "high",
+                        "critical"
+                    ],
+                    "default": "medium"
+                },
+                "context_files": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "default": []
+                },
+                "expected_output_format": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "metadata": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
+            },
+            "additionalProperties": false
+        },
+        "decision": {
+            "type": "object",
+            "description": "Decision record (aligned with progress_compass decision)",
+            "required": [
+                "id",
+                "decision",
+                "rationale"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "decision": {
+                    "type": "string",
+                    "description": "What was decided",
+                    "minLength": 1
+                },
+                "rationale": {
+                    "type": "string",
+                    "description": "Why this decision was made",
+                    "minLength": 1
+                },
+                "alternatives": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "Options that were considered",
+                    "default": []
+                },
+                "tradeoffs": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "Known tradeoffs of this decision",
+                    "default": []
+                },
+                "decided_at": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "decided_by": {
+                    "type": "string",
+                    "description": "Agent ID that made the decision"
+                }
+            },
+            "additionalProperties": false
+        },
+        "relationship": {
+            "type": "object",
+            "description": "A typed relationship between two entities",
+            "required": [
+                "type",
+                "from_id",
+                "to_id"
+            ],
+            "properties": {
+                "type": {
+                    "$ref": "#/definitions/relationType"
+                },
+                "from_id": {
+                    "type": "string",
+                    "description": "Source entity ID",
+                    "minLength": 1
+                },
+                "to_id": {
+                    "type": "string",
+                    "description": "Target entity ID",
+                    "minLength": 1
+                },
+                "created_at": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "properties": {
+                    "type": "object",
+                    "description": "Relationship-specific properties",
+                    "additionalProperties": true
+                }
+            },
+            "additionalProperties": false
+        },
+        "validationResult": {
+            "type": "object",
+            "description": "Result of entity validation",
+            "required": [
+                "is_valid",
+                "entity_type"
+            ],
+            "properties": {
+                "is_valid": {
+                    "type": "boolean"
+                },
+                "entity_type": {
+                    "$ref": "#/definitions/entityType"
+                },
+                "errors": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "default": []
+                },
+                "warnings": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "default": []
+                }
+            },
+            "additionalProperties": false
+        }
+    },
+    "required": [
+        "schema_version",
+        "entities"
+    ],
+    "properties": {
+        "schema_version": {
+            "type": "string",
+            "pattern": "^\\d+\\.\\d+\\.\\d+$",
+            "default": "1.0.0"
+        },
+        "created_at": {
+            "type": "string",
+            "format": "date-time"
+        },
+        "entities": {
+            "type": "object",
+            "description": "All entities in the knowledge graph",
+            "properties": {
+                "agents": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/agent"
+                    },
+                    "default": []
+                },
+                "skills": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/skill"
+                    },
+                    "default": []
+                },
+                "artifacts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/artifact"
+                    },
+                    "default": []
+                },
+                "events": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/event"
+                    },
+                    "default": []
+                },
+                "contexts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/context"
+                    },
+                    "default": []
+                },
+                "tasks": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/task"
+                    },
+                    "default": []
+                },
+                "decisions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/decision"
+                    },
+                    "default": []
+                }
+            },
+            "additionalProperties": false
+        },
+        "relationships": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/relationship"
+            },
+            "default": []
+        },
+        "metadata": {
+            "type": "object",
+            "description": "Graph-level metadata",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "owner": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": true
+        }
+    },
+    "additionalProperties": false,
+    "examples": [
+        {
+            "schema_version": "1.0.0",
+            "created_at": "2026-01-10T00:00:00Z",
+            "entities": {
+                "agents": [
+                    {
+                        "id": "agent-navigator-001",
+                        "name": "Navigator",
+                        "type": "agentic",
+                        "status": "active",
+                        "created_at": "2026-01-10T00:00:00Z"
+                    }
+                ],
+                "skills": [
+                    {
+                        "id": "skill-path-resolve-001",
+                        "name": "PathResolver",
+                        "description": "Resolves import paths using territory map",
+                        "version": "1.0.0",
+                        "created_at": "2026-01-10T00:00:00Z"
+                    }
+                ],
+                "tasks": [
+                    {
+                        "id": "task-001",
+                        "title": "Eliminate import errors",
+                        "status": "in-progress",
+                        "priority": "high"
+                    }
+                ]
+            },
+            "relationships": [
+                {
+                    "type": "EXECUTED_BY",
+                    "from_id": "skill-path-resolve-001",
+                    "to_id": "agent-navigator-001"
+                }
+            ]
+        }
+    ]
+}

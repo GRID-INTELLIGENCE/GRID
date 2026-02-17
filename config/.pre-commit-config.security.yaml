@@ -1,0 +1,435 @@
+# ============================================================================
+# GRID Security Pre-Commit Configuration
+# ============================================================================
+# This configuration prevents accidental commit of secrets and security issues.
+#
+# Installation:
+#   pip install pre-commit
+#   pre-commit install
+#
+# Manual run:
+#   pre-commit run --all-files
+#
+# To use this file, either:
+#   1. Rename to .pre-commit-config.yaml, or
+#   2. Merge contents with existing .pre-commit-config.yaml
+# ============================================================================
+
+repos:
+  # ==========================================================================
+  # SECRET DETECTION
+  # ==========================================================================
+
+  # Detect-secrets: Yelp's enterprise-grade secret scanner
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.4.0
+    hooks:
+      - id: detect-secrets
+        name: "🔐 Detect hardcoded secrets"
+        args:
+          - "--baseline"
+          - ".secrets.baseline"
+          # Exclude test files that may have fake credentials
+          - "--exclude-files"
+          - ".*test.*|.*fixture.*|.*mock.*"
+          # High entropy string detection
+          - "--base64-limit"
+          - "4.5"
+          - "--hex-limit"
+          - "3.0"
+        exclude: |
+          (?x)^(
+            .*\.lock$|
+            .*\.min\.js$|
+            .*\.min\.css$|
+            poetry\.lock$|
+            package-lock\.json$|
+            yarn\.lock$|
+            uv\.lock$
+          )$
+
+  # Gitleaks: Fast, comprehensive secret scanner
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.18.1
+    hooks:
+      - id: gitleaks
+        name: "🔍 Gitleaks secret scan"
+        args:
+          - "--verbose"
+          - "--redact"
+
+  # TruffleHog: Deep secret scanning (optional - slower but thorough)
+  # Uncomment if you want additional scanning
+  # - repo: https://github.com/trufflesecurity/trufflehog
+  #   rev: v3.63.2
+  #   hooks:
+  #     - id: trufflehog
+  #       name: "🐷 TruffleHog deep scan"
+  #       args:
+  #         - "--only-verified"
+
+  # ==========================================================================
+  # CREDENTIAL & SENSITIVE DATA PATTERNS
+  # ==========================================================================
+
+  - repo: local
+    hooks:
+      # Block common API key patterns
+      - id: check-api-keys
+        name: "🚫 Check for API key patterns"
+        entry: python -c "
+import re
+import sys
+
+patterns = [
+    (r'sk-[a-zA-Z0-9]{20,}', 'OpenAI API key'),
+    (r'sk_live_[a-zA-Z0-9]{20,}', 'Stripe live key'),
+    (r'sk_test_[a-zA-Z0-9]{20,}', 'Stripe test key'),
+    (r'ghp_[a-zA-Z0-9]{36}', 'GitHub personal access token'),
+    (r'gho_[a-zA-Z0-9]{36}', 'GitHub OAuth token'),
+    (r'github_pat_[a-zA-Z0-9_]{22,}', 'GitHub fine-grained PAT'),
+    (r'xox[baprs]-[a-zA-Z0-9-]{10,}', 'Slack token'),
+    (r'AKIA[0-9A-Z]{16}', 'AWS access key'),
+    (r'dapi[a-f0-9]{32}', 'Databricks token'),
+    (r'AIza[0-9A-Za-z_-]{35}', 'Google API key'),
+]
+
+found = False
+for filepath in sys.argv[1:]:
+    try:
+        with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+            content = f.read()
+            for pattern, name in patterns:
+                matches = re.findall(pattern, content)
+                if matches:
+                    print(f'❌ {filepath}: Found potential {name}')
+                    found = True
+    except Exception:
+        pass
+
+sys.exit(1 if found else 0)
+"
+        language: python
+        types: [text]
+        exclude: |
+          (?x)^(
+            .*test.*|
+            .*\.lock$|
+            \.pre-commit.*
+          )$
+
+      # Block hardcoded passwords
+      - id: check-hardcoded-passwords
+        name: "🔑 Check for hardcoded passwords"
+        entry: python -c "
+import re
+import sys
+
+# Patterns that suggest hardcoded passwords
+patterns = [
+    r'password\s*[=:]\s*[\"\\'][^\"\\'\s]{8,}[\"\\']',
+    r'passwd\s*[=:]\s*[\"\\'][^\"\\'\s]{8,}[\"\\']',
+    r'pwd\s*[=:]\s*[\"\\'][^\"\\'\s]{8,}[\"\\']',
+    r'secret\s*[=:]\s*[\"\\'][^\"\\'\s]{8,}[\"\\']',
+    r'api_key\s*[=:]\s*[\"\\'][^\"\\'\s]{16,}[\"\\']',
+    r'apikey\s*[=:]\s*[\"\\'][^\"\\'\s]{16,}[\"\\']',
+    r'auth_token\s*[=:]\s*[\"\\'][^\"\\'\s]{16,}[\"\\']',
+    r'bearer\s+[a-zA-Z0-9_-]{20,}',
+]
+
+# Allowlist patterns (test files, examples, etc.)
+allowlist = [
+    r'password.*example',
+    r'password.*test',
+    r'password.*dummy',
+    r'password.*fake',
+    r'password.*placeholder',
+    r'your[_-]?password',
+    r'<password>',
+    r'\$\{.*password.*\}',
+    r'os\.environ',
+    r'getenv',
+]
+
+found = False
+for filepath in sys.argv[1:]:
+    try:
+        with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+            for line_num, line in enumerate(f, 1):
+                line_lower = line.lower()
+                # Skip if matches allowlist
+                if any(re.search(p, line_lower) for p in allowlist):
+                    continue
+                for pattern in patterns:
+                    if re.search(pattern, line_lower):
+                        print(f'❌ {filepath}:{line_num}: Potential hardcoded credential')
+                        found = True
+                        break
+    except Exception:
+        pass
+
+sys.exit(1 if found else 0)
+"
+        language: python
+        types: [python]
+        exclude: |
+          (?x)^(
+            .*test.*|
+            .*_test\.py$|
+            test_.*\.py$
+          )$
+
+      # Block private keys
+      - id: check-private-keys
+        name: "🔒 Check for private keys"
+        entry: python -c "
+import sys
+
+markers = [
+    b'-----BEGIN RSA PRIVATE KEY-----',
+    b'-----BEGIN DSA PRIVATE KEY-----',
+    b'-----BEGIN EC PRIVATE KEY-----',
+    b'-----BEGIN OPENSSH PRIVATE KEY-----',
+    b'-----BEGIN PGP PRIVATE KEY BLOCK-----',
+    b'-----BEGIN PRIVATE KEY-----',
+    b'-----BEGIN ENCRYPTED PRIVATE KEY-----',
+]
+
+found = False
+for filepath in sys.argv[1:]:
+    try:
+        with open(filepath, 'rb') as f:
+            content = f.read()
+            for marker in markers:
+                if marker in content:
+                    print(f'❌ {filepath}: Contains private key!')
+                    found = True
+                    break
+    except Exception:
+        pass
+
+sys.exit(1 if found else 0)
+"
+        language: python
+        types: [text]
+
+      # Block .env files from being committed
+      - id: check-env-files
+        name: "📁 Block .env files"
+        entry: python -c "
+import sys
+import os
+
+blocked_patterns = ['.env', 'user_env', 'credentials', 'secrets.json', 'secrets.yaml']
+found = False
+
+for filepath in sys.argv[1:]:
+    basename = os.path.basename(filepath).lower()
+    for pattern in blocked_patterns:
+        if pattern in basename and 'example' not in basename and 'template' not in basename:
+            print(f'❌ {filepath}: Environment/secrets file should not be committed!')
+            found = True
+
+sys.exit(1 if found else 0)
+"
+        language: python
+        types: [text]
+
+  # ==========================================================================
+  # PYTHON SECURITY LINTING
+  # ==========================================================================
+
+  # Bandit: Python security linter
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.6
+    hooks:
+      - id: bandit
+        name: "🐍 Bandit security lint"
+        args:
+          - "-ll"  # Only medium and above severity
+          - "-ii"  # Only medium and above confidence
+          - "--skip"
+          - "B101,B311"  # Skip assert and random warnings
+          - "-r"
+        exclude: |
+          (?x)^(
+            .*test.*|
+            tests/.*
+          )$
+
+  # Safety: Check for known vulnerabilities in dependencies
+  # Note: Requires safety to be installed
+  - repo: local
+    hooks:
+      - id: safety-check
+        name: "🛡️ Safety dependency check"
+        entry: bash -c 'command -v safety >/dev/null 2>&1 && safety check --full-report || echo "⚠️ Safety not installed, skipping..."'
+        language: system
+        files: ^requirements.*\.txt$|^pyproject\.toml$
+        pass_filenames: false
+
+  # ==========================================================================
+  # GENERAL CODE QUALITY (Security-Related)
+  # ==========================================================================
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      # Prevent large files that might contain data dumps
+      - id: check-added-large-files
+        name: "📦 Check for large files"
+        args: ["--maxkb=1000"]
+
+      # Check for files that would conflict on case-insensitive filesystems
+      - id: check-case-conflict
+        name: "📁 Check case conflicts"
+
+      # Check for merge conflict markers
+      - id: check-merge-conflict
+        name: "🔀 Check merge conflicts"
+
+      # Prevent committing to protected branches
+      - id: no-commit-to-branch
+        name: "🌳 Protect main branches"
+        args: ["--branch", "main", "--branch", "master", "--branch", "production"]
+
+      # Check YAML syntax (misconfigurations can be security issues)
+      - id: check-yaml
+        name: "📄 Check YAML syntax"
+        args: ["--unsafe"]
+
+      # Check JSON syntax
+      - id: check-json
+        name: "📄 Check JSON syntax"
+
+      # Check TOML syntax
+      - id: check-toml
+        name: "📄 Check TOML syntax"
+
+      # Detect AWS credentials
+      - id: detect-aws-credentials
+        name: "☁️ Detect AWS credentials"
+        args: ["--allow-missing-credentials"]
+
+      # Detect private keys
+      - id: detect-private-key
+        name: "🔐 Detect private keys"
+
+  # ==========================================================================
+  # CUSTOM GRID SECURITY CHECKS
+  # ==========================================================================
+
+  - repo: local
+    hooks:
+      # Check for hardcoded paths (Windows/Linux specific)
+      - id: check-hardcoded-paths
+        name: "📍 Check for hardcoded user paths"
+        entry: python -c "
+import re
+import sys
+
+# Patterns that indicate hardcoded user-specific paths
+patterns = [
+    r'C:\\\\Users\\\\[a-zA-Z0-9_]+',
+    r'C:/Users/[a-zA-Z0-9_]+',
+    r'/home/[a-zA-Z0-9_]+',
+    r'/Users/[a-zA-Z0-9_]+',
+    r'E:\\\\[a-zA-Z]+\\\\',
+    r'E:/[a-zA-Z]+/',
+]
+
+# Allowlist (comments, strings that are clearly examples)
+allowlist = [
+    r'#.*',
+    r'\"\"\".*\"\"\"',
+    r'expanduser',
+    r'Path\.home',
+    r'os\.environ',
+    r'example',
+    r'<username>',
+]
+
+found = False
+for filepath in sys.argv[1:]:
+    try:
+        with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+            for line_num, line in enumerate(f, 1):
+                # Skip comments
+                stripped = line.strip()
+                if stripped.startswith('#') or stripped.startswith('//'):
+                    continue
+                # Skip allowlisted patterns
+                if any(re.search(p, line, re.IGNORECASE) for p in allowlist):
+                    continue
+                for pattern in patterns:
+                    if re.search(pattern, line):
+                        print(f'⚠️ {filepath}:{line_num}: Hardcoded path detected')
+                        found = True
+                        break
+    except Exception:
+        pass
+
+sys.exit(1 if found else 0)
+"
+        language: python
+        types: [python]
+        exclude: |
+          (?x)^(
+            .*test.*|
+            .*\.md$
+          )$
+
+      # Check for debug mode enabled
+      - id: check-debug-mode
+        name: "🐛 Check for debug mode"
+        entry: python -c "
+import re
+import sys
+
+patterns = [
+    (r'DEBUG\s*=\s*True', 'DEBUG=True'),
+    (r'debug\s*=\s*True', 'debug=True'),
+    (r'logging\.DEBUG', 'DEBUG logging level'),
+]
+
+found = False
+for filepath in sys.argv[1:]:
+    try:
+        with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+            content = f.read()
+            # Skip if this is clearly a config/settings file
+            if 'settings' in filepath.lower() or 'config' in filepath.lower():
+                continue
+            for pattern, name in patterns:
+                if re.search(pattern, content):
+                    # Check it's not in a comment or conditional
+                    for line_num, line in enumerate(content.split('\n'), 1):
+                        if re.search(pattern, line) and not line.strip().startswith('#'):
+                            print(f'⚠️ {filepath}:{line_num}: {name} found - disable for production')
+                            found = True
+    except Exception:
+        pass
+
+sys.exit(1 if found else 0)
+"
+        language: python
+        types: [python]
+        exclude: |
+          (?x)^(
+            .*test.*|
+            .*settings.*|
+            .*config.*
+          )$
+
+# ============================================================================
+# CI CONFIGURATION
+# ============================================================================
+# Fail fast on first hook failure
+fail_fast: false
+
+# Set default language version
+default_language_version:
+  python: python3
+
+# Default stages
+default_stages: [commit, push]

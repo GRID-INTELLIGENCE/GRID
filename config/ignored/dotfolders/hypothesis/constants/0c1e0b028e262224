@@ -1,0 +1,4 @@
+# file: E:\grid\grid\patterns\recognition.py
+# hypothesis_version: 6.150.0
+
+[0.0, 0.01, 0.5, 'blended_val', 'strong-activation', 'weak-activation']

@@ -1,0 +1,23 @@
+{
+  "recommendations": [
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "ms-python.black-formatter",
+    "charliermarsh.ruff",
+    "ms-python.mypy-type-checker",
+    "ms-python.pytest",
+    "tamasfe.even-better-toml",
+    "redhat.vscode-yaml",
+    "ms-vscode.vscode-json",
+    "eamodio.gitlens",
+    "GitHub.copilot",
+    "GitHub.copilot-chat",
+    "ms-vscode-remote.vscode-remote-extensionpack",
+    "ms-python.debugpy",
+    "ms-vscode.makefile-tools",
+    "yzhang.markdown-all-in-one",
+    "esbenp.prettier-vscode",
+    "pkief.material-icon-theme",
+    "be5invis.vscode-custom-css"
+  ]
+}

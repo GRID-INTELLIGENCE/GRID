@@ -1,0 +1,105 @@
+ # =============================================================================
+ # GRID — GitLab CI/CD Pipeline (aligned with GitHub Actions)
+ # =============================================================================
+ # Focus: local-first, UV-based, Python 3.13, fast + stable checks.
+ # Includes GitLab Secret Detection template.
+ # =============================================================================
+
+stages:
+  - secrets
+  - smoke
+  - lint
+  - test
+  - secret-detection
+
+include:
+  - template: Security/Secret-Detection.gitlab-ci.yml
+
+variables:
+  PYTHONUNBUFFERED: "1"
+  PYTHONDONTWRITEBYTECODE: "1"
+  PIP_NO_CACHE_DIR: "1"
+  GRID_ENVIRONMENT: "testing"
+  BLOCKER_DISABLED: "1"
+  PYTHONPATH: "."
+  UV_CACHE_DIR: ".cache/uv"
+  MOTHERSHIP_SECRET_KEY: "ci_test_secret_key_change_me"
+  SECRET_DETECTION_ENABLED: "true"
+
+cache:
+  key: "${CI_COMMIT_REF_SLUG}"
+  paths:
+    - .cache/uv
+
+.default_python:
+  image: python:3.13
+  before_script:
+    - python -V
+    - echo "Python version: $(cat config/.python-version || echo '3.13.11')"
+    - python -m pip install --upgrade pip
+    - python -m pip install uv
+
+secrets_scan:
+  stage: secrets
+  extends: .default_python
+  script:
+    - echo "Running basic secrets scan..."
+    - |
+      if grep -r -i -E "(password|secret|token|api_key)\s*=\s*[\"'][^\"']{20,}[\"']" --include="*.py" --include="*.yaml" --include="*.yml" --include="*.json" src/; then
+        echo "Potential hardcoded secrets found - please review"
+        exit 1
+      elif grep -r -i "ghp_[a-zA-Z0-9]{36}" --include="*.py" --include="*.yaml" --include="*.yml" --include="*.json" src/; then
+        echo "GitHub token found - please review"
+        exit 1
+      else
+        echo "No obvious hardcoded secrets detected"
+      fi
+
+smoke_test:
+  stage: smoke
+  extends: .default_python
+  needs: ["secrets_scan"]
+  script:
+    - uv sync --frozen --group test
+    - |
+      uv run python -c "
+      import sys
+      print(f'Python: {sys.version}')
+      imports_to_test = [
+          ('pytest', 'pytest'),
+          ('pydantic', 'pydantic'),
+          ('fastapi', 'fastapi'),
+      ]
+      passed = 0
+      failed = 0
+      for name, module in imports_to_test:
+          try:
+              __import__(module)
+              print(f'✓ {name}')
+              passed += 1
+          except ImportError as e:
+              print(f'✗ {name}: {e}')
+              failed += 1
+      print(f'Import check: {passed} passed, {failed} failed')
+      if failed > 0:
+          sys.exit(1)
+      "
+    - uv run pytest tests/unit/ --collect-only -q | head -20 || echo "No tests found"
+
+lint:
+  stage: lint
+  extends: .default_python
+  needs: ["secrets_scan"]
+  script:
+    - uv sync --frozen
+    - uv run ruff check . --output-format=full
+    - uv run black --check src/grid/ src/application/ src/tools/ tests/
+    - uv run mypy src/ --ignore-missing-imports || true
+
+unit_tests:
+  stage: test
+  extends: .default_python
+  needs: ["smoke_test"]
+  script:
+    - uv sync --frozen --group test
+    - uv run pytest tests/unit/ -v --tb=short

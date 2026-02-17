@@ -1,0 +1,30 @@
+# EUFLE Sync Configuration
+# This file defines the synchronization logic between GRID and EUFLE
+
+sync:
+  enabled: true
+  source_path: "e:/eufle"
+  target_path: "e:/grid"
+
+  # Models Inventory Sync
+  models_inventory:
+    source: "models_inventory.yaml"
+    target: "config/eufle_models.yaml"
+    auto_sync: true
+
+  # Integration Point
+  implementation_point:
+    module: "grid.distribution.eufle_bridge"
+    class: "EUFLEBridge"
+
+  # Settings to sync
+  settings:
+    - "default_model"
+    - "fallback_mechanism"
+    - "governance_policies"
+    - "vram_optimizations"
+
+# Resonance Patterns
+resonance:
+  discovery_enabled: true
+  eufle_studio_integration: true

@@ -1,0 +1,4 @@
+# file: E:\grid\application\mothership\security\jwt.py
+# hypothesis_version: 6.150.0
+
+['Additional metadata', 'Expiration timestamp', 'HS256', 'Issued at timestamp', 'JWT access token', 'JWT refresh token', 'Permission scopes', 'Subject (user ID)', 'Token type', 'User ID', 'User email', 'access', 'bearer', 'email', 'exp', 'iat', 'insecure-dev-key', 'jti', 'metadata', 'refresh', 'scopes', 'sub', 'type', 'user_id']

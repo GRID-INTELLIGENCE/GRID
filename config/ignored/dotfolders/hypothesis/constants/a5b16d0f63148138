@@ -1,0 +1,4 @@
+# file: E:\grid\application\mothership\middleware\__init__.py
+# hypothesis_version: 6.150.0
+
+[60.0, 400, 500, 1000, '/health', '/metrics', '/ping', '0', '1; mode=block', '60', 'DENY', 'INTERNAL_ERROR', 'PATCH', 'POST', 'PUT', 'Permissions-Policy', 'RATE_LIMIT_EXCEEDED', 'RateLimitMiddleware', 'Referrer-Policy', 'RequestIDMiddleware', 'Retry-After', 'TimingMiddleware', 'User-Agent', 'X-API-Key', 'X-Correlation-ID', 'X-Frame-Options', 'X-Process-Time', 'X-Process-Time-Ms', 'X-RateLimit-Limit', 'X-Request-ID', 'X-XSS-Protection', 'body_size', 'client_ip', 'code', 'correlation_id', 'database', 'debug_enabled', 'duration_ms', 'error', 'get_correlation_id', 'get_request_id', 'message', 'method', 'nosniff', 'path', 'query', 'request', 'request_id', 'request_start_time', 'response', 'security', 'setup_middleware', 'status_code', 'success', 'telemetry', 'timestamp', 'type', 'unknown', 'user_agent']

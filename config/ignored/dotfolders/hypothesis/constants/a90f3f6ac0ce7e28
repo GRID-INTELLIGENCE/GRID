@@ -1,0 +1,4 @@
+# file: E:\grid\application\mothership\db\models_billing.py
+# hypothesis_version: 6.150.0
+
+[128, 256, 512, 'USD', 'active', 'draft', 'free', 'mothership_api_keys', 'mothership_invoices', 'pending', 'stripe']

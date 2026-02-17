@@ -1,0 +1,71 @@
+{
+  "delegation_spec": {
+    "tool": "seed",
+    "subcommand": "test",
+    "required_positional": [
+      {
+        "name": "environment",
+        "type": "string",
+        "description": "Target runtime environment (e.g., dev, staging, prod, city, village, tournament, casual). Maps to a concrete configuration set used by the test suite."
+      }
+    ],
+    "optional_flags": [
+      {
+        "short": "h",
+        "long": "help",
+        "type": "bool",
+        "description": "Show help text and exit."
+      },
+      {
+        "short": "c",
+        "long": "config",
+        "type": "string",
+        "argument_name": "CONFIG",
+        "description": "Path to a configuration file that supplies environment-specific settings (rules, penalty thresholds, IO settings). If omitted the tool falls back to config/arena_config.yaml in the project root."
+      },
+      {
+        "short": "o",
+        "long": "output",
+        "type": "enum",
+        "argument_name": "OUTPUT",
+        "allowed_values": ["json", "text"],
+        "default": "text",
+        "description": "Control the format of the test-run report. 'json' yields a structured JSON payload suitable for CI parsers; 'text' yields a human-readable summary (default)."
+      }
+    ],
+    "examples": [
+      {
+        "command_line": "seed test dev",
+        "description": "Run the full test suite against the 'dev' environment using the default configuration and plain-text output."
+      },
+      {
+        "command_line": "seed test city --config ./config/arena_config.yaml --output json",
+        "description": "Run tests in city mode, load a custom config file, and emit a JSON report."
+      },
+      {
+        "command_line": "seed test tournament --output text",
+        "description": "Run tests on the tournament environment and print a human-readable summary."
+      },
+      {
+        "command_line": "seed test village --config ./config/arena_config.yaml",
+        "description": "Run tests on the village environment with a custom config."
+      }
+    ],
+    "exit_codes": {
+      "0": "All tests passed / dry-run completed successfully.",
+      "1": "One or more tests failed / environment not found.",
+      "2": "Invalid usage (e.g., missing required argument).",
+      "127": "Command not found or not executable."
+    },
+    "integration_hook": {
+      "ci_workflow_snippet": {
+        "language": "yaml",
+        "example": "github-actions:\n  - job: test\n    runs-on: ubuntu-latest\n    strategy:\n      matrix:\n        env: [city, village, tournament]\n    steps:\n      - uses: actions/checkout@v4\n      - name: Setup Python\n        uses: actions/setup-python@v5\n        with:\n          python-version: '3.11'\n      - name: Install dependencies\n        run: pip install pyyaml\n      - name: Execute tests\n        env:\n          SEED_ENV: ${{ matrix.env }}\n        run: |\n          python -m the_chase.cli.seeder_cli test ${{ matrix.env }} --config config/arena_config.yaml --output json > report-${{ matrix.env }}.json\n      - uses: actions/upload-artifact@v4\n        with:\n          name: report-${{ matrix.env }}\n          path: report-${{ matrix.env }}.json"
+      }
+    },
+    "delegation_rules": {
+      "precondition": "The caller must supply a non-empty string for the 'environment' argument.",
+      "postcondition": "The command must return exit code 0 for the delegation to be considered successful; otherwise the caller should treat the run as a failure and abort downstream steps."
+    }
+  }
+}

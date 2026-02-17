@@ -1,0 +1,4 @@
+# file: E:\grid\grid\entry_points\service_entry.py
+# hypothesis_version: 6.150.0
+
+['Permission denied', 'data', 'error', 'method', 'processed', 'service', 'service_call', 'success', 'trace_id']

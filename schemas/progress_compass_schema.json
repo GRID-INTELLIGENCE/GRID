@@ -1,0 +1,565 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://example.com/schemas/progress_compass_schema.json",
+    "title": "GRID Progress Compass Schema",
+    "description": "A structured mid-journey checkpoint schema for tracking progress, momentum, risks, decisions, evidence, and next actions.",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+        "schema_version",
+        "checkpoint",
+        "compass",
+        "signals",
+        "actions"
+    ],
+    "properties": {
+        "schema_version": {
+            "type": "string",
+            "description": "Schema version for the Progress Compass payload.",
+            "pattern": "^\\d+\\.\\d+\\.\\d+$",
+            "default": "1.0.0"
+        },
+        "checkpoint": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "id",
+                "created_at",
+                "scope"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "description": "Unique checkpoint identifier (e.g., date-based or UUID).",
+                    "minLength": 1
+                },
+                "created_at": {
+                    "type": "string",
+                    "description": "ISO-8601 timestamp for when the checkpoint was created.",
+                    "format": "date-time"
+                },
+                "created_by": {
+                    "type": "string",
+                    "description": "Optional author/agent identifier.",
+                    "minLength": 1
+                },
+                "branch": {
+                    "type": "string",
+                    "description": "Git branch name at the time of checkpoint.",
+                    "minLength": 1
+                },
+                "commit": {
+                    "type": "string",
+                    "description": "Optional git commit hash or short hash.",
+                    "minLength": 1
+                },
+                "scope": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                        "workspace"
+                    ],
+                    "properties": {
+                        "workspace": {
+                            "type": "string",
+                            "description": "Workspace or repo name/path context.",
+                            "minLength": 1
+                        },
+                        "paths": {
+                            "type": "array",
+                            "description": "Paths (files/folders) relevant to the checkpoint.",
+                            "items": {
+                                "type": "string",
+                                "minLength": 1
+                            },
+                            "default": []
+                        },
+                        "milestone": {
+                            "type": "string",
+                            "description": "Milestone label this checkpoint belongs to.",
+                            "minLength": 1
+                        }
+                    }
+                },
+                "notes": {
+                    "type": "string",
+                    "description": "Free-form checkpoint notes.",
+                    "default": ""
+                }
+            }
+        },
+        "compass": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "north_star",
+                "bearing",
+                "phase"
+            ],
+            "properties": {
+                "north_star": {
+                    "type": "string",
+                    "description": "The primary objective / why this work exists.",
+                    "minLength": 1
+                },
+                "bearing": {
+                    "type": "string",
+                    "description": "Current direction in plain language (what we are doing next).",
+                    "minLength": 1
+                },
+                "phase": {
+                    "type": "string",
+                    "description": "High-level journey phase.",
+                    "enum": [
+                        "exploration",
+                        "design",
+                        "implementation",
+                        "stabilization",
+                        "hardening",
+                        "release",
+                        "maintenance"
+                    ]
+                },
+                "confidence": {
+                    "type": "number",
+                    "description": "Confidence in plan/bearing. 0.0 = low, 1.0 = high.",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "default": 0.7
+                },
+                "momentum": {
+                    "type": "string",
+                    "description": "Qualitative progress velocity.",
+                    "enum": [
+                        "stalled",
+                        "slow",
+                        "steady",
+                        "fast"
+                    ],
+                    "default": "steady"
+                },
+                "constraints": {
+                    "type": "array",
+                    "description": "Key constraints that shape decisions (time, safety, compatibility, governance).",
+                    "items": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "default": []
+                }
+            }
+        },
+        "signals": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "status",
+                "health",
+                "risks",
+                "decisions"
+            ],
+            "properties": {
+                "status": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                        "summary",
+                        "completed",
+                        "in_progress",
+                        "blocked"
+                    ],
+                    "properties": {
+                        "summary": {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "completed": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/work_item"
+                            },
+                            "default": []
+                        },
+                        "in_progress": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/work_item"
+                            },
+                            "default": []
+                        },
+                        "blocked": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/blocker"
+                            },
+                            "default": []
+                        }
+                    }
+                },
+                "health": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                        "tests",
+                        "lint",
+                        "build"
+                    ],
+                    "properties": {
+                        "tests": {
+                            "$ref": "#/definitions/check_result"
+                        },
+                        "lint": {
+                            "$ref": "#/definitions/check_result"
+                        },
+                        "build": {
+                            "$ref": "#/definitions/check_result"
+                        },
+                        "notes": {
+                            "type": "string",
+                            "default": ""
+                        }
+                    }
+                },
+                "risks": {
+                    "type": "array",
+                    "description": "Current risks and mitigations.",
+                    "items": {
+                        "$ref": "#/definitions/risk"
+                    },
+                    "default": []
+                },
+                "decisions": {
+                    "type": "array",
+                    "description": "Decisions made since last checkpoint.",
+                    "items": {
+                        "$ref": "#/definitions/decision"
+                    },
+                    "default": []
+                },
+                "evidence": {
+                    "type": "array",
+                    "description": "Evidence supporting the checkpoint state (links, file paths, logs, benchmarks).",
+                    "items": {
+                        "$ref": "#/definitions/evidence"
+                    },
+                    "default": []
+                }
+            }
+        },
+        "actions": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "next",
+                "owner"
+            ],
+            "properties": {
+                "next": {
+                    "type": "array",
+                    "description": "Next concrete actions (ordered).",
+                    "items": {
+                        "$ref": "#/definitions/action_item"
+                    },
+                    "minItems": 1
+                },
+                "owner": {
+                    "type": "string",
+                    "description": "Who is responsible for the next actions (person/agent/team).",
+                    "minLength": 1
+                },
+                "definition_of_done": {
+                    "type": "array",
+                    "description": "Explicit criteria to declare this phase done.",
+                    "items": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "default": []
+                }
+            }
+        },
+        "meta": {
+            "type": "object",
+            "description": "Optional metadata for analytics/automation.",
+            "additionalProperties": false,
+            "properties": {
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "default": []
+                },
+                "links": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "format": "uri"
+                    },
+                    "default": []
+                }
+            }
+        }
+    },
+    "definitions": {
+        "work_item": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "id",
+                "title"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "title": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "area": {
+                    "type": "string",
+                    "default": ""
+                },
+                "refs": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "default": []
+                }
+            }
+        },
+        "blocker": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "id",
+                "summary",
+                "severity"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "summary": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "severity": {
+                    "type": "string",
+                    "enum": [
+                        "low",
+                        "medium",
+                        "high",
+                        "critical"
+                    ]
+                },
+                "owner": {
+                    "type": "string",
+                    "default": ""
+                },
+                "mitigation": {
+                    "type": "string",
+                    "default": ""
+                }
+            }
+        },
+        "check_result": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "status"
+            ],
+            "properties": {
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "unknown",
+                        "pass",
+                        "fail",
+                        "skipped"
+                    ]
+                },
+                "command": {
+                    "type": "string",
+                    "default": ""
+                },
+                "summary": {
+                    "type": "string",
+                    "default": ""
+                },
+                "timestamp": {
+                    "type": "string",
+                    "format": "date-time"
+                }
+            }
+        },
+        "risk": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "id",
+                "description",
+                "likelihood",
+                "impact"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "description": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "likelihood": {
+                    "type": "string",
+                    "enum": [
+                        "low",
+                        "medium",
+                        "high"
+                    ]
+                },
+                "impact": {
+                    "type": "string",
+                    "enum": [
+                        "low",
+                        "medium",
+                        "high"
+                    ]
+                },
+                "mitigation": {
+                    "type": "string",
+                    "default": ""
+                },
+                "owner": {
+                    "type": "string",
+                    "default": ""
+                }
+            }
+        },
+        "decision": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "id",
+                "decision",
+                "rationale"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "decision": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "rationale": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "alternatives": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "default": []
+                },
+                "tradeoffs": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "default": []
+                }
+            }
+        },
+        "evidence": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "kind",
+                "value"
+            ],
+            "properties": {
+                "kind": {
+                    "type": "string",
+                    "enum": [
+                        "file",
+                        "folder",
+                        "url",
+                        "command",
+                        "log",
+                        "benchmark",
+                        "screenshot"
+                    ]
+                },
+                "value": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "notes": {
+                    "type": "string",
+                    "default": ""
+                }
+            }
+        },
+        "action_item": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "id",
+                "title",
+                "priority"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "title": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "priority": {
+                    "type": "string",
+                    "enum": [
+                        "low",
+                        "medium",
+                        "high"
+                    ]
+                },
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "pending",
+                        "in_progress",
+                        "completed"
+                    ],
+                    "default": "pending"
+                },
+                "eta": {
+                    "type": "string",
+                    "description": "Optional ETA (free form)",
+                    "default": ""
+                },
+                "refs": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "default": []
+                }
+            }
+        }
+    }
+}

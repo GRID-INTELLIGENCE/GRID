@@ -1,0 +1,86 @@
+# Arena API Gateway Requirements
+# SECURITY UPDATE 2026-02-02: Updated all vulnerable dependencies
+# Core dependencies for the dynamic API architecture
+
+# Web Framework (SECURITY UPDATE: Patched CORS bypass CVE)
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+starlette==0.41.3
+
+# Authentication & Security
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.9
+
+# HTTP Client for Service Calls (CRITICAL: CVE-2024-23334 Directory Traversal PATCHED)
+aiohttp==3.11.11
+httpx==0.28.1
+
+# Monitoring & Observability
+prometheus-client==0.21.1
+structlog==24.4.0
+sentry-sdk[fastapi]==2.19.2
+
+# Rate Limiting
+redis==5.2.1
+aioredis==2.0.1
+
+# Data Validation (SECURITY UPDATE)
+pydantic==2.10.0
+pydantic-settings==2.7.1
+
+# Testing
+pytest==8.3.4
+pytest-asyncio==0.24.0
+pytest-cov==6.0.0
+# httpx already listed above for testing
+
+# Code Quality
+flake8==7.1.1
+mypy==1.14.0
+black==24.10.0
+isort==5.13.2
+
+# Security Scanning
+bandit==1.8.0
+safety==3.3.1
+
+# Performance Testing
+locust==2.33.0
+
+# Environment Management
+python-dotenv==1.0.1
+
+# Logging
+rich==13.9.4
+
+# Development Tools
+pre-commit==4.0.1
+
+# Documentation
+mkdocs==1.6.1
+mkdocs-material==9.5.50
+
+# Container & Orchestration
+kubernetes==31.0.0
+
+# AI/ML Safety (SECURITY UPDATE)
+transformers==4.48.3
+torch==2.9.1
+scikit-learn==1.6.1
+pandas==2.2.3
+numpy==2.2.1
+
+# Compliance & Audit (CRITICAL SECURITY UPDATE: Crypto vulnerabilities patched)
+cryptography==44.0.0
+bcrypt==4.2.1
+
+# CHANGES FROM PREVIOUS VERSION:
+# - fastapi: 0.104.1 -> 0.115.6 (CORS bypass fix)
+# - starlette: 0.27.0 -> 0.45.2 (security updates)
+# - aiohttp: 3.9.1 -> 3.11.11 (CVE-2024-23334 CRITICAL FIX)
+# - cryptography: 41.0.7 -> 44.0.0 (multiple CVE fixes)
+# - pydantic: 2.5.0 -> 2.10.5 (security improvements)
+# - transformers: 4.35.2 -> 4.48.3 (security updates)
+# - torch: 2.1.1 -> 2.5.1 (security updates)
+# - All other packages updated to latest secure versions

@@ -1,0 +1,529 @@
+# =============================================================================
+# API Routes Factory Defaults Configuration
+# =============================================================================
+#
+# This file defines the baseline "factory defaults" for the Mothership API.
+# These defaults ensure the API remains stable and secure even under
+# configuration drift or incomplete setup.
+#
+# IMPORTANT: Changes to this file affect ALL API endpoints.
+# Review carefully before modifying production deployments.
+#
+# Schema Version: 2026.1
+# Last Updated: 2026-01-11
+# =============================================================================
+
+__schema__: 2026.1
+__type__: factory_defaults
+__version__: 1.0.0
+__description__: >
+  Industry-grade security and reliability defaults for the Mothership API.
+  These settings enforce deny-by-default security posture with explicit
+  configuration required for any deviation from secure defaults.
+
+# =============================================================================
+# Global API Configuration
+# =============================================================================
+
+api:
+  prefix: "/api/v1"
+  title: "Mothership Cockpit API"
+  version: "1.0.0"
+
+  # Documentation (disabled in production by default)
+  docs:
+    enabled_in_development: true
+    enabled_in_production: false
+    swagger_path: "/docs"
+    redoc_path: "/redoc"
+    openapi_path: "/openapi.json"
+
+# =============================================================================
+# Security Defaults
+# =============================================================================
+
+security:
+  # Authentication Configuration
+  authentication:
+    # Minimum authentication level for protected endpoints
+    # Options: none, basic, integrity, elevated, admin
+    min_auth_level: integrity
+
+    # Require authentication in production (deny-by-default)
+    require_in_production: true
+
+    # Allow development bypass (must be explicitly enabled via env var)
+    allow_dev_bypass: false
+    dev_bypass_env_var: "MOTHERSHIP_ALLOW_DEV_BYPASS"
+
+    # JWT Configuration
+    jwt:
+      algorithm: "HS256"
+      access_token_expire_minutes: 30
+      refresh_token_expire_days: 7
+      require_strong_secret: true
+      min_secret_length: 32
+      recommended_secret_length: 64
+
+    # API Key Configuration
+    api_key:
+      header_name: "X-API-Key"
+      min_length: 32
+      require_prefix: false
+
+  # Authorization (RBAC)
+  authorization:
+    enabled: true
+    default_role: "anonymous"
+    roles:
+      - anonymous
+      - reader
+      - writer
+      - admin
+      - super_admin
+      - service_account
+
+  # Input Sanitization
+  input_sanitization:
+    enabled: true
+    strict_mode: true
+    max_input_length: 1000000  # 1MB
+    max_recursion_depth: 10
+
+    # Threat detection filters
+    filters:
+      sqli:
+        enabled: true
+        action: reject  # reject, sanitize, log_only, alert
+        severity: 9
+      xss:
+        enabled: true
+        action: reject
+        severity: 9
+      path_traversal:
+        enabled: true
+        action: reject
+        severity: 8
+      command_injection:
+        enabled: true
+        action: reject
+        severity: 9
+      header_injection:
+        enabled: true
+        action: sanitize
+        severity: 7
+      ssrf:
+        enabled: true
+        action: log_only  # Log but allow - may be legitimate
+        severity: 8
+      template_injection:
+        enabled: true
+        action: sanitize
+        severity: 7
+
+  # CORS Configuration (deny by default)
+  cors:
+    origins: []  # Empty = deny all by default
+    allow_credentials: false
+    allow_methods:
+      - GET
+      - HEAD
+      - OPTIONS
+    allow_headers:
+      - Content-Type
+      - Authorization
+      - X-API-Key
+      - X-Request-ID
+    expose_headers:
+      - X-Request-ID
+      - X-Process-Time
+      - X-RateLimit-Limit
+      - X-RateLimit-Remaining
+    max_age: 600
+
+  # Security Headers (always applied)
+  headers:
+    X-Content-Type-Options: "nosniff"
+    X-Frame-Options: "DENY"
+    X-XSS-Protection: "1; mode=block"
+    Referrer-Policy: "strict-origin-when-cross-origin"
+    Permissions-Policy: "camera=(), microphone=(), geolocation=(), usb=(self), interest-cohort=()"
+    Content-Security-Policy: "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'; object-src 'none'; frame-src 'none'"
+
+  # HTTPS/TLS Configuration
+  transport:
+    require_https_in_production: true
+    hsts:
+      enabled: true
+      max_age: 31536000  # 1 year
+      include_subdomains: true
+      preload: true
+
+# =============================================================================
+# Rate Limiting Defaults
+# =============================================================================
+
+rate_limiting:
+  enabled: true
+
+  # Global defaults
+  default:
+    requests_per_minute: 60
+    burst_size: 10
+    window_seconds: 60
+
+  # Per-tier limits
+  tiers:
+    anonymous:
+      requests_per_minute: 10
+      burst_size: 3
+    reader:
+      requests_per_minute: 60
+      burst_size: 10
+    writer:
+      requests_per_minute: 120
+      burst_size: 20
+    admin:
+      requests_per_minute: 300
+      burst_size: 50
+    service_account:
+      requests_per_minute: 1000
+      burst_size: 100
+
+  # Endpoint-specific overrides
+  endpoint_overrides:
+    "/api/v1/navigation/plan":
+      requests_per_minute: 30
+      burst_size: 5
+    "/api/v1/navigation/plan-stream":
+      requests_per_minute: 10
+      burst_size: 2
+    "/api/v1/auth/login":
+      requests_per_minute: 5
+      burst_size: 3
+    "/api/v1/auth/refresh":
+      requests_per_minute: 10
+      burst_size: 5
+
+  # Excluded paths (no rate limiting)
+  excluded_paths:
+    - "/health"
+    - "/health/live"
+    - "/health/ready"
+    - "/health/startup"
+    - "/ping"
+    - "/metrics"
+
+# =============================================================================
+# Request/Response Constraints
+# =============================================================================
+
+constraints:
+  # Request limits
+  request:
+    max_body_size_bytes: 10485760  # 10MB
+    max_upload_size_bytes: 52428800  # 50MB
+    max_header_size_bytes: 16384  # 16KB
+    max_url_length: 2048
+
+    # Allowed content types for bodies
+    allowed_content_types:
+      - application/json
+      - application/x-www-form-urlencoded
+      - multipart/form-data
+
+  # Response limits
+  response:
+    max_body_size_bytes: 52428800  # 50MB
+    gzip_minimum_size: 1000
+
+# =============================================================================
+# Timeout Configuration
+# =============================================================================
+
+timeouts:
+  # Default request timeout
+  default_ms: 30000  # 30 seconds
+
+  # Streaming endpoints
+  streaming_ms: 300000  # 5 minutes
+
+  # Long-running operations
+  long_running_ms: 600000  # 10 minutes
+
+  # Endpoint-specific timeouts
+  endpoint_overrides:
+    "/api/v1/navigation/plan":
+      timeout_ms: 60000
+    "/api/v1/navigation/plan-stream":
+      timeout_ms: 300000
+    "/api/v1/intelligence/analyze":
+      timeout_ms: 120000
+
+# =============================================================================
+# Circuit Breaker Configuration
+# =============================================================================
+
+circuit_breaker:
+  enabled: true
+
+  # Global defaults
+  default:
+    failure_threshold: 5  # Failures before opening circuit
+    success_threshold: 3  # Successes to close from half-open
+    recovery_timeout_seconds: 30
+    failure_window_seconds: 60
+    half_open_max_requests: 3
+
+  # Status codes that count as failures
+  failure_status_codes:
+    - 500
+    - 502
+    - 503
+    - 504
+
+  # Excluded paths (health checks should not trip circuit)
+  excluded_paths:
+    - "/health"
+    - "/health/live"
+    - "/health/ready"
+    - "/health/startup"
+    - "/ping"
+    - "/metrics"
+
+  # Granularity: "path", "method_path", or "global"
+  granularity: "path"
+
+# =============================================================================
+# Audit Logging Configuration
+# =============================================================================
+
+audit:
+  enabled: true
+
+  # What to log
+  log_requests: true
+  log_responses: false  # Disabled for privacy
+  log_request_bodies: false  # Disabled for privacy
+  log_response_bodies: false
+
+  # Sensitive headers to mask in logs
+  masked_headers:
+    - Authorization
+    - X-API-Key
+    - Cookie
+    - Set-Cookie
+    - X-Auth-Token
+
+  # Paths excluded from audit logging
+  excluded_paths:
+    - "/health"
+    - "/health/live"
+    - "/health/ready"
+    - "/ping"
+
+  # Retention
+  max_entries: 10000
+  retention_days: 30
+
+# =============================================================================
+# Public Endpoints (No Authentication Required)
+# =============================================================================
+
+public_endpoints:
+  - "/"
+  - "/health"
+  - "/health/live"
+  - "/health/ready"
+  - "/health/startup"
+  - "/ping"
+  - "/version"
+  - "/metrics"
+  - "/docs"
+  - "/redoc"
+  - "/openapi.json"
+
+# =============================================================================
+# Endpoint Security Matrix
+# =============================================================================
+# Defines security requirements for each endpoint category
+
+endpoint_matrix:
+  # Navigation endpoints
+  navigation:
+    auth_level: integrity
+    rate_limit: "30/minute"
+    input_sanitization: true
+    audit_logging: true
+    endpoints:
+      - path: "/api/v1/navigation/plan"
+        method: POST
+        timeout_ms: 60000
+      - path: "/api/v1/navigation/plan-stream"
+        method: POST
+        timeout_ms: 300000
+        streaming: true
+      - path: "/api/v1/navigation/decision"
+        method: POST
+        timeout_ms: 30000
+
+  # Authentication endpoints
+  auth:
+    auth_level: none  # Login doesn't require auth
+    rate_limit: "5/minute"
+    input_sanitization: true
+    audit_logging: true
+    endpoints:
+      - path: "/api/v1/auth/login"
+        method: POST
+      - path: "/api/v1/auth/refresh"
+        method: POST
+        auth_level: basic  # Requires refresh token
+      - path: "/api/v1/auth/logout"
+        method: POST
+        auth_level: integrity
+
+  # Billing endpoints
+  billing:
+    auth_level: elevated
+    rate_limit: "60/minute"
+    input_sanitization: true
+    audit_logging: true
+    require_permission: "billing_read"
+    endpoints:
+      - path: "/api/v1/billing/usage"
+        method: GET
+      - path: "/api/v1/billing/invoices"
+        method: GET
+
+  # Payment endpoints
+  payment:
+    auth_level: elevated
+    rate_limit: "10/minute"
+    input_sanitization: true
+    audit_logging: true
+    require_https: true
+    require_permission: "billing_write"
+    endpoints:
+      - path: "/api/v1/payment/methods"
+        method: GET
+      - path: "/api/v1/payment/methods"
+        method: POST
+      - path: "/api/v1/payment/charge"
+        method: POST
+
+  # Admin endpoints
+  admin:
+    auth_level: admin
+    rate_limit: "300/minute"
+    input_sanitization: true
+    audit_logging: true
+    require_permission: "admin"
+    endpoints:
+      - path: "/api/v1/admin/users"
+        method: GET
+      - path: "/api/v1/admin/config"
+        method: GET
+      - path: "/api/v1/admin/config"
+        method: PUT
+
+  # Intelligence endpoints
+  intelligence:
+    auth_level: integrity
+    rate_limit: "20/minute"
+    input_sanitization: true
+    audit_logging: true
+    endpoints:
+      - path: "/api/v1/intelligence/analyze"
+        method: POST
+        timeout_ms: 120000
+
+# =============================================================================
+# Health Check Factory Defaults Verification
+# =============================================================================
+
+verification:
+  enabled: true
+
+  # Health check endpoint that verifies factory defaults
+  health_endpoint: "/health/security"
+
+  # Checks to perform
+  checks:
+    - name: authentication_enforced
+      description: "Authentication is enforced in production"
+      required: true
+
+    - name: rate_limiting_enabled
+      description: "Rate limiting is enabled"
+      required: true
+
+    - name: input_sanitization_enabled
+      description: "Input sanitization is enabled"
+      required: true
+
+    - name: security_headers_present
+      description: "Security headers are configured"
+      required: true
+
+    - name: https_enforced
+      description: "HTTPS is enforced in production"
+      required: true
+
+    - name: circuit_breaker_enabled
+      description: "Circuit breaker is enabled"
+      required: false
+
+    - name: audit_logging_enabled
+      description: "Audit logging is enabled"
+      required: false
+
+  # Alert if verification fails
+  alert_on_failure: true
+
+  # Block startup if critical checks fail
+  block_startup_on_failure: true
+
+# =============================================================================
+# Ghost Registry Configuration
+# =============================================================================
+
+ghost_registry:
+  enabled: true
+
+  # Handler registration settings
+  handlers:
+    default_timeout_ms: 30000
+    default_require_auth: true
+    default_require_sanitization: true
+
+  # Circuit breaker for handlers
+  circuit_breaker:
+    failure_threshold: 5
+    recovery_timeout_seconds: 30
+    success_threshold: 2
+
+# =============================================================================
+# Compliance and Governance
+# =============================================================================
+
+compliance:
+  # Require security review for changes
+  require_review: true
+
+  # Changelog tracking
+  changelog:
+    enabled: true
+    path: "docs/api_security_changelog.md"
+
+  # Pre-deployment checks
+  pre_deployment:
+    - security_audit
+    - rate_limit_verification
+    - auth_verification
+    - input_sanitization_test
+
+  # Chaos testing schedule
+  chaos_testing:
+    enabled: false  # Enable in staging
+    schedule: "weekly"

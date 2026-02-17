@@ -1,0 +1,102 @@
+/* Auto-generated CSS Variables from branding.json */
+/* DO NOT EDIT MANUALLY - Run: node scripts/generate-css-variables.js */
+
+:root {
+    /* Graphite Base System */
+    --graphite-50: #FAFAFC;
+    --graphite-100: #F5F5F8;
+    --graphite-200: #E0E0E8;
+    --graphite-300: #BABAC8;
+    --graphite-400: #8A8A9E;
+    --graphite-500: #5A5A6E;
+    --graphite-600: #3A3A4A;
+    --graphite-700: #2A2A36;
+    --graphite-800: #1F1F28;
+    --graphite-900: #14141A;
+    --graphite-950: #0A0A0F;
+
+    /* Electric Cyan Accent System */
+    --cyan-300: #66E8FF;
+    --cyan-400: #33E0FF;
+    --cyan-500: #00D9FF;
+    --cyan-600: #00B8D4;
+    --cyan-700: #0099B3;
+
+    /* Amber Accent System */
+    --amber-400: #FBBF24;
+    --amber-500: #F59E0B;
+    --amber-600: #D97706;
+    --amber-700: #EA580C;
+
+    /* Semantic Colors */
+    --success: #059669;
+    --warning: #D97706;
+    --error: #DC2626;
+    --info: #0891B2;
+    --white: #FFFFFF;
+
+    /* Primary Colors (using Graphite + Cyan) */
+    --primary: var(--cyan-500);
+    --primary-hover: var(--cyan-400);
+    --primary-active: var(--cyan-600);
+    --primary-light: var(--cyan-300);
+    --primary-dark: var(--cyan-700);
+
+    /* Background Colors - Light Theme */
+    --bg-primary: var(--graphite-50);
+    --bg-secondary: var(--white);
+    --bg-tertiary: var(--graphite-100);
+    --bg-card: var(--white);
+    --bg-overlay: rgba(10, 10, 15, 0.5);
+
+    /* Text Colors - Light Theme */
+    --text-primary: var(--graphite-900);
+    --text-secondary: var(--graphite-600);
+    --text-tertiary: var(--graphite-500);
+    --text-muted: var(--graphite-400);
+    --text-inverse: var(--white);
+
+    /* Border Colors */
+    --border-primary: var(--graphite-200);
+    --border-secondary: var(--graphite-300);
+    --border-accent: var(--cyan-500);
+
+    /* Base Colors */
+    --white: #FFFFFF;
+    --black: #000000;
+
+    /* Legacy support (for gradual migration) */
+    --primary-indigo: var(--cyan-500);
+    --primary-indigo-hover: var(--cyan-400);
+    --primary-indigo-light: var(--cyan-300);
+    --primary-indigo-dark: var(--cyan-700);
+    --accent-cyan: var(--cyan-500);
+    --accent-emerald: var(--success);
+    --accent-amber: var(--warning);
+    --accent-rose: var(--error);
+    --gray-950: var(--graphite-950);
+    --gray-900: var(--graphite-900);
+    --gray-800: var(--graphite-800);
+    --gray-700: var(--graphite-700);
+    --gray-600: var(--graphite-600);
+    --gray-500: var(--graphite-500);
+    --gray-400: var(--graphite-400);
+    --gray-300: var(--graphite-300);
+    --gray-200: var(--graphite-200);
+    --gray-100: var(--graphite-100);
+    --gray-50: var(--graphite-50);
+
+    /* Typography */
+    --font-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-body: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'Monaco', monospace;
+
+    /* Shadows with Cyan Glow */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    --shadow-glow: 0 0 40px rgba(0, 217, 255, 0.3);
+    --shadow-glow-strong: 0 0 60px rgba(0, 217, 255, 0.4);
+    --shadow-cyan: 0 4px 20px rgba(0, 217, 255, 0.25);
+}

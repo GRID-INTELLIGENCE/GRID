@@ -1,0 +1,90 @@
+{
+  "dashboard": {
+    "title": "Parasitic Leak Remediation",
+    "tags": ["parasitic-leaks"],
+    "timezone": "browser",
+    "refresh": "30s",
+    "panels": [
+      {
+        "id": 1,
+        "title": "EventBus Active Subscriptions",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "eventbus_active_subscriptions",
+            "legendFormat": "Active Subscriptions"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "DB Active Connections",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "db_active_connections",
+            "legendFormat": "Active Connections"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "EventBus Subscription Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(eventbus_subscriptions_created_total[5m])",
+            "legendFormat": "Created/sec"
+          },
+          {
+            "expr": "rate(eventbus_subscriptions_removed_total[5m])",
+            "legendFormat": "Removed/sec"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+      },
+      {
+        "id": 4,
+        "title": "DB Disposal Metrics",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(parasite_guard_db_engine_disposal_success_total[5m])",
+            "legendFormat": "Success/sec"
+          },
+          {
+            "expr": "rate(parasite_guard_db_engine_disposal_failures_total[5m])",
+            "legendFormat": "Failures/sec"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
+      },
+      {
+        "id": 5,
+        "title": "System Health Status",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "health_check_status",
+            "legendFormat": "Health Status"
+          }
+        ],
+        "gridPos": {"h": 4, "w": 12, "x": 0, "y": 16}
+      },
+      {
+        "id": 6,
+        "title": "Parasite Guard Cleanup Success Rate",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "rate(parasite_guard_eventbus_cleanup_success_total[5m]) / (rate(parasite_guard_eventbus_cleanup_success_total[5m]) + rate(parasite_guard_db_engine_disposal_failures_total[5m]))",
+            "legendFormat": "Success Rate"
+          }
+        ],
+        "gridPos": {"h": 4, "w": 12, "x": 12, "y": 16}
+      }
+    ]
+  }
+}

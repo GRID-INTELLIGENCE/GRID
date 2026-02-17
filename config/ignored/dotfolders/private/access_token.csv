@@ -1,0 +1,2 @@
+Header Parameter,Value
+Authorization,Valid access token following the format: Bearer <Access Token>

@@ -1,0 +1,98 @@
+{
+  "project": {
+    "name": "GRID",
+    "description": "Geometric Resonance Intelligence Driver - A Python framework for exploring complex systems through geometric resonance patterns",
+    "version": "2.1.0",
+    "language": "Python 3.11+",
+    "architecture": "Layered (core → API → database → CLI → services)"
+  },
+  "key_components": {
+    "core_intelligence": {
+      "path": "grid/",
+      "description": "Core intelligence layer with essence, patterns, awareness, evolution, and interfaces"
+    },
+    "cognitive_layer": {
+      "path": "light_of_the_seven/cognitive_layer/",
+      "description": "Cognitive decision support system with bounded rationality, mental models, and cognitive load management"
+    },
+    "rag_system": {
+      "path": "tools/rag/",
+      "description": "Local-only RAG system using Ollama models (nomic-embed-text-v2-moe:latest) and ChromaDB"
+    },
+    "processing_pipeline": {
+      "description": "NER → Pattern Engine → Rules Engine → Relationship Analyzer → Scenario Analyzer"
+    }
+  },
+  "technology_stack": {
+    "web_framework": "FastAPI",
+    "database": "SQLAlchemy (with Databricks support)",
+    "data_models": "Pydantic v2",
+    "testing": "pytest (≥80% coverage)",
+    "linting": "ruff, black (120 char line length)",
+    "type_checking": "mypy",
+    "embeddings": "Ollama (nomic-embed-text-v2-moe:latest)",
+    "llm": "Ollama (ministral, gpt-oss-safeguard)",
+    "vector_store": "ChromaDB"
+  },
+  "architecture_principles": [
+    "Layered architecture with clear separation",
+    "Local-first operation (no external APIs)",
+    "Event-driven processing (Input → Process → Output)",
+    "Cognitive-aware decision support",
+    "Pattern-based development (9 cognition patterns)",
+    "RAG-enhanced context retrieval"
+  ],
+  "patterns": {
+    "cognition_patterns": [
+      "Flow & Motion (Green) - Data streams and pipelines",
+      "Spatial Relationships (Blue) - Architecture and topology",
+      "Natural Rhythms (Yellow) - Concurrency and scheduling",
+      "Color & Light (Orange) - Observability and logging",
+      "Repetition & Habit (Purple) - Standardization",
+      "Deviation & Surprise (Red) - Error handling",
+      "Cause & Effect (Teal) - Event-driven architecture",
+      "Temporal Patterns (Silver) - State history",
+      "Combination Patterns (Gold) - Integration"
+    ]
+  },
+  "constraints": {
+    "local_only": "No external API calls (Ollama local models only)",
+    "python_version": "3.11+ with full type hints",
+    "test_coverage": "≥80% maintained",
+    "code_style": "120 char lines, ruff + black",
+    "architecture": "Respect layer boundaries",
+    "backward_compatibility": "Additive changes preferred"
+  },
+  "key_files": {
+    "architecture": "docs/architecture.md",
+    "global_rules": "docs/global_layer.md",
+    "pattern_language": "docs/pattern_language.md",
+    "project_config": "pyproject.toml",
+    "cursor_rules": ".cursorrules",
+    "project_summary": ".cursor/context/project_summary.md"
+  },
+  "rag_usage": {
+    "index_command": "python -m tools.rag.cli index <path>",
+    "query_command": "python -m tools.rag.cli query \"<question>\"",
+    "embedding_model": "nomic-embed-text-v2-moe:latest",
+    "llm_models": ["ministral", "gpt-oss-safeguard"],
+    "vector_store": "ChromaDB in .rag_db/"
+  },
+  "development_workflow": {
+    "input_modes": [
+      "Conversational baseline (direct input)",
+      "RAG mode (docs/ directory)"
+    ],
+    "processing": [
+      "NER extraction",
+      "Pattern recognition",
+      "Relationship analysis",
+      "Scenario exploration"
+    ],
+    "output": [
+      "Structured entities and relationships",
+      "Explainable judgments with confidence scores",
+      "Traceable to source (event_id, chunk_id, doc_id)"
+    ]
+  }
+}

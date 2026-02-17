@@ -1,0 +1,30 @@
+__schema__: 2026.1
+prefix: "/api/v1"
+routers:
+  - module: "application.mothership.routers.auth:router"
+    enabled: true
+  - module: "application.mothership.routers.navigation_simple:router"
+    enabled: true
+    # prefix removed - router already has prefix="/navigation" built in
+    stream: false
+    hooks:
+      pre_import: "validate_streaming_capability"
+  - module: "application.mothership.routers.payment:router"
+    enabled: true
+  - module: "application.mothership.routers.stripe_connect_demo:router"
+    enabled: true
+  - module: "application.mothership.routers.api_keys:router"
+    enabled: true
+  - module: "application.mothership.routers.billing:router"
+    enabled: true
+  - module: "application.resonance.api.router:router"
+    prefix: "/resonance"
+    tags: ["resonance"]
+    enabled: true
+  - module: "application.canvas.api:router"
+    enabled: true
+  - module: "grid.AGENT.api.router:router"
+    enabled: false
+  - module: "application.mothership.routers.intelligence:router"
+    prefix: "/intelligence"
+    enabled: true

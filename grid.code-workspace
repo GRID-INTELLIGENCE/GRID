@@ -1,0 +1,83 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../work"
+		}
+	],
+	"settings": {
+		"terminal.integrated.shellIntegration.enabled": false,
+		"terminal.integrated.shellIntegration.decorationsEnabled": "never",
+		"terminal.integrated.env.linux": {
+			"PROJECT_ROOT": "${workspaceFolder}",
+			"GRID_HOME": "${workspaceFolder}/grid",
+			"EUFLE_HOME": "${workspaceFolder}/projects/EUFLE",
+			"EUFLE_ROOT": "${workspaceFolder}/projects/EUFLE",
+			"ENV": "development",
+			"SAMPLE_RATE": "48000",
+			"BPM": "124",
+			"BIT_DEPTH": "32_float"
+		},
+		"terminal.integrated.env.windows": {
+			"PROJECT_ROOT": "${workspaceFolder}",
+			"GRID_HOME": "${workspaceFolder}\\grid",
+			"EUFLE_HOME": "${workspaceFolder}\\projects\\EUFLE",
+			"EUFLE_ROOT": "${workspaceFolder}\\projects\\EUFLE",
+			"ENV": "development",
+			"SAMPLE_RATE": "48000",
+			"BPM": "124",
+			"BIT_DEPTH": "32_float"
+		},
+		"workbench.editor.alwaysShowEditorActions": true,
+		"workbench.editor.autoLockGroups": {
+			"default": true,
+			"workbench.editorinputs.searchEditorInput": true,
+			"workbench.input.interactive": true,
+			"jsProfileVisualizer.heapsnapshot.table": true,
+			"jsProfileVisualizer.heapprofile.table": true,
+			"jsProfileVisualizer.cpuprofile.table": true,
+			"vscode.videoPreview": true,
+			"vscode.audioPreview": true,
+			"imagePreview.previewEditor": true,
+			"workbench.editors.gettingStartedInput": true,
+			"repl": true,
+			"jupyter-notebook": true,
+			"notebookOutputEditor": true
+		},
+		"workbench.editor.closeOnFileDelete": true,
+		"workbench.editor.centeredLayoutFixedWidth": true,
+		"terminal.integrated.profiles.windows": {
+			"PowerShell": {
+				"source": "PowerShell",
+				"icon": "terminal-powershell"
+			},
+			"WSL": {
+				"path": "wsl.exe",
+				"args": [
+					"-d",
+					"Ubuntu"
+				],
+				"icon": "terminal-linux",
+				"color": "terminal.ansiBlue"
+			}
+		},
+		"terminal.integrated.defaultProfile.windows": "PowerShell",
+		"chat.agent.maxRequests": 55,
+		"chat.customAgentInSubagent.enabled": true,
+		"chat.editor.wordWrap": "on",
+		"chat.edits2.enabled": true,
+		"chat.mcp.discovery.enabled": {
+			"cursor-workspace": true,
+			"cursor-global": true,
+			"windsurf": true,
+			"claude-desktop": true
+		},
+		"chat.renderRelatedFiles": true,
+		"chat.tools.terminal.autoReplyToPrompts": true,
+		"chat.useNestedAgentsMdFiles": true,
+		"inlineChat.enableV2": true,
+		"inlineChat.notebookAgent": true
+	}
+}

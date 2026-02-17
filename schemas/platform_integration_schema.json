@@ -1,0 +1,149 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "GRID Platform Integration Schema",
+    "description": "Structured schema for defining platform and tool integrations within the Geometric Resonance Intelligence Driver (GRID) framework.",
+    "type": "object",
+    "required": [
+        "platform_id",
+        "resonance_tier",
+        "core_mapping",
+        "branch_hierarchy"
+    ],
+    "properties": {
+        "platform_id": {
+            "type": "string",
+            "description": "Unique identifier for the platform (e.g., windsurf, databricks, obsidian)."
+        },
+        "resonance_tier": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 7,
+            "description": "The workspace tier this integration operates on (Floor 1-7)."
+        },
+        "metadata": {
+            "type": "object",
+            "properties": {
+                "version": {
+                    "type": "string"
+                },
+                "author": {
+                    "type": "string"
+                },
+                "status": {
+                    "enum": [
+                        "stable",
+                        "experimental",
+                        "deprecated"
+                    ]
+                }
+            }
+        },
+        "core_mapping": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": [
+                    "component",
+                    "layer"
+                ],
+                "properties": {
+                    "component": {
+                        "enum": [
+                            "circuits",
+                            "physics",
+                            "rag",
+                            "visualization",
+                            "intelligence"
+                        ],
+                        "description": "The core GRID component the platform interacts with."
+                    },
+                    "layer": {
+                        "enum": [
+                            "bronze",
+                            "silver",
+                            "gold"
+                        ],
+                        "description": "The maturity layer of the data/interaction."
+                    },
+                    "role": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "branch_hierarchy": {
+            "type": "object",
+            "required": [
+                "root_prefix",
+                "theme_mapping"
+            ],
+            "properties": {
+                "root_prefix": {
+                    "type": "string",
+                    "default": "topic/",
+                    "description": "The git branch prefix for this platform's work."
+                },
+                "theme_mapping": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string",
+                        "description": "Map internal themes to git-topic short names."
+                    }
+                }
+            }
+        },
+        "compliance": {
+            "type": "object",
+            "required": [
+                "contract_verified",
+                "resonance_threshold"
+            ],
+            "properties": {
+                "contract_verified": {
+                    "type": "boolean"
+                },
+                "citation_required": {
+                    "type": "boolean",
+                    "default": false
+                },
+                "resonance_threshold": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                }
+            }
+        },
+        "relationship": {
+            "type": "object",
+            "required": [
+                "status",
+                "principles"
+            ],
+            "properties": {
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "friend",
+                        "partner",
+                        "external",
+                        "unknown"
+                    ],
+                    "description": "The strategic relationship status of the platform."
+                },
+                "principles": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "Explicit values and principles that define the trust in this platform."
+                },
+                "trust_score": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "description": "Calculated trust and reliability score (0.0 - 1.0)."
+                }
+            }
+        }
+    }
+}

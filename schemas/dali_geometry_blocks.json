@@ -1,0 +1,364 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DaliGeometryBlocks",
+  "description": "Geometric block representation of Dalí's 'The Elephants' (1948) for visualization",
+  "type": "object",
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "painting": { "const": "The Elephants" },
+        "artist": { "const": "Salvador Dalí" },
+        "year": { "const": 1948 },
+        "reference": { "const": "Dalí Museum, St. Petersburg, Florida" },
+        "educational_level": { "const": "High School Geometry" }
+      }
+    },
+    "coordinate_system": {
+      "type": "object",
+      "description": "3D Cartesian coordinate system",
+      "properties": {
+        "x_axis": { "type": "string", "const": "horizontal (left/right)" },
+        "y_axis": { "type": "string", "const": "vertical (up/down)" },
+        "z_axis": { "type": "string", "const": "depth (near/far)" },
+        "units": { "type": "string", "const": "meters" },
+        "origin": { "$ref": "#/$defs/Point3D" }
+      }
+    },
+    "canvas": {
+      "type": "object",
+      "properties": {
+        "width": { "type": "number", "const": 100 },
+        "height": { "type": "number", "const": 80 },
+        "aspect_ratio": { "type": "number", "const": 1.25 },
+        "horizon_y": { "type": "number", "const": 10 },
+        "horizon_percent": { "type": "number", "const": 12.5 },
+        "negative_space_ratio": { "type": "number", "const": 0.875 }
+      }
+    },
+    "blocks": {
+      "type": "object",
+      "properties": {
+        "ground_plane": {
+          "$ref": "#/$defs/GeometricBlock",
+          "description": "Reference plane at Y=0"
+        },
+        "left_elephant": { "$ref": "#/$defs/ElephantBlocks" },
+        "right_elephant": { "$ref": "#/$defs/ElephantBlocks" },
+        "center_building": { "$ref": "#/$defs/GeometricBlock" }
+      }
+    },
+    "impossibility_metrics": {
+      "type": "object",
+      "properties": {
+        "mass_support_ratio": {
+          "type": "number",
+          "description": "Weight per support area (normal ≈ 1.0)"
+        },
+        "slenderness_index": {
+          "type": "number",
+          "description": "Length/thickness of legs (buckle threshold = 30)"
+        },
+        "vertical_stretch": {
+          "type": "number",
+          "description": "Height multiplier vs natural elephant"
+        },
+        "symmetry_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "impossibility_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Combined surrealism score (80-100 = Pure Dalí)"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "Point3D": {
+      "type": "object",
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "z": { "type": "number" }
+      },
+      "required": ["x", "y", "z"]
+    },
+    "BoundingBox": {
+      "type": "object",
+      "properties": {
+        "min": { "$ref": "#/$defs/Point3D" },
+        "max": { "$ref": "#/$defs/Point3D" }
+      },
+      "required": ["min", "max"]
+    },
+    "GeometricBlock": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "type": {
+          "type": "string",
+          "enum": ["plane", "box", "cylinder", "ellipsoid", "pyramid"]
+        },
+        "bounds": { "$ref": "#/$defs/BoundingBox" },
+        "dimensions": {
+          "type": "object",
+          "properties": {
+            "width": { "type": "number" },
+            "height": { "type": "number" },
+            "depth": { "type": "number" }
+          }
+        },
+        "color": { "type": "string" },
+        "opacity": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "required": ["id", "type", "bounds"]
+    },
+    "ElephantBlocks": {
+      "type": "object",
+      "description": "Geometric decomposition of Dalí's impossible elephant",
+      "properties": {
+        "position": { "$ref": "#/$defs/Point3D" },
+        "legs": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/GeometricBlock" },
+          "minItems": 4,
+          "maxItems": 4,
+          "description": "Four impossibly thin, tall cylinders"
+        },
+        "body": {
+          "$ref": "#/$defs/GeometricBlock",
+          "description": "Compressed ellipsoid mass"
+        },
+        "burden": {
+          "$ref": "#/$defs/GeometricBlock",
+          "description": "Obelisk/tower carried on back"
+        },
+        "metrics": {
+          "type": "object",
+          "properties": {
+            "leg_length": { "type": "number", "const": 15 },
+            "leg_thickness": { "type": "number", "const": 0.15 },
+            "slenderness_ratio": { "type": "number", "const": 100 },
+            "body_volume": { "type": "number" },
+            "total_height": { "type": "number" }
+          }
+        }
+      }
+    }
+  },
+  "example": {
+    "metadata": {
+      "painting": "The Elephants",
+      "artist": "Salvador Dalí",
+      "year": 1948,
+      "reference": "Dalí Museum, St. Petersburg, Florida",
+      "educational_level": "High School Geometry"
+    },
+    "coordinate_system": {
+      "x_axis": "horizontal (left/right)",
+      "y_axis": "vertical (up/down)",
+      "z_axis": "depth (near/far)",
+      "units": "meters",
+      "origin": { "x": 0, "y": 0, "z": 0 }
+    },
+    "canvas": {
+      "width": 100,
+      "height": 80,
+      "aspect_ratio": 1.25,
+      "horizon_y": 10,
+      "horizon_percent": 12.5,
+      "negative_space_ratio": 0.875
+    },
+    "blocks": {
+      "ground_plane": {
+        "id": "ground",
+        "type": "plane",
+        "bounds": {
+          "min": { "x": -50, "y": -0.1, "z": -50 },
+          "max": { "x": 50, "y": 0, "z": 50 }
+        },
+        "dimensions": { "width": 100, "height": 0.1, "depth": 100 },
+        "color": "#8B4513",
+        "opacity": 1.0
+      },
+      "left_elephant": {
+        "position": { "x": -25, "y": 0, "z": 0 },
+        "legs": [
+          {
+            "id": "left_front_left_leg",
+            "type": "cylinder",
+            "bounds": {
+              "min": { "x": -26, "y": 0, "z": -0.5 },
+              "max": { "x": -25.85, "y": 15, "z": -0.35 }
+            },
+            "dimensions": { "width": 0.15, "height": 15, "depth": 0.15 },
+            "color": "#808080",
+            "opacity": 1.0
+          },
+          {
+            "id": "left_front_right_leg",
+            "type": "cylinder",
+            "bounds": {
+              "min": { "x": -24, "y": 0, "z": -0.5 },
+              "max": { "x": -23.85, "y": 15, "z": -0.35 }
+            },
+            "dimensions": { "width": 0.15, "height": 15, "depth": 0.15 },
+            "color": "#808080",
+            "opacity": 1.0
+          },
+          {
+            "id": "left_back_left_leg",
+            "type": "cylinder",
+            "bounds": {
+              "min": { "x": -26, "y": 0, "z": 0.5 },
+              "max": { "x": -25.85, "y": 15, "z": 0.65 }
+            },
+            "dimensions": { "width": 0.15, "height": 15, "depth": 0.15 },
+            "color": "#808080",
+            "opacity": 1.0
+          },
+          {
+            "id": "left_back_right_leg",
+            "type": "cylinder",
+            "bounds": {
+              "min": { "x": -24, "y": 0, "z": 0.5 },
+              "max": { "x": -23.85, "y": 15, "z": 0.65 }
+            },
+            "dimensions": { "width": 0.15, "height": 15, "depth": 0.15 },
+            "color": "#808080",
+            "opacity": 1.0
+          }
+        ],
+        "body": {
+          "id": "left_body",
+          "type": "ellipsoid",
+          "bounds": {
+            "min": { "x": -26.5, "y": 15, "z": -1 },
+            "max": { "x": -23.5, "y": 17.5, "z": 1 }
+          },
+          "dimensions": { "width": 3, "height": 2.5, "depth": 2 },
+          "color": "#A0522D",
+          "opacity": 1.0
+        },
+        "burden": {
+          "id": "left_burden",
+          "type": "pyramid",
+          "bounds": {
+            "min": { "x": -25.5, "y": 17.5, "z": -0.5 },
+            "max": { "x": -24.5, "y": 20.5, "z": 0.5 }
+          },
+          "dimensions": { "width": 1, "height": 3, "depth": 1 },
+          "color": "#DAA520",
+          "opacity": 1.0
+        },
+        "metrics": {
+          "leg_length": 15,
+          "leg_thickness": 0.15,
+          "slenderness_ratio": 100,
+          "body_volume": 7.85,
+          "total_height": 20.5
+        }
+      },
+      "right_elephant": {
+        "position": { "x": 25, "y": 0, "z": 0 },
+        "legs": [
+          {
+            "id": "right_front_left_leg",
+            "type": "cylinder",
+            "bounds": {
+              "min": { "x": 24, "y": 0, "z": -0.5 },
+              "max": { "x": 24.15, "y": 15, "z": -0.35 }
+            },
+            "dimensions": { "width": 0.15, "height": 15, "depth": 0.15 },
+            "color": "#808080",
+            "opacity": 1.0
+          },
+          {
+            "id": "right_front_right_leg",
+            "type": "cylinder",
+            "bounds": {
+              "min": { "x": 26, "y": 0, "z": -0.5 },
+              "max": { "x": 26.15, "y": 15, "z": -0.35 }
+            },
+            "dimensions": { "width": 0.15, "height": 15, "depth": 0.15 },
+            "color": "#808080",
+            "opacity": 1.0
+          },
+          {
+            "id": "right_back_left_leg",
+            "type": "cylinder",
+            "bounds": {
+              "min": { "x": 24, "y": 0, "z": 0.5 },
+              "max": { "x": 24.15, "y": 15, "z": 0.65 }
+            },
+            "dimensions": { "width": 0.15, "height": 15, "depth": 0.15 },
+            "color": "#808080",
+            "opacity": 1.0
+          },
+          {
+            "id": "right_back_right_leg",
+            "type": "cylinder",
+            "bounds": {
+              "min": { "x": 26, "y": 0, "z": 0.5 },
+              "max": { "x": 26.15, "y": 15, "z": 0.65 }
+            },
+            "dimensions": { "width": 0.15, "height": 15, "depth": 0.15 },
+            "color": "#808080",
+            "opacity": 1.0
+          }
+        ],
+        "body": {
+          "id": "right_body",
+          "type": "ellipsoid",
+          "bounds": {
+            "min": { "x": 23.5, "y": 15, "z": -1 },
+            "max": { "x": 26.5, "y": 17.5, "z": 1 }
+          },
+          "dimensions": { "width": 3, "height": 2.5, "depth": 2 },
+          "color": "#A0522D",
+          "opacity": 1.0
+        },
+        "burden": {
+          "id": "right_burden",
+          "type": "pyramid",
+          "bounds": {
+            "min": { "x": 24.5, "y": 17.5, "z": -0.5 },
+            "max": { "x": 25.5, "y": 20.5, "z": 0.5 }
+          },
+          "dimensions": { "width": 1, "height": 3, "depth": 1 },
+          "color": "#DAA520",
+          "opacity": 1.0
+        },
+        "metrics": {
+          "leg_length": 15,
+          "leg_thickness": 0.15,
+          "slenderness_ratio": 100,
+          "body_volume": 7.85,
+          "total_height": 20.5
+        }
+      },
+      "center_building": {
+        "id": "center_structure",
+        "type": "box",
+        "bounds": {
+          "min": { "x": -1, "y": 0, "z": -0.5 },
+          "max": { "x": 1, "y": 2, "z": 0.5 }
+        },
+        "dimensions": { "width": 2, "height": 2, "depth": 1 },
+        "color": "#D2B48C",
+        "opacity": 1.0
+      }
+    },
+    "impossibility_metrics": {
+      "mass_support_ratio": 277.8,
+      "slenderness_index": 100,
+      "vertical_stretch": 6.8,
+      "symmetry_score": 0.85,
+      "impossibility_score": 97.6
+    }
+  }
+}

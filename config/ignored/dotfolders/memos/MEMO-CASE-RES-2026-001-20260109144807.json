@@ -1,0 +1,38 @@
+{
+  "memo_id": "MEMO-CASE-RES-2026-001-20260109144807",
+  "case_id": "CASE-RES-2026-001",
+  "timestamp": "2026-01-09T08:48:07.328606",
+  "executive_summary": "Consolidated lawyer report after iterative analysis.",
+  "boolean_decisions": [
+    {
+      "feature": "monitoring",
+      "value": true,
+      "protocol": "GRID-ENFORCE"
+    }
+  ],
+  "xai_explanations": [
+    {
+      "decision_id": "DEC-CASE-RES-2026-001-MAIN",
+      "resonance_alignment": 0.992,
+      "logic_path": [
+        "Automated enforcement triggered by high resonance factor and validated iterative lawyer reports",
+        "Legacy drift neutralized via Shadow Guard activation."
+      ],
+      "safety_verification": "PASSED",
+      "evidence_nodes": [
+        {
+          "case_id": "CASE-RES-2026-001",
+          "note": "Default task execution"
+        }
+      ],
+      "uncertainty_factor": 0.008000000000000007
+    }
+  ],
+  "enforcement_protocol": "GRID-SEC-ENFORCE-V1",
+  "audit_trail": [
+    {
+      "case_id": "CASE-RES-2026-001",
+      "note": "Default task execution"
+    }
+  ]
+}

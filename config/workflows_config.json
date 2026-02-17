@@ -1,0 +1,5 @@
+{
+  "focus_areas": ["GRID", "Hogwarts", "The Chase"],
+  "metrics": ["progress", "blockers", "insights"],
+  "tools": ["Python", "React", "Supabase"]
+}

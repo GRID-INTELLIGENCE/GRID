@@ -1,0 +1,269 @@
+# IDENTITY BRIDGING & CROSS-DEVICE CORRELATION FIREWALL BLOCKLIST
+# Last Updated: February 2026
+# Purpose: Block ML-based device fingerprinting and SSID/BSSID exfiltration
+# Implementation: NextDNS | Pi-hole | OpenWRT/pfSense
+
+# ============================================================================
+# TIER 1: CRITICAL (High confidence bridging, minimal legitimate impact)
+# ============================================================================
+
+# SIFT SCIENCE - Primary Device Correlation Engine
+# Function: Aggregates device fingerprints, IP addresses, BSSID for fraud ML models
+# Affects: Shopify, DoorDash, Airbnb, PayPal fraud detection
+# Mitigation Impact: MEDIUM (May trigger additional verification on transactions)
+api3.siftscience.com
+api2.siftscience.com
+cdn.siftscience.com
+pixel.siftscience.com
+siftscience.com
+
+# TENCENT BEACON - Network Topology Mapping & Telemetry
+# Function: Collects BSSID of nearby routers, SSID names, location inference
+# Apps: QQ Games, Honor of Kings, PUBG Mobile, WeChat, TencentOS
+# Mitigation Impact: LOW (Primarily telemetry; blocks don't break core functionality)
+otheve.beacon.qq.com
+monitor.uu.qq.com
+analytics.map.qq.com
+mtrace.qq.com
+wxsnsreport.qq.com
+
+# BRANCH.IO - Cross-App Device Linking
+# Function: Tracks users across multiple apps on same device, bridges to web
+# Used by: Uber, DoorDash, Shopify, Instagram, TikTok
+# Mitigation Impact: MEDIUM (May break deeplinks between app and web versions)
+api.branch.io
+api2.branch.io
+bnc.lt
+branch.io
+api.branchmetrics.io
+
+# ============================================================================
+# TIER 2: HIGH CONFIDENCE (Well-documented bridging, moderate impact)
+# ============================================================================
+
+# FIREBASE (Google) - Cross-Device Analytics & Crash Reporting
+# Function: Links devices via Google Account, IP, fingerprint
+# Apps: ~90% of Android apps
+# Mitigation Impact: HIGH (May break analytics, crash reporting in apps)
+# NOTE: Consider more granular blocking (see TIER 3)
+firebase-settings.crashlytics.com
+crashlytics.com
+analytics.google.com
+firebaseremoteconfig.googleapis.com
+firebaseinstallations.googleapis.com
+
+# ADJUST - Mobile Attribution & Device Bridging
+# Function: Tracks device IDs across app installs, OS reinstalls
+# Used by: Gaming studios, social apps, e-commerce
+# Mitigation Impact: LOW
+api.adjust.com
+config.adjust.com
+api.adjust.world
+
+# APPSFLYER - Mobile Analytics & Cross-Install Tracking
+# Function: Persistent device identifier across app reinstalls
+# Used by: Mobile games, social networks
+# Mitigation Impact: LOW
+api2.appsflyer.com
+api.appsflyer.com
+t.appsflyer.com
+
+# SINGULAR.NET - Cross-Device Attribution
+# Function: Maps user journey across devices and touchpoints
+# Mitigation Impact: LOW
+api.singular.net
+config.singular.net
+
+# ============================================================================
+# TIER 3: CONDITIONAL (High impact; selective blocking recommended)
+# ============================================================================
+
+# FIREBASE SUB-DOMAINS (Granular approach - block telemetry, keep essential)
+# BLOCK ONLY if you want to minimize Google cross-device linking
+# WARNING: May break app stability, crash reporting, feature flags
+firebasedynamiclinks.googleapis.com
+firebaseremoteconfig.googleapis.com
+firebaselogging.googleapis.com
+# SAFE TO BLOCK: minimal app disruption
+firebase-analytics.com
+google-analytics.com
+
+# FACEBOOK PIXEL / META
+# Function: Tracks users across Meta ecosystem + third-party sites
+# Mitigation Impact: HIGH (Breaks Facebook login integration)
+# RECOMMENDATION: Block only if not using FB login
+facebook.com
+fbcdn.net
+connect.facebook.net
+api.facebook.com
+
+# APPLE ANALYTICS (iOS only)
+# Function: Cross-device linking via iCloud account
+# Mitigation Impact: MEDIUM (Disable in Settings > Privacy > Analytics)
+metrics.apple.com
+analytics.apple.com
+api-glb-sea.sm.apple.com
+
+# ============================================================================
+# TIER 4: SUPPORTING (Secondary telemetry, lower priority)
+# ============================================================================
+
+# MIXPANEL - User Event Analytics
+mixpanel.com
+api.mixpanel.com
+track.mixpanel.com
+
+# AMPLITUDE - Analytics & User Segmentation
+amplitude.com
+api.amplitude.com
+events.amplitude.com
+
+# INTERCOM - In-app Messaging & User Tracking
+intercom.io
+api.intercom.io
+api-iam.intercom.io
+
+# SEGMENT.IO - Data Collection Hub (feeds multiple platforms)
+segment.com
+cdn.segment.com
+api.segment.io
+analytics.segment.com
+
+# DATABOX - Analytics Aggregation
+databox.com
+api.databox.com
+
+# BUGSNAG - Crash Reporting
+bugsnag.com
+notify.bugsnag.com
+sessions.bugsnag.com
+
+# ============================================================================
+# TIER 5: GEOGRAPHIC TARGETING (China-focused ML systems)
+# ============================================================================
+
+# ALIBABA TRACKING (AliPay, Taobao, DingTalk)
+aliyun.com
+alibaba.com
+*.aliyuncs.com
+
+# BAIDU ANALYTICS
+baidu.com
+api.baidu.com
+analytics.baidu.com
+
+# BYTEDANCE (TikTok, Douyin parent)
+bytedance.com
+*.bytedance.com
+bytedanceapi.com
+
+# ============================================================================
+# IMPLEMENTATION NOTES
+# ============================================================================
+
+# NEXTDNS SETUP:
+# 1. Go to NextDNS.io > Manage > Blocklists
+# 2. Create custom list named "Identity-Bridging-Tier1"
+# 3. Paste TIER 1 domains
+# 4. Enable at device level or network-wide
+# 5. Log and monitor for 72 hours before adding TIER 2
+
+# PI-HOLE SETUP:
+# 1. SSH into Pi-hole device
+# 2. Edit /etc/dnsmasq.d/adlists.conf
+# 3. Add lines: address=/api3.siftscience.com/0.0.0.0
+# 4. Restart: sudo pihole restartdns
+# 5. Monitor Pi-hole dashboard for blocked queries
+
+# OPENWRT/PFSENSE SETUP:
+# 1. Create firewall rules in Web UI
+# 2. Set action: Reject
+# 3. Direction: Out
+# 4. Destination: api3.siftscience.com (etc.)
+# 5. Protocol: TCP/UDP Port 443, 80
+# 6. Enable logging to identify false positives
+
+# ============================================================================
+# EXPECTED OUTCOMES BY TIER
+# ============================================================================
+
+# TIER 1 ONLY (Recommended baseline):
+# ✓ Breaks Sift Science device correlation (90% effective)
+# ✓ Blocks Tencent network mapping
+# ✓ Disables Branch.io cross-app linking
+# ~ May trigger CAPTCHA on Shopify, DoorDash, Airbnb
+# ~ Family members on shared Wi-Fi still partially correlated (via IP)
+
+# TIER 1 + TIER 2:
+# ✓ Breaks Firebase cross-device linking (Google account correlation)
+# ✓ Disables most mobile attribution networks
+# ~ May impact app stability (missing crash reports, analytics)
+# ~ Banking apps may flag account as suspicious
+# ~ Multiple CAPTCHA challenges on transactions
+
+# TIER 1 + TIER 2 + TIER 3:
+# ✓ Maximum device isolation
+# ✗ Significant app breakage (login failures, missing features)
+# ✗ Transaction friction increases dramatically
+# ✗ Only recommended for high-threat scenarios
+
+# ============================================================================
+# MONITORING & ROLLBACK
+# ============================================================================
+
+# Monitor for 48-72 hours:
+# 1. Check app functionality (login, transactions, notifications)
+# 2. Review NextDNS/Pi-hole logs for unexpected blocks
+# 3. Note which services throw errors (build allowlist)
+# 4. Adjust individual domains if false positives exceed 5%
+
+# Rollback process:
+# - NextDNS: Disable list, wait 5 min for DNS cache clear
+# - Pi-hole: Remove lines, restart DNS, check gravity update
+# - OpenWRT: Delete firewall rule, reboot if necessary
+
+# ============================================================================
+# FAMILY-SPECIFIC CONFIGURATION
+# ============================================================================
+
+# SCENARIO A: Shared Home Wi-Fi (Everyone on 192.168.1.x)
+# Problem: Public IP alone links all devices
+# Solution:
+#   1. Apply firewall blocklist at router level (affects all devices)
+#   2. Enable AP Isolation in router settings
+#   3. Each device gets separate correlation space in ML models
+#   4. Family members' reputation scores remain independent
+
+# SCENARIO B: Separate Wi-Fi Networks (Main + Guest)
+# Problem: Still shares ISP public IP
+# Solution:
+#   1. Place high-telemetry devices (phones, gaming) on Guest network
+#   2. Keep work/financial devices on Main network
+#   3. Different subnets (192.168.1.x vs 192.168.2.x) reduce ML correlation
+#   4. Apply firewall rules separately to each network if possible
+
+# SCENARIO C: Mixed Devices (iOS + Android + Windows + Mac)
+# Problem: Cross-platform ML models use different signals
+# Solution:
+#   1. iOS: Settings > Privacy > Analytics (disable all)
+#   2. Android: Settings > Apps > Permissions > Location (revoke for untrusted apps)
+#   3. Windows: Settings > Privacy > Diagnostics (set to "Required")
+#   4. Mac: System Preferences > Security & Privacy (minimal tracking)
+#   5. Apply firewall rules at router (device-agnostic)
+
+# ============================================================================
+# LEGAL & PRACTICAL CONSIDERATIONS
+# ============================================================================
+
+# IMPORTANT: Blocking api3.siftscience.com may:
+# - Cause legitimate fraud detection to fail (false negatives for actual fraud)
+# - Trigger manual review processes (more CAPTCHAs, phone verification)
+# - Conflict with merchant ToS (some e-commerce sites require Sift)
+# - Create account flags if you're detected using a blocklist
+#
+# RECOMMENDATION: Start with TIER 1, monitor for 1 week, escalate only if:
+# - You've experienced actual identity fraud or account takeover
+# - Family members are being falsely flagged due to device correlation
+# - You have high-risk assets (cryptocurrency, business accounts)
+
+# ============================================================================

@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-02-12T14:15:07.505562+00:00",
+  "content_hash": "6aed041bfc49b9f8",
+  "violation": {
+    "category": "harmful_content",
+    "severity": "high",
+    "confidence": 0.8,
+    "description": "Serious violation",
+    "evidence": {},
+    "timestamp": "2026-02-12T14:15:07.505151+00:00",
+    "provider": "unknown"
+  },
+  "context": {},
+  "escalation_id": "ESC_1770905707_6aed041b"
+}

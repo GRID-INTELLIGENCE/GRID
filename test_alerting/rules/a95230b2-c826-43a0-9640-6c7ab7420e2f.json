@@ -1,0 +1,15 @@
+{
+  "rule_id": "a95230b2-c826-43a0-9640-6c7ab7420e2f",
+  "name": "test_rule",
+  "description": "Test alert rule",
+  "query": "up == 0",
+  "condition": "eq",
+  "threshold": 0.0,
+  "severity": "warning",
+  "for_duration": 300.0,
+  "labels": {},
+  "annotations": {},
+  "enabled": true,
+  "notification_channels": [],
+  "escalation_policy": null
+}

@@ -1,0 +1,12 @@
+model_list:
+- model_name: qwen2.5-coder
+  litellm_params:
+    model: ollama/qwen2.5-coder:latest
+    api_base: http://localhost:11434
+    drop_params: true
+
+general_settings:
+  master_key: "sk-123456"
+  disable_db: true
+  disable_anthropic_thinking: true
+  drop_params: true

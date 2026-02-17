@@ -1,0 +1,261 @@
+{
+  "metadata": {
+    "name": "GRID",
+    "description": "GRID Intelligence Platform",
+    "version": "0.1.0"
+  },
+  "api": {
+    "baseUrl": "http://127.0.0.1:8000",
+    "ollamaUrl": "http://127.0.0.1:11434",
+    "endpoints": {
+      "health": "/health",
+      "healthLive": "/health/live",
+      "healthReady": "/health/ready",
+      "ragQuery": "/rag/query",
+      "ragQueryStream": "/rag/query/stream",
+      "intelligenceProcess": "/api/v1/intelligence/process",
+      "cockpitStatus": "/api/v1/cockpit/status",
+      "cockpitHealth": "/api/v1/cockpit/health",
+      "agenticCases": "/api/v1/agentic/cases",
+      "navigationPlan": "/api/v1/navigation/plan",
+      "safetyInfer": "/safety/infer",
+      "skillsHealth": "/api/v1/skills/health",
+      "securityStatus": "/security/status",
+      "ollamaModels": "/api/tags",
+      "ollamaChat": "/api/chat"
+    }
+  },
+  "routes": [
+    {
+      "id": "dashboard",
+      "path": "/",
+      "title": "Dashboard",
+      "description": "GRID Intelligence Platform Overview",
+      "navLabel": "Dashboard",
+      "icon": "layout-dashboard"
+    },
+    {
+      "id": "chat",
+      "path": "/chat",
+      "title": "AI Chat",
+      "description": "Chat with local LLM models via Ollama",
+      "navLabel": "AI Chat",
+      "icon": "message-square"
+    },
+    {
+      "id": "rag",
+      "path": "/rag",
+      "title": "RAG Query",
+      "description": "Search indexed knowledge with retrieval-augmented generation",
+      "navLabel": "RAG Query",
+      "icon": "search"
+    },
+    {
+      "id": "intelligence",
+      "path": "/intelligence",
+      "title": "Intelligence",
+      "description": "Full intelligence pipeline — pattern recognition, sensory processing, and reasoning",
+      "navLabel": "Intelligence",
+      "icon": "sparkles"
+    },
+    {
+      "id": "cognitive",
+      "path": "/cognitive",
+      "title": "Cognitive",
+      "description": "Monitor event-driven cognitive processing and pattern detection",
+      "navLabel": "Cognitive",
+      "icon": "brain"
+    },
+    {
+      "id": "security",
+      "path": "/security",
+      "title": "Security",
+      "description": "Path validation, secrets scanning, and audit logs",
+      "navLabel": "Security",
+      "icon": "shield"
+    },
+    {
+      "id": "observability",
+      "path": "/observability",
+      "title": "Observability",
+      "description": "System metrics, logs, and performance monitoring",
+      "navLabel": "Observability",
+      "icon": "activity"
+    },
+    {
+      "id": "knowledge",
+      "path": "/knowledge",
+      "title": "Knowledge Base",
+      "description": "Manage indexed documents and vector store collections",
+      "navLabel": "Knowledge",
+      "icon": "database"
+    },
+    {
+      "id": "terminal",
+      "path": "/terminal",
+      "title": "Terminal",
+      "description": "Interactive terminal for GRID CLI commands",
+      "navLabel": "Terminal",
+      "icon": "terminal"
+    },
+    {
+      "id": "settings",
+      "path": "/settings",
+      "title": "Settings",
+      "description": "Configure GRID frontend and backend connection",
+      "navLabel": "Settings",
+      "icon": "settings"
+    }
+  ],
+  "navigation": {
+    "primary": [
+      "dashboard",
+      "chat",
+      "rag",
+      "intelligence",
+      "cognitive",
+      "security",
+      "observability",
+      "knowledge",
+      "terminal"
+    ],
+    "secondary": ["settings"]
+  },
+  "dashboard": {
+    "stats": [
+      {
+        "id": "status",
+        "label": "Status",
+        "icon": "activity",
+        "source": "health",
+        "health": {
+          "ok": "Operational",
+          "fail": "Offline",
+          "okVariant": "success",
+          "failVariant": "warning"
+        }
+      },
+      {
+        "id": "cognitive",
+        "label": "Cognitive",
+        "icon": "brain",
+        "source": "static",
+        "value": "Ready"
+      },
+      {
+        "id": "knowledge",
+        "label": "Knowledge Base",
+        "icon": "database",
+        "source": "static",
+        "value": "Indexed"
+      },
+      {
+        "id": "security",
+        "label": "Security",
+        "icon": "shield",
+        "source": "static",
+        "value": "Active"
+      }
+    ],
+    "quickActions": [
+      {
+        "id": "chat",
+        "title": "AI Chat",
+        "description": "Start a conversation with your local LLM. Streaming, multi-turn, context-aware.",
+        "icon": "message-square",
+        "routeId": "chat"
+      },
+      {
+        "id": "rag",
+        "title": "Quick RAG Query",
+        "description": "Query indexed knowledge using the RAG pipeline with hybrid search and reranking.",
+        "icon": "zap",
+        "routeId": "rag"
+      },
+      {
+        "id": "intelligence",
+        "title": "Intelligence Pipeline",
+        "description": "Run the full intelligence stack — pattern recognition, sensory processing, reasoning.",
+        "icon": "sparkles",
+        "routeId": "intelligence"
+      },
+      {
+        "id": "cognitive",
+        "title": "Cognitive Patterns",
+        "description": "Monitor event-driven cognitive patterns and vision layer processing.",
+        "icon": "brain",
+        "routeId": "cognitive"
+      },
+      {
+        "id": "security",
+        "title": "Security Overview",
+        "description": "Review path validation, secrets scanning, and security audit logs.",
+        "icon": "shield",
+        "routeId": "security"
+      }
+    ]
+  },
+  "chat": {
+    "title": "AI Chat",
+    "description": "Chat with local LLM models via Ollama — streaming, multi-turn conversations",
+    "placeholder": "Type a message…",
+    "defaultModel": "ministral",
+    "systemPrompt": "You are GRID, an intelligent assistant powered by the GRID Intelligence Platform. You have access to local knowledge bases, cognitive patterns, and security analysis tools. Be helpful, precise, and concise.",
+    "preferredModels": [
+      "ministral",
+      "mistral-nemo:latest",
+      "qwen2.5-coder:latest"
+    ]
+  },
+  "rag": {
+    "title": "RAG Query",
+    "description": "Search indexed knowledge with retrieval-augmented generation",
+    "placeholder": "Ask a question about your knowledge base…",
+    "submitLabel": "Search",
+    "endpointId": "ragQuery",
+    "streamEndpointId": "ragQueryStream"
+  },
+  "intelligence": {
+    "title": "Intelligence Pipeline",
+    "description": "Process inputs through the full GRID intelligence stack — pattern recognition, sensory processing, quantum bridge, and reasoning",
+    "endpointId": "intelligenceProcess",
+    "capabilities": [
+      {
+        "id": "pattern",
+        "label": "Pattern Recognition",
+        "description": "Detect patterns in data using cognitive models",
+        "icon": "radar"
+      },
+      {
+        "id": "reasoning",
+        "label": "Reasoning",
+        "description": "Multi-source reasoning across knowledge graph, web, and LLM",
+        "icon": "brain"
+      },
+      {
+        "id": "security",
+        "label": "Security Analysis",
+        "description": "Threat detection, path validation, and audit",
+        "icon": "shield"
+      }
+    ]
+  },
+  "settings": {
+    "sections": [
+      {
+        "title": "API Connection",
+        "description": "Core backend endpoints used by the UI",
+        "items": [
+          {
+            "label": "Backend URL",
+            "valueFrom": "api.baseUrl"
+          },
+          {
+            "label": "Ollama URL",
+            "valueFrom": "api.ollamaUrl"
+          }
+        ]
+      }
+    ]
+  }
+}
