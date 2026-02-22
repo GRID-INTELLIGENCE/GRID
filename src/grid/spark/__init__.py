@@ -17,7 +17,8 @@ Usage:
         issues = nav.diagnose("path/to/file.py")
 """
 
-from collections.abc import ContextManager, Iterator
+from collections.abc import Iterator
+from contextlib import AbstractContextManager as ContextManager
 from typing import TYPE_CHECKING, Any
 
 from .core import Spark, SparkPhase, SparkResult

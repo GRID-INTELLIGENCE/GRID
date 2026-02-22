@@ -15,6 +15,7 @@ ADSR Parameters (matching GRID's defaults):
 import time
 from dataclasses import dataclass
 from enum import Enum
+from typing import Any
 
 
 class EnvelopePhase(Enum):
@@ -52,17 +53,26 @@ class ArenaADSREnvelope:
 
     def __init__(
         self,
-        attack_time: float = 0.1,
+        attack_time: float | Any = 0.1,
         decay_time: float = 0.2,
         sustain_level: float = 0.7,
         sustain_time: float = 1.0,
         release_time: float = 0.3,
     ):
-        self.attack_time = attack_time
-        self.decay_time = decay_time
-        self.sustain_level = sustain_level
-        self.sustain_time = sustain_time
-        self.release_time = release_time
+        # Handle OverwatchConfig if passed as first argument
+        if hasattr(attack_time, "attack_energy"):
+            config = attack_time
+            self.attack_time = getattr(config, "attack_energy", 0.1)
+            self.decay_time = getattr(config, "decay_rate", 0.2)
+            self.sustain_level = getattr(config, "sustain_level", 0.7)
+            self.sustain_time = 1.0  # Default
+            self.release_time = getattr(config, "release_rate", 0.3)
+        else:
+            self.attack_time = attack_time
+            self.decay_time = decay_time
+            self.sustain_level = sustain_level
+            self.sustain_time = sustain_time
+            self.release_time = release_time
 
         self._start_time: float | None = None
         self._release_start: float | None = None
@@ -80,9 +90,9 @@ class ArenaADSREnvelope:
     def velocity(self) -> float:
         return self._metrics.velocity
 
-    def trigger(self) -> None:
+    def trigger(self, current_time: float | None = None) -> None:
         """Start the envelope (attack phase)."""
-        self._start_time = time.time()
+        self._start_time = current_time if current_time is not None else time.time()
         self._release_start = None
         self._metrics = EnvelopeMetrics(
             phase=EnvelopePhase.ATTACK,
@@ -90,13 +100,13 @@ class ArenaADSREnvelope:
             velocity=1.0,
         )
 
-    def release(self) -> None:
+    def release(self, current_time: float | None = None) -> None:
         """Start release phase (fade out)."""
         if self._start_time is not None and self._release_start is None:
-            self._release_start = time.time()
+            self._release_start = current_time if current_time is not None else time.time()
             self._metrics.phase = EnvelopePhase.RELEASE
 
-    def update(self) -> EnvelopeMetrics:
+    def update(self, current_time: float | None = None) -> EnvelopeMetrics:
         """Update envelope state and return metrics."""
         if self._start_time is None:
             if self._metrics.amplitude > 0.0:
@@ -104,13 +114,15 @@ class ArenaADSREnvelope:
                 self._metrics.velocity = -0.1
                 if self._metrics.amplitude <= 0.0:
                     self._metrics = EnvelopeMetrics()
-            return self._metrics
+                return self._metrics
+            # Auto-trigger at t=0 on first update if not explicitly started
+            self.trigger(0.0)
 
-        current_time = time.time()
-        elapsed = current_time - self._start_time
+        now = current_time if current_time is not None else time.time()
+        elapsed = max(0.0, now - self._start_time)
 
         if self._release_start is not None:
-            release_elapsed = current_time - self._release_start
+            release_elapsed = now - self._release_start
             if release_elapsed >= self.release_time:
                 self._start_time = None
                 self._release_start = None
@@ -128,7 +140,7 @@ class ArenaADSREnvelope:
         if elapsed < self.attack_time:
             progress = elapsed / self.attack_time
             self._metrics.amplitude = progress**0.5
-            self._metrics.velocity = (0.5 * progress**-0.5) / self.attack_time
+            self._metrics.velocity = (0.5 / max(progress, 1e-9) ** 0.5) / self.attack_time
             self._metrics.phase = EnvelopePhase.ATTACK
             self._metrics.time_in_phase = elapsed
             self._metrics.total_time = elapsed
@@ -156,8 +168,8 @@ class ArenaADSREnvelope:
             self._metrics.total_time = elapsed
             return self._metrics
 
-        self.release()
-        return self.update()
+        self.release(current_time)
+        return self.update(current_time)
 
     def get_metrics(self) -> EnvelopeMetrics:
         return self._metrics

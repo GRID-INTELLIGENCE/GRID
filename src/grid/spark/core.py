@@ -12,7 +12,8 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
-from collections.abc import Callable, ContextManager
+from collections.abc import Callable
+from contextlib import AbstractContextManager as ContextManager
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from datetime import datetime

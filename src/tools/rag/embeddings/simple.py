@@ -62,13 +62,12 @@ class SimpleEmbedding(BaseEmbeddingProvider):
             word_counts[word] = word_counts.get(word, 0) + 1
 
         if not self.use_tfidf:
-            # Simple frequency - convert to fixed-size vector
-            # This is a very basic implementation
+            # Hash-based frequency vector: same word always maps to same dimension
             vocab_size = self.embedding_dim
             embedding = [0.0] * vocab_size
-            for i, (_word, count) in enumerate(word_counts.items()):
-                if i < vocab_size:
-                    embedding[i] = float(count) / len(words)
+            for word, count in word_counts.items():
+                idx = hash(word) % vocab_size
+                embedding[idx] += float(count) / len(words)
             return np.array(embedding, dtype=float)
 
         # TF-IDF (simplified)
@@ -80,12 +79,12 @@ class SimpleEmbedding(BaseEmbeddingProvider):
             idf = math.log(doc_count / (self.doc_freqs.get(word, 0) + 1) + 1)
             tfidf_scores[word] = tf * idf
 
-        # Convert to fixed-size vector
+        # Hash-based placement: same word always maps to same dimension
         vocab_size = self.embedding_dim
         embedding = [0.0] * vocab_size
-        sorted_words = sorted(tfidf_scores.items(), key=lambda x: x[1], reverse=True)
-        for i, (_word, score) in enumerate(sorted_words[:vocab_size]):
-            embedding[i] = score
+        for word, score in tfidf_scores.items():
+            idx = hash(word) % vocab_size
+            embedding[idx] += score
 
         return np.array(embedding, dtype=float)
 

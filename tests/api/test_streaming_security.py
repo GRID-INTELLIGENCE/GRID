@@ -291,10 +291,8 @@ class TestStreamingEndpointSecurity:
             """Slow streaming endpoint."""
             return EventSourceResponse(slow_stream_generator())
 
-        # Test with short timeout
-        with patch("asyncio.wait_for") as mock_wait_for:
-            mock_wait_for.side_effect = TimeoutError("Streaming timeout")
-
+        # Test with short timeout — circuit breaker uses asyncio.timeout() (Python 3.11+)
+        with patch("asyncio.timeout", side_effect=TimeoutError("Streaming timeout")):
             response = client.post("/api/v1/slow-stream", json={})
             assert response.status_code == 504  # Gateway timeout
 

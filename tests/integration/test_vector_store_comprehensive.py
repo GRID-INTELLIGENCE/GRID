@@ -19,10 +19,13 @@ class TestVectorStoreOperations:
     def vector_store(self, request):
         """Parameterized fixture for testing all vector stores"""
         if request.param == "chromadb":
-            store = ChromaDBVectorStore(collection_name="test_collection")
-            return store
+            import uuid
+
+            store = ChromaDBVectorStore(collection_name=f"test_{uuid.uuid4().hex[:8]}")
+            yield store
+            store.reset()  # Clean up ephemeral test collection after each test
         else:
-            return InMemoryDenseStore(embedding_dim=1536)
+            yield InMemoryDenseStore(embedding_dim=1536)
 
     @pytest.fixture
     def sample_documents(self) -> list[Document]:
