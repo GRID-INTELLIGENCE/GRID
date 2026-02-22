@@ -5,6 +5,7 @@ Alternative to 'alembic upgrade head' when alembic.ini is not configured.
 """
 
 import asyncio
+import os
 import sys
 from pathlib import Path
 
@@ -16,8 +17,10 @@ from sqlalchemy.ext.asyncio import create_async_engine
 
 from safety.audit.models import Base
 
-# Database URL - adjust as needed
-DATABASE_URL = "postgresql+asyncpg://user:password@localhost:5432/grid_mothership"
+# Database URL must be set via environment variable
+DATABASE_URL = os.environ.get("DATABASE_URL")
+if not DATABASE_URL:
+    raise RuntimeError("DATABASE_URL environment variable is required")
 
 
 async def migrate():

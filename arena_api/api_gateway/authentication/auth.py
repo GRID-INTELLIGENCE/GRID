@@ -17,7 +17,7 @@ import hashlib
 import logging
 import os
 import secrets
-from datetime import datetime, timezone, timedelta
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import jwt
@@ -32,18 +32,24 @@ class AuthManager:
     """
 
     def __init__(self) -> None:
-        self.jwt_secret: str = os.getenv("ARENA_JWT_SECRET", "arena-secret-key-change-in-production")
+        jwt_secret = os.getenv("ARENA_JWT_SECRET")
+        if not jwt_secret:
+            raise RuntimeError("ARENA_JWT_SECRET environment variable is required and must not be empty")
+        self.jwt_secret: str = jwt_secret
         self.jwt_algorithm: str = "HS256"
         self.api_keys: dict[str, dict[str, Any]] = self._load_api_keys()
         self.service_tokens: dict[str, dict[str, Any]] = {}
 
     def _load_api_keys(self) -> dict[str, dict[str, Any]]:
-        """Load API keys from configuration."""
-        # In production, load from secure storage
-        return {
-            "admin_key": {"key": "arena-admin-key-2024", "permissions": ["read", "write", "admin"], "rate_limit": 1000},
-            "service_key": {"key": "arena-service-key-2024", "permissions": ["read", "write"], "rate_limit": 500},
-        }
+        """Load API keys from environment variables."""
+        admin_key = os.getenv("ARENA_ADMIN_API_KEY")
+        service_key = os.getenv("ARENA_SERVICE_API_KEY")
+        keys: dict[str, dict[str, Any]] = {}
+        if admin_key:
+            keys["admin_key"] = {"key": admin_key, "permissions": ["read", "write", "admin"], "rate_limit": 1000}
+        if service_key:
+            keys["service_key"] = {"key": service_key, "permissions": ["read", "write"], "rate_limit": 500}
+        return keys
 
     async def authenticate(self, request: Request) -> dict[str, Any]:
         """
@@ -85,7 +91,7 @@ class AuthManager:
             payload = jwt.decode(token, self.jwt_secret, algorithms=[self.jwt_algorithm])
 
             # Check token expiration
-            if payload.get("exp", 0) < datetime.now(timezone.utc).timestamp():
+            if payload.get("exp", 0) < datetime.now(UTC).timestamp():
                 return {"authenticated": False, "error": "Token expired"}
 
             return {
@@ -146,7 +152,7 @@ class AuthManager:
                 return {"authenticated": False, "error": "Invalid service token"}
 
             # Check token expiration
-            if service_info.get("expires_at", 0) < datetime.now(timezone.utc).timestamp():
+            if service_info.get("expires_at", 0) < datetime.now(UTC).timestamp():
                 return {"authenticated": False, "error": "Service token expired"}
 
             return {
@@ -206,8 +212,8 @@ class AuthManager:
             "user_id": user_id,
             "permissions": permissions,
             "roles": roles,
-            "iat": datetime.now(timezone.utc),
-            "exp": datetime.now(timezone.utc) + timedelta(seconds=expires_in),
+            "iat": datetime.now(UTC),
+            "exp": datetime.now(UTC) + timedelta(seconds=expires_in),
         }
 
         token = jwt.encode(payload, self.jwt_secret, algorithm=self.jwt_algorithm)
@@ -231,13 +237,13 @@ class AuthManager:
             permissions = ["read"]
 
         token = secrets.token_urlsafe(32)
-        expires_at = datetime.now(timezone.utc).timestamp() + expires_in
+        expires_at = datetime.now(UTC).timestamp() + expires_in
 
         self.service_tokens[token] = {
             "service_name": service_name,
             "permissions": permissions,
             "expires_at": expires_at,
-            "created_at": datetime.now(timezone.utc).timestamp(),
+            "created_at": datetime.now(UTC).timestamp(),
         }
 
         return token
@@ -256,7 +262,7 @@ class AuthManager:
         if not service_info:
             return None
 
-        if service_info.get("expires_at", 0) < datetime.now(timezone.utc).timestamp():
+        if service_info.get("expires_at", 0) < datetime.now(UTC).timestamp():
             # Remove expired token
             del self.service_tokens[token]
             return None

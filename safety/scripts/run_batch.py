@@ -1,9 +1,11 @@
+import shlex
 import subprocess
 import sys
 
 
 def run_command(cmd):
-    result = subprocess.run(cmd, shell=True, capture_output=True, text=True)  # noqa: S602
+    args = shlex.split(cmd) if isinstance(cmd, str) else cmd
+    result = subprocess.run(args, shell=False, capture_output=True, text=True)  # noqa: S603
     print(f"Command: {cmd}")
     print("Output:")
     print(result.stdout)

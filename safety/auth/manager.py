@@ -45,57 +45,26 @@ class AuthManager:
             return None
 
     def authenticate_user(self, username: str, password: str) -> dict[str, Any] | None:
-        """Authenticate user with username and password"""
-        # In real implementation, this would query the database
-        # For now, return mock user data
-        if username == "admin" and password == "admin123":
-            return {
-                "id": 1,
-                "username": username,
-                "email": "admin@example.com",
-                "full_name": "Administrator",
-                "is_active": True,
-                "trust_tier": "privileged",
-                "created_at": datetime.now(UTC).isoformat(),
-                "hashed_password": self.get_password_hash(password),
-            }
-        elif username == "user" and password == "user123":
-            return {
-                "id": 2,
-                "username": username,
-                "email": "user@example.com",
-                "full_name": "Regular User",
-                "is_active": True,
-                "trust_tier": "user",
-                "created_at": datetime.now(UTC).isoformat(),
-                "hashed_password": self.get_password_hash(password),
-            }
-        return None
+        """Authenticate user with username and password.
+
+        This method must be backed by a real database query.
+        Hard-coded credentials are not permitted in this module.
+        """
+        raise NotImplementedError(
+            "authenticate_user must be implemented against a real user database. "
+            "Hard-coded credentials are not permitted in safety/auth/manager.py."
+        )
 
     def get_user_by_username(self, username: str) -> dict[str, Any] | None:
-        """Get user by username"""
-        # In real implementation, this would query the database
-        if username == "admin":
-            return {
-                "id": 1,
-                "username": username,
-                "email": "admin@example.com",
-                "full_name": "Administrator",
-                "is_active": True,
-                "trust_tier": "privileged",
-                "created_at": datetime.now(UTC).isoformat(),
-            }
-        elif username == "user":
-            return {
-                "id": 2,
-                "username": username,
-                "email": "user@example.com",
-                "full_name": "Regular User",
-                "is_active": True,
-                "trust_tier": "user",
-                "created_at": datetime.now(UTC).isoformat(),
-            }
-        return None
+        """Get user by username.
+
+        This method must be backed by a real database query.
+        Hard-coded user stubs are not permitted in this module.
+        """
+        raise NotImplementedError(
+            "get_user_by_username must be implemented against a real user database. "
+            "Hard-coded user stubs are not permitted in safety/auth/manager.py."
+        )
 
     def check_rate_limit(self, user_id: str, action: str = "request") -> bool:
         """Check if user is within rate limits"""

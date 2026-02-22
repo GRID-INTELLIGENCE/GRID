@@ -11,6 +11,7 @@ import os
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -97,7 +98,7 @@ async def check_health() -> bool:
             AUDIT_DB_HEALTHY.set(0)
             return False
         async with _engine.connect() as conn:
-            await conn.execute(__import__("sqlalchemy").text("SELECT 1"))
+            await conn.execute(text("SELECT 1"))
         AUDIT_DB_HEALTHY.set(1)
         return True
     except Exception as exc:

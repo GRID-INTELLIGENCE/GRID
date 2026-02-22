@@ -3,8 +3,8 @@ Project GUARDIAN: Safety Canary Utility.
 Injects and detects hidden markers in AI responses to identify adversarial recycling.
 """
 
-import random
 import re
+import secrets
 
 # These are invisible or rare UTF-8 sequences that won't disrupt UI but are easy to regex
 # Zero-width Joiner + specific sequence
@@ -24,7 +24,7 @@ class SafetyCanary:
     @staticmethod
     def inject(text: str) -> str:
         """Inject a random canary token into the text."""
-        token = random.choice(CANARY_TOKENS)  # noqa: S311
+        token = secrets.choice(CANARY_TOKENS)
         # Append to the end of the string
         return f"{text}{token}"
 
