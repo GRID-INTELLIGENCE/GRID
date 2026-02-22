@@ -36,7 +36,7 @@ class GovernanceEngine:
     def register_policy(self, policy: GovernancePolicy) -> None:
         """Register or update a governance policy."""
         self._policies[policy.policy_id] = policy
-        logger.info("policy_registered", extra={"policy_id": policy.policy_id, "name": policy.name})
+        logger.info("policy_registered", extra={"policy_id": policy.policy_id, "policy_name": policy.name})
 
     def deactivate_policy(self, policy_id: str) -> bool:
         """Soft-delete a policy by marking it inactive."""

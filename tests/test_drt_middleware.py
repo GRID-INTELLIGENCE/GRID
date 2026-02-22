@@ -2,7 +2,7 @@
 Simplified tests for DRT (Don't Repeat Themselves) Middleware.
 """
 
-from datetime import datetime
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -99,7 +99,7 @@ class TestDRTMiddleware:
 
         assert "/api/test" in middleware.ESCALATED_ENDPOINTS
         expiry = middleware.ESCALATED_ENDPOINTS["/api/test"]
-        assert expiry > datetime.utcnow()
+        assert expiry > datetime.now(UTC)
 
     def test_attack_vector_management(self):
         """Test adding attack vectors."""
@@ -268,7 +268,8 @@ class TestDRTMetricsCollector:
 
     def test_record_behavioral_signature(self, metrics_collector):
         """Test recording behavioral signatures."""
-        metrics_collector.record_behavioral_signature()
+        signature = BehavioralSignature(path_pattern="/api/test*", method="GET", headers=("X-Test",))
+        metrics_collector.record_behavioral_signature(signature)
         assert metrics_collector.metrics.behavioral_signatures_total == 1
 
     def test_record_attack_vector(self, metrics_collector):
@@ -349,10 +350,9 @@ class TestDRTMetricsCollector:
     def test_global_collector_functions(self):
         """Test global collector convenience functions."""
         # Reset the global collector for clean testing
-        global _metrics_collector
-        from application.mothership.middleware.drt_metrics import _metrics_collector
+        import application.mothership.middleware.drt_metrics as _drt_metrics_mod
 
-        _metrics_collector = None
+        _drt_metrics_mod._metrics_collector = None
 
         collector = get_drt_metrics_collector()
         assert isinstance(collector, DRTMetricsCollector)
@@ -389,11 +389,19 @@ class TestDRTFalsePositiveTracking:
         """Create a mock database session for testing."""
         from unittest.mock import MagicMock
 
+        # Explicitly set return_value to MagicMock to avoid Python 3.13 AsyncMock
+        # behaviour where return_value is itself an AsyncMock, causing sync methods
+        # like scalar_one_or_none() to return coroutines instead of values.
+        execute_result = MagicMock()
+        execute_result.scalar_one_or_none.return_value = None
+        execute_result.scalars.return_value.all.return_value = []
+        execute_result.scalar_one.return_value = 0
+
         session = AsyncMock()
         session.add = MagicMock()
         session.flush = AsyncMock()
-        session.execute = AsyncMock()
-        session.get = AsyncMock()
+        session.execute = AsyncMock(return_value=execute_result)
+        session.get = AsyncMock(return_value=MagicMock())
         return session
 
     @pytest.fixture
@@ -535,7 +543,8 @@ class TestDRTFalsePositiveTracking:
                 false_positive_rate=0.2,
             ),
         ]
-        pattern_repo._db.execute.return_value.scalars.return_value.all.return_value = mock_patterns
+        # Mock DB returns only patterns above threshold (DB WHERE clause is applied server-side)
+        pattern_repo._db.execute.return_value.scalars.return_value.all.return_value = [mock_patterns[0]]
 
         result = await pattern_repo.get_patterns_above_threshold(threshold=0.5)
 
@@ -601,8 +610,8 @@ class TestDRTAPIIntegration:
 
         set_drt_middleware(middleware)
 
-        # Create test client
-        client = TestClient(app)
+        # Create test client - use middleware as outer ASGI app so requests go through dispatch
+        client = TestClient(middleware)
 
         return {"app": app, "middleware": middleware, "client": client}
 

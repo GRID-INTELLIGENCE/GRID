@@ -42,27 +42,29 @@ def isolate_module(module_name: str) -> Iterator[None]:
             # Remove from sys.modules to force re-import
             del sys.modules[module_name]
 
-        # Import the module fresh
-        module = importlib.import_module(module_name)
+        # Try to import the module fresh (if it exists)
+        try:
+            module = importlib.import_module(module_name)
 
-        # Create a clean module copy
-        clean_module = types.ModuleType(module_name)
-        clean_module.__file__ = module.__file__
-        clean_module.__package__ = module.__package__
-        clean_module.__name__ = module.__name__
+            # Create a clean module copy
+            clean_module = types.ModuleType(module_name)
+            clean_module.__file__ = module.__file__
+            clean_module.__package__ = module.__package__
+            clean_module.__name__ = module.__name__
 
-        # Copy only non-dunder attributes
-        for name, attr in vars(module).items():
-            if not name.startswith("__"):
-                setattr(clean_module, name, attr)
+            # Copy only non-dunder attributes
+            for name, attr in vars(module).items():
+                if not name.startswith("__"):
+                    setattr(clean_module, name, attr)
 
-        # Replace in sys.modules
-        sys.modules[module_name] = clean_module
+            # Replace in sys.modules
+            sys.modules[module_name] = clean_module
+        except ImportError:
+            # Module doesn't exist — yield without adding to sys.modules
+            pass
 
         yield
 
-    except ImportError as e:
-        raise ModuleIsolationError(f"Failed to isolate module {module_name}: {e}")
     finally:
         # Cleanup
         if module_name in sys.modules:

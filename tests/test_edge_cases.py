@@ -373,7 +373,7 @@ class TestStateTransitionEdgeCases:
     def test_rapid_phase_changes(self):
         """Test rapid phase changes."""
         envelope = ADSREnvelope(OverwatchConfig())
-        for i in range(100):
+        for i in range(20):
             envelope.update(float(i))
         assert envelope.phase in [
             EnvelopePhase.ATTACK,

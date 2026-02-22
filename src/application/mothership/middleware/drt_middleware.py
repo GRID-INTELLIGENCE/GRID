@@ -51,8 +51,6 @@ class BehavioralSignature:
 class ComprehensiveDRTMiddleware(BaseHTTPMiddleware):
     """Middleware for DRT - Don't Repeat Themselves focused monitoring."""
 
-    ESCALATED_ENDPOINTS: dict[str, datetime] = {}
-
     def __init__(
         self,
         app: Any,
@@ -87,6 +85,7 @@ class ComprehensiveDRTMiddleware(BaseHTTPMiddleware):
         self._config_repo = None
 
         # In-memory caches for performance
+        self.ESCALATED_ENDPOINTS: dict[str, datetime] = {}
         self.behavioral_history: list[BehavioralSignature] = []
         self.attack_vectors: list[BehavioralSignature] = []
         self._attack_vector_ids: dict[str, str] = {}  # signature_id -> attack_vector_id

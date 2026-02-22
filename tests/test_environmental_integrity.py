@@ -74,6 +74,8 @@ class TestEnvironmentalIntegrity(unittest.TestCase):
 
     def test_safe_reload_creates_fresh_module(self):
         """Test that safe_reload creates a fresh module state."""
+        from grid.security.module_utils import safe_reload
+
         # Create a test module
         with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
             f.write("""
@@ -113,17 +115,26 @@ def test_func():
 
     def test_environment_path_sanitization(self):
         """Test that PATH sanitization removes duplicates and invalid paths."""
+        import shutil
+
         from grid.security.environment import sanitize_path
 
-        # Set up a polluted PATH
-        original_path = os.environ.get("PATH", "")
+        # Create real temp directories to serve as "valid" paths
+        valid_dir1 = tempfile.mkdtemp()
+        valid_dir2 = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, valid_dir1, True)
+        self.addCleanup(shutil.rmtree, valid_dir2, True)
+        normed1 = os.path.normpath(valid_dir1)
+        normed2 = os.path.normpath(valid_dir2)
+        nonexistent = os.path.join(tempfile.gettempdir(), "nonexistent_xyz_99999_absent")
+
         test_path = os.pathsep.join(
             [
-                "/valid/path",
-                "/another/valid/path",
-                "/valid/path",  # duplicate
-                "/nonexistent/path",  # invalid
-                "/valid/path",  # another duplicate
+                valid_dir1,
+                valid_dir2,
+                valid_dir1,  # duplicate
+                nonexistent,  # invalid
+                valid_dir1,  # another duplicate
             ]
         )
         os.environ["PATH"] = test_path
@@ -131,35 +142,41 @@ def test_func():
         # Sanitize
         sanitize_path()
 
-        # Check result
+        # Check result: duplicates and non-existent removed
         sanitized = os.environ["PATH"].split(os.pathsep)
         self.assertEqual(len(sanitized), 2)  # Should have removed duplicates and invalid
-        self.assertIn("/valid/path", sanitized)
-        self.assertIn("/another/valid/path", sanitized)
-
-        # Restore
-        os.environ["PATH"] = original_path
+        self.assertIn(normed1, sanitized)
+        self.assertIn(normed2, sanitized)
 
     def test_sensitive_environment_variable_removal(self):
         """Test that sensitive environment variables are removed."""
-        from grid.security.environment import sanitize_environment
+        from unittest.mock import patch
 
-        # Set sensitive variables
-        os.environ["GITHUB_TOKEN"] = "secret_token"
-        os.environ["DATABASE_URL"] = "postgresql://user:pass@localhost/db"
-        os.environ["SECRET_KEY"] = "super_secret"
+        from grid.security.environment import remove_sensitive_vars
 
-        # Sanitize
-        report = sanitize_environment()
+        # Run in an isolated environment with only the test vars so the count is exact
+        test_env = {
+            "GITHUB_TOKEN": "secret_token",
+            "DATABASE_URL": "postgresql://user:pass@localhost/db",
+            "SECRET_KEY": "super_secret",
+            "SAFE_VAR": "harmless_value",
+        }
+        with patch.dict(os.environ, test_env, clear=True):
+            report = remove_sensitive_vars()
 
-        # Check that they were removed
-        self.assertNotIn("GITHUB_TOKEN", os.environ)
-        self.assertNotIn("DATABASE_URL", os.environ)
-        self.assertNotIn("SECRET_KEY", os.environ)
+            # Check that sensitive vars were removed
+            self.assertNotIn("GITHUB_TOKEN", os.environ)
+            self.assertNotIn("DATABASE_URL", os.environ)
+            self.assertNotIn("SECRET_KEY", os.environ)
+            # Non-sensitive var should remain
+            self.assertIn("SAFE_VAR", os.environ)
 
-        # Check report
-        self.assertIn("security", report)
-        self.assertEqual(len(report["security"]), 3)
+            # Check report contains exactly the 3 sensitive vars
+            self.assertIn("security", report)
+            self.assertEqual(len(report["security"]), 3)
+            self.assertIn("GITHUB_TOKEN", report["security"])
+            self.assertIn("DATABASE_URL", report["security"])
+            self.assertIn("SECRET_KEY", report["security"])
 
     def test_module_isolation_context_manager(self):
         """Test that the isolate_module context manager works correctly."""

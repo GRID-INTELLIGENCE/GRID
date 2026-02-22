@@ -91,11 +91,11 @@ class CharacterRewardState:
 
     def _update_level(self) -> None:
         """Update reward level based on honor"""
-        if self.honor >= 50:
+        if self.honor >= 100:
             self._level = RewardLevel.PROMOTED
-        elif self.honor >= 25:
+        elif self.honor >= 50:
             self._level = RewardLevel.REWARDED
-        elif self.honor >= 10:
+        elif self.honor >= 25:
             self._level = RewardLevel.ACKNOWLEDGED
         else:
             self._level = RewardLevel.NEUTRAL

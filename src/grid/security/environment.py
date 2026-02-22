@@ -6,8 +6,9 @@ Handles loading, validation, and secure access to environment variables using Py
 
 import logging
 import os
+import sys
 from functools import lru_cache
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -69,6 +70,9 @@ def get_environment_settings() -> EnvironmentSettings:
 environment_settings = get_environment_settings()
 
 
+_SENSITIVE_ENV_PATTERNS = ("TOKEN", "SECRET", "PASSWORD", "PASSWD", "PRIVATE_KEY", "CREDENTIAL", "DATABASE_URL")
+
+
 def sanitize_environment() -> dict[str, list[str]]:
     """
     Sanitize the current process environment variables.
@@ -77,7 +81,7 @@ def sanitize_environment() -> dict[str, list[str]]:
     Returns a report mapping category names to lists of messages describing
     changes that were made.
     """
-    report: dict[str, list[str]] = {"removed": [], "warnings": []}
+    report: dict[str, list[str]] = {"removed": [], "warnings": [], "security": []}
     keys_to_remove: list[str] = [key for key in os.environ if not key.replace("_", "").replace(".", "").isalnum()]
 
     for key in keys_to_remove:
@@ -100,19 +104,65 @@ def sanitize_environment() -> dict[str, list[str]]:
     return report
 
 
+def remove_sensitive_vars() -> dict[str, list[str]]:
+    """
+    Remove sensitive environment variables (tokens, secrets, passwords, etc.).
+
+    Unlike ``sanitize_environment``, this function targets semantically sensitive
+    variables by name pattern rather than character validity. Call this explicitly
+    when you want to strip credentials from the environment.
+
+    Returns a report with a ``"security"`` key listing removed variable names.
+    """
+    report: dict[str, list[str]] = {"security": []}
+    sensitive_keys = [
+        key for key in list(os.environ.keys())
+        if any(pattern in key.upper() for pattern in _SENSITIVE_ENV_PATTERNS)
+    ]
+    for key in sensitive_keys:
+        logger.warning(f"Removing sensitive environment variable: {key}")
+        report["security"].append(key)
+        del os.environ[key]
+    return report
+
+
 def sanitize_path() -> None:
     """
     Sanitize the ``PATH`` environment variable in-place.
 
-    Removes non-existent directories and normalises every entry.
+    Removes non-existent directories, deduplicates entries, and normalises every entry.
     """
     raw = os.environ.get("PATH", "")
     entries = raw.split(os.pathsep)
     cleaned: list[str] = []
+    seen: set[str] = set()
     for entry in entries:
         normed = os.path.normpath(entry)
-        if os.path.isdir(normed):
+        if normed in seen:
+            logger.debug(f"Removing duplicate PATH entry: {entry}")
+        elif os.path.isdir(normed):
             cleaned.append(normed)
+            seen.add(normed)
         else:
             logger.debug(f"Removing non-existent PATH entry: {entry}")
     os.environ["PATH"] = os.pathsep.join(cleaned)
+
+
+def get_environment_report() -> dict[str, Any]:
+    """
+    Generate a report of the current environment state.
+
+    Returns a dictionary containing Python runtime information and
+    current environment variable summary.
+    """
+    return {
+        "python": {
+            "executable": sys.executable,
+            "version": sys.version,
+            "path": sys.path,
+        },
+        "environment": {
+            "path": os.environ.get("PATH", ""),
+            "pythonpath": os.environ.get("PYTHONPATH", ""),
+        },
+    }

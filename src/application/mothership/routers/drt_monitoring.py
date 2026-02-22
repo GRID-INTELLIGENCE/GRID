@@ -100,7 +100,9 @@ async def get_drt_status(middleware: ComprehensiveDRTMiddleware = Depends(get_dr
 async def add_attack_vector(
     request: AttackVectorAddRequest, middleware: ComprehensiveDRTMiddleware = Depends(get_drt_middleware)
 ) -> dict[str, str]:
-    signature = BehavioralSignature(
+    from ..middleware.drt_middleware import BehavioralSignature as _BehavioralSignature
+
+    signature = _BehavioralSignature(
         path_pattern=request.path_pattern,
         method=request.method,
         headers=tuple(request.headers),
@@ -124,18 +126,20 @@ async def get_escalated_endpoints(
 async def escalate_endpoint(
     path: str, middleware: ComprehensiveDRTMiddleware = Depends(get_drt_middleware)
 ) -> dict[str, str]:
-    middleware._escalate_endpoint(path)
-    return {"status": "success", "message": f"Endpoint escalated: {path}"}
+    normalized = f"/{path}" if not path.startswith("/") else path
+    middleware._escalate_endpoint(normalized)
+    return {"status": "success", "message": f"Endpoint escalated: {normalized}"}
 
 
 @router.post("/de-escalate/{path:path}")
 async def de_escalate_endpoint(
     path: str, middleware: ComprehensiveDRTMiddleware = Depends(get_drt_middleware)
 ) -> dict[str, str]:
-    if path in middleware.ESCALATED_ENDPOINTS:
-        del middleware.ESCALATED_ENDPOINTS[path]
-        return {"status": "success", "message": f"Endpoint de-escalated: {path}"}
-    return {"status": "warning", "message": f"Endpoint not found in escalated list: {path}"}
+    normalized = f"/{path}" if not path.startswith("/") else path
+    if normalized in middleware.ESCALATED_ENDPOINTS:
+        del middleware.ESCALATED_ENDPOINTS[normalized]
+        return {"status": "success", "message": f"Endpoint de-escalated: {normalized}"}
+    return {"status": "warning", "message": f"Endpoint not found in escalated list: {normalized}"}
 
 
 @router.get("/behavioral-history")
@@ -159,10 +163,11 @@ async def mark_false_positive(
     request: FalsePositiveRequest, middleware: ComprehensiveDRTMiddleware = Depends(get_drt_middleware)
 ) -> FalsePositiveResponse:
     """Mark a violation as a false positive."""
-    from ..db.engine import get_db_session
+    from ..db.engine import get_async_sessionmaker
     from ..middleware.drt_metrics import record_false_positive
 
-    async with get_db_session() as session:
+    factory = get_async_sessionmaker()
+    async with factory() as session:
         fp_repo = DRTFalsePositiveRepository(session)
         pattern_repo = DRTFalsePositivePatternRepository(session)
         violation_repo = DRTViolationRepository(session)
@@ -209,26 +214,34 @@ async def get_false_positive_stats(
     middleware: ComprehensiveDRTMiddleware = Depends(get_drt_middleware),
 ) -> FalsePositiveStatsResponse:
     """Get false positive statistics."""
-    from ..db.engine import get_db_session
+    try:
+        from ..db.engine import get_async_sessionmaker
 
-    async with get_db_session() as session:
-        fp_repo = DRTFalsePositiveRepository(session)
-        pattern_repo = DRTFalsePositivePatternRepository(session)
+        factory = get_async_sessionmaker()
+        async with factory() as session:
+            fp_repo = DRTFalsePositiveRepository(session)
+            pattern_repo = DRTFalsePositivePatternRepository(session)
 
-        # Get statistics
-        total_fp = await fp_repo.count()
-        recent_fp = await fp_repo.count(hours=24)
-        fp_rate = await fp_repo.get_false_positive_rate(hours=24)
+            total_fp = await fp_repo.count()
+            recent_fp = await fp_repo.count(hours=24)
+            fp_rate = await fp_repo.get_false_positive_rate(hours=24)
 
-        # Get learned patterns
-        patterns = await pattern_repo.get_patterns_above_threshold(threshold=0.5)
-        patterns_learned = len(patterns)
+            patterns = await pattern_repo.get_patterns_above_threshold(threshold=0.5)
+            patterns_learned = len(patterns)
 
+            return FalsePositiveStatsResponse(
+                total_false_positives=total_fp,
+                false_positive_rate=fp_rate,
+                recent_false_positives=recent_fp,
+                patterns_learned=patterns_learned,
+                timestamp=datetime.now(UTC).isoformat(),
+            )
+    except Exception:
         return FalsePositiveStatsResponse(
-            total_false_positives=total_fp,
-            false_positive_rate=fp_rate,
-            recent_false_positives=recent_fp,
-            patterns_learned=patterns_learned,
+            total_false_positives=0,
+            false_positive_rate=0.0,
+            recent_false_positives=0,
+            patterns_learned=0,
             timestamp=datetime.now(UTC).isoformat(),
         )
 
@@ -238,16 +251,23 @@ async def get_recent_false_positives(
     hours: int = 24, limit: int = 50, middleware: ComprehensiveDRTMiddleware = Depends(get_drt_middleware)
 ) -> dict[str, Any]:
     """Get recent false positive records."""
-    from ..db.engine import get_db_session
+    try:
+        from ..db.engine import get_async_sessionmaker
 
-    async with get_db_session() as session:
-        fp_repo = DRTFalsePositiveRepository(session)
-
-        false_positives = await fp_repo.get_recent(hours=hours, limit=limit)
-
+        factory = get_async_sessionmaker()
+        async with factory() as session:
+            fp_repo = DRTFalsePositiveRepository(session)
+            false_positives = await fp_repo.get_recent(hours=hours, limit=limit)
+            return {
+                "false_positives": false_positives,
+                "count": len(false_positives),
+                "hours": hours,
+                "timestamp": datetime.now(UTC).isoformat(),
+            }
+    except Exception:
         return {
-            "false_positives": false_positives,
-            "count": len(false_positives),
+            "false_positives": [],
+            "count": 0,
             "hours": hours,
             "timestamp": datetime.now(UTC).isoformat(),
         }
@@ -260,16 +280,24 @@ async def get_false_positive_patterns(
     middleware: ComprehensiveDRTMiddleware = Depends(get_drt_middleware),
 ) -> dict[str, Any]:
     """Get learned false positive patterns."""
-    from ..db.engine import get_db_session
+    try:
+        from ..db.engine import get_async_sessionmaker
 
-    async with get_db_session() as session:
-        pattern_repo = DRTFalsePositivePatternRepository(session)
-
-        patterns = await pattern_repo.get_patterns_above_threshold(threshold=threshold, active_only=active_only)
-
+        factory = get_async_sessionmaker()
+        async with factory() as session:
+            pattern_repo = DRTFalsePositivePatternRepository(session)
+            patterns = await pattern_repo.get_patterns_above_threshold(threshold=threshold, active_only=active_only)
+            return {
+                "patterns": patterns,
+                "count": len(patterns),
+                "threshold": threshold,
+                "active_only": active_only,
+                "timestamp": datetime.now(UTC).isoformat(),
+            }
+    except Exception:
         return {
-            "patterns": patterns,
-            "count": len(patterns),
+            "patterns": [],
+            "count": 0,
             "threshold": threshold,
             "active_only": active_only,
             "timestamp": datetime.now(UTC).isoformat(),
@@ -281,17 +309,21 @@ async def deactivate_false_positive_pattern(
     pattern_id: str, middleware: ComprehensiveDRTMiddleware = Depends(get_drt_middleware)
 ) -> dict[str, str]:
     """Deactivate a false positive pattern."""
-    from ..db.engine import get_db_session
+    try:
+        from ..db.engine import get_async_sessionmaker
 
-    async with get_db_session() as session:
-        pattern_repo = DRTFalsePositivePatternRepository(session)
-
-        success = await pattern_repo.deactivate_pattern(pattern_id)
-
-        if success:
-            return {"status": "success", "message": f"Pattern {pattern_id} deactivated"}
-        else:
-            raise HTTPException(status_code=404, detail=f"Pattern {pattern_id} not found")
+        factory = get_async_sessionmaker()
+        async with factory() as session:
+            pattern_repo = DRTFalsePositivePatternRepository(session)
+            success = await pattern_repo.deactivate_pattern(pattern_id)
+            if success:
+                return {"status": "success", "message": f"Pattern {pattern_id} deactivated"}
+            else:
+                raise HTTPException(status_code=404, detail=f"Pattern {pattern_id} not found")
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(status_code=503, detail="Database unavailable")
 
 
 def set_drt_middleware(middleware: ComprehensiveDRTMiddleware) -> None:
