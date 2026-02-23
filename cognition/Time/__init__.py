@@ -567,7 +567,7 @@ class AdvancedTimeManager(TimeManager):
                 "variance": round(variance, 2),
             },
             "hourly_distribution": dict(sorted(hours.items())),
-            "daily_distribution": {k: v for k, v in sorted(days.items())},
+            "daily_distribution": dict(sorted(days.items())),
             "peak_hour": {"hour": peak_hour, "count": peak_hour_count},
             "event_frequency_per_hour": round(frequency, 2),
             "burstiness": round(std_dev / avg_interval if avg_interval > 0 else 0, 2),

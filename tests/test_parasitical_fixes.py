@@ -401,10 +401,7 @@ class TestTraceContextStackFix:
 
         # Create multiple traces
         trace1 = manager.create_trace("test1", "action1")
-        manager._context_stack.append(trace1.context)
-
         trace2 = manager.create_trace("test2", "action2")
-        manager._context_stack.append(trace2.context)
 
         # Verify both in stack
         assert len(manager._context_stack) == 2
@@ -427,9 +424,8 @@ class TestTraceContextStackFix:
 
         manager = TraceManager()
 
-        # Create and push context
+        # Create context (create_trace pushes to stack)
         trace = manager.create_trace("test", "action")
-        manager._context_stack.append(trace.context)
 
         # Verify trace_id is in stack
         assert trace.trace_id in [ctx.trace_id for ctx in manager._context_stack]

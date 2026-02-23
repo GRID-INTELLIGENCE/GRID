@@ -12,6 +12,7 @@ from cognition.patterns.security.cognitive_fingerprint import (
     ReinforcementSignature,
     get_cognitive_fingerprint,
 )
+
 # from cognition.patterns.security.null_wrapper import (
 #     _wrapped_reinforce,
 #     _wrapped_signal_create,

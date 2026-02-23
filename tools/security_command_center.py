@@ -242,7 +242,7 @@ class SecurityCommandCenter:
         print(f"\n🔒 Starting real-time security monitoring ({duration_seconds}s)...")
         print("=" * 60)
 
-        monitor = SecurityMonitor()
+        SecurityMonitor()
         start_time = datetime.now(UTC)
         event_count = 0
 

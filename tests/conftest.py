@@ -176,7 +176,6 @@ def reset_services():
 
 from unittest.mock import AsyncMock, Mock
 
-
 # ---------------------------------------------------------------------------
 # Service Availability Fixtures
 # These fixtures check if external services are available and skip tests

@@ -611,7 +611,7 @@ def _calculate_dependency_health_score(results: dict[str, Any]) -> float:
     """Calculate dependency health score."""
     score = 10.0
 
-    for _check_type, result in results.items():
+    for result in results.values():
         if not result.get("success"):
             score -= 2.0
 
@@ -622,7 +622,7 @@ def _calculate_quality_score(results: dict[str, Any]) -> float:
     """Calculate code quality score."""
     score = 10.0
 
-    for _metric, result in results.items():
+    for result in results.values():
         if not result.get("success"):
             score -= 2.5
 

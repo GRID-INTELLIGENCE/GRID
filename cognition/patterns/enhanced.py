@@ -284,7 +284,7 @@ class EnhancedPatternManager(PatternManager):
         """Extract searchable text from input data."""
         text_parts = []
 
-        for _key, value in input_data.items():
+        for value in input_data.values():
             if isinstance(value, str):
                 text_parts.append(value)
             elif isinstance(value, dict):

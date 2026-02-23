@@ -201,7 +201,7 @@ class AdaptiveLearning:
 
     def _update_feature_importance(self, outcome: LearningOutcome) -> None:
         """Update feature importance based on outcome."""
-        for feature_name, _feature_value in outcome.input_features.items():
+        for feature_name in outcome.input_features.keys():
             if feature_name not in self._feature_performance:
                 self._feature_performance[feature_name] = PerformanceMetrics()
 

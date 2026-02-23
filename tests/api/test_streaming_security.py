@@ -1558,7 +1558,7 @@ class TestStreamingEndToEnd:
         get_ghost_registry()
 
         @register_handler("navigation.stream", description="Navigation stream for e2e auth test", timeout_ms=60000)
-        async def navigation_stream_handler(payload: dict) -> AsyncGenerator[dict[str, Any], None]:
+        async def navigation_stream_handler(payload: dict) -> AsyncGenerator[dict[str, Any]]:
             yield {"event": "status", "data": {"stage": "ok"}}
             yield {"event": "result", "data": {"done": True}}
 

@@ -457,7 +457,7 @@ class ParasiteAttackSimulator:
         results = await asyncio.gather(*tasks)
 
         if self.monitor.current_state == "DETECTING":
-            unique_endpoints = len(set(r for r in results))
+            unique_endpoints = len(set(results))
             if unique_endpoints >= 3:
                 self.monitor.record_transition(
                     "DETECTING", "MITIGATING", trigger=f"api_abuse_{unique_endpoints}_endpoints"

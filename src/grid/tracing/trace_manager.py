@@ -155,8 +155,7 @@ class TraceManager:
         if input_data:
             trace.input_data = input_data
 
-        # FIXED: Push to stack only after successful creation
-        self._context_stack.append(trace.context)
+        # create_trace() already pushes this context onto the stack.
 
         try:
             yield trace
@@ -170,14 +169,14 @@ class TraceManager:
             # FIXED: Pop only the exact context we pushed (verified by trace_id)
             if self._context_stack and self._context_stack[-1].trace_id == trace.trace_id:
                 self._context_stack.pop()
-            elif trace.trace_id in self._context_stack:
+            else:
                 # Context is in stack but not at top - log error but still remove
                 idx = next((i for i, ctx in enumerate(self._context_stack) if ctx.trace_id == trace.trace_id), None)
                 if idx is not None:
                     self._context_stack.pop(idx)
                     logger.error(f"Trace stack out of order: removed {trace.trace_id} from middle of stack")
-            else:
-                logger.error(f"Trace {trace.trace_id} not found in context stack during cleanup")
+                else:
+                    logger.error(f"Trace {trace.trace_id} not found in context stack during cleanup")
 
             # Remove from active traces
             if trace.trace_id in self._active_traces:

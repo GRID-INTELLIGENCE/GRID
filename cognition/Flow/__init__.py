@@ -238,7 +238,7 @@ class AdvancedFlowManager(FlowManager):
             return []
 
         # Build adjacency list and in-degree count
-        in_degree: dict[str, int] = {flow_id: 0 for flow_id in self.flows}
+        in_degree: dict[str, int] = dict.fromkeys(self.flows, 0)
         dependents: dict[str, list[str]] = {flow_id: [] for flow_id in self.flows}
 
         # Process dependencies
@@ -286,7 +286,7 @@ class AdvancedFlowManager(FlowManager):
             self.logger.warning("Circular dependencies detected, returning unsorted flows")
             # Return flows sorted by priority as fallback
             return sorted(
-                list(self.flows.keys()),
+                self.flows.keys(),
                 key=lambda fid: self.flow_priorities.get(fid, 0),
                 reverse=True,
             )
