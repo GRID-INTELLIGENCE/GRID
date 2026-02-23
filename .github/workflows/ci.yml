@@ -43,12 +43,12 @@ jobs:
     needs: secrets_scan
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
       - name: Install uv
-        run: pip install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.13"
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
       - name: Sync dependencies
         run: uv sync --frozen --group test
       - name: Import check
@@ -84,12 +84,12 @@ jobs:
     needs: secrets_scan
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
       - name: Install uv
-        run: pip install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.13"
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
       - name: Sync dependencies
         run: uv sync --frozen
       - name: Run ruff
@@ -105,12 +105,12 @@ jobs:
     needs: smoke_test
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
       - name: Install uv
-        run: pip install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.13"
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
       - name: Sync dependencies
         run: uv sync --frozen --group test
       - name: Run tests

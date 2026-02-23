@@ -23,20 +23,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
         with:
           python-version: "3.13"
+          enable-cache: true
 
       - name: Install build and twine
-        run: pip install build hatchling twine
+        run: uv pip install build hatchling twine
 
       - name: Build grid-safety
-        run: python -m build --wheel
+        run: uv run python -m build --wheel
         working-directory: safety
 
       - name: Publish grid-safety to PyPI
-        run: twine upload --skip-existing safety/dist/*
+        run: uv run twine upload --skip-existing safety/dist/*
         env:
           # PyPI recommends username __token__ when using API token as password
           TWINE_USERNAME: __token__
@@ -51,20 +52,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
         with:
           python-version: "3.13"
+          enable-cache: true
 
       - name: Install build and twine
-        run: pip install build hatchling twine
+        run: uv pip install build hatchling twine
 
       - name: Build grid-intelligence
-        run: python -m build --wheel
+        run: uv run python -m build --wheel
         working-directory: work/GRID
 
       - name: Publish grid-intelligence to PyPI
-        run: twine upload --skip-existing work/GRID/dist/*
+        run: uv run twine upload --skip-existing work/GRID/dist/*
         env:
           # PyPI recommends username __token__ when using API token as password
           TWINE_USERNAME: __token__

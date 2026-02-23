@@ -26,14 +26,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
       - name: Install uv
         uses: astral-sh/setup-uv@v5
         with:
+          python-version: ${{ env.PYTHON_VERSION }}
           enable-cache: true
           cache-dependency-glob: "uv.lock"
 
@@ -81,14 +77,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
       - name: Install uv
         uses: astral-sh/setup-uv@v5
         with:
+          python-version: ${{ env.PYTHON_VERSION }}
           enable-cache: true
           cache-dependency-glob: "uv.lock"
 
@@ -129,14 +121,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
       - name: Install uv
         uses: astral-sh/setup-uv@v5
         with:
+          python-version: ${{ env.PYTHON_VERSION }}
           enable-cache: true
           cache-dependency-glob: "uv.lock"
 
@@ -146,7 +134,7 @@ jobs:
 
       - name: Analyze signal quality
         run: |
-          python -c "
+          uv run python -c "
           from grid.skills.nsr_tracker import NSRTracker
           from grid.skills.signal_classification import SignalClassifier
 
@@ -184,14 +172,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
       - name: Install uv
         uses: astral-sh/setup-uv@v5
         with:
+          python-version: ${{ env.PYTHON_VERSION }}
           enable-cache: true
           cache-dependency-glob: "uv.lock"
 
@@ -201,7 +185,7 @@ jobs:
 
       - name: Check for regressions
         run: |
-          python -c "
+          uv run python -c "
           from grid.skills.performance_guard import PerformanceGuard
           from grid.skills.intelligence_inventory import IntelligenceInventory
 
@@ -257,14 +241,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
       - name: Install uv
         uses: astral-sh/setup-uv@v5
         with:
+          python-version: ${{ env.PYTHON_VERSION }}
           enable-cache: true
           cache-dependency-glob: "uv.lock"
 
@@ -289,7 +269,7 @@ jobs:
 
       - name: Create nightly report
         run: |
-          python -c "
+          uv run python -c "
           from grid.skills.diagnostics import SkillsDiagnostics
 
           diagnostics = SkillsDiagnostics()
@@ -317,18 +297,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
-        with:
-          enable-cache: true
-          cache-dependency-glob: "uv.lock"
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
-        with:
           enable-cache: true
           cache-dependency-glob: "uv.lock"
 
@@ -338,7 +310,7 @@ jobs:
 
       - name: Auto-tune NSR threshold
         run: |
-          python -c "
+          uv run python -c "
           from grid.skills.nsr_tracker import NSRTracker
 
           nsr_tracker = NSRTracker()
