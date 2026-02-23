@@ -5,6 +5,19 @@ Append new entries at the top. One decision per entry.
 
 ---
 
+## 2026-02-24 — Release v2.4.1
+
+**Decision**: Tagged and released v2.4.1 from main (commit `def11d7`). Merged 11 Dependabot PRs, deferred 5 breaking-change PRs (#9 FastAPI, #13 pytest-asyncio, #18 npm group, #19 zod 4, #20 eslint 10). Fixed release workflow (`tomllib` stdlib instead of third-party `toml`, `uv venv` for build job). PyPI publish deferred (trusted publisher not yet configured on PyPI).
+
+**Why**: 161 commits behind last tag (v2.2.4). CI green, dependency updates include CVE fix (cryptography 44->46). Release pipeline itself needed fixes discovered during execution.
+
+**Alternatives considered**:
+1. Merge all 16 Dependabot PRs — Rejected: FastAPI 0.132, pytest-asyncio 1.x, zod 4, eslint 10 are breaking changes requiring dedicated migration.
+2. Skip to v3.0.0 — Rejected: no breaking API changes warrant major bump.
+3. Wait for PyPI trusted publisher setup — Rejected: GitHub Release + artifacts are sufficient for now.
+
+---
+
 ## 2026-02-24 — Reject `copilot-worktree-2026-02-17T11-02-39` branch
 
 **Decision**: Branch blocked from merge. No changes applied to main.
