@@ -95,8 +95,14 @@ class TestSkillsSandbox:
         sandbox = SkillsSandbox(config=SandboxConfig(timeout=2.0))
         monkeypatch.setattr(sandbox, "_apply_resource_limits", lambda: None)
 
+        # Force in-process fallback for deterministic cross-platform behavior.
+        # The subprocess path strips PYTHONPATH which can fail in CI envs.
+        async def _deny_subprocess(*args, **kwargs):
+            raise PermissionError("subprocess unavailable in unit test")
+
+        monkeypatch.setattr(sandbox, "_execute_with_monitoring", _deny_subprocess)
+
         skill_code = """
-import json
 def main(args):
     return {"result": "ok", "echo": args.get("value")}
 """
