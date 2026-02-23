@@ -81,9 +81,6 @@ jobs:
           enable-cache: true
           cache-dependency-glob: "uv.lock"
 
-      - name: "Install tools"
-        run: uv pip install --system toml
-
       - name: "Determine Version & Package"
         id: version
         run: |
@@ -98,12 +95,12 @@ jobs:
             fi
             TAG=${GITHUB_REF#refs/tags/}
           else
-            # Manual dispatch
+            # Manual dispatch — use tomllib (stdlib, Python 3.11+)
             PACKAGE="${{ github.event.inputs.package }}"
             if [[ "$PACKAGE" == "grid-safety" ]]; then
-              CURRENT=$(uv run python -c "import toml; print(toml.load('safety/pyproject.toml')['project']['version'])" 2>/dev/null || echo "1.0.0")
+              CURRENT=$(uv run python -c "import tomllib; print(tomllib.load(open('safety/pyproject.toml','rb'))['project']['version'])" 2>/dev/null || echo "1.0.0")
             else
-              CURRENT=$(uv run python -c "import toml; print(toml.load('pyproject.toml')['project']['version'])")
+              CURRENT=$(uv run python -c "import tomllib; print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")
             fi
             IFS='.' read -r -a parts <<< "$CURRENT"
             MAJOR=${parts[0]}
@@ -203,18 +200,22 @@ jobs:
           cache-dependency-glob: "uv.lock"
 
       - name: "Install build tools"
-        run: uv pip install --system build twine toml
+        run: |
+          uv venv
+          uv pip install build twine
 
       - name: "Update Version (grid-intelligence)"
         if: github.event_name == 'workflow_dispatch' && needs.prepare.outputs.package == 'grid-intelligence'
         run: |
           uv run python -c "
-          import toml
+          import tomllib, re
+          with open('pyproject.toml', 'rb') as f:
+              current = tomllib.load(f)['project']['version']
           with open('pyproject.toml', 'r') as f:
-              config = toml.load(f)
-          config['project']['version'] = '${{ needs.prepare.outputs.version }}'
+              content = f.read()
+          content = content.replace(f'version = \"{current}\"', 'version = \"${{ needs.prepare.outputs.version }}\"', 1)
           with open('pyproject.toml', 'w') as f:
-              toml.dump(config, f)
+              f.write(content)
           "
 
       - name: "Build grid-intelligence"
