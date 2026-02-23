@@ -98,11 +98,13 @@ async def batch_privacy_processing(request: PrivacyBatchRequest, current_user: U
         results = []
         total_entities = 0
         for text, pr in zip(request.texts, privacy_results, strict=False):
-            results.append({
-                "original_text": text,
-                "masked_text": pr.masked_text,
-                "detected_entities": [_entity_to_dict(e) for e in pr.detected_entities],
-            })
+            results.append(
+                {
+                    "original_text": text,
+                    "masked_text": pr.masked_text,
+                    "detected_entities": [_entity_to_dict(e) for e in pr.detected_entities],
+                }
+            )
             total_entities += len(pr.detected_entities)
         _stats["total_requests"] += 1
         _stats["entities_detected"] += total_entities

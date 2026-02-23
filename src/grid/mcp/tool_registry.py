@@ -205,6 +205,7 @@ class ToolRegistry:
             config_path: Path to the MCP configuration file.
         """
         import aiofiles
+
         config_path = Path(config_path)
         if not await asyncio.to_thread(config_path.exists):
             raise FileNotFoundError(f"Configuration file not found: {config_path}")

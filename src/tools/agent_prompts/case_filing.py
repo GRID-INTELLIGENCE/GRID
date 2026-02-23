@@ -358,7 +358,9 @@ class CaseFilingSystem:
 
         for pattern, rel_type in relationship_patterns:
             matches = re.finditer(pattern, text, re.IGNORECASE)
-            relationships.extend({"source": match.group(1), "target": match.group(3), "type": rel_type} for match in matches)
+            relationships.extend(
+                {"source": match.group(1), "target": match.group(3), "type": rel_type} for match in matches
+            )
 
         return {
             "iteration": 5,

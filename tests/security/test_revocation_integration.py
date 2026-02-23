@@ -36,9 +36,9 @@ async def test_verify_jwt_token_with_revocation():
         "type": "access",
     }
 
-    import jose.jwt
+    import jwt
 
-    token = jose.jwt.encode(payload, "test-secret-key-at-least-32-chars-long-for-valid-test", algorithm="HS256")
+    token = jwt.encode(payload, "test-secret-key-at-least-32-chars-long-for-valid-test", algorithm="HS256")
 
     # 3. Verify it works before revocation
     result = await verify_jwt_token(token)

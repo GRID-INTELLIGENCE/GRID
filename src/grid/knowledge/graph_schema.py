@@ -301,7 +301,11 @@ class KnowledgeGraphSchema:
         errors = []
 
         # Check required properties
-        errors.extend(f"Missing required property: {prop.name}" for prop in schema.properties if prop.required and prop.name not in data)
+        errors.extend(
+            f"Missing required property: {prop.name}"
+            for prop in schema.properties
+            if prop.required and prop.name not in data
+        )
 
         # Validate property types
         for prop in schema.properties:

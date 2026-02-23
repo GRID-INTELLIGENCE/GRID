@@ -444,7 +444,11 @@ class Correlator:
         """Extract correlation keys from event data."""
         keys: list[str] = []
 
-        keys.extend(f"{key}:{event_data[key]}" for key in ("action", "type", "intent", "topic", "category") if key in event_data and event_data[key])
+        keys.extend(
+            f"{key}:{event_data[key]}"
+            for key in ("action", "type", "intent", "topic", "category")
+            if key in event_data and event_data[key]
+        )
 
         return keys
 

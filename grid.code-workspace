@@ -3,42 +3,108 @@
 		{
 			"path": ".",
 			"name": "GRID-CORE"
-		},
-		{
-			"path": "../work",
-			"name": "GRID-WORK"
 		}
 	],
 	"settings": {
 		"python.defaultInterpreterPath": ".venv/Scripts/python.exe",
-		"python.languageServer": "Default",
+		"python.languageServer": "Jedi",
+		"python.analysis.typeCheckingMode": "basic",
 		"python.analysis.extraPaths": [
-			"${workspaceFolder}/src"
+			"${workspaceFolder}/src",
+			"${workspaceFolder}/safety",
+			"${workspaceFolder}/security",
+			"${workspaceFolder}/boundaries"
 		],
 		"python.testing.pytestEnabled": true,
 		"python.testing.pytestArgs": [
 			"tests"
 		],
+		"[python]": {
+			"editor.defaultFormatter": "codeium.windsurf",
+			"editor.formatOnSave": true,
+			"editor.rulers": [
+				120
+			],
+			"editor.codeActionsOnSave": {
+				"source.organizeImports": "explicit",
+				"source.fixAll": "explicit"
+			}
+		},
 		"editor.formatOnSave": true,
 		"editor.codeActionsOnSave": {
 			"source.fixAll.ruff": "explicit",
 			"source.organizeImports.ruff": "explicit"
 		},
-		"ruff.path": [
-			"${workspaceFolder}/.venv/Scripts/ruff.exe"
-		],
 		"ruff.importStrategy": "fromEnvironment",
+		"files.eol": "\n",
+		"files.trimTrailingWhitespace": true,
+		"files.insertFinalNewline": true,
+		"files.autoSave": "onFocusChange",
+		"files.exclude": {
+			"**/.venv": true,
+			"**/__pycache__": true,
+			"**/.pytest_cache": true,
+			"**/.mypy_cache": true,
+			"**/.ruff_cache": true,
+			"**/node_modules": true,
+			"**/dist": true,
+			"**/build": true,
+			"**/archive": true,
+			"**/.rag_db": true,
+			"**/.rag_logs": true,
+			"**/.test_rag_db": true,
+			"**/.test_eval_rag_db": true
+		},
+		"search.exclude": {
+			"**/.venv": true,
+			"**/__pycache__": true,
+			"**/.pytest_cache": true,
+			"**/.mypy_cache": true,
+			"**/.ruff_cache": true,
+			"**/node_modules": true,
+			"**/dist": true,
+			"**/build": true,
+			"**/archive": true,
+			"**/uv.lock": true
+		},
+		"files.watcherExclude": {
+			"**/.venv/**": true,
+			"**/__pycache__/**": true,
+			"**/.pytest_cache/**": true,
+			"**/.mypy_cache/**": true,
+			"**/.ruff_cache/**": true,
+			"**/node_modules/**": true,
+			"**/dist/**": true,
+			"**/build/**": true,
+			"**/archive/**": true
+		},
 		"terminal.integrated.shellIntegration.enabled": false,
 		"terminal.integrated.shellIntegration.decorationsEnabled": "never",
 		"terminal.integrated.env.windows": {
 			"PROJECT_ROOT": "${workspaceFolder}",
-			"PYTHONPATH": "${workspaceFolder}/src",
+			"PYTHONPATH": "${workspaceFolder}/src:${workspaceFolder}/safety:${workspaceFolder}/security:${workspaceFolder}/boundaries",
 			"GRID_HOME": "${workspaceFolder}/src/grid",
 			"COGNITIVE_HOME": "${workspaceFolder}/src/cognitive",
 			"RESONANCE_HOME": "${workspaceFolder}/src/application/resonance",
 			"ENV": "development",
 			"PYTHON_VERSION": "3.13"
 		},
+		"terminal.integrated.profiles.windows": {
+			"PowerShell": {
+				"source": "PowerShell",
+				"icon": "terminal-powershell"
+			},
+			"WSL": {
+				"path": "wsl.exe",
+				"args": [
+					"-d",
+					"Ubuntu"
+				],
+				"icon": "terminal-linux",
+				"color": "terminal.ansiBlue"
+			}
+		},
+		"terminal.integrated.defaultProfile.windows": "PowerShell",
 		"workbench.editor.alwaysShowEditorActions": true,
 		"workbench.editor.autoLockGroups": {
 			"default": true,
@@ -57,22 +123,6 @@
 		},
 		"workbench.editor.closeOnFileDelete": true,
 		"workbench.editor.centeredLayoutFixedWidth": true,
-		"terminal.integrated.profiles.windows": {
-			"PowerShell": {
-				"source": "PowerShell",
-				"icon": "terminal-powershell"
-			},
-			"WSL": {
-				"path": "wsl.exe",
-				"args": [
-					"-d",
-					"Ubuntu"
-				],
-				"icon": "terminal-linux",
-				"color": "terminal.ansiBlue"
-			}
-		},
-		"terminal.integrated.defaultProfile.windows": "PowerShell",
 		"chat.agent.maxRequests": 55,
 		"chat.customAgentInSubagent.enabled": true,
 		"chat.editor.wordWrap": "on",

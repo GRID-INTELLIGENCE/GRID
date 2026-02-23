@@ -100,6 +100,8 @@ def setup_env():
     os.environ["MOTHERSHIP_RATE_LIMIT_ENABLED"] = "false"
 
     # CRITICAL: Disable database connections in test mode to prevent hangs
+    # Use in-memory SQLite: each pytest-xdist worker gets its own DB, avoiding
+    # file locking when running with -n auto. For file-based SQLite, use worker_id.
     os.environ["MOTHERSHIP_DATABASE_URL"] = "sqlite:///:memory:"
     os.environ["MOTHERSHIP_USE_DATABRICKS"] = "false"
     os.environ["MOTHERSHIP_REDIS_ENABLED"] = "false"
@@ -111,24 +113,24 @@ def setup_env():
     # Settings will be loaded lazily when needed with test environment
 
 
-try:
-    from application.resonance.api.dependencies import reset_resonance_service
-except ImportError:
-    reset_resonance_service = None
-
-
 @pytest.fixture(autouse=True)
 def reset_services():
     """Reset singleton services before and after each test for isolation."""
-    # Reset before test
-    if reset_resonance_service:
-        reset_resonance_service()
+    try:
+        from application.resonance.api.dependencies import reset_resonance_service
 
+        if reset_resonance_service:
+            reset_resonance_service()
+    except ImportError:
+        pass
     yield
+    try:
+        from application.resonance.api.dependencies import reset_resonance_service
 
-    # Reset after test
-    if reset_resonance_service:
-        reset_resonance_service()
+        if reset_resonance_service:
+            reset_resonance_service()
+    except ImportError:
+        pass
 
 
 from unittest.mock import AsyncMock, Mock

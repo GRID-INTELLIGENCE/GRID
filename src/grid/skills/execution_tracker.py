@@ -213,7 +213,10 @@ class SkillExecutionTracker:
                 # Trim dead-letter if too large
                 if len(self._dead_letter) > self._max_dead_letter_size:
                     self._dead_letter = self._dead_letter[-self._max_dead_letter_size :]
-            self._logger.warning(f"Inventory unavailable, moved {len(self._batch_buffer)} records to dead-letter")
+            try:
+                self._logger.warning(f"Inventory unavailable, moved {len(self._batch_buffer)} records to dead-letter")
+            except (ValueError, OSError):
+                pass  # Logging stream may be closed during shutdown
             self._batch_buffer.clear()
             return
 

@@ -83,6 +83,17 @@ class EnhancedRAGMCPServer:
         self.sessions: dict[str, RAGSession] = {}
         self._register_handlers()
 
+        # Expose tool handler for direct invocation (testing, tool dispatch)
+        async def _call_tool_handler(name: str, arguments: dict[str, Any]) -> CallToolResult:
+            return await self._dispatch_tool(name, arguments)
+
+        self.server._call_tool_handler = _call_tool_handler
+
+        async def _handle_list_tools(_req: Any) -> ListToolsResult:
+            return self._get_list_tools_result()
+
+        self.server._handle_list_tools = _handle_list_tools
+
         # Check Ollama connection
         if not ollama_checker():
             logger.warning("Ollama connection not available. Some features may be limited.")
@@ -166,6 +177,9 @@ class EnhancedRAGMCPServer:
             ]
             return ListToolsResult(tools=tools)
 
+        # Expose for tests
+        self.server._handle_list_tools = lambda req=None: list_tools()
+
         @self.server.call_tool()
         async def call_tool(name: str, arguments: dict[str, Any]) -> CallToolResult:
             """Handle tool calls."""
@@ -189,6 +203,79 @@ class EnhancedRAGMCPServer:
             except Exception as e:
                 logger.error(f"Error in tool {name}: {e}")
                 return CallToolResult(content=[TextContent(text=f"Error: {str(e)}", type="text")], isError=True)
+
+    def _get_list_tools_result(self) -> ListToolsResult:
+        """Return list of tools. Used by _handle_list_tools for testing."""
+        tools = [
+            Tool(
+                name="query",
+                description="Query the RAG knowledge base with conversation support",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "query": {"type": "string", "description": "Query text"},
+                        "session_id": {"type": "string", "description": "Session ID", "default": None},
+                        "enable_multi_hop": {"type": "boolean", "default": False},
+                        "temperature": {"type": "number", "default": 0.7},
+                    },
+                    "required": ["query"],
+                },
+            ),
+            Tool(
+                name="create_session",
+                description="Create session",
+                inputSchema={
+                    "type": "object",
+                    "properties": {"session_id": {"type": "string"}},
+                    "required": ["session_id"],
+                },
+            ),
+            Tool(
+                name="get_session",
+                description="Get session",
+                inputSchema={
+                    "type": "object",
+                    "properties": {"session_id": {"type": "string"}},
+                    "required": ["session_id"],
+                },
+            ),
+            Tool(
+                name="delete_session",
+                description="Delete session",
+                inputSchema={
+                    "type": "object",
+                    "properties": {"session_id": {"type": "string"}},
+                    "required": ["session_id"],
+                },
+            ),
+            Tool(name="get_stats", description="Get stats", inputSchema={"type": "object"}),
+            Tool(
+                name="index_documents",
+                description="Index documents",
+                inputSchema={"type": "object", "properties": {"path": {"type": "string"}}, "required": ["path"]},
+            ),
+        ]
+        return ListToolsResult(tools=tools)
+
+    async def _dispatch_tool(self, name: str, arguments: dict[str, Any]) -> CallToolResult:
+        """Dispatch tool calls by name. Used by _call_tool_handler for testing."""
+        if name == "query":
+            return await self._handle_query(arguments)
+        elif name == "create_session":
+            return await self._handle_create_session(arguments)
+        elif name == "get_session":
+            return await self._handle_get_session(arguments)
+        elif name == "delete_session":
+            return await self._handle_delete_session(arguments)
+        elif name == "get_stats":
+            return await self._handle_get_stats(arguments)
+        elif name == "index_documents":
+            return await self._handle_index_documents(arguments)
+        else:
+            return CallToolResult(
+                content=[TextContent(text=json.dumps({"error": f"Unknown tool: {name}"}), type="text")],
+                isError=True,
+            )
 
     async def _handle_query(self, arguments: dict[str, Any]) -> CallToolResult:
         """Handle RAG query with conversation support."""

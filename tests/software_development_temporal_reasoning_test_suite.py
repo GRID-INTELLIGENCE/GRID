@@ -362,7 +362,7 @@ class SoftwareDevelopmentTemporalReasoningTestSuite:
             len([f for f in sample_software_development_facts if "migration" in f.predicate]),  # Migration debt
             len([f for f in sample_software_development_facts if "depends" in f.predicate]),  # Coupling debt
             len(
-                set([f.metadata.get("programming_language") for f in sample_software_development_facts])
+                {f.metadata.get("programming_language") for f in sample_software_development_facts}
             ),  # Language diversity debt
         ]
 

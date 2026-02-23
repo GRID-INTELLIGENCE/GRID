@@ -616,6 +616,8 @@ async def summon_handler(
             request_id=request_id,
         )
 
+    except HTTPException:
+        raise  # Let FastAPI propagate the proper status code (401, 500, etc.)
     except TimeoutError:
         latency_ms = (time.perf_counter() - start_time) * 1000
         error_msg = f"Handler timed out after {handler.timeout_ms}ms"

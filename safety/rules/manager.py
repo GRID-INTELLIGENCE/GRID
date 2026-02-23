@@ -97,18 +97,14 @@ class CodeAnalyzer:
 
                 def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
                     if self._function_depth > 0:
-                        self.violations.append(
-                            "Nested function definition (potential code smuggling)"
-                        )
+                        self.violations.append("Nested function definition (potential code smuggling)")
                     self._function_depth += 1
                     self.generic_visit(node)
                     self._function_depth -= 1
 
                 def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
                     if self._function_depth > 0:
-                        self.violations.append(
-                            "Nested async function definition (potential code smuggling)"
-                        )
+                        self.violations.append("Nested async function definition (potential code smuggling)")
                     self._function_depth += 1
                     self.generic_visit(node)
                     self._function_depth -= 1
@@ -321,7 +317,10 @@ class SafetyRuleManager:
         flattened_text = json.dumps(data) if isinstance(data, (dict, list)) else str(data)
         prompt_violations = self.prompt_inspector.analyze(flattened_text, ctx)
 
-        reasons.extend(f"Content Policy Violation: {match.rule_name} (Severity: {match.severity.value})" for match in prompt_violations)
+        reasons.extend(
+            f"Content Policy Violation: {match.rule_name} (Severity: {match.severity.value})"
+            for match in prompt_violations
+        )
 
         is_safe = len(reasons) == 0
 

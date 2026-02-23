@@ -15,9 +15,9 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime, timedelta
 
+import jwt
 import pytest
 from fastapi.testclient import TestClient
-from jose import jwt
 
 from application.mothership.main import create_app
 from application.mothership.security.jwt import JWTManager, reset_jwt_manager
@@ -114,7 +114,7 @@ class TestTokenTampering:
         tampered_token = f"{header}.{tampered_payload}.{signature}"
 
         # Should fail verification
-        from jose import JWTError
+        from jwt.exceptions import InvalidTokenError as JWTError
 
         with pytest.raises(JWTError):
             jwt_manager.verify_token(tampered_token)
@@ -127,7 +127,7 @@ class TestTokenTampering:
         tampered_signature = signature[:-10] + "0000000000"
         tampered_token = f"{header}.{payload}.{tampered_signature}"
 
-        from jose import JWTError
+        from jwt.exceptions import InvalidTokenError as JWTError
 
         with pytest.raises(JWTError):
             jwt_manager.verify_token(tampered_token)
@@ -153,7 +153,7 @@ class TestTokenTampering:
         # 'none' algorithm tokens have no signature
         none_token = f"{header}.{payload_encoded}."
 
-        from jose import JWTError
+        from jwt.exceptions import InvalidTokenError as JWTError
 
         with pytest.raises(JWTError):
             jwt_manager.verify_token(none_token)
@@ -170,7 +170,7 @@ class TestTokenTampering:
             environment="test",
         )
 
-        from jose import JWTError
+        from jwt.exceptions import InvalidTokenError as JWTError
 
         with pytest.raises(JWTError):
             different_manager.verify_token(valid_token)
@@ -183,7 +183,7 @@ class TestTokenTampering:
             expires_delta=timedelta(seconds=-10),
         )
 
-        from jose import JWTError
+        from jwt.exceptions import InvalidTokenError as JWTError
 
         with pytest.raises(JWTError):
             jwt_manager.verify_token(expired_token)
@@ -194,7 +194,7 @@ class TestTokenValidation:
 
     def test_empty_token_rejected(self, jwt_manager: JWTManager) -> None:
         """Test that empty token is rejected."""
-        from jose import JWTError
+        from jwt.exceptions import InvalidTokenError as JWTError
 
         with pytest.raises(JWTError):
             jwt_manager.verify_token("")
@@ -211,7 +211,7 @@ class TestTokenValidation:
             "header..signature",  # Missing payload
         ]
 
-        from jose import JWTError
+        from jwt.exceptions import InvalidTokenError as JWTError
 
         for token in malformed_tokens:
             with pytest.raises((JWTError, ValueError, Exception)):
@@ -283,7 +283,7 @@ class TestTokenValidation:
         time.sleep(2.0)
 
         # Should now be expired
-        from jose import JWTError
+        from jwt.exceptions import InvalidTokenError as JWTError
 
         with pytest.raises(JWTError):
             jwt_manager.verify_token(token)
@@ -529,9 +529,12 @@ class TestRateLimiting:
             json={"username": "test", "password": "test"},
         )
 
-        if response.status_code == 429:
-            # assert "retry-after" in response.headers.keys() or "Retry-After" in response.headers.keys()
-            pass
+        assert response.status_code == 429, f"Expected 429, got {response.status_code}"
+        # RFC 7231: 429 responses should include Retry-After when possible
+        retry_after = response.headers.get("Retry-After") or response.headers.get("retry-after")
+        assert retry_after is not None, (
+            f"Rate limit response must include Retry-After header. Headers: {dict(response.headers)}"
+        )
 
 
 # =============================================================================
@@ -696,7 +699,7 @@ class TestEdgeCases:
         )
 
         # Should be immediately expired
-        from jose import JWTError
+        from jwt.exceptions import InvalidTokenError as JWTError
 
         with pytest.raises(JWTError):
             jwt_manager.verify_token(token)
@@ -709,7 +712,7 @@ class TestEdgeCases:
         )
 
         # Should be expired
-        from jose import JWTError
+        from jwt.exceptions import InvalidTokenError as JWTError
 
         with pytest.raises(JWTError):
             jwt_manager.verify_token(token)

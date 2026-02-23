@@ -106,9 +106,7 @@ def test_openai_handler_explicit_fail_open_override(monkeypatch: Any) -> None:
     monkeypatch.setattr(openai_provider, "get_config", lambda: DummyConfig())
     monkeypatch.setitem(sys.modules, "requests", dummy_requests)
 
-    result = openai_provider.openai_handler(
-        {"content": "test content", "fail_closed": False, "max_retries": 0}
-    )
+    result = openai_provider.openai_handler({"content": "test content", "fail_closed": False, "max_retries": 0})
     assert result["success"] is True
     assert result["degraded"] is True
     assert result["fail_closed"] is False
@@ -150,9 +148,7 @@ def test_check_openai_safety_retries_transient_then_succeeds(monkeypatch: Any) -
     monkeypatch.setattr(openai_provider, "get_config", lambda: DummyConfig())
     monkeypatch.setitem(sys.modules, "requests", dummy_requests)
 
-    result = openai_provider.check_openai_safety_detailed(
-        "Test content", max_retries=1, retry_base_seconds=0
-    )
+    result = openai_provider.check_openai_safety_detailed("Test content", max_retries=1, retry_base_seconds=0)
     assert result.degraded is False
     assert result.retries_attempted == 1
     assert len(result.violations) == 1

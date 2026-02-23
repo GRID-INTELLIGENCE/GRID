@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "contract_id": "grid-post-11pm-2026-02-23",
+  "version": "1.0",
+  "created": "2026-02-23",
+  "scheduled_after": "23:00",
+  "source_report": "GRID_COMPREHENSIVE_REPORT_2026-02-23.md",
+  "summary": {
+    "good_to_preserve": 8,
+    "bad_to_fix_immediately": 7,
+    "ok_to_improve": 6
+  },
+  "actions": [
+    {
+      "id": "commit-working-tree",
+      "priority": "critical",
+      "description": "Commit or stash 127 modified files to avoid loss",
+      "precondition": "No active debug session",
+      "command": "git status"
+    },
+    {
+      "id": "fix-test-failures-api",
+      "priority": "high",
+      "description": "Fix failures in tests/api (Stripe, streaming, security governance)",
+      "files": [
+        "tests/api/test_payment_stripe_integration.py",
+        "tests/api/test_streaming_security.py",
+        "tests/api/test_stripe_connect_demo.py",
+        "tests/api/test_security_governance.py"
+      ]
+    },
+    {
+      "id": "fix-test-errors-setup",
+      "priority": "high",
+      "description": "Fix setup/teardown errors in test_repositories, test_rag_evolution, test_navigation_intelligence",
+      "files": [
+        "tests/integration/test_repositories.py",
+        "tests/integration/test_rag_evolution.py",
+        "tests/integration/test_navigation_intelligence.py"
+      ]
+    },
+    {
+      "id": "frontend-ts-fixes",
+      "priority": "medium",
+      "description": "Fix TS2307 (@/lib/utils) and TS7006 (implicit any) in frontend",
+      "paths": [
+        "frontend/tsconfig.json",
+        "frontend/src"
+      ]
+    },
+    {
+      "id": "normalize-crlf",
+      "priority": "low",
+      "description": "Normalize line endings: git add --renormalize",
+      "precondition": "After commit",
+      "command": "git add --renormalize ."
+    },
+    {
+      "id": "update-test-report",
+      "priority": "low",
+      "description": "Re-run pytest, update comprehensive_test_report.md",
+      "precondition": "After test fixes",
+      "command": "uv run pytest tests/ -q -o addopts= --tb=no 2>&1 | tee comprehensive_test_report.md"
+    }
+  ],
+  "preserve": [
+    "uv sync --frozen --group test in CI",
+    "In-memory SQLite for safety and mothership tests",
+    "setup-uv@v7.3.0 and version 0.10.4",
+    "Lazy conftest imports",
+    "grid-safety local path override"
+  ],
+  "skip_if": [
+    "Windows build (use WSL for sdist)",
+    "Ollama-dependent checks (external service)"
+  ],
+  "context": {
+    "git_changes_4h": "9fb0e73 chore(vscode), b7297b5 fix(ci) Python 3.13, Cascade snapshots",
+    "working_tree": "127 modified, 4 untracked",
+    "safety_tests": "251 passed, 2 skipped",
+    "full_suite": "27 files with failures, 7 with errors"
+  }
+}

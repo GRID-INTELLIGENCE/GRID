@@ -169,7 +169,11 @@ class DependencyValidator:
                         func = decorator.func
                         if isinstance(func, ast.Name) and func.id == "depends_on":
                             # Parse keyword arguments
-                            deps.extend(kw.value.value for kw in decorator.keywords if kw.arg == "skill_id" and isinstance(kw.value, ast.Constant))
+                            deps.extend(
+                                kw.value.value
+                                for kw in decorator.keywords
+                                if kw.arg == "skill_id" and isinstance(kw.value, ast.Constant)
+                            )
                             # Parse positional arguments
                             deps.extend(arg.value for arg in decorator.args if isinstance(arg, ast.Constant))
 

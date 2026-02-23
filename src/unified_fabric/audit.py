@@ -220,6 +220,7 @@ class DistributedAuditLogger:
 
         try:
             import aiofiles
+
             async with aiofiles.open(log_file, "a", encoding="utf-8") as f:
                 for entry in entries:
                     await f.write(entry.to_json() + "\n")
@@ -255,6 +256,7 @@ class DistributedAuditLogger:
 
         try:
             import aiofiles
+
             async with aiofiles.open(log_file, encoding="utf-8") as f:
                 async for line in f:
                     try:

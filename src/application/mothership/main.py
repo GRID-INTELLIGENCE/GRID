@@ -142,6 +142,7 @@ async def mothership_error_handler(request: Request, exc: Exception) -> JSONResp
 async def http_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     """Handle standard HTTP exceptions."""
     exc = cast(HTTPException, exc)
+    headers = dict(exc.headers) if exc.headers else {}
     return JSONResponse(
         status_code=exc.status_code,
         content=ErrorResponse(
@@ -154,6 +155,7 @@ async def http_exception_handler(request: Request, exc: Exception) -> JSONRespon
             request_id=request.headers.get("X-Request-ID"),
             timestamp=datetime.now(UTC).isoformat(),
         ).model_dump(),
+        headers=headers,
     )
 
 

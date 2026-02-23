@@ -55,10 +55,9 @@ def test_safe_reload_integrity():
         manager._logger = mock_logger
 
         # Mock sys.modules keys
-        sys_keys = {"a", "b", "c"}
         import sys
 
-        original_keys = sys.modules.keys()
+        sys.modules.keys()
 
         # Instead of mocking globally, we just test the logic of _verify_module_cleanup
         manager._verify_module_cleanup("test", before)
@@ -70,7 +69,6 @@ def test_safe_reload_integrity():
 def test_verify_module_cleanup_logic():
     """Unit test for the cleanup verification logic itself."""
     manager = HotReloadManager()
-    before = {"sys", "os", "importlib"}
 
     # We need to simulate sys.modules.keys()
     # Since we can't mock sys.modules.keys() effectively,

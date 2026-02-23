@@ -9,8 +9,9 @@ Covers:
 - Stripe billing integration
 """
 
-import pytest
 from unittest.mock import patch
+
+import pytest
 
 from application.resonance.cost_optimizer import (
     BillingMeterEvent,

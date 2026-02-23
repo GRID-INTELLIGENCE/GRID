@@ -103,13 +103,13 @@ def get_policy(reload: bool = False) -> dict[str, Any]:
 def is_network_allowed(reload: bool = False) -> bool:
     """True if runtime may perform outbound network calls (policy-driven)."""
     p = load_policy(reload=reload)
-    return p.get("network", {}).get("allowed", True)
+    return bool(p.get("network", {}).get("allowed", True))
 
 
 def is_external_api_allowed(reload: bool = False) -> bool:
     """True if runtime may call external AI providers (OpenAI, Anthropic, etc.)."""
     p = load_policy(reload=reload)
-    return p.get("external_api", {}).get("allowed", True)
+    return bool(p.get("external_api", {}).get("allowed", True))
 
 
 def is_tool_allowed(tool_name: str, program_id: str | None = None, reload: bool = False) -> bool:

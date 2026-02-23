@@ -46,8 +46,9 @@ async def test_event_prioritization():
 
     # Process 3 events
     # Worker would normally run in background, but we can manually pull from queue
+    # Queue stores (priority, count, event) - see DatabricksBridge.log_event
     for _ in range(3):
-        priority, event = await bridge.queue.get()
+        priority, count, event = await bridge.queue.get()
         await bridge._sync_to_databricks(event)
 
     # Order should be HIGH, MEDIUM, LOW because higher impact = lower priority value
@@ -64,7 +65,7 @@ async def test_log_event_queuing(bridge):
 
     # Check queue
     assert bridge.queue.qsize() == 1
-    priority, queued_event = await bridge.queue.get()
+    priority, count, queued_event = await bridge.queue.get()
     assert queued_event["type"] == "TEST_EVENT"
     assert queued_event["data"] == data
     assert "timestamp" in queued_event
@@ -121,12 +122,13 @@ async def test_check_remote_tuning_no_network(bridge):
         assert True
 
 
-def test_tuning_inbox(bridge):
+@pytest.mark.asyncio
+async def test_tuning_inbox(bridge):
     tuning_data = {"attack": 0.9}
     with open(bridge.tuning_path, "w") as f:
         json.dump(tuning_data, f)
 
-    result = bridge.get_pending_tuning()
+    result = await bridge.get_pending_tuning()
     assert result == tuning_data
 
     bridge.clear_tuning()

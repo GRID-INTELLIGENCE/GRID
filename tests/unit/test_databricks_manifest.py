@@ -87,7 +87,7 @@ def test_fetch_all_uses_parameters(mock_connection):
         # Mock fetch results
         mock_cursor.fetchall.return_value = [("test-repo", "/path/file.py", "abc123", 1024, 12345, 5)]
 
-        result = tracker.fetch_all()
+        tracker.fetch_all()
 
         # Verify parameterized call
         mock_cursor.execute.assert_called()
@@ -109,7 +109,7 @@ def test_delete_paths_uses_parameters(mock_connection):
             "'; DROP TABLE manifest; --",
         ]
 
-        deleted = tracker.delete_paths(paths_to_delete)
+        tracker.delete_paths(paths_to_delete)
 
         # Verify parameterized call
         mock_cursor.execute.assert_called()
@@ -152,13 +152,13 @@ def test_upsert_states_uses_parameters(mock_connection):
             ),
         ]
 
-        upserted = tracker.upsert_states(states)
+        tracker.upsert_states(states)
 
         # Verify parameterized call
         mock_cursor.execute.assert_called()
         call_args = mock_cursor.execute.call_args
         sql = call_args[0][0]
-        params = call_args[0][1]
+        call_args[0][1]
 
         # SQL should use parameter placeholders
         assert ":repo_0" in sql

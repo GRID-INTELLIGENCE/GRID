@@ -28,7 +28,11 @@ class OllamaEmbedding(EmbeddingProvider):
         """Get embeddings using Ollama (sync version)."""
         try:
             result = subprocess.run(  # noqa: S603 subprocess call is intentional
-                ["ollama", "run", self.model, text], capture_output=True, text=True, check=True, timeout=30  # noqa: S607 partial path is intentional
+                ["ollama", "run", self.model, text],
+                capture_output=True,
+                text=True,
+                check=True,
+                timeout=30,  # noqa: S607 partial path is intentional
             )
             # Parse dense vector from output
             vector = json.loads(result.stdout)
@@ -36,9 +40,7 @@ class OllamaEmbedding(EmbeddingProvider):
             return {str(i): v for i, v in enumerate(vector) if abs(v) > 0.01}
         except Exception as e:
             logger.error(f"Ollama embedding failed: {e}")
-            raise EmbeddingProviderError(
-                f"Failed to generate embedding using Ollama model {self.model}: {e}"
-            ) from e
+            raise EmbeddingProviderError(f"Failed to generate embedding using Ollama model {self.model}: {e}") from e
 
     async def _async_subprocess_embed(self, text: str) -> dict[str, float]:
         """Get embeddings using Ollama via async subprocess."""
@@ -221,14 +223,10 @@ class OpenAIEmbedding(EmbeddingProvider):
         try:
             from openai import OpenAI  # type: ignore[import-untyped]
         except ImportError as e:
-            raise EmbeddingProviderError(
-                "OpenAI library not installed. Install with: uv add openai"
-            ) from e
+            raise EmbeddingProviderError("OpenAI library not installed. Install with: uv add openai") from e
 
         if not self.api_key:
-            raise EmbeddingProviderError(
-                "OpenAI API key not provided. Set OPENAI_API_KEY environment variable."
-            )
+            raise EmbeddingProviderError("OpenAI API key not provided. Set OPENAI_API_KEY environment variable.")
 
         try:
             client = OpenAI(api_key=self.api_key)
@@ -238,9 +236,7 @@ class OpenAIEmbedding(EmbeddingProvider):
             return {str(i): v for i, v in enumerate(vector) if abs(v) > 0.01}
         except Exception as e:
             logger.error(f"OpenAI embedding failed: {e}")
-            raise EmbeddingProviderError(
-                f"Failed to generate embedding using OpenAI model {self.model}: {e}"
-            ) from e
+            raise EmbeddingProviderError(f"Failed to generate embedding using OpenAI model {self.model}: {e}") from e
 
     def embed_batch(self, texts: list[str]) -> list[dict[str, float]]:
         """Get embeddings for multiple texts."""

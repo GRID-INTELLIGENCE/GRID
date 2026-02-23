@@ -2,7 +2,7 @@
 JWT Authentication Utilities.
 
 Production-grade JWT token generation, validation, and management.
-Uses python-jose for secure token handling.
+Uses PyJWT for secure token handling.
 """
 
 from __future__ import annotations
@@ -12,7 +12,8 @@ import os
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
-from jose import JWTError, jwt  # type: ignore[import-untyped]
+import jwt
+from jwt.exceptions import InvalidTokenError as JWTError
 from pydantic import BaseModel, Field
 
 from .secret_validation import SecretStrength, SecretValidationError, generate_secure_secret, validate_secret_strength
@@ -363,7 +364,7 @@ class JWTManager:
             Decoded payload dictionary
         """
         try:
-            return jwt.get_unverified_claims(token)
+            return jwt.decode(token, algorithms=[self.algorithm], options={"verify_signature": False})
         except Exception as e:
             logger.warning("Failed to decode token: %s", str(e))
             return {}

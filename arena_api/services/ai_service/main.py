@@ -14,7 +14,7 @@ import asyncio
 import logging
 import os
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 import uvicorn
@@ -106,7 +106,7 @@ class ArenaAIService:
             return {
                 "status": "healthy",
                 "service": self.service_name,
-                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
                 "version": "1.0.0",
             }
 
@@ -150,7 +150,7 @@ class ArenaAIService:
                     tokens_used=len(generated_text.split()),
                     safety_score=output_safety.get("score", 0.8),
                     processing_time=round(processing_time, 3),
-                    timestamp=datetime.now(timezone.utc),
+                    timestamp=datetime.now(UTC),
                 )
 
                 return response

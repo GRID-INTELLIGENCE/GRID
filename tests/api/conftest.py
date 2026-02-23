@@ -7,14 +7,14 @@ Provides TestClient, WebSocket client, and service mocks for testing.
 from __future__ import annotations
 
 import asyncio
+from typing import TYPE_CHECKING
 
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from application.resonance.api.dependencies import reset_resonance_service
-from application.resonance.api.router import router
-from application.resonance.services.resonance_service import ResonanceService
+if TYPE_CHECKING:
+    from application.resonance.services.resonance_service import ResonanceService
 
 
 @pytest.fixture
@@ -25,6 +25,8 @@ def app() -> FastAPI:
     Returns:
         FastAPI application instance
     """
+    from application.resonance.api.router import router
+
     app = FastAPI()
     app.include_router(router, prefix="/api/v1/resonance", tags=["resonance"])
     return app
@@ -52,9 +54,9 @@ def service() -> ResonanceService:
     Returns:
         ResonanceService instance
     """
-    reset_resonance_service()
-    from application.resonance.api.dependencies import get_resonance_service
+    from application.resonance.api.dependencies import get_resonance_service, reset_resonance_service
 
+    reset_resonance_service()
     return get_resonance_service()
 
 
@@ -66,7 +68,12 @@ def cleanup_service():
     This ensures tests don't interfere with each other.
     """
     yield
-    reset_resonance_service()
+    try:
+        from application.resonance.api.dependencies import reset_resonance_service
+
+        reset_resonance_service()
+    except ImportError:
+        pass
 
 
 @pytest.fixture

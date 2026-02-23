@@ -73,9 +73,7 @@ async def test_deterministic_heat_cooldown():
     now = time.time()
 
     # Heat_Generated = (SensitiveDetections * 10) + (density * 50). 2 detections = 20 heat > 15.
-    await engine.evaluate_interaction(
-        "Bad input", "Bad response", 1.0, sensitive_detections=2, current_time=now
-    )
+    await engine.evaluate_interaction("Bad input", "Bad response", 1.0, sensitive_detections=2, current_time=now)
 
     assert engine.current_heat >= 15.0
 

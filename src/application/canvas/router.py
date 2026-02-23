@@ -128,9 +128,9 @@ class UnifiedRouter:
 
                 # Look for specific files that match
                 try:
-                    py_files = await asyncio.to_thread(lambda dp=dir_path: [
-                        fp for fp in dp.rglob("*.py") if fp.is_file()
-                    ])
+                    py_files = await asyncio.to_thread(
+                        lambda dp=dir_path: [fp for fp in dp.rglob("*.py") if fp.is_file()]
+                    )
                     for file_path in py_files:
                         if True:
                             file_similarity = self._calculate_file_similarity(file_path, query_words)

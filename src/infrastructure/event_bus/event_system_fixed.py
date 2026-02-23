@@ -165,6 +165,7 @@ class EventStore:
         """Persist event to disk."""
         try:
             import aiofiles
+
             filename = f"{self.storage_path}/events/{event.id}.json"
             async with aiofiles.open(filename, "w") as f:
                 await f.write(json.dumps(event.to_dict(), indent=2))
@@ -175,6 +176,7 @@ class EventStore:
         """Persist result to disk."""
         try:
             import aiofiles
+
             filename = f"{self.storage_path}/results/{result.event_id}.json"
             async with aiofiles.open(filename, "w") as f:
                 await f.write(json.dumps(asdict(result), indent=2))
@@ -507,7 +509,7 @@ class EventBus:
         # Count active subscribers (exclude dead refs)
         active_subscribers = 0
         for subs in self._subscribers.values():
-            for (weak_ref, _) in subs.values():
+            for weak_ref, _ in subs.values():
                 callback = weak_ref() if isinstance(weak_ref, ref) else weak_ref()
                 if callback is not None:
                     active_subscribers += 1

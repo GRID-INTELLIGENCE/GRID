@@ -637,5 +637,3 @@ async def trace_async_function(func: Callable[..., Any]) -> Callable[..., Any]:
             tracer.stop()
 
     return wrapper
-
-

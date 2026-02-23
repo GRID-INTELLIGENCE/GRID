@@ -117,11 +117,11 @@ class DatabricksJobsManager:
             List of job information
         """
         jobs = [
-                {
-                    "job_id": job.job_id,
-                    "settings": job.settings.name,
-                    "created_time": job.created_time,
-                }
+            {
+                "job_id": job.job_id,
+                "settings": job.settings.name,
+                "created_time": job.created_time,
+            }
             for job in self.client.workspace.jobs.list()
         ]
         return jobs

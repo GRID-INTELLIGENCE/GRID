@@ -112,7 +112,7 @@ class TestEnhancedCognitiveEngine:
         assert len(patterns) > 0, "Should detect at least some patterns"
 
         # Verify pattern structure
-        for _pattern_name, detection in patterns.items():
+        for detection in patterns.values():
             assert hasattr(detection, "detected")
             assert hasattr(detection, "confidence")
             assert hasattr(detection, "features")

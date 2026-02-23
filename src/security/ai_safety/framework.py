@@ -206,6 +206,7 @@ class ContentModerator:
         """Load harmful content detection tokens with confidence tiers."""
         try:
             from .patterns import HARMFUL_PATTERNS
+
             return HARMFUL_PATTERNS
         except ImportError:
             logger.warning("Safety patterns module not available")

@@ -7,6 +7,7 @@ import pytest
 from src.tools.rag.config import RAGConfig
 from src.tools.rag.conversation import ConversationMemory, ConversationTurn
 from src.tools.rag.conversational_rag import ConversationalRAGEngine, create_conversational_rag_engine
+from src.tools.rag.utils import check_ollama_connection
 
 
 @pytest.fixture
@@ -95,6 +96,10 @@ class TestConversationMemory:
         assert conversation_memory.get_session("session2") is not None
 
 
+@pytest.mark.skipif(
+    not check_ollama_connection(),
+    reason="Ollama not running at http://localhost:11434",
+)
 class TestConversationalRAGEngine:
     """Test conversational RAG engine functionality."""
 

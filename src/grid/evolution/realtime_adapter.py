@@ -197,7 +197,11 @@ class DynamicWeightNetwork:
         if len(self.weight_history) < 2:
             return None
 
-        values = [snapshot[layer][weight_name] for snapshot in self.weight_history if layer in snapshot and weight_name in snapshot[layer]]
+        values = [
+            snapshot[layer][weight_name]
+            for snapshot in self.weight_history
+            if layer in snapshot and weight_name in snapshot[layer]
+        ]
 
         if len(values) < 2:
             return None

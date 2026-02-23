@@ -1065,6 +1065,7 @@ async def comprehensive_index(
     Returns:
         IndexingStats with complete indexing metrics
     """
+
     def _resolve_and_check(rp: str) -> Path:
         p = Path(rp).resolve()
         if not p.exists():

@@ -1217,8 +1217,6 @@ class TestStreamingSecurityIntegration:
 
             return generator()
 
-            return generator()
-
         # Override Settings dependency
         from application.mothership.dependencies import get_config
 

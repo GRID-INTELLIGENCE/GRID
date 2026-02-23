@@ -295,13 +295,20 @@ class TestStripeGateway:
                 class SignatureVerificationError(Exception):
                     pass
 
+            class Subscription:
+                @staticmethod
+                def create(**kwargs):
+                    items = kwargs.get("items") or []
+                    price = items[0].get("price") if items else None
+                    if not price:
+                        raise _FakeStripe.error.StripeError("Invalid price ID")
+                    return SimpleNamespace(id="sub_123", status="active", current_period_start=0, current_period_end=0)
+
         monkeypatch.setattr(stripe_gateway_module, "stripe", _FakeStripe())
+        monkeypatch.setenv("STRIPE_PRICE_STARTER", "")
         gateway = stripe_gateway_module.StripeGateway(
             secret_key="sk_test_123",
             webhook_secret="whsec_123",
-            price_starter="",
-            price_professional="",
-            price_enterprise="",
         )
 
         with pytest.raises(IntegrationError):

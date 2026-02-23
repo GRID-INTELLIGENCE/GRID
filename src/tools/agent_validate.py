@@ -65,7 +65,11 @@ def validate_agent_output(output_json: dict[str, Any]) -> dict[str, Any]:
             errors.append(f"Invalid file action: {file.get('action')}")
 
     # Validate test entries
-    errors.extend(f"Invalid test entry: {test}" for test in output_json.get("tests", []) if "path" not in test or "content" not in test)
+    errors.extend(
+        f"Invalid test entry: {test}"
+        for test in output_json.get("tests", [])
+        if "path" not in test or "content" not in test
+    )
 
     return {"valid": len(errors) == 0, "errors": errors}
 

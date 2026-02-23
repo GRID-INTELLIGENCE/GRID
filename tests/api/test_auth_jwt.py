@@ -10,11 +10,11 @@ from __future__ import annotations
 import os
 from collections.abc import Generator
 from datetime import UTC, datetime, timedelta
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 from fastapi.testclient import TestClient
-from jose import JWTError
+from jwt.exceptions import InvalidTokenError as JWTError
 
 from application.mothership.main import create_app
 from application.mothership.security.jwt import JWTManager, TokenPair, TokenPayload, reset_jwt_manager
@@ -37,7 +37,7 @@ def jwt_manager() -> JWTManager:
 
 
 @pytest.fixture
-def client() -> Generator[TestClient, None, None]:
+def client() -> Generator[TestClient]:
     """Create a test client with clean state and trigger lifespan."""
     reset_jwt_manager()
     # Reset rate limit store for test isolation
@@ -466,11 +466,9 @@ class TestSecurityHardening:
 
     def test_rate_limiting_on_login(self) -> None:
         """Test rate limiting on login endpoint."""
-        from unittest.mock import patch
-        from safety.api.rate_limiter import RateLimitResult
-
         # Create a client with rate limiting enabled
         from application.mothership.config import reload_settings
+        from safety.api.rate_limiter import RateLimitResult
 
         os.environ["MOTHERSHIP_RATE_LIMIT_ENABLED"] = "true"
         os.environ["MOTHERSHIP_SECRET_KEY"] = "test-secret-key-at-least-32-characters-long"
@@ -486,6 +484,7 @@ class TestSecurityHardening:
                 if mock_allow.counter > 5:
                     return RateLimitResult(allowed=False, remaining=0, reset_seconds=60)
                 return RateLimitResult(allowed=True, remaining=10, reset_seconds=0)
+
             mock_allow.counter = 0
 
             # Patch where it is USED: safety.api.middleware.allow_request

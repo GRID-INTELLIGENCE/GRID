@@ -295,7 +295,9 @@ class EnhancedAccountabilityEnforcer:
             # Add explicit permissions
             effective_permissions.update(user_permissions)
 
-            missing_permissions = [permission for permission in required_permissions if permission not in effective_permissions]
+            missing_permissions = [
+                permission for permission in required_permissions if permission not in effective_permissions
+            ]
 
             if missing_permissions:
                 violations.append(

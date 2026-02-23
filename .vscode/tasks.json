@@ -3,20 +3,29 @@
   "tasks": [
     {
       "label": "Daily: Verify the Wall",
-      "detail": "Run all tests + lint before starting any new work",
+      "detail": "Run all tests + lint before starting any new work (Session Start Protocol)",
       "type": "shell",
-      "command": "uv run python -m pytest -q --tb=short && uv run ruff check work/ safety/ security/ boundaries/",
-      "group": { "kind": "build", "isDefault": true },
-      "presentation": { "reveal": "always", "panel": "shared" },
+      "command": "uv run pytest -q --tb=short && uv run ruff check src/ safety/ security/ boundaries/",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
       "problemMatcher": []
     },
     {
       "label": "Debug: Verify Wall + Health Checks",
       "detail": "Run The Wall + integration health checks",
       "type": "shell",
-      "command": "uv run python -m pytest -q --tb=short && uv run ruff check work/ safety/ security/ boundaries/ && uv run python scripts/debug_health_check.py",
+      "command": "uv run pytest -q --tb=short && uv run ruff check src/ safety/ security/ boundaries/ && uv run python scripts/debug_health_check.py",
       "group": "test",
-      "presentation": { "reveal": "always", "panel": "shared" },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
       "problemMatcher": []
     },
     {
@@ -39,16 +48,19 @@
       "label": "Test: Safety + Boundaries",
       "detail": "Fast safety/boundaries test suite",
       "type": "shell",
-      "command": "uv run python -m pytest safety/tests boundaries/tests -q --tb=short",
+      "command": "uv run pytest safety/tests boundaries/tests -q --tb=short",
       "group": "test",
-      "presentation": { "reveal": "always", "panel": "shared" },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
       "problemMatcher": []
     },
     {
       "label": "Test: GRID Core",
-      "detail": "Run work/GRID tests only",
+      "detail": "Run src/grid tests only",
       "type": "shell",
-      "command": "uv run python -m pytest work/GRID/tests -q --tb=short",
+      "command": "uv run pytest tests/ -q --tb=short -k \"not integration\"",
       "group": "test",
       "problemMatcher": []
     },
@@ -56,78 +68,152 @@
       "label": "Test: Current File",
       "detail": "Run pytest on the file currently open in the editor",
       "type": "shell",
-      "command": "uv run python -m pytest ${file} -q --tb=short -v",
+      "command": "uv run pytest ${file} -q --tb=short -v",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Test: Integration",
+      "detail": "Run integration tests only",
+      "type": "shell",
+      "command": "uv run pytest tests/ -q --tb=short -k \"integration\"",
       "group": "test",
       "problemMatcher": []
     },
     {
       "label": "Lint: Ruff Check + Fix",
+      "detail": "Run ruff lint with auto-fix on all Python source directories",
       "type": "shell",
-      "command": "uv run ruff check work/ safety/ security/ boundaries/ --fix",
+      "command": "uv run ruff check src/ safety/ security/ boundaries/ scripts/ --fix",
       "group": "build",
       "problemMatcher": []
     },
     {
       "label": "Format: Ruff",
+      "detail": "Format all Python code with ruff (120 char line length)",
       "type": "shell",
-      "command": "uv run ruff format work/ safety/ security/ boundaries/ scripts/ && uv run ruff check --fix work/ safety/ security/ boundaries/",
+      "command": "uv run ruff format src/ safety/ security/ boundaries/ scripts/ && uv run ruff check --fix src/ safety/ security/ boundaries/ scripts/",
       "problemMatcher": []
     },
     {
       "label": "Typecheck: mypy",
+      "detail": "Run mypy type checking on src/grid",
       "type": "shell",
-      "command": "uv run mypy work/GRID/src/grid --no-error-summary",
+      "command": "uv run mypy src/grid --no-error-summary",
       "problemMatcher": []
     },
     {
       "label": "Weekly: Security Audit",
       "detail": "Dependency audit + bandit scan + slowest tests",
       "type": "shell",
-      "command": "echo === Dependency Audit === && uv run pip-audit --progress-spinner off && echo === Bandit Scan === && uv run bandit -r safety/ security/ boundaries/ -q && echo === Slowest Tests === && uv run python -m pytest -q --tb=short --durations=10",
-      "presentation": { "reveal": "always", "panel": "dedicated" },
+      "command": "echo === Dependency Audit === && uv run pip-audit --progress-spinner off && echo === Bandit Scan === && uv run bandit -r safety/ security/ boundaries/ src/ -q && echo === Slowest Tests === && uv run pytest -q --tb=short --durations=10",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
       "problemMatcher": []
     },
     {
       "label": "Weekly: Performance Budget",
       "detail": "Show 10 slowest tests (budget: 30s total)",
       "type": "shell",
-      "command": "uv run python -m pytest -q --tb=short --durations=10",
+      "command": "uv run pytest -q --tb=short --durations=10",
       "problemMatcher": []
     },
     {
       "label": "Guard: Security Invariants",
       "detail": "Scan for eval/exec/pickle in production code",
       "type": "shell",
-      "command": "rg -n \"eval\\(|exec\\(|pickle\\.\" work/ safety/ security/ boundaries/ --glob \"*.py\" --glob \"!*test*\" --glob \"!*archive*\" && echo VIOLATIONS FOUND || echo CLEAN: No eval/exec/pickle found",
+      "command": "rg -n \"eval\\(|exec\\(|pickle\\.\" src/ safety/ security/ boundaries/ --glob \"*.py\" --glob \"!*test*\" --glob \"!*archive*\" && echo VIOLATIONS FOUND || echo CLEAN: No eval/exec/pickle found",
+      "problemMatcher": []
+    },
+    {
+      "label": "Backend: Mothership Dev Server",
+      "detail": "Start FastAPI Mothership server on port 8080 with reload",
+      "type": "shell",
+      "command": "uv run uvicorn application.mothership.main:app --reload --port 8080",
+      "options": {
+        "cwd": "${workspaceFolder}/src"
+      },
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
       "problemMatcher": []
     },
     {
       "label": "Frontend: Dev Server",
+      "detail": "Start Vite + Electron development server",
       "type": "shell",
       "command": "npm run dev",
-      "options": { "cwd": "${workspaceFolder}/frontend" },
+      "options": {
+        "cwd": "${workspaceFolder}/frontend"
+      },
       "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
       "problemMatcher": []
     },
     {
       "label": "Frontend: Lint + Typecheck",
+      "detail": "Run ESLint and TypeScript strict mode check",
       "type": "shell",
       "command": "npm run lint",
-      "options": { "cwd": "${workspaceFolder}/frontend" },
+      "options": {
+        "cwd": "${workspaceFolder}/frontend"
+      },
       "problemMatcher": []
     },
     {
       "label": "Frontend: Test (Vitest)",
+      "detail": "Run Vitest unit tests",
       "type": "shell",
       "command": "npm test",
-      "options": { "cwd": "${workspaceFolder}/frontend" },
+      "options": {
+        "cwd": "${workspaceFolder}/frontend"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Frontend: Format",
+      "detail": "Run Prettier on frontend code",
+      "type": "shell",
+      "command": "npm run format",
+      "options": {
+        "cwd": "${workspaceFolder}/frontend"
+      },
       "problemMatcher": []
     },
     {
       "label": "Git: Status + Diff Summary",
+      "detail": "Show git status and diff statistics",
       "type": "shell",
       "command": "git status --short && echo --- && git diff --stat",
       "problemMatcher": []
+    },
+    {
+      "label": "Database: Alembic Upgrade",
+      "detail": "Run Alembic migrations to latest revision",
+      "type": "shell",
+      "command": "uv run alembic upgrade head",
+      "problemMatcher": []
+    },
+    {
+      "label": "Database: Alembic Revision",
+      "detail": "Create new Alembic migration revision",
+      "type": "shell",
+      "command": "uv run alembic revision --autogenerate -m \"${input:migrationMessage}\"",
+      "problemMatcher": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "migrationMessage",
+      "type": "promptString",
+      "description": "Migration message for Alembic revision"
     }
   ]
 }

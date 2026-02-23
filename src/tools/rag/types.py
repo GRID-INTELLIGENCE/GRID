@@ -1,5 +1,6 @@
 """Type definitions and protocols for RAG components."""
 
+import uuid
 from typing import Any, Protocol
 
 
@@ -9,7 +10,6 @@ class EmbeddingProviderError(RuntimeError):
 
 class LLMProviderError(RuntimeError):
     """Raised when an LLM provider fails to generate a response."""
-
 
 
 class EmbeddingProvider(Protocol):
@@ -49,14 +49,16 @@ class Document:
 
     def __init__(
         self,
-        id: str,
+        id: str | None = None,
         text: str | None = None,
         metadata: dict[str, Any] | None = None,
         content: str | None = None,
     ):
-        self.id = id
+        self.id = id if id is not None else str(uuid.uuid4())
         self.text = text or content or ""
-        self.metadata = metadata or {}
+        if metadata is None:
+            raise ValueError("Metadata cannot be None")
+        self.metadata = metadata
 
     @property
     def content(self) -> str:

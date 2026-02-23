@@ -318,7 +318,9 @@ class EmergenceLayer:
         # Extract feature keys
         features: list[str] = []
 
-        features.extend(f"{key}:{data[key]}" for key in ("action", "type", "intent", "topic") if key in data and data[key])
+        features.extend(
+            f"{key}:{data[key]}" for key in ("action", "type", "intent", "topic") if key in data and data[key]
+        )
 
         # Update pairwise co-occurrence
         for i, f1 in enumerate(features):

@@ -272,7 +272,9 @@ class MultiGitMCPServer:
                     "path": str(repo.path),
                     "description": repo.description or "",
                     "is_active": name == self.active_repo,
-                    "branch": await self._get_current_branch(repo) if await asyncio.to_thread(repo.path.exists) else "N/A",
+                    "branch": await self._get_current_branch(repo)
+                    if await asyncio.to_thread(repo.path.exists)
+                    else "N/A",
                 }
             )
 

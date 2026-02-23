@@ -24,7 +24,7 @@ import logging
 import os
 from collections.abc import AsyncIterator, Awaitable, Callable
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from functools import wraps
 from typing import TYPE_CHECKING, Any, TypeVar
 
@@ -59,7 +59,7 @@ def _is_production_environment() -> bool:
     return env.strip().lower() in {"production", "prod"}
 
 
-class GeminiModel(str, Enum):
+class GeminiModel(StrEnum):
     """Available Gemini models."""
 
     GEMINI_PRO = "gemini-pro"
@@ -367,8 +367,7 @@ class GeminiStudioClient:
         """
         if self._dry_run:
             raise GeminiAuthError(
-                "Gemini API key not configured. "
-                "Set GEMINI_API_KEY environment variable to enable Gemini."
+                "Gemini API key not configured. Set GEMINI_API_KEY environment variable to enable Gemini."
             )
 
         if not self._initialized:
@@ -416,8 +415,7 @@ class GeminiStudioClient:
         """
         if self._dry_run:
             raise GeminiAuthError(
-                "Gemini API key not configured. "
-                "Set GEMINI_API_KEY environment variable to enable Gemini."
+                "Gemini API key not configured. Set GEMINI_API_KEY environment variable to enable Gemini."
             )
 
         if not self._initialized:
@@ -478,8 +476,7 @@ class GeminiStudioClient:
         """
         if self._dry_run:
             raise GeminiAuthError(
-                "Gemini API key not configured. "
-                "Set GEMINI_API_KEY environment variable to enable Gemini."
+                "Gemini API key not configured. Set GEMINI_API_KEY environment variable to enable Gemini."
             )
 
         if not self._initialized:

@@ -140,10 +140,16 @@ class ProductionSecurityManager:
         warnings = []
 
         # Check required environment variables
-        issues.extend(f"Missing required environment variable: {var}" for var in self.config.required_env_vars if not os.getenv(var))
+        issues.extend(
+            f"Missing required environment variable: {var}"
+            for var in self.config.required_env_vars
+            if not os.getenv(var)
+        )
 
         # Check for blocked environment variables
-        issues.extend(f"Blocked environment variable is set: {var}" for var in self.config.blocked_env_vars if os.getenv(var))
+        issues.extend(
+            f"Blocked environment variable is set: {var}" for var in self.config.blocked_env_vars if os.getenv(var)
+        )
 
         # Check secrets management
         if self.config.use_secrets_manager:

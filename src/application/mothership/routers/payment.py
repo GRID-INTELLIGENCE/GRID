@@ -69,10 +69,6 @@ def get_payment_gateway(settings: Settings) -> PaymentGatewayBase:
             secret_key=settings.payment.stripe_secret_key,
             webhook_secret=settings.payment.stripe_webhook_secret,
             publishable_key=settings.payment.stripe_publishable_key,
-            price_starter=settings.payment.stripe_price_starter,
-            price_professional=settings.payment.stripe_price_professional,
-            price_enterprise=settings.payment.stripe_price_enterprise,
-            customer_creation_enabled=settings.payment.stripe_customer_creation_enabled,
         )
     elif gateway_name == "bkash":
         raise HTTPException(

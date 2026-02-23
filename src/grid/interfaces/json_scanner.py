@@ -191,6 +191,8 @@ class JSONScanner:
                     continue
 
                 # Try recursive search
-                results.extend((found_file, self.get_file_metadata(found_file)) for found_file in search_dir.rglob(file_name))
+                results.extend(
+                    (found_file, self.get_file_metadata(found_file)) for found_file in search_dir.rglob(file_name)
+                )
 
         return results

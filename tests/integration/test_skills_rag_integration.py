@@ -96,6 +96,13 @@ class MockRAGEngine:
         if not relevant_docs:
             relevant_docs = self.documents[:2]  # Default fallback
 
+        if not relevant_docs:
+            return {
+                "answer": "No relevant documents found.",
+                "sources": [],
+                "confidence": 0.0,
+            }
+
         return {
             "answer": f"Based on the documents: {relevant_docs[0]['content'][:100]}...",
             "sources": [
@@ -140,12 +147,25 @@ class RAGQuerySkill:
         self.run_count += 1
         query = args.get("query", args.get("input", ""))
 
-        # Run async query
-        loop = asyncio.new_event_loop()
+        # Run async query — handle case where we're already inside an event loop
         try:
-            result = loop.run_until_complete(self.rag_engine.query(query))
-        finally:
-            loop.close()
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            loop = None
+
+        if loop and loop.is_running():
+            # Already in an async context — create a task and extract the result
+            # via a synchronous wrapper using a new thread
+            import concurrent.futures
+
+            with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+                result = pool.submit(asyncio.run, self.rag_engine.query(query)).result()
+        else:
+            new_loop = asyncio.new_event_loop()
+            try:
+                result = new_loop.run_until_complete(self.rag_engine.query(query))
+            finally:
+                new_loop.close()
 
         return {
             "status": "success",
@@ -621,7 +641,7 @@ class TestRealSkillsRAGIntegration:
 
     def test_skills_registry_has_skills(self, skills_registry):
         """Test skills registry discovers skills."""
-        skills = skills_registry.list_skills()
+        skills = skills_registry.list()
         assert isinstance(skills, list)
 
     def test_rag_engine_initialization(self, rag_engine):

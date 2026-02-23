@@ -252,7 +252,7 @@ def export_openapi_spec(app: FastAPI, output_path: str | Path) -> None:
     async def _async_export():
         async with aiofiles.open(output_path, "w", encoding="utf-8") as f:
             await f.write(json.dumps(openapi_schema, indent=2, ensure_ascii=False))
-    
+
     try:
         loop = asyncio.get_event_loop()
         if loop.is_running():

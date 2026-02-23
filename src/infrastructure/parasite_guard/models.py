@@ -46,11 +46,11 @@ class ParasiteContext:
     profiling, tracing, and sanitization.
     """
 
-    id: uuid.UUID
     component: str  # Component ID (e.g., "websocket", "eventbus")
     pattern: str  # Pattern name (e.g., "no_ack", "leak")
     rule: str  # Detector name that fired
     severity: ParasiteSeverity
+    id: uuid.UUID = field(default_factory=uuid.uuid4)
     start_ts: datetime = field(default_factory=lambda: datetime.now(UTC))
     end_ts: datetime | None = None
 

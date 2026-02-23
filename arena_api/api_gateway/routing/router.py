@@ -15,8 +15,8 @@ Key Features:
 
 import asyncio
 import logging
-from datetime import datetime, timezone, timedelta
-from typing import Any, Awaitable, Callable, Optional
+from datetime import UTC, datetime, timedelta
+from typing import Any
 
 import httpx
 
@@ -58,6 +58,7 @@ class DynamicRouter:
             Response from the routed service
         """
         from fastapi.responses import JSONResponse
+
         from application.mothership.api.versioning import get_version_metadata
 
         try:
@@ -182,7 +183,7 @@ class CircuitBreaker:
             self._record_failure(instance_id)
             if self.failure_counts.get(instance_id, 0) >= self.failure_threshold:
                 self.state[instance_id] = "open"
-                self.last_failure_time[instance_id] = datetime.now(timezone.utc)
+                self.last_failure_time[instance_id] = datetime.now(UTC)
 
             raise e
 
@@ -192,7 +193,7 @@ class CircuitBreaker:
         if not last_failure:
             return True
 
-        return (datetime.now(timezone.utc) - last_failure) > timedelta(seconds=self.timeout)
+        return (datetime.now(UTC) - last_failure) > timedelta(seconds=self.timeout)
 
     def _record_failure(self, instance_id: str):
         """Record a service call failure."""
@@ -225,7 +226,7 @@ class CircuitBreaker:
                     "headers": dict(response.headers),
                     "data": response.json() if "application/json" in response.headers.get("content-type", "") else response.text,
                 }
-        except asyncio.TimeoutError:
+        except TimeoutError:
             logger.error(f"Timeout calling service {url}")
             raise Exception(f"Service call timed out: {url}")
         except httpx.RequestError as e:

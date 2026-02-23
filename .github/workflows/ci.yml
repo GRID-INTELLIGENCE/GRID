@@ -10,6 +10,8 @@ on:
     branches: [main, master]
 
 env:
+  UV_PYTHON: "3.13"
+  PYTEST_XDIST_AUTO_NUM_WORKERS: "4"
   PYTHONUNBUFFERED: "1"
   PYTHONDONTWRITEBYTECODE: "1"
   PIP_NO_CACHE_DIR: "1"
@@ -44,13 +46,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v7.3.0
         with:
+          version: "0.10.4"
           python-version: "3.13"
           enable-cache: true
           cache-dependency-glob: "uv.lock"
+      - name: Install Python
+        run: uv python install
       - name: Sync dependencies
         run: uv sync --frozen --group test
+      - name: Verify Python version
+        run: |
+          uv run python --version
+          uv run python -c "import sys; assert sys.version_info >= (3, 13), f'Wrong Python: {sys.version}'"
       - name: Import check
         run: |
           uv run python -c "
@@ -85,11 +94,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v7.3.0
         with:
+          version: "0.10.4"
           python-version: "3.13"
           enable-cache: true
           cache-dependency-glob: "uv.lock"
+      - name: Install Python
+        run: uv python install
       - name: Sync dependencies
         run: uv sync --frozen
       - name: Run ruff
@@ -106,12 +118,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v7.3.0
         with:
+          version: "0.10.4"
           python-version: "3.13"
           enable-cache: true
           cache-dependency-glob: "uv.lock"
+      - name: Install Python
+        run: uv python install
       - name: Sync dependencies
         run: uv sync --frozen --group test
+      - name: Verify Python version
+        run: |
+          uv run python --version
+          uv run python -c "import sys; assert sys.version_info >= (3, 13), f'Wrong Python: {sys.version}'"
       - name: Run tests
         run: uv run pytest tests/unit/ -v --tb=short

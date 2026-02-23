@@ -367,7 +367,7 @@ class TestDefinitiveStep:
             "/api/v1/resonance/definitive",
             json={"query": ""},  # Invalid empty query
         )
-        assert invalid_response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert invalid_response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
         # Then: valid retry
         valid_response = client.post(
@@ -437,11 +437,11 @@ class TestDefinitiveStep:
             "/api/v1/resonance/definitive",
             json={"query": "Test", "max_chars": 19},
         )
-        assert response_below.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert response_below.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
         # Above max
         response_above = client.post(
             "/api/v1/resonance/definitive",
             json={"query": "Test", "max_chars": 2001},
         )
-        assert response_above.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert response_above.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT

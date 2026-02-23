@@ -439,7 +439,9 @@ else:
         try:
             # Check for unauthorized file access
             if not self.config.allow_filesystem:
-                violations.extend(f"Unauthorized file access: {file_path}" for file_path in work_dir.rglob("*") if file_path.is_file())
+                violations.extend(
+                    f"Unauthorized file access: {file_path}" for file_path in work_dir.rglob("*") if file_path.is_file()
+                )
 
             # Check for network access attempts
             # This would require more sophisticated monitoring in production

@@ -884,14 +884,14 @@ class SecurityMonitor:
             for pattern, severity in secret_patterns:
                 matches = re.finditer(pattern, content, re.IGNORECASE)
                 vulnerabilities.extend(
-                        {
-                            "type": "exposed_secret",
-                            "severity": severity,
-                            "file": str(file_path),
-                            "line": content[: match.start()].count("\n") + 1,
-                            "description": "Potential exposed secret in configuration",
-                            "match": match.group()[:50],
-                        }
+                    {
+                        "type": "exposed_secret",
+                        "severity": severity,
+                        "file": str(file_path),
+                        "line": content[: match.start()].count("\n") + 1,
+                        "description": "Potential exposed secret in configuration",
+                        "match": match.group()[:50],
+                    }
                     for match in matches
                 )
 

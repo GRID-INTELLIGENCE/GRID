@@ -657,7 +657,7 @@ class TestEdgeCases:
                 raise RuntimeError("Detector failure")
 
         # Middleware should catch this and continue
-        middleware = ParasiteDetectorMiddleware(
+        ParasiteDetectorMiddleware(
             app=MagicMock(),
             detectors=[FailingDetector()],
         )

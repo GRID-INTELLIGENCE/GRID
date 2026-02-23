@@ -10,7 +10,8 @@ import pytest
 
 # Set test environment variables before any imports
 os.environ.setdefault("REDIS_URL", "redis://localhost:6379")
-os.environ.setdefault("DATABASE_URL", "sqlite+aiosqlite:///test_audit.db")
+# Use in-memory SQLite to avoid file locking when pytest-xdist runs with -n auto
+os.environ.setdefault("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
 os.environ.setdefault("SAFETY_ENV", "test")
 os.environ.setdefault("SAFETY_JWT_SECRET", "test-secret-key-for-unit-tests-only")
 os.environ.setdefault("SAFETY_API_KEYS", "test-key-1:verified,test-key-2:user")

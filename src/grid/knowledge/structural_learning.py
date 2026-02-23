@@ -375,7 +375,7 @@ class HierarchyEvolutionTracker:
 
         # Find root entities (entities with no incoming relationships)
         root_entities = set(entities.keys())
-        for (source_id, target_id) in relationships.keys():
+        for source_id, target_id in relationships.keys():
             if target_id in root_entities:
                 root_entities.remove(target_id)
 
@@ -392,7 +392,7 @@ class HierarchyEvolutionTracker:
 
             for entity_id in levels[current_level].entities:
                 # Find children
-                for (source_id, target_id) in relationships.keys():
+                for source_id, target_id in relationships.keys():
                     if source_id == entity_id and target_id not in processed:
                         next_level_entities.add(target_id)
                         next_level_relationships.add((source_id, target_id))

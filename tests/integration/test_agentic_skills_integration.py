@@ -94,7 +94,7 @@ class MockSkillsRegistry:
     def get_skill(self, name: str) -> MockSkill | None:
         return self.skills.get(name)
 
-    def list_skills(self) -> list[str]:
+    def list(self) -> list[str]:
         return list(self.skills.keys())
 
     def register_skill(self, name: str, skill: MockSkill) -> None:
@@ -183,7 +183,7 @@ class MockAgenticSystem:
 
     def get_available_skills(self) -> list[str]:
         """Get list of available skills."""
-        return self.skills_registry.list_skills()
+        return self.skills_registry.list()
 
 
 # =============================================================================
@@ -206,7 +206,7 @@ class TestAgenticSkillsIntegration:
 
     def test_skills_registry_has_skills(self, skills_registry):
         """Test skills registry contains expected skills."""
-        skills = skills_registry.list_skills()
+        skills = skills_registry.list()
 
         assert len(skills) >= 3
         assert "transform.data" in skills
@@ -232,7 +232,7 @@ class TestAgenticSkillsIntegration:
 
         skills_registry.register_skill("new.skill", new_skill)
 
-        assert "new.skill" in skills_registry.list_skills()
+        assert "new.skill" in skills_registry.list()
         assert skills_registry.get_skill("new.skill") == new_skill
 
     @pytest.mark.asyncio
@@ -433,7 +433,7 @@ class TestRealAgenticSkillsIntegration:
 
     def test_skills_registry_discovers_skills(self, skills_registry):
         """Test skills registry discovers available skills."""
-        skills = skills_registry.list_skills()
+        skills = skills_registry.list()
 
         assert isinstance(skills, list)
         # Should discover built-in skills
@@ -441,7 +441,7 @@ class TestRealAgenticSkillsIntegration:
 
     def test_get_skill_metadata(self, skills_registry):
         """Test getting skill metadata."""
-        skills = skills_registry.list_skills()
+        skills = skills_registry.list()
 
         if len(skills) > 0:
             skill = skills_registry.get_skill(skills[0])
@@ -549,7 +549,7 @@ class TestAgenticSkillsPerformance:
         import time
 
         start = time.time()
-        skills = large_registry.list_skills()
+        skills = large_registry.list()
         elapsed = time.time() - start
 
         assert len(skills) >= 100
@@ -560,7 +560,7 @@ class TestAgenticSkillsPerformance:
         import time
 
         # Get all skills to find one that exists
-        all_skills = large_registry.list_skills()
+        all_skills = large_registry.list()
         if not all_skills:
             return
 

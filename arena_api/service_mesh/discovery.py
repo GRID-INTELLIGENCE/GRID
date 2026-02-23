@@ -18,7 +18,7 @@ import asyncio
 import logging
 import time
 from dataclasses import asdict, dataclass
-from datetime import datetime, timezone, timedelta
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import aiohttp
@@ -128,8 +128,8 @@ class ServiceDiscovery:
                 url=service_data["url"],
                 health_url=service_data["health_url"],
                 metadata=service_data.get("metadata", {}),
-                registered_at=datetime.now(timezone.utc),
-                last_heartbeat=datetime.now(timezone.utc),
+                registered_at=datetime.now(UTC),
+                last_heartbeat=datetime.now(UTC),
                 status="registering",
                 version=service_data.get("version", "1.0.0"),
                 tags=service_data.get("tags", []),
@@ -148,7 +148,7 @@ class ServiceDiscovery:
             self.service_health[instance_id] = ServiceHealth(
                 status="unknown",
                 response_time=0.0,
-                last_check=datetime.now(timezone.utc),
+                last_check=datetime.now(UTC),
                 consecutive_failures=0,
                 total_checks=0,
                 uptime_percentage=0.0,
@@ -270,7 +270,7 @@ class ServiceDiscovery:
             if not instance:
                 return {"success": False, "error": f"Instance not found: {instance_id}"}
 
-            instance.last_heartbeat = datetime.now(timezone.utc)
+            instance.last_heartbeat = datetime.now(UTC)
             instance.status = "healthy"
 
             return {
@@ -290,7 +290,7 @@ class ServiceDiscovery:
             try:
                 await asyncio.sleep(self.heartbeat_interval)
 
-                current_time = datetime.now(timezone.utc)
+                current_time = datetime.now(UTC)
                 stale_threshold = timedelta(seconds=self.heartbeat_interval * 2)
 
                 for service_name, instances in self.services.items():
@@ -349,11 +349,11 @@ class ServiceDiscovery:
                             instance.status = "degraded"
 
                     health_info.response_time = response_time
-                    health_info.last_check = datetime.now(timezone.utc)
+                    health_info.last_check = datetime.now(UTC)
                     health_info.total_checks += 1
 
                     # Calculate uptime percentage
-                    total_time = (datetime.now(timezone.utc) - instance.registered_at).total_seconds()
+                    total_time = (datetime.now(UTC) - instance.registered_at).total_seconds()
                     healthy_time = (
                         total_time
                         * (health_info.total_checks - health_info.consecutive_failures)
@@ -369,7 +369,7 @@ class ServiceDiscovery:
             if health_info:
                 health_info.consecutive_failures += 1
                 health_info.response_time = 0.0
-                health_info.last_check = datetime.now(timezone.utc)
+                health_info.last_check = datetime.now(UTC)
 
                 if health_info.consecutive_failures >= self.max_consecutive_failures:
                     instance.status = "down"
@@ -381,7 +381,7 @@ class ServiceDiscovery:
             try:
                 await asyncio.sleep(300)  # Clean up every 5 minutes
 
-                current_time = datetime.now(timezone.utc)
+                current_time = datetime.now(UTC)
                 cleanup_threshold = timedelta(hours=1)  # Remove instances older than 1 hour
 
                 for service_name, instances in list(self.services.items()):
@@ -421,7 +421,7 @@ class ServiceDiscovery:
         healthy_instances = 0
         unhealthy_instances = 0
 
-        for service_name, instances in self.services.items():
+        for instances in self.services.values():
             for instance in instances:
                 health = self.service_health.get(instance.id)
                 if health and health.status == "healthy":

@@ -98,7 +98,7 @@ class TestMultiProviderSafety:
 
         content = "Harmful content test"
 
-        for name, skill in PROVIDER_SKILLS.items():
+        for skill in PROVIDER_SKILLS.values():
             result = skill.run({"content": content})
             # All should have these fields
             assert "success" in result

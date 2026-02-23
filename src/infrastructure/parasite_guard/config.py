@@ -53,20 +53,21 @@ class ComponentConfig:
         delay = int(os.getenv(f"{env_prefix}_ASYNC_DELAY", "5"))
 
         # Get thresholds (JSON or comma-separated key=value)
-        thresholds = {}
+        thresholds: dict[str, int | float | str] = {}
         thresholds_str = os.getenv(f"{env_prefix}_THRESHOLDS", "")
         if thresholds_str:
             for pair in thresholds_str.split(","):
                 if "=" in pair:
-                    key, value = pair.split("=", 1)
+                    key, raw_value = pair.split("=", 1)
+                    parsed: int | float | str = raw_value
                     try:
-                        value = int(value)
+                        parsed = int(raw_value)
                     except ValueError:
                         try:
-                            value = float(value)
+                            parsed = float(raw_value)
                         except ValueError:
                             pass
-                    thresholds[key] = value
+                    thresholds[key] = parsed
 
         return cls(
             enabled=enabled,

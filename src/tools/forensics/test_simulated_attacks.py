@@ -45,6 +45,7 @@ class TestFilesystemAttacks:
         audit_log_path = _mcp_filesystem / "audit.log"
         if audit_log_path.exists():
             import aiofiles
+
             async with aiofiles.open(audit_log_path, encoding="utf-8") as f:
                 content = await f.read()
                 logs = [json.loads(line.strip()) for line in content.splitlines() if line.strip()]
@@ -72,6 +73,7 @@ class TestFilesystemAttacks:
         audit_log_path = _mcp_filesystem / "audit.log"
         if audit_log_path.exists():
             import aiofiles
+
             async with aiofiles.open(audit_log_path, encoding="utf-8") as f:
                 content = await f.read()
                 logs = [json.loads(line.strip()) for line in content.splitlines() if line.strip()]
@@ -105,6 +107,7 @@ class TestPlaywrightAttacks:
         audit_log_path = _mcp_playwright / "audit.log"
         if audit_log_path.exists():
             import aiofiles
+
             async with aiofiles.open(audit_log_path, encoding="utf-8") as f:
                 content = await f.read()
                 logs = [json.loads(line.strip()) for line in content.splitlines() if line.strip()]
@@ -128,6 +131,7 @@ class TestPlaywrightAttacks:
         audit_log_path = _mcp_playwright / "audit.log"
         if audit_log_path.exists():
             import aiofiles
+
             async with aiofiles.open(audit_log_path, encoding="utf-8") as f:
                 content = await f.read()
                 logs = [json.loads(line.strip()) for line in content.splitlines() if line.strip()]

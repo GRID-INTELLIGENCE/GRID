@@ -76,11 +76,11 @@ def _query_knowledge(args: Mapping[str, Any]) -> dict[str, Any]:
         sources = []
         if result.get("sources"):
             sources.extend(
-                    {
-                        "path": source.get("metadata", {}).get("path", "unknown"),
-                        "distance": source.get("distance", 0),
-                        "confidence": 1.0 - (source.get("distance", 0) / 2.0),  # Convert distance to confidence
-                    }
+                {
+                    "path": source.get("metadata", {}).get("path", "unknown"),
+                    "distance": source.get("distance", 0),
+                    "confidence": 1.0 - (source.get("distance", 0) / 2.0),  # Convert distance to confidence
+                }
                 for source in result["sources"]
             )
 

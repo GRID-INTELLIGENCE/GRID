@@ -31,7 +31,7 @@ def benchmark_pattern_matcher():
         "focus": 0.5,
         "time_distortion": 0.1,
         "timestamps": [time.time() - i for i in range(10)],
-        "values": [i for i in range(10)],
+        "values": list(range(10)),
         "coordinates": [(i, i) for i in range(10)],
         "sequence": ["a", "b", "c", "a", "b", "c"],
         "events": ["click", "scroll", "click"],

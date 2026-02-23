@@ -144,8 +144,14 @@ class StripeGateway(PaymentGatewayBase):
             }
 
             price_id = price_map.get(tier.lower())
-            if not price_id:
+            if price_id is None:
                 raise ValueError(f"Invalid tier: {tier}")
+            if not price_id or not str(price_id).strip():
+                raise IntegrationError(
+                    service="stripe",
+                    message="Price ID not configured for this tier",
+                    details={"tier": tier},
+                )
 
             subscription_data: dict[str, Any] = {
                 "items": [{"price": price_id}],

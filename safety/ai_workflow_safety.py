@@ -1441,15 +1441,7 @@ async def get_ai_workflow_safety_engine(
 
 def clear_ai_workflow_safety_cache():
     """Clear all cached safety engines (useful for tests)"""
-    # We need to run this async, or expose a sync wrapper for tests
-    # For now, we manually clear the internal dict of the global manager
-    # Note: access protected member for testing purposes only
-    if asyncio.get_event_loop().is_running():
-        # If loop running, we can't easily wait, so we just clear dict
-        _engine_manager._engines.clear()
-    else:
-        # If no loop (sync test), clear dict directly
-        _engine_manager._engines.clear()
+    _engine_manager._engines.clear()
 
 
 # Legacy function for backward compatibility (DEPRECATED)

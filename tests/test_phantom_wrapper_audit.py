@@ -10,17 +10,14 @@ Covers:
 - P3: OnDemandRAGEngine degradation metadata
 """
 
-import os
+# Load modules that are shadowed on sys.path via importlib.
+import importlib.util as _ilu
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import patch
 
 import pytest
-
-# Load modules that are shadowed on sys.path via importlib.
-import importlib.util as _ilu
 
 _repo_root = Path(__file__).resolve().parent.parent
 
@@ -41,7 +38,6 @@ _gemini_mod = _load_module(
     "_gemini_client_standalone",
     str(_repo_root / "infrastructure" / "cloud" / "gemini_client.py"),
 )
-
 
 
 # ---------------------------------------------------------------------------

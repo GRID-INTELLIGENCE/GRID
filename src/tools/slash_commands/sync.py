@@ -184,6 +184,7 @@ class SyncCommand(KnowledgeCommand):
 
             # Scan for new library files
             src_path = Path("src/grid")
+
             def _find_py_files(p: Path) -> list[Path]:
                 return list(p.rglob("*.py"))
 

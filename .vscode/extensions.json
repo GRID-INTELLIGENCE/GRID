@@ -1,7 +1,6 @@
 {
   "recommendations": [
     "ms-python.python",
-    "ms-python.vscode-pylance",
     "charliermarsh.ruff",
     "njpwerner.autodocstring",
     "ms-vscode.vscode-typescript-next",
@@ -18,11 +17,18 @@
     "christian-kohler.path-intellisense",
     "ms-vscode-remote.remote-wsl",
     "ms-azuretools.vscode-docker",
-    "bierner.markdown-mermaid"
+    "bierner.markdown-mermaid",
+    "ms-vscode.makefile-tools",
+    "mtxr.semantic-tokens",
+    "GitHub.copilot",
+    "GitHub.vscode-github-actions",
+    "ms-vscode.hexeditor",
+    "yzhang.markdown-all-in-one"
   ],
   "unwantedRecommendations": [
     "ms-python.black-formatter",
     "ms-python.isort",
-    "ms-python.vscode-pylint"
+    "ms-python.vscode-pylint",
+    "ms-python.vscode-pylance"
   ]
 }

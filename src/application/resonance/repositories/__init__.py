@@ -37,11 +37,15 @@ class StateStore:
         yield self
 
 
+_state_store: StateStore | None = None
+
+
 def get_state_store() -> StateStore:
     """Get or create StateStore instance (Mothership pattern)."""
-    if not hasattr(get_state_store, "_instance"):
-        get_state_store._instance = StateStore()
-    return get_state_store._instance
+    global _state_store
+    if _state_store is None:
+        _state_store = StateStore()
+    return _state_store
 
 
 # =============================================================================

@@ -30,9 +30,10 @@ class PerformanceBenchmark:
         # Try to find a model that is available
         available_models = ["ministral-3:3b", "llama3.2:3b", "phi3:latest", "mistral:latest"]
         selected_model = "ministral-3:3b"
-        
+
         try:
             import httpx
+
             r = httpx.get("http://localhost:11434/api/tags", timeout=2.0)
             if r.status_code == 200:
                 models = [m["name"] for m in r.json().get("models", [])]
@@ -50,7 +51,7 @@ class PerformanceBenchmark:
             "session_delete_latencies": [],
             "concurrent_queries": [],
             "memory_usage": [],
-            "selected_model": selected_model
+            "selected_model": selected_model,
         }
 
     async def benchmark_query_latency(self, num_queries: int = 100) -> dict[str, float]:
@@ -73,11 +74,11 @@ class PerformanceBenchmark:
 
             start = time.perf_counter()
             _ = await self.engine.query(
-                query_text=query, 
-                session_id=session_id, 
-                enable_multi_hop=False, 
+                query_text=query,
+                session_id=session_id,
+                enable_multi_hop=False,
                 temperature=0.7,
-                llm_model=self.results["selected_model"]
+                llm_model=self.results["selected_model"],
             )
             latency_ms = (time.perf_counter() - start) * 1000
             latencies.append(latency_ms)
@@ -173,10 +174,10 @@ class PerformanceBenchmark:
         async def single_query():
             start = time.perf_counter()
             _ = await self.engine.query(
-                query_text=query, 
-                session_id=session_id, 
+                query_text=query,
+                session_id=session_id,
                 enable_multi_hop=False,
-                llm_model=self.results["selected_model"]
+                llm_model=self.results["selected_model"],
             )
             latency_ms = (time.perf_counter() - start) * 1000
             return latency_ms
@@ -220,10 +221,10 @@ class PerformanceBenchmark:
         for i in range(100):
             session_id = f"memory-benchmark-{i % 10}"
             await self.engine.query(
-                query_text="What is GRID?", 
-                session_id=session_id, 
+                query_text="What is GRID?",
+                session_id=session_id,
                 enable_multi_hop=False,
-                llm_model=self.results["selected_model"]
+                llm_model=self.results["selected_model"],
             )
 
         snapshot3 = tracemalloc.take_snapshot()

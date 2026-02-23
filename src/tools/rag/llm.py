@@ -51,9 +51,7 @@ class OllamaLLM(LLMProvider):
             raise LLMProviderError(f"Ollama request timed out for {self.model}") from e
         except Exception as e:
             logger.error(f"Ollama LLM error: {e}")
-            raise LLMProviderError(
-                f"Failed to generate response using Ollama model {self.model}: {e}"
-            ) from e
+            raise LLMProviderError(f"Failed to generate response using Ollama model {self.model}: {e}") from e
 
     async def async_generate(self, prompt: str, **kwargs: Any) -> str:
         """Generate text using Ollama (async version).
@@ -84,11 +82,9 @@ class OllamaLLM(LLMProvider):
             if proc.returncode == 0:
                 return stdout.decode("utf-8", errors="replace").strip()
             else:
-                err_msg = stderr.decode('utf-8', errors='replace')
+                err_msg = stderr.decode("utf-8", errors="replace")
                 logger.error(f"Ollama subprocess failed: {err_msg}")
-                raise LLMProviderError(
-                    f"Ollama returned non-zero exit code for {self.model}: {err_msg}"
-                )
+                raise LLMProviderError(f"Ollama returned non-zero exit code for {self.model}: {err_msg}")
         except LLMProviderError:
             raise
         except TimeoutError as e:
@@ -96,9 +92,7 @@ class OllamaLLM(LLMProvider):
             raise LLMProviderError(f"Ollama async request timed out for {self.model}") from e
         except Exception as e:
             logger.error(f"Ollama async LLM error: {e}")
-            raise LLMProviderError(
-                f"Failed to generate async response using Ollama model {self.model}: {e}"
-            ) from e
+            raise LLMProviderError(f"Failed to generate async response using Ollama model {self.model}: {e}") from e
 
 
 class OpenAILLM(LLMProvider):
@@ -151,9 +145,7 @@ class OpenAILLM(LLMProvider):
             return response.choices[0].message.content
         except Exception as e:
             logger.error(f"OpenAI LLM error: {e}")
-            raise LLMProviderError(
-                f"Failed to generate response using OpenAI model {self.model}: {e}"
-            ) from e
+            raise LLMProviderError(f"Failed to generate response using OpenAI model {self.model}: {e}") from e
 
 
 class SimpleLLM(LLMProvider):

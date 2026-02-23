@@ -83,20 +83,20 @@ class MetricsWriter:
         for i in range(0, len(metrics), batch_size):
             batch = metrics[i : i + batch_size]
             params = [
-                    {
-                        "ts": m.timestamp.isoformat(),
-                        "tid": m.trace_id,
-                        "lat": m.transfer_latency_ms,
-                        "csz": m.compressed_size,
-                        "rsz": m.raw_size,
-                        "rat": m.compression_ratio,
-                        "coh": m.coherence_level,
-                        "ent": m.entanglement_count,
-                        "int": m.integrity_check,
-                        "suc": 1 if m.success else 0,
-                        "src": m.source_module,
-                        "meta": json.dumps(m.metadata),
-                    }
+                {
+                    "ts": m.timestamp.isoformat(),
+                    "tid": m.trace_id,
+                    "lat": m.transfer_latency_ms,
+                    "csz": m.compressed_size,
+                    "rsz": m.raw_size,
+                    "rat": m.compression_ratio,
+                    "coh": m.coherence_level,
+                    "ent": m.entanglement_count,
+                    "int": m.integrity_check,
+                    "suc": 1 if m.success else 0,
+                    "src": m.source_module,
+                    "meta": json.dumps(m.metadata),
+                }
                 for m in batch
             ]
 
@@ -144,18 +144,18 @@ class MetricsWriter:
         for i in range(0, len(metrics), batch_size):
             batch = metrics[i : i + batch_size]
             params = [
-                    {
-                        "ts": m.timestamp.isoformat(),
-                        "tid": m.trace_id,
-                        "mod": m.modality,
-                        "dur": m.duration_ms,
-                        "coh": m.coherence,
-                        "rsz": m.raw_size,
-                        "src": m.source,
-                        "suc": 1 if m.success else 0,
-                        "err": m.error_message,
-                        "meta": json.dumps(m.metadata),
-                    }
+                {
+                    "ts": m.timestamp.isoformat(),
+                    "tid": m.trace_id,
+                    "mod": m.modality,
+                    "dur": m.duration_ms,
+                    "coh": m.coherence,
+                    "rsz": m.raw_size,
+                    "src": m.source,
+                    "suc": 1 if m.success else 0,
+                    "err": m.error_message,
+                    "meta": json.dumps(m.metadata),
+                }
                 for m in batch
             ]
 

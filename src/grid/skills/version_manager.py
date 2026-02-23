@@ -182,6 +182,7 @@ class SkillVersionManager:
 
     async def _save_version(self, version: SkillVersion) -> None:
         import aiofiles
+
         skill_dir = self._get_skill_dir(version.skill_id)
         version_file = skill_dir / f"{version.version_id}.json"
         async with aiofiles.open(version_file, "w") as f:
@@ -201,6 +202,7 @@ class SkillVersionManager:
     async def list_versions_async(self, skill_id: str) -> list[dict[str, Any]]:
         """List available versions for a skill."""
         import aiofiles
+
         skill_dir = self._get_skill_dir(skill_id)
         versions = []
         v_files = await asyncio.to_thread(lambda: list(skill_dir.glob("*.json")))
@@ -216,6 +218,7 @@ class SkillVersionManager:
     async def get_version(self, skill_id: str, version_id: str) -> SkillVersion | None:
         """Fetch a specific version."""
         import aiofiles
+
         skill_dir = self._get_skill_dir(skill_id)
         version_file = skill_dir / f"{version_id}.json"
 

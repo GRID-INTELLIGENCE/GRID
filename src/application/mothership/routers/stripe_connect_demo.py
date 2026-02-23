@@ -743,7 +743,7 @@ async def create_connected_account(
     try:
         form_data = AccountCreateForm(display_name=display_name, contact_email=contact_email)
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=f"Invalid form data: {e}")
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=f"Invalid form data: {e}")
 
     stripe_client = _require_stripe_client(settings)
     user_id = str(auth.get("user_id") or "")
@@ -878,7 +878,7 @@ async def create_product(
             name=name, description=description, price_in_cents=price_in_cents, currency=currency
         )
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=f"Invalid form data: {e}")
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=f"Invalid form data: {e}")
 
     stripe_client = _require_stripe_client(settings)
     user_id = str(auth.get("user_id") or "")

@@ -342,7 +342,9 @@ class ComprehensiveDRTMiddleware(BaseHTTPMiddleware):
                 if self._calculate_similarity(signature, vector_sig) >= self.similarity_threshold:
                     attack_vector_id = vector_id
                     # Try to get severity from attack vectors
-                    for attack_sig, attack_severity in zip(self.attack_vectors, ["medium"] * len(self.attack_vectors), strict=False):
+                    for attack_sig, attack_severity in zip(
+                        self.attack_vectors, ["medium"] * len(self.attack_vectors), strict=False
+                    ):
                         if attack_sig == vector_sig:
                             severity = attack_severity
                             break

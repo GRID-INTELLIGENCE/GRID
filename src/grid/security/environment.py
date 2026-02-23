@@ -116,8 +116,7 @@ def remove_sensitive_vars() -> dict[str, list[str]]:
     """
     report: dict[str, list[str]] = {"security": []}
     sensitive_keys = [
-        key for key in list(os.environ.keys())
-        if any(pattern in key.upper() for pattern in _SENSITIVE_ENV_PATTERNS)
+        key for key in list(os.environ.keys()) if any(pattern in key.upper() for pattern in _SENSITIVE_ENV_PATTERNS)
     ]
     for key in sensitive_keys:
         logger.warning(f"Removing sensitive environment variable: {key}")

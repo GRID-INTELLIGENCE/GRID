@@ -288,7 +288,11 @@ class SecretManager:
 
         # Check for weak patterns
         value_lower = value.lower()
-        errors.extend(f"Secret contains weak pattern: '{weak_pattern}'" for weak_pattern in self.config.reject_weak_patterns if weak_pattern in value_lower)
+        errors.extend(
+            f"Secret contains weak pattern: '{weak_pattern}'"
+            for weak_pattern in self.config.reject_weak_patterns
+            if weak_pattern in value_lower
+        )
 
         # Check entropy (basic check - at least some variety)
         if len(set(value)) < min(8, len(value) // 2):

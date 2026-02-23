@@ -536,7 +536,7 @@ class EnhancedCognitiveEngine:
             try:
                 if hasattr(self.pattern_matcher, "patterns") and pattern_name in self.pattern_matcher.patterns:
                     recognizer = self.pattern_matcher.patterns[pattern_name]
-                    result = recognizer.recognize(operation)
+                    result = await recognizer.recognize(operation)
                     patterns[pattern_name] = result
             except Exception as e:
                 logger.debug(f"Failed to detect {pattern_name} pattern: {e}")
@@ -719,25 +719,29 @@ class EnhancedCognitiveEngine:
         rationale = self._generate_cognitive_rationale(cognitive_state, patterns, temporal_route)
 
         # Use GRID's XAIExplainer
+        context_payload = {
+            "interaction": interaction,
+            "cognitive": cognitive_context,
+            "patterns": pattern_context,
+            "temporal": temporal_context,
+        }
         try:
             xai_result = self.xai_explainer.synthesize_explanation(
                 decision_id=decision_id,
-                context={
-                    "interaction": interaction,
-                    "cognitive": cognitive_context,
-                    "patterns": pattern_context,
-                    "temporal": temporal_context,
-                },
+                context=context_payload,
                 rationale=rationale,
                 cognitive_state=cognitive_context,
                 detected_patterns=pattern_context,
             )
+            # Ensure standard keys are present for consumers
+            xai_result.setdefault("rationale", rationale)
+            xai_result.setdefault("context", context_payload)
             return xai_result
         except Exception as e:
             logger.warning(f"XAI explainer failed: {e}")
-            # Return a minimal valid explanation
             return {
                 "decision_id": decision_id,
+                "context": context_payload,
                 "cognitive_context": cognitive_context,
                 "rationale": rationale,
                 "resonance_explanation": "Unable to generate full explanation",
@@ -948,3 +952,126 @@ class EnhancedCognitiveEngine:
             base_operation.update(metadata)
 
         return base_operation
+
+    async def get_comprehensive_cognitive_report(self, user_id: str) -> dict[str, Any]:
+        """Generate a comprehensive cognitive report for a user.
+
+        Args:
+            user_id: User identifier
+
+        Returns:
+            Report with current_cognitive_state, pattern_analysis, load_factor_trends,
+            interaction_summary, and xai_insights.
+        """
+        interactions = self._interaction_history.get(user_id, [])
+        total_interactions = len(interactions)
+
+        # Compute load factor trends for each recorded interaction
+        load_factor_trends: list[dict[str, Any]] = []
+        scaffolding_count = 0
+        for interaction in interactions:
+            operation = self._interaction_to_operation(interaction)
+            load_analysis = self.get_load_factor_analysis(operation)
+            load_factor_trends.append(load_analysis)
+            if load_analysis["threshold_analysis"]["scaffolding_triggered"]:
+                scaffolding_count += 1
+
+        # Interaction summary
+        most_common_action = ""
+        if interactions:
+            action_counts: dict[str, int] = {}
+            for interaction in interactions:
+                action = interaction.get("action", "")
+                action_counts[action] = action_counts.get(action, 0) + 1
+            most_common_action = max(action_counts, key=action_counts.__getitem__)
+
+        # Current cognitive state from cache
+        cognitive_state_dict: dict[str, Any] = {}
+        cached = self._state_cache.get(user_id)
+        if cached:
+            current_state, _ = cached
+            load_type = current_state.load_type
+            processing_mode = current_state.processing_mode
+            cognitive_state_dict = {
+                "estimated_load": current_state.estimated_load,
+                "load_type": load_type if isinstance(load_type, str) else load_type.value,
+                "processing_mode": processing_mode if isinstance(processing_mode, str) else processing_mode.value,
+            }
+        elif load_factor_trends:
+            last = load_factor_trends[-1]
+            cognitive_state_dict = {
+                "estimated_load": last["total_load"],
+                "load_type": last["load_type"],
+                "processing_mode": "system_2" if last["total_load"] > 5.0 else "system_1",
+            }
+
+        return {
+            "current_cognitive_state": cognitive_state_dict,
+            "pattern_analysis": {},
+            "load_factor_trends": load_factor_trends,
+            "interaction_summary": {
+                "total_interactions": total_interactions,
+                "most_common_action": most_common_action,
+            },
+            "xai_insights": {
+                "explanations_generated": total_interactions,
+                "pattern_driven_decisions": 0,
+                "scaffolding_applications": scaffolding_count,
+            },
+        }
+
+    def get_load_factor_analysis(self, operation: dict[str, Any]) -> dict[str, Any]:
+        """Analyze cognitive load factors for an operation.
+
+        Args:
+            operation: Operation description with load factor values (0-1 scale)
+
+        Returns:
+            Dictionary with total_load (0-10 scale), load_factors breakdown,
+            load_type classification, and threshold_analysis.
+        """
+        factor_configs = {
+            "information_density": {"weight": 0.25, "description": "Information density and content complexity"},
+            "novelty": {"weight": 0.20, "description": "Novelty and unfamiliarity of content"},
+            "complexity": {"weight": 0.25, "description": "Task complexity and cognitive demands"},
+            "time_pressure": {"weight": 0.15, "description": "Time constraints and urgency"},
+            "split_attention": {"weight": 0.10, "description": "Split attention across multiple sources"},
+            "element_interactivity": {"weight": 0.05, "description": "Element interactivity requirements"},
+        }
+
+        load_factors: dict[str, Any] = {}
+        total_load = 0.0
+        for factor, config in factor_configs.items():
+            value = float(operation.get(factor, 0.5))
+            weight = config["weight"]
+            contribution = value * weight * 10.0
+            total_load += contribution
+            load_factors[factor] = {
+                "value": value,
+                "weight": weight,
+                "contribution": contribution,
+                "description": config["description"],
+            }
+
+        total_load = min(10.0, max(0.0, total_load))
+
+        # Determine load type (using cognitive load theory terminology)
+        if operation.get("element_interactivity", 0.0) > 0.7:
+            load_type = "intrinsic"
+        elif operation.get("split_attention", 0.0) > 0.5:
+            load_type = "extraneous"
+        elif operation.get("novelty", 0.0) > 0.6 and operation.get("complexity", 1.0) < 0.5:
+            load_type = "germane"
+        else:
+            load_type = "intrinsic"
+
+        return {
+            "total_load": total_load,
+            "load_factors": load_factors,
+            "load_type": load_type,
+            "threshold_analysis": {
+                "scaffolding_triggered": total_load > 7.0,
+                "high_load": total_load >= 7.0,
+                "moderate_load": total_load >= 4.0,
+            },
+        }

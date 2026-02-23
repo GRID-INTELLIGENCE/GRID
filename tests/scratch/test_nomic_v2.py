@@ -1,6 +1,8 @@
+import pytest
 import requests
 
 
+@pytest.mark.scratch
 def test_nomic_v2_limit(text_len):
     url = "http://localhost:11434/api/embeddings"
     data = {"model": "nomic-embed-text-v2-moe:latest", "prompt": "A" * text_len}

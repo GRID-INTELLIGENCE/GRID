@@ -287,10 +287,7 @@ class RegexSetMatcher:
                 return
 
             # Combine all patterns with OR (with ReDoS validation)
-            safe_patterns = [
-                p for p in rule.patterns
-                if self._validate_regex(p, rule.id)
-            ]
+            safe_patterns = [p for p in rule.patterns if self._validate_regex(p, rule.id)]
             if safe_patterns:
                 flags = 0 if rule.case_sensitive else re.IGNORECASE
                 combined = "|".join(f"({p})" for p in safe_patterns)

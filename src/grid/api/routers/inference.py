@@ -43,9 +43,7 @@ async def create_async_inference(
 ):
     """Create an asynchronous inference request"""
     try:
-        task_id = await queue_inference_task(
-            request, current_user.username, background_tasks=background_tasks
-        )
+        task_id = await queue_inference_task(request, current_user.username, background_tasks=background_tasks)
         return {"task_id": task_id, "status": "queued", "message": "Inference request queued for processing"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to queue inference: {str(e)}")

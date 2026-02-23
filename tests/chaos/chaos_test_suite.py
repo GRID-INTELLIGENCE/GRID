@@ -215,8 +215,8 @@ class ChaosTestSuite:
 
         # Start stressors in background
         with ThreadPoolExecutor(max_workers=4) as executor:
-            cpu_futures = [executor.submit(cpu_stressor) for _ in range(2)]
-            mem_future = executor.submit(memory_stressor)
+            [executor.submit(cpu_stressor) for _ in range(2)]
+            executor.submit(memory_stressor)
 
             # Monitor system responses during stress
             success_count = 0

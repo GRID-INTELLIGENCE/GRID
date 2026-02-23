@@ -578,7 +578,7 @@ class TestSecurityProperties:
             tampered_token = token_bytes.decode("utf-8", errors="ignore")
 
             # Should reject tampered token
-            from jose import JWTError
+            from jwt.exceptions import InvalidTokenError as JWTError
 
             with pytest.raises((JWTError, ValueError, Exception)):
                 jwt_manager.verify_token(tampered_token)
@@ -604,7 +604,7 @@ class TestSecurityProperties:
         )
 
         # Should reject expired token
-        from jose import JWTError
+        from jwt.exceptions import InvalidTokenError as JWTError
 
         with pytest.raises(JWTError):
             jwt_manager.verify_token(token)

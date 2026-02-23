@@ -313,9 +313,7 @@ class APIGateway:
         elif "discussion" in service_name.lower():
             fallback_data["message"] = "Discussion reasoning is temporarily limited. Direct responses only."
 
-        return JSONResponse(
-            status_code=status_code, content=fallback_data, headers={"X-Gateway-Fallback": "true"}
-        )
+        return JSONResponse(status_code=status_code, content=fallback_data, headers={"X-Gateway-Fallback": "true"})
 
     async def route_request(self, request: Request) -> Response:
         """Route incoming request."""

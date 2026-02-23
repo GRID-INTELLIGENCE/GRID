@@ -327,25 +327,27 @@ class ContinuousLearningSystem:
 
 
 if __name__ == "__main__":
+    import asyncio
+
     from .case_filing import CaseFilingSystem
 
-    # Example usage
-    filing_system = CaseFilingSystem()
-    learning_system = ContinuousLearningSystem(memory_path=Path(".case_memory"))
+    async def _main() -> None:
+        filing_system = CaseFilingSystem()
+        learning_system = ContinuousLearningSystem(memory_path=Path(".case_memory"))
 
-    test_input = "Add authentication endpoint"
-    structure = filing_system.log_and_categorize(raw_input=test_input)
+        test_input = "Add authentication endpoint"
+        structure = filing_system.log_and_categorize(raw_input=test_input)
 
-    # Record case completion
-    learning_system.record_case_completion(
-        case_id="TEST-003",
-        structure=structure,
-        solution="Implemented JWT authentication endpoint",
-        outcome="success",
-        agent_experience={"lessons": ["Use secure token storage", "Implement rate limiting"], "time_taken": "2 hours"},
-    )
+        await learning_system.record_case_completion(
+            case_id="TEST-003",
+            structure=structure,
+            solution="Implemented JWT authentication endpoint",
+            outcome="success",
+            agent_experience={"lessons": ["Use secure token storage", "Implement rate limiting"], "time_taken": "2 hours"},
+        )
 
-    # Get experience
-    experience = learning_system.get_agent_experience()
-    print("Agent Experience:")
-    print(json.dumps(experience, indent=2))
+        experience = learning_system.get_agent_experience()
+        print("Agent Experience:")
+        print(json.dumps(experience, indent=2))
+
+    asyncio.run(_main())

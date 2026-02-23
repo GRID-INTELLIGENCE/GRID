@@ -165,13 +165,13 @@ class DatabricksLearningSystem(ContinuousLearningSystem):
             )
 
             recommendations = [
-                    {
-                        "case_id": case.case_id,
-                        "similarity": 0.5,  # Would calculate actual similarity
-                        "recommended_solution": case.solution,
-                        "expected_outcome": case.outcome,
-                        "lessons_learned": case.agent_experience.get("lessons", []) if case.agent_experience else [],
-                    }
+                {
+                    "case_id": case.case_id,
+                    "similarity": 0.5,  # Would calculate actual similarity
+                    "recommended_solution": case.solution,
+                    "expected_outcome": case.outcome,
+                    "lessons_learned": case.agent_experience.get("lessons", []) if case.agent_experience else [],
+                }
                 for case in similar_cases
             ]
 

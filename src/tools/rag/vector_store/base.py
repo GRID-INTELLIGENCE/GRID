@@ -71,6 +71,9 @@ class BaseVectorStore(ABC):
 
     def add_documents(self, documents: list[Any]) -> None:
         """Add a list of Document objects to the store."""
+        for doc in documents:
+            if not doc.text:
+                raise ValueError("Document content cannot be empty")
         ids = [doc.id for doc in documents]
         texts = [doc.text for doc in documents]
         metadatas = [doc.metadata for doc in documents]
@@ -99,6 +102,10 @@ class BaseVectorStore(ABC):
 
     def similarity_search(self, query: str, k: int = 5, where: dict[str, Any] | None = None) -> list[Any]:
         """Search for similar documents using query string."""
+        if not query:
+            raise ValueError("Query cannot be empty")
+        if k <= 0:
+            raise ValueError("k must be positive")
         from ..embeddings.simple import SimpleEmbedding
 
         embedder = SimpleEmbedding()

@@ -164,14 +164,14 @@ class TestProviderSkillVersions:
 
     def test_all_providers_have_versions(self):
         """Test that all provider skills have version attributes."""
-        for name, skill in PROVIDER_SKILLS.items():
+        for skill in PROVIDER_SKILLS.values():
             assert hasattr(skill, "version")
             assert skill.version is not None
             assert len(skill.version.split(".")) >= 2  # Semantic version format
 
     def test_all_providers_have_descriptions(self):
         """Test that all provider skills have descriptions."""
-        for name, skill in PROVIDER_SKILLS.items():
+        for skill in PROVIDER_SKILLS.values():
             assert hasattr(skill, "description")
             assert skill.description is not None
             assert len(skill.description) > 0

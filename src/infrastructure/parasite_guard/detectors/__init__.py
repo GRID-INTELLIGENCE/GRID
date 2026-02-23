@@ -129,7 +129,7 @@ class DetectorChain:
                 )
                 continue
 
-        return None
+        return DetectionResult(detected=False)
 
     def get_stats(self) -> dict[str, int]:
         """Get detection statistics."""

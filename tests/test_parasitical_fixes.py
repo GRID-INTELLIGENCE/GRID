@@ -39,7 +39,7 @@ class TestEventBusSubscriberFix:
                 pass
 
         handler = TempHandler()
-        sub = event_bus.subscribe("test.event", handler.handle)
+        event_bus.subscribe("test.event", handler.handle)
 
         # Verify subscription exists
         assert len(event_bus._subscribers["test.event"]) == 1
@@ -82,7 +82,7 @@ class TestEventBusSubscriberFix:
         def handler(event):
             pass
 
-        with event_bus.subscribe("test.event", handler) as sub:
+        with event_bus.subscribe("test.event", handler):
             assert len(event_bus._subscribers["test.event"]) == 1
 
         # Should be unsubscribed after context exit
@@ -257,7 +257,7 @@ class TestSkillExecutionDeadLetterFix:
         tracker._inventory_available = False  # Force inventory unavailable
 
         # Create a record
-        record = tracker.track_execution(
+        tracker.track_execution(
             skill_id="test.skill",
             input_args={},
             output="test output",

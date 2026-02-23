@@ -108,10 +108,7 @@ class MotivationEngine:
         """Run a command asynchronously."""
         try:
             proc = await asyncio.create_subprocess_exec(
-                *cmd,
-                cwd=self.project_root,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE
+                *cmd, cwd=self.project_root, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
             )
             async with asyncio.timeout(timeout):
                 stdout, stderr = await proc.communicate()
@@ -135,10 +132,13 @@ class MotivationEngine:
 
     async def _count_errors_async(self, pattern: str) -> int:
         """Count specific error types in test output asynchronously."""
-        output = await self._run_cmd_async([sys.executable, "-m", "pytest", "tests/", "--collect-only", "-q"], timeout=30)
+        output = await self._run_cmd_async(
+            [sys.executable, "-m", "pytest", "tests/", "--collect-only", "-q"], timeout=30
+        )
         if not output:
             return 0
         import re
+
         matches = re.findall(pattern, output)
         return len(matches)
 
@@ -148,6 +148,7 @@ class MotivationEngine:
         if not output:
             return 0
         import re
+
         matches = re.findall(r"(\d+) error", output)
         return int(matches[0]) if matches else 0
 

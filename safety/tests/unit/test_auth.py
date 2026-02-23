@@ -7,7 +7,7 @@ from __future__ import annotations
 import os
 from unittest.mock import MagicMock
 
-from jose import jwt
+import jwt
 
 from safety.api.auth import (
     TrustTier,

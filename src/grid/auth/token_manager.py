@@ -3,7 +3,8 @@ import uuid
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
-from jose import JWTError, jwt
+import jwt
+from jwt.exceptions import InvalidTokenError as JWTError
 
 from grid.config.runtime_settings import RuntimeSettings
 from grid.infrastructure.cache import CacheFactory

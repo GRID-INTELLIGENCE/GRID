@@ -1,0 +1,104 @@
+# GRID Session Terminal Outputs — 2026-02-23
+
+Recorded from session thread for post-11pm contract execution. Reference this file in prompts via:
+`scripts/artifacts/session-terminal-outputs-2026-02-23.txt` or `E:\GRID-main\scripts\artifacts\session-terminal-outputs-2026-02-23.txt`
+
+---
+
+## 1. Safety tests (after in-memory SQLite + deprecation fix)
+
+```
+PS E:\GRID-main> uv run pytest safety/tests/ -q -n auto -o "addopts="
+bringing up nodes...
+.................................... [ 14%]
+.................................... [ 28%]
+.................................... [ 43%]
+.................................... [ 57%]
+.................................... [ 71%]
+.................................... [ 86%]
+...................................  [100%]
+============ warnings summary =============
+251 passed, 2 skipped in 8.08s
+```
+
+(Post-fix run: no deprecation warning; same pass/skip counts.)
+
+---
+
+## 2. Git log — last 4.5 hours (session context)
+
+```
+9fb0e73 chore(vscode): update Python language server and formatter settings
+b080495 Cascade snapshot 2026-02-23T14:49:40.5196143Z
+100a711 Cascade snapshot 2026-02-23T14:47:08.1752172Z
+...
+b7297b5 fix(ci): pin all workflows to Python 3.13 via setup-uv
+48148b1 fix(ci): pin all workflows and conftest to Python 3.13
+```
+
+---
+
+## 3. Git status (working tree at report time)
+
+```
+ M .github/workflows/agent_validation.yml
+ M .github/workflows/async-tests.yml
+ ... (127 modified files total)
+ M safety/ai_workflow_safety.py
+ M safety/tests/conftest.py
+ M src/application/resonance/repositories/__init__.py
+ M src/infrastructure/parasite_guard/config.py
+ M src/tools/agent_prompts/continuous_learning.py
+ M src/tools/rag/llm/openai_llm.py
+ M src/tools/rag/llm/anthropic_llm.py
+ M src/tools/runtime_policy.py
+ M tests/conftest.py
+?? AUDIT_REPORT.md
+?? "Fixing Test Failures and Deprecations.md"
+?? comprehensive_test_report.md
+?? error.txt
+```
+
+---
+
+## 4. mypy (targeted files — high-impact fixes applied)
+
+Relevant errors that were addressed in-session:
+- safety/ai_workflow_safety.py: clear_ai_workflow_safety_cache (simplified)
+- src/infrastructure/parasite_guard/config.py: thresholds int/float/str typing
+- src/tools/runtime_policy.py: is_network_allowed / is_external_api_allowed return bool()
+- src/tools/rag/llm/openai_llm.py, anthropic_llm.py: (api_key or os.getenv(...) or "").strip()
+- src/application/resonance/repositories/__init__.py: get_state_store() singleton via _state_store
+- src/tools/agent_prompts/continuous_learning.py: async _main() + asyncio.run() for record_case_completion
+
+Full mypy still reports ~1833 errors in 378 files (see .grid/debug-report.json).
+
+---
+
+## 5. uv / Python version check
+
+```
+uv run python --version   → Python 3.13.12
+uv run python -c "from application.mothership.repositories import BaseRepository; print('OK')"  → OK
+uv lock --check  → Passed
+```
+
+---
+
+## 6. Pytest collection (unit + api)
+
+```
+uv run pytest tests/unit/ --collect-only -q   → No SyntaxError
+uv run pytest tests/api/ --collect-only -q   → No SyntaxError
+```
+
+---
+
+## Paths to use in Claude Code prompts
+
+- Report: `GRID_COMPREHENSIVE_REPORT_2026-02-23.md` (repo root)
+- Contract: `.grid/post-11pm-contract.json`
+- This file: `scripts/artifacts/session-terminal-outputs-2026-02-23.txt`
+- Debug contract: `.grid/debug-contract.json`
+- Debug report: `.grid/debug-report.json`
+- Test failures list: `comprehensive_test_report.md`

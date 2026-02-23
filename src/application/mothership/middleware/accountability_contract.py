@@ -126,7 +126,7 @@ class AccountabilityContractMiddleware(BaseHTTPMiddleware):
             if response is not None:
                 response.headers["X-Accountability-Error"] = "middleware_error"
                 return response
-            
+
             # If we haven't called call_next yet, call it now
             response = await call_next(request)
             response.headers["X-Accountability-Error"] = "middleware_error"
@@ -290,16 +290,14 @@ class AccountabilityContractMiddleware(BaseHTTPMiddleware):
         response_result: EnforcementResult | None,
     ) -> None:
         """Add accountability enforcement headers to the response."""
-        response.headers["X-Accountability-Status"] = (
-            "enforced" if self.enforcement_mode == "enforce" else "monitored"
-        )
-        
+        response.headers["X-Accountability-Status"] = "enforced" if self.enforcement_mode == "enforce" else "monitored"
+
         total_violations = len(request_result.violations)
         if response_result:
             total_violations += len(response_result.violations)
-            
+
         response.headers["X-Accountability-Violation-Count"] = str(total_violations)
-        
+
         if total_violations > 0:
             response.headers["X-Accountability-Violation"] = "true"
 

@@ -225,6 +225,7 @@ class EventStore:
         """Persist event to disk."""
         try:
             import aiofiles
+
             filename = f"{self.storage_path}/events/{event.id}.json"
             async with aiofiles.open(filename, "w") as f:
                 await f.write(json.dumps(event.to_dict(), indent=2))
@@ -235,6 +236,7 @@ class EventStore:
         """Persist result to disk."""
         try:
             import aiofiles
+
             filename = f"{self.storage_path}/results/{result.event_id}.json"
             async with aiofiles.open(filename, "w") as f:
                 await f.write(json.dumps(asdict(result), indent=2))
@@ -630,10 +632,7 @@ class EventBus:
 
         async with self._state_lock:
             stale_ids.extend(
-                sub.id
-                for subs in self._subscribers.values()
-                for sub in subs
-                if now - sub.created_at > max_age_seconds
+                sub.id for subs in self._subscribers.values() for sub in subs if now - sub.created_at > max_age_seconds
             )
 
         # Unsubscribe stale subscriptions outside the lock

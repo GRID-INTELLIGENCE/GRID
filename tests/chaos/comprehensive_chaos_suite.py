@@ -133,7 +133,8 @@ class ChaosInjector:
     ) -> Callable:
         """Return a decorator that injects errors at the given rate."""
         if error_generator is None:
-            error_generator = lambda: Exception("Chaos injection error")
+            def error_generator():
+                return Exception("Chaos injection error")
 
         def error_injector(func):
             async def wrapper(*args, **kwargs):
@@ -804,7 +805,7 @@ class TestErrorBudget:
 
         # Overload the system
         tasks = [process_request() for _ in range(200)]
-        results = await asyncio.gather(*tasks)
+        await asyncio.gather(*tasks)
 
         # Should have processed most and rejected some
         assert processed > 50, f"Too few processed: {processed}"

@@ -53,48 +53,41 @@ _MEDIUM = "medium"
 # alone should NOT — it needs co-occurrence with other signals.
 
 HARMFUL_PATTERNS: dict[str, list[tuple[str, str]]] = {
-
     # ─── NON-CONSENSUAL MEDIA ────────────────────────────────────────────
     "nonconsensual_media": [
-        ("সেক্সটর্শন", _HIGH),     # [NM-01] sexual extortion
-        ("রিভেঞ্জ পর্ন", _HIGH),   # [NM-02] retaliatory intimate media
-        ("ডিপফেক পর্ন", _HIGH),    # [NM-03] AI-generated explicit content
+        ("সেক্সটর্শন", _HIGH),  # [NM-01] sexual extortion
+        ("রিভেঞ্জ পর্ন", _HIGH),  # [NM-02] retaliatory intimate media
+        ("ডিপফেক পর্ন", _HIGH),  # [NM-03] AI-generated explicit content
     ],
-
     # ─── PLATFORM EXPLOITATION ───────────────────────────────────────────
     "platform_exploitation": [
-        ("ডক্সিং", _HIGH),         # [PE-01] personal data exposure
-        ("সাইবার বুলিং", _HIGH),   # [PE-02] cyberbullying
+        ("ডক্সিং", _HIGH),  # [PE-01] personal data exposure
+        ("সাইবার বুলিং", _HIGH),  # [PE-02] cyberbullying
     ],
-
     # ─── FINANCIAL FRAUD ─────────────────────────────────────────────────
     "financial_fraud": [
-        ("ফিশিং", _HIGH),          # [FF-01] phishing
-        ("জালিয়াতি", _HIGH),      # [FF-02] forgery / fraud
-        ("প্রতারণা", _HIGH),       # [FF-03] deception / fraud
+        ("ফিশিং", _HIGH),  # [FF-01] phishing
+        ("জালিয়াতি", _HIGH),  # [FF-02] forgery / fraud
+        ("প্রতারণা", _HIGH),  # [FF-03] deception / fraud
     ],
-
     # ─── VIOLENCE ────────────────────────────────────────────────────────
     "violence": [
-        ("গণহত্যা", _HIGH),        # [VL-01] genocide
-        ("লিঞ্চিং", _HIGH),        # [VL-02] lynching
+        ("গণহত্যা", _HIGH),  # [VL-01] genocide
+        ("লিঞ্চিং", _HIGH),  # [VL-02] lynching
     ],
-
     # ─── GENDERED VIOLENCE ───────────────────────────────────────────────
     "gendered_violence": [
-        ("যৌন নির্যাতন", _HIGH),   # [GV-01] sexual abuse
-        ("পাচার", _HIGH),           # [GV-02] trafficking
+        ("যৌন নির্যাতন", _HIGH),  # [GV-01] sexual abuse
+        ("পাচার", _HIGH),  # [GV-02] trafficking
     ],
-
     # ─── DISTRESS SIGNALS ────────────────────────────────────────────────
     # These detect users who may need SUPPORT. Detection MUST route to
     # help resources, NOT punitive action. Only unambiguous crisis terms.
     "distress_signals": [
-        ("আত্মহত্যা", _HIGH),      # [DS-01] crisis keyword (native)
-        ("সুইসাইড", _HIGH),         # [DS-02] crisis keyword (Banglish)
-        ("আত্মক্ষতি", _HIGH),      # [DS-03] self-injury (native)
+        ("আত্মহত্যা", _HIGH),  # [DS-01] crisis keyword (native)
+        ("সুইসাইড", _HIGH),  # [DS-02] crisis keyword (Banglish)
+        ("আত্মক্ষতি", _HIGH),  # [DS-03] self-injury (native)
     ],
-
     # ── FIELD RESEARCH EXPANSION POINT ───────────────────────────────────
     # Additional tokens should be added here ONLY after validation through
     # real field research: native speaker review, corpus frequency analysis,

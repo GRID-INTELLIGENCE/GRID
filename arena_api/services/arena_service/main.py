@@ -26,7 +26,7 @@ import logging
 import os
 import sys
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 import uvicorn
@@ -47,7 +47,7 @@ from the_chase.overwatch.rewards import (  # type: ignore[import-not-found]
 logger = logging.getLogger(__name__)
 
 
-class ArenaPhase(str, Enum):
+class ArenaPhase(StrEnum):
     """Arena phase matching ADSR envelope phases."""
 
     ATTACK = "attack"

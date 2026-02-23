@@ -170,6 +170,7 @@ dump.rdb
 # These entries are safety nets for non-standard venv names.
 venv/
 .venv_locked/
+.venv_broken/
 
 # ==========================
 # PYTHON BUILD ARTIFACTS
@@ -622,6 +623,7 @@ integrated_report.json
 parasite_analysis_report.json
 security_validation_report.json
 resonance_architecture_reference.json
+.windsurf/codemaps/
 
 # Chaos/stress test outputs
 chaos_err.txt

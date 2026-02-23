@@ -332,7 +332,7 @@ class TestParameterQuerying:
 
         assert len(params) == len(TuningParameter)
 
-        for name, value in params.items():
+        for value in params.values():
             assert isinstance(value, ParameterValue)
             assert value.min_value <= value.current_value <= value.max_value
 

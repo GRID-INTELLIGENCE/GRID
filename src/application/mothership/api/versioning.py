@@ -15,6 +15,7 @@ from fastapi import Response
 
 class ApiVersion(StrEnum):
     """Supported API versions."""
+
     V1 = "v1"
     V2 = "v2"
     EXPERIMENTAL = "experimental"
@@ -22,6 +23,7 @@ class ApiVersion(StrEnum):
 
 class VersionStatus(StrEnum):
     """Status of an API version."""
+
     STABLE = "stable"
     DEPRECATED = "deprecated"
     SUNSET = "sunset"

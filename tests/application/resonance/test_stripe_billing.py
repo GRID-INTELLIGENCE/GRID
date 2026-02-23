@@ -8,8 +8,9 @@ Covers:
 - Invoice preview
 """
 
-import pytest
 from unittest.mock import patch
+
+import pytest
 
 from application.resonance.stripe_billing import (
     InvoicePreview,

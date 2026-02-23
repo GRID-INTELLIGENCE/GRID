@@ -13,8 +13,9 @@ from dataclasses import dataclass
 from enum import StrEnum
 from typing import Any
 
+import jwt
 from fastapi import Request
-from jose import JWTError, jwt
+from jwt.exceptions import InvalidTokenError as JWTError
 
 from safety.observability.logging_setup import get_logger
 

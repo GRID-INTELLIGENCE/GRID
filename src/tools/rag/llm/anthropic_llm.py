@@ -26,7 +26,7 @@ class AnthropicLLM(BaseLLMProvider):
         import os
 
         self.model = model
-        self.api_key = (api_key or os.getenv("ANTHROPIC_API_KEY", "")).strip()
+        self.api_key = (api_key or os.getenv("ANTHROPIC_API_KEY") or "").strip()
         self.timeout = timeout
         if not self.api_key:
             raise ValueError("ANTHROPIC_API_KEY is required for Anthropic LLM")

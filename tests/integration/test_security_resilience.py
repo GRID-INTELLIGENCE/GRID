@@ -86,6 +86,7 @@ class MockAdaptiveTimeout:
 # Use mock instances for testing
 def trace_safety_analysis(operation=None):
     """Mock decorator factory for safety analysis tracing."""
+
     def decorator(func):
         from functools import wraps
 
@@ -93,12 +94,15 @@ def trace_safety_analysis(operation=None):
         def wrapper(*args, **kwargs):
             try:
                 from grid.tracing.ai_safety_tracer import get_trace_manager
+
                 manager = get_trace_manager()
                 manager.trace_action(operation)
             except Exception:
                 pass
             return func(*args, **kwargs)
+
         return wrapper
+
     return decorator
 
 

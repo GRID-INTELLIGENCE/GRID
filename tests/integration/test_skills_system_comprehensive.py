@@ -111,7 +111,7 @@ class TestSkillsRegistry:
         skill.id = "test_skill"
         skill.name = "Test Skill"
         registry.register(skill)
-        assert "test_skill" in registry.list_skills()
+        assert "test_skill" in registry.list()
 
     def test_get_skill(self):
         """Test retrieving a registered skill"""

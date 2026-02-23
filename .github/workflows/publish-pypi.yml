@@ -2,7 +2,7 @@
 #
 # Tags:
 #   grid-safety-1.0.0  -> publish grid-safety from safety/
-#   v2.2.4             -> publish grid-intelligence from work/GRID/
+#   v2.2.4             -> publish grid-intelligence from repo root
 #
 # Secrets: Set PYPI_API_TOKEN in repo secrets (or use PyPI trusted publishing).
 
@@ -24,10 +24,12 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v7.3.0
         with:
+          version: "0.10.4"
           python-version: "3.13"
           enable-cache: true
+          cache-dependency-glob: "uv.lock"
 
       - name: Install build and twine
         run: uv pip install build hatchling twine
@@ -53,20 +55,21 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v7.3.0
         with:
+          version: "0.10.4"
           python-version: "3.13"
           enable-cache: true
+          cache-dependency-glob: "uv.lock"
 
       - name: Install build and twine
         run: uv pip install build hatchling twine
 
       - name: Build grid-intelligence
         run: uv run python -m build --wheel
-        working-directory: work/GRID
 
       - name: Publish grid-intelligence to PyPI
-        run: uv run twine upload --skip-existing work/GRID/dist/*
+        run: uv run twine upload --skip-existing dist/*
         env:
           # PyPI recommends username __token__ when using API token as password
           TWINE_USERNAME: __token__

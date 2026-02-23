@@ -22,8 +22,8 @@ import statistics
 import time
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from enum import Enum, StrEnum
+from datetime import UTC, datetime
+from enum import StrEnum
 from typing import Any
 
 import aiohttp
@@ -200,7 +200,7 @@ class MonitoringManager:
 
             # Log error
             error_log = {
-                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
                 "level": "ERROR",
                 "type": "request_error",
                 "method": request.method,
@@ -234,7 +234,7 @@ class MonitoringManager:
 
             # Log violation
             violation_log = {
-                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
                 "level": "WARNING",
                 "type": "rate_limit_violation",
                 "limit_type": limit_type,
@@ -266,7 +266,7 @@ class MonitoringManager:
             self.counters[f"security_events_{event_type}"] += 1
 
             security_log = {
-                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
                 "level": severity,
                 "type": "security_event",
                 "event_type": event_type,
@@ -286,7 +286,7 @@ class MonitoringManager:
         """Log request metrics in structured format."""
         try:
             request_log = {
-                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
                 "level": "INFO",
                 "type": "request",
                 "method": metrics.method,
@@ -369,7 +369,7 @@ class MonitoringManager:
                 "message": message,
                 "severity": severity,
                 "details": details,
-                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
                 "acknowledged": False,
             }
 
@@ -470,7 +470,7 @@ class MonitoringManager:
                     metrics_data = {
                         "counters": dict(self.counters),
                         "gauges": self.gauges.copy(),
-                        "timestamp": datetime.now(timezone.utc).isoformat(),
+                        "timestamp": datetime.now(UTC).isoformat(),
                     }
 
                     async with aiohttp.ClientSession() as session:

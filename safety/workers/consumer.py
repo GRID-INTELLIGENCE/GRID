@@ -110,7 +110,7 @@ async def _process_message(msg_id: str, fields: dict[str, str]) -> None:
                     model_output=result.get("output", "") if isinstance(result, dict) else str(result),
                     original_input=input_text,
                     request_id=request_id,
-                    metadata=metadata
+                    metadata=metadata,
                 )
         except TimeoutError:
             logger.error("post_check_timeout", request_id=request_id)

@@ -22,7 +22,7 @@ import logging
 import os
 import time
 from contextlib import asynccontextmanager
-from datetime import datetime, timezone, timedelta
+from datetime import UTC, datetime, timedelta, timezone
 from typing import Any, AsyncIterator
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response
@@ -182,7 +182,7 @@ class ArenaAPIGateway:
         @self.app.get("/health")
         async def health_check():
             """Health check endpoint."""
-            return {"status": "healthy", "timestamp": datetime.now(timezone.utc).isoformat(), "version": "1.0.0"}
+            return {"status": "healthy", "timestamp": datetime.now(UTC).isoformat(), "version": "1.0.0"}
 
         # Service discovery endpoints
         @self.app.get("/services")
@@ -293,7 +293,7 @@ class RequestProcessingMiddleware(BaseHTTPMiddleware):
             "service": service_name,
             "status": "degraded_mode",
             "message": "We are experiencing technical difficulties. Please try again later.",
-            "timestamp": datetime.now(timezone.utc).isoformat()
+            "timestamp": datetime.now(UTC).isoformat()
         }
         
         # Service-specific fallbacks could be added here

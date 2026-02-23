@@ -283,7 +283,11 @@ class ResponseSynthesizer:
 
         # Add reasoning steps (compressed)
         prompt_parts.append("**Reasoning Process:**")
-        prompt_parts.extend(f"{step.step_number}. {step.content}" for step in reasoning_chain.steps if step.step_type != ReasoningStepType.UNCERTAINTY)
+        prompt_parts.extend(
+            f"{step.step_number}. {step.content}"
+            for step in reasoning_chain.steps
+            if step.step_type != ReasoningStepType.UNCERTAINTY
+        )
         prompt_parts.append("")
 
         # Add evidence

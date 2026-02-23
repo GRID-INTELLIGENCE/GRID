@@ -5,8 +5,6 @@ Policy and principles are loaded as code context; these tests assert runtime
 behavior (network allowed, external API allowed, protected tools not blocked).
 """
 
-import pytest
-
 # Import after potential path setup; policy loader finds repo root via __file__
 from tools.runtime_policy import (
     clear_cache,
@@ -51,8 +49,7 @@ def test_protected_tools_not_blocked():
     protected = set(get_protected_tools(reload=True))
     overlap = blocked & protected
     assert not overlap, (
-        f"Protected tools {overlap} must not be blocked; "
-        "open-source principles and freedom to think require access."
+        f"Protected tools {overlap} must not be blocked; open-source principles and freedom to think require access."
     )
 
 

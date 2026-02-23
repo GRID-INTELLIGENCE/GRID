@@ -24,6 +24,7 @@ from cognition.Pattern import (
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture
 def manager() -> AdvancedPatternManager:
     mgr = AdvancedPatternManager(learning_rate=0.1, decay=0.001)
@@ -47,14 +48,19 @@ def semantic_pattern(manager: AdvancedPatternManager) -> CognitivePattern:
 # Test: Empty input → low probability (skeptical default)
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.unit
 class TestEmptyInputSafety:
-    def test_empty_string_low_probability(self, manager: AdvancedPatternManager, semantic_pattern: CognitivePattern) -> None:
+    def test_empty_string_low_probability(
+        self, manager: AdvancedPatternManager, semantic_pattern: CognitivePattern
+    ) -> None:
         prob = manager.predict_proba("test_semantic", "")
         # Bias is -0.5 → sigmoid(-0.5) ≈ 0.378
         assert prob < 0.5, f"Empty input should be below 0.5, got {prob}"
 
-    def test_none_input_low_probability(self, manager: AdvancedPatternManager, semantic_pattern: CognitivePattern) -> None:
+    def test_none_input_low_probability(
+        self, manager: AdvancedPatternManager, semantic_pattern: CognitivePattern
+    ) -> None:
         prob = manager.predict_proba("test_semantic", None)
         assert prob < 0.5, f"None input should be below 0.5, got {prob}"
 
@@ -67,14 +73,19 @@ class TestEmptyInputSafety:
 # Test: Overflow protection
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.unit
 class TestOverflowProtection:
-    def test_huge_feature_value_no_crash(self, manager: AdvancedPatternManager, semantic_pattern: CognitivePattern) -> None:
+    def test_huge_feature_value_no_crash(
+        self, manager: AdvancedPatternManager, semantic_pattern: CognitivePattern
+    ) -> None:
         """Feature value of 1,000,000 must not cause OverflowError."""
         prob = manager.predict_proba("test_semantic", {"extreme_feature": 1_000_000})
         assert 0.0 <= prob <= 1.0
 
-    def test_negative_extreme_no_crash(self, manager: AdvancedPatternManager, semantic_pattern: CognitivePattern) -> None:
+    def test_negative_extreme_no_crash(
+        self, manager: AdvancedPatternManager, semantic_pattern: CognitivePattern
+    ) -> None:
         prob = manager.predict_proba("test_semantic", {"extreme_feature": -1_000_000})
         assert 0.0 <= prob <= 1.0
 
@@ -88,6 +99,7 @@ class TestOverflowProtection:
 # ---------------------------------------------------------------------------
 # Test: Learning convergence
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.unit
 class TestLearningConvergence:
@@ -122,9 +134,7 @@ class TestLearningConvergence:
         final_prob = manager.predict_proba("test_semantic", "urgent error")
         assert final_prob < mid_prob, f"Expected decrease: {mid_prob} → {final_prob}"
 
-    def test_samples_seen_increments(
-        self, manager: AdvancedPatternManager, semantic_pattern: CognitivePattern
-    ) -> None:
+    def test_samples_seen_increments(self, manager: AdvancedPatternManager, semantic_pattern: CognitivePattern) -> None:
         for _ in range(5):
             manager.learn_from_match("test_semantic", "urgent", actual_label=1.0)
 
@@ -136,6 +146,7 @@ class TestLearningConvergence:
 # ---------------------------------------------------------------------------
 # Test: L2 decay reduces weights on active features
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.unit
 class TestL2Decay:
@@ -168,14 +179,13 @@ class TestL2Decay:
 
         w_after_decay = state["weights"]["alpha"]
         # With near-zero error, decay should have shrunk the weight
-        assert w_after_decay < w_after_train, (
-            f"Decay should shrink weight: {w_after_train} → {w_after_decay}"
-        )
+        assert w_after_decay < w_after_train, f"Decay should shrink weight: {w_after_train} → {w_after_decay}"
 
 
 # ---------------------------------------------------------------------------
 # Test: learning_enabled guard
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.unit
 class TestLearningDisabled:
@@ -199,6 +209,7 @@ class TestLearningDisabled:
 # ---------------------------------------------------------------------------
 # Test: JSON serialisability
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.unit
 class TestJSONPersistence:

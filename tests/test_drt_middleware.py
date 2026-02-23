@@ -633,7 +633,7 @@ class TestDRTAPIIntegration:
     def test_drt_attack_vector_management(self, test_app_with_drt):
         """Test adding and managing attack vectors via API."""
         client = test_app_with_drt["client"]
-        middleware = test_app_with_drt["middleware"]
+        test_app_with_drt["middleware"]
 
         # Initially should have no attack vectors
         initial_status = client.get("/drt/status").json()
@@ -707,7 +707,7 @@ class TestDRTAPIIntegration:
     def test_false_positive_marking(self, test_app_with_drt):
         """Test marking violations as false positives."""
         client = test_app_with_drt["client"]
-        middleware = test_app_with_drt["middleware"]
+        test_app_with_drt["middleware"]
 
         # Add an attack vector
         attack_vector_data = {"path_pattern": "/api/test", "method": "POST", "headers": ["content-type"]}
@@ -720,11 +720,6 @@ class TestDRTAPIIntegration:
         # In a real scenario, we'd need to trigger an actual violation
 
         # Try to mark a violation as false positive (using a mock violation ID)
-        fp_data = {
-            "violation_id": "mock-violation-id",
-            "reason": "This was legitimate admin access",
-            "confidence": 0.95,
-        }
 
         # Note: This would normally require a real violation ID from the database
         # For this test, we're just checking the endpoint exists and accepts the format

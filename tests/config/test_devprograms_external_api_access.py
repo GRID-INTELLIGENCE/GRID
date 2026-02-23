@@ -6,9 +6,9 @@ access to ideas, AI providers, and the open web is protected. Policy is defined
 in .cursor/devprograms/GLOBAL_CONFIG.md; this test asserts the config state
 matches those values (no restriction of external_api/network by default).
 """
-from pathlib import Path
-import re
 
+import re
+from pathlib import Path
 
 # Path to the single source of truth (repo root relative to this file).
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
@@ -62,8 +62,7 @@ def test_global_blocked_tools_do_not_include_external_api_or_network():
         "external API access is required for AI providers worldwide."
     )
     assert "network" not in blocked, (
-        "Global blocked_tools must not contain 'network'; "
-        "network access is required for AI providers worldwide."
+        "Global blocked_tools must not contain 'network'; network access is required for AI providers worldwide."
     )
 
 
@@ -81,9 +80,7 @@ def test_program_blocks_do_not_block_external_api_or_network():
             f"Program block at line ~{line_no} must not block 'external_api'; "
             "access to AI providers worldwide must be maintained."
         )
-        assert "network" not in blocked, (
-            f"Program block at line ~{line_no} must not block 'network'."
-        )
+        assert "network" not in blocked, f"Program block at line ~{line_no} must not block 'network'."
         assert "network_connection" not in blocked, (
             f"Program block at line ~{line_no} must not block 'network_connection'."
         )
@@ -151,9 +148,7 @@ def test_principles_doc_exists_and_enshrines_rights():
     text = principles_path.read_text(encoding="utf-8")
     assert "transparency" in text.lower(), "PRINCIPLES must mention transparency"
     assert "openness" in text.lower(), "PRINCIPLES must mention openness"
-    assert "access" in text.lower() or "AI providers" in text, (
-        "PRINCIPLES must affirm access to AI providers / rights"
-    )
+    assert "access" in text.lower() or "AI providers" in text, "PRINCIPLES must affirm access to AI providers / rights"
 
 
 def test_global_config_code_quality_meets_2026_standards():
@@ -165,9 +160,7 @@ def test_global_config_code_quality_meets_2026_standards():
     assert "ruff" in global_block and "formatting" in global_block, (
         "code_quality.formatting must reference ruff (2026 standard)"
     )
-    assert "max_line_length: 120" in global_block or "max_line_length:120" in global_block.replace(
-        " ", ""
-    ), (
+    assert "max_line_length: 120" in global_block or "max_line_length:120" in global_block.replace(" ", ""), (
         "code_quality.max_line_length must be 120 (2026 standard)"
     )
 

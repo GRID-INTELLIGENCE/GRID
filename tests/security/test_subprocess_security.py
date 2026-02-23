@@ -55,17 +55,20 @@ class TestSecureSubprocess:
 
     def test_path_validation_blocks_non_allowed_directory(self) -> None:
         """Test that commands cannot run in non-allowed directories."""
-        runner = SecureSubprocess(allowed_directories=["/tmp"])
+        # Use a real directory but don't whitelist it
+        temp_dir = tempfile.gettempdir()
+        runner = SecureSubprocess(allowed_directories=[str(Path.cwd())])
 
         with pytest.raises(SubprocessSecurityError, match="not in allowed directories"):
-            runner.run(["python", "--version"], cwd="/root", timeout=5)
+            runner.run(["python", "--version"], cwd=temp_dir, timeout=5)
 
     def test_path_validation_allows_all_when_empty(self) -> None:
         """Test that empty allowed_directories allows all directories."""
         runner = SecureSubprocess(allowed_directories=[])
 
         # Should not raise
-        result = runner.run(["python", "--version"], cwd="/tmp", timeout=5)
+        temp_dir = tempfile.gettempdir()
+        result = runner.run(["python", "--version"], cwd=temp_dir, timeout=5)
         assert isinstance(result, SubprocessResult)
 
     def test_command_injection_prevention_string_command(self) -> None:

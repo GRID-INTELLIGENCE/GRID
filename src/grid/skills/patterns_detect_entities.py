@@ -30,13 +30,13 @@ def _simple_entity_detection(text: str, entity_types: list[str]) -> list[dict[st
     if "PERSON" in entity_types:
         person_pattern = r"\b[A-Z][a-z]+ [A-Z][a-z]+\b"
         entities.extend(
-                {
-                    "text": match.group(),
-                    "type": "PERSON",
-                    "start": match.start(),
-                    "end": match.end(),
-                    "confidence": 0.75,  # Lower confidence for heuristic
-                }
+            {
+                "text": match.group(),
+                "type": "PERSON",
+                "start": match.start(),
+                "end": match.end(),
+                "confidence": 0.75,  # Lower confidence for heuristic
+            }
             for match in re.finditer(person_pattern, text)
         )
 
@@ -44,13 +44,13 @@ def _simple_entity_detection(text: str, entity_types: list[str]) -> list[dict[st
     if "ORG" in entity_types:
         org_pattern = r"\b[A-Z][a-zA-Z]*(?:\s+[A-Z][a-zA-Z]*)*\s+(?:Corp|Inc|LLC|Ltd|Co|Company|Organization)\b"
         entities.extend(
-                {
-                    "text": match.group(),
-                    "type": "ORG",
-                    "start": match.start(),
-                    "end": match.end(),
-                    "confidence": 0.80,
-                }
+            {
+                "text": match.group(),
+                "type": "ORG",
+                "start": match.start(),
+                "end": match.end(),
+                "confidence": 0.80,
+            }
             for match in re.finditer(org_pattern, text)
         )
 
@@ -58,13 +58,13 @@ def _simple_entity_detection(text: str, entity_types: list[str]) -> list[dict[st
     if "DOMAIN" in entity_types:
         domain_pattern = r"\b(?:machine learning|artificial intelligence|data science|software engineering|web development|cloud computing|devops|cybersecurity)\b"
         entities.extend(
-                {
-                    "text": match.group(),
-                    "type": "DOMAIN",
-                    "start": match.start(),
-                    "end": match.end(),
-                    "confidence": 0.85,
-                }
+            {
+                "text": match.group(),
+                "type": "DOMAIN",
+                "start": match.start(),
+                "end": match.end(),
+                "confidence": 0.85,
+            }
             for match in re.finditer(domain_pattern, text, re.IGNORECASE)
         )
 

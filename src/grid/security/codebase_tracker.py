@@ -47,7 +47,9 @@ class CodebaseTracker:
             if not self.git_dir.exists():
                 return None
             return subprocess.check_output(  # noqa: S603 subprocess call is intentional
-                ["git", "-C", str(self.root_dir), "rev-parse", "HEAD"], text=True, stderr=subprocess.STDOUT  # noqa: S607 partial path is intentional
+                ["git", "-C", str(self.root_dir), "rev-parse", "HEAD"],
+                text=True,
+                stderr=subprocess.STDOUT,  # noqa: S607 partial path is intentional
             ).strip()
         except Exception:
             return None
@@ -83,7 +85,10 @@ class CodebaseTracker:
 
         # Check for modified files (quick poll)
         modified_files = self._get_modified_files()
-        events.extend(ActivityEvent(event_type="file_modified", path=file_path, details={"polled": True}) for file_path in modified_files)
+        events.extend(
+            ActivityEvent(event_type="file_modified", path=file_path, details={"polled": True})
+            for file_path in modified_files
+        )
 
         self._last_checked_time = time.time()
         return events
@@ -101,7 +106,10 @@ class CodebaseTracker:
 
         # Check for modified files (quick poll)
         modified_files = await self._get_modified_files_async()
-        events.extend(ActivityEvent(event_type="file_modified", path=file_path, details={"polled": True}) for file_path in modified_files)
+        events.extend(
+            ActivityEvent(event_type="file_modified", path=file_path, details={"polled": True})
+            for file_path in modified_files
+        )
 
         self._last_checked_time = time.time()
         return events
@@ -110,7 +118,8 @@ class CodebaseTracker:
         """Capture details about a new commit."""
         try:
             show_output = subprocess.check_output(  # noqa: S603 subprocess call is intentional
-                ["git", "-C", str(self.root_dir), "show", "--name-only", "--format=%s", commit_hash], text=True  # noqa: S607 partial path is intentional
+                ["git", "-C", str(self.root_dir), "show", "--name-only", "--format=%s", commit_hash],
+                text=True,  # noqa: S607 partial path is intentional
             ).splitlines()
 
             message = show_output[0]
@@ -123,7 +132,8 @@ class CodebaseTracker:
                     "message": message,
                     "files": files,
                     "author": subprocess.check_output(  # noqa: S603 subprocess call is intentional
-                        ["git", "-C", str(self.root_dir), "show", "-s", "--format=%an", commit_hash], text=True  # noqa: S607 partial path is intentional
+                        ["git", "-C", str(self.root_dir), "show", "-s", "--format=%an", commit_hash],
+                        text=True,  # noqa: S607 partial path is intentional
                     ).strip(),
                 },
                 severity="info",
@@ -135,7 +145,8 @@ class CodebaseTracker:
         """Get list of files modified since last check using git status."""
         try:
             output = subprocess.check_output(  # noqa: S603 subprocess call is intentional
-                ["git", "-C", str(self.root_dir), "status", "--porcelain"], text=True  # noqa: S607 partial path is intentional
+                ["git", "-C", str(self.root_dir), "status", "--porcelain"],
+                text=True,  # noqa: S607 partial path is intentional
             ).splitlines()
 
             modified = []

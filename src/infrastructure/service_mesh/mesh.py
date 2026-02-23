@@ -197,6 +197,7 @@ class ServiceRegistry:
         """Save registry to disk."""
         try:
             import aiofiles
+
             data = {name: [instance.to_dict() for instance in instances] for name, instances in self.services.items()}
 
             async with aiofiles.open(self.config_file, "w") as f:
@@ -208,6 +209,7 @@ class ServiceRegistry:
         """Load registry from disk."""
         try:
             import aiofiles
+
             async with aiofiles.open(self.config_file) as f:
                 content = await f.read()
                 data = json.loads(content)
@@ -424,7 +426,7 @@ class ServiceMesh:
             "status": "degraded_mode",
             "message": "The service is currently unavailable. Returning simplified data.",
             "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-            "fallback": True
+            "fallback": True,
         }
 
         # Service-specific simplified data

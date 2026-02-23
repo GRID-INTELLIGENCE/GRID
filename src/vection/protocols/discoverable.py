@@ -170,7 +170,11 @@ class DiscoverableAdapter:
         data = self.to_dict()
         keys: list[str] = []
 
-        keys.extend(f"{key}:{data[key]}" for key in ("action", "type", "intent", "topic", "category") if key in data and data[key])
+        keys.extend(
+            f"{key}:{data[key]}"
+            for key in ("action", "type", "intent", "topic", "category")
+            if key in data and data[key]
+        )
 
         # Add type key
         keys.append(f"_type:{type(self._obj).__name__}")

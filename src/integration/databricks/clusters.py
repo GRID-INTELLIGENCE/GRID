@@ -84,13 +84,13 @@ class DatabricksClustersManager:
             List of cluster information
         """
         clusters = [
-                {
-                    "cluster_id": cluster.cluster_id,
-                    "cluster_name": cluster.cluster_name,
-                    "state": cluster.state,
-                    "num_workers": cluster.num_workers,
-                    "spark_version": cluster.spark_version,
-                }
+            {
+                "cluster_id": cluster.cluster_id,
+                "cluster_name": cluster.cluster_name,
+                "state": cluster.state,
+                "num_workers": cluster.num_workers,
+                "spark_version": cluster.spark_version,
+            }
             for cluster in self.client.workspace.clusters.list()
         ]
         return clusters

@@ -1,8 +1,9 @@
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
+import jwt
 import redis
-from jose import JWTError, jwt
+from jwt.exceptions import InvalidTokenError as JWTError
 from passlib.context import CryptContext
 
 from ...src.grid.core.config import settings

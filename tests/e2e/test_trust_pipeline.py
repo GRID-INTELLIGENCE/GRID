@@ -165,7 +165,9 @@ class TestSafetyFramework:
             user_id="test_operator",
         )
         assert len(report.violations) > 0
-        violation_categories = [v.category.value if hasattr(v.category, "value") else str(v.category) for v in report.violations]
+        violation_categories = [
+            v.category.value if hasattr(v.category, "value") else str(v.category) for v in report.violations
+        ]
         assert any("harmful" in cat.lower() for cat in violation_categories)
 
     @pytest.mark.anyio

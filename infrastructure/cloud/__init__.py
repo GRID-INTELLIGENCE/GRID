@@ -19,7 +19,7 @@ import logging
 import os
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import Enum, StrEnum
 from functools import lru_cache
 from types import TracebackType
 from typing import Any, TypeVar
@@ -51,7 +51,7 @@ def _parse_bool(value: str | None, default: bool = False) -> bool:
     return value.strip().lower() in {"true", "1", "yes", "y", "on"}
 
 
-class GeminiEnvironment(str, Enum):
+class GeminiEnvironment(StrEnum):
     """Gemini Studio deployment environments."""
 
     DEVELOPMENT = "development"
@@ -60,7 +60,7 @@ class GeminiEnvironment(str, Enum):
     LOCAL = "local"  # For pre-deployment testing
 
 
-class AuthMethod(str, Enum):
+class AuthMethod(StrEnum):
     """Supported authentication methods."""
 
     API_KEY = "api_key"
@@ -288,9 +288,7 @@ class GeminiAuthenticator:
             from google.auth.transport.requests import Request
 
             def _fetch() -> str:
-                credentials, _ = google.auth.default(
-                    scopes=["https://www.googleapis.com/auth/cloud-platform"]
-                )
+                credentials, _ = google.auth.default(scopes=["https://www.googleapis.com/auth/cloud-platform"])
                 if credentials.expired:
                     credentials.refresh(Request())
                 return credentials.token or ""
@@ -309,9 +307,7 @@ class GeminiAuthenticator:
             from google.auth.transport.requests import Request
             from google.oauth2 import service_account
 
-            path = self.config.service_account_path or os.environ.get(
-                "GOOGLE_APPLICATION_CREDENTIALS"
-            )
+            path = self.config.service_account_path or os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
             if path and os.path.isfile(path):
                 credentials = service_account.Credentials.from_service_account_file(
                     path, scopes=["https://www.googleapis.com/auth/cloud-platform"]
@@ -321,9 +317,7 @@ class GeminiAuthenticator:
             import google.auth
 
             def _adc_token() -> str:
-                creds, _ = google.auth.default(
-                    scopes=["https://www.googleapis.com/auth/cloud-platform"]
-                )
+                creds, _ = google.auth.default(scopes=["https://www.googleapis.com/auth/cloud-platform"])
                 if creds.expired:
                     creds.refresh(Request())
                 return creds.token or ""

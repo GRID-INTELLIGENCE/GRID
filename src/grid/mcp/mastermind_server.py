@@ -537,9 +537,9 @@ async def search_code(pattern: str, file_pattern: str = "*") -> dict[str, Any]:
 
         regex = re.compile(pattern, re.IGNORECASE)
 
-        all_files = await asyncio.to_thread(lambda: [
-            f for f in session.project_root.rglob(file_pattern) if f.is_file()
-        ])
+        all_files = await asyncio.to_thread(
+            lambda: [f for f in session.project_root.rglob(file_pattern) if f.is_file()]
+        )
         for file_path in all_files:
             if True:
                 try:

@@ -147,7 +147,9 @@ class OnDemandRAGEngine:
         if index_result["fallback"] > 0:
             degradation_reasons.append(f"{index_result['fallback']} chunks used fallback embedding provider")
         if index_result["simple_fallback"] > 0:
-            degradation_reasons.append(f"{index_result['simple_fallback']} chunks used word-frequency embedding (non-semantic)")
+            degradation_reasons.append(
+                f"{index_result['simple_fallback']} chunks used word-frequency embedding (non-semantic)"
+            )
 
         if self.hooks.on_chunked:
             self.hooks.on_chunked(chunk_count)
@@ -180,9 +182,11 @@ class OnDemandRAGEngine:
             if expand_result["degraded"]:
                 embedding_degraded = True
                 if expand_result["fallback"] > 0:
-                    degradation_reasons.append(f"expansion round {d+1}: {expand_result['fallback']} fallback")
+                    degradation_reasons.append(f"expansion round {d + 1}: {expand_result['fallback']} fallback")
                 if expand_result["simple_fallback"] > 0:
-                    degradation_reasons.append(f"expansion round {d+1}: {expand_result['simple_fallback']} simple_fallback")
+                    degradation_reasons.append(
+                        f"expansion round {d + 1}: {expand_result['simple_fallback']} simple_fallback"
+                    )
 
         # Final retrieval after expansions
         retrieved = self._retrieve(query_text, store, embedding_provider, top_k=top_k)
@@ -464,7 +468,10 @@ class OnDemandRAGEngine:
             _log = _logging.getLogger(__name__)
             _log.warning(
                 "Embedding quality degraded: %d/%d primary, %d fallback, %d simple_fallback",
-                primary_count, total, fallback_count, simple_fallback_count,
+                primary_count,
+                total,
+                fallback_count,
+                simple_fallback_count,
             )
 
         return {

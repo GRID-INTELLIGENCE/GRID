@@ -31,7 +31,7 @@ class OpenAILLM(BaseLLMProvider):
         import os
 
         self.model = model
-        self.api_key = (api_key or os.getenv("OPENAI_API_KEY", "")).strip()
+        self.api_key = (api_key or os.getenv("OPENAI_API_KEY") or "").strip()
         self.base_url = base_url
         self.timeout = timeout
         if not self.api_key:

@@ -538,15 +538,15 @@ class DatabricksVectorStore(BaseVectorStore):
             return {"ids": [], "documents": [], "metadatas": [], "distances": []}
 
         scored = [
-                {
-                    "id": row[0],
-                    "document_id": row[1],
-                    "chunk_index": row[2],
-                    "text": row[3],
-                    "path": row[4],
-                    "metadata": json.loads(row[5]) if row[5] else {},
-                    "distance": float(row[6]),
-                }
+            {
+                "id": row[0],
+                "document_id": row[1],
+                "chunk_index": row[2],
+                "text": row[3],
+                "path": row[4],
+                "metadata": json.loads(row[5]) if row[5] else {},
+                "distance": float(row[6]),
+            }
             for row in rows
         ]
 

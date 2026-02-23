@@ -313,7 +313,11 @@ class VectionContext:
         Returns:
             List of salient signals.
         """
-        return [signal for signal in self.accumulated_signals if hasattr(signal, "effective_salience") and signal.effective_salience >= threshold]
+        return [
+            signal
+            for signal in self.accumulated_signals
+            if hasattr(signal, "effective_salience") and signal.effective_salience >= threshold
+        ]
 
     def get_anchors_by_type(self, anchor_type: AnchorType) -> list[Anchor]:
         """Get anchors of a specific type.

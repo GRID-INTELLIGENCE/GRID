@@ -49,5 +49,5 @@ class VersioningMiddleware(BaseHTTPMiddleware):
         version_meta = get_version_metadata(version_str)
         if version_meta:
             version_meta.inject_headers(response)
-        
+
         return response

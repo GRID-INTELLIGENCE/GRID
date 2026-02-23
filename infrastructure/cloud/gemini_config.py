@@ -8,11 +8,11 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 
-class GeminiModel(str, Enum):
+class GeminiModel(StrEnum):
     """Available Gemini model variants."""
 
     GEMINI_PRO = "gemini-pro"
@@ -22,7 +22,7 @@ class GeminiModel(str, Enum):
     GEMINI_PRO_15 = "gemini-1.5-pro"
 
 
-class DeploymentStage(str, Enum):
+class DeploymentStage(StrEnum):
     """Deployment stages for cloud app lifecycle."""
 
     NOT_DEPLOYED = "not_deployed"

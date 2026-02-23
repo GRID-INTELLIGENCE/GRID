@@ -154,6 +154,16 @@ class ChromaDBVectorStore(BaseVectorStore):
         except Exception as e:
             print(f"Warning: Could not reset collection {self.collection_name}: {e}")
 
+    def _ensure_collection(self) -> None:
+        """Ensure the collection exists, re-opening it if needed."""
+        try:
+            self.collection = self.client.get_collection(name=self.collection_name)
+        except Exception:
+            self.collection = self.client.create_collection(
+                name=self.collection_name,
+                metadata={"hnsw:space": "cosine"},
+            )
+
     def get_dimension(self) -> int:
         """Get the dimension of embeddings in the collection."""
         try:

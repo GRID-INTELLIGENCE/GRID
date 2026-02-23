@@ -57,7 +57,7 @@ dependencies = [
     # Safety (Cognitive Privacy Shield)
     "grid-safety>=1.0.0",
     # Security & Authentication
-    "python-jose[cryptography]>=3.3.0",
+    "PyJWT[crypto]>=2.8.0",
     "bcrypt>=4.1.0",
     "email-validator>=2.1.0.post1",
     "stripe>=14.0.1",
@@ -149,6 +149,7 @@ dev = [
     "mypy>=1.5.1",
     "asyncpg-stubs>=0.31.1",
     "pre-commit>=4.5.1",
+    "pip-audit>=2.10.0",
 ]
 
 [build-system]
@@ -208,6 +209,11 @@ torch = { index = "pytorch-cpu" }
 torchvision = { index = "pytorch-cpu" }
 torchaudio = { index = "pytorch-cpu" }
 
+# Override: grid-safety 1.0.0 on PyPI still depends on python-jose[cryptography]
+# which pulls in ecdsa (CVE-2024-23342). Force-override to use local safety/ source
+# until grid-safety 1.0.1 is published with the fix.
+grid-safety = { path = "safety" }
+
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests", "safety/tests", "boundaries/tests"]
@@ -255,6 +261,7 @@ addopts = [
     "--strict-markers",
     "-p", "cacheprovider",
     "-m", "not scratch and not flaky",
+    "--ignore=tests/scratch",
     "--tb=short",
     "-q",
     "-n", "auto",
@@ -266,6 +273,8 @@ addopts = [
 # Suppress warnings
 filterwarnings = [
     "ignore::DeprecationWarning:pkg_resources",
+    "ignore::DeprecationWarning:google.rpc.*",
+    "ignore:.*pkg_resources is deprecated.*:UserWarning",
     "ignore::DeprecationWarning:sqlalchemy.*",
     "ignore::DeprecationWarning:pydantic.*",
 ]
@@ -358,6 +367,8 @@ extend-ignore = [
 "**/mcp/*.py" = ["F401"]  # Optional RAG imports
 "**/audit_logger.py" = ["F401"]  # Optional cloud logging
 "**/*learning*.py" = ["F401"]  # Optional learning imports
+"tests/**/*.py" = ["F401", "E722", "S110", "B017", "ASYNC251", "ASYNC110", "ASYNC210", "ASYNC220", "ASYNC221", "ASYNC230", "ASYNC240", "S311", "S603", "S607", "S108", "S324", "PERF401"]  # test patterns
+"**/verify*.py" = ["F841", "PERF102"]  # Verify scripts may have unused vars / dict iteration
 
 [tool.ruff.lint.isort]
 known-first-party = ["grid", "application", "cognitive", "tools"]

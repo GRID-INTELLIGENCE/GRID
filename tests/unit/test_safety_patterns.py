@@ -16,11 +16,10 @@ import importlib.util
 import os
 import sys
 
-import pytest
-
 # ── Direct file-based imports ────────────────────────────────────────────
 # Root-level security/ package shadows src/security/, so we load by path.
 _SRC = os.path.join(os.path.dirname(__file__), "..", "..", "src")
+
 
 def _load_module(name: str, rel_path: str):
     """Load a module by file path to avoid package shadowing."""
@@ -31,10 +30,12 @@ def _load_module(name: str, rel_path: str):
     spec.loader.exec_module(mod)
     return mod
 
+
 _patterns = _load_module("_safety_patterns", "security/ai_safety/patterns.py")
 
 # Build a synthetic package so framework.py's `from .patterns import ...` works.
 import types
+
 _ai_safety_dir = os.path.normpath(os.path.join(_SRC, "security", "ai_safety"))
 
 _sec_pkg = types.ModuleType("security")
@@ -77,8 +78,7 @@ class TestSeedSetIntegrity:
         for category, entries in _patterns.HARMFUL_PATTERNS.items():
             for token, confidence in entries:
                 assert confidence == "high", (
-                    f"Seed token '{token}' in '{category}' has confidence "
-                    f"'{confidence}' — seed set must be all HIGH"
+                    f"Seed token '{token}' in '{category}' has confidence '{confidence}' — seed set must be all HIGH"
                 )
 
     def test_no_duplicate_tokens(self):
@@ -102,18 +102,14 @@ class TestTokenQuality:
         cholito_endings = ("করব", "বানাব", "দেব", "মারব", "করো", "বানাও", "দাও")
         for token in _patterns.ALL_TOKENS:
             for ending in cholito_endings:
-                assert not token.endswith(ending), (
-                    f"Token '{token}' ends with Cholito verb form '{ending}'"
-                )
+                assert not token.endswith(ending), f"Token '{token}' ends with Cholito verb form '{ending}'"
 
     def test_no_targeting_pronouns(self):
         """No second-person targeting pronouns."""
         pronouns = ("তোর", "তোকে", "তুই", "তুমি", "আমি", "আমার")
         for token in _patterns.ALL_TOKENS:
             for pronoun in pronouns:
-                assert pronoun not in token, (
-                    f"Token '{token}' contains targeting pronoun '{pronoun}'"
-                )
+                assert pronoun not in token, f"Token '{token}' contains targeting pronoun '{pronoun}'"
 
 
 class TestCheckContent:
@@ -161,7 +157,6 @@ class TestCheckContent:
 
 
 class TestGetPatternsByCategory:
-
     def test_returns_tokens_for_valid_category(self):
         tokens = _patterns.get_patterns_by_category("distress_signals")
         assert len(tokens) == 3
@@ -177,7 +172,8 @@ import asyncio
 
 _fw_path = os.path.normpath(os.path.join(_SRC, "security/ai_safety/framework.py"))
 _fw_spec = importlib.util.spec_from_file_location(
-    "security.ai_safety.framework", _fw_path,
+    "security.ai_safety.framework",
+    _fw_path,
     submodule_search_locations=[],
 )
 _framework = importlib.util.module_from_spec(_fw_spec)
@@ -205,57 +201,39 @@ class TestFrameworkSafetyPatterns:
     def test_moderator_detects_harmful_token(self):
         moderator = _framework.ContentModerator()
         violations = _run(moderator.analyze_content("সেক্সটর্শন"))
-        safety_hits = [
-            v for v in violations
-            if v.evidence and v.evidence.get("confidence_tier") == "high"
-        ]
+        safety_hits = [v for v in violations if v.evidence and v.evidence.get("confidence_tier") == "high"]
         assert len(safety_hits) >= 1
 
     def test_moderator_no_violation_on_benign(self):
         moderator = _framework.ContentModerator()
         violations = _run(moderator.analyze_content("আজকের আবহাওয়া খুব সুন্দর"))
-        safety_hits = [
-            v for v in violations
-            if v.evidence and "confidence_tier" in v.evidence
-        ]
+        safety_hits = [v for v in violations if v.evidence and "confidence_tier" in v.evidence]
         assert safety_hits == []
 
     def test_distress_signal_severity_is_high(self):
         moderator = _framework.ContentModerator()
         violations = _run(moderator.analyze_content("আত্মহত্যা"))
-        ds = [
-            v for v in violations
-            if v.evidence and v.evidence.get("category") == "distress_signals"
-        ]
+        ds = [v for v in violations if v.evidence and v.evidence.get("category") == "distress_signals"]
         assert len(ds) >= 1
         assert ds[0].severity == _framework.ThreatLevel.HIGH
 
     def test_violence_severity_is_critical(self):
         moderator = _framework.ContentModerator()
         violations = _run(moderator.analyze_content("গণহত্যা"))
-        vl = [
-            v for v in violations
-            if v.evidence and v.evidence.get("category") == "violence"
-        ]
+        vl = [v for v in violations if v.evidence and v.evidence.get("category") == "violence"]
         assert len(vl) >= 1
         assert vl[0].severity == _framework.ThreatLevel.CRITICAL
 
     def test_financial_fraud_severity_is_medium(self):
         moderator = _framework.ContentModerator()
         violations = _run(moderator.analyze_content("ফিশিং"))
-        ff = [
-            v for v in violations
-            if v.evidence and v.evidence.get("category") == "financial_fraud"
-        ]
+        ff = [v for v in violations if v.evidence and v.evidence.get("category") == "financial_fraud"]
         assert len(ff) >= 1
         assert ff[0].severity == _framework.ThreatLevel.MEDIUM
 
     def test_confidence_score_is_09_for_high_tier(self):
         moderator = _framework.ContentModerator()
         violations = _run(moderator.analyze_content("লিঞ্চিং"))
-        hits = [
-            x for x in violations
-            if x.evidence and x.evidence.get("confidence_tier") == "high"
-        ]
+        hits = [x for x in violations if x.evidence and x.evidence.get("confidence_tier") == "high"]
         assert len(hits) >= 1
         assert hits[0].confidence == 0.9

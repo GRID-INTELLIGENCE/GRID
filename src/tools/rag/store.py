@@ -160,15 +160,15 @@ Answer:"""
         ]
 
         lines.extend(
-                json.dumps(
-                    {
-                        "type": "document",
-                        "id": self.ids[i],
-                        "doc": self.docs[i],
-                        "embedding": self.embeddings[i],
-                        "metadata": self.metadatas[i],
-                    }
-                )
+            json.dumps(
+                {
+                    "type": "document",
+                    "id": self.ids[i],
+                    "doc": self.docs[i],
+                    "embedding": self.embeddings[i],
+                    "metadata": self.metadatas[i],
+                }
+            )
             for i in range(len(self.ids))
         )
         with open(path, "w") as f:
@@ -216,14 +216,14 @@ Answer:"""
     def to_ndjson(self) -> list[str]:
         """Convert to NDJSON format."""
         lines = [
-                json.dumps(
-                    {
-                        "id": self.ids[i],
-                        "doc": self.docs[i],
-                        "embedding": self.embeddings[i],
-                        "metadata": self.metadatas[i],
-                    }
-                )
+            json.dumps(
+                {
+                    "id": self.ids[i],
+                    "doc": self.docs[i],
+                    "embedding": self.embeddings[i],
+                    "metadata": self.metadatas[i],
+                }
+            )
             for i in range(len(self.ids))
         ]
         return lines

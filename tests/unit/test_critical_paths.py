@@ -341,7 +341,7 @@ class TestAgenticCaseProcessing:
         from grid.agentic.agentic_system import AgenticSystem
         from grid.agentic.schemas import CaseCreateRequest
 
-        system = AgenticSystem(
+        AgenticSystem(
             knowledge_base_path=knowledge_base_path,
             event_bus=mock_event_bus,
             enable_cognitive=False,

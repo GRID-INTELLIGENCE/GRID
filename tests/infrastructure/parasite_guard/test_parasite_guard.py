@@ -36,7 +36,7 @@ async def test_middleware_passthrough():
     app = AsyncMock()
     config = ParasiteGuardConfig(enabled=True)
 
-    detector = MockDetector(trigger=False)
+    MockDetector(trigger=False)
 
     # We need to mock _create_detector_chain to use our MockDetector
     with patch("infrastructure.metrics.REGISTRY"):
