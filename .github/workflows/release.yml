@@ -260,7 +260,7 @@ jobs:
 
     steps:
       - name: "Download Artifacts"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: dist-packages
           path: dist/
@@ -285,13 +285,13 @@ jobs:
         uses: actions/checkout@v4
 
       - name: "Download Artifacts"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: dist-packages
           path: dist/
 
       - name: "Download Release Notes"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: release-notes
 
