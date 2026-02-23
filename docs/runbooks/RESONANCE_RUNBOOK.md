@@ -43,12 +43,12 @@ The Resonance API provides the "canvas flip" communication layer for the GRID sy
 
 2. **Check if skills registry is healthy**:
    ```powershell
-   .\venv\Scripts\python.exe -m grid skills list
+   .\.venv\Scripts\python.exe -m grid skills list
    ```
 
 3. **Check if RAG index is corrupt** (if `use_rag=true` requests failing):
    ```powershell
-   .\venv\Scripts\python.exe -m tools.rag.cli status
+   .\.venv\Scripts\python.exe -m tools.rag.cli status
    ```
 
 4. **Check service memory/CPU**:
@@ -64,7 +64,7 @@ The Resonance API provides the "canvas flip" communication layer for the GRID sy
    Stop-Process -Name python -Force
 
    # Start fresh
-   .\venv\Scripts\python.exe -m application.mothership.main
+   .\.venv\Scripts\python.exe -m application.mothership.main
    ```
 
 2. **Disable the endpoint via feature flag** (if issue is in definitive step):
@@ -75,7 +75,7 @@ The Resonance API provides the "canvas flip" communication layer for the GRID sy
 
 3. **Rebuild RAG index** (if RAG-related):
    ```powershell
-   .\venv\Scripts\python.exe -m tools.rag.cli index . --rebuild
+   .\.venv\Scripts\python.exe -m tools.rag.cli index . --rebuild
    ```
 
 ---
@@ -167,7 +167,7 @@ If the Resonance API is causing issues:
 
 2. **Full rollback** (use rollback script):
    ```powershell
-   .\venv\Scripts\python.exe scripts\rollback_resonance.py
+   .\.venv\Scripts\python.exe scripts\rollback_resonance.py
    ```
 
 3. **Git rollback** (if code changes are the issue):

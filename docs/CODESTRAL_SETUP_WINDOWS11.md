@@ -52,21 +52,21 @@ $env:gridstral_code_api_key = "your_api_key_here"
 
 ### 4. Create and Activate Virtual Environment
 
-```powershell
-# Create virtual environment
-python -m venv .venv
+This project uses [UV](https://docs.astral.sh/uv/) for the virtual environment. From the project root (where `pyproject.toml` lives):
 
-# Activate the environment
+```powershell
+# Create .venv and install dependencies (UV uses .python-version and uv.lock)
+uv sync --group dev --group test
+
+# Activate the environment (optional; you can also use `uv run <command>`)
 .\.venv\Scripts\Activate.ps1
 ```
 
+If you need only Codestral-related deps, run `uv sync` then use `uv run` for scripts. Do not use `python -m venv` or `pip install`; use UV so the environment matches the lockfile.
+
 ### 5. Install Required Packages
 
-Install the minimal Codestral dependencies from the dedicated manifest:
-
-```powershell
-pip install -r requirements.codestral.txt
-```
+Dependencies are managed by UV. After `uv sync`, required packages are already installed. For a minimal Codestral-only install in a separate project, you could use the dedicated manifest with `uv pip install -r data/requirements.codestral.txt` from the repo root; in this repo, prefer `uv sync` so the single `.venv` stays in sync with `uv.lock`.
 
 ### 6. Create the Client Script
 

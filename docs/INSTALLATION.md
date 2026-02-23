@@ -97,39 +97,33 @@ cd grid
 
 ### Step 3: Create Virtual Environment
 
-#### Windows (PowerShell)
+This project uses [UV](https://docs.astral.sh/uv/) as the standard environment manager. From the project root:
+
+#### All platforms (recommended)
+```bash
+# Creates .venv from .python-version and installs deps from uv.lock
+uv sync --group dev --group test
+```
+
+#### Activate (optional; you can also use `uv run <command>`)
+
+**Windows (PowerShell):**
 ```powershell
-# Create virtual environment
-python -m venv .venv
-
-# Activate
 .\.venv\Scripts\Activate.ps1
-
 # If execution policy error:
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
 
-#### Unix/macOS
+**Unix/macOS:**
 ```bash
-# Create virtual environment
-python3 -m venv .venv
-
-# Activate
 source .venv/bin/activate
 ```
 
+Do not use `python -m venv` or `pip install` for this repo; use UV so the environment matches the lockfile. See [VENV_SETUP.md](VENV_SETUP.md) for details.
+
 ### Step 4: Install Dependencies
 
-```bash
-# Install core dependencies only
-pip install -e .
-
-# Install with development tools
-pip install -e ".[dev]"
-
-# Install all features
-pip install -e ".[dev,api,ml]"
-```
+With UV (recommended), dependencies are already installed after `uv sync --group dev --group test`. To add packages, use `uv add <package>` (or `uv add --group dev <package>`) so they are tracked in `pyproject.toml` and `uv.lock`.
 
 ### Step 5: Configure Environment
 

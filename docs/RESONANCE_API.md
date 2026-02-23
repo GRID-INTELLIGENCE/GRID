@@ -87,7 +87,7 @@ This is the "library" / "collective" interface: it converts a mid-process ambigu
 ### Run API server
 
 ```powershell
-.\venv\Scripts\python.exe -m application.mothership.main
+.\.venv\Scripts\python.exe -m application.mothership.main
 ```
 
 Then open:
@@ -97,7 +97,7 @@ Then open:
 ### Test the resonance API
 
 ```powershell
-.\venv\Scripts\python.exe -m pytest tests\api\test_router.py -q
+.\.venv\Scripts\python.exe -m pytest tests\api\test_router.py -q
 ```
 
 ## Notes

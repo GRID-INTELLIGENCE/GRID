@@ -559,12 +559,13 @@ The repository contains:
 ## Quick Start
 ```bash
 cd e:\grid
-python -m venv venv
-venv\Scripts\activate
-make install-dev   # install dependencies
+uv sync --group dev --group test   # creates .venv, installs from uv.lock
+.\.venv\Scripts\Activate.ps1       # optional; or use uv run <command>
+make install-dev   # install dependencies (if not using uv sync)
 make setup         # initial setup
 make test-cov      # run tests with coverage (>80%)
 ```
+Project standard: use UV and `.venv` (see [VENV_SETUP.md](VENV_SETUP.md)). Do not use `python -m venv` or `pip` for this repo.
 
 ## Development
 - Run `make format` to auto‑format code.
