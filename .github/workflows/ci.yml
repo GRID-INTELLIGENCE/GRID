@@ -161,6 +161,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: [secrets-scan]
+    env:
+      UV_TORCH_BACKEND: "cpu"  # Use CPU-only torch to avoid 2GB CUDA download
     steps:
       - name: "Checkout"
         uses: actions/checkout@v4
@@ -176,7 +178,7 @@ jobs:
       - name: "Install Python"
         run: uv python install
 
-      - name: "Sync dependencies"
+      - name: "Sync dependencies (CPU only)"
         run: uv sync --frozen --group test
 
       - name: "Verify Python version"
@@ -220,6 +222,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     needs: [smoke-test, lint]
+    env:
+      UV_TORCH_BACKEND: "cpu"  # Use CPU-only torch to avoid 2GB CUDA download
     steps:
       - name: "Checkout"
         uses: actions/checkout@v4
@@ -235,7 +239,7 @@ jobs:
       - name: "Install Python"
         run: uv python install
 
-      - name: "Sync dependencies"
+      - name: "Sync dependencies (CPU only)"
         run: uv sync --frozen --group dev --group test
 
       - name: "Run unit tests"
@@ -260,6 +264,8 @@ jobs:
     needs: [test]
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || github.event.inputs.run_slow_tests == 'true'
     continue-on-error: true
+    env:
+      UV_TORCH_BACKEND: "cpu"
     steps:
       - name: "Checkout"
         uses: actions/checkout@v4
@@ -272,7 +278,7 @@ jobs:
           enable-cache: true
           cache-dependency-glob: "uv.lock"
 
-      - name: "Sync dependencies"
+      - name: "Sync dependencies (CPU only)"
         run: uv sync --frozen --group test
 
       - name: "Run integration tests"
@@ -287,6 +293,8 @@ jobs:
     timeout-minutes: 15
     needs: [test]
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    env:
+      UV_TORCH_BACKEND: "cpu"
     steps:
       - name: "Checkout"
         uses: actions/checkout@v4

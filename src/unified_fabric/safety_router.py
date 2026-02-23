@@ -94,7 +94,15 @@ class SafetyFirstRouter:
             "harmful": ["violence", "attack", "weapon", "kill", "harm"],
             "privacy": ["social security", "credit card", "password", "private key"],
             "injection": ["ignore previous", "system prompt", "you are now", "disregard instructions", "jailbreak"],
-            "medical_risk": ["suicide", "self harm", "overdose", "kill myself"],
+            "medical_risk": [
+                "suicide",
+                "self harm",
+                "self-harm",
+                "harm myself",
+                "hurt myself",
+                "overdose",
+                "kill myself",
+            ],
         }
 
     async def initialize(self):

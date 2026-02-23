@@ -369,8 +369,12 @@ class TestEventBus:
     async def event_bus(self):
         """Create event bus for testing."""
         from unified_fabric import DynamicEventBus
+        from unified_fabric.event_schemas import EventSchema, register_schema
 
         bus = DynamicEventBus(bus_id="test-bus")
+        # Avoid cross-test schema pollution from globally registered test schemas.
+        register_schema(EventSchema(event_type="test.event", domain="grid", required_keys=()))
+        register_schema(EventSchema(event_type="history.test", domain="grid", required_keys=()))
         await bus.start()
         yield bus
         await bus.stop()
