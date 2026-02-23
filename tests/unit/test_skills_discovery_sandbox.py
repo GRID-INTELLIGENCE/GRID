@@ -69,7 +69,8 @@ class TestSkillDiscoveryEngine:
         assert len(skills) == 1
         meta = skills[0]
         assert meta.id == "sample.skill"
-        assert meta.file_path == str(skill_file)
+        # Compare absolute paths to handle cross-platform differences
+        assert os.path.abspath(meta.file_path) == os.path.abspath(str(skill_file))
         assert meta.category in {"high-level", "low-level"}
 
     def test_registry_registers_discovered_skills(self, temp_skill_package, monkeypatch):
