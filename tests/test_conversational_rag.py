@@ -245,7 +245,7 @@ class TestStreamingAPI:
 
         assert len(chunks) == 6  # Text has 52 chars, 10 chars per chunk
         assert "Hello" in chunks[0]
-        assert "functionality" in chunks[-1]
+        assert "".join(chunks) == text
 
     @pytest.mark.asyncio
     async def test_stream_chunk_generation(self):

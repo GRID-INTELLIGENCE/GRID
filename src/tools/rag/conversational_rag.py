@@ -143,6 +143,11 @@ class ConversationalRAGEngine(RAGEngine):
 
         # Store conversation turn if session exists
         if session_id and use_conversation and self.config.conversation_enabled:
+            is_new_session = session_id not in self.conversation_memory.sessions
+            if is_new_session:
+                self.conversation_memory.create_session(session_id)
+                self.conversation_metrics["total_sessions"] += 1
+
             turn = ConversationTurn(
                 user_query=query_text, system_response=result["answer"], retrieved_sources=result.get("sources", [])
             )
@@ -150,8 +155,6 @@ class ConversationalRAGEngine(RAGEngine):
 
             # Update metrics
             self.conversation_metrics["total_turns"] += 1
-            if session_id not in self.conversation_memory.sessions:
-                self.conversation_metrics["total_sessions"] += 1
 
         # Calculate conversational metrics
         self._update_conversation_metrics()
