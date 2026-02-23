@@ -1,6 +1,6 @@
 [project]
 name = "grid-intelligence"
-version = "2.4.0"
+version = "2.4.1"
 description = "GRID - Geometric Resonance Intelligence Driver: A comprehensive framework for exploring complex systems through geometric resonance patterns, cognitive decision support, local-first AI, and event-driven agentic systems"
 authors = [{ name = "Irfan Kabir", email = "irfankabir02@gmail.com" }]
 requires-python = ">=3.13,<3.14"

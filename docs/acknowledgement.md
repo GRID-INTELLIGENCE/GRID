@@ -1,10 +1,15 @@
 # Acknowledgements
 
-We would like to thank the following individuals and organizations for their contributions:
+This project is built on sustained individual work, open-source infrastructure, and community knowledge.
 
-- [Contributor 1]
-- [Contributor 2]
-- [Organization 1]
+## Core Credits
 
-![Scorching](file:///C:/Users/irfan/OneDrive/Pictures/scorching.png)
-![3D Image](file:///C:/Users/irfan/OneDrive/Pictures/Create%20a%203D%20image%20of.png)
+- **Project Author**: Irfan Kabir
+- **Open-Source Ecosystem**: Python, FastAPI, Pydantic, Ruff, Pytest, and maintainers across the dependency chain
+- **Community Knowledge Base**: documentation writers, issue triagers, and technical forum contributors
+
+## Canonical Long-Form Acknowledgement
+
+For the complete narrative acknowledgement and milestone context, see:
+
+- `docs/project/ACKNOWLEDGEMENT.md`

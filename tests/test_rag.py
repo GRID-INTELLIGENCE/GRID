@@ -1,6 +1,9 @@
 import pytest
 
-pytest.importorskip("chromadb")
+try:
+    import chromadb  # noqa: F401
+except Exception as exc:  # pragma: no cover - environment-dependent import failure
+    pytest.skip(f"chromadb unavailable in test environment: {exc}", allow_module_level=True)
 
 import json
 import subprocess

@@ -4,8 +4,7 @@ import asyncio
 import inspect
 import threading
 import time
-from collections.abc import Awaitable
-from collections.abc import Mapping
+from collections.abc import Awaitable, Mapping
 from dataclasses import dataclass
 from typing import Any, Protocol
 

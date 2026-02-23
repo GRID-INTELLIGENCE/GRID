@@ -7,7 +7,10 @@ Retrieves relevant documentation and provides LLM-generated answers.
 
 from __future__ import annotations
 
+import asyncio
+import inspect
 import sys
+import threading
 from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
@@ -25,6 +28,33 @@ try:
     _BRIDGE_AVAILABLE = True
 except ImportError:
     _BRIDGE_AVAILABLE = False
+
+
+def _resolve_awaitable(value: Any) -> Any:
+    """Resolve awaitables in sync code paths (also when loop is already running)."""
+    if not inspect.isawaitable(value):
+        return value
+
+    try:
+        asyncio.get_running_loop()
+    except RuntimeError:
+        return asyncio.run(value)
+
+    output: dict[str, Any] = {}
+    error: dict[str, BaseException] = {}
+
+    def _runner() -> None:
+        try:
+            output["value"] = asyncio.run(value)
+        except BaseException as exc:  # pragma: no cover
+            error["value"] = exc
+
+    thread = threading.Thread(target=_runner, daemon=True)
+    thread.start()
+    thread.join()
+    if "value" in error:
+        raise error["value"]
+    return output.get("value")
 
 
 def _query_knowledge(args: Mapping[str, Any]) -> dict[str, Any]:
@@ -71,6 +101,7 @@ def _query_knowledge(args: Mapping[str, Any]) -> dict[str, Any]:
             temperature=temperature,
             include_sources=True,
         )
+        result = _resolve_awaitable(result)
 
         # Normalize output
         sources = []

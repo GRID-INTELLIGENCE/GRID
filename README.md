@@ -143,6 +143,14 @@ GRID (Geometric Resonance Intelligence Driver) is a comprehensive framework for 
 
 ## 🚀 What's New (February 2026)
 
+### v2.4.1 — Consolidation & Snapshot Integrity
+
+- ✅ **Main Consolidation Completed** — `main` remains the authoritative baseline after branch audit and merge mitigation review
+- ✅ **Unsafe Branch Mitigated** — `copilot-worktree-2026-02-17T11-02-39` explicitly rejected and logged in `docs/decisions/DECISIONS.md`
+- ✅ **Snapshot Functionality Verified** — Snapshot capture tests validated for structural and landscape tracking flows
+- ✅ **Async Skill Runtime Stability** — sync wrappers now safely resolve async handlers across running and non-running event loop contexts
+- ✅ **Test Collection Hardening** — RAG contract tests now skip cleanly when optional `chromadb` import fails at environment level
+
 ### v2.4.0 — Full Lint Remediation & Cleanup
 
 - ✅ **664→0 Lint Errors** — Complete ruff remediation across 251 files; codebase is lint-clean
@@ -827,10 +835,10 @@ This repository follows a structured branching strategy for feature development 
 ### Current Branch Structure
 
 - **main** - Production-ready stable release
-- **claude/organize-branch-structure-LM7e9** - Active consolidation branch (this branch)
-  - Merges: `chore/coldstart-baseline-guardrails`, `feature/test-suite-overhaul`, `authors-notes`, `Application`, and Claude-generated feature branches
-  - Purpose: Consolidate security hardening, test improvements, and Cognitive Privacy Shield features
-  - Status: ✅ Active development
+- **support branches / worktrees** - Short-lived investigation and implementation branches
+  - Purpose: isolate experiments, safety reviews, and branch-level validation before promotion
+  - Promotion policy: only audited, test-validated, safety-preserving changes are merged to `main`
+  - Mitigation policy: regressions are blocked and documented in `docs/decisions/DECISIONS.md`
 
 ### Branch Naming Conventions
 

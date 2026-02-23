@@ -11,7 +11,10 @@ import hashlib
 
 import pytest
 
-pytest.importorskip("chromadb")
+try:
+    import chromadb  # noqa: F401
+except Exception as exc:  # pragma: no cover - environment-dependent import failure
+    pytest.skip(f"chromadb unavailable in test environment: {exc}", allow_module_level=True)
 
 from grid.rag import BaseIndex, InMemoryIndex, ScoredChunk, normalize_results, to_scored_chunk
 

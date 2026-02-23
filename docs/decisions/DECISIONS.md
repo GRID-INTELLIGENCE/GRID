@@ -5,6 +5,21 @@ Append new entries at the top. One decision per entry.
 
 ---
 
+## 2026-02-24 — Reject `copilot-worktree-2026-02-17T11-02-39` branch
+
+**Decision**: Branch blocked from merge. No changes applied to main.
+
+**Why**: Senior review identified critical safety regressions — 13 safety-critical tests deleted (`tests/cognitive/test_pattern_learning.py`), overflow protection (`_sigmoid` clamping) removed, L2 regularization removed, breaking API change (`actual_label` → `confidence`), shared mutable state introduced, and `predict_proba` eliminated. The branch replaces a production-hardened Online Logistic Regression system with an unbounded EMA approach lacking convergence guarantees.
+
+**Alternatives considered**:
+1. Cherry-pick non-destructive changes — Rejected: 277 files changed with interleaved regressions make safe extraction impractical.
+2. Merge and fix forward — Rejected: safety invariants must never be weakened, even temporarily (fail-closed principle).
+3. Archive as tag then delete — Deferred: branch retained for now pending any future audit needs.
+
+**Verification**: All 13 tests in `tests/cognitive/test_pattern_learning.py` pass on main (sigmoid clamping, L2 decay, convergence, JSON persistence, overflow protection, learning guard). Main safety features confirmed intact.
+
+---
+
 ## 2026-02-12 — Debug Insights Remediation
 
 **Decision**: Fixed critical blocking issues in debugging routine: StreamMonitorMiddleware import, test_ollama.py collection crash, duplicate test names, Guardian rule loading, connection pool messages.
