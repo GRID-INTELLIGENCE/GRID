@@ -82,7 +82,7 @@ jobs:
           cache-dependency-glob: "uv.lock"
 
       - name: "Install tools"
-        run: uv pip install toml
+        run: uv pip install --system toml
 
       - name: "Determine Version & Package"
         id: version
@@ -203,7 +203,7 @@ jobs:
           cache-dependency-glob: "uv.lock"
 
       - name: "Install build tools"
-        run: uv pip install build twine toml
+        run: uv pip install --system build twine toml
 
       - name: "Update Version (grid-intelligence)"
         if: github.event_name == 'workflow_dispatch' && needs.prepare.outputs.package == 'grid-intelligence'
