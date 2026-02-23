@@ -13,7 +13,7 @@ passlib[bcrypt]==1.7.4
 python-multipart==0.0.9
 
 # HTTP Client for Service Calls (CRITICAL: CVE-2024-23334 Directory Traversal PATCHED)
-aiohttp==3.11.11
+aiohttp==3.13.3
 httpx==0.28.1
 
 # Monitoring & Observability
