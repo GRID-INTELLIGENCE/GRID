@@ -52,16 +52,37 @@ class RecoveryEngine:
         *args: Any,
         max_attempts: int | None = None,
         fallback_fn: Callable[..., T] | None = None,
+        timeout_seconds: float | None = None,
         **kwargs: Any,
     ) -> T:
-        """Execute a function with automatic recovery based on error classification."""
-        last_error = None
+        """Execute a function with automatic recovery based on error classification.
+
+        Args:
+            task_fn: Async function to execute.
+            *args: Positional arguments for task_fn.
+            max_attempts: Maximum retry attempts (default: self.max_retries).
+            fallback_fn: Optional fallback function if all retries fail.
+            timeout_seconds: Per-attempt timeout in seconds. If provided, each
+                attempt is bounded by this timeout independently.
+            **kwargs: Keyword arguments for task_fn.
+
+        Returns:
+            Result from task_fn or fallback_fn.
+
+        Raises:
+            TimeoutError: If timeout_seconds is set and an attempt times out.
+            Exception: The last error if all attempts fail and no fallback.
+        """
+        last_error: Exception | None = None
         attempts = 0
         limit = max_attempts or self.max_retries
 
         while attempts < limit:
             try:
                 attempts += 1
+                if timeout_seconds is not None:
+                    async with asyncio.timeout(timeout_seconds):
+                        return await task_fn(*args, **kwargs)
                 return await task_fn(*args, **kwargs)
             except Exception as e:
                 last_error = e

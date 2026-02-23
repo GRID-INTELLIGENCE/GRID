@@ -13,7 +13,6 @@ This module addresses AI safety concerns beyond traditional content filtering:
 
 from __future__ import annotations
 
-import asyncio
 import re
 import statistics
 import threading

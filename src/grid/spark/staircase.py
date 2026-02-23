@@ -340,10 +340,10 @@ def create_hogwarts_topology() -> GrandStaircase:
                         id=stair_id,
                         origin=origin,
                         destination=dest,
-                        has_vanishing_step=random.random()
-                        < 0.15,  # 15% have traps  # noqa: S311 non-security random use
-                        requires_polite_request=random.random()
-                        < 0.1,  # 10% need politeness  # noqa: S311 non-security random use
+                        has_vanishing_step=random.random()  # noqa: S311 non-security random use
+                        < 0.15,  # 15% have traps
+                        requires_polite_request=random.random()  # noqa: S311 non-security random use
+                        < 0.1,  # 10% need politeness
                         day_behavior=random.choice(list(DayBehavior)),  # noqa: S311 non-security random use
                         move_probability=random.uniform(0.05, 0.2),  # noqa: S311 non-security random use
                     )

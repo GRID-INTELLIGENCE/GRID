@@ -47,9 +47,9 @@ class CodebaseTracker:
             if not self.git_dir.exists():
                 return None
             return subprocess.check_output(  # noqa: S603 subprocess call is intentional
-                ["git", "-C", str(self.root_dir), "rev-parse", "HEAD"],
+                ["git", "-C", str(self.root_dir), "rev-parse", "HEAD"],  # noqa: S607 partial path is intentional
                 text=True,
-                stderr=subprocess.STDOUT,  # noqa: S607 partial path is intentional
+                stderr=subprocess.STDOUT,
             ).strip()
         except Exception:
             return None
@@ -118,8 +118,8 @@ class CodebaseTracker:
         """Capture details about a new commit."""
         try:
             show_output = subprocess.check_output(  # noqa: S603 subprocess call is intentional
-                ["git", "-C", str(self.root_dir), "show", "--name-only", "--format=%s", commit_hash],
-                text=True,  # noqa: S607 partial path is intentional
+                ["git", "-C", str(self.root_dir), "show", "--name-only", "--format=%s", commit_hash],  # noqa: S607 partial path is intentional
+                text=True,
             ).splitlines()
 
             message = show_output[0]
@@ -132,8 +132,8 @@ class CodebaseTracker:
                     "message": message,
                     "files": files,
                     "author": subprocess.check_output(  # noqa: S603 subprocess call is intentional
-                        ["git", "-C", str(self.root_dir), "show", "-s", "--format=%an", commit_hash],
-                        text=True,  # noqa: S607 partial path is intentional
+                        ["git", "-C", str(self.root_dir), "show", "-s", "--format=%an", commit_hash],  # noqa: S607 partial path is intentional
+                        text=True,
                     ).strip(),
                 },
                 severity="info",
@@ -145,8 +145,8 @@ class CodebaseTracker:
         """Get list of files modified since last check using git status."""
         try:
             output = subprocess.check_output(  # noqa: S603 subprocess call is intentional
-                ["git", "-C", str(self.root_dir), "status", "--porcelain"],
-                text=True,  # noqa: S607 partial path is intentional
+                ["git", "-C", str(self.root_dir), "status", "--porcelain"],  # noqa: S607 partial path is intentional
+                text=True,
             ).splitlines()
 
             modified = []

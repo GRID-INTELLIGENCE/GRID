@@ -28,11 +28,11 @@ class OllamaEmbedding(EmbeddingProvider):
         """Get embeddings using Ollama (sync version)."""
         try:
             result = subprocess.run(  # noqa: S603 subprocess call is intentional
-                ["ollama", "run", self.model, text],
+                ["ollama", "run", self.model, text],  # noqa: S607 partial path is intentional
                 capture_output=True,
                 text=True,
                 check=True,
-                timeout=30,  # noqa: S607 partial path is intentional
+                timeout=30,
             )
             # Parse dense vector from output
             vector = json.loads(result.stdout)

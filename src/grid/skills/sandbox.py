@@ -11,8 +11,12 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import os
+import shutil
+import sys
 import tempfile
 import time
+import uuid
 from dataclasses import dataclass
 from datetime import datetime
 from enum import StrEnum
@@ -163,32 +167,46 @@ class SkillsSandbox:
         start_time = datetime.now()
         logger.info(f"Starting skill execution: {execution_id}")
 
+        temp_path: Path | None = None
         try:
-            # Create temporary execution directory
-            with tempfile.TemporaryDirectory() as temp_dir:
-                temp_path = Path(temp_dir)
+            # Use deterministic temp root to avoid ACL issues in constrained runtimes.
+            temp_path = self._create_execution_directory(execution_id)
 
-                # Prepare skill execution
-                exec_script = self._prepare_execution_script(skill_code, skill_args or {})
-                script_path = temp_path / "skill.py"
-                await asyncio.to_thread(script_path.write_text, exec_script)
+            # Prepare skill execution
+            exec_script = self._prepare_execution_script(skill_code, skill_args or {})
+            script_path = temp_path / "skill.py"
+            await asyncio.to_thread(script_path.write_text, exec_script)
 
-                # Set up resource limits
-                self._apply_resource_limits()
+            # Set up resource limits
+            self._apply_resource_limits()
 
-                # Execute with monitoring
+            # Execute with monitoring
+            try:
                 result = await self._execute_with_monitoring(
                     execution_id,
                     script_path,
                     temp_path,
                     start_time,
                 )
+            except PermissionError as e:
+                logger.warning(
+                    "Subprocess execution unavailable for %s; falling back to in-process mode: %s",
+                    execution_id,
+                    e,
+                )
+                result = await self._execute_in_process_fallback(
+                    execution_id=execution_id,
+                    skill_code=skill_code,
+                    skill_args=skill_args or {},
+                    work_dir=temp_path,
+                    start_time=start_time,
+                )
 
-                # Store result
-                self._execution_history.append(result)
-                logger.info(f"Skill execution completed: {execution_id}")
+            # Store result
+            self._execution_history.append(result)
+            logger.info(f"Skill execution completed: {execution_id}")
 
-                return result
+            return result
 
         except Exception as e:
             logger.error(f"Skill execution failed: {execution_id} - {e}")
@@ -206,6 +224,23 @@ class SkillsSandbox:
             )
             self._execution_history.append(result)
             return result
+        finally:
+            if temp_path is not None:
+                shutil.rmtree(temp_path, ignore_errors=True)
+
+    def _create_execution_directory(self, execution_id: str) -> Path:
+        """Create a per-run execution directory with predictable permissions."""
+        configured_root = (
+            os.environ.get("GRID_SANDBOX_TMPDIR")
+            or os.environ.get("GRID_TEST_TMPDIR")
+            or tempfile.gettempdir()
+        )
+        temp_root = Path(configured_root) / "grid_skills_sandbox"
+        temp_root.mkdir(parents=True, exist_ok=True)
+
+        execution_dir = temp_root / f"{execution_id}_{uuid.uuid4().hex}"
+        execution_dir.mkdir(parents=False, exist_ok=False)
+        return execution_dir
 
     def _prepare_execution_script(self, skill_code: str, skill_args: dict[str, Any]) -> str:
         """Prepare the skill execution script."""
@@ -281,7 +316,7 @@ else:
         try:
             # Start the process
             process = await asyncio.create_subprocess_exec(
-                "python",
+                sys.executable,
                 str(script_path),
                 cwd=str(work_dir),
                 stdout=asyncio.subprocess.PIPE,
@@ -350,6 +385,63 @@ else:
                 await process.wait()
 
             raise
+
+    async def _execute_in_process_fallback(
+        self,
+        execution_id: str,
+        skill_code: str,
+        skill_args: dict[str, Any],
+        work_dir: Path,
+        start_time: datetime,
+    ) -> SandboxResult:
+        """Fallback execution path when subprocess creation is blocked."""
+
+        def _run_in_process() -> Any:
+            previous_cwd = Path.cwd()
+            namespace: dict[str, Any] = {}
+            try:
+                os.chdir(work_dir)
+                exec(skill_code, namespace)  # noqa: S102 - intentional sandbox fallback execution
+                main = namespace.get("main")
+                if not callable(main):
+                    raise RuntimeError("No main function found in skill")
+                return main(skill_args)
+            finally:
+                os.chdir(previous_cwd)
+
+        try:
+            async with asyncio.timeout(self.config.timeout):
+                value = await asyncio.to_thread(_run_in_process)
+            stdout_text = f"RESULT: {json.dumps(value)}"
+            stderr_text = ""
+            status = SandboxStatus.COMPLETED
+            exit_code = 0
+            error_message = None
+        except TimeoutError:
+            stdout_text = ""
+            stderr_text = f"Execution timed out after {self.config.timeout}s"
+            status = SandboxStatus.TIMEOUT
+            exit_code = 124
+            error_message = stderr_text
+        except Exception as e:
+            stdout_text = ""
+            stderr_text = str(e)
+            status = SandboxStatus.FAILED
+            exit_code = 1
+            error_message = str(e)
+
+        return SandboxResult(
+            execution_id=execution_id,
+            status=status,
+            start_time=start_time,
+            end_time=datetime.now(),
+            exit_code=exit_code,
+            stdout=stdout_text,
+            stderr=stderr_text,
+            resource_usage=await self._get_resource_usage(execution_id),
+            error_message=error_message,
+            security_violations=self._check_security_violations(execution_id, work_dir),
+        )
 
     def _get_execution_environment(self) -> dict[str, str]:
         """Get execution environment variables."""

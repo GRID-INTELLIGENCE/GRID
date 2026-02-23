@@ -63,10 +63,10 @@ def _analyze_git(args: Mapping[str, Any]) -> dict[str, Any]:
 
         # Get staged files
         result_files = subprocess.run(
-            ["git", "diff", "--cached", "--name-only"],
+            ["git", "diff", "--cached", "--name-only"],  # noqa: S607 partial path is intentional
             capture_output=True,
             text=True,
-            timeout=30,  # noqa: S607 partial path is intentional
+            timeout=30,
         )
         staged_files = result_files.stdout.strip().split("\n") if result_files.returncode == 0 else []
 

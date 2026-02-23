@@ -203,12 +203,10 @@ class XAILoadBalancer:
         self.health_checks: dict[str, datetime] = {}
 
     def add_server(self, server_id: str, capacity: int = 100) -> None:
-        """Add a server to the load balancer."""
+        """Add a server to the load balancer. Server starts unhealthy until update_server_health is called."""
         self.servers[server_id] = LoadBalancingMetrics(
             server_id=server_id, load_score=0.0, active_tasks=0, capacity=capacity, last_updated=datetime.now()
         )
-
-        self.health_checks[server_id] = datetime.now()
 
     def update_server_health(self, server_id: str, is_healthy: bool) -> None:
         """Update server health status."""
@@ -222,11 +220,12 @@ class XAILoadBalancer:
         if not self.servers:
             return None
 
-        # Filter healthy servers
+        # Filter healthy servers (must have a recent health check)
         healthy_servers = {
             server_id: metrics
             for server_id, metrics in self.servers.items()
-            if server_id in self.health_checks or (datetime.now() - self.health_checks[server_id]).total_seconds() < 300
+            if server_id in self.health_checks
+            and (datetime.now() - self.health_checks[server_id]).total_seconds() < 300
         }
 
         if not healthy_servers:
@@ -247,9 +246,15 @@ class XAILoadBalancer:
             return server
 
     def update_server_load(self, server_id: str, response_time: float, task_complexity: float = 1.0) -> None:
-        """Update server load metrics."""
-        if server_id in self.servers:
-            self.servers[server_id].update_load(response_time, task_complexity)
+        """Update server load metrics. Auto-creates server entry if missing."""
+        if server_id not in self.servers:
+            self.servers[server_id] = LoadBalancingMetrics(
+                server_id=server_id, load_score=0.0, active_tasks=0, capacity=100, last_updated=datetime.now()
+            )
+        self.servers[server_id].active_tasks += 1
+        self.servers[server_id].response_times.append(response_time)
+        self.servers[server_id].load_score += task_complexity
+        self.servers[server_id].last_updated = datetime.now()
 
     def get_server_status(self) -> dict[str, Any]:
         """Get load balancing status."""
