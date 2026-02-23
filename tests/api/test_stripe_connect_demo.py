@@ -12,6 +12,7 @@ from starlette.requests import Request
 
 from application.mothership import dependencies as mothership_dependencies
 from application.mothership.routers import stripe_connect_demo
+from application.mothership.routers.stripe_connect_demo import _generate_csrf_token
 
 
 class _FakeAccountsAPI:
@@ -124,6 +125,7 @@ def connect_env(monkeypatch):
     monkeypatch.setenv("STRIPE_CONNECT_BILLING_WEBHOOK_SECRET", "whsec_snap_test")
     monkeypatch.setenv("STRIPE_CONNECT_SUBSCRIPTION_PRICE_ID", "price_test_sub")
     monkeypatch.setenv("STRIPE_CONNECT_APPLICATION_FEE_AMOUNT", "123")
+    monkeypatch.setenv("CSRF_SECRET", "test_csrf_secret_for_stripe_connect_demo")
     stripe_connect_demo._CONNECT_MAP_MEMORY.clear()
 
 
@@ -181,6 +183,7 @@ class TestConnectIdempotency:
             settings=settings,
             display_name="Merchant One",
             contact_email="merchant@example.com",
+            csrf_token=_generate_csrf_token(),
         )
         assert response1.status_code == 303
         assert len(fake_client.v2.core.accounts.created_payloads) == 1
@@ -191,6 +194,7 @@ class TestConnectIdempotency:
             settings=settings,
             display_name="Merchant One Updated",
             contact_email="merchant2@example.com",
+            csrf_token=_generate_csrf_token(),
         )
         assert response2.status_code == 303
         assert len(fake_client.v2.core.accounts.created_payloads) == 1
@@ -210,6 +214,7 @@ class TestThinWebhookPersistence:
             settings=settings,
             display_name="Merchant ABC",
             contact_email="abc@example.com",
+            csrf_token=_generate_csrf_token(),
         )
 
         fake_client.v2.core.events.set_event(
@@ -255,6 +260,7 @@ class TestConnectEventsEndpoint:
             settings=settings,
             display_name="Merchant EVT",
             contact_email="evt@example.com",
+            csrf_token=_generate_csrf_token(),
         )
 
         # Seed two timeline events and ensure endpoint reverses to most-recent-first.
@@ -295,7 +301,7 @@ class TestConnectRouteIntegration:
     def test_create_account_route_then_dashboard_shows_connected_account(self, connect_route_client, fake_client):
         create_response = connect_route_client.post(
             "/api/v1/connect-demo/accounts/create",
-            data={"display_name": "Route Merchant", "contact_email": "route@example.com"},
+            data={"display_name": "Route Merchant", "contact_email": "route@example.com", "csrf_token": _generate_csrf_token()},
             follow_redirects=False,
         )
         assert create_response.status_code == 303

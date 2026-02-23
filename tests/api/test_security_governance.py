@@ -705,9 +705,10 @@ class TestSummonHandler:
         assert exc_info.value.status_code == 404
 
     @pytest.mark.asyncio
-    async def test_summon_disabled_raises(self, setup_registry):
-        """Test that summoning disabled handler raises HTTPException."""
+    async def test_summon_disabled_returns_disabled_result(self, setup_registry):
+        """Test that summoning disabled handler returns DISABLED result."""
         from application.mothership.api_core import (
+            InvocationResult,
             get_ghost_registry,
             summon_handler,
         )
@@ -720,10 +721,10 @@ class TestSummonHandler:
         registry.register("test.disabled", test_handler)
         registry.disable("test.disabled")
 
-        with pytest.raises(HTTPException) as exc_info:
-            await summon_handler("test.disabled")
+        response = await summon_handler("test.disabled")
 
-        assert exc_info.value.status_code == 503
+        assert response.result == InvocationResult.DISABLED
+        assert "disabled" in response.error.lower()
 
     @pytest.mark.asyncio
     async def test_summon_records_metrics(self, setup_registry):

@@ -1,4 +1,5 @@
 import { Cognitive } from "@/pages/Cognitive";
+import { Login } from "@/pages/Login";
 import { Register } from "@/pages/Register";
 import { Dashboard } from "@/pages/Dashboard";
 import { Knowledge } from "@/pages/Knowledge";
@@ -66,6 +67,7 @@ export const routeComponents: Record<RouteKey, ComponentType> = {
   terminal: TerminalPage,
   settings: SettingsPage,
   register: Register,
+  login: Login,
 };
 
 const routesById = new Map<RouteKey, RouteConfig>(

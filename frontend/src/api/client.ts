@@ -1,7 +1,16 @@
-import axios, { AxiosInstance, AxiosResponse, AxiosError } from 'axios';
-import { jwtDecode } from 'jwt-decode';
+import axios, {
+  type AxiosInstance,
+  type AxiosError,
+  type InternalAxiosRequestConfig,
+} from "axios";
+import { jwtDecode } from "jwt-decode";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+
+/** Extend the Axios config to carry our retry flag. */
+interface RetryableConfig extends InternalAxiosRequestConfig {
+  _retry?: boolean;
+}
 
 interface AuthTokens {
   access_token: string;
@@ -27,7 +36,7 @@ interface InferenceRequest {
   model?: string;
   max_tokens?: number;
   temperature?: number;
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
 }
 
 interface InferenceResponse {
@@ -35,7 +44,7 @@ interface InferenceResponse {
   model: string;
   tokens_used: number;
   processing_time: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 interface PrivacyRequest {
@@ -46,12 +55,12 @@ interface PrivacyRequest {
 
 interface PrivacyResponse {
   masked_text: string;
-  detected_entities: Array<{
+  detected_entities: {
     type: string;
     value: string;
     start: number;
     end: number;
-  }>;
+  }[];
   applied_rules: string[];
 }
 
@@ -60,9 +69,9 @@ interface ResonanceResponse {
   state: string;
   urgency: number;
   message: string;
-  context: Record<string, any> | null;
-  paths: Record<string, any> | null;
-  envelope: Record<string, any> | null;
+  context: Record<string, unknown> | null;
+  paths: Record<string, unknown> | null;
+  envelope: Record<string, unknown> | null;
   timestamp: string;
 }
 
@@ -72,15 +81,32 @@ interface DefinitiveResponse {
   canvas_before: string;
   canvas_after: string;
   summary: string;
-  faq: Array<{ question: string; answer: string }>;
-  use_cases: Array<{ audience: string; scenario: string; entrypoint: string; output: string }>;
+  faq: { question: string; answer: string }[];
+  use_cases: {
+    audience: string;
+    scenario: string;
+    entrypoint: string;
+    output: string;
+  }[];
   api_mechanics: string[];
-  structured: Record<string, any>;
-  context: Record<string, any> | null;
-  paths: Record<string, any> | null;
-  choices: Array<{ direction: string; option: Record<string, any>; why: string }>;
-  skills: Record<string, any>;
-  rag: Record<string, any> | null;
+  structured: Record<string, unknown>;
+  context: Record<string, unknown> | null;
+  paths: Record<string, unknown> | null;
+  choices: {
+    direction: string;
+    option: Record<string, unknown>;
+    why: string;
+  }[];
+  skills: Record<string, unknown>;
+  rag: Record<string, unknown> | null;
+}
+
+interface DecodedToken {
+  exp?: number;
+  user_id?: number;
+  sub?: string;
+  email?: string;
+  trust_tier?: string;
 }
 
 class ApiClient {
@@ -91,7 +117,7 @@ class ApiClient {
     this.client = axios.create({
       baseURL: API_BASE_URL,
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       timeout: 30000, // 30 seconds
     });
@@ -113,9 +139,13 @@ class ApiClient {
     this.client.interceptors.response.use(
       (response) => response,
       async (error: AxiosError) => {
-        const originalRequest = error.config;
+        const originalRequest = error.config as RetryableConfig | undefined;
 
-        if (error.response?.status === 401 && !originalRequest?._retry) {
+        if (
+          error.response?.status === 401 &&
+          originalRequest &&
+          !originalRequest._retry
+        ) {
           originalRequest._retry = true;
 
           try {
@@ -125,7 +155,7 @@ class ApiClient {
             return this.client(originalRequest);
           } catch (refreshError) {
             this.clearTokens();
-            window.location.href = '/login';
+            window.location.href = "/login";
             return Promise.reject(refreshError);
           }
         }
@@ -136,23 +166,23 @@ class ApiClient {
   }
 
   private getAccessToken(): string | null {
-    return localStorage.getItem('access_token');
+    return localStorage.getItem("access_token");
   }
 
   private getRefreshToken(): string | null {
-    return localStorage.getItem('refresh_token');
+    return localStorage.getItem("refresh_token");
   }
 
   private setTokens(tokens: AuthTokens) {
-    localStorage.setItem('access_token', tokens.access_token);
+    localStorage.setItem("access_token", tokens.access_token);
     // In a real implementation, you'd also store a refresh token
-    localStorage.setItem('token_type', tokens.token_type);
+    localStorage.setItem("token_type", tokens.token_type);
   }
 
   private clearTokens() {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
-    localStorage.removeItem('token_type');
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    localStorage.removeItem("token_type");
   }
 
   private async refreshToken(): Promise<AuthTokens> {
@@ -160,9 +190,11 @@ class ApiClient {
       return this.refreshPromise;
     }
 
-    this.refreshPromise = axios.post(`${API_BASE_URL}/auth/refresh`, {
-      refresh_token: this.getRefreshToken(),
-    }).then(response => response.data);
+    this.refreshPromise = axios
+      .post(`${API_BASE_URL}/auth/refresh`, {
+        refresh_token: this.getRefreshToken(),
+      })
+      .then((response) => response.data);
 
     try {
       const tokens = await this.refreshPromise;
@@ -174,63 +206,79 @@ class ApiClient {
 
   // Authentication methods
   async login(credentials: LoginCredentials): Promise<AuthTokens> {
-    const response = await this.client.post<AuthTokens>('/api/v1/auth/login', credentials);
+    const response = await this.client.post<AuthTokens>(
+      "/api/v1/auth/login",
+      credentials
+    );
     this.setTokens(response.data);
     return response.data;
   }
 
   async logout(): Promise<void> {
     try {
-      await this.client.post('/auth/logout');
+      await this.client.post("/auth/logout");
     } finally {
       this.clearTokens();
     }
   }
 
   async getCurrentUser(): Promise<User> {
-    const response = await this.client.get<User>('/api/v1/auth/me');
+    const response = await this.client.get<User>("/api/v1/auth/me");
     return response.data;
   }
 
   // Inference methods
   async createInference(request: InferenceRequest): Promise<InferenceResponse> {
-    const response = await this.client.post<InferenceResponse>('/api/v1/inference/', request);
+    const response = await this.client.post<InferenceResponse>(
+      "/api/v1/inference/",
+      request
+    );
     return response.data;
   }
 
-  async createAsyncInference(request: InferenceRequest): Promise<{ task_id: string }> {
-    const response = await this.client.post('/api/v1/inference/async', request);
+  async createAsyncInference(
+    request: InferenceRequest
+  ): Promise<{ task_id: string }> {
+    const response = await this.client.post("/api/v1/inference/async", request);
     return response.data;
   }
 
-  async getInferenceStatus(taskId: string): Promise<any> {
-    const response = await this.client.get(`/api/v1/inference/status/${taskId}`);
+  async getInferenceStatus(taskId: string): Promise<Record<string, unknown>> {
+    const response = await this.client.get(
+      `/api/v1/inference/status/${taskId}`
+    );
     return response.data;
   }
 
   async getAvailableModels(): Promise<{ models: string[]; default: string }> {
-    const response = await this.client.get('/api/v1/inference/models');
+    const response = await this.client.get("/api/v1/inference/models");
     return response.data;
   }
 
   // Privacy methods
-  async detectPII(request: { text: string }): Promise<any> {
-    const response = await this.client.post('/api/v1/privacy/detect', request);
+  async detectPII(request: { text: string }): Promise<Record<string, unknown>> {
+    const response = await this.client.post("/api/v1/privacy/detect", request);
     return response.data;
   }
 
   async maskPII(request: PrivacyRequest): Promise<PrivacyResponse> {
-    const response = await this.client.post<PrivacyResponse>('/api/v1/privacy/mask', request);
+    const response = await this.client.post<PrivacyResponse>(
+      "/api/v1/privacy/mask",
+      request
+    );
     return response.data;
   }
 
-  async batchPrivacyProcessing(request: { texts: string[]; level?: string }): Promise<any> {
-    const response = await this.client.post('/api/v1/privacy/batch', request);
+  async batchPrivacyProcessing(request: {
+    texts: string[];
+    level?: string;
+  }): Promise<Record<string, unknown>> {
+    const response = await this.client.post("/api/v1/privacy/batch", request);
     return response.data;
   }
 
-  async getPrivacyLevels(): Promise<any> {
-    const response = await this.client.get('/api/v1/privacy/levels');
+  async getPrivacyLevels(): Promise<Record<string, unknown>> {
+    const response = await this.client.get("/api/v1/privacy/levels");
     return response.data;
   }
 
@@ -238,13 +286,16 @@ class ApiClient {
   async processResonance(request: {
     query: string;
     activity_type?: string;
-    context?: Record<string, any>;
+    context?: Record<string, unknown>;
   }): Promise<ResonanceResponse> {
-    const response = await this.client.post<ResonanceResponse>('/api/v1/resonance/process', {
-      query: request.query,
-      activity_type: request.activity_type || 'general',
-      context: request.context || {},
-    });
+    const response = await this.client.post<ResonanceResponse>(
+      "/api/v1/resonance/process",
+      {
+        query: request.query,
+        activity_type: request.activity_type || "general",
+        context: request.context || {},
+      }
+    );
     return response.data;
   }
 
@@ -256,22 +307,39 @@ class ApiClient {
     use_llm?: boolean;
     max_chars?: number;
   }): Promise<DefinitiveResponse> {
-    const response = await this.client.post<DefinitiveResponse>('/api/v1/resonance/definitive', {
-      query: request.query,
-      activity_type: 'general',
-      context: {},
-      progress: request.progress ?? 0.65,
-      target_schema: request.target_schema ?? 'context_engineering',
-      use_rag: request.use_rag ?? false,
-      use_llm: request.use_llm ?? false,
-      max_chars: request.max_chars ?? 280,
-    });
+    const response = await this.client.post<DefinitiveResponse>(
+      "/api/v1/resonance/definitive",
+      {
+        query: request.query,
+        activity_type: "general",
+        context: {},
+        progress: request.progress ?? 0.65,
+        target_schema: request.target_schema ?? "context_engineering",
+        use_rag: request.use_rag ?? false,
+        use_llm: request.use_llm ?? false,
+        max_chars: request.max_chars ?? 280,
+      }
+    );
     return response.data;
+  }
+
+  // Generic request helpers
+  async post<T = unknown>(
+    endpoint: string,
+    body?: unknown
+  ): Promise<{ data: T }> {
+    const response = await this.client.post<T>(endpoint, body);
+    return { data: response.data };
+  }
+
+  async get<T = unknown>(endpoint: string): Promise<{ data: T }> {
+    const response = await this.client.get<T>(endpoint);
+    return { data: response.data };
   }
 
   // Health check
   async healthCheck(): Promise<{ status: string; version: string }> {
-    const response = await this.client.get('/health');
+    const response = await this.client.get("/health");
     return response.data;
   }
 
@@ -281,9 +349,9 @@ class ApiClient {
     if (!token) return false;
 
     try {
-      const decoded = jwtDecode(token);
+      const decoded = jwtDecode<DecodedToken>(token);
       const currentTime = Date.now() / 1000;
-      return decoded.exp > currentTime;
+      return (decoded.exp ?? 0) > currentTime;
     } catch {
       return false;
     }
@@ -294,12 +362,12 @@ class ApiClient {
     if (!token) return null;
 
     try {
-      const decoded = jwtDecode(token) as any;
+      const decoded = jwtDecode<DecodedToken>(token);
       return {
-        id: decoded.user_id,
-        username: decoded.sub,
-        email: decoded.email,
-        trust_tier: decoded.trust_tier,
+        id: decoded.user_id ?? 0,
+        username: decoded.sub ?? "",
+        email: decoded.email ?? "",
+        trust_tier: decoded.trust_tier ?? "basic",
         is_active: true,
       };
     } catch {

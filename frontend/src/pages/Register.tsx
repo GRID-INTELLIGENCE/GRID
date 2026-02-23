@@ -1,5 +1,11 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { apiClient } from "@/api/client";
 import { useState } from "react";
@@ -34,7 +40,10 @@ export function Register() {
     setError(null);
 
     try {
-      const response = await apiClient.post("/api/v1/auth/register", {
+      const response = await apiClient.post<{
+        success?: boolean;
+        error?: { message?: string };
+      }>("/api/v1/auth/register", {
         username: formData.username,
         email: formData.email,
         password: formData.password,
@@ -42,17 +51,16 @@ export function Register() {
       });
 
       if (response.data?.success) {
-        // Registration successful - navigate to login or auto-login
         navigate("/login");
       } else {
         setError(response.data?.error?.message || "Registration failed");
       }
-    } catch (err: any) {
-      setError(
-        err.response?.data?.error?.message || 
-        err.message || 
-        "Registration failed. Please try again."
-      );
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Registration failed. Please try again.";
+      setError(message);
     } finally {
       setIsLoading(false);
     }
@@ -62,7 +70,9 @@ export function Register() {
     <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] animate-fade-in">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
+          <CardTitle className="text-2xl font-bold">
+            Create an account
+          </CardTitle>
           <CardDescription>
             Enter your details to create your GRID account
           </CardDescription>
@@ -143,11 +153,7 @@ export function Register() {
               </div>
             )}
 
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={isLoading}
-            >
+            <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Creating account..." : "Create account"}
             </Button>
 
