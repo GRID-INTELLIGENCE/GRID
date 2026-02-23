@@ -48,7 +48,13 @@ sample_skill = SampleSkill()
 
     sys.path.insert(0, str(tmp_path))
     yield "temp_skills_pkg.skills", skill_file
-    sys.path.remove(str(tmp_path))
+    if str(tmp_path) in sys.path:
+        sys.path.remove(str(tmp_path))
+
+    # Clear import cache so the next test does not resolve stale module paths.
+    for mod_name in list(sys.modules):
+        if mod_name == "temp_skills_pkg" or mod_name.startswith("temp_skills_pkg."):
+            sys.modules.pop(mod_name, None)
 
 
 class TestSkillDiscoveryEngine:
@@ -113,6 +119,47 @@ def main(args):
 
         assert result.status == SandboxStatus.TIMEOUT
         assert result.exit_code is not None
+
+    def test_fallback_used_when_subprocess_blocked(self, monkeypatch):
+        """PermissionError in subprocess path should use in-process fallback."""
+        sandbox = SkillsSandbox(config=SandboxConfig(timeout=2.0))
+        monkeypatch.setattr(sandbox, "_apply_resource_limits", lambda: None)
+
+        async def _deny_subprocess(*args, **kwargs):
+            raise PermissionError("subprocess blocked")
+
+        monkeypatch.setattr(sandbox, "_execute_with_monitoring", _deny_subprocess)
+
+        skill_code = """
+def main(args):
+    return {"mode": "fallback", "value": args.get("value")}
+"""
+        result = asyncio.run(sandbox.execute_skill(skill_code, {"value": 99}))
+
+        assert result.status == SandboxStatus.COMPLETED
+        assert "RESULT:" in result.stdout
+        assert result.error_message is None
+
+    def test_fallback_timeout_when_subprocess_blocked(self, monkeypatch):
+        """Fallback path must still respect timeout configuration."""
+        sandbox = SkillsSandbox(config=SandboxConfig(timeout=0.2))
+        monkeypatch.setattr(sandbox, "_apply_resource_limits", lambda: None)
+
+        async def _deny_subprocess(*args, **kwargs):
+            raise PermissionError("subprocess blocked")
+
+        monkeypatch.setattr(sandbox, "_execute_with_monitoring", _deny_subprocess)
+
+        skill_code = """
+import time
+def main(args):
+    time.sleep(1.0)
+    return {"mode": "fallback"}
+"""
+        result = asyncio.run(sandbox.execute_skill(skill_code))
+
+        assert result.status == SandboxStatus.TIMEOUT
+        assert result.error_message is not None
 
     def test_security_violations_flagged(self, monkeypatch):
         """Filesystem disallowed should flag violations for created files."""

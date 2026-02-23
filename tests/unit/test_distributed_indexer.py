@@ -7,7 +7,6 @@ Mocks Databricks and Spark interactions to avoid external dependencies.
 from __future__ import annotations
 
 import sys
-import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
@@ -37,17 +36,11 @@ def mock_databricks_env():
 
 
 @pytest.fixture
-def temp_checkpoint_dir():
+def temp_checkpoint_dir(tmp_path: Path):
     """Create temporary directory for checkpoints."""
-    tmpdir = tempfile.mkdtemp()
-    yield tmpdir
-    # Clean up
-    import shutil
-
-    try:
-        shutil.rmtree(tmpdir, ignore_errors=True)
-    except Exception:
-        pass
+    checkpoint_dir = tmp_path / "checkpoints"
+    checkpoint_dir.mkdir(parents=True, exist_ok=True)
+    return str(checkpoint_dir)
 
 
 @pytest.fixture

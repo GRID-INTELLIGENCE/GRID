@@ -30,6 +30,23 @@ from tools.rag.embeddings.simple import SimpleEmbedding
 from tools.rag.vector_store.in_memory_dense import InMemoryDenseVectorStore
 
 
+def _create_huggingface_provider_or_skip() -> HuggingFaceEmbeddingProvider:
+    """Create HF provider or skip when model/network is unavailable."""
+    try:
+        provider = HuggingFaceEmbeddingProvider(model_name="sentence-transformers/all-MiniLM-L6-v2")
+        # Warm-up call ensures runtime dependencies are actually usable.
+        provider.embed("health check")
+        return provider
+    except Exception as e:
+        pytest.skip(f"HuggingFace provider unavailable in this environment: {e}")
+
+
+@pytest.fixture(scope="module")
+def huggingface_provider() -> HuggingFaceEmbeddingProvider:
+    """Shared HuggingFace provider fixture with graceful skip fallback."""
+    return _create_huggingface_provider_or_skip()
+
+
 class TestEmbeddingProviders:
     """Test all embedding providers for consistency and quality"""
 
@@ -37,7 +54,7 @@ class TestEmbeddingProviders:
     def embedding_provider(self, request):
         """Parameterized fixture for testing embedding providers"""
         if request.param == "huggingface":
-            return HuggingFaceEmbeddingProvider(model_name="sentence-transformers/all-MiniLM-L6-v2")
+            return request.getfixturevalue("huggingface_provider")
         elif request.param == "nomic":
             # Skip if Ollama is not available
             try:
@@ -179,10 +196,10 @@ class TestEmbeddingProviders:
 class TestEmbeddingQuality:
     """Advanced tests for embedding quality and characteristics"""
 
-    def test_embedding_distribution_properties(self):
+    def test_embedding_distribution_properties(self, huggingface_provider):
         """Test statistical properties of embeddings"""
         # Use HuggingFace provider for quality tests - SimpleEmbedding is just a fallback
-        provider = HuggingFaceEmbeddingProvider(model_name="sentence-transformers/all-MiniLM-L6-v2")
+        provider = huggingface_provider
 
         # Generate embeddings for diverse text (100 unique texts)
         texts = []
@@ -218,10 +235,10 @@ class TestEmbeddingQuality:
         assert float(np.mean(std_embedding)) > 0.01, "Embeddings should have some variance"  # type: ignore[arg-type]
         assert np.all(std_embedding < 1.0), "Embeddings should not have excessive variance"  # type: ignore[arg-type]
 
-    def test_embedding_uniqueness(self):
+    def test_embedding_uniqueness(self, huggingface_provider):
         """Test that different texts produce different embeddings"""
         # Use HuggingFace provider for quality tests - SimpleEmbedding is just a fallback
-        provider = HuggingFaceEmbeddingProvider(model_name="sentence-transformers/all-MiniLM-L6-v2")
+        provider = huggingface_provider
 
         texts = [f"Unique text number {i} with specific content {i * 10}" for i in range(50)]
 
@@ -234,10 +251,10 @@ class TestEmbeddingQuality:
         max_similarity = float(np.max(similarities))  # type: ignore[arg-type]
         assert max_similarity < 0.95, f"Embeddings should be unique, max similarity: {max_similarity:.3f}"
 
-    def test_embedding_reproducibility(self):
+    def test_embedding_reproducibility(self, huggingface_provider):
         """Test that same input produces same output"""
         # Use HuggingFace provider for quality tests - SimpleEmbedding is just a fallback
-        provider = HuggingFaceEmbeddingProvider(model_name="sentence-transformers/all-MiniLM-L6-v2")
+        provider = huggingface_provider
 
         text = "This is a reproducibility test."
 
@@ -260,10 +277,10 @@ class TestEmbeddingQuality:
 class TestEmbeddingIntegration:
     """Integration tests with vector stores and RAG pipeline"""
 
-    def test_embedding_vector_store_integration(self):
+    def test_embedding_vector_store_integration(self, huggingface_provider):
         """Test embeddings work correctly with vector stores"""
         # Use HuggingFace provider for integration tests - SimpleEmbedding is just a fallback
-        provider = HuggingFaceEmbeddingProvider(model_name="sentence-transformers/all-MiniLM-L6-v2")
+        provider = huggingface_provider
         store = InMemoryDenseVectorStore()
 
         documents = [

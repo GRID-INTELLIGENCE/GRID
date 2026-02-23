@@ -2,12 +2,9 @@ from unittest.mock import MagicMock
 
 import pytest
 
-# Modules pending migration from legacy_src/
-PriorityQueue = None
-HeuristicRouter = None
+from grid.kernel.routing import HeuristicRouter, PriorityQueue
 
 
-@pytest.mark.skipif(PriorityQueue is None, reason="PriorityQueue pending migration")
 class TestPriorityQueue:
     def test_priority_queue_ordering(self):
         pq = PriorityQueue()
@@ -21,7 +18,7 @@ class TestPriorityQueue:
         assert pq.get() is None
 
 
-@pytest.mark.skipif(HeuristicRouter is None, reason="HeuristicRouter pending migration")
+
 class TestHeuristicRouter:
     def test_heuristic_router_logic(self):
         router = HeuristicRouter()

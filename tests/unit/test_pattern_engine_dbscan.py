@@ -1,23 +1,6 @@
-# NOTE: ClusteringService exists only in archive/legacy_src/grid/analysis/clustering.py
-# This test requires the legacy module to be accessible
-import sys
-from pathlib import Path
-
 import pytest
 
-# Add legacy_src to path for this test
-legacy_src_path = Path(__file__).parent.parent.parent / "archive" / "legacy_src"
-if str(legacy_src_path) not in sys.path:
-    sys.path.insert(0, str(legacy_src_path))
-
-# Try to import legacy module, skip if not available
-try:
-    from grid.analysis.clustering import ClusteringService  # type: ignore
-
-    HAS_LEGACY_SRC = True
-except (ImportError, ModuleNotFoundError):
-    HAS_LEGACY_SRC = False
-    pytestmark = pytest.mark.skip(reason="legacy_src module not available")
+from grid.analysis.clustering import ClusteringService
 
 
 class TestPatternEngineDBSCAN:

@@ -8,8 +8,7 @@ Tests are skipped if chromadb is not installed.
 
 from __future__ import annotations
 
-import shutil
-import tempfile
+from pathlib import Path
 
 import pytest
 
@@ -30,15 +29,11 @@ except ImportError:
 
 
 @pytest.fixture
-def temp_chroma_dir():
+def temp_chroma_dir(tmp_path: Path):
     """Create temporary directory for ChromaDB persistence."""
-    tmpdir = tempfile.mkdtemp()
-    yield tmpdir
-    # Clean up with error handling for Windows file lock issues
-    try:
-        shutil.rmtree(tmpdir, ignore_errors=True)
-    except Exception:
-        pass
+    chroma_dir = tmp_path / "chroma_db"
+    chroma_dir.mkdir(parents=True, exist_ok=True)
+    return str(chroma_dir)
 
 
 @pytest.fixture

@@ -20,12 +20,10 @@ except ImportError:
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 
-# CLI module pending migration from legacy_src/
-cli = None
+from grid.cli.main import cli
 
 
 class TestEventCommands:
-    @pytest.mark.skipif(cli is None, reason="CLI module pending migration from legacy_src/")
     def test_list_events(self):
         runner = CliRunner()
         result = runner.invoke(cli, ["list-events"])

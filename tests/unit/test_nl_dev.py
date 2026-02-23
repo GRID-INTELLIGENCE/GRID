@@ -1,10 +1,8 @@
 import pytest
 
-# CodeGenerator pending migration from legacy_src/
-CodeGenerator = None
+from grid.nl_dev.code_generator import CodeGenerator
 
 
-@pytest.mark.skipif(CodeGenerator is None, reason="CodeGenerator pending migration")
 class TestCodeGenerator:
     @pytest.fixture
     def generator(self):

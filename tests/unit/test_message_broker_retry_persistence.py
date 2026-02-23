@@ -1,10 +1,8 @@
 import pytest
 
-# MessageBroker pending migration from legacy_src/
-MessageBroker = None
+from grid.kernel.bus import MessageBroker
 
 
-@pytest.mark.skipif(MessageBroker is None, reason="MessageBroker pending migration")
 class TestMessageBroker:
     @pytest.fixture
     def broker(self):

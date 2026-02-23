@@ -5,6 +5,22 @@
 import type { Plan, PlanExecutionResult, StepResult } from "@/schema/tools";
 import { toolRegistry } from "./tool-registry";
 
+function withTimeout<T>(
+  operation: Promise<T>,
+  timeoutMs: number,
+  timeoutError: Error
+): Promise<T> {
+  let timer: ReturnType<typeof setTimeout>;
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(timeoutError), timeoutMs);
+  });
+
+  return Promise.race([
+    operation.finally(() => clearTimeout(timer)),
+    timeoutPromise,
+  ]);
+}
+
 export interface ExecutionProgress {
   currentStep: number;
   totalSteps: number;
@@ -14,6 +30,8 @@ export interface ExecutionProgress {
 export interface ExecutePlanOptions {
   dryRun?: boolean;
   stopOnError?: boolean;
+  /** Per-step timeout in milliseconds. If a step exceeds this, it returns an error. */
+  stepTimeoutMs?: number;
   onProgress?: (progress: ExecutionProgress) => void;
 }
 
@@ -21,7 +39,12 @@ export async function executePlan(
   plan: Plan,
   options: ExecutePlanOptions = {}
 ): Promise<PlanExecutionResult> {
-  const { dryRun = false, stopOnError = true, onProgress } = options;
+  const {
+    dryRun = false,
+    stopOnError = true,
+    stepTimeoutMs,
+    onProgress,
+  } = options;
   const sorted = [...plan.steps].sort((a, b) => a.order - b.order);
   const results: StepResult[] = [];
   const start = performance.now();
@@ -79,10 +102,18 @@ export async function executePlan(
       continue;
     }
 
-    // Execute
+    // Execute (with optional timeout)
     const stepStart = performance.now();
     try {
-      const data = await tool.execute(parsed.data);
+      const execution = stepTimeoutMs
+        ? withTimeout(
+            tool.execute(parsed.data),
+            stepTimeoutMs,
+            new Error(`Step ${step.order} timed out after ${stepTimeoutMs}ms`)
+          )
+        : tool.execute(parsed.data);
+
+      const data = await execution;
       results.push({
         status: "success",
         stepOrder: step.order,

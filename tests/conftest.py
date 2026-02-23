@@ -1,8 +1,17 @@
 import os
+import shutil
 import subprocess
 import sys
+import uuid
+from pathlib import Path
 
 import pytest
+
+# Ensure pytest temp roots stay inside the workspace (needed before sessionstart).
+_PROJECT_ROOT = Path(__file__).resolve().parents[1]
+_PYTEST_TEMP_ROOT = _PROJECT_ROOT / ".pytest_tmp_root"
+_PYTEST_TEMP_ROOT.mkdir(parents=True, exist_ok=True)
+os.environ.setdefault("PYTEST_DEBUG_TEMPROOT", str(_PYTEST_TEMP_ROOT))
 
 
 def pytest_configure(config):
@@ -15,6 +24,12 @@ def pytest_configure(config):
     sys.path.insert(0, src)
     if root not in sys.path:
         sys.path.append(root)
+
+    # Windows sandbox environments can fail during xdist temp-root setup.
+    # Force single-process execution there for deterministic collection/runs.
+    if os.name == "nt" and hasattr(config.option, "numprocesses"):
+        if getattr(config.option, "numprocesses", None):
+            config.option.numprocesses = 0
 
 
 # ---------------------------------------------------------------------------
@@ -106,6 +121,10 @@ def setup_env():
     os.environ["MOTHERSHIP_DATABASE_URL"] = "sqlite:///:memory:"
     os.environ["MOTHERSHIP_USE_DATABRICKS"] = "false"
     os.environ["MOTHERSHIP_REDIS_ENABLED"] = "false"
+    os.environ.setdefault("GRID_TEST_TMPDIR", os.path.join(ROOT_DIR, ".test_tmp"))
+    os.makedirs(os.environ["GRID_TEST_TMPDIR"], exist_ok=True)
+    os.environ.setdefault("GRID_SANDBOX_TMPDIR", os.path.join(ROOT_DIR, ".test_tmp", "sandbox"))
+    os.makedirs(os.environ["GRID_SANDBOX_TMPDIR"], exist_ok=True)
 
     # Avoid loading chromadb in tests (chromadb.config.Settings + pydantic v1 fails on Python 3.13+)
     os.environ["RAG_VECTOR_STORE_PROVIDER"] = os.environ.get("RAG_VECTOR_STORE_PROVIDER", "in_memory")
@@ -115,6 +134,24 @@ def setup_env():
 
     # DON'T call reload_settings() here - it can trigger DB connections
     # Settings will be loaded lazily when needed with test environment
+
+
+@pytest.fixture
+def tmp_path() -> Path:
+    """Workspace-scoped temporary path fixture.
+
+    Uses a deterministic writable directory inside the repo instead of pytest's
+    default temp root. This avoids intermittent Windows ACL errors around
+    ``.../pytest-of-<user>`` in constrained/sandboxed environments.
+    """
+    base = Path(os.environ.get("GRID_TEST_TMPDIR", os.path.join(ROOT_DIR, ".test_tmp")))
+    base.mkdir(parents=True, exist_ok=True)
+    path = base / f"case_{uuid.uuid4().hex}"
+    path.mkdir(parents=False, exist_ok=False)
+    try:
+        yield path
+    finally:
+        shutil.rmtree(path, ignore_errors=True)
 
 
 @pytest.fixture(autouse=True)

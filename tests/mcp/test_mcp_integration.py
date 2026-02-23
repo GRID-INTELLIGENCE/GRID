@@ -4,6 +4,9 @@ GRID MCP Integration Tests
 
 Comprehensive test suite for all MCP servers.
 Tests server startup, basic functionality, and integration.
+
+NOTE: These tests require external services (Ollama). They will skip
+gracefully if services are unavailable.
 """
 
 import asyncio
@@ -12,6 +15,8 @@ import os
 import subprocess
 import sys
 from pathlib import Path
+
+import pytest
 
 # Add GRID to path
 grid_root = Path(__file__).parent.parent.parent
@@ -24,6 +29,34 @@ YELLOW = "\033[93m"
 BLUE = "\033[94m"
 RESET = "\033[0m"
 BOLD = "\033[1m"
+
+
+def _ollama_reachable() -> bool:
+    """Check if Ollama is reachable with a short timeout."""
+    try:
+        import httpx
+
+        r = httpx.get("http://localhost:11434/api/tags", timeout=2.0)
+        return r.status_code == 200
+    except Exception:
+        return False
+
+
+def _api_server_reachable() -> bool:
+    """Check if API server is reachable with a short timeout."""
+    try:
+        import httpx
+
+        r = httpx.get("http://localhost:8000/health", timeout=2.0)
+        return r.status_code == 200
+    except Exception:
+        return False
+
+
+# Module-level skip: skip entire module if services are not running
+_ollama_available = _ollama_reachable()
+if not _ollama_available:
+    pytest.skip("Ollama service not available at localhost:11434", allow_module_level=True)
 
 
 def print_header(text: str):
@@ -173,6 +206,7 @@ class MCPTestSuite:
         """Test that a server can start without errors"""
         print_test(f"{name} server startup")
 
+        proc = None
         try:
             # Start server process
             full_env = os.environ.copy()
@@ -197,17 +231,12 @@ class MCPTestSuite:
                 success = True
             else:
                 # Exited early, bad
-                stdout, stderr = proc.communicate()
+                stdout, stderr = proc.communicate(timeout=5)
                 print_error(f"Server exited with code {proc.returncode}")
                 if stderr:
                     print_info(f"Error: {stderr.decode()[:200]}")
                 self.failed += 1
                 success = False
-
-            # Cleanup
-            if proc.poll() is None:
-                proc.terminate()
-                proc.wait(timeout=5)
 
             return success
 
@@ -215,6 +244,22 @@ class MCPTestSuite:
             print_error(str(e))
             self.failed += 1
             return False
+        finally:
+            # Cleanup: ensure process is terminated
+            if proc is not None and proc.poll() is None:
+                try:
+                    proc.terminate()
+                    proc.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    # Force kill if terminate doesn't work
+                    proc.kill()
+                    proc.wait(timeout=2)
+                except Exception:
+                    # Last resort: kill without waiting
+                    try:
+                        proc.kill()
+                    except Exception:
+                        pass
 
     async def test_git_server(self) -> bool:
         """Test Git server"""

@@ -8,7 +8,6 @@ Tests the core "brain" of GRID's CLI experience including:
 - Pattern recognition and learning integration
 """
 
-import tempfile
 from datetime import datetime
 
 # Define missing enums locally since imports may fail
@@ -88,10 +87,11 @@ class TestUserContextManager:
     """Test UserContextManager for user behavior pattern recognition."""
 
     @pytest.fixture
-    def temp_context_dir(self):
+    def temp_context_dir(self, tmp_path: Path):
         """Create temporary directory for context storage."""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            yield Path(temp_dir)
+        context_dir = tmp_path / "context_storage"
+        context_dir.mkdir(parents=True, exist_ok=True)
+        return context_dir
 
     @pytest.fixture
     def context_manager(self, temp_context_dir):

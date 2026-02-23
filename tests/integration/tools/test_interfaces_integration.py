@@ -12,9 +12,17 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
+import pytest
+
 from grid.interfaces.config import DashboardConfig, set_config
 from grid.interfaces.metrics_collector import BridgeMetrics, SensoryMetrics
 from tools.interfaces_dashboard.collector import DashboardCollector
+
+
+@pytest.fixture
+def db_path(tmp_path):
+    """Provide a temporary SQLite database path for tests."""
+    return str(tmp_path / "test_interfaces.db")
 
 
 def create_test_metrics() -> tuple[list[BridgeMetrics], list[SensoryMetrics]]:
@@ -64,7 +72,7 @@ def create_test_metrics() -> tuple[list[BridgeMetrics], list[SensoryMetrics]]:
     return bridge_metrics, sensory_metrics
 
 
-def test_sqlite_schema(db_path: str) -> bool:
+def _run_sqlite_schema(db_path: str) -> bool:
     """Test SQLite schema creation.
 
     Args:
@@ -117,7 +125,7 @@ def test_sqlite_schema(db_path: str) -> bool:
         return False
 
 
-def test_metrics_insertion(db_path: str) -> bool:
+def _run_metrics_insertion(db_path: str) -> bool:
     """Test metrics insertion into SQLite.
 
     Args:
@@ -174,7 +182,7 @@ def test_metrics_insertion(db_path: str) -> bool:
         return False
 
 
-def test_dashboard_collector(db_path: str) -> bool:
+def _run_dashboard_collector(db_path: str) -> bool:
     """Test dashboard collector queries.
 
     Args:
@@ -222,6 +230,21 @@ def test_dashboard_collector(db_path: str) -> bool:
         return False
 
 
+def test_sqlite_schema(db_path: str) -> None:
+    """Pytest wrapper for schema validation."""
+    assert _run_sqlite_schema(db_path)
+
+
+def test_metrics_insertion(db_path: str) -> None:
+    """Pytest wrapper for insertion validation."""
+    assert _run_metrics_insertion(db_path)
+
+
+def test_dashboard_collector(db_path: str) -> None:
+    """Pytest wrapper for collector validation."""
+    assert _run_dashboard_collector(db_path)
+
+
 def main() -> int:
     """Run integration tests.
 
@@ -240,9 +263,9 @@ def main() -> int:
     set_config(config)
 
     tests = [
-        ("SQLite Schema", lambda: test_sqlite_schema(test_db_path)),
-        ("Metrics Insertion", lambda: test_metrics_insertion(test_db_path)),
-        ("Dashboard Collector", lambda: test_dashboard_collector(test_db_path)),
+        ("SQLite Schema", lambda: _run_sqlite_schema(test_db_path)),
+        ("Metrics Insertion", lambda: _run_metrics_insertion(test_db_path)),
+        ("Dashboard Collector", lambda: _run_dashboard_collector(test_db_path)),
     ]
 
     results = []

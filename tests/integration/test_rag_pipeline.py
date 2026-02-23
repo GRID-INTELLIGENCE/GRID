@@ -5,7 +5,7 @@ Phase 3 Sprint 2: RAG integration tests (5 tests for pipeline)
 
 from __future__ import annotations
 
-import tempfile
+from pathlib import Path
 
 import pytest
 
@@ -18,17 +18,11 @@ from tools.rag.vector_store.in_memory_dense import InMemoryDenseStore
 
 
 @pytest.fixture
-def temp_rag_dir():
+def temp_rag_dir(tmp_path: Path):
     """Create temporary directory for RAG operations."""
-    tmpdir = tempfile.mkdtemp()
-    yield tmpdir
-    # Clean up
-    import shutil
-
-    try:
-        shutil.rmtree(tmpdir, ignore_errors=True)
-    except Exception:
-        pass
+    rag_dir = tmp_path / "rag_pipeline"
+    rag_dir.mkdir(parents=True, exist_ok=True)
+    return str(rag_dir)
 
 
 @pytest.fixture

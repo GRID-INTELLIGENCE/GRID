@@ -1,10 +1,8 @@
 import pytest
 
-# ContributionTracker pending migration from legacy_src/
-ContributionTracker = None
+from grid.services.contribution_tracker import ContributionTracker
 
 
-@pytest.mark.skipif(ContributionTracker is None, reason="ContributionTracker pending migration")
 class TestContributionTracker:
     @pytest.fixture
     def tracker(self):

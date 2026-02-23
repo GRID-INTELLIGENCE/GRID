@@ -358,6 +358,36 @@ describe("ToolExecutor", () => {
     }
   });
 
+  it("marks step as error on timeout", async () => {
+    const executeFn = vi.fn(async () => {
+      await new Promise((resolve) => {
+        setTimeout(resolve, 100);
+      });
+      return { echo: "late" };
+    });
+
+    toolRegistry.register(makeTool("echo", { execute: executeFn }));
+
+    const plan = makePlan([
+      {
+        order: 0,
+        call: {
+          toolId: "echo",
+          arguments: { message: "slow" },
+          description: "Slow step",
+        },
+        dryRun: false,
+      },
+    ]);
+
+    const result = await executePlan(plan, { stepTimeoutMs: 10 });
+    expect(result.results[0].status).toBe("error");
+    if (result.results[0].status === "error") {
+      expect(result.results[0].error).toMatch(/timed out/i);
+      expect(result.results[0].durationMs).toBeGreaterThanOrEqual(10);
+    }
+  });
+
   it("fires onProgress callback", async () => {
     toolRegistry.register(makeTool("echo"));
     const progress: number[] = [];
@@ -408,5 +438,39 @@ describe("ToolExecutor", () => {
     const result = await executePlan(plan);
     expect(result.totalDurationMs).toBeGreaterThanOrEqual(0);
     expect(result.completedAt).toBeGreaterThan(0);
+  });
+
+  it("returns error step when stepTimeoutMs is exceeded", async () => {
+    // Register a slow tool that takes 100ms
+    toolRegistry.register({
+      id: "slow-tool",
+      name: "Slow Tool",
+      description: "A slow tool",
+      category: "info",
+      inputSchema: z.object({ message: z.string() }),
+      execute: async () => {
+        await new Promise((r) => setTimeout(r, 100));
+        return { result: "done" };
+      },
+    });
+
+    const plan = makePlan([
+      {
+        order: 0,
+        call: {
+          toolId: "slow-tool",
+          arguments: { message: "test" },
+          description: "Slow step",
+        },
+        dryRun: false,
+      },
+    ]);
+
+    // Set timeout to 10ms, which is less than the 100ms the tool needs
+    const result = await executePlan(plan, { stepTimeoutMs: 10 });
+    expect(result.results[0].status).toBe("error");
+    if (result.results[0].status === "error") {
+      expect(result.results[0].error).toMatch(/timed out/i);
+    }
   });
 });
