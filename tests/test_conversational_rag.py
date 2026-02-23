@@ -36,6 +36,7 @@ def conversational_engine():
     config = RAGConfig()
     config.conversation_enabled = True
     config.multi_hop_enabled = False
+    config.vector_store_provider = "in_memory"
     return ConversationalRAGEngine(config)
 
 
@@ -205,6 +206,7 @@ class TestMultiHopReasoning:
         config = RAGConfig()
         config.multi_hop_enabled = True
         config.multi_hop_max_depth = 2
+        config.vector_store_provider = "in_memory"
         engine = ConversationalRAGEngine(config)
 
         # Mock the base engine
