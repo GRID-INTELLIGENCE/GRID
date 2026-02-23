@@ -56,6 +56,7 @@ def format_tool_output(tool_name: str, result: dict[str, Any], execution_time: f
 def _debug_log(message: str, data: dict[str, Any] | None = None, hypothesis_id: str = "H1") -> None:
     try:
         import os as _os
+
         _path = _os.path.join(_os.path.dirname(_os.path.dirname(_os.path.dirname(__file__))), "debug-14d2f0.log")
         _payload = {
             "sessionId": "14d2f0",
@@ -70,6 +71,8 @@ def _debug_log(message: str, data: dict[str, Any] | None = None, hypothesis_id: 
             _f.write(__import__("json", fromlist=["json"]).json.dumps(_payload) + "\n")
     except Exception:
         pass
+
+
 # endregion
 
 

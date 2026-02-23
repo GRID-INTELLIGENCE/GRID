@@ -286,7 +286,11 @@ class GRIDSecurityAssessmentAgent:
         if blocked_count > 0:
             report.append("### 🚨 SECURITY FINDINGS")
             report.append("The system successfully blocked the following unauthorized actions:")
-            report.extend(f"- **{e['event_type']}**: {json.dumps(e['details'])}" for e in self.audit_events if e["event_type"] in ["AUTHZ_ACCESS_DENIED", "REQUEST_BLOCKED"])
+            report.extend(
+                f"- **{e['event_type']}**: {json.dumps(e['details'])}"
+                for e in self.audit_events
+                if e["event_type"] in ["AUTHZ_ACCESS_DENIED", "REQUEST_BLOCKED"]
+            )
         else:
             report.append(
                 "✅ **No security breaches simulated.** All attempts were either authorized or no attacks were performed."

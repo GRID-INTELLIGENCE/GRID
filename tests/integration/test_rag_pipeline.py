@@ -20,6 +20,7 @@ def _create_chromadb_store_or_skip(collection_name: str, persist_directory: str)
     except Exception as e:
         pytest.skip(f"ChromaDB unavailable in this environment: {e}")
 
+
 # ============================================================================
 # Test Fixtures
 # ============================================================================

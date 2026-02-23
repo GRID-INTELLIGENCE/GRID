@@ -527,9 +527,7 @@ class AdvancedPatternManager(PatternManager):
 
         state["samples_seen"] += 1
 
-        self.match_history.append(
-            {"pattern_id": pattern_id, "label": actual_label, "predicted": predicted_prob}
-        )
+        self.match_history.append({"pattern_id": pattern_id, "label": actual_label, "predicted": predicted_prob})
         self.logger.info(
             "Learned on %s: label=%.1f, predicted=%.4f, error=%.4f, samples=%d",
             pattern_id,

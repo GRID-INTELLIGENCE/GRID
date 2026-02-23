@@ -133,6 +133,7 @@ class ChaosInjector:
     ) -> Callable:
         """Return a decorator that injects errors at the given rate."""
         if error_generator is None:
+
             def error_generator():
                 return Exception("Chaos injection error")
 

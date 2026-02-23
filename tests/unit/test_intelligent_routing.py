@@ -18,7 +18,6 @@ class TestPriorityQueue:
         assert pq.get() is None
 
 
-
 class TestHeuristicRouter:
     def test_heuristic_router_logic(self):
         router = HeuristicRouter()

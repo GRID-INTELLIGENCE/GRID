@@ -137,7 +137,9 @@ class ForensicLogAnalyzer:
         blocked = analysis["blocked_requests"]
         if blocked:
             report.append("## Blocked Requests")
-            report.extend(f"- **{req['timestamp']}**: {req['method']} {req['url']} (Reason: {req['reason']})" for req in blocked)
+            report.extend(
+                f"- **{req['timestamp']}**: {req['method']} {req['url']} (Reason: {req['reason']})" for req in blocked
+            )
             report.append("")
         else:
             report.append("## Blocked Requests")

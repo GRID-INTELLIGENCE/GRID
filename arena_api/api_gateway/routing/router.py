@@ -68,10 +68,7 @@ class DynamicRouter:
             # 2. Get healthy service instances
             service_instances = await self._get_service_instances(service_name)
             if not service_instances:
-                return JSONResponse(
-                    status_code=503,
-                    content={"error": "Service unavailable", "service": service_name}
-                )
+                return JSONResponse(status_code=503, content={"error": "Service unavailable", "service": service_name})
 
             # 3. Select service instance (load balancing)
             target_instance = self.load_balancer.select_instance(service_instances)
@@ -85,16 +82,14 @@ class DynamicRouter:
             # Create final response
             status_code = response_data.get("status_code", 200)
             response = JSONResponse(
-                status_code=status_code,
-                content=response_data.get("data"),
-                headers=response_data.get("headers")
+                status_code=status_code, content=response_data.get("data"), headers=response_data.get("headers")
             )
 
             # Inject versioning headers based on path
             version_str = "v1"
             if path.startswith("api/v2") or "/api/v2" in path:
                 version_str = "v2"
-            
+
             version_meta = get_version_metadata(version_str)
             if version_meta:
                 version_meta.inject_headers(response)
@@ -103,10 +98,7 @@ class DynamicRouter:
 
         except Exception as e:
             logger.error(f"Routing error for path {path}: {str(e)}")
-            return JSONResponse(
-                status_code=500,
-                content={"error": "Internal routing error", "details": str(e)}
-            )
+            return JSONResponse(status_code=500, content={"error": "Internal routing error", "details": str(e)})
 
     def _parse_service_path(self, path: str) -> tuple[str, str]:
         """
@@ -224,7 +216,9 @@ class CircuitBreaker:
                     "status": "success" if response.status_code < 400 else "error",
                     "status_code": response.status_code,
                     "headers": dict(response.headers),
-                    "data": response.json() if "application/json" in response.headers.get("content-type", "") else response.text,
+                    "data": response.json()
+                    if "application/json" in response.headers.get("content-type", "")
+                    else response.text,
                 }
         except TimeoutError:
             logger.error(f"Timeout calling service {url}")

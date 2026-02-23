@@ -136,11 +136,7 @@ class ArenaAPIGateway:
         metrics_task.cancel()
         safety_task.cancel()
 
-        await asyncio.gather(
-            self.service_discovery.cleanup(),
-            self.monitoring.cleanup(),
-            return_exceptions=True
-        )
+        await asyncio.gather(self.service_discovery.cleanup(), self.monitoring.cleanup(), return_exceptions=True)
         logger.info("Arena API Gateway shutdown complete")
 
     async def _register_configured_services(self) -> None:
@@ -267,7 +263,7 @@ class RequestProcessingMiddleware(BaseHTTPMiddleware):
                 if "Circuit breaker is open" in str(e):
                     logger.warning(f"Circuit breaker open for {request.url.path}, using fallback")
                     return await self._get_fallback_response(request)
-                
+
                 # Record error metrics
                 processing_time = time.time() - start_time
                 await self.monitoring.record_error(request=request, error=str(e), processing_time=processing_time)
@@ -282,29 +278,25 @@ class RequestProcessingMiddleware(BaseHTTPMiddleware):
     async def _get_fallback_response(self, request: Request) -> Response:
         """Provide a fallback response when services are unavailable."""
         from fastapi.responses import JSONResponse
-        
+
         # Determine service name from path
         path_parts = request.url.path.strip("/").split("/")
         service_name = path_parts[0] if path_parts else "unknown"
-        
+
         # Generic fallback data
         fallback_data = {
             "error": "Service temporarily unavailable",
             "service": service_name,
             "status": "degraded_mode",
             "message": "We are experiencing technical difficulties. Please try again later.",
-            "timestamp": datetime.now(UTC).isoformat()
+            "timestamp": datetime.now(UTC).isoformat(),
         }
-        
+
         # Service-specific fallbacks could be added here
         if service_name == "ai_service":
             fallback_data["message"] = "AI features are temporarily unavailable. Static processing active."
-        
-        return JSONResponse(
-            status_code=503,
-            content=fallback_data,
-            headers={"X-Gateway-Fallback": "true"}
-        )
+
+        return JSONResponse(status_code=503, content=fallback_data, headers={"X-Gateway-Fallback": "true"})
 
 
 # Global gateway instance

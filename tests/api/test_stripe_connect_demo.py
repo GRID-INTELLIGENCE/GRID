@@ -301,7 +301,11 @@ class TestConnectRouteIntegration:
     def test_create_account_route_then_dashboard_shows_connected_account(self, connect_route_client, fake_client):
         create_response = connect_route_client.post(
             "/api/v1/connect-demo/accounts/create",
-            data={"display_name": "Route Merchant", "contact_email": "route@example.com", "csrf_token": _generate_csrf_token()},
+            data={
+                "display_name": "Route Merchant",
+                "contact_email": "route@example.com",
+                "csrf_token": _generate_csrf_token(),
+            },
             follow_redirects=False,
         )
         assert create_response.status_code == 303

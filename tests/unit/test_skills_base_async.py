@@ -30,4 +30,3 @@ async def test_simple_skill_executes_async_handler_with_running_loop() -> None:
     skill = SimpleSkill(id="test.async.loop", name="Test", description="test", handler=handler)
     result = skill.run({"value": 5})
     assert result == {"value": 10}
-

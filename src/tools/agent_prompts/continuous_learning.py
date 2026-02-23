@@ -343,7 +343,10 @@ if __name__ == "__main__":
             structure=structure,
             solution="Implemented JWT authentication endpoint",
             outcome="success",
-            agent_experience={"lessons": ["Use secure token storage", "Implement rate limiting"], "time_taken": "2 hours"},
+            agent_experience={
+                "lessons": ["Use secure token storage", "Implement rate limiting"],
+                "time_taken": "2 hours",
+            },
         )
 
         experience = learning_system.get_agent_experience()

@@ -231,9 +231,7 @@ class SkillsSandbox:
     def _create_execution_directory(self, execution_id: str) -> Path:
         """Create a per-run execution directory with predictable permissions."""
         configured_root = (
-            os.environ.get("GRID_SANDBOX_TMPDIR")
-            or os.environ.get("GRID_TEST_TMPDIR")
-            or tempfile.gettempdir()
+            os.environ.get("GRID_SANDBOX_TMPDIR") or os.environ.get("GRID_TEST_TMPDIR") or tempfile.gettempdir()
         )
         temp_root = Path(configured_root) / "grid_skills_sandbox"
         temp_root.mkdir(parents=True, exist_ok=True)
