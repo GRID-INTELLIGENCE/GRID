@@ -1,13 +1,42 @@
-# GRID — GitHub Actions CI/CD Pipeline
-# Local-first, UV-based, Python 3.13, fast + stable checks
+# =============================================================================
+# GRID — Unified CI Pipeline
+# =============================================================================
+# Consolidated from: ci.yml, ci-main.yml, minimal-ci.yml, async-tests.yml
+# Provides comprehensive quality checks, security, tests, and build verification
+# =============================================================================
 
 name: GRID CI
 
 on:
   push:
     branches: [main, master]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - "*.txt"
+      - ".gitignore"
+      - "LICENSE"
   pull_request:
     branches: [main, master]
+  workflow_dispatch:
+    inputs:
+      run_slow_tests:
+        description: "Run slow/integration tests"
+        required: false
+        default: false
+        type: boolean
+      run_security_scan:
+        description: "Run security scan (bandit, pip-audit)"
+        required: false
+        default: true
+        type: boolean
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 env:
   UV_PYTHON: "3.13"
@@ -26,45 +55,131 @@ env:
   GRID_SANDBOX_TMPDIR: ".tmp/sandbox"
 
 jobs:
-  secrets_scan:
-    name: Secrets Scan
+  # =========================================================================
+  # SECRETS SCAN - Quick security gate
+  # =========================================================================
+  secrets-scan:
+    name: "Secrets Scan"
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
-      - name: Check for hardcoded secrets
+      - name: "Checkout"
+        uses: actions/checkout@v4
+
+      - name: "Check for hardcoded secrets"
         run: |
           if grep -r -i -E "(password|secret|token|api_key)\s*=\s*[\"'][^\"']{20,}[\"']" --include="*.py" --include="*.yaml" --include="*.yml" --include="*.json" src/ 2>/dev/null; then
-            echo "Potential hardcoded secrets found - please review"
+            echo "::error::Potential hardcoded secrets found - please review"
             exit 1
           elif grep -r -i "ghp_[a-zA-Z0-9]{36}" --include="*.py" --include="*.yaml" --include="*.yml" --include="*.json" src/ 2>/dev/null; then
-            echo "GitHub token found - please review"
+            echo "::error::GitHub token found - please review"
             exit 1
           else
-            echo "No obvious hardcoded secrets detected"
+            echo "✅ No obvious hardcoded secrets detected"
           fi
 
-  smoke_test:
-    name: Smoke Test
+  # =========================================================================
+  # LINT - Code Quality Checks
+  # =========================================================================
+  lint:
+    name: "Lint"
     runs-on: ubuntu-latest
-    needs: secrets_scan
+    timeout-minutes: 10
+    needs: [secrets-scan]
     steps:
-      - uses: actions/checkout@v4
-      - name: Install uv
+      - name: "Checkout"
+        uses: actions/checkout@v4
+
+      - name: "Install uv"
         uses: astral-sh/setup-uv@v7.3.0
         with:
           version: "0.10.4"
           python-version: "3.13"
           enable-cache: true
           cache-dependency-glob: "uv.lock"
-      - name: Install Python
+
+      - name: "Install Python"
         run: uv python install
-      - name: Sync dependencies
+
+      - name: "Sync dependencies"
+        run: uv sync --frozen
+
+      - name: "Run ruff check"
+        run: uv run ruff check . --output-format=full
+
+      - name: "Run ruff format check"
+        run: uv run ruff format --check src/grid/ src/application/ src/tools/ tests/
+
+      - name: "Run mypy"
+        run: uv run mypy src/ --ignore-missing-imports || true
+        continue-on-error: true
+
+  # =========================================================================
+  # SECURITY - Security Scanning (optional)
+  # =========================================================================
+  security:
+    name: "Security Scan"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [secrets-scan]
+    if: github.event.inputs.run_security_scan == 'true' || github.ref == 'refs/heads/main'
+    continue-on-error: true
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
+
+      - name: "Install uv"
+        uses: astral-sh/setup-uv@v7.3.0
+        with:
+          version: "0.10.4"
+          python-version: "3.13"
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: "Sync dependencies"
+        run: uv sync --frozen
+
+      - name: "Install security tools"
+        run: uv pip install bandit pip-audit
+
+      - name: "Run Bandit security scan"
+        run: uv run bandit -r src/grid src/application src/tools -ll || true
+
+      - name: "Run pip-audit dependency check"
+        run: uv run pip-audit --desc || true
+
+  # =========================================================================
+  # SMOKE TEST - Quick Environment Verification
+  # =========================================================================
+  smoke-test:
+    name: "Smoke Test"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [secrets-scan]
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
+
+      - name: "Install uv"
+        uses: astral-sh/setup-uv@v7.3.0
+        with:
+          version: "0.10.4"
+          python-version: "3.13"
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: "Install Python"
+        run: uv python install
+
+      - name: "Sync dependencies"
         run: uv sync --frozen --group test
-      - name: Verify Python version
+
+      - name: "Verify Python version"
         run: |
           uv run python --version
           uv run python -c "import sys; assert sys.version_info >= (3, 13), f'Wrong Python: {sys.version}'"
-      - name: Import check
+
+      - name: "Import smoke test"
         run: |
           uv run python -c "
           import sys
@@ -88,53 +203,141 @@ jobs:
           if failed > 0:
               sys.exit(1)
           "
-      - name: Test collection
+
+      - name: "Test collection"
         run: uv run pytest tests/unit/ --collect-only -q
 
-  lint:
-    name: Lint
+  # =========================================================================
+  # TEST - Unit Tests with Coverage
+  # =========================================================================
+  test:
+    name: "Test"
     runs-on: ubuntu-latest
-    needs: secrets_scan
+    timeout-minutes: 20
+    needs: [smoke-test, lint]
     steps:
-      - uses: actions/checkout@v4
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7.3.0
-        with:
-          version: "0.10.4"
-          python-version: "3.13"
-          enable-cache: true
-          cache-dependency-glob: "uv.lock"
-      - name: Install Python
-        run: uv python install
-      - name: Sync dependencies
-        run: uv sync --frozen
-      - name: Run ruff
-        run: uv run ruff check . --output-format=full
-      - name: Run ruff format
-        run: uv run ruff format --check src/grid/ src/application/ src/tools/ tests/
-      - name: Run mypy
-        run: uv run mypy src/ --ignore-missing-imports || true
+      - name: "Checkout"
+        uses: actions/checkout@v4
 
-  unit_tests:
-    name: Unit Tests
-    runs-on: ubuntu-latest
-    needs: smoke_test
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install uv
+      - name: "Install uv"
         uses: astral-sh/setup-uv@v7.3.0
         with:
           version: "0.10.4"
           python-version: "3.13"
           enable-cache: true
           cache-dependency-glob: "uv.lock"
-      - name: Install Python
+
+      - name: "Install Python"
         run: uv python install
-      - name: Sync dependencies
-        run: uv sync --frozen --group test
-      - name: Verify Python version
+
+      - name: "Sync dependencies"
+        run: uv sync --frozen --group dev --group test
+
+      - name: "Run unit tests"
+        run: uv run pytest tests/unit/ -v --tb=short -x
+
+      - name: "Run async function tests"
+        run: uv run pytest tests/test_async_boolean.py -v --tb=short || true
+        continue-on-error: true
+
+      - name: "Run policy tests"
         run: |
-          uv run python --version
-          uv run python -c "import sys; assert sys.version_info >= (3, 13), f'Wrong Python: {sys.version}'"
-      - name: Run tests
-        run: uv run pytest tests/unit/ -v --tb=short
+          uv run pytest tests/config/test_devprograms_external_api_access.py tests/config/test_runtime_policy.py tests/test_external_llm_provider.py -v --tb=short || true
+        continue-on-error: true
+
+  # =========================================================================
+  # INTEGRATION - Integration Tests (main branch or manual)
+  # =========================================================================
+  integration:
+    name: "Integration Tests"
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: [test]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || github.event.inputs.run_slow_tests == 'true'
+    continue-on-error: true
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
+
+      - name: "Install uv"
+        uses: astral-sh/setup-uv@v7.3.0
+        with:
+          version: "0.10.4"
+          python-version: "3.13"
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: "Sync dependencies"
+        run: uv sync --frozen --group test
+
+      - name: "Run integration tests"
+        run: uv run pytest tests/integration/ -v --tb=short -m "not slow" || true
+
+  # =========================================================================
+  # BUILD - Package Building
+  # =========================================================================
+  build:
+    name: "Build Package"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [test]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
+
+      - name: "Install uv"
+        uses: astral-sh/setup-uv@v7.3.0
+        with:
+          version: "0.10.4"
+          python-version: "3.13"
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: "Sync dependencies"
+        run: uv sync --frozen
+
+      - name: "Install build tools"
+        run: uv pip install build twine
+
+      - name: "Build package"
+        run: uv run python -m build
+
+      - name: "Verify package"
+        run: uv run twine check dist/*
+
+      - name: "Upload build artifacts"
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-packages
+          path: dist/
+          retention-days: 7
+
+  # =========================================================================
+  # CI STATUS - Pipeline Summary
+  # =========================================================================
+  ci-status:
+    name: "CI Status Summary"
+    runs-on: ubuntu-latest
+    needs: [secrets-scan, lint, smoke-test, test]
+    if: always()
+    timeout-minutes: 5
+    steps:
+      - name: "Pipeline Status"
+        run: |
+          echo "## GRID CI Pipeline Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Secrets Scan | ${{ needs.secrets-scan.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Lint | ${{ needs.lint.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Smoke Test | ${{ needs.smoke-test.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Test | ${{ needs.test.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ needs.test.result }}" != "success" ] || [ "${{ needs.lint.result }}" == "failure" ]; then
+            echo "❌ **Pipeline failed** - Critical jobs must pass" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          else
+            echo "✅ **Pipeline passed** - All critical jobs successful" >> $GITHUB_STEP_SUMMARY
+          fi

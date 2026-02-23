@@ -74,8 +74,9 @@ async def _init_sqlite_schema(engine: AsyncEngine) -> None:
 
 
 def get_async_engine() -> AsyncEngine:
-    global _engine
+    global _engine, _disposed
     if _engine is not None:
+        _disposed = False
         return _engine
 
     settings = get_settings()
@@ -99,6 +100,7 @@ def get_async_engine() -> AsyncEngine:
                 echo=settings.database.echo,
                 poolclass=NullPool if _should_auto_init_sqlite(fallback_url) else None,
             )
+            _disposed = False
             if _should_auto_init_sqlite(fallback_url):
                 try:
                     loop = asyncio.get_running_loop()
@@ -120,6 +122,7 @@ def get_async_engine() -> AsyncEngine:
             poolclass=StaticPool,
             connect_args={"check_same_thread": False},
         )
+        _disposed = False
 
         # Store sync engine for Databricks
         import application.mothership.db.engine as engine_module
@@ -151,6 +154,7 @@ def get_async_engine() -> AsyncEngine:
         )
 
     _engine = create_async_engine(url, **kwargs)
+    _disposed = False
 
     if METRICS_ENABLED and _engine.pool and hasattr(_engine.pool, "size"):
         _db_connections.set(_engine.pool.size())
@@ -185,20 +189,24 @@ async def dispose_async_engine() -> None:
     global _engine, _sessionmaker, _databricks_sync_engine, _disposed
 
     async with _engine_lock:
-        # Check if already disposed
-        if _disposed:
+        # Skip only when everything has already been torn down.
+        if _disposed and _engine is None and _sessionmaker is None and _databricks_sync_engine is None:
             logger.debug("Database engine already disposed, skipping")
             return
-
-        _disposed = True
 
         if _sessionmaker is not None:
             _sessionmaker = None
             logger.info("Session maker cleared")
 
         if _engine is not None:
+            pool_size = 0
+            pool = _engine.pool
+            if pool is not None and hasattr(pool, "size"):
+                try:
+                    pool_size = int(pool.size())
+                except Exception:  # noqa: S110 intentional best-effort metrics
+                    pool_size = 0
             await _engine.dispose()
-            pool_size = _engine.pool.size() if _engine.pool else 0
             _engine = None
             if METRICS_ENABLED:
                 _db_connections.set(0)
@@ -209,6 +217,8 @@ async def dispose_async_engine() -> None:
             _databricks_sync_engine.dispose()
             _databricks_sync_engine = None
             logger.info("Databricks sync engine disposed")
+
+        _disposed = True
 
 
 def init_db_lifespan(app):

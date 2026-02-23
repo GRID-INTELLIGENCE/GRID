@@ -1,12 +1,13 @@
 # =============================================================================
 # GRID — Release & Publishing Pipeline
 # =============================================================================
+# Consolidated from: release.yaml, publish-pypi.yml
 # Automated release workflow for versioning, changelog generation, and
-# publishing to PyPI.
+# publishing to PyPI for both grid-intelligence and grid-safety packages.
 #
 # Triggers:
+#   - Tag push: v*.*.* (grid-intelligence) or grid-safety-* (grid-safety)
 #   - Manual dispatch with version bump type
-#   - Tag push matching v*.*.*
 # =============================================================================
 
 name: Release & Publish
@@ -15,7 +16,7 @@ on:
   push:
     tags:
       - "v*.*.*"
-
+      - "grid-safety-*"
   workflow_dispatch:
     inputs:
       version_bump:
@@ -36,21 +37,34 @@ on:
         required: false
         type: boolean
         default: false
+      package:
+        description: "Package to release"
+        required: true
+        type: choice
+        options:
+          - grid-intelligence
+          - grid-safety
+        default: grid-intelligence
+
+permissions:
+  contents: write
+  id-token: write
 
 env:
   PYTHONUNBUFFERED: "1"
   PYTHONDONTWRITEBYTECODE: "1"
 
 jobs:
-  # ---------------------------------------------------------------------------
-  # Validate & Prepare Release
-  # ---------------------------------------------------------------------------
+  # =========================================================================
+  # PREPARE - Determine Version & Generate Changelog
+  # =========================================================================
   prepare:
     name: "Prepare Release"
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version.outputs.version }}
       tag: ${{ steps.version.outputs.tag }}
+      package: ${{ steps.version.outputs.package }}
 
     steps:
       - name: "Checkout Repository"
@@ -68,48 +82,55 @@ jobs:
           cache-dependency-glob: "uv.lock"
 
       - name: "Install tools"
-        run: |
-          uv pip install toml
+        run: uv pip install toml
 
-      - name: "Determine Version"
+      - name: "Determine Version & Package"
         id: version
         run: |
           if [[ "${{ github.event_name }}" == "push" ]]; then
-            VERSION=${GITHUB_REF#refs/tags/v}
+            # Tag push
+            if [[ "${GITHUB_REF}" == refs/tags/grid-safety-* ]]; then
+              PACKAGE="grid-safety"
+              VERSION=${GITHUB_REF#refs/tags/grid-safety-}
+            else
+              PACKAGE="grid-intelligence"
+              VERSION=${GITHUB_REF#refs/tags/v}
+            fi
             TAG=${GITHUB_REF#refs/tags/}
           else
-            CURRENT=$(uv run python -c "import toml; print(toml.load('pyproject.toml')['project']['version'])")
+            # Manual dispatch
+            PACKAGE="${{ github.event.inputs.package }}"
+            if [[ "$PACKAGE" == "grid-safety" ]]; then
+              CURRENT=$(uv run python -c "import toml; print(toml.load('safety/pyproject.toml')['project']['version'])" 2>/dev/null || echo "1.0.0")
+            else
+              CURRENT=$(uv run python -c "import toml; print(toml.load('pyproject.toml')['project']['version'])")
+            fi
             IFS='.' read -r -a parts <<< "$CURRENT"
             MAJOR=${parts[0]}
             MINOR=${parts[1]}
             PATCH=${parts[2]}
 
             case "${{ github.event.inputs.version_bump }}" in
-              major)
-                MAJOR=$((MAJOR + 1))
-                MINOR=0
-                PATCH=0
-                ;;
-              minor)
-                MINOR=$((MINOR + 1))
-                PATCH=0
-                ;;
-              patch)
-                PATCH=$((PATCH + 1))
-                ;;
+              major) MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0 ;;
+              minor) MINOR=$((MINOR + 1)); PATCH=0 ;;
+              patch) PATCH=$((PATCH + 1)) ;;
             esac
 
             VERSION="${MAJOR}.${MINOR}.${PATCH}"
             if [[ "${{ github.event.inputs.prerelease }}" == "true" ]]; then
               VERSION="${VERSION}-rc.1"
             fi
-            TAG="v${VERSION}"
+            if [[ "$PACKAGE" == "grid-safety" ]]; then
+              TAG="grid-safety-${VERSION}"
+            else
+              TAG="v${VERSION}"
+            fi
           fi
 
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
           echo "tag=${TAG}" >> $GITHUB_OUTPUT
-          echo "Version: ${VERSION}"
-          echo "Tag: ${TAG}"
+          echo "package=${PACKAGE}" >> $GITHUB_OUTPUT
+          echo "::notice::Package: ${PACKAGE}, Version: ${VERSION}, Tag: ${TAG}"
 
       - name: "Generate Changelog"
         id: changelog
@@ -120,8 +141,7 @@ jobs:
           else
             COMMITS=$(git log --pretty=format:"- %s (%h)" --no-merges -20)
           fi
-          CHANGELOG="## What's Changed in ${{ steps.version.outputs.tag }}\n\n${COMMITS}"
-          echo -e "$CHANGELOG" > RELEASE_NOTES.md
+          echo -e "## What's Changed in ${{ steps.version.outputs.tag }}\n\n${COMMITS}" > RELEASE_NOTES.md
           cat RELEASE_NOTES.md
 
       - name: "Upload Release Notes"
@@ -130,13 +150,14 @@ jobs:
           name: release-notes
           path: RELEASE_NOTES.md
 
-  # ---------------------------------------------------------------------------
-  # Run Tests
-  # ---------------------------------------------------------------------------
+  # =========================================================================
+  # TEST - Run Tests Before Release
+  # =========================================================================
   test:
     name: "Test Before Release"
     runs-on: ubuntu-latest
     needs: [prepare]
+    if: needs.prepare.outputs.package == 'grid-intelligence'
 
     steps:
       - name: "Checkout Repository"
@@ -151,23 +172,23 @@ jobs:
           cache-dependency-glob: "uv.lock"
 
       - name: "Install dependencies"
-        run: |
-          uv sync --frozen
+        run: uv sync --frozen --group test
 
       - name: "Run Tests"
         run: uv run pytest tests/unit -v --tb=short -m "not slow"
         env:
-          PYTHONPATH: circuits:.
+          PYTHONPATH: .
           BLOCKER_DISABLED: "1"
           GRID_ENVIRONMENT: testing
 
-  # ---------------------------------------------------------------------------
-  # Build Package
-  # ---------------------------------------------------------------------------
+  # =========================================================================
+  # BUILD - Package Building
+  # =========================================================================
   build:
     name: "Build Package"
     runs-on: ubuntu-latest
     needs: [prepare, test]
+    if: always() && (needs.test.result == 'success' || needs.prepare.outputs.package == 'grid-safety')
 
     steps:
       - name: "Checkout Repository"
@@ -182,11 +203,10 @@ jobs:
           cache-dependency-glob: "uv.lock"
 
       - name: "Install build tools"
-        run: |
-          uv pip install build twine toml
+        run: uv pip install build twine toml
 
-      - name: "Update Version"
-        if: github.event_name == 'workflow_dispatch'
+      - name: "Update Version (grid-intelligence)"
+        if: github.event_name == 'workflow_dispatch' && needs.prepare.outputs.package == 'grid-intelligence'
         run: |
           uv run python -c "
           import toml
@@ -197,23 +217,38 @@ jobs:
               toml.dump(config, f)
           "
 
-      - name: "Build Package"
+      - name: "Build grid-intelligence"
+        if: needs.prepare.outputs.package == 'grid-intelligence'
         run: |
           uv run python -m build
           ls -la dist/
 
+      - name: "Build grid-safety"
+        if: needs.prepare.outputs.package == 'grid-safety'
+        working-directory: safety
+        run: |
+          uv run python -m build --wheel
+          ls -la dist/
+
       - name: "Verify Package"
-        run: uv run twine check dist/*
+        run: |
+          if [[ "${{ needs.prepare.outputs.package }}" == "grid-safety" ]]; then
+            uv run twine check safety/dist/*
+          else
+            uv run twine check dist/*
+          fi
 
       - name: "Upload Build Artifacts"
         uses: actions/upload-artifact@v4
         with:
           name: dist-packages
-          path: dist/
+          path: |
+            dist/
+            safety/dist/
 
-  # ---------------------------------------------------------------------------
-  # Publish to PyPI
-  # ---------------------------------------------------------------------------
+  # =========================================================================
+  # PUBLISH - PyPI Publishing
+  # =========================================================================
   publish-pypi:
     name: "Publish to PyPI"
     runs-on: ubuntu-latest
@@ -221,10 +256,7 @@ jobs:
     if: github.event.inputs.dry_run != 'true'
     environment:
       name: pypi
-      url: https://pypi.org/project/grid-intelligence/
-
-    permissions:
-      id-token: write
+      url: ${{ needs.prepare.outputs.package == 'grid-safety' && 'https://pypi.org/project/grid-safety/' || 'https://pypi.org/project/grid-intelligence/' }}
 
     steps:
       - name: "Download Artifacts"
@@ -239,17 +271,14 @@ jobs:
           skip-existing: true
           verbose: true
 
-  # ---------------------------------------------------------------------------
-  # Create GitHub Release
-  # ---------------------------------------------------------------------------
+  # =========================================================================
+  # RELEASE - Create GitHub Release
+  # =========================================================================
   release:
     name: "Create GitHub Release"
     runs-on: ubuntu-latest
     needs: [prepare, build]
     if: always() && needs.build.result == 'success'
-
-    permissions:
-      contents: write
 
     steps:
       - name: "Checkout Repository"
@@ -292,9 +321,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  # ---------------------------------------------------------------------------
-  # Summary
-  # ---------------------------------------------------------------------------
+  # =========================================================================
+  # SUMMARY - Release Summary
+  # =========================================================================
   summary:
     name: "Release Summary"
     runs-on: ubuntu-latest
@@ -306,6 +335,7 @@ jobs:
         run: |
           echo "## GRID Release Complete" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Package:** ${{ needs.prepare.outputs.package }}" >> $GITHUB_STEP_SUMMARY
           echo "**Version:** ${{ needs.prepare.outputs.version }}" >> $GITHUB_STEP_SUMMARY
           echo "**Tag:** ${{ needs.prepare.outputs.tag }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY

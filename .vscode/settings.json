@@ -12,6 +12,32 @@
     "python.testing.pytestArgs": [
         "tests"
     ],
+    "[typescript]": {
+        "editor.defaultFormatter": "codeium.windsurf",
+        "editor.formatOnSave": true,
+        "editor.rulers": [
+            120
+        ]
+    },
+    "[typescriptreact]": {
+        "editor.defaultFormatter": "codeium.windsurf",
+        "editor.formatOnSave": true,
+        "editor.rulers": [
+            120
+        ]
+    },
+    "[javascript]": {
+        "editor.defaultFormatter": "codeium.windsurf",
+        "editor.formatOnSave": true
+    },
+    "[javascriptreact]": {
+        "editor.defaultFormatter": "codeium.windsurf",
+        "editor.formatOnSave": true
+    },
+    "[css]": {
+        "editor.defaultFormatter": "codeium.windsurf",
+        "editor.formatOnSave": true
+    },
     "[python]": {
         "editor.defaultFormatter": "codeium.windsurf",
         "editor.formatOnSave": true,
@@ -40,7 +66,9 @@
         "**/.rag_db": true,
         "**/.rag_logs": true,
         "**/.test_rag_db": true,
-        "**/.test_eval_rag_db": true
+        "**/.test_eval_rag_db": true,
+        "**/coverage": true,
+        "**/.storybook": true
     },
     "search.exclude": {
         "**/.venv": true,
@@ -52,7 +80,10 @@
         "**/dist": true,
         "**/build": true,
         "**/archive": true,
-        "**/uv.lock": true
+        "**/uv.lock": true,
+        "**/coverage": true,
+        "**/.storybook": true,
+        "**/frontend/dist": true
     },
     "files.watcherExclude": {
         "**/.venv/**": true,
@@ -76,5 +107,17 @@
         "RESONANCE_HOME": "${workspaceFolder}/src/application/resonance",
         "ENV": "development",
         "PYTHON_VERSION": "3.13"
-    }
+    },
+    "typescript.tsdk": "frontend/node_modules/typescript/lib",
+    "typescript.enablePromptUseWorkspaceTsdk": true,
+    "tailwindCSS.experimental.classRegex": [
+        [
+            "cva\\(([^)]*)\\)",
+            "[\"'`]([^\"'`]*).*?[\"'`]"
+        ],
+        [
+            "cn\\(([^)]*)\\)",
+            "[\"'`]([^\"'`]*).*?[\"'`]"
+        ]
+    ]
 }

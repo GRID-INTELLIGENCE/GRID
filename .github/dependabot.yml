@@ -122,8 +122,10 @@ updates:
           - "patch"
 
   # ---------------------------------------------------------------------------
+  # NPM Dependencies (Frontend)
   # ---------------------------------------------------------------------------
-    directory: "/"
+  - package-ecosystem: "npm"
+    directory: "/frontend"
     schedule:
       interval: "weekly"
       day: "tuesday"
@@ -132,6 +134,15 @@ updates:
     open-pull-requests-limit: 3
     labels:
       - "dependencies"
+      - "npm"
       - "automated"
     commit-message:
+      prefix: "deps(npm)"
       include: "scope"
+    groups:
+      npm-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"

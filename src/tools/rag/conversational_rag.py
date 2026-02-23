@@ -349,6 +349,7 @@ Current query: {query}"""
         """
         total_sessions = len(self.conversation_memory.sessions)
         total_turns = self.conversation_metrics["total_turns"]
+        self.conversation_metrics["total_sessions"] = total_sessions
 
         if total_sessions > 0:
             self.conversation_metrics["session_average_turns"] = total_turns / total_sessions
