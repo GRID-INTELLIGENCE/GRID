@@ -17,6 +17,10 @@ routers:
     enabled: true
   - module: "application.mothership.routers.billing:router"
     enabled: true
+  - module: "application.mothership.routers.inference:router"
+    enabled: true
+  - module: "application.mothership.routers.privacy:router"
+    enabled: true
   - module: "application.resonance.api.router:router"
     prefix: "/resonance"
     tags: ["resonance"]

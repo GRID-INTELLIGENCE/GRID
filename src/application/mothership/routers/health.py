@@ -739,6 +739,7 @@ async def factory_defaults_status() -> dict[str, Any]:
     "/metrics",
     summary="Basic Metrics",
     description="Get basic system metrics",
+    operation_id="cockpit_metrics_get",
 )
 async def metrics(
     cockpit: Cockpit,

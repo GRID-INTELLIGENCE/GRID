@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import os
 import re
 import time
@@ -19,6 +20,8 @@ from .llm.simple import SimpleLLM
 from .model_router import ModelRoutingDecision, route_models
 from .utils import check_ollama_connection
 from .vector_store import InMemoryDenseVectorStore
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -402,13 +405,13 @@ class OnDemandRAGEngine:
             origin = "primary"
             # Aggressive truncation for embedding stability across models
             candidate_texts = [text[:2000], text[:1000], text[:600]]
-            last_err: Exception | None = None
+            _last_err: Exception | None = None
             for ct in candidate_texts:
                 try:
                     emb = embedding_provider.embed(ct)
                     break
                 except Exception as e:
-                    last_err = e
+                    _last_err = e
                     continue
 
             if emb is None and embedding_fallback_provider is not None:
@@ -418,13 +421,15 @@ class OnDemandRAGEngine:
                         emb = embedding_fallback_provider.embed(ct)
                         break
                     except Exception as e:
-                        last_err = e
+                        _last_err = e
                         continue
 
             if emb is None:
                 from .embeddings.simple import SimpleEmbedding
 
                 origin = "simple_fallback"
+                if _last_err is not None:
+                    logger.debug("Embedding fallback to simple: %s", _last_err)
                 emb = SimpleEmbedding(use_tfidf=False).embed(candidate_texts[-1])
 
             if origin == "primary":

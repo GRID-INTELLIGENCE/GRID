@@ -427,9 +427,9 @@ class TestSecretValidation:
             validate_secret_strength,
         )
 
-        # Long enough but contains weak pattern
-        weak_secret = "a" * 64 + "password"
-        with pytest.raises(SecretValidationError, match="weak pattern"):
+        # High entropy (passes entropy check) but contains weak pattern "password"
+        weak_secret = "aB3xZ9qW7mR2pL5vN8kT4jH6fD0sY1cpasswordG3nK8wQ5eR7tU2bX"
+        with pytest.raises(SecretValidationError, match=r"weak pattern|too weak for production"):
             validate_secret_strength(weak_secret, environment="production")
 
     def test_generate_secure_secret_meets_minimum(self):

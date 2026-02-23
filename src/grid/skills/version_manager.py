@@ -168,21 +168,37 @@ class SkillVersionManager:
             skill_file_path=str(skill_file_path),
         )
 
-        # 5. Save to disk
-        self._save_version(version)
+        # 5. Save to disk (sync for backward compatibility with sync callers)
+        self._save_version_sync(version)
 
         self._logger.info(f"Captured version {version_id} for skill {skill_id}")
         return version
 
-    async def _save_version(self, version: SkillVersion):
+    def _save_version_sync(self, version: SkillVersion) -> None:
+        """Save version to disk (sync)."""
+        skill_dir = self._get_skill_dir(version.skill_id)
+        version_file = skill_dir / f"{version.version_id}.json"
+        version_file.write_text(json.dumps(asdict(version), indent=2))
+
+    async def _save_version(self, version: SkillVersion) -> None:
         import aiofiles
         skill_dir = self._get_skill_dir(version.skill_id)
         version_file = skill_dir / f"{version.version_id}.json"
-
         async with aiofiles.open(version_file, "w") as f:
             await f.write(json.dumps(asdict(version), indent=2))
 
-    async def list_versions(self, skill_id: str) -> list[dict[str, Any]]:
+    def list_versions(self, skill_id: str) -> list[dict[str, Any]]:
+        """List available versions for a skill (sync)."""
+        skill_dir = self._get_skill_dir(skill_id)
+        versions = []
+        for v_file in skill_dir.glob("*.json"):
+            content = v_file.read_text()
+            data = json.loads(content)
+            data.pop("code_snapshot", None)
+            versions.append(data)
+        return sorted(versions, key=lambda x: x["created_at"], reverse=True)
+
+    async def list_versions_async(self, skill_id: str) -> list[dict[str, Any]]:
         """List available versions for a skill."""
         import aiofiles
         skill_dir = self._get_skill_dir(skill_id)
@@ -211,9 +227,19 @@ class SkillVersionManager:
             data = json.loads(content)
             return SkillVersion(**data)
 
+    def get_version_sync(self, skill_id: str, version_id: str) -> SkillVersion | None:
+        """Fetch a specific version (sync)."""
+        skill_dir = self._get_skill_dir(skill_id)
+        version_file = skill_dir / f"{version_id}.json"
+        if not version_file.exists():
+            return None
+        content = version_file.read_text()
+        data = json.loads(content)
+        return SkillVersion(**data)
+
     def rollback(self, skill_id: str, version_id: str) -> bool:
         """Rollback skill to a previous version."""
-        version = self.get_version(skill_id, version_id)
+        version = self.get_version_sync(skill_id, version_id)
         if not version:
             self._logger.error(f"Version {version_id} not found for skill {skill_id}")
             return False
@@ -247,8 +273,8 @@ class SkillVersionManager:
 
     def compare(self, skill_id: str, v1_id: str, v2_id: str) -> dict[str, Any]:
         """Compare two versions (performance + code diff placeholder)."""
-        v1 = self.get_version(skill_id, v1_id)
-        v2 = self.get_version(skill_id, v2_id)
+        v1 = self.get_version_sync(skill_id, v1_id)
+        v2 = self.get_version_sync(skill_id, v2_id)
 
         if not v1 or not v2:
             return {"error": "One or both versions not found"}

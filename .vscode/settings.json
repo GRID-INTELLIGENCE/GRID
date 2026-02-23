@@ -1,6 +1,6 @@
 {
     "python.defaultInterpreterPath": ".venv/Scripts/python.exe",
-    "python.languageServer": "Pylance",
+    "python.languageServer": "Jedi",
     "python.analysis.typeCheckingMode": "basic",
     "python.analysis.extraPaths": [
         "./src",
@@ -13,7 +13,7 @@
         "tests"
     ],
     "[python]": {
-        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.defaultFormatter": "codeium.windsurf",
         "editor.formatOnSave": true,
         "editor.rulers": [
             120
@@ -70,7 +70,7 @@
     "terminal.integrated.defaultProfile.windows": "PowerShell",
     "terminal.integrated.env.windows": {
         "PROJECT_ROOT": "${workspaceFolder}",
-        "PYTHONPATH": "${workspaceFolder}/src",
+        "PYTHONPATH": "${workspaceFolder}/src:${workspaceFolder}/safety:${workspaceFolder}/security:${workspaceFolder}/boundaries",
         "GRID_HOME": "${workspaceFolder}/src/grid",
         "COGNITIVE_HOME": "${workspaceFolder}/src/cognitive",
         "RESONANCE_HOME": "${workspaceFolder}/src/application/resonance",

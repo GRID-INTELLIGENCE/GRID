@@ -289,7 +289,7 @@ def get_metrics_router() -> APIRouter:  # noqa: F821
 
     router = APIRouter()
 
-    @router.get("/metrics", response_class=StarletteResponse)
+    @router.get("/metrics", response_class=StarletteResponse, operation_id="prometheus_metrics_get")
     async def metrics() -> StarletteResponse:
         """Return Prometheus metrics."""
         return StarletteResponse(

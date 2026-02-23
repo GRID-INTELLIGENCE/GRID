@@ -29,7 +29,8 @@ async def client():
 async def auth_headers(client: AsyncClient) -> dict[str, str]:
     resp = await client.post("/api/v1/auth/login", json={"username": "operator", "password": "operator"})
     if resp.status_code == 200:
-        token = resp.json().get("access_token", resp.json().get("token", "dev"))
+        data = resp.json()
+        token = data.get("data", {}).get("access_token", data.get("access_token", data.get("token", "dev")))
         return {"Authorization": f"Bearer {token}"}
     return {"Authorization": "Bearer dev-test-token"}
 

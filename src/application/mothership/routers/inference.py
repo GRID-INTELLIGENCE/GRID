@@ -12,7 +12,7 @@ import logging
 import uuid
 from typing import Any
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
+from fastapi import APIRouter, BackgroundTasks, HTTPException
 from pydantic import BaseModel, Field
 
 from application.mothership.dependencies import Auth
@@ -49,7 +49,7 @@ _inference_tasks: dict[str, dict[str, Any]] = {}
 async def create_inference(
     request: InferenceRequest,
     background_tasks: BackgroundTasks,
-    auth: Auth = Depends(),
+    auth: Auth,
 ):
     """Create a new inference request."""
     try:
@@ -99,7 +99,7 @@ async def create_inference(
 async def create_async_inference(
     request: InferenceRequest,
     background_tasks: BackgroundTasks,
-    auth: Auth = Depends(),
+    auth: Auth,
 ):
     """Create an asynchronous inference request."""
     try:
@@ -112,7 +112,7 @@ async def create_async_inference(
 
 
 @router.get("/status/{task_id}")
-async def get_inference_status(task_id: str, auth: Auth = Depends()):
+async def get_inference_status(task_id: str, auth: Auth):
     """Get the status of an asynchronous inference request."""
     try:
         user_id = auth.get("user_id", "anonymous")
@@ -126,7 +126,7 @@ async def get_inference_status(task_id: str, auth: Auth = Depends()):
 
 
 @router.get("/models")
-async def list_available_models(auth: Auth = Depends()):
+async def list_available_models(auth: Auth):
     """List available inference models."""
     return {
         "models": ["gpt-3.5-turbo", "gpt-4", "claude-2", "local-llama", "ollama-llama3"],

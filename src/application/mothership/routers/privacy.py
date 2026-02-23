@@ -11,7 +11,7 @@ import logging
 import time
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from application.mothership.dependencies import Auth
@@ -96,7 +96,7 @@ def _get_privacy_level(level_str: str | None) -> str:
 
 
 @router.post("/detect", response_model=DetectionResponse)
-async def detect_pii(request: DetectionRequest, auth: Auth = Depends()):
+async def detect_pii(request: DetectionRequest, auth: Auth):
     """Detect PII entities in text."""
     try:
         from safety.privacy.engine import PrivacyEngine
@@ -127,7 +127,7 @@ async def detect_pii(request: DetectionRequest, auth: Auth = Depends()):
 
 
 @router.post("/mask", response_model=PrivacyMaskResponse)
-async def mask_pii(request: PrivacyRequest, auth: Auth = Depends()):
+async def mask_pii(request: PrivacyRequest, auth: Auth):
     """Mask PII entities in text."""
     try:
         from safety.privacy.engine import PrivacyEngine
@@ -165,7 +165,7 @@ async def mask_pii(request: PrivacyRequest, auth: Auth = Depends()):
 
 
 @router.post("/batch", response_model=BatchPrivacyResponse)
-async def batch_privacy_processing(request: PrivacyBatchRequest, auth: Auth = Depends()):
+async def batch_privacy_processing(request: PrivacyBatchRequest, auth: Auth):
     """Process multiple texts for PII detection and masking."""
     try:
         from safety.privacy.engine import PrivacyEngine
@@ -215,7 +215,7 @@ async def batch_privacy_processing(request: PrivacyBatchRequest, auth: Auth = De
 
 
 @router.get("/levels")
-async def get_privacy_levels(auth: Auth = Depends()):
+async def get_privacy_levels(auth: Auth):
     """Get available privacy processing levels."""
     return {
         "levels": {
@@ -228,7 +228,7 @@ async def get_privacy_levels(auth: Auth = Depends()):
 
 
 @router.get("/stats")
-async def get_privacy_stats(auth: Auth = Depends()):
+async def get_privacy_stats(auth: Auth):
     """Get privacy processing statistics."""
     uptime_sec = time.time() - _stats["_start_time"]
     days = int(uptime_sec // 86400)
