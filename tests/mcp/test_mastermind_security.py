@@ -5,7 +5,6 @@ Tests for path traversal vulnerabilities and access controls.
 """
 
 import sys
-import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
@@ -22,15 +21,13 @@ class TestMastermindSecurity:
     """Security tests for mastermind server functions."""
 
     @pytest.fixture
-    def session(self):
+    def session(self, tmp_path: Path):
         """Create a test session."""
         session = MastermindSession()
-        # Use a temporary directory as project root for testing
-        with tempfile.TemporaryDirectory() as temp_dir:
-            session.project_root = Path(temp_dir)
-            # Patch the global session
-            with patch("grid.mcp.mastermind_server.session", session):
-                yield session
+        session.project_root = tmp_path
+        # Patch the global session
+        with patch("grid.mcp.mastermind_server.session", session):
+            yield session
 
     @pytest.mark.asyncio
     async def test_analyze_file_path_traversal_prevention(self, session):

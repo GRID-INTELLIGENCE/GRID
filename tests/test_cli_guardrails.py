@@ -55,9 +55,10 @@ def test_allowed_command():
 
 def test_contribution_blocker():
     print("\nTesting contribution blocker (Threshold=0.95)...")
-    # 'serve' has score 0.85, so it should be blocked by 0.95
-    result = run_grid(["serve"], env={"GRID_MIN_CONTRIBUTION": "0.95"})
-    if "ERROR: Command 'serve' blocked. Contribution score 0.85 is below threshold 0.95" in result.stderr:
+    # Use a short-lived command path to avoid long-running server startup in tests.
+    # 'skills' has score 0.91, so it should be blocked by 0.95.
+    result = run_grid(["skills", "list"], env={"GRID_MIN_CONTRIBUTION": "0.95"})
+    if "ERROR: Command 'skills' blocked. Contribution score 0.91 is below threshold 0.95" in result.stderr:
         print("✅ Contribution blocker working correctly.")
     else:
         print("❌ Contribution blocker FAILED.")
@@ -67,9 +68,9 @@ def test_contribution_blocker():
 
 def test_contribution_allowed():
     print("\nTesting contribution allowed (Threshold=0.80)...")
-    # 'serve' has score 0.85, so it should be allowed by 0.80
-    result = run_grid(["serve"], env={"GRID_MIN_CONTRIBUTION": "0.80"})
-    if "ERROR: Command 'serve' blocked" not in result.stderr:
+    # 'skills' has score 0.91, so it should be allowed by 0.80.
+    result = run_grid(["skills", "list"], env={"GRID_MIN_CONTRIBUTION": "0.80"})
+    if "ERROR: Command 'skills' blocked" not in result.stderr:
         print("✅ Contribution allowance working correctly.")
     else:
         print("❌ Contribution allowance FAILED.")
