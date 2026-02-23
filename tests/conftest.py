@@ -1,20 +1,14 @@
+"""
+Tests conftest: auto-markers, environment setup, and shared fixtures.
+
+Path resolution is handled by pyproject.toml's pythonpath = ["src"] setting.
+No sys.path manipulation needed.
+"""
+
 import os
-import sys
+from unittest.mock import AsyncMock, Mock
 
 import pytest
-
-
-def pytest_configure(config):
-    """Re-ensure src is at sys.path[0] after any plugin/pytest path changes."""
-    root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-    src = os.path.join(root, "src")
-    for path in [src, root]:
-        while path in sys.path:
-            sys.path.remove(path)
-    sys.path.insert(0, src)
-    if root not in sys.path:
-        sys.path.append(root)
-
 
 # ---------------------------------------------------------------------------
 # Auto-marker: apply markers based on directory structure so selective runs
@@ -56,32 +50,6 @@ def pytest_collection_modifyitems(config, items):
                 break
 
 
-# Additional paths needed for legacy modules (appended so src stays first)
-ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-LOTS_OUTER_DIR = os.path.join(ROOT_DIR, "light_of_the_seven")
-ARCHIVE_DIR = os.path.join(ROOT_DIR, "archive")
-LEGACY_SRC_DIR = os.path.join(ARCHIVE_DIR, "legacy_src")
-LEGACY_DIR = os.path.join(ARCHIVE_DIR, "legacy")
-ARCHIVE_LOTS_DIR = os.path.join(ARCHIVE_DIR, "light_of_the_seven")
-SCRIPTS_DIR = os.path.join(ROOT_DIR, "scripts")
-CONTEXT_DIR = os.path.join(ROOT_DIR, "src", "cognitive", "context")
-
-# Insert additional paths AFTER src (index 1+) so src remains first
-additional_paths = [
-    LOTS_OUTER_DIR,
-    LEGACY_SRC_DIR,
-    LEGACY_DIR,
-    ARCHIVE_LOTS_DIR,
-    SCRIPTS_DIR,
-    ROOT_DIR,
-    CONTEXT_DIR,
-]
-
-for path in additional_paths:
-    if os.path.exists(path) and path not in sys.path:
-        sys.path.append(path)
-
-
 @pytest.fixture(scope="session", autouse=True)
 def setup_env():
     """Set test environment variables without triggering DB connections.
@@ -90,8 +58,6 @@ def setup_env():
     connection attempts that may hang or timeout. Settings will be loaded
     lazily when needed with the test environment variables set.
     """
-    import os
-
     os.environ["MOTHERSHIP_ENVIRONMENT"] = "test"
     # Generate secure test key: python -c "import secrets; print(secrets.token_urlsafe(32))"
     os.environ["MOTHERSHIP_SECRET_KEY"] = os.environ.get(
@@ -107,19 +73,16 @@ def setup_env():
     # Bypass Redis safety checks in test mode (middleware fails closed without Redis)
     os.environ["SAFETY_BYPASS_REDIS"] = "true"
 
-    # DON'T call reload_settings() here - it can trigger DB connections
-    # Settings will be loaded lazily when needed with test environment
-
-
-try:
-    from application.resonance.api.dependencies import reset_resonance_service
-except ImportError:
-    reset_resonance_service = None
-
 
 @pytest.fixture(autouse=True)
 def reset_services():
     """Reset singleton services before and after each test for isolation."""
+    # Lazy import — runs at fixture call, not collection
+    try:
+        from application.resonance.api.dependencies import reset_resonance_service
+    except ImportError:
+        reset_resonance_service = None
+
     # Reset before test
     if reset_resonance_service:
         reset_resonance_service()
@@ -129,9 +92,6 @@ def reset_services():
     # Reset after test
     if reset_resonance_service:
         reset_resonance_service()
-
-
-from unittest.mock import AsyncMock, Mock
 
 
 @pytest.fixture

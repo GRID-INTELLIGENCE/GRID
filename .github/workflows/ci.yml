@@ -16,7 +16,6 @@ env:
   GRID_ENVIRONMENT: "testing"
   BLOCKER_DISABLED: "1"
   PYTHONPATH: "."
-  UV_CACHE_DIR: ".cache/uv"
   MOTHERSHIP_SECRET_KEY: "ci_test_secret_key_change_me"
 
 jobs:
@@ -43,14 +42,22 @@ jobs:
     needs: secrets_scan
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
+
       - name: Install uv
-        run: pip install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.13"
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Verify Python version
+        run: |
+          uv run python --version
+          uv run python -c "import sys; assert sys.version_info[:2] == (3, 13), f'Expected 3.13, got {sys.version}'"
+
       - name: Sync dependencies
         run: uv sync --frozen --group test
+
       - name: Import check
         run: |
           uv run python -c "
@@ -66,15 +73,16 @@ jobs:
           for name, module in imports_to_test:
               try:
                   __import__(module)
-                  print(f'✓ {name}')
+                  print(f'  {name}: OK')
                   passed += 1
               except ImportError as e:
-                  print(f'✗ {name}: {e}')
+                  print(f'  {name}: FAIL ({e})')
                   failed += 1
           print(f'Import check: {passed} passed, {failed} failed')
           if failed > 0:
               sys.exit(1)
           "
+
       - name: Test collection
         run: uv run pytest tests/unit/ --collect-only -q 2>/dev/null || echo "No tests found"
 
@@ -84,18 +92,23 @@ jobs:
     needs: secrets_scan
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
+
       - name: Install uv
-        run: pip install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.13"
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
       - name: Sync dependencies
         run: uv sync --frozen
+
       - name: Run ruff
         run: uv run ruff check . --output-format=full
+
       - name: Run ruff format
         run: uv run ruff format --check src/grid/ src/application/ src/tools/ tests/
+
       - name: Run mypy
         run: uv run mypy src/ --ignore-missing-imports || true
 
@@ -105,13 +118,21 @@ jobs:
     needs: smoke_test
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
+
       - name: Install uv
-        run: pip install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.13"
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Verify Python version
+        run: |
+          uv run python --version
+          uv run python -c "import sys; assert sys.version_info[:2] == (3, 13), f'Expected 3.13, got {sys.version}'"
+
       - name: Sync dependencies
         run: uv sync --frozen --group test
+
       - name: Run tests
         run: uv run pytest tests/unit/ -v --tb=short

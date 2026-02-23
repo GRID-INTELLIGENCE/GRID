@@ -16,30 +16,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
-
       - name: Install uv
         uses: astral-sh/setup-uv@v5
         with:
+          python-version: "3.13"
           enable-cache: true
           cache-dependency-glob: "uv.lock"
 
-      - name: Cache uv dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/uv
-            .venv
-          key: ${{ runner.os }}-uv-${{ hashFiles('uv.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-uv-
-
       - name: Install dependencies
-        run: |
-          uv sync --frozen
+        run: uv sync --frozen
 
       - name: Run unit tests
         run: |
@@ -51,31 +36,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
-
       - name: Install uv
         uses: astral-sh/setup-uv@v5
         with:
+          python-version: "3.13"
           enable-cache: true
           cache-dependency-glob: "uv.lock"
-
-      - name: Cache uv dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/uv
-            .venv
-          key: ${{ runner.os }}-uv-${{ hashFiles('uv.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-uv-
 
       - name: Install dependencies
         run: |
           uv pip install openapi-spec-validator jsonschema pyyaml
-          echo "✅ Dependencies installed successfully"
 
       - name: Validate OpenAPI schemas
         run: |
@@ -164,30 +134,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
-
       - name: Install uv
         uses: astral-sh/setup-uv@v5
         with:
+          python-version: "3.13"
           enable-cache: true
           cache-dependency-glob: "uv.lock"
 
-      - name: Cache uv dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/uv
-            .venv
-          key: ${{ runner.os }}-uv-${{ hashFiles('uv.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-uv-
-
       - name: Install dependencies
-        run: |
-          uv sync --frozen
+        run: uv sync --frozen
 
       - name: Run integration tests
         run: |
@@ -200,35 +155,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
-
       - name: Install uv
         uses: astral-sh/setup-uv@v5
         with:
+          python-version: "3.13"
           enable-cache: true
           cache-dependency-glob: "uv.lock"
 
-      - name: Cache uv dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/uv
-            .venv
-          key: ${{ runner.os }}-uv-${{ hashFiles('uv.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-uv-
-
       - name: Install dependencies
-        run: |
-          uv pip install jsonschema pyyaml semver openapi-spec-validator
+        run: uv pip install jsonschema pyyaml semver openapi-spec-validator
 
       - name: Run inventory
         id: inventory
         run: |
-          python src/tools/inventory.py --repo . --output inventory.json
+          uv run python src/tools/inventory.py --repo . --output inventory.json
         continue-on-error: true
 
       - name: Upload inventory
@@ -242,7 +182,7 @@ jobs:
         run: |
           echo "🔍 Contract Coverage Analysis (Isolated for Iteration)"
           echo "================================================"
-          python src/tools/agent_validate.py --check-contracts --inventory inventory.json || echo "⚠️ Contract validation failed - this is expected during iteration"
+          uv run python src/tools/agent_validate.py --check-contracts --inventory inventory.json || echo "Contract validation failed - this is expected during iteration"
           echo ""
           echo "📊 Current Status:"
           echo "- This job is isolated and won't affect the workflow status"
@@ -257,9 +197,9 @@ jobs:
       - name: Run validate_system
         run: |
           if [ -f "validate_system.py" ]; then
-            python validate_system.py manifest.json || true
+            uv run python validate_system.py manifest.json || true
           elif [ -f "scaffolds/DOC/validate_system.py" ]; then
-            cd scaffolds/DOC && python validate_system.py system_template.json || true
+            cd scaffolds/DOC && uv run python validate_system.py system_template.json || true
           else
             echo "No validate_system.py found, skipping"
           fi
@@ -272,14 +212,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
-
       - name: Install uv
         uses: astral-sh/setup-uv@v5
         with:
+          python-version: "3.13"
           enable-cache: true
           cache-dependency-glob: "uv.lock"
 
@@ -290,11 +226,11 @@ jobs:
 
       - name: Validate JSON files against schemas
         run: |
-          python tools/validate_schemas.py --verbose --fail-on-error || echo "No schema validation tool found"
+          uv run python tools/validate_schemas.py --verbose --fail-on-error || echo "No schema validation tool found"
 
       - name: Generate schema validation report
         run: |
-          python -c "
+          uv run python -c "
           import os
           import json
           from pathlib import Path
