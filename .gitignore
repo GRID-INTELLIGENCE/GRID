@@ -223,6 +223,7 @@ coverage.xml
 *_errors*.txt
 test_*.txt
 test_*.json
+.test_tmp/
 property_test_error.txt
 reproduce_*.py
 reproduce_*.txt

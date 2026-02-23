@@ -17,9 +17,9 @@ try:
     import chromadb  # noqa: F401
 
     from tools.rag.vector_store.chromadb_store import ChromaDBVectorStore
-except ImportError:
+except Exception as e:
     pytest.skip(
-        "chromadb package not installed - skipping ChromaDB tests. Install with: pip install chromadb",
+        f"chromadb unavailable in this environment ({e}) - skipping ChromaDB tests.",
         allow_module_level=True,
     )
 

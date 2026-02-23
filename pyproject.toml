@@ -258,6 +258,7 @@ norecursedirs = [
 
 # Default addopts: strict markers, cache, deselect scratch
 addopts = [
+    "--import-mode=importlib",
     "--strict-markers",
     "-p", "cacheprovider",
     "-m", "not scratch and not flaky",
