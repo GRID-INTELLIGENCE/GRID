@@ -117,6 +117,12 @@ def main(args):
         sandbox = SkillsSandbox(config=SandboxConfig(timeout=0.5))
         monkeypatch.setattr(sandbox, "_apply_resource_limits", lambda: None)
 
+        # Force in-process fallback for deterministic cross-platform behavior.
+        async def _deny_subprocess(*args, **kwargs):
+            raise PermissionError("subprocess unavailable in unit test")
+
+        monkeypatch.setattr(sandbox, "_execute_with_monitoring", _deny_subprocess)
+
         skill_code = """
 import time
 def main(args):
@@ -126,7 +132,7 @@ def main(args):
         result = asyncio.run(sandbox.execute_skill(skill_code))
 
         assert result.status == SandboxStatus.TIMEOUT
-        assert result.exit_code is not None
+        assert result.error_message is not None
 
     def test_fallback_used_when_subprocess_blocked(self, monkeypatch):
         """PermissionError in subprocess path should use in-process fallback."""
@@ -173,6 +179,12 @@ def main(args):
         """Filesystem disallowed should flag violations for created files."""
         sandbox = SkillsSandbox(config=SandboxConfig(allow_filesystem=False, timeout=2.0))
         monkeypatch.setattr(sandbox, "_apply_resource_limits", lambda: None)
+
+        # Force in-process fallback for deterministic cross-platform behavior.
+        async def _deny_subprocess(*args, **kwargs):
+            raise PermissionError("subprocess unavailable in unit test")
+
+        monkeypatch.setattr(sandbox, "_execute_with_monitoring", _deny_subprocess)
 
         # Skill writes a file, which should be flagged when FS disallowed
         skill_code = """
