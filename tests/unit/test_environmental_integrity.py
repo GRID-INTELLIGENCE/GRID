@@ -8,6 +8,7 @@ from grid.security.environment import sanitize_environment
 from grid.skills.hot_reload_manager import HotReloadManager
 
 
+@pytest.mark.skipif(sys.platform != "win32", reason="Windows-specific path deduplication test")
 def test_path_deduplication():
     """Verify that sanitize_environment removes duplicate PATH entries."""
     original_path = os.environ.get("PATH", "")
@@ -18,6 +19,23 @@ def test_path_deduplication():
         sanitize_environment()
         clean_paths = os.environ["PATH"].split(os.pathsep)
         assert clean_paths == ["C:\\test", "C:\\unique"]
+    finally:
+        os.environ["PATH"] = original_path
+
+
+def test_path_deduplication_cross_platform():
+    """Verify that sanitize_environment removes duplicate PATH entries (cross-platform)."""
+    original_path = os.environ.get("PATH", "")
+    # Use platform-agnostic paths
+    base_path = "/test" if sys.platform != "win32" else "C:\\test"
+    unique_path = "/unique" if sys.platform != "win32" else "C:\\unique"
+    test_path = f"{base_path}{os.pathsep}{base_path}{os.pathsep}{unique_path}"
+    os.environ["PATH"] = test_path
+
+    try:
+        sanitize_environment()
+        clean_paths = os.environ["PATH"].split(os.pathsep)
+        assert clean_paths == [base_path, unique_path]
     finally:
         os.environ["PATH"] = original_path
 

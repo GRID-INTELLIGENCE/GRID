@@ -228,9 +228,9 @@ class CacheLayer:
         value: Any,
         ttl_seconds: float = 60.0,
         priority: float = 0.5,
-        reward_level: str = "neutral",
+        reward_level: str | RewardLevel | None = "neutral",
         soft_ttl_seconds: float | None = None,
-        penalty_level: str = "none",
+        penalty_level: str | PenaltyLevel | None = "none",
         decay_rate: float = 0.0,
     ) -> None:
         """
@@ -246,12 +246,26 @@ class CacheLayer:
             penalty_level: Penalty level for priority reduction
             decay_rate: Priority decay rate during sustain (0 = no decay)
         """
+        if reward_level is None:
+            resolved_reward = RewardLevel.NEUTRAL
+        elif isinstance(reward_level, RewardLevel):
+            resolved_reward = reward_level
+        else:
+            resolved_reward = RewardLevel(reward_level)
+
+        if penalty_level is None:
+            resolved_penalty = PenaltyLevel.NONE
+        elif isinstance(penalty_level, PenaltyLevel):
+            resolved_penalty = penalty_level
+        else:
+            resolved_penalty = PenaltyLevel(penalty_level)
+
         meta = CacheMeta(
             priority=priority,
             ttl_seconds=ttl_seconds,
             soft_ttl_seconds=soft_ttl_seconds or (ttl_seconds / 2),
-            reward_level=reward_level if isinstance(reward_level, RewardLevel) else RewardLevel(reward_level),
-            penalty_level=penalty_level if isinstance(penalty_level, PenaltyLevel) else PenaltyLevel(penalty_level),
+            reward_level=resolved_reward,
+            penalty_level=resolved_penalty,
             decay_rate=decay_rate,
         )
         meta = self.mem.apply_metadata_modifiers(meta)

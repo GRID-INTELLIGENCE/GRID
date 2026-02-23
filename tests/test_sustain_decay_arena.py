@@ -493,9 +493,14 @@ class TestADSRArenaIntegration:
         """
         state = CharacterRewardState(entity_id="player1")
 
-        # ADSR Attack: Initial achievement (honor grows from 0.0)
-        achievement = Achievement(achievement_type=AchievementType.SIGNIFICANT, description="First major achievement")
-        state.add_achievement(achievement)
+        # ADSR Attack: Initial rising phase (multiple significant events)
+        # Use several achievements to cross the reward-level threshold consistently.
+        for i in range(3):
+            achievement = Achievement(
+                achievement_type=AchievementType.SIGNIFICANT,
+                description=f"Major achievement {i + 1}",
+            )
+            state.add_achievement(achievement)
 
         # Honor should grow (attack phase: 0.0 → higher)
         assert state.honor > 0.0

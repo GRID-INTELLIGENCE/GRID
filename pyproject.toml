@@ -368,6 +368,18 @@ extend-ignore = [
 "**/*learning*.py" = ["F401"]  # Optional learning imports
 "tests/**/*.py" = ["F401", "E722", "S110", "B017", "ASYNC251", "ASYNC110", "ASYNC210", "ASYNC220", "ASYNC221", "ASYNC230", "ASYNC240", "S311", "S603", "S607", "S108", "S324", "PERF401"]  # test patterns
 "**/verify*.py" = ["F841", "PERF102"]  # Verify scripts may have unused vars / dict iteration
+# Non-src directories with intentional patterns
+"arena_api/**/*.py" = ["F821", "S110", "S104", "PERF401", "ASYNC240"]  # Arena API prototypes
+"cognition/**/*.py" = ["PERF401", "S324"]  # Cognitive processing patterns
+"examples/**/*.py" = ["S311", "S324", "PERF401"]  # Example code
+"infrastructure/**/*.py" = ["ASYNC240", "PERF401"]  # Infrastructure patterns
+"knowledge_base/**/*.py" = ["S324", "S603", "S607", "PERF401"]  # KB ingestion patterns
+"mcp-setup/**/*.py" = ["S603", "S607", "S110", "PERF401", "ASYNC109", "ASYNC230", "ASYNC240"]  # MCP server patterns
+"workspace/**/*.py" = ["S104", "S603", "S607", "S110", "PERF401", "ASYNC109", "ASYNC230", "ASYNC240"]  # Workspace servers
+"tools/**/*.py" = ["S110", "S603", "S607", "PERF401"]  # Tool scripts
+"scripts/**/*.py" = ["S110", "S112", "S603", "S607", "S608", "S108", "S310", "PERF401", "S311", "S324", "F401", "ASYNC230"]  # Utility scripts
+"mcp-setup/server/enhanced_tools_mcp_server.py" = ["S108"]  # Temp directory for mypy report
+"tests/conftest.py" = ["F811"]  # Fixture redefinitions are intentional
 
 [tool.ruff.lint.isort]
 known-first-party = ["grid", "application", "cognitive", "tools"]
