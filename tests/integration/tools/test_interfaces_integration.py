@@ -242,6 +242,7 @@ def test_metrics_insertion(db_path: str) -> None:
 
 def test_dashboard_collector(db_path: str) -> None:
     """Pytest wrapper for collector validation."""
+    assert _run_metrics_insertion(db_path)
     assert _run_dashboard_collector(db_path)
 
 
