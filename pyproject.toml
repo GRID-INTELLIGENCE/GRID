@@ -256,7 +256,7 @@ norecursedirs = [
     "seed",
 ]
 
-# Default addopts: strict markers, cache, deselect scratch, parallelise
+# Default addopts: strict markers, cache, deselect scratch
 addopts = [
     "--strict-markers",
     "-p", "cacheprovider",
@@ -264,8 +264,6 @@ addopts = [
     "--ignore=tests/scratch",
     "--tb=short",
     "-q",
-    "-n", "auto",
-    "--dist", "loadscope",
     "--durations=10",
     "--maxfail=5",
 ]

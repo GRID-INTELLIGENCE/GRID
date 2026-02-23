@@ -22,6 +22,8 @@ env:
   MOTHERSHIP_SECRET_KEY: "ci_test_secret_key_change_me"
   MOTHERSHIP_DATABASE_URL: "sqlite:///:memory:"
   RAG_VECTOR_STORE_PROVIDER: "in_memory"
+  GRID_TEST_TMPDIR: ".tmp/test"
+  GRID_SANDBOX_TMPDIR: ".tmp/sandbox"
 
 jobs:
   secrets_scan:
@@ -87,7 +89,7 @@ jobs:
               sys.exit(1)
           "
       - name: Test collection
-        run: uv run pytest tests/unit/ --collect-only -q 2>/dev/null || echo "No tests found"
+        run: uv run pytest tests/unit/ --collect-only -q
 
   lint:
     name: Lint
