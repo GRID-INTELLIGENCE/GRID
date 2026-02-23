@@ -45,8 +45,10 @@ class TestADSRArenaBridge:
 
     @pytest.fixture
     def grid_adsr(self, config: OverwatchConfig) -> ADSREnvelope:
-        """Create GRID ADSR envelope."""
-        return ADSREnvelope(config)
+        """Create GRID ADSR envelope triggered at t=0."""
+        env = ADSREnvelope(config)
+        env.trigger(current_time=0.0)
+        return env
 
     @pytest.fixture
     def cache(self) -> MockCacheLayer:
@@ -73,7 +75,7 @@ class TestADSRArenaBridge:
 
     def test_sync_sustain_phase_maintains_cache(self, bridge, cache):
         """Verify sustain phase maintains cache entries."""
-        bridge.grid_adsr.update(4.0)  # Enter sustain
+        bridge.grid_adsr.update(0.5)  # Enter sustain (0.40–1.40)
         cache.l1["key1"] = {"priority": "normal"}
         cache.l1["key2"] = {"priority": "normal"}
 
@@ -92,12 +94,12 @@ class TestADSRArenaBridge:
         assert cache.l1["key1"]["priority"] == "normal"
 
     def test_sync_decay_phase_applies_honor_decay(self, bridge, rewards):
-        """Verify decay phase applies honor decay."""
+        """Verify decay/release phase applies honor decay."""
         rewards.add_achievement(Achievement(AchievementType.VICTORY, 100))
-        bridge.grid_adsr.update(20.0)  # After sustain ends
+        bridge.grid_adsr.update(1.5)  # Past sustain → auto-release
 
-        # Verify envelope is past sustain phase (either DECAY or RELEASE)
-        assert bridge.grid_adsr.phase in [EnvelopePhase.DECAY, EnvelopePhase.RELEASE]
+        # Verify envelope is past sustain phase (RELEASE via auto-release)
+        assert bridge.grid_adsr.phase == EnvelopePhase.RELEASE
 
         initial_honor = rewards.honor
         bridge.sync_decay_phase()
@@ -108,7 +110,7 @@ class TestADSRArenaBridge:
     def test_sync_decay_phase_no_op_outside_decay(self, bridge, rewards):
         """Verify sync does nothing when not in decay."""
         rewards.add_achievement(Achievement(AchievementType.VICTORY, 100))
-        bridge.grid_adsr.update(4.0)  # Sustain phase
+        bridge.grid_adsr.update(0.5)  # Sustain phase (0.40–1.40)
 
         initial_honor = rewards.honor
         bridge.sync_decay_phase()
@@ -117,7 +119,7 @@ class TestADSRArenaBridge:
 
     def test_empty_cache_sync_sustain(self, bridge, cache):
         """Verify sync works with empty cache."""
-        bridge.grid_adsr.update(4.0)  # Sustain
+        bridge.grid_adsr.update(0.5)  # Sustain (0.40–1.40)
         bridge.sync_sustain_phase()  # Should not raise
         assert len(cache.l1) == 0
 
@@ -131,7 +133,7 @@ class TestADSRArenaBridgeWorkflows:
         return OverwatchConfig()
 
     def test_sustain_to_decay_transition(self):
-        """Test full transition from sustain to decay."""
+        """Test full transition from sustain to release."""
         from Arena.the_chase.python.src.the_chase.integration.adsr_arena import ADSRArenaBridge
 
         grid_adsr = ADSREnvelope(OverwatchConfig())
@@ -141,16 +143,17 @@ class TestADSRArenaBridgeWorkflows:
         bridge = ADSRArenaBridge(grid_adsr, cache, rewards)
 
         # Enter sustain
-        grid_adsr.update(4.0)
+        grid_adsr.trigger(current_time=0.0)
+        grid_adsr.update(0.5)  # Sustain (0.40–1.40)
         assert grid_adsr.phase == EnvelopePhase.SUSTAIN
 
         cache.l1["entry1"] = {"data": "test"}
         bridge.sync_sustain_phase()
         assert cache.l1["entry1"]["priority"] == "maintained"
 
-        # Enter decay
-        grid_adsr.update(20.0)
-        assert grid_adsr.phase == EnvelopePhase.DECAY
+        # Enter release (past sustain)
+        grid_adsr.update(1.5)
+        assert grid_adsr.phase == EnvelopePhase.RELEASE
 
         rewards.add_achievement(Achievement(AchievementType.VICTORY, 100))
         initial_honor = rewards.honor
@@ -167,7 +170,8 @@ class TestADSRArenaBridgeWorkflows:
 
         bridge = ADSRArenaBridge(grid_adsr, cache, rewards)
 
-        grid_adsr.update(4.0)  # Sustain
+        grid_adsr.trigger(current_time=0.0)
+        grid_adsr.update(0.5)  # Sustain (0.40–1.40)
         cache.l1["key"] = {"priority": "normal"}
 
         for _ in range(5):
@@ -185,7 +189,8 @@ class TestADSRArenaBridgeWorkflows:
 
         bridge = ADSRArenaBridge(grid_adsr, cache, rewards)
 
-        grid_adsr.update(4.0)  # Sustain
+        grid_adsr.trigger(current_time=0.0)
+        grid_adsr.update(0.5)  # Sustain (0.40–1.40)
 
         for i in range(10):
             cache.l1[f"key_{i}"] = {"priority": "normal", "data": i}
@@ -214,7 +219,8 @@ class TestADSRArenaBridgeEdgeCases:
 
         bridge = ADSRArenaBridge(grid_adsr, cache, rewards)
 
-        grid_adsr.update(20.0)  # Decay
+        grid_adsr.trigger(current_time=0.0)
+        grid_adsr.update(1.5)  # Past sustain → auto-release
         bridge.sync_decay_phase()  # Should not raise
 
     def test_bridge_with_high_honor(self):
@@ -245,7 +251,8 @@ class TestADSRArenaBridgeEdgeCases:
 
         bridge = ADSRArenaBridge(grid_adsr, cache, rewards)
 
-        grid_adsr.update(4.0)  # Sustain
+        grid_adsr.trigger(current_time=0.0)
+        grid_adsr.update(0.5)  # Sustain (0.40–1.40)
         cache.l2["l2_key"] = {"data": "l2"}  # L2 entry
 
         bridge.sync_sustain_phase()  # Should only affect L1
@@ -263,7 +270,8 @@ class TestADSRArenaBridgeEdgeCases:
 
         bridge = ADSRArenaBridge(grid_adsr, cache, rewards)
 
-        grid_adsr.update(25.0)  # Release phase
+        grid_adsr.trigger(current_time=0.0)
+        grid_adsr.update(1.5)  # Past sustain → auto-release
         assert grid_adsr.phase == EnvelopePhase.RELEASE
 
         # With updated bridge, sync_decay_phase DOES apply decay in release
@@ -303,7 +311,8 @@ class TestGRIDADSRIntegration:
     def test_grid_adsr_sustain_matches_chase_config(self):
         """Verify GRID ADSR sustain level matches Chase config."""
         grid_adsr = ADSREnvelope(OverwatchConfig())
-        grid_adsr.update(4.0)
+        grid_adsr.trigger(current_time=0.0)
+        grid_adsr.update(0.5)  # Sustain phase (0.40–1.40)
         assert grid_adsr.quality == 0.6
 
     def test_bridge_uses_chase_adsr(self):
@@ -317,4 +326,4 @@ class TestGRIDADSRIntegration:
 
         bridge = ADSRArenaBridge(grid_adsr, cache, rewards)
 
-        assert bridge.grid_adsr.config.sustain_level == 0.6
+        assert bridge.grid_adsr.sustain_level == 0.6

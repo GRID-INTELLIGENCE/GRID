@@ -61,7 +61,9 @@ class Event:
     version: str = "1.0"
 
     def __post_init__(self) -> None:
-        self.source_domain = infer_domain(self.event_type, default=EventDomain.ALL.value)
+        # Only infer source_domain when caller passed the default "all"
+        if self.source_domain == EventDomain.ALL.value:
+            self.source_domain = infer_domain(self.event_type, default=EventDomain.ALL.value)
         self.target_domains = resolve_target_domains(self.target_domains, self.event_type)
 
     def to_dict(self) -> dict:

@@ -254,11 +254,8 @@ def export_openapi_spec(app: FastAPI, output_path: str | Path) -> None:
             await f.write(json.dumps(openapi_schema, indent=2, ensure_ascii=False))
 
     try:
-        loop = asyncio.get_event_loop()
-        if loop.is_running():
-            loop.create_task(_async_export())
-        else:
-            asyncio.run(_async_export())
+        loop = asyncio.get_running_loop()
+        loop.create_task(_async_export())
     except RuntimeError:
         asyncio.run(_async_export())
 
@@ -329,11 +326,8 @@ def export_html_docs(app: FastAPI, output_path: str | Path) -> None:
             await f.write(html_content)
 
     try:
-        loop = asyncio.get_event_loop()
-        if loop.is_running():
-            loop.create_task(_async_export_html())
-        else:
-            asyncio.run(_async_export_html())
+        loop = asyncio.get_running_loop()
+        loop.create_task(_async_export_html())
     except RuntimeError:
         asyncio.run(_async_export_html())
 

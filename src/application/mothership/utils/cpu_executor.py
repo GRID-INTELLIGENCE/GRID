@@ -76,7 +76,7 @@ async def run_cpu_bound[T](
 
         result = await run_cpu_bound(heavy_computation, [1, 2, 3, 4, 5])
     """
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
     executor = get_executor()
 
     # Use partial to bind kwargs if present
@@ -128,7 +128,7 @@ async def run_blocking_io[T](
     Returns:
         The result of the function execution
     """
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
 
     if kwargs:
         func = partial(func, **kwargs)

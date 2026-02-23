@@ -20,6 +20,8 @@ env:
   PYTHONPATH: "."
   UV_CACHE_DIR: ".cache/uv"
   MOTHERSHIP_SECRET_KEY: "ci_test_secret_key_change_me"
+  MOTHERSHIP_DATABASE_URL: "sqlite:///:memory:"
+  RAG_VECTOR_STORE_PROVIDER: "in_memory"
 
 jobs:
   secrets_scan:

@@ -102,17 +102,17 @@ class AgentExecutor:
         timeout_ms = self.timeout_manager.get_timeout_for_task(task, agent_role)
         trace.metadata["timeout_applied_ms"] = timeout_ms
 
-        # Execute based on task type with recovery logic
+        # Execute based on task type with recovery logic (bounded by adaptive timeout)
         try:
-            # Wrap the actual execution in the recovery engine
-            result = await self.recovery_engine.execute_with_recovery(
-                self._execute_task_by_type,
-                case_id=case_id,
-                reference=reference,
-                agent_role=agent_role,
-                task=task,
-                trace=trace,
-            )
+            async with asyncio.timeout(timeout_ms / 1000):
+                result = await self.recovery_engine.execute_with_recovery(
+                    self._execute_task_by_type,
+                    case_id=case_id,
+                    reference=reference,
+                    agent_role=agent_role,
+                    task=task,
+                    trace=trace,
+                )
 
             # Record success
             self.tracer.end_trace(trace.trace_id, ExecutionOutcome.SUCCESS)
@@ -122,6 +122,13 @@ class AgentExecutor:
             await self.learning_coordinator.record_execution_outcome(case_id, trace)
 
             return result
+        except TimeoutError:
+            self.tracer.end_trace(trace.trace_id, ExecutionOutcome.FAILURE)
+            self.timeout_manager.record_execution_time(task, agent_role, trace.duration_ms, False)
+            trace.error_category = "timeout"
+            trace.metadata["error_message"] = f"Task timed out after {timeout_ms}ms"
+            logger.error(f"Task execution timed out ({timeout_ms}ms) for {task} as {agent_role}")
+            raise
         except Exception as e:
             # Record failure with classification
             error_context = ErrorClassifier.classify(e)

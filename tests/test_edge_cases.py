@@ -47,6 +47,7 @@ class TestADSREnvelopeEdgeCases:
         """Test with very small attack energy."""
         config = OverwatchConfig(attack_energy=0.001)
         envelope = ADSREnvelope(config)
+        envelope.trigger(current_time=0.0)
         envelope.update(0.001)
         assert envelope.quality >= 0.0
 
@@ -54,6 +55,7 @@ class TestADSREnvelopeEdgeCases:
         """Test with very large attack energy."""
         config = OverwatchConfig(attack_energy=100.0)
         envelope = ADSREnvelope(config)
+        envelope.trigger(current_time=0.0)
         envelope.update(0.1)
         assert envelope.quality >= 0.0
 
@@ -61,63 +63,72 @@ class TestADSREnvelopeEdgeCases:
         """Test with zero decay rate."""
         config = OverwatchConfig(decay_rate=0.0)
         envelope = ADSREnvelope(config)
-        envelope.update(4.0)  # Sustain
-        envelope.update(20.0)  # Decay
+        envelope.trigger(current_time=0.0)
+        envelope.update(0.5)  # Sustain (sustain 0.15–1.15)
+        envelope.update(1.5)  # Past sustain
         assert envelope.quality >= 0.0
 
     def test_very_high_decay_rate(self):
         """Test with very high decay rate."""
         config = OverwatchConfig(decay_rate=10.0)
         envelope = ADSREnvelope(config)
-        envelope.update(4.0)  # Sustain
-        envelope.update(20.0)  # Decay
+        envelope.trigger(current_time=0.0)
+        envelope.update(0.5)  # In or past decay
+        envelope.update(20.0)
         assert envelope.quality >= 0.0
 
     def test_zero_sustain_level(self):
         """Test with zero sustain level."""
         config = OverwatchConfig(sustain_level=0.0)
         envelope = ADSREnvelope(config)
-        envelope.update(4.0)
+        envelope.trigger(current_time=0.0)
+        envelope.update(0.5)  # Sustain phase
         assert envelope.quality == 0.0
 
     def test_max_sustain_level(self):
         """Test with maximum sustain level."""
         config = OverwatchConfig(sustain_level=1.0)
         envelope = ADSREnvelope(config)
-        envelope.update(4.0)
+        envelope.trigger(current_time=0.0)
+        envelope.update(0.5)  # Within sustain phase
         assert envelope.quality == 1.0
 
     def test_zero_release_rate(self):
         """Test with zero release rate."""
         config = OverwatchConfig(release_rate=0.0)
         envelope = ADSREnvelope(config)
-        envelope.update(25.0)  # Release
+        envelope.trigger(current_time=0.0)
+        envelope.update(1.5)  # Past sustain → release
         assert envelope.quality >= 0.0
 
     def test_high_release_rate(self):
         """Test with high release rate."""
         config = OverwatchConfig(release_rate=5.0)
         envelope = ADSREnvelope(config)
-        envelope.update(25.0)  # Release
+        envelope.trigger(current_time=0.0)
+        envelope.update(1.5)  # Past sustain → release
         assert envelope.quality >= 0.0
 
     def test_zero_release_threshold(self):
         """Test with zero release threshold."""
         config = OverwatchConfig(release_threshold=0.0)
         envelope = ADSREnvelope(config)
-        envelope.update(25.0)
+        envelope.trigger(current_time=0.0)
+        envelope.update(1.5)
         assert envelope.quality >= 0.0
 
     def test_high_release_threshold(self):
         """Test with high release threshold."""
         config = OverwatchConfig(release_threshold=1.0)
         envelope = ADSREnvelope(config)
-        envelope.update(25.0)
+        envelope.trigger(current_time=0.0)
+        envelope.update(1.5)
         assert envelope.quality >= 0.0
 
     def test_rapid_updates(self):
         """Test with rapid successive updates."""
         envelope = ADSREnvelope(OverwatchConfig())
+        envelope.trigger(current_time=0.0)
         for i in range(1000):
             envelope.update(float(i) * 0.001)
         assert envelope.phase in [
@@ -130,6 +141,7 @@ class TestADSREnvelopeEdgeCases:
     def test_negative_time_updates(self):
         """Test with negative time values."""
         envelope = ADSREnvelope(OverwatchConfig())
+        envelope.trigger(current_time=0.0)
         for i in range(10):
             envelope.update(float(-i))
         assert envelope.phase == EnvelopePhase.ATTACK
@@ -137,6 +149,7 @@ class TestADSREnvelopeEdgeCases:
     def test_very_large_time_value(self):
         """Test with very large time values."""
         envelope = ADSREnvelope(OverwatchConfig())
+        envelope.trigger(current_time=0.0)
         envelope.update(1_000_000.0)
         assert envelope.quality >= 0.0
 
@@ -360,26 +373,31 @@ class TestStateTransitionEdgeCases:
 
     def test_phase_transition_boundaries(self):
         """Test exact phase transition boundaries."""
-        envelope = ADSREnvelope(OverwatchConfig())
-        sustain_start = envelope.config.attack_energy / (envelope.config.attack_energy / 4)
-        sustain_end = sustain_start + 15
+        config = OverwatchConfig()
+        envelope = ADSREnvelope(config)
+        envelope.trigger(current_time=0.0)
+        # Phase boundaries: attack 0–0.15, decay 0.15–0.40, sustain 0.40–1.40
+        sustain_start = config.attack_energy + config.decay_rate  # 0.40
 
-        envelope.update(sustain_start)
+        envelope.update(sustain_start + 0.1)  # Just inside sustain
         assert envelope.phase == EnvelopePhase.SUSTAIN
 
-        envelope.update(sustain_end)
-        assert envelope.phase == EnvelopePhase.DECAY
+        envelope.release(current_time=sustain_start + 0.5)
+        envelope.update(sustain_start + 0.6)  # During release
+        assert envelope.phase == EnvelopePhase.RELEASE
 
     def test_rapid_phase_changes(self):
         """Test rapid phase changes."""
         envelope = ADSREnvelope(OverwatchConfig())
+        envelope.trigger(current_time=0.0)
         for i in range(20):
-            envelope.update(float(i))
+            envelope.update(float(i) * 0.1)  # 0.0 to 1.9
         assert envelope.phase in [
             EnvelopePhase.ATTACK,
-            EnvelopePhase.SUSTAIN,
             EnvelopePhase.DECAY,
+            EnvelopePhase.SUSTAIN,
             EnvelopePhase.RELEASE,
+            EnvelopePhase.IDLE,
         ]
 
     def test_level_transition_boundaries(self):

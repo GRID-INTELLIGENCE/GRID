@@ -102,7 +102,7 @@ class EventBus:
         event_type = event.get("event_type", "unknown")
         event_data = {
             **event,
-            "published_at": asyncio.get_event_loop().time(),
+            "published_at": asyncio.get_running_loop().time(),
         }
 
         # Store in history (deque auto-pops oldest when at maxlen)

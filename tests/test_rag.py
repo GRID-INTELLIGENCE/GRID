@@ -30,11 +30,21 @@ class OllamaEmbedding:
         """Get embeddings using Ollama."""
         try:
             result = subprocess.run(
-                ["ollama", "run", self.model, text], capture_output=True, text=True, check=True, encoding="utf-8"
+                ["ollama", "run", self.model, text],
+                capture_output=True,
+                text=True,
+                check=True,
+                encoding="utf-8",
+                timeout=30,  # Prevent indefinite hanging
             )
             # Convert dense vector to sparse dict for compatibility
             vector = json.loads(result.stdout)
             return {str(i): v for i, v in enumerate(vector) if abs(v) > 0.01}
+        except subprocess.TimeoutExpired:
+            print(f"Embedding timeout: Ollama took >30s for model {self.model}")
+            # Fallback to basic word frequency
+            words = text.lower().split()
+            return {word: words.count(word) for word in set(words)}
         except Exception as e:
             print(f"Embedding error: {e}")
             # Fallback to basic word frequency
@@ -52,9 +62,16 @@ class NemotronLLM:
         """Generate completion using Nemotron."""
         try:
             result = subprocess.run(
-                ["ollama", "run", self.model, prompt], capture_output=True, text=True, check=True, encoding="utf-8"
+                ["ollama", "run", self.model, prompt],
+                capture_output=True,
+                text=True,
+                check=True,
+                encoding="utf-8",
+                timeout=60,  # Prevent indefinite hanging (LLM needs more time)
             )
             return result.stdout.strip()
+        except subprocess.TimeoutExpired:
+            return f"Error: LLM generation timed out (>60s) for model {self.model}"
         except Exception as e:
             print(f"LLM error: {e}")
             return f"Error: Could not generate response using {self.model}"
@@ -79,8 +96,13 @@ def test_chunk_embedding_and_query(tmp_path: Path):
     assert all(isinstance(s, float) for s in retrieved_scores)
 
 
-def test_ollama_rag_demo(tmp_path: Path):
+@pytest.mark.timeout(120)  # Ollama tests may take longer
+def test_ollama_rag_demo(tmp_path: Path, ollama_available):
     """Demonstrate RAG with Ollama models."""
+    # Skip if Ollama is not available
+    if not ollama_available:
+        pytest.skip("Ollama service not available at localhost:11434")
+
     # Initialize models
     embedder = OllamaEmbedding()
     llm = NemotronLLM()

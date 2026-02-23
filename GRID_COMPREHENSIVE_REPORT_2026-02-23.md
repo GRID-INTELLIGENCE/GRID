@@ -214,11 +214,26 @@
 For scheduling this contract after 11pm, use the "New Action" dialog:
 
 - **Action:** Start a program
-- **Program/script:** `uv` or full path to `uv.exe` (e.g. `C:\Users\USER\.local\bin\uv.exe`)
-- **Add arguments (optional):** `run python scripts/run_contract.py` (if such script exists) or equivalent
+- **Program/script:** `powershell.exe`
+- **Add arguments (optional):** `-NoProfile -ExecutionPolicy Bypass -File "E:\GRID-main\scripts\run_post_11pm_contract.ps1"`
 - **Start in (optional):** `E:\GRID-main`
 
-Alternatively, invoke a Cursor/Claude agent via CLI or API with this report as context.
+Alternatively, invoke the runner script manually or via Cursor/Claude with this report as context.
+
+### Script and artifact paths (for Claude Code)
+
+| Resource | Path (repo root relative) |
+|----------|---------------------------|
+| This report | `GRID_COMPREHENSIVE_REPORT_2026-02-23.md` |
+| Contract JSON | `.grid/post-11pm-contract.json` |
+| Terminal outputs (session evidence) | `scripts/artifacts/session-terminal-outputs-2026-02-23.txt` |
+| Context file (system prompt append) | `scripts/post_11pm_context.txt` |
+| Runner (PowerShell) | `scripts/run_post_11pm_contract.ps1` |
+| Runner (Bash) | `scripts/run_post_11pm_contract.sh` |
+| Run logs | `scripts/artifacts/post_11pm_run_*.log` |
+| Runner README | `scripts/artifacts/README_POST_11PM.md` |
+
+The runner uses Claude Code with worktree isolation, Opus model, and append-system-prompt-file per [Anthropic common workflows](https://docs.anthropic.com/en/docs/claude-code/common-workflows) and [CLI reference](https://docs.anthropic.com/en/docs/claude-code/cli-reference).
 
 ---
 

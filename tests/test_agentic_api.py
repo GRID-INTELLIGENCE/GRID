@@ -104,10 +104,27 @@ def client(mock_processing_unit_fixture, mock_agentic_system_fixture):
         access_token_expire_minutes = 30
         refresh_token_expire_days = 7
         max_request_size_bytes = 10485760
+        # DRT / accountability / parasite guard (disabled for tests)
+        drt_enabled = False
+        drt_behavioral_similarity_threshold = 0.85
+        drt_retention_hours = 96
+        drt_enforcement_mode = "monitor"
+        drt_websocket_monitoring_enabled = False
+        drt_api_movement_logging_enabled = False
+        drt_penalty_points_enabled = False
+        drt_slo_evaluation_interval_seconds = 300
+        drt_slo_violation_penalty_base = 10
+        drt_report_generation_enabled = False
+        accountability_enabled = False
+        accountability_enforcement_mode = "monitor"
+        accountability_contract_path = "config/accountability/contracts.yaml"
+        parasite_guard_enabled = False
+        parasite_guard_pruning_enabled = False
 
     class MockTelemetry:
         enabled = False
         metrics_enabled = False
+        tracing_enabled = False
         log_level = MagicMock()
         log_level.value = "INFO"
         metrics_path = "/metrics"

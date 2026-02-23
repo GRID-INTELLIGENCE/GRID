@@ -1,9 +1,11 @@
-"""ChromaDB vector store implementation."""
+"""ChromaDB vector store implementation.
+
+Chromadb and Settings are imported lazily in __init__ to avoid pulling in
+chromadb.config.Settings at module load time (avoids pydantic v1 inference
+issues on Python 3.13+ when tests only need RAGConfig or other RAG code).
+"""
 
 from typing import Any, cast
-
-import chromadb
-from chromadb.config import Settings
 
 from .base import BaseVectorStore
 
@@ -27,10 +29,13 @@ class ChromaDBVectorStore(BaseVectorStore):
             persist_directory: Directory to persist data
             embedding_function: Optional embedding function (for ChromaDB's built-in)
         """
+        import chromadb
+        from chromadb.config import Settings
+
         self.collection_name = collection_name
         self.persist_directory = persist_directory
 
-        # Initialize ChromaDB client
+        # Initialize ChromaDB client (lazy import avoids pydantic/ConfigError at module load)
         self.client = chromadb.PersistentClient(
             path=persist_directory, settings=Settings(anonymized_telemetry=False, allow_reset=True)
         )

@@ -12,7 +12,6 @@ ADSR Parameters (matching GRID's defaults):
 - release_time: 0.3 (fade out time)
 """
 
-import math
 import time
 from dataclasses import dataclass
 from enum import Enum
@@ -57,33 +56,27 @@ class ArenaADSREnvelope:
         attack_time: float | Any = 0.1,
         decay_time: float = 0.2,
         sustain_level: float = 0.7,
-        sustain_time: float = 15.0,
+        sustain_time: float = 1.0,
         release_time: float = 0.3,
-        release_threshold: float = 0.05,
     ):
         # Handle OverwatchConfig if passed as first argument
         if hasattr(attack_time, "attack_energy"):
             config = attack_time
-            self.config = config
             self.attack_time = getattr(config, "attack_energy", 0.1)
             self.decay_time = getattr(config, "decay_rate", 0.2)
             self.sustain_level = getattr(config, "sustain_level", 0.7)
-            self.sustain_time = getattr(config, "sustain_time", 15.0)
+            self.sustain_time = 1.0  # Default
             self.release_time = getattr(config, "release_rate", 0.3)
-            self.release_threshold = getattr(config, "release_threshold", 0.05)
         else:
             self.attack_time = attack_time
             self.decay_time = decay_time
             self.sustain_level = sustain_level
             self.sustain_time = sustain_time
             self.release_time = release_time
-            self.release_threshold = release_threshold
 
         self._start_time: float | None = None
         self._release_start: float | None = None
         self._metrics = EnvelopeMetrics()
-        # Auto-trigger so the initial state is ATTACK with quality=0.0
-        self.trigger(0.0)
 
     @property
     def phase(self) -> EnvelopePhase:
@@ -121,12 +114,10 @@ class ArenaADSREnvelope:
                 self._metrics.velocity = -0.1
                 if self._metrics.amplitude <= 0.0:
                     self._metrics = EnvelopeMetrics()
-                return self._metrics
-            # Auto-trigger at t=0 on first update if not explicitly started
-            self.trigger(0.0)
+            return self._metrics
 
         now = current_time if current_time is not None else time.time()
-        elapsed = max(0.0, now - self._start_time)
+        elapsed = now - self._start_time
 
         if self._release_start is not None:
             release_elapsed = now - self._release_start
@@ -145,12 +136,12 @@ class ArenaADSREnvelope:
             return self._metrics
 
         if elapsed < self.attack_time:
-            progress = elapsed / self.attack_time
-            self._metrics.amplitude = progress**0.5
-            self._metrics.velocity = (0.5 / max(progress, 1e-9) ** 0.5) / self.attack_time
+            progress = max(0.0, elapsed / self.attack_time)
+            self._metrics.amplitude = progress**0.5 if progress > 0 else 0.0
+            self._metrics.velocity = (0.5 * progress**-0.5) / self.attack_time if progress > 0 else 0.0
             self._metrics.phase = EnvelopePhase.ATTACK
-            self._metrics.time_in_phase = elapsed
-            self._metrics.total_time = elapsed
+            self._metrics.time_in_phase = max(0.0, elapsed)
+            self._metrics.total_time = max(0.0, elapsed)
             self._metrics.peak_amplitude = max(self._metrics.peak_amplitude, self._metrics.amplitude)
             return self._metrics
 
@@ -175,21 +166,8 @@ class ArenaADSREnvelope:
             self._metrics.total_time = elapsed
             return self._metrics
 
-        # Post-sustain exponential DECAY phase
-        post_sustain_elapsed = elapsed - sustain_start - self.sustain_time
-        amplitude = self.sustain_level * math.exp(-self.release_time * post_sustain_elapsed)
-        if amplitude < self.release_threshold:
-            self._start_time = None
-            self._release_start = None
-            self._metrics = EnvelopeMetrics()
-            return self._metrics
-
-        self._metrics.amplitude = amplitude
-        self._metrics.velocity = -self.release_time * amplitude
-        self._metrics.phase = EnvelopePhase.DECAY
-        self._metrics.time_in_phase = post_sustain_elapsed
-        self._metrics.total_time = elapsed
-        return self._metrics
+        self.release(current_time=now)
+        return self.update(current_time=now)
 
     def get_metrics(self) -> EnvelopeMetrics:
         return self._metrics

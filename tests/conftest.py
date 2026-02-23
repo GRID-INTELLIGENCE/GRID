@@ -1,4 +1,5 @@
 import os
+import subprocess
 import sys
 
 import pytest
@@ -106,6 +107,9 @@ def setup_env():
     os.environ["MOTHERSHIP_USE_DATABRICKS"] = "false"
     os.environ["MOTHERSHIP_REDIS_ENABLED"] = "false"
 
+    # Avoid loading chromadb in tests (chromadb.config.Settings + pydantic v1 fails on Python 3.13+)
+    os.environ["RAG_VECTOR_STORE_PROVIDER"] = os.environ.get("RAG_VECTOR_STORE_PROVIDER", "in_memory")
+
     # Bypass Redis safety checks in test mode (middleware fails closed without Redis)
     os.environ["SAFETY_BYPASS_REDIS"] = "true"
 
@@ -134,6 +138,79 @@ def reset_services():
 
 
 from unittest.mock import AsyncMock, Mock
+
+
+# ---------------------------------------------------------------------------
+# Service Availability Fixtures
+# These fixtures check if external services are available and skip tests
+# gracefully if they are not. Session-scoped to check once per test session.
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture(scope="session")
+def ollama_available():
+    """Check if Ollama service is running at localhost:11434.
+
+    Returns True if available, False otherwise.
+    Tests using this fixture should skip if False.
+    """
+    try:
+        import httpx
+
+        r = httpx.get("http://localhost:11434/api/tags", timeout=2.0)
+        return r.status_code == 200
+    except Exception:
+        return False
+
+
+@pytest.fixture(scope="session")
+def api_server_available():
+    """Check if API server is running at localhost:8000.
+
+    Returns True if available, False otherwise.
+    Tests using this fixture should skip if False.
+    """
+    try:
+        import httpx
+
+        r = httpx.get("http://localhost:8000/health", timeout=2.0)
+        return r.status_code == 200
+    except Exception:
+        return False
+
+
+@pytest.fixture(scope="session")
+def ollama_models_available(ollama_available):
+    """Check if required Ollama models are available.
+
+    Returns a set of available model names, or empty set if Ollama unavailable.
+    """
+    if not ollama_available:
+        return set()
+
+    try:
+        result = subprocess.run(
+            ["ollama", "list"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+        if result.returncode == 0:
+            # Parse model names from output (format: "NAME\tID\tSIZE\tMODIFIED")
+            models = set()
+            for line in result.stdout.strip().split("\n"):
+                if line and not line.startswith("NAME"):
+                    model_name = line.split()[0]
+                    models.add(model_name)
+            return models
+    except Exception:
+        pass
+    return set()
+
+
+# ---------------------------------------------------------------------------
+# Mock Fixtures
+# ---------------------------------------------------------------------------
 
 
 @pytest.fixture
@@ -176,3 +253,58 @@ def mock_agentic_system(mock_event_bus):
     system.process_case = AsyncMock(return_value={"case_id": "test_case", "status": "completed"})
     system.get_case = AsyncMock(return_value={"case_id": "test_case", "status": "completed"})
     return system
+
+
+# ---------------------------------------------------------------------------
+# Service Availability Fixtures
+# These fixtures check if external services are available and skip tests
+# gracefully if they are not. Using session scope so checks run once per session.
+# ---------------------------------------------------------------------------
+
+
+def _check_ollama_available() -> bool:
+    """Check if Ollama service is running on localhost:11434."""
+    try:
+        import httpx
+
+        response = httpx.get("http://localhost:11434/api/tags", timeout=2.0)
+        return response.status_code == 200
+    except Exception:
+        return False
+
+
+def _check_api_server_available(port: int = 8000) -> bool:
+    """Check if API server is running on localhost:<port>."""
+    try:
+        import httpx
+
+        response = httpx.get(f"http://localhost:{port}/health", timeout=2.0)
+        return response.status_code == 200
+    except Exception:
+        return False
+
+
+@pytest.fixture(scope="session")
+def ollama_available():
+    """Session-scoped check for Ollama availability.
+
+    Returns True if Ollama is running on localhost:11434, False otherwise.
+    Use with @pytest.mark.skipif(not ollama_available) to skip tests.
+    """
+    return _check_ollama_available()
+
+
+@pytest.fixture(scope="session")
+def api_server_available():
+    """Session-scoped check for API server availability on port 8000.
+
+    Returns True if API server health endpoint returns 200, False otherwise.
+    Use with @pytest.mark.skipif to skip tests that require the API server.
+    """
+    return _check_api_server_available(8000)
+
+
+@pytest.fixture(scope="session")
+def resonance_server_available():
+    """Session-scoped check for Resonance service on port 8080."""
+    return _check_api_server_available(8080)

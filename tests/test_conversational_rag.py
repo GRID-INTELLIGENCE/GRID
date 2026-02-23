@@ -77,21 +77,21 @@ class TestConversationMemory:
 
     def test_session_cleanup(self, conversation_memory):
         """Test automatic session cleanup."""
-        # Set small TTL for testing
-        conversation_memory.session_ttl_hours = 0.001  # ~3.6 seconds
+        # TTL so that session1 expires after ~0.1s (0.1/3600 hours)
+        conversation_memory.session_ttl_hours = 0.1 / 3600  # ~0.1 seconds
 
         conversation_memory.create_session("session1")
         assert conversation_memory.get_session("session1") is not None
 
-        # Simulate time passing
+        # Simulate time passing past TTL
         import time
 
-        time.sleep(0.1)
+        time.sleep(0.2)
 
         # Create another session to trigger cleanup
         conversation_memory.create_session("session2")
 
-        # First session should be cleaned up
+        # First session should be cleaned up (expired by TTL)
         assert conversation_memory.get_session("session1") is None
         assert conversation_memory.get_session("session2") is not None
 

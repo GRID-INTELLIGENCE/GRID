@@ -101,8 +101,9 @@ def get_async_engine() -> AsyncEngine:
             )
             if _should_auto_init_sqlite(fallback_url):
                 try:
-                    asyncio.get_event_loop().create_task(_init_sqlite_schema(_engine))
-                except Exception:  # noqa: S110 intentional silent handling
+                    loop = asyncio.get_running_loop()
+                    loop.create_task(_init_sqlite_schema(_engine))
+                except (RuntimeError, Exception):  # noqa: S110 intentional silent handling
                     # If we're not in an event loop context, schema can be initialized lazily elsewhere.
                     pass
             return _engine
@@ -156,8 +157,9 @@ def get_async_engine() -> AsyncEngine:
 
     if _should_auto_init_sqlite(url):
         try:
-            asyncio.get_event_loop().create_task(_init_sqlite_schema(_engine))
-        except Exception:  # noqa: S110 intentional silent handling
+            loop = asyncio.get_running_loop()
+            loop.create_task(_init_sqlite_schema(_engine))
+        except (RuntimeError, Exception):  # noqa: S110 intentional silent handling
             pass
     return _engine
 

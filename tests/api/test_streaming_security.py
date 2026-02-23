@@ -1553,10 +1553,17 @@ class TestStreamingEndToEnd:
         setup_middleware(app, MockSettings)
         app.include_router(health_router)
 
+        from application.mothership.api_core import get_ghost_registry, register_handler
+
+        get_ghost_registry()
+
+        @register_handler("navigation.stream", description="Navigation stream for e2e auth test", timeout_ms=60000)
+        async def navigation_stream_handler(payload: dict) -> AsyncGenerator[dict[str, Any], None]:
+            yield {"event": "status", "data": {"stage": "ok"}}
+            yield {"event": "result", "data": {"done": True}}
+
         @app.post("/api/v1/e2e-stream")
         async def e2e_stream_endpoint(data: dict):
-            from sse_starlette.sse import EventSourceResponse
-
             from application.mothership.api_core import summon_handler
 
             result = await summon_handler("navigation.stream", data)

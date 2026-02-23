@@ -38,9 +38,8 @@ try:
         TextContent,
         Tool,
     )
-except ImportError:
-    print("MCP library not found. Please install: pip install mcp")
-    sys.exit(1)
+except ImportError as e:
+    raise ImportError("MCP library not found. Please install: pip install mcp") from e
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -74,9 +73,8 @@ class EnhancedRAGMCPServer:
                 utils_module = importlib.import_module("tools.rag.utils")
                 rag_engine_factory = rag_engine_factory or rag_module.create_conversational_rag_engine
                 ollama_checker = ollama_checker or utils_module.check_ollama_connection
-            except ImportError:
-                print("GRID RAG tools not found. Please ensure GRID is properly installed.")
-                sys.exit(1)
+            except ImportError as e:
+                raise ImportError("GRID RAG tools not found. Please ensure GRID is properly installed.") from e
 
         self.server = Server("grid-rag-enhanced")
         self.rag_engine = rag_engine_factory()

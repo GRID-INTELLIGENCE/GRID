@@ -251,6 +251,9 @@ reproduce_*.txt
 
 # Other editors
 .cursor/
+!.cursor/skills/
+!.cursor/rules/
+!.cursor/agents/
 config/.cursorrules
 .claude/
 .windsurf/
@@ -271,6 +274,7 @@ config/.agentignore
 # ==========================
 
 *.log
+debug-*.log
 **/logs/
 !**/logs/.gitkeep
 **/log/

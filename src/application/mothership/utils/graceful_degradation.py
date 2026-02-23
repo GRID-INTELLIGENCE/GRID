@@ -54,7 +54,7 @@ class ServiceHealth:
         if self.status != ServiceStatus.HEALTHY:
             logger.info(f"Service {self.name} recovered to healthy")
         self.status = ServiceStatus.HEALTHY
-        self.last_check = asyncio.get_event_loop().time()
+        self.last_check = asyncio.get_running_loop().time()
 
     def record_failure(self) -> None:
         """Record failed health check."""
@@ -75,11 +75,11 @@ class ServiceHealth:
                 logger.warning(f"Service {self.name} marked as degraded after {self.failure_count} failures")
             self.status = ServiceStatus.DEGRADED
 
-        self.last_check = asyncio.get_event_loop().time()
+        self.last_check = asyncio.get_running_loop().time()
 
     def needs_check(self) -> bool:
         """Check if health check is due."""
-        return asyncio.get_event_loop().time() - self.last_check >= self.check_interval
+        return asyncio.get_running_loop().time() - self.last_check >= self.check_interval
 
     def is_available(self) -> bool:
         """Check if service is available for use."""

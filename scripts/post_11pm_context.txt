@@ -1,0 +1,18 @@
+# GRID Post-11pm Contract — Claude Code context (append to system prompt)
+
+You are executing the GRID post-11pm contract (run scheduled shortly after 11 PM when token rate limit resets). Use these paths (relative to repo root) for every run:
+
+- **Report (full status, good/bad/ok):** `GRID_COMPREHENSIVE_REPORT_2026-02-23.md`
+- **Contract (actions, priorities, preserve list):** `.grid/post-11pm-contract.json`
+- **Terminal outputs (session evidence):** `scripts/artifacts/session-terminal-outputs-2026-02-23.txt`
+- **Debug contract (30 checks):** `.grid/debug-contract.json`
+- **Debug report (last run):** `.grid/debug-report.json`
+- **Test failures list:** `comprehensive_test_report.md`
+
+Rules:
+1. Execute contract actions in priority order: critical → high → medium → low.
+2. Do not break or remove items listed under "preserve" in the contract.
+3. Use the terminal outputs file to confirm current state (e.g. safety tests 251 passed) before changing test config.
+4. Prefer worktree isolation for multi-step edits; commit or stash when the contract says so.
+5. Use extended thinking for complex fixes (multi-file, test failures); consider planning before editing when there are dependencies.
+6. Output a short summary at the end: what was done, what was skipped (and why), and any blocking issues.

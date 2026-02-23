@@ -201,20 +201,16 @@ class GracefulShutdown:
         logger.info("Graceful shutdown requested")
 
     async def wait_for_shutdown_complete(self) -> None:
-        """Wait for all active operations to complete."""
-        shutdown_deadline = asyncio.get_event_loop().time() + self.shutdown_timeout_seconds
+        """Wait for all active operations to complete (poll until drain or deadline)."""
+        loop = asyncio.get_running_loop()
+        shutdown_deadline = loop.time() + self.shutdown_timeout_seconds
 
         while self._active_operations > 0:
-            remaining_time = shutdown_deadline - asyncio.get_event_loop().time()
+            remaining_time = shutdown_deadline - loop.time()
             if remaining_time <= 0:
                 logger.warning(f"Shutdown timeout exceeded, {self._active_operations} operations still active")
                 break
-
-            try:
-                async with asyncio.timeout(min(1.0, remaining_time)):
-                    await self._shutdown_event.wait()
-            except TimeoutError:
-                continue
+            await asyncio.sleep(min(1.0, remaining_time))
 
         logger.info("Graceful shutdown completed")
 

@@ -473,7 +473,7 @@ class ToolRegistry:
         Returns:
             Tool call result.
         """
-        start_time = asyncio.get_event_loop().time()
+        start_time = asyncio.get_running_loop().time()
 
         if name not in self._tools:
             return ToolCallResult(
@@ -507,7 +507,7 @@ class ToolRegistry:
                 response.raise_for_status()
 
                 result_data = response.json()
-                execution_time = int((asyncio.get_event_loop().time() - start_time) * 1000)
+                execution_time = int((asyncio.get_running_loop().time() - start_time) * 1000)
 
                 result = ToolCallResult(
                     success=True,
@@ -535,7 +535,7 @@ class ToolRegistry:
             if attempt < server.config.retry_attempts - 1:
                 await asyncio.sleep(server.config.retry_delay)
 
-        execution_time = int((asyncio.get_event_loop().time() - start_time) * 1000)
+        execution_time = int((asyncio.get_running_loop().time() - start_time) * 1000)
         return ToolCallResult(
             success=False,
             tool_name=name,
