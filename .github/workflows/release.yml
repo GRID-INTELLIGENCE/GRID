@@ -145,7 +145,7 @@ jobs:
           cat RELEASE_NOTES.md
 
       - name: "Upload Release Notes"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: release-notes
           path: RELEASE_NOTES.md
@@ -239,7 +239,7 @@ jobs:
           fi
 
       - name: "Upload Build Artifacts"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: dist-packages
           path: |
