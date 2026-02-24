@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "grid-safety"
-version = "1.0.0"
+version = "1.0.1"
 description = "GRID Safety layer and Cognitive Privacy Shield: real-time safety enforcement, PII detection, masking, and compliance presets (GDPR, HIPAA, PCI-DSS) for AI inference."
 readme = "README.md"
 license = { file = "LICENSE" }

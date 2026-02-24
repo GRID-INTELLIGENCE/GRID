@@ -1026,7 +1026,7 @@ test = [
 
 [[package]]
 name = "grid-safety"
-version = "1.0.0"
+version = "1.0.1"
 source = { directory = "safety" }
 dependencies = [
     { name = "asyncpg" },
