@@ -8,7 +8,9 @@ import { RagQuery } from "@/pages/RagQuery";
 import { Security } from "@/pages/Security";
 import { SettingsPage } from "@/pages/SettingsPage";
 import { RoundTablePage } from "@/pages/RoundTablePage";
+import { MyceliumPage } from "@/pages/MyceliumPage";
 import { TerminalPage } from "@/pages/TerminalPage";
+import { MyceliumDemo } from "@/pages/MyceliumDemo";
 import type { LucideIcon } from "lucide-react";
 import {
   Activity,
@@ -18,11 +20,13 @@ import {
   Database,
   LayoutDashboard,
   MessageSquare,
+  Presentation,
   Radar,
   Search,
   Settings,
   Shield,
   Sparkles,
+  Sprout,
   Terminal,
   Zap,
 } from "lucide-react";
@@ -56,6 +60,8 @@ export const iconRegistry: Record<IconKey, LucideIcon> = {
   sparkles: Sparkles,
   terminal: Terminal,
   zap: Zap,
+  sprout: Sprout,
+  presentation: Presentation,
 };
 
 export const routeComponents: Record<RouteKey, ComponentType> = {
@@ -72,6 +78,8 @@ export const routeComponents: Record<RouteKey, ComponentType> = {
   register: Register,
   login: Login,
   roundtable: RoundTablePage,
+  mycelium: MyceliumPage,
+  "mycelium-demo": MyceliumDemo,
 };
 
 const routesById = new Map<RouteKey, RouteConfig>(

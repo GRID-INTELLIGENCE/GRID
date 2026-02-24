@@ -1,0 +1,609 @@
+{
+  "scenarios": [
+    {
+      "id": "grid_analysis",
+      "title": "GRID Platform Analysis",
+      "context": "An Environmental Intelligence report from GRID's DRTP framework",
+      "source_text": "The Environmental Intelligence middleware detected dimensional imbalance in the DRTP framework during the latest Roundtable session. The Practical dimension scored 0.82 while Legal scored 0.31 and Psychological scored 0.45. This indicates the conversation was heavily skewed toward actionable items without sufficient consideration of regulatory constraints or emotional impact on stakeholders. The system applied a temperature adjustment of +0.15 to bias LLM responses toward legal and psychological grounding. Three nudge injections were triggered at turns 4, 7, and 11 to restore equilibrium. The overall balance coefficient improved from 0.39 to 0.67 over the session, representing a 72% improvement in dimensional balance. However, the Legal dimension remains below the 0.5 threshold and requires focused attention in the next session.",
+      "source_length": 840,
+      "personas": [
+        {
+          "id": "expert",
+          "label": "Expert Analyst",
+          "icon": "🔬",
+          "description": "Deep technical understanding, wants precision and nuance",
+          "depth": "cold_brew",
+          "gist": "The Environmental Intelligence middleware detected dimensional imbalance in the\nDRTP framework during the latest Roundtable session.",
+          "highlights": [
+            {
+              "text": "session",
+              "priority": "critical",
+              "context": "...framework during the latest Roundtable session. The Practical dimension score",
+              "category": "concept"
+            },
+            {
+              "text": "scored",
+              "priority": "critical",
+              "context": "...dtable session. The Practical dimension scored 0.82 while Legal scored 0.31 a",
+              "category": "concept"
+            },
+            {
+              "text": "legal",
+              "priority": "critical",
+              "context": "...e Practical dimension scored 0.82 while Legal scored 0.31 and Psychological s",
+              "category": "concept"
+            },
+            {
+              "text": "dimensional",
+              "priority": "high",
+              "context": "...mental Intelligence middleware detected dimensional imbalance in the DRTP fra",
+              "category": "concept"
+            },
+            {
+              "text": "dimension",
+              "priority": "high",
+              "context": "...mental Intelligence middleware detected dimensional imbalance in the DRTP fra",
+              "category": "concept"
+            },
+            {
+              "text": "psychological",
+              "priority": "high",
+              "context": "...scored 0.82 while Legal scored 0.31 and Psychological scored 0.45. This indic",
+              "category": "concept"
+            }
+          ],
+          "summary": "The Environmental Intelligence middleware detected dimensional imbalance in the\nDRTP framework during the latest Roundtable session. The Practical dimension\nscored 0.82 while Legal scored 0.31 and Psychological scored 0.45. The overall\nbalance coefficient improved from 0.39 to 0.67 over the session, representing a\n72% improvement in dimensional balance. However, the Legal dimension remains\nbelow the 0.5 threshold and requires focused attention in the next session.",
+          "explanation": "IN BRIEF: The Environmental Intelligence middleware detected dimensional\nimbalance in the DRTP framework during the latest Roundtable session.\n\nKEY POINTS:\n  ***session*** — ...framework during the latest Roundtable session. The\nPractical dimension scored 0.82 wh...\n  ***scored*** — ...dtable session. The Practical dimension scored 0.82 while\nLegal scored 0.31 and Psycho...\n  ***legal*** — ...e Practical dimension scored 0.82 while Legal scored 0.31 and\nPsychological scored 0....\n  **dimensional** — ...mental Intelligence middleware detected dimensional\nimbalance in the DRTP framework during...\n  **dimension** — ...mental Intelligence middleware detected dimensional\nimbalance in the DRTP framework durin...\n  **psychological** — ...scored 0.82 while Legal scored 0.31 and Psychological\nscored 0.45. This indicates the convers...\n  *toward* — ...tes the conversation was heavily skewed toward actionable items\nwithout sufficient con...\n  *balance* — ...gence middleware detected dimensional imbalance in the DRTP\nframework during the latest...\n  environmental — The Environmental Intelligence middleware detected dimens...\n  intelligence — The Environmental Intelligence middleware detected dimensional\nimbalan...\n\nSUMMARY:\nThe Environmental Intelligence middleware detected dimensional imbalance in the\nDRTP framework during the latest Roundtable session.\n\nThe Practical dimension scored 0.82 while Legal scored 0.31 and Psychological\nscored 0.45.\n\nThe overall balance coefficient improved from 0.39 to 0.67 over the session,\nrepresenting a 72% improvement in dimensional balance.\n\nHowever, the Legal dimension remains below the 0.5 threshold and requires\nfocused attention in the next session.\n\nDETAILS: Key concepts: session, scored, legal. The Environmental Intelligence\nmiddleware detected dimensional imbalance in the DRTP framework during the\nlatest Roundtable session. The Practical dimension scored 0.82 while Legal\nscored 0.31 and Psychological scored 0.45. The system applied a temperature\nadjustment of +0.15 to bias LLM responses toward legal and psychological\ngrounding. The overall balance coefficient improved from 0.39 to 0.67 over the\nsession, representing a 72% improvement in dimensional balance. However, the\nLegal dimension remains below the 0.5 threshold and requires focused attention\nin the next session.\n\nEXAMPLE: Like water flowing through pipes — 'session' is what moves through the\nsystem.",
+          "analogy": "This topic is like a forest. 'session' is the tallest tree — the most visible\nidea. The other keywords are the surrounding trees. Together they form the\nlandscape of the subject.",
+          "compression_ratio": 0.157,
+          "patterns": [
+            "repetition",
+            "rhythm",
+            "flow",
+            "spatial"
+          ]
+        },
+        {
+          "id": "stakeholder",
+          "label": "Business Stakeholder",
+          "icon": "💼",
+          "description": "Knows the basics, wants actionable takeaways",
+          "depth": "americano",
+          "gist": "The Environmental Intelligence middleware detected dimensional imbalance in the\nDRTP framework during the latest Roundtable session.",
+          "highlights": [
+            {
+              "text": "session",
+              "priority": "critical",
+              "context": "...framework during the latest Roundtable session. The Practical dimension score",
+              "category": "concept"
+            },
+            {
+              "text": "scored",
+              "priority": "critical",
+              "context": "...dtable session. The Practical dimension scored 0.82 while Legal scored 0.31 a",
+              "category": "concept"
+            },
+            {
+              "text": "legal",
+              "priority": "critical",
+              "context": "...e Practical dimension scored 0.82 while Legal scored 0.31 and Psychological s",
+              "category": "concept"
+            },
+            {
+              "text": "dimensional",
+              "priority": "high",
+              "context": "...mental Intelligence middleware detected dimensional imbalance in the DRTP fra",
+              "category": "concept"
+            },
+            {
+              "text": "dimension",
+              "priority": "high",
+              "context": "...mental Intelligence middleware detected dimensional imbalance in the DRTP fra",
+              "category": "concept"
+            },
+            {
+              "text": "psychological",
+              "priority": "high",
+              "context": "...scored 0.82 while Legal scored 0.31 and Psychological scored 0.45. This indic",
+              "category": "concept"
+            }
+          ],
+          "summary": "The Environmental Intelligence middleware detected dimensional imbalance in the\nDRTP framework during the latest Roundtable session. The Practical dimension\nscored 0.82 while Legal scored 0.31 and Psychological scored 0.45. The overall\nbalance coefficient improved from 0.39 to 0.67 over the session, representing a\n72% improvement in dimensional balance. However, the Legal dimension remains\nbelow the 0.5 threshold and requires focused attention in the next session.",
+          "explanation": "IN BRIEF: The Environmental Intelligence middleware detected dimensional\nimbalance in the DRTP framework during the latest Roundtable session.\n\nKEY POINTS:\n  ***session*** — ...framework during the latest Roundtable session. The\nPractical dimension scored 0.82 wh...\n  ***scored*** — ...dtable session. The Practical dimension scored 0.82 while\nLegal scored 0.31 and Psycho...\n  ***legal*** — ...e Practical dimension scored 0.82 while Legal scored 0.31 and\nPsychological scored 0....\n  **dimensional** — ...mental Intelligence middleware detected dimensional\nimbalance in the DRTP framework during...\n  **dimension** — ...mental Intelligence middleware detected dimensional\nimbalance in the DRTP framework durin...\n  **psychological** — ...scored 0.82 while Legal scored 0.31 and Psychological\nscored 0.45. This indicates the convers...\n  *toward* — ...tes the conversation was heavily skewed toward actionable items\nwithout sufficient con...\n  *balance* — ...gence middleware detected dimensional imbalance in the DRTP\nframework during the latest...\n  environmental — The Environmental Intelligence middleware detected dimens...\n  intelligence — The Environmental Intelligence middleware detected dimensional\nimbalan...\n\nSUMMARY:\nThe Environmental Intelligence middleware detected dimensional imbalance in the\nDRTP framework during the latest Roundtable session.\n\nThe Practical dimension scored 0.82 while Legal scored 0.31 and Psychological\nscored 0.45.\n\nThe overall balance coefficient improved from 0.39 to 0.67 over the session,\nrepresenting a 72% improvement in dimensional balance.\n\nHowever, the Legal dimension remains below the 0.5 threshold and requires\nfocused attention in the next session.\n\nDETAILS: Key concepts: session, scored, legal. The Environmental Intelligence\nmiddleware detected dimensional imbalance in the DRTP framework during the\nlatest Roundtable session. The Practical dimension scored 0.82 while Legal\nscored 0.31 and Psychological scored 0.45. The system applied a temperature\nadjustment of +0.15 to bias LLM responses toward legal and psychological\ngrounding. The overall balance coefficient improved from 0.39 to 0.67 over the\nsession, representing a 72% improvement in dimensional balance. However, the\nLegal dimension remains below the 0.5 threshold and requires focused attention\nin the next session.\n\nEXAMPLE: Like water flowing through pipes — 'session' is what moves through the\nsystem.",
+          "analogy": "This topic is like a forest. 'session' is the tallest tree — the most visible\nidea. The other keywords are the surrounding trees. Together they form the\nlandscape of the subject.",
+          "compression_ratio": 0.157,
+          "patterns": [
+            "repetition",
+            "rhythm",
+            "flow",
+            "spatial"
+          ]
+        },
+        {
+          "id": "newcomer",
+          "label": "New Team Member",
+          "icon": "🌱",
+          "description": "First week on the job, needs gentle onboarding",
+          "depth": "espresso",
+          "gist": "The Environmental Intelligence middleware detected dimensional imbalance in the\nDRTP framework during the latest Roundtable session.",
+          "highlights": [
+            {
+              "text": "session",
+              "priority": "critical",
+              "context": "...framework during the latest Roundtable session. The Practical dimension score",
+              "category": "concept"
+            },
+            {
+              "text": "scored",
+              "priority": "critical",
+              "context": "...dtable session. The Practical dimension scored 0.82 while Legal scored 0.31 a",
+              "category": "concept"
+            },
+            {
+              "text": "legal",
+              "priority": "critical",
+              "context": "...e Practical dimension scored 0.82 while Legal scored 0.31 and Psychological s",
+              "category": "concept"
+            },
+            {
+              "text": "dimensional",
+              "priority": "high",
+              "context": "...mental Intelligence middleware detected dimensional imbalance in the DRTP fra",
+              "category": "concept"
+            },
+            {
+              "text": "dimension",
+              "priority": "high",
+              "context": "...mental Intelligence middleware detected dimensional imbalance in the DRTP fra",
+              "category": "concept"
+            },
+            {
+              "text": "psychological",
+              "priority": "high",
+              "context": "...scored 0.82 while Legal scored 0.31 and Psychological scored 0.45. This indic",
+              "category": "concept"
+            }
+          ],
+          "summary": "The Environmental Intelligence middleware detected dimensional imbalance in the\nDRTP framework during the latest Roundtable session. The Practical dimension\nscored 0.82 while Legal scored 0.31 and Psychological scored 0.45. The overall\nbalance coefficient improved from 0.39 to 0.67 over the session, representing a\n72% improvement in dimensional balance. However, the Legal dimension remains\nbelow the 0.5 threshold and requires focused attention in the next session.",
+          "explanation": "IN BRIEF: The Environmental Intelligence middleware detected dimensional\nimbalance in the DRTP framework during the latest Roundtable session.\n\nKEY POINTS:\n  ***session*** — ...framework during the latest Roundtable session. The\nPractical dimension scored 0.82 wh...\n  ***scored*** — ...dtable session. The Practical dimension scored 0.82 while\nLegal scored 0.31 and Psycho...\n  ***legal*** — ...e Practical dimension scored 0.82 while Legal scored 0.31 and\nPsychological scored 0....\n  **dimensional** — ...mental Intelligence middleware detected dimensional\nimbalance in the DRTP framework during...\n  **dimension** — ...mental Intelligence middleware detected dimensional\nimbalance in the DRTP framework durin...\n  **psychological** — ...scored 0.82 while Legal scored 0.31 and Psychological\nscored 0.45. This indicates the convers...\n  *toward* — ...tes the conversation was heavily skewed toward actionable items\nwithout sufficient con...\n  *balance* — ...gence middleware detected dimensional imbalance in the DRTP\nframework during the latest...\n  environmental — The Environmental Intelligence middleware detected dimens...\n  intelligence — The Environmental Intelligence middleware detected dimensional\nimbalan...\n\nSUMMARY:\nThe Environmental Intelligence middleware detected dimensional imbalance in the\nDRTP framework during the latest Roundtable session.\n\nThe Practical dimension scored 0.82 while Legal scored 0.31 and Psychological\nscored 0.45.\n\nThe overall balance coefficient improved from 0.39 to 0.67 over the session,\nrepresenting a 72% improvement in dimensional balance.\n\nHowever, the Legal dimension remains below the 0.5 threshold and requires\nfocused attention in the next session.\n\nDETAILS: Key concepts: session, scored, legal. The Environmental Intelligence\nmiddleware detected dimensional imbalance in the DRTP framework during the\nlatest Roundtable session. The Practical dimension scored 0.82 while Legal\nscored 0.31 and Psychological scored 0.45. The system applied a temperature\nadjustment of +0.15 to bias LLM responses toward legal and psychological\ngrounding. The overall balance coefficient improved from 0.39 to 0.67 over the\nsession, representing a 72% improvement in dimensional balance. However, the\nLegal dimension remains below the 0.5 threshold and requires focused attention\nin the next session.\n\nEXAMPLE: Like water flowing through pipes — 'session' is what moves through the\nsystem.",
+          "analogy": "This topic is like a forest. 'session' is the tallest tree — the most visible\nidea. The other keywords are the surrounding trees. Together they form the\nlandscape of the subject.",
+          "compression_ratio": 0.157,
+          "patterns": [
+            "repetition",
+            "rhythm",
+            "flow",
+            "spatial"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "machine_learning",
+      "title": "Machine Learning Concepts",
+      "context": "A textbook passage about neural network training",
+      "source_text": "Neural networks learn through backpropagation, an algorithm that computes the gradient of the loss function with respect to each weight by the chain rule, composing gradients from the output layer backward through the network. During training, the network feeds input data forward through layers of artificial neurons, each applying a nonlinear activation function such as ReLU or sigmoid. The predicted output is compared against the true label using a loss function like cross-entropy or mean squared error. The gradient of this loss tells each weight how much to change to reduce the error. Stochastic gradient descent then updates the weights in small steps proportional to the learning rate, iterating over batches of training data until the model converges to acceptable accuracy.",
+      "source_length": 786,
+      "personas": [
+        {
+          "id": "expert",
+          "label": "Expert Analyst",
+          "icon": "🔬",
+          "description": "Deep technical understanding, wants precision and nuance",
+          "depth": "cold_brew",
+          "gist": "Neural networks learn through backpropagation, an algorithm that computes the\ngradient of the loss function with respect to each weight by the chain rule,\ncomposing gradients from the output layer backward through the network.",
+          "highlights": [
+            {
+              "text": "gradient",
+              "priority": "critical",
+              "context": "...agation, an algorithm that computes the gradient of the loss function with re",
+              "category": "concept"
+            },
+            {
+              "text": "function",
+              "priority": "critical",
+              "context": "...that computes the gradient of the loss function with respect to each weight b",
+              "category": "action"
+            },
+            {
+              "text": "loss",
+              "priority": "critical",
+              "context": "...rithm that computes the gradient of the loss function with respect to each we",
+              "category": "concept"
+            },
+            {
+              "text": "weight",
+              "priority": "high",
+              "context": "...the loss function with respect to each weight by the chain rule, composing gr",
+              "category": "concept"
+            },
+            {
+              "text": "output",
+              "priority": "high",
+              "context": "...hain rule, composing gradients from the output layer backward through the net",
+              "category": "concept"
+            },
+            {
+              "text": "network",
+              "priority": "high",
+              "context": "Neural networks learn through backpropagation, an algo...",
+              "category": "concept"
+            }
+          ],
+          "summary": "Neural networks learn through backpropagation, an algorithm that computes the\ngradient of the loss function with respect to each weight by the chain rule,\ncomposing gradients from the output layer backward through the network. During\ntraining, the network feeds input data forward through layers of artificial\nneurons, each applying a nonlinear activation function such as ReLU or sigmoid.\nThe predicted output is compared against the true label using a loss function\nlike cross-entropy or mean squared error. The gradient of this loss tells each\nweight how much to change to reduce the error. Stochastic gradient descent then\nupdates the weights in small steps proportional to the learning rate, iterating\nover batches of training data until the model converges to acceptable accuracy.",
+          "explanation": "Neural networks learn through backpropagation, an algorithm that computes the\ngradient of the loss function with respect to each weight by the chain rule,\ncomposing gradients from the output layer backward through the network.\nNeural networks learn through backpropagation, an algorithm that computes the\ngradient of the loss function with respect to each weight by the chain rule,\ncomposing gradients from the output layer backward through the network. During\ntraining, the network feeds input data forward through layers of artificial\nneurons, each applying a nonlinear activation function such as ReLU or sigmoid.\nThe predicted output is compared against the true label using a loss function\nlike cross-entropy or mean squared error. The gradient of this loss tells each\nweight how much to change to reduce the error. Stochastic gradient descent then\nupdates the weights in small steps proportional to the learning rate, iterating\nover batches of training data until the model converges to acceptable accuracy.",
+          "analogy": "This topic is like a forest. 'gradient' is the tallest tree — the most visible\nidea. The other keywords are the surrounding trees. Together they form the\nlandscape of the subject.",
+          "compression_ratio": 0.288,
+          "patterns": [
+            "repetition",
+            "rhythm",
+            "flow",
+            "spatial"
+          ]
+        },
+        {
+          "id": "stakeholder",
+          "label": "Business Stakeholder",
+          "icon": "💼",
+          "description": "Knows the basics, wants actionable takeaways",
+          "depth": "americano",
+          "gist": "Neural networks learn through backpropagation, an algorithm that computes the\ngradient of the loss function with respect to each weight by the chain rule,\ncomposing gradients from the output layer backward through the network.",
+          "highlights": [
+            {
+              "text": "gradient",
+              "priority": "critical",
+              "context": "...agation, an algorithm that computes the gradient of the loss function with re",
+              "category": "concept"
+            },
+            {
+              "text": "function",
+              "priority": "critical",
+              "context": "...that computes the gradient of the loss function with respect to each weight b",
+              "category": "action"
+            },
+            {
+              "text": "loss",
+              "priority": "critical",
+              "context": "...rithm that computes the gradient of the loss function with respect to each we",
+              "category": "concept"
+            },
+            {
+              "text": "weight",
+              "priority": "high",
+              "context": "...the loss function with respect to each weight by the chain rule, composing gr",
+              "category": "concept"
+            },
+            {
+              "text": "output",
+              "priority": "high",
+              "context": "...hain rule, composing gradients from the output layer backward through the net",
+              "category": "concept"
+            },
+            {
+              "text": "network",
+              "priority": "high",
+              "context": "Neural networks learn through backpropagation, an algo...",
+              "category": "concept"
+            }
+          ],
+          "summary": "Neural networks learn through backpropagation, an algorithm that computes the\ngradient of the loss function with respect to each weight by the chain rule,\ncomposing gradients from the output layer backward through the network. The\npredicted output is compared against the true label using a loss function like\ncross-entropy or mean squared error. The gradient of this loss tells each weight\nhow much to change to reduce the error. Stochastic gradient descent then updates\nthe weights in small steps proportional to the learning rate, iterating over\nbatches of training data until the model converges to acceptable accuracy.",
+          "explanation": "IN BRIEF: Neural networks learn through backpropagation, an algorithm that\ncomputes the gradient of the loss function with respect to each weight by the\nchain rule, composing gradients from the output layer backward through the\nnetwork.\n\nKEY POINTS:\n  ***gradient*** — ...agation, an algorithm that computes the gradient of the\nloss function with respect to ea...\n  ***function*** — ...that computes the gradient of the loss function with\nrespect to each weight by the chai...\n  ***loss*** — ...rithm that computes the gradient of the loss function with\nrespect to each weight by...\n  **weight** — ...the loss function with respect to each weight by the chain\nrule, composing gradients...\n  **output** — ...hain rule, composing gradients from the output layer backward\nthrough the network. Dur...\n  **network** — Neural networks learn through backpropagation, an algo...\n  *training* — ...er backward through the network. During training, the network\nfeeds input data forward t...\n  *data* — ...uring training, the network feeds input data forward through\nlayers of artificial ne...\n  error — ...tion like cross-entropy or mean squared error. The gradient of this\nloss tells each w...\n  backpropagation — Neural networks learn through backpropagation, an algorithm\nthat computes the gradien...\n\nSUMMARY:\nNeural networks learn through backpropagation, an algorithm that computes the\ngradient of the loss function with respect to each weight by the chain rule,\ncomposing gradients from the output layer backward through the network.\n\nThe predicted output is compared against the true label using a loss function\nlike cross-entropy or mean squared error.\n\nThe gradient of this loss tells each weight how much to change to reduce the\nerror.\n\nStochastic gradient descent then updates the weights in small steps proportional\nto the learning rate, iterating over batches of training data until the model\nconverges to acceptable accuracy.\n\nDETAILS: Key concepts: gradient, function, loss. Neural networks learn through\nbackpropagation, an algorithm that computes the gradient of the loss function\nwith respect to each weight by the chain rule, composing gradients from the\noutput layer backward through the network. During training, the network feeds\ninput data forward through layers of artificial neurons, each applying a\nnonlinear activation function such as ReLU or sigmoid. The predicted output is\ncompared against the true label using a loss function like cross-entropy or mean\nsquared error. The gradient of this loss tells each weight how much to change to\nreduce the error. Stochastic gradient descent then updates the weights in small\nsteps proportional to the learning rate, iterating over batches of training data\nuntil the model converges to acceptable accuracy.\n\nEXAMPLE: Like water flowing through pipes — 'gradient' is what moves through the\nsystem.",
+          "analogy": "This topic is like a forest. 'gradient' is the tallest tree — the most visible\nidea. The other keywords are the surrounding trees. Together they form the\nlandscape of the subject.",
+          "compression_ratio": 0.288,
+          "patterns": [
+            "repetition",
+            "rhythm",
+            "flow",
+            "spatial"
+          ]
+        },
+        {
+          "id": "newcomer",
+          "label": "New Team Member",
+          "icon": "🌱",
+          "description": "First week on the job, needs gentle onboarding",
+          "depth": "espresso",
+          "gist": "Neural networks learn through backpropagation, an algorithm that computes the\ngradient of the loss function with respect to each weight by the chain rule,\ncomposing gradients from the output layer backward through the network.",
+          "highlights": [
+            {
+              "text": "gradient",
+              "priority": "critical",
+              "context": "...agation, an algorithm that computes the gradient of the loss function with re",
+              "category": "concept"
+            },
+            {
+              "text": "function",
+              "priority": "critical",
+              "context": "...that computes the gradient of the loss function with respect to each weight b",
+              "category": "action"
+            },
+            {
+              "text": "loss",
+              "priority": "critical",
+              "context": "...rithm that computes the gradient of the loss function with respect to each we",
+              "category": "concept"
+            },
+            {
+              "text": "weight",
+              "priority": "high",
+              "context": "...the loss function with respect to each weight by the chain rule, composing gr",
+              "category": "concept"
+            },
+            {
+              "text": "output",
+              "priority": "high",
+              "context": "...hain rule, composing gradients from the output layer backward through the net",
+              "category": "concept"
+            },
+            {
+              "text": "network",
+              "priority": "high",
+              "context": "Neural networks learn through backpropagation, an algo...",
+              "category": "concept"
+            }
+          ],
+          "summary": "Neural networks learn through backpropagation, an algorithm that computes the\ngradient of the loss function with respect to each weight by the chain rule,\ncomposing gradients from the output layer backward through the network.\nStochastic gradient descent then updates the weights in small steps proportional\nto the learning rate, iterating over batches of training data until the model\nconverges to acceptable accuracy.",
+          "explanation": "IN BRIEF: Neural networks learn through backpropagation, an algorithm that\ncomputes the gradient of the loss function with respect to each weight by the\nchain rule, composing gradients from the output layer backward through the\nnetwork.\n\nKEY POINTS:\n  ***gradient*** — ...agation, an algorithm that computes the gradient of the\nloss function with respect to ea...\n  ***function*** — ...that computes the gradient of the loss function with\nrespect to each weight by the chai...\n  ***loss*** — ...rithm that computes the gradient of the loss function with\nrespect to each weight by...\n  **weight** — ...the loss function with respect to each weight by the chain\nrule, composing gradients...\n  **output** — ...hain rule, composing gradients from the output layer backward\nthrough the network. Dur...\n  **network** — Neural networks learn through backpropagation, an algo...\n  *training* — ...er backward through the network. During training, the network\nfeeds input data forward t...\n  *data* — ...uring training, the network feeds input data forward through\nlayers of artificial ne...\n  error — ...tion like cross-entropy or mean squared error. The gradient of this\nloss tells each w...\n  backpropagation — Neural networks learn through backpropagation, an algorithm\nthat computes the gradien...\n\nSUMMARY:\nNeural networks learn through backpropagation, an algorithm that computes the\ngradient of the loss function with respect to each weight by the chain rule,\ncomposing gradients from the output layer backward through the network.\n\nStochastic gradient descent then updates the weights in small steps proportional\nto the learning rate, iterating over batches of training data until the model\nconverges to acceptable accuracy.\n\nEXAMPLE: Like water flowing through pipes — 'gradient' is what moves through the\nsystem.",
+          "analogy": "",
+          "compression_ratio": 0.288,
+          "patterns": [
+            "repetition",
+            "rhythm",
+            "flow",
+            "spatial"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "legal_privacy",
+      "title": "Data Privacy Regulation",
+      "context": "A compliance briefing about local data handling requirements",
+      "source_text": "Under the framework's data governance requirements, all personally identifiable information must be processed exclusively on local infrastructure without transmission to external services. This includes but is not limited to biometric identifiers, geolocation data, device fingerprints, behavioral analytics, and session-correlated metadata. The retention period for interaction logs is capped at 90 days, after which automated purging must occur without manual intervention. Users retain the right to request immediate deletion of their profile data, including derived inferences and pattern analysis results. Non-compliance triggers a mandatory incident report within 72 hours and may result in automatic suspension of the affected processing module.",
+      "source_length": 752,
+      "personas": [
+        {
+          "id": "expert",
+          "label": "Expert Analyst",
+          "icon": "🔬",
+          "description": "Deep technical understanding, wants precision and nuance",
+          "depth": "cold_brew",
+          "gist": "Under the framework's data governance requirements, all personally identifiable\ninformation must be processed exclusively on local infrastructure without\ntransmission to external services.",
+          "highlights": [
+            {
+              "text": "data",
+              "priority": "critical",
+              "context": "Under the framework's data governance requirements, all personally...",
+              "category": "concept"
+            },
+            {
+              "text": "without",
+              "priority": "critical",
+              "context": "...sed exclusively on local infrastructure without transmission to external serv",
+              "category": "concept"
+            },
+            {
+              "text": "framework",
+              "priority": "critical",
+              "context": "Under the framework's data governance requirements, all per...",
+              "category": "concept"
+            },
+            {
+              "text": "governance",
+              "priority": "high",
+              "context": "Under the framework's data governance requirements, all personally identifiab...",
+              "category": "action"
+            },
+            {
+              "text": "requirements",
+              "priority": "high",
+              "context": "Under the framework's data governance requirements, all personally identifiable ",
+              "category": "concept"
+            },
+            {
+              "text": "personally",
+              "priority": "high",
+              "context": "...ork's data governance requirements, all personally identifiable information m",
+              "category": "concept"
+            }
+          ],
+          "summary": "Under the framework's data governance requirements, all personally identifiable\ninformation must be processed exclusively on local infrastructure without\ntransmission to external services. This includes but is not limited to biometric\nidentifiers, geolocation data, device fingerprints, behavioral analytics, and\nsession-correlated metadata. The retention period for interaction logs is capped\nat 90 days, after which automated purging must occur without manual\nintervention. Users retain the right to request immediate deletion of their\nprofile data, including derived inferences and pattern analysis results. Non-\ncompliance triggers a mandatory incident report within 72 hours and may result\nin automatic suspension of the affected processing module.",
+          "explanation": "Under the framework's data governance requirements, all personally identifiable\ninformation must be processed exclusively on local infrastructure without\ntransmission to external services.\nUnder the framework's data governance requirements, all personally identifiable\ninformation must be processed exclusively on local infrastructure without\ntransmission to external services. This includes but is not limited to biometric\nidentifiers, geolocation data, device fingerprints, behavioral analytics, and\nsession-correlated metadata. The retention period for interaction logs is capped\nat 90 days, after which automated purging must occur without manual\nintervention. Users retain the right to request immediate deletion of their\nprofile data, including derived inferences and pattern analysis results. Non-\ncompliance triggers a mandatory incident report within 72 hours and may result\nin automatic suspension of the affected processing module.",
+          "analogy": "This topic is like a forest. 'data' is the tallest tree — the most visible idea.\nThe other keywords are the surrounding trees. Together they form the landscape\nof the subject.",
+          "compression_ratio": 0.25,
+          "patterns": [
+            "repetition",
+            "rhythm",
+            "spatial",
+            "cause"
+          ]
+        },
+        {
+          "id": "stakeholder",
+          "label": "Business Stakeholder",
+          "icon": "💼",
+          "description": "Knows the basics, wants actionable takeaways",
+          "depth": "americano",
+          "gist": "Under the framework's data governance requirements, all personally identifiable\ninformation must be processed exclusively on local infrastructure without\ntransmission to external services.",
+          "highlights": [
+            {
+              "text": "data",
+              "priority": "critical",
+              "context": "Under the framework's data governance requirements, all personally...",
+              "category": "concept"
+            },
+            {
+              "text": "without",
+              "priority": "critical",
+              "context": "...sed exclusively on local infrastructure without transmission to external serv",
+              "category": "concept"
+            },
+            {
+              "text": "framework",
+              "priority": "critical",
+              "context": "Under the framework's data governance requirements, all per...",
+              "category": "concept"
+            },
+            {
+              "text": "governance",
+              "priority": "high",
+              "context": "Under the framework's data governance requirements, all personally identifiab...",
+              "category": "action"
+            },
+            {
+              "text": "requirements",
+              "priority": "high",
+              "context": "Under the framework's data governance requirements, all personally identifiable ",
+              "category": "concept"
+            },
+            {
+              "text": "personally",
+              "priority": "high",
+              "context": "...ork's data governance requirements, all personally identifiable information m",
+              "category": "concept"
+            }
+          ],
+          "summary": "Under the framework's data governance requirements, all personally identifiable\ninformation must be processed exclusively on local infrastructure without\ntransmission to external services. This includes but is not limited to biometric\nidentifiers, geolocation data, device fingerprints, behavioral analytics, and\nsession-correlated metadata. The retention period for interaction logs is capped\nat 90 days, after which automated purging must occur without manual\nintervention. Non-compliance triggers a mandatory incident report within 72\nhours and may result in automatic suspension of the affected processing module.",
+          "explanation": "IN BRIEF: Under the framework's data governance requirements, all personally\nidentifiable information must be processed exclusively on local infrastructure\nwithout transmission to external services.\n\nKEY POINTS:\n  ***data*** — Under the framework's data governance requirements, all\npersonally...\n  ***without*** — ...sed exclusively on local infrastructure without\ntransmission to external services. This...\n  ***framework*** — Under the framework's data governance requirements, all\nper...\n  **governance** — Under the framework's data governance requirements, all\npersonally identifiab...\n  **requirements** — Under the framework's data governance requirements, all\npersonally identifiable informatio...\n  **personally** — ...ork's data governance requirements, all personally\nidentifiable information must be proces...\n  *identifiable* — ...governance requirements, all personally identifiable\ninformation must be processed exclusive...\n  *information* — ...quirements, all personally identifiable information must be\nprocessed exclusively on local...\n  processed — ...onally identifiable information must be processed exclusively\non local infrastructure wit...\n  exclusively — ...ntifiable information must be processed exclusively on local\ninfrastructure without transmi...\n\nSUMMARY:\nUnder the framework's data governance requirements, all personally identifiable\ninformation must be processed exclusively on local infrastructure without\ntransmission to external services.\n\nThis includes but is not limited to biometric identifiers, geolocation data,\ndevice fingerprints, behavioral analytics, and session-correlated metadata.\n\nThe retention period for interaction logs is capped at 90 days, after which\nautomated purging must occur without manual intervention.\n\nNon-compliance triggers a mandatory incident report within 72 hours and may\nresult in automatic suspension of the affected processing module.\n\nDETAILS: Key concepts: data, without, framework. Under the framework's data\ngovernance requirements, all personally identifiable information must be\nprocessed exclusively on local infrastructure without transmission to external\nservices. This includes but is not limited to biometric identifiers, geolocation\ndata, device fingerprints, behavioral analytics, and session-correlated\nmetadata. The retention period for interaction logs is capped at 90 days, after\nwhich automated purging must occur without manual intervention. Users retain the\nright to request immediate deletion of their profile data, including derived\ninferences and pattern analysis results. Non-compliance triggers a mandatory\nincident report within 72 hours and may result in automatic suspension of the\naffected processing module.\n\nEXAMPLE: Notice how 'data' keeps coming up — that's the thread connecting\neverything.",
+          "analogy": "This topic is like a forest. 'data' is the tallest tree — the most visible idea.\nThe other keywords are the surrounding trees. Together they form the landscape\nof the subject.",
+          "compression_ratio": 0.25,
+          "patterns": [
+            "repetition",
+            "rhythm",
+            "spatial",
+            "cause"
+          ]
+        },
+        {
+          "id": "newcomer",
+          "label": "New Team Member",
+          "icon": "🌱",
+          "description": "First week on the job, needs gentle onboarding",
+          "depth": "espresso",
+          "gist": "Under the framework's data governance requirements, all personally identifiable\ninformation must be processed exclusively on local infrastructure without\ntransmission to external services.",
+          "highlights": [
+            {
+              "text": "data",
+              "priority": "critical",
+              "context": "Under the framework's data governance requirements, all personally...",
+              "category": "concept"
+            },
+            {
+              "text": "without",
+              "priority": "critical",
+              "context": "...sed exclusively on local infrastructure without transmission to external serv",
+              "category": "concept"
+            },
+            {
+              "text": "framework",
+              "priority": "critical",
+              "context": "Under the framework's data governance requirements, all per...",
+              "category": "concept"
+            },
+            {
+              "text": "governance",
+              "priority": "high",
+              "context": "Under the framework's data governance requirements, all personally identifiab...",
+              "category": "action"
+            },
+            {
+              "text": "requirements",
+              "priority": "high",
+              "context": "Under the framework's data governance requirements, all personally identifiable ",
+              "category": "concept"
+            },
+            {
+              "text": "personally",
+              "priority": "high",
+              "context": "...ork's data governance requirements, all personally identifiable information m",
+              "category": "concept"
+            }
+          ],
+          "summary": "Under the framework's data governance requirements, all personally identifiable\ninformation must be processed exclusively on local infrastructure without\ntransmission to external services. Non-compliance triggers a mandatory incident\nreport within 72 hours and may result in automatic suspension of the affected\nprocessing module.",
+          "explanation": "IN BRIEF: Under the framework's data governance requirements, all personally\nidentifiable information must be processed exclusively on local infrastructure\nwithout transmission to external services.\n\nKEY POINTS:\n  ***data*** — Under the framework's data governance requirements, all\npersonally...\n  ***without*** — ...sed exclusively on local infrastructure without\ntransmission to external services. This...\n  ***framework*** — Under the framework's data governance requirements, all\nper...\n  **governance** — Under the framework's data governance requirements, all\npersonally identifiab...\n  **requirements** — Under the framework's data governance requirements, all\npersonally identifiable informatio...\n  **personally** — ...ork's data governance requirements, all personally\nidentifiable information must be proces...\n  *identifiable* — ...governance requirements, all personally identifiable\ninformation must be processed exclusive...\n  *information* — ...quirements, all personally identifiable information must be\nprocessed exclusively on local...\n  processed — ...onally identifiable information must be processed exclusively\non local infrastructure wit...\n  exclusively — ...ntifiable information must be processed exclusively on local\ninfrastructure without transmi...\n\nSUMMARY:\nUnder the framework's data governance requirements, all personally identifiable\ninformation must be processed exclusively on local infrastructure without\ntransmission to external services.\n\nNon-compliance triggers a mandatory incident report within 72 hours and may\nresult in automatic suspension of the affected processing module.\n\nEXAMPLE: Notice how 'data' keeps coming up — that's the thread connecting\neverything.",
+          "analogy": "",
+          "compression_ratio": 0.25,
+          "patterns": [
+            "repetition",
+            "rhythm",
+            "spatial",
+            "cause"
+          ]
+        }
+      ]
+    }
+  ],
+  "concepts": [
+    {
+      "name": "cache",
+      "pattern": "flow",
+      "eli5": "A shelf next to you with stuff you use a lot. Saves walking to the warehouse.",
+      "analogy": "A river with pools — fast water flows past, pools hold what you need nearby.",
+      "visual_hint": "Picture a river. The pools are your cache. Water is data flowing through.",
+      "when_useful": "When you keep asking for the same thing and it's slow to get.",
+      "alternatives": 2,
+      "alt_pattern": "rhythm",
+      "alt_eli5": "Like checking your fridge. Milk expires, so you check before using it.",
+      "alt_analogy": "A heartbeat — regular pulses of checking and refreshing."
+    },
+    {
+      "name": "recursion",
+      "pattern": "repetition",
+      "eli5": "A box inside a box inside a box. Open one, find another. Same shape, smaller.",
+      "analogy": "Mirrors facing each other — the same image repeating smaller and smaller.",
+      "visual_hint": "Picture Russian nesting dolls. Each one contains a smaller version of itself.",
+      "when_useful": "When a problem can be solved by solving a smaller version of itself.",
+      "alternatives": 0
+    },
+    {
+      "name": "encryption",
+      "pattern": "combination",
+      "eli5": "Writing a secret message in code. Only your friend knows the code.",
+      "analogy": "A lockbox with two keys — one to lock, one to unlock.",
+      "visual_hint": "Picture a treasure chest. The lock scrambles what's inside. The key unscrambles it.",
+      "when_useful": "When you need to keep information private during transfer.",
+      "alternatives": 0
+    },
+    {
+      "name": "api",
+      "pattern": "flow",
+      "eli5": "A tube. You put a question in one end, an answer comes out the other.",
+      "analogy": "A pipeline with valves — requests flow in, responses flow out.",
+      "visual_hint": "Picture a pipe connecting two boxes. Messages travel through it.",
+      "when_useful": "When you need to understand how data moves between systems.",
+      "alternatives": 1,
+      "alt_pattern": "cause",
+      "alt_eli5": "You ask for pizza. The waiter goes to the kitchen and brings it. The waiter is the API.",
+      "alt_analogy": "A waiter in a restaurant — you tell them what you want, they bring it from the kitchen."
+    },
+    {
+      "name": "database",
+      "pattern": "spatial",
+      "eli5": "A big notebook where you write things down so you don't forget.",
+      "analogy": "A library with organized shelves — every book has an address.",
+      "visual_hint": "Picture a giant filing cabinet. Each drawer has a label.",
+      "when_useful": "When you need to store and find things reliably.",
+      "alternatives": 1,
+      "alt_pattern": "repetition",
+      "alt_eli5": "Like filling out the same form for every student in a school.",
+      "alt_analogy": "A filing system — same structure repeated for every record."
+    }
+  ],
+  "sensory_comparison": {
+    "default": {
+      "gist": "The Environmental Intelligence middleware detected dimensional imbalance in the\nDRTP framework during the latest Roundtable session.",
+      "info": "Active profile: default"
+    },
+    "cognitive": {
+      "gist": "The Environmental Intelligence middleware detected\ndimensional imbalance in the DRTP framework during the\nlatest Roundtable session.",
+      "info": "Active profile: cognitive Visual formatting removed (plain text only). Punctuation simplified (fewer symbols). Lines wrap at 60 characters. Tone: gentle. 1 custom adjustment(s) active."
+    },
+    "focus": {
+      "gist": "The Environmental Intelligence middleware detected\ndimensional imbalance in the Drtp framework during\nthe latest Roundtable session.",
+      "info": "Active profile: focus Visual formatting removed (plain text only). Punctuation simplified (fewer symbols). Lines wrap at 50 characters. Tone: none. 1 custom adjustment(s) active."
+    },
+    "calm": {
+      "gist": "The Environmental Intelligence middleware detected dimensional\nimbalance in the Drtp framework during the latest Roundtable session.",
+      "info": "Active profile: calm Lines wrap at 70 characters. Tone: none."
+    }
+  }
+}

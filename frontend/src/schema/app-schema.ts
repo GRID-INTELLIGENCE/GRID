@@ -12,7 +12,9 @@ export type IconKey =
   | "sparkles"
   | "radar"
   | "cog"
-  | "compass";
+  | "compass"
+  | "sprout"
+  | "presentation";
 
 export type RouteKey =
   | "dashboard"
@@ -27,7 +29,9 @@ export type RouteKey =
   | "settings"
   | "register"
   | "login"
-  | "roundtable";
+  | "roundtable"
+  | "mycelium"
+  | "mycelium-demo";
 
 export type EndpointKey =
   | "health"

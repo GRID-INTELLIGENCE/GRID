@@ -5,6 +5,30 @@ All notable changes to the GRID project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.0] - 2026-02-24
+
+### Highlights
+
+**Mycelium Frontend** — Interactive comprehension layer with adaptive synthesis, concept exploration, and accessibility-first design. Includes a full interactive page, a standalone demo/presentation page, and comprehensive test coverage.
+
+### Added
+
+- **MyceliumPage** (`frontend/src/pages/MyceliumPage.tsx`) — Main interactive page with text input, adaptive synthesis, keyword-driven concept exploration, feedback loop (Simpler/Deeper), concept browser panel, and accessibility settings
+- **MyceliumDemo** (`frontend/src/pages/MyceliumDemo.tsx`) — Self-contained presentation page showcasing 3 personas, 3 source texts, 5 concept lenses with multi-lens switching
+- **6 Mycelium components** (`frontend/src/components/mycelium/`) — OutputDisplay, LensCard, HighlightPill, FeedbackBar, DepthControl, SensoryPicker
+- **useMycelium hook** (`frontend/src/hooks/use-mycelium.ts`) — useReducer FSM with 9 action types, bridge abstraction for Electron IPC/browser fallback
+- **Type definitions** (`frontend/src/types/mycelium.ts`) — Full type coverage for synthesis results, navigation, personas, sensory profiles
+- **Shared keyword extraction** (`frontend/src/lib/text-utils.ts`) — Deduplicated stop-word filtering and frequency counting utility
+- **Browser shim** (`frontend/src/lib/browser-shim.ts`) — Extended with `window.mycelium` for consistent browser-mode demo data across all pages
+- **Test suite** (`frontend/src/__tests__/MyceliumPage.test.tsx`) — 17 tests covering rendering, input validation, synthesis, keyboard shortcuts, error states, concept exploration, and feedback depth adjustment
+- **Frontend routes** — `mycelium` and `mycelium-demo` routes added to `app.config.json`, `app-schema.ts`, and `schema/index.ts`
+
+### Changed
+
+- **Performance** — Bridge instance memoized with `useMemo`, all callbacks stabilized via destructured hook return, `filteredConcepts` wrapped in `useMemo`, textarea resize batched with `requestAnimationFrame`
+- **Architecture** — `clearExplored` dispatch replaces wasteful `explore("")` IPC call; `eslint-disable` removed after fixing bridge stability
+- **Frontend CI** (`.github/workflows/frontend.yml`) — Fixed self-referential path trigger from `frontend-ci.yml` to `frontend.yml`
+
 ## [2.5.1] - 2026-02-24
 
 ### Changed

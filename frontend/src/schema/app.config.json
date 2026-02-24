@@ -121,6 +121,22 @@
       "description": "Digital Round Table Protocol — multi-stakeholder consensus facilitation",
       "navLabel": "Round Table",
       "icon": "compass"
+    },
+    {
+      "id": "mycelium",
+      "path": "/mycelium",
+      "title": "Mycelium",
+      "description": "Pattern recognition and synthesis — simplify complex text for any expertise level",
+      "navLabel": "Mycelium",
+      "icon": "sprout"
+    },
+    {
+      "id": "mycelium-demo",
+      "path": "/mycelium-demo",
+      "title": "Mycelium Demo",
+      "description": "Interactive demonstration of Mycelium's universal comprehension layer",
+      "navLabel": "",
+      "icon": "presentation"
     }
   ],
   "navigation": {
@@ -134,7 +150,8 @@
       "observability",
       "knowledge",
       "terminal",
-      "roundtable"
+      "roundtable",
+      "mycelium"
     ],
     "secondary": ["settings"]
   },
