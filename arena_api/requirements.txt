@@ -39,7 +39,7 @@ pytest-cov==7.0.0
 flake8==7.1.1
 mypy==1.19.1
 black==24.10.0
-isort==5.13.2
+isort==8.0.0
 
 # Security Scanning
 bandit==1.9.3
