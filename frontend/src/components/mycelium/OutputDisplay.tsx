@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import type { SynthesisResult } from "@/types/mycelium";
-import { Check, ChevronRight, Copy, Sparkles } from "lucide-react";
+import { Check, ChevronRight, Copy } from "lucide-react";
 import { useCallback, useId, useState } from "react";
 import { HighlightPill } from "./HighlightPill";
 
@@ -42,18 +42,68 @@ function CopyButton({ text }: { text: string }) {
   );
 }
 
+/** Animated SVG arc gauge for compression ratio */
+function CompressionGauge({ ratio }: { ratio: number }) {
+  const pct = Math.round(ratio * 100);
+  const radius = 14;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference * (1 - ratio);
+
+  return (
+    <svg
+      width="36"
+      height="36"
+      viewBox="0 0 36 36"
+      aria-hidden="true"
+      className="shrink-0"
+    >
+      <circle
+        cx="18"
+        cy="18"
+        r={radius}
+        fill="none"
+        stroke="var(--muted)"
+        strokeWidth="3"
+      />
+      <circle
+        cx="18"
+        cy="18"
+        r={radius}
+        fill="none"
+        stroke="var(--primary)"
+        strokeWidth="3"
+        strokeLinecap="round"
+        strokeDasharray={circumference}
+        strokeDashoffset={offset}
+        transform="rotate(-90 18 18)"
+        style={{
+          transition:
+            "stroke-dashoffset 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)",
+        }}
+      />
+      <text
+        x="18"
+        y="18"
+        textAnchor="middle"
+        dominantBaseline="central"
+        fill="var(--muted-foreground)"
+        fontSize="8"
+        fontWeight="600"
+      >
+        {pct}%
+      </text>
+    </svg>
+  );
+}
+
 export function OutputDisplay({ result, onKeywordClick }: OutputDisplayProps) {
   const [expanded, setExpanded] = useState(false);
   const explanationId = useId();
 
   return (
-    <div
-      className="space-y-4 animate-fade-in"
-      role="region"
-      aria-label="Synthesis result"
-    >
-      {/* Gist — always visible, the most important thing */}
-      <div aria-live="polite" aria-atomic="true">
+    <div className="space-y-4" role="region" aria-label="Synthesis result">
+      {/* Gist — staggered fade-in, the most important thing */}
+      <div className="animate-fade-in" aria-live="polite" aria-atomic="true">
         <div className="flex items-start justify-between gap-3">
           <p className="text-lg font-medium leading-relaxed text-[var(--foreground)]">
             {result.gist}
@@ -62,24 +112,31 @@ export function OutputDisplay({ result, onKeywordClick }: OutputDisplayProps) {
         </div>
       </div>
 
-      {/* Compression badge */}
-      <div className="flex items-center gap-2 text-xs text-[var(--muted-foreground)]">
-        <Sparkles className="h-3 w-3" aria-hidden="true" />
-        <span>
-          Compressed to {Math.round(result.compression_ratio * 100)}% of
-          original
-        </span>
-        {result.patterns.length > 0 && (
-          <>
-            <span aria-hidden="true">·</span>
-            <span>{result.patterns.join(", ")} detected</span>
-          </>
-        )}
+      {/* Compression badge with animated arc gauge */}
+      <div
+        className="flex items-center gap-3 text-xs text-[var(--muted-foreground)] animate-fade-in"
+        style={{ animationDelay: "100ms", animationFillMode: "backwards" }}
+      >
+        <CompressionGauge ratio={result.compression_ratio} />
+        <div className="flex flex-col gap-0.5">
+          <span>
+            Compressed to {Math.round(result.compression_ratio * 100)}% of
+            original
+          </span>
+          {result.patterns.length > 0 && (
+            <span className="text-[var(--muted-foreground)]/70">
+              {result.patterns.join(", ")} detected
+            </span>
+          )}
+        </div>
       </div>
 
-      {/* Highlights */}
+      {/* Highlights — staggered entrance */}
       {result.highlights.length > 0 && (
-        <div className="space-y-2">
+        <div
+          className="space-y-2 animate-fade-in"
+          style={{ animationDelay: "200ms", animationFillMode: "backwards" }}
+        >
           <h3 className="text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">
             Key Points
           </h3>
@@ -93,6 +150,7 @@ export function OutputDisplay({ result, onKeywordClick }: OutputDisplayProps) {
                 <HighlightPill
                   highlight={h}
                   onClick={() => onKeywordClick?.(h.text)}
+                  index={i}
                 />
               </div>
             ))}
@@ -100,9 +158,12 @@ export function OutputDisplay({ result, onKeywordClick }: OutputDisplayProps) {
         </div>
       )}
 
-      {/* Summary — always visible if present */}
+      {/* Summary — staggered after highlights */}
       {result.summary && (
-        <div className="space-y-1.5">
+        <div
+          className="space-y-1.5 animate-fade-in"
+          style={{ animationDelay: "300ms", animationFillMode: "backwards" }}
+        >
           <div className="flex items-center justify-between">
             <h3 className="text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">
               Summary

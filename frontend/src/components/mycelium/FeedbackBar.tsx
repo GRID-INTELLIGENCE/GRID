@@ -1,5 +1,7 @@
+import { memo } from "react";
 import { cn } from "@/lib/utils";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import { useState } from "react";
 
 interface FeedbackBarProps {
   onSimpler: () => void;
@@ -7,7 +9,7 @@ interface FeedbackBarProps {
   disabled?: boolean;
 }
 
-export function FeedbackBar({
+export const FeedbackBar = memo(function FeedbackBar({
   onSimpler,
   onDeeper,
   disabled,
@@ -34,7 +36,7 @@ export function FeedbackBar({
       />
     </div>
   );
-}
+});
 
 function FeedbackButton({
   onClick,
@@ -49,22 +51,32 @@ function FeedbackButton({
   label: string;
   description: string;
 }) {
+  const [adjusting, setAdjusting] = useState(false);
+
+  const handleClick = () => {
+    setAdjusting(true);
+    onClick();
+    setTimeout(() => setAdjusting(false), 800);
+  };
+
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={handleClick}
       disabled={disabled}
       aria-label={description}
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] px-3 py-1.5",
+        "group inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] px-3 py-1.5",
         "text-xs font-medium text-[var(--muted-foreground)] transition-all",
         "hover:border-[var(--primary)]/40 hover:text-[var(--foreground)] hover:bg-[var(--accent)]",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]",
-        "disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+        "disabled:opacity-50 disabled:pointer-events-none cursor-pointer",
+        adjusting &&
+          "animate-shimmer bg-[length:200%_100%] bg-gradient-to-r from-[var(--card)] via-[var(--accent)] to-[var(--card)]"
       )}
     >
-      {icon}
-      {label}
+      <span className="transition-transform group-hover:scale-110">{icon}</span>
+      {adjusting ? "Adjusting..." : label}
     </button>
   );
 }
