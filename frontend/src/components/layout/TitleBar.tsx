@@ -4,6 +4,75 @@ import { useEffect, useState } from "react";
 
 const isElectron = typeof window !== "undefined" && !!window.windowControls;
 
+/** SVG logo mark: 4 interconnected nodes — mycelium network motif */
+function LogoMark({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      aria-hidden="true"
+    >
+      {/* Edges */}
+      <line
+        x1="6"
+        y1="6"
+        x2="18"
+        y2="6"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        opacity="0.5"
+      />
+      <line
+        x1="6"
+        y1="6"
+        x2="6"
+        y2="18"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        opacity="0.5"
+      />
+      <line
+        x1="18"
+        y1="6"
+        x2="18"
+        y2="18"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        opacity="0.5"
+      />
+      <line
+        x1="6"
+        y1="18"
+        x2="18"
+        y2="18"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        opacity="0.5"
+      />
+      <line
+        x1="6"
+        y1="6"
+        x2="18"
+        y2="18"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        opacity="0.3"
+      />
+      {/* Nodes */}
+      <circle cx="6" cy="6" r="2.5" fill="var(--primary)" />
+      <circle cx="18" cy="6" r="2.5" fill="var(--primary)" />
+      <circle cx="6" cy="18" r="2.5" fill="var(--primary)" />
+      <circle cx="18" cy="18" r="2.5" fill="var(--primary)" />
+    </svg>
+  );
+}
+
 export function TitleBar() {
   const [maximized, setMaximized] = useState(false);
 
@@ -25,8 +94,14 @@ export function TitleBar() {
     >
       {/* App identity */}
       <div className="flex items-center gap-2 pl-4">
-        <div className="h-4 w-4 rounded-sm bg-[var(--primary)] glow-primary" />
-        <span className="text-xs font-bold tracking-widest uppercase text-[var(--muted-foreground)]">
+        <LogoMark className="h-5 w-5 text-[var(--primary)] animate-pulse-organic" />
+        <span
+          className="text-xs font-bold uppercase text-[var(--muted-foreground)]"
+          style={{
+            letterSpacing: "0.15em",
+            fontFamily: "var(--typography-font-family)",
+          }}
+        >
           GRID
         </span>
       </div>
