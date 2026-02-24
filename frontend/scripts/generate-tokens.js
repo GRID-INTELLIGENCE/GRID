@@ -78,6 +78,15 @@ function generate() {
   ].join("\n");
 
   fs.writeFileSync(OUTPUT_PATH, css, "utf-8");
+
+  // Run prettier on the generated file so CI format:check passes
+  const { execSync } = require("child_process");
+  try {
+    execSync(`npx prettier --write "${OUTPUT_PATH}"`, { stdio: "pipe" });
+  } catch {
+    // prettier not available (e.g. before npm install) — skip
+  }
+
   const themeCount = Object.keys(themes).length;
   const rootCount = rootLines.length;
   console.log(
