@@ -227,6 +227,8 @@ jobs:
         if: needs.prepare.outputs.package == 'grid-safety'
         working-directory: safety
         run: |
+          uv venv
+          uv pip install build
           uv run python -m build --wheel
           ls -la dist/
 
