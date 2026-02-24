@@ -22,7 +22,7 @@ structlog==25.5.0
 sentry-sdk[fastapi]==2.19.2
 
 # Rate Limiting
-redis==5.2.1
+redis==7.2.0
 aioredis==2.0.1
 
 # Data Validation (SECURITY UPDATE)
