@@ -1,6 +1,23 @@
 @import "tailwindcss";
 @import "./tokens/tokens.css";
 
+/* ── Font faces ───────────────────────────────────────────────── */
+@font-face {
+  font-family: "Geist Sans";
+  src: url("./assets/fonts/GeistSans-Variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Geist Mono";
+  src: url("./assets/fonts/GeistMono-Variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* ── Base layer ────────────────────────────────────────────────── */
 @layer base {
   * {
@@ -11,7 +28,7 @@
     background-color: var(--background);
     color: var(--foreground);
     font-family:
-      "Inter",
+      "Geist Sans",
       system-ui,
       -apple-system,
       sans-serif;
@@ -49,10 +66,50 @@
   box-shadow: var(--shadow-glow-success);
 }
 
-@utility animate-fade-in {
-  animation: fade-in 0.2s ease-out;
+@utility glow-mycelium {
+  box-shadow: var(--shadow-glow-mycelium);
 }
 
+@utility animate-fade-in {
+  animation: fade-in var(--motion-duration-normal)
+    var(--motion-easing-decelerate);
+}
+
+@utility animate-grow {
+  animation: grow-tendril var(--motion-duration-organic)
+    var(--motion-easing-organic);
+}
+
+@utility animate-pulse-organic {
+  animation: pulse-organic 2s var(--motion-easing-default) infinite;
+}
+
+@utility animate-shimmer {
+  animation: shimmer 1.5s linear infinite;
+}
+
+@utility animate-connect {
+  animation: connect-nodes var(--motion-duration-organic)
+    var(--motion-easing-decelerate);
+}
+
+@utility animate-stagger-1 {
+  animation-delay: 50ms;
+}
+
+@utility animate-stagger-2 {
+  animation-delay: 100ms;
+}
+
+@utility animate-stagger-3 {
+  animation-delay: 150ms;
+}
+
+@utility animate-stagger-4 {
+  animation-delay: 200ms;
+}
+
+/* ── Keyframes ─────────────────────────────────────────────────── */
 @keyframes fade-in {
   from {
     opacity: 0;
@@ -64,6 +121,51 @@
   }
 }
 
+@keyframes grow-tendril {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(8px);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.02) translateY(-1px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes pulse-organic {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes connect-nodes {
+  0% {
+    opacity: 0;
+    stroke-dashoffset: 100;
+  }
+  100% {
+    opacity: 1;
+    stroke-dashoffset: 0;
+  }
+}
+
 @keyframes pulse-subtle {
   0%,
   100% {
@@ -71,5 +173,27 @@
   }
   50% {
     opacity: 0.7;
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
 }

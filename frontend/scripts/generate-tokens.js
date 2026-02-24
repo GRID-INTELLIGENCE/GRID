@@ -5,6 +5,9 @@
  * containing CSS custom properties. This keeps tokens.json as the
  * single source of truth for all design values.
  *
+ * Supports multi-theme: themes.dark, themes.light, themes.mycelium
+ * are emitted as scoped CSS classes. All other tokens go in :root.
+ *
  * Usage: node scripts/generate-tokens.js
  */
 const fs = require("fs");
@@ -25,7 +28,6 @@ function loadTokens() {
 function flattenTokens(obj, prefix = "") {
   const lines = [];
   for (const [key, value] of Object.entries(obj)) {
-    // Skip JSON schema meta-fields
     if (key.startsWith("$")) continue;
 
     const varName = prefix ? `${prefix}-${key}` : key;
@@ -40,7 +42,6 @@ function flattenTokens(obj, prefix = "") {
 
 function generate() {
   const tokens = loadTokens();
-  const lines = flattenTokens(tokens);
 
   const banner = [
     "/* ═══════════════════════════════════════════════════════════════",
@@ -50,14 +51,19 @@ function generate() {
     "",
   ];
 
-  // Colors go in .dark scope (dark-first design)
-  const colorLines = flattenTokens({ color: tokens.color }, "").map(
-    (l) => l.replace("--color-", "--")
-  );
+  // Theme-scoped color tokens
+  const themes = tokens.themes || {};
+  const themeBlocks = [];
+  for (const [themeName, themeColors] of Object.entries(themes)) {
+    const colorLines = flattenTokens(themeColors).map((l) =>
+      l.replace(/^  --/, "  --")
+    );
+    themeBlocks.push(`.${themeName} {`, ...colorLines, "}", "");
+  }
 
-  // Non-color tokens go in :root (theme-agnostic)
+  // Non-theme tokens go in :root (theme-agnostic)
   const rootTokens = { ...tokens };
-  delete rootTokens.color;
+  delete rootTokens.themes;
   delete rootTokens.$schema;
   delete rootTokens.$description;
   const rootLines = flattenTokens(rootTokens);
@@ -68,16 +74,14 @@ function generate() {
     ...rootLines,
     "}",
     "",
-    ".dark {",
-    ...colorLines,
-    "}",
-    "",
+    ...themeBlocks,
   ].join("\n");
 
   fs.writeFileSync(OUTPUT_PATH, css, "utf-8");
-  const tokenCount = lines.length;
+  const themeCount = Object.keys(themes).length;
+  const rootCount = rootLines.length;
   console.log(
-    `Generated ${OUTPUT_PATH} (${tokenCount} tokens from tokens.json)`
+    `Generated ${OUTPUT_PATH} (${rootCount} root tokens, ${themeCount} themes from tokens.json)`
   );
 }
 
