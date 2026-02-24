@@ -1,0 +1,150 @@
+Publish to PyPI	Publish to PyPI	﻿2026-02-24T02:14:48.7914059Z ##[group]Run pypa/gh-action-pypi-publish@release/v1
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.7916259Z with:
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.7917623Z   attestations: false
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.7919217Z   skip-existing: true
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.7920808Z   verbose: true
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.7922633Z   user: __token__
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.7924408Z   repository_url: https://upload.pypi.org/legacy/
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.7926632Z   packages_dir: dist
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.7928182Z   verify_metadata: true
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.7929821Z   skip_existing: false
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.7931612Z   print_hash: false
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.7933046Z env:
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.7934433Z   PYTHONUNBUFFERED: 1
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.7936071Z   PYTHONDONTWRITEBYTECODE: 1
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.7937795Z ##[endgroup]
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.8095657Z ##[group]Run # Reset path if needed
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.8096840Z [36;1m# Reset path if needed[0m
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.8098245Z [36;1m# https://github.com/pypa/gh-action-pypi-publish/issues/112[0m
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.8099761Z [36;1mif [[ $PATH != *"/usr/bin"* ]]; then[0m
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.8101901Z [36;1m  echo "\$PATH=$PATH. Resetting \$PATH for GitHub Actions."[0m
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.8103703Z [36;1m  PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"[0m
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.8105254Z [36;1m  echo "PATH=$PATH" >>"$GITHUB_ENV"[0m
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.8106445Z [36;1m  echo "$PATH" >>"$GITHUB_PATH"[0m
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.8107620Z [36;1m  echo "\$PATH reset. \$PATH=$PATH"[0m
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.8108699Z [36;1mfi[0m
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.8150337Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.8152002Z env:
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.8152749Z   PYTHONUNBUFFERED: 1
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.8153842Z   PYTHONDONTWRITEBYTECODE: 1
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.8154933Z ##[endgroup]
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.8330870Z ##[group]Run # 🔎 Discover pre-installed Python
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.8333005Z [36;1m# 🔎 Discover pre-installed Python[0m
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.8335674Z [36;1mecho "python-path=$(command -v python3 || :)" | tee -a "${GITHUB_OUTPUT}"[0m
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.8376768Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.8378812Z env:
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.8379949Z   PYTHONUNBUFFERED: 1
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.8381586Z   PYTHONDONTWRITEBYTECODE: 1
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.8383010Z ##[endgroup]
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.8458931Z python-path=/usr/bin/python3
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.8603834Z ##[group]Run # Create Docker container action
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.8605953Z [36;1m# Create Docker container action[0m
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.8609601Z [36;1m/usr/bin/python3 '/home/runner/work/_actions/pypa/gh-action-pypi-publish/release/v1/create-docker-action.py'[0m
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.8660926Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.8663518Z env:
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.8664798Z   PYTHONUNBUFFERED: 1
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.8666352Z   PYTHONDONTWRITEBYTECODE: 1
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.8668100Z   REF: release/v1
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.8669504Z   REPO: pypa/gh-action-pypi-publish
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.8670807Z   REPO_ID: 1147341146
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.8671909Z ##[endgroup]
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.9210304Z ##[group]Run ./.github/.tmp/.generated-actions/run-pypi-publish-in-docker-container
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.9212150Z with:
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.9212857Z   user: __token__
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.9213790Z   repository-url: https://upload.pypi.org/legacy/
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.9214961Z   packages-dir: dist
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.9215802Z   verify-metadata: true
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.9216663Z   skip-existing: true
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.9217490Z   verbose: true
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.9218280Z   print-hash: false
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.9219085Z   attestations: false
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.9219892Z env:
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.9220600Z   PYTHONUNBUFFERED: 1
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.9222265Z   PYTHONDONTWRITEBYTECODE: 1
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.9223275Z ##[endgroup]
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:48.9380884Z ##[command]/usr/bin/docker run --name ghcriopypaghactionpypipublishreleasev1_4e96fc --label 7b08ed --workdir /github/workspace --rm -e "PYTHONUNBUFFERED" -e "PYTHONDONTWRITEBYTECODE" -e "INPUT_USER" -e "INPUT_PASSWORD" -e "INPUT_REPOSITORY-URL" -e "INPUT_PACKAGES-DIR" -e "INPUT_VERIFY-METADATA" -e "INPUT_SKIP-EXISTING" -e "INPUT_VERBOSE" -e "INPUT_PRINT-HASH" -e "INPUT_ATTESTATIONS" -e "HOME" -e "GITHUB_JOB" -e "GITHUB_REF" -e "GITHUB_SHA" -e "GITHUB_REPOSITORY" -e "GITHUB_REPOSITORY_OWNER" -e "GITHUB_REPOSITORY_OWNER_ID" -e "GITHUB_RUN_ID" -e "GITHUB_RUN_NUMBER" -e "GITHUB_RETENTION_DAYS" -e "GITHUB_RUN_ATTEMPT" -e "GITHUB_ACTOR_ID" -e "GITHUB_ACTOR" -e "GITHUB_WORKFLOW" -e "GITHUB_HEAD_REF" -e "GITHUB_BASE_REF" -e "GITHUB_EVENT_NAME" -e "GITHUB_SERVER_URL" -e "GITHUB_API_URL" -e "GITHUB_GRAPHQL_URL" -e "GITHUB_REF_NAME" -e "GITHUB_REF_PROTECTED" -e "GITHUB_REF_TYPE" -e "GITHUB_WORKFLOW_REF" -e "GITHUB_WORKFLOW_SHA" -e "GITHUB_REPOSITORY_ID" -e "GITHUB_TRIGGERING_ACTOR" -e "GITHUB_WORKSPACE" -e "GITHUB_ACTION" -e "GITHUB_EVENT_PATH" -e "GITHUB_ACTION_REPOSITORY" -e "GITHUB_ACTION_REF" -e "GITHUB_PATH" -e "GITHUB_ENV" -e "GITHUB_STEP_SUMMARY" -e "GITHUB_STATE" -e "GITHUB_OUTPUT" -e "GITHUB_ACTION_PATH" -e "RUNNER_OS" -e "RUNNER_ARCH" -e "RUNNER_NAME" -e "RUNNER_ENVIRONMENT" -e "RUNNER_TOOL_CACHE" -e "RUNNER_TEMP" -e "RUNNER_WORKSPACE" -e "ACTIONS_RUNTIME_URL" -e "ACTIONS_RUNTIME_TOKEN" -e "ACTIONS_CACHE_URL" -e "ACTIONS_RESULTS_URL" -e "ACTIONS_ORCHESTRATION_ID" -e GITHUB_ACTIONS=true -e CI=true -v "/var/run/docker.sock":"/var/run/docker.sock" -v "/home/runner/work/_temp":"/github/runner_temp" -v "/home/runner/work/_temp/_github_home":"/github/home" -v "/home/runner/work/_temp/_github_workflow":"/github/workflow" -v "/home/runner/work/_temp/_runner_file_commands":"/github/file_commands" -v "/home/runner/work/GRID/GRID":"/github/workspace" ghcr.io/pypa/gh-action-pypi-publish:release-v1
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.0103141Z Unable to find image 'ghcr.io/pypa/gh-action-pypi-publish:release-v1' locally
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.2070723Z release-v1: Pulling from pypa/gh-action-pypi-publish
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.2079062Z 6e0d6626b028: Pulling fs layer
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.2083092Z 7b1ad37e982c: Pulling fs layer
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.2084929Z 31b0d2470ce1: Pulling fs layer
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.2086516Z 8c141999d083: Pulling fs layer
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.2088101Z 6ad5a334a1c3: Pulling fs layer
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.2089640Z 1d9261df0a43: Pulling fs layer
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.2090640Z 8d984121c369: Pulling fs layer
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.2092015Z 96c84f895532: Pulling fs layer
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.2093642Z 912833a16df9: Pulling fs layer
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.2095307Z 15b5df32596c: Pulling fs layer
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.2096888Z d4289cea1034: Pulling fs layer
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.2098287Z 8380019ec1fc: Pulling fs layer
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.2099665Z f5d447a84c58: Pulling fs layer
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.2101060Z 4f4fb700ef54: Pulling fs layer
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.2102927Z 96c84f895532: Waiting
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.2104303Z 912833a16df9: Waiting
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.2105592Z 15b5df32596c: Waiting
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.2106823Z d4289cea1034: Waiting
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.2108065Z 8380019ec1fc: Waiting
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.2109472Z f5d447a84c58: Waiting
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.2111614Z 4f4fb700ef54: Waiting
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.2119491Z 6ad5a334a1c3: Waiting
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.2120888Z 1d9261df0a43: Waiting
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.2122601Z 8d984121c369: Waiting
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.2124036Z 8c141999d083: Waiting
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.2832538Z 7b1ad37e982c: Verifying Checksum
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.2837773Z 7b1ad37e982c: Download complete
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.3326015Z 31b0d2470ce1: Verifying Checksum
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.3334816Z 31b0d2470ce1: Download complete
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.3545584Z 8c141999d083: Verifying Checksum
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.3549066Z 8c141999d083: Download complete
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.3818634Z 6ad5a334a1c3: Verifying Checksum
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.3824084Z 6ad5a334a1c3: Download complete
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.4229180Z 6e0d6626b028: Verifying Checksum
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.4233913Z 6e0d6626b028: Download complete
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.4518544Z 8d984121c369: Verifying Checksum
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.4539581Z 8d984121c369: Download complete
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.5049709Z 96c84f895532: Verifying Checksum
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.5063124Z 96c84f895532: Download complete
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.5130894Z 912833a16df9: Verifying Checksum
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.5135372Z 912833a16df9: Download complete
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.5619398Z 15b5df32596c: Verifying Checksum
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.5621590Z 15b5df32596c: Download complete
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.5665532Z 1d9261df0a43: Verifying Checksum
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.5673083Z 1d9261df0a43: Download complete
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.5756899Z d4289cea1034: Verifying Checksum
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.5764754Z d4289cea1034: Download complete
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.6112588Z 8380019ec1fc: Verifying Checksum
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.6120797Z 8380019ec1fc: Download complete
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.6142379Z f5d447a84c58: Verifying Checksum
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.6144115Z f5d447a84c58: Download complete
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.6220752Z 4f4fb700ef54: Verifying Checksum
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:49.6224416Z 4f4fb700ef54: Download complete
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:50.8216830Z 6e0d6626b028: Pull complete
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:51.4378429Z 7b1ad37e982c: Pull complete
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:52.0895449Z 31b0d2470ce1: Pull complete
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:52.1061908Z 8c141999d083: Pull complete
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:52.1474478Z 6ad5a334a1c3: Pull complete
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:53.5360836Z 1d9261df0a43: Pull complete
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:53.5493429Z 8d984121c369: Pull complete
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:53.5618237Z 96c84f895532: Pull complete
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:53.5740348Z 912833a16df9: Pull complete
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:53.5973576Z 15b5df32596c: Pull complete
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:53.6071021Z d4289cea1034: Pull complete
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:53.6177031Z 8380019ec1fc: Pull complete
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:53.6301523Z f5d447a84c58: Pull complete
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:53.6442797Z 4f4fb700ef54: Pull complete
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:53.6484976Z Digest: sha256:10b09cfb1f96809cac141fcd2b0800184ce6bb17aee65e4ff4ab77db03d6203d
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:53.6507615Z Status: Downloaded newer image for ghcr.io/pypa/gh-action-pypi-publish:release-v1
+Publish to PyPI	Publish to PyPI	2026-02-24T02:14:54.7201176Z ##[error]Trusted publishing exchange failure: 
+Publish to PyPI	Publish to PyPI	OpenID Connect token retrieval failed: GitHub: missing or insufficient OIDC token permissions, the ACTIONS_ID_TOKEN_REQUEST_TOKEN environment variable was unset
+Publish to PyPI	Publish to PyPI	
+Publish to PyPI	Publish to PyPI	This generally indicates a workflow configuration error, such as insufficient
+Publish to PyPI	Publish to PyPI	permissions. Make sure that your workflow has `id-token: write` configured
+Publish to PyPI	Publish to PyPI	at the job level, e.g.:
+Publish to PyPI	Publish to PyPI	
+Publish to PyPI	Publish to PyPI	```yaml
+Publish to PyPI	Publish to PyPI	permissions:
+Publish to PyPI	Publish to PyPI	  id-token: write
+Publish to PyPI	Publish to PyPI	```
+Publish to PyPI	Publish to PyPI	
+Publish to PyPI	Publish to PyPI	Learn more at https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/about-security-hardening-with-openid-connect#adding-permissions-settings.
+Publish to PyPI	Publish to PyPI	
