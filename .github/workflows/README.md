@@ -17,7 +17,7 @@ Consolidated quality checks, security scanning, tests, and build verification.
 
 | Job | Blocking | Description |
 |-----|----------|-------------|
-| **secrets-scan** | yes | Heuristic secret detection (grep-based) |
+| **secrets-scan** | yes | Heuristic secret detection + version/changelog consistency check |
 | **lint** | no | Ruff check/format, mypy (continue-on-error) |
 | **security** | no | Bandit + pip-audit (continue-on-error) |
 | **smoke-test** | yes | Import checks, Python version assertion, test collection |
@@ -37,7 +37,9 @@ Consolidated quality checks, security scanning, tests, and build verification.
 
 **Triggers:** Push/PR to `main` or `develop` affecting `frontend/**`.
 
-**Jobs:** lint-typecheck, test, build (Node 22, `actions/setup-node@v4`)
+**Jobs:** lint-typecheck, test, build (Node 22, `actions/setup-node@v6`)
+
+The lint/typecheck job also enforces that `frontend/coverage/` artifacts are not tracked in git.
 
 **Duration:** ~3-5 minutes
 

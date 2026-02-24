@@ -782,6 +782,14 @@ make watch-ci
 
 ```
 
+Pipeline green checklist for release-bound changes:
+
+1. Ensure `pyproject.toml` version matches the top entry in `CHANGELOG.md`
+2. Run local gates: `ruff`, `pytest`, frontend lint/test/build, and package build
+3. Keep generated artifacts out of git (for example `frontend/coverage/`, release scratch logs)
+4. Require all workflow runs to pass on PR before merge
+5. Re-check all workflow runs on `main` after merge
+
 ### Pre-Push Validation
 
 Optimized pre-push hook ensures:
@@ -842,6 +850,7 @@ Optimized pre-push hook ensures:
 ### Development Guides
 
 - [`docs/structure/README.md`](docs/structure/README.md) - Repository structure guide
+- [`docs/release/pipeline-runbook.md`](docs/release/pipeline-runbook.md) - Execution and post-execution pipeline green runbook
 - [`BRANCH_ORGANIZATION.md`](BRANCH_ORGANIZATION.md) - Branch organization strategy and merge history
 - [`docs/CLEANUP_SUMMARY.md`](docs/CLEANUP_SUMMARY.md) - Recent cleanup and reorganization
 - [`SAFE_MERGES_COMPLETED.md`](SAFE_MERGES_COMPLETED.md) - Merge strategy and completion report

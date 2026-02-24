@@ -844,7 +844,7 @@ wheels = [
 
 [[package]]
 name = "grid-intelligence"
-version = "2.5.0"
+version = "2.6.1"
 source = { editable = "." }
 dependencies = [
     { name = "aio-pika" },

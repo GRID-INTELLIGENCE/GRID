@@ -74,6 +74,25 @@ uv run ruff check work/ safety/ security/ boundaries/
 uv run ruff check --fix work/ safety/ security/ boundaries/
 ```
 
+## Pipeline Green Checklist
+
+Before opening a PR, run this checklist end-to-end:
+
+1. Confirm `pyproject.toml` version equals the top version in `CHANGELOG.md`
+2. Run local quality gates:
+   - `uv run ruff check .`
+   - `uv run pytest -q --tb=short`
+   - `npm --prefix frontend run lint`
+   - `npm --prefix frontend run test`
+   - `npm --prefix frontend run build`
+3. Verify package build integrity:
+   - `uv run python -m build`
+   - `uv run twine check dist/*`
+4. Ensure generated artifacts are not staged (coverage reports, release scratch logs, temp outputs)
+5. Ensure all GitHub workflow runs are green on the PR before merge
+
+See [`docs/release/pipeline-runbook.md`](docs/release/pipeline-runbook.md) for the full execution and post-execution routine.
+
 ## Safety-Critical Code
 
 The `safety/`, `security/`, and `boundaries/` directories enforce GRID's security invariants. Extra rules apply:

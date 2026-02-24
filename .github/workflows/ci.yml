@@ -71,6 +71,31 @@ jobs:
       - name: "Checkout"
         uses: actions/checkout@v6
 
+      - name: "Validate version/changelog consistency"
+        run: |
+          python3 - <<'PY'
+          import re
+          import sys
+          import tomllib
+          from pathlib import Path
+
+          pyproject = tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))
+          package_version = pyproject["project"]["version"]
+          changelog = Path("CHANGELOG.md").read_text(encoding="utf-8")
+          match = re.search(r"^## \[([0-9]+\.[0-9]+\.[0-9]+(?:[-+][0-9A-Za-z\.-]+)?)\]", changelog, re.MULTILINE)
+          if not match:
+              print("::error::Unable to find top changelog version heading in CHANGELOG.md")
+              sys.exit(1)
+          changelog_version = match.group(1)
+          if package_version != changelog_version:
+              print(
+                  f"::error::Version mismatch: pyproject.toml has {package_version}, "
+                  f"CHANGELOG.md top entry is {changelog_version}"
+              )
+              sys.exit(1)
+          print(f"Version metadata aligned at {package_version}")
+          PY
+
       - name: "Check for hardcoded secrets"
         run: |
           if grep -r -i -E "(password|secret|token|api_key)\s*=\s*[\"'][^\"']{20,}[\"']" --include="*.py" --include="*.yaml" --include="*.yml" --include="*.json" src/ 2>/dev/null; then
