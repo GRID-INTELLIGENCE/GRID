@@ -19,9 +19,7 @@ from __future__ import annotations
 
 import logging
 import re
-import statistics
 import time
-from collections import Counter
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -320,7 +318,7 @@ class PersonaEngine:
 
     def _detect_cognitive_style(self, text: str) -> None:
         """Infer cognitive style from phrasing patterns."""
-        scores: dict[CognitiveStyle, int] = {style: 0 for style in CognitiveStyle}
+        scores: dict[CognitiveStyle, int] = dict.fromkeys(CognitiveStyle, 0)
 
         for style, indicators in self._STYLE_INDICATORS.items():
             for phrase in indicators:

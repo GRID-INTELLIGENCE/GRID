@@ -11,7 +11,6 @@ import pytest
 
 from mycelium.sensory import SensoryAdaptation, SensoryMode, SensoryProfile, SensoryState
 
-
 SAMPLE_OUTPUT = (
     "IN BRIEF: The electromagnetic spectrum spans from radio waves (3 Hz) "
     "to gamma rays (30 EHz).\n\n"
@@ -140,9 +139,7 @@ class TestFormatting:
             sensory.apply_profile(profile)
             formatted = sensory.format_output(SAMPLE_OUTPUT)
             for fact in key_facts:
-                assert fact in formatted, (
-                    f"Fact '{fact}' lost in profile '{profile.value}'"
-                )
+                assert fact in formatted, f"Fact '{fact}' lost in profile '{profile.value}'"
 
 
 class TestCustomAdjustments:

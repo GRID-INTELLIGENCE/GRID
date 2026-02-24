@@ -11,21 +11,20 @@ from __future__ import annotations
 
 import pytest
 
-from mycelium.core import Depth, HighlightPriority, PersonaProfile, ExpertiseLevel
+from mycelium.core import Depth, ExpertiseLevel, HighlightPriority, PersonaProfile
 from mycelium.synthesizer import Synthesizer
-
 from tests.mycelium.conftest import (
-    ELECTROMAGNETIC_SPECTRUM_TEXT,
-    PHASE_TRANSITIONS_TEXT,
-    POLAR_THERMODYNAMICS_TEXT,
     ECOSYSTEM_ENERGY_TEXT,
+    ECOSYSTEM_EXPECTED_KEYWORDS,
+    ELECTROMAGNETIC_SPECTRUM_TEXT,
+    EM_EXPECTED_KEYWORDS,
     EMPTY_TEXT,
     ONE_SENTENCE,
-    TWO_SENTENCES,
-    EM_EXPECTED_KEYWORDS,
     PHASE_EXPECTED_KEYWORDS,
+    PHASE_TRANSITIONS_TEXT,
     POLAR_EXPECTED_KEYWORDS,
-    ECOSYSTEM_EXPECTED_KEYWORDS,
+    POLAR_THERMODYNAMICS_TEXT,
+    TWO_SENTENCES,
 )
 
 
@@ -88,8 +87,12 @@ class TestSynthesis:
 
     def test_gist_is_always_produced(self, synthesizer: Synthesizer) -> None:
         """Every synthesis must produce a gist — like every signal has a fundamental frequency."""
-        for text in [ELECTROMAGNETIC_SPECTRUM_TEXT, PHASE_TRANSITIONS_TEXT,
-                     POLAR_THERMODYNAMICS_TEXT, ECOSYSTEM_ENERGY_TEXT]:
+        for text in [
+            ELECTROMAGNETIC_SPECTRUM_TEXT,
+            PHASE_TRANSITIONS_TEXT,
+            POLAR_THERMODYNAMICS_TEXT,
+            ECOSYSTEM_ENERGY_TEXT,
+        ]:
             result = synthesizer.synthesize(text)
             assert len(result.gist) > 0
 
@@ -160,10 +163,14 @@ class TestPatternDetection:
 
     def test_patterns_list_is_not_empty_for_rich_text(self, synthesizer: Synthesizer) -> None:
         """Rich scientific text should trigger at least one pattern."""
-        for text in [ELECTROMAGNETIC_SPECTRUM_TEXT, PHASE_TRANSITIONS_TEXT,
-                     POLAR_THERMODYNAMICS_TEXT, ECOSYSTEM_ENERGY_TEXT]:
+        for text in [
+            ELECTROMAGNETIC_SPECTRUM_TEXT,
+            PHASE_TRANSITIONS_TEXT,
+            POLAR_THERMODYNAMICS_TEXT,
+            ECOSYSTEM_ENERGY_TEXT,
+        ]:
             result = synthesizer.synthesize(text)
-            assert len(result.patterns_applied) >= 1, f"No patterns found in text"
+            assert len(result.patterns_applied) >= 1, "No patterns found in text"
 
 
 class TestSummarize:

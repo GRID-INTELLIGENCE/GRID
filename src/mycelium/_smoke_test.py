@@ -1,6 +1,7 @@
 """Smoke test for Mycelium Instrument — run with: uv run python src/mycelium/_smoke_test.py"""
 
 import sys
+
 sys.path.insert(0, "src")
 
 from mycelium.instrument import Instrument

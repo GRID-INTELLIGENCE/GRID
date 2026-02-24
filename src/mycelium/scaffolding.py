@@ -22,13 +22,11 @@ Inspired by:
 from __future__ import annotations
 
 import logging
-import textwrap
 from dataclasses import dataclass, field
 from enum import StrEnum
 from typing import Any
 
 from mycelium.core import (
-    Depth,
     ExpertiseLevel,
     Highlight,
     HighlightPriority,

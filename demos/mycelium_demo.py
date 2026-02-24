@@ -26,7 +26,6 @@ from mycelium import Instrument
 from mycelium.core import Depth
 from mycelium.sensory import SensoryProfile
 
-
 # ── Source texts ──────────────────────────────────────────────────
 SCENARIOS = [
     {

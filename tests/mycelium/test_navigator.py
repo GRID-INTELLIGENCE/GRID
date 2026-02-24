@@ -134,29 +134,35 @@ class TestConceptRegistration:
     periodic table when discovered."""
 
     def test_register_new_concept(self, navigator: PatternNavigator) -> None:
-        navigator.register_concept("thermodynamics", [
-            PatternLens(
-                pattern="flow",
-                analogy="Heat flows like water — from hot to cold, never uphill without work.",
-                eli5="Hot things cool down. Cold things warm up. They meet in the middle.",
-                visual_hint="Picture two cups of water at different temperatures mixing.",
-                when_useful="When understanding why heat moves and energy transforms.",
-            ),
-        ])
+        navigator.register_concept(
+            "thermodynamics",
+            [
+                PatternLens(
+                    pattern="flow",
+                    analogy="Heat flows like water — from hot to cold, never uphill without work.",
+                    eli5="Hot things cool down. Cold things warm up. They meet in the middle.",
+                    visual_hint="Picture two cups of water at different temperatures mixing.",
+                    when_useful="When understanding why heat moves and energy transforms.",
+                ),
+            ],
+        )
         result = navigator.explore("thermodynamics")
         assert result is not None
         assert "heat" in result.lens.analogy.lower() or "hot" in result.lens.eli5.lower()
 
     def test_registered_concept_appears_in_available(self, navigator: PatternNavigator) -> None:
-        navigator.register_concept("quantum_tunneling", [
-            PatternLens(
-                pattern="deviation",
-                analogy="A ball rolling through a hill it shouldn't be able to climb.",
-                eli5="Sometimes things go through walls. Very tiny things, very thin walls.",
-                visual_hint="Picture a ball at the bottom of a hill. It appears on the other side.",
-                when_useful="When classical physics says 'impossible' but quantum says 'maybe'.",
-            ),
-        ])
+        navigator.register_concept(
+            "quantum_tunneling",
+            [
+                PatternLens(
+                    pattern="deviation",
+                    analogy="A ball rolling through a hill it shouldn't be able to climb.",
+                    eli5="Sometimes things go through walls. Very tiny things, very thin walls.",
+                    visual_hint="Picture a ball at the bottom of a hill. It appears on the other side.",
+                    when_useful="When classical physics says 'impossible' but quantum says 'maybe'.",
+                ),
+            ],
+        )
         assert "quantum_tunneling" in navigator.available_concepts
 
 

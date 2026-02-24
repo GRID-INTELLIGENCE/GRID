@@ -25,8 +25,7 @@ import logging
 import math
 import re
 from collections import Counter
-from dataclasses import dataclass, field
-from typing import Any
+from dataclasses import dataclass
 
 from mycelium.core import (
     Depth,
@@ -53,7 +52,7 @@ _STOP_WORDS: frozenset[str] = frozenset(
         "too", "very", "just", "about", "above", "after", "again", "also",
         "any", "because", "before", "between", "during", "if", "into", "then",
         "there", "through", "under", "until", "up", "while", "as", "over",
-        "here", "out", "even", "new", "like", "well", "also", "back", "way",
+        "here", "out", "even", "new", "like", "well", "back", "way",
         "get", "got", "make", "made", "still", "much", "many", "since",
     }
 )
@@ -397,8 +396,7 @@ class Synthesizer:
         top = sorted(scored, key=lambda s: s.score, reverse=True)[:n]
         top.sort(key=lambda s: s.index)
 
-        for s in top:
-            parts.append(s.text)
+        parts.extend(s.text for s in top)
 
         return " ".join(parts)
 

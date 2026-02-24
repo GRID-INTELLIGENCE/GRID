@@ -8,12 +8,14 @@ Open: http://localhost:8765
 
 from __future__ import annotations
 
-import asyncio
-import json
 import logging
 import os
 import sys
 from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from tools.rag.chat import RAGChatSession
 
 # Suppress noisy logging
 os.environ["GRID_QUIET"] = "1"
@@ -25,12 +27,10 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 logging.basicConfig(level=logging.WARNING)
 
 from dataclasses import dataclass
-from typing import Any
 
-from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, JSONResponse
-from fastapi.staticfiles import StaticFiles
 import uvicorn
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse
 
 # Add src to path
 src_path = Path(__file__).parent / "src"
@@ -39,7 +39,7 @@ sys.path.insert(0, str(src_path))
 app = FastAPI(title="GRID RAG Chat")
 
 # Global session state
-_session: "RAGChatSession | None" = None
+_session: RAGChatSession | None = None
 
 
 @dataclass
@@ -52,7 +52,7 @@ class ChatConfig:
     vector_store_path: str = ""
 
 
-async def get_session() -> "RAGChatSession":
+async def get_session() -> RAGChatSession:
     global _session
     if _session is None:
         from tools.rag.chat import ChatConfig as SessionConfig
@@ -411,14 +411,12 @@ async def chat(request: Request):
         # Build response
         sources = []
         if context.documents:
-            for i, (meta, dist) in enumerate(zip(context.metadatas, context.distances), 1):
+            for i, (meta, dist) in enumerate(zip(context.metadatas, context.distances, strict=False), 1):
                 path = meta.get("path", "unknown")
                 sources.append(f"{i}. {path} (dist: {dist:.3f})")
 
         # Stream response from Ollama
-        full_response = []
-        async for chunk in session.stream_response(query, context):
-            full_response.append(chunk)
+        full_response = [chunk async for chunk in session.stream_response(query, context)]
 
         response_text = "".join(full_response)
 
@@ -441,7 +439,7 @@ if __name__ == "__main__":
     print("=" * 60)
     print("  GRID RAG Chat Server")
     print("=" * 60)
-    print(f"  URL: http://localhost:8766")
-    print(f"  Model: ministral-3:3b")
+    print("  URL: http://localhost:8766")
+    print("  Model: ministral-3:3b")
     print("=" * 60)
     uvicorn.run(app, host="127.0.0.1", port=8766, log_level="warning")

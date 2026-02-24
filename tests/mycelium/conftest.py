@@ -36,7 +36,6 @@ from mycelium.scaffolding import AdaptiveScaffold, ScaffoldDepth
 from mycelium.sensory import SensoryMode, SensoryProfile
 from mycelium.synthesizer import Synthesizer
 
-
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #  DOMAIN TEXTS — Real physics, grounded in measurable facts
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -113,8 +112,7 @@ ECOSYSTEM_ENERGY_TEXT = (
 EMPTY_TEXT = ""
 ONE_SENTENCE = "The speed of light is 299,792,458 meters per second."
 TWO_SENTENCES = (
-    "Water boils at 100 degrees Celsius at sea level. "
-    "The latent heat of vaporization is 2,260 joules per gram."
+    "Water boils at 100 degrees Celsius at sea level. The latent heat of vaporization is 2,260 joules per gram."
 )
 
 
@@ -151,6 +149,7 @@ ECOSYSTEM_EXPECTED_KEYWORDS = {"energy", "trophic", "photosynthesis", "carbon"}
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #  FIXTURES
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 
 @pytest.fixture
 def instrument() -> Instrument:

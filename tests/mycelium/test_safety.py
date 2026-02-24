@@ -20,7 +20,7 @@ import pytest
 
 from mycelium.core import PersonaProfile, SynthesisResult
 from mycelium.instrument import Instrument
-from mycelium.persona import PersonaEngine, InteractionSignal, _MAX_SIGNALS
+from mycelium.persona import _MAX_SIGNALS, InteractionSignal, PersonaEngine
 from mycelium.safety import (
     MAX_CONCEPT_NAME_LENGTH,
     MAX_HIGHLIGHTS,
@@ -191,16 +191,12 @@ class TestParameterValidation:
 
     def test_allowed_values_enforced(self) -> None:
         guard = SafetyGuard()
-        report = guard.validate_parameter(
-            "depth", "invalid", allowed_values={"espresso", "americano", "cold_brew"}
-        )
+        report = guard.validate_parameter("depth", "invalid", allowed_values={"espresso", "americano", "cold_brew"})
         assert report.verdict == SafetyVerdict.REJECT
 
     def test_allowed_value_passes(self) -> None:
         guard = SafetyGuard()
-        report = guard.validate_parameter(
-            "depth", "espresso", allowed_values={"espresso", "americano", "cold_brew"}
-        )
+        report = guard.validate_parameter("depth", "espresso", allowed_values={"espresso", "americano", "cold_brew"})
         assert report.verdict == SafetyVerdict.PASS
 
     def test_list_size_enforced(self) -> None:
@@ -356,10 +352,7 @@ class TestAdversarialInputs:
     def test_unicode_text_processes(self) -> None:
         """Unicode (non-Latin) text should not crash the system."""
         m = Instrument()
-        result = m.synthesize(
-            "বাংলা ভাষায় লেখা পাঠ্য। এটি একটি পরীক্ষা। "
-            "তাপমাত্রা এবং চাপ পরিবর্তনের ফলে পদার্থের অবস্থার পরিবর্তন ঘটে।"
-        )
+        result = m.synthesize("বাংলা ভাষায় লেখা পাঠ্য। এটি একটি পরীক্ষা। তাপমাত্রা এবং চাপ পরিবর্তনের ফলে পদার্থের অবস্থার পরিবর্তন ঘটে।")
         assert len(result.gist) > 0
 
     def test_repeated_single_char(self) -> None:
@@ -384,17 +377,13 @@ class TestAdversarialInputs:
     def test_html_like_input_not_executed(self) -> None:
         """HTML-like content should be treated as plain text, never executed."""
         m = Instrument()
-        result = m.synthesize(
-            "<script>alert('test')</script> Normal text about physics."
-        )
+        result = m.synthesize("<script>alert('test')</script> Normal text about physics.")
         assert "alert" not in result.gist or "script" in result.gist.lower()
         # The key assertion: it processed without error
 
     def test_newlines_and_tabs_preserved(self) -> None:
         m = Instrument()
         result = m.synthesize(
-            "Line one about thermodynamics.\n"
-            "Line two about phase transitions.\n"
-            "Line three about energy conservation."
+            "Line one about thermodynamics.\nLine two about phase transitions.\nLine three about energy conservation."
         )
         assert len(result.gist) > 0

@@ -1,11 +1,11 @@
 import sys
-import os
 from pathlib import Path
 
 # Add the src directory to the Python path
 sys.path.append(str(Path(__file__).parent / "src"))
 
 from mycelium import Instrument
+
 
 def run_demo():
     print("\n" + "="*60)
@@ -15,11 +15,11 @@ def run_demo():
     m = Instrument()
 
     complex_text = """
-    Quantum entanglement is a physical phenomenon that occurs when a group of particles 
-    are generated, interact, or share spatial proximity in a way such that the quantum state 
-    of each particle of the group cannot be described independently of the state of the others, 
-    including when the particles are separated by a large distance. The topic of quantum 
-    entanglement is at the heart of the disparity between classical and quantum physics: 
+    Quantum entanglement is a physical phenomenon that occurs when a group of particles
+    are generated, interact, or share spatial proximity in a way such that the quantum state
+    of each particle of the group cannot be described independently of the state of the others,
+    including when the particles are separated by a large distance. The topic of quantum
+    entanglement is at the heart of the disparity between classical and quantum physics:
     entanglement is a primary feature of quantum mechanics lacking in classical mechanics.
     """
 

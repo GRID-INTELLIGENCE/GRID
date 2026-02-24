@@ -23,23 +23,23 @@ from mycelium.scaffolding import AdaptiveScaffold, ScaffoldDepth, Strategy
 
 def _make_result(gist: str = "Energy cannot be created or destroyed.", **kwargs) -> SynthesisResult:
     """Factory for test SynthesisResults."""
-    defaults = dict(
-        summary="The first law of thermodynamics states that energy is conserved. "
-                "Phase transitions require energy input. "
-                "Temperature remains constant during phase change.",
-        explanation="Energy conservation is fundamental. During melting, 334 J/g is absorbed. "
-                    "During boiling, 2260 J/g is absorbed. The energy breaks intermolecular bonds.",
-        analogy="Think of energy like water in connected pools — it flows but never disappears.",
-        highlights=[
+    defaults = {
+        "summary": "The first law of thermodynamics states that energy is conserved. "
+        "Phase transitions require energy input. "
+        "Temperature remains constant during phase change.",
+        "explanation": "Energy conservation is fundamental. During melting, 334 J/g is absorbed. "
+        "During boiling, 2260 J/g is absorbed. The energy breaks intermolecular bonds.",
+        "analogy": "Think of energy like water in connected pools — it flows but never disappears.",
+        "highlights": [
             Highlight(text="energy", priority=HighlightPriority.CRITICAL, category="concept"),
             Highlight(text="thermodynamics", priority=HighlightPriority.HIGH, category="concept"),
             Highlight(text="conservation", priority=HighlightPriority.MEDIUM, category="concept"),
         ],
-        source_length=500,
-        compression_ratio=0.1,
-        depth_used=Depth.AMERICANO,
-        patterns_applied=["flow", "repetition"],
-    )
+        "source_length": 500,
+        "compression_ratio": 0.1,
+        "depth_used": Depth.AMERICANO,
+        "patterns_applied": ["flow", "repetition"],
+    }
     defaults.update(kwargs)
     return SynthesisResult(gist=gist, **defaults)
 
@@ -70,9 +70,7 @@ class TestAutoDepthDetection:
 
     def test_challenges_override_to_maximum(self) -> None:
         """Any accessibility challenge → maximum scaffolding, like maximum instrument sensitivity."""
-        scaffold = AdaptiveScaffold(
-            PersonaProfile(expertise=ExpertiseLevel.EXPERT, challenges=["dyslexia"])
-        )
+        scaffold = AdaptiveScaffold(PersonaProfile(expertise=ExpertiseLevel.EXPERT, challenges=["dyslexia"]))
         assert scaffold._auto_detect_depth() == ScaffoldDepth.MAXIMUM
 
 
@@ -153,9 +151,7 @@ class TestOutputContent:
 
     def test_simplification_replaces_complex_words(self) -> None:
         scaffold = AdaptiveScaffold()
-        result = _make_result(
-            explanation="We must utilize this methodology to facilitate comprehensive optimization."
-        )
+        result = _make_result(explanation="We must utilize this methodology to facilitate comprehensive optimization.")
         output = scaffold.scaffold(result, depth=ScaffoldDepth.MAXIMUM)
         lower = output.content.lower()
         # "utilize" → "use", "methodology" → "method", "facilitate" → "help"

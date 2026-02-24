@@ -14,18 +14,17 @@ import pytest
 from mycelium.core import Depth, ExpertiseLevel, ResonanceLevel
 from mycelium.instrument import Instrument
 from mycelium.sensory import SensoryProfile
-
 from tests.mycelium.conftest import (
-    ELECTROMAGNETIC_SPECTRUM_TEXT,
-    PHASE_TRANSITIONS_TEXT,
-    POLAR_THERMODYNAMICS_TEXT,
     ECOSYSTEM_ENERGY_TEXT,
-    EM_EXPECTED_KEYWORDS,
-    PHASE_EXPECTED_KEYWORDS,
-    POLAR_EXPECTED_KEYWORDS,
     ECOSYSTEM_EXPECTED_KEYWORDS,
-    SPEED_OF_LIGHT_MPS,
+    ELECTROMAGNETIC_SPECTRUM_TEXT,
+    EM_EXPECTED_KEYWORDS,
     LATENT_HEAT_FUSION_J_PER_G,
+    PHASE_EXPECTED_KEYWORDS,
+    PHASE_TRANSITIONS_TEXT,
+    POLAR_EXPECTED_KEYWORDS,
+    POLAR_THERMODYNAMICS_TEXT,
+    SPEED_OF_LIGHT_MPS,
     VOSTOK_RECORD_TEMP_C,
 )
 
@@ -215,15 +214,18 @@ class TestNavigatorIntegration:
         assert "complex" in explanation.lower() or "simple" in explanation.lower()
 
     def test_register_custom_concept(self, instrument: Instrument) -> None:
-        instrument.register_concept("thermodynamics", [
-            {
-                "pattern": "flow",
-                "analogy": "Heat flows from hot to cold, like water downhill.",
-                "eli5": "Hot things cool down. Cold things warm up.",
-                "visual_hint": "Picture two cups of water mixing temperatures.",
-                "when_useful": "When understanding energy transfer.",
-            }
-        ])
+        instrument.register_concept(
+            "thermodynamics",
+            [
+                {
+                    "pattern": "flow",
+                    "analogy": "Heat flows from hot to cold, like water downhill.",
+                    "eli5": "Hot things cool down. Cold things warm up.",
+                    "visual_hint": "Picture two cups of water mixing temperatures.",
+                    "when_useful": "When understanding energy transfer.",
+                }
+            ],
+        )
         nav = instrument.explore("thermodynamics")
         assert nav is not None
         assert "hot" in nav.lens.eli5.lower()

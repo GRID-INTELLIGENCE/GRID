@@ -189,9 +189,7 @@ class TestSynthesisResult:
     def test_synthesis_result_as_dict_serializes(self) -> None:
         r = SynthesisResult(
             gist="Speed of light is constant.",
-            highlights=[
-                Highlight(text="light", priority=HighlightPriority.CRITICAL, category="concept")
-            ],
+            highlights=[Highlight(text="light", priority=HighlightPriority.CRITICAL, category="concept")],
             compression_ratio=0.05,
             depth_used=Depth.ESPRESSO,
             patterns_applied=["flow", "repetition"],

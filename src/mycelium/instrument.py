@@ -51,11 +51,9 @@ from mycelium.persona import InteractionSignal, PersonaEngine
 from mycelium.safety import (
     MAX_HIGHLIGHTS,
     MAX_REGISTERED_CONCEPTS,
-    MAX_TRAIT_VALUE_LENGTH,
     SafetyGuard,
-    SafetyVerdict,
 )
-from mycelium.scaffolding import AdaptiveScaffold, ScaffoldedOutput
+from mycelium.scaffolding import AdaptiveScaffold
 from mycelium.sensory import SensoryMode, SensoryProfile
 from mycelium.synthesizer import Synthesizer
 

@@ -92,7 +92,9 @@ class TestCognitiveStyleDetection:
 
     def test_kinesthetic_phrases_set_kinesthetic_style(self, persona_engine: PersonaEngine) -> None:
         persona_engine.observe(
-            InteractionSignal(signal_type="query", content="Let me try it hands-on and build something interactive step by step")
+            InteractionSignal(
+                signal_type="query", content="Let me try it hands-on and build something interactive step by step"
+            )
         )
         assert persona_engine.profile.cognitive_style == CognitiveStyle.KINESTHETIC
 
@@ -103,9 +105,7 @@ class TestFeedbackAdaptation:
     def test_too_complex_feedback_reduces_depth(self, persona_engine: PersonaEngine) -> None:
         """'Too complex' signal → depth shifts down."""
         persona_engine.set_explicit(depth="cold_brew")
-        persona_engine.observe(
-            InteractionSignal(signal_type="feedback", content="This is too complex and confusing")
-        )
+        persona_engine.observe(InteractionSignal(signal_type="feedback", content="This is too complex and confusing"))
         assert persona_engine.profile.depth == Depth.AMERICANO
 
     def test_too_simple_feedback_increases_depth(self, persona_engine: PersonaEngine) -> None:
@@ -117,25 +117,19 @@ class TestFeedbackAdaptation:
         assert persona_engine.profile.depth == Depth.AMERICANO
 
     def test_boring_feedback_switches_to_playful(self, persona_engine: PersonaEngine) -> None:
-        persona_engine.observe(
-            InteractionSignal(signal_type="feedback", content="This is boring and dry")
-        )
+        persona_engine.observe(InteractionSignal(signal_type="feedback", content="This is boring and dry"))
         assert persona_engine.profile.tone == EngagementTone.PLAYFUL
 
     def test_depth_floor_at_espresso(self, persona_engine: PersonaEngine) -> None:
         """Cannot go below espresso — like absolute zero in temperature."""
         persona_engine.set_explicit(depth="espresso")
-        persona_engine.observe(
-            InteractionSignal(signal_type="feedback", content="Too complex")
-        )
+        persona_engine.observe(InteractionSignal(signal_type="feedback", content="Too complex"))
         assert persona_engine.profile.depth == Depth.ESPRESSO
 
     def test_depth_ceiling_at_cold_brew(self, persona_engine: PersonaEngine) -> None:
         """Cannot go above cold_brew — like speed of light limit."""
         persona_engine.set_explicit(depth="cold_brew")
-        persona_engine.observe(
-            InteractionSignal(signal_type="feedback", content="Too simple, I know this")
-        )
+        persona_engine.observe(InteractionSignal(signal_type="feedback", content="Too simple, I know this"))
         assert persona_engine.profile.depth == Depth.COLD_BREW
 
 
@@ -190,9 +184,7 @@ class TestSnapshotConfidence:
 
     def test_confidence_grows_with_signals(self, persona_engine: PersonaEngine) -> None:
         for i in range(10):
-            persona_engine.observe(
-                InteractionSignal(signal_type="query", content=f"query number {i}")
-            )
+            persona_engine.observe(InteractionSignal(signal_type="query", content=f"query number {i}"))
         snapshot = persona_engine._build_snapshot()
         assert snapshot.confidence > 0.0
         assert snapshot.signals_analyzed == 10
@@ -200,9 +192,7 @@ class TestSnapshotConfidence:
     def test_confidence_caps_below_one(self, persona_engine: PersonaEngine) -> None:
         """Confidence never reaches 1.0 — like Heisenberg uncertainty."""
         for i in range(100):
-            persona_engine.observe(
-                InteractionSignal(signal_type="query", content=f"query {i}")
-            )
+            persona_engine.observe(InteractionSignal(signal_type="query", content=f"query {i}"))
         snapshot = persona_engine._build_snapshot()
         assert snapshot.confidence <= 0.95
 
