@@ -254,6 +254,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: [prepare, build]
     if: github.event.inputs.dry_run != 'true'
+    environment:
+      name: pypi
+      url: ${{ needs.prepare.outputs.package == 'grid-safety' && 'https://pypi.org/project/grid-safety/' || 'https://pypi.org/project/grid-intelligence/' }}
 
     steps:
       - name: "Download Artifacts"
