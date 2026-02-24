@@ -1,0 +1,603 @@
+{
+    "drtp_session": {
+        "protocol_version": "2.5.0",
+        "session_id": "DRTP-2026-02-24-0750",
+        "grid_version": "2.5.0",
+        "opened_at": "2026-02-24T07:50:01+06:00",
+        "closed_at": "2026-02-24T08:02:48+06:00",
+        "duration_seconds": 767,
+        "founder": "Irfan Kabir",
+        "facilitator": "Antigravity (GRID Structural Intelligence)",
+        "topic": "GRID directional identity — cognitive practice platform vs conventional product"
+    },
+    "ambiance": {
+        "spatial_arrangement": "circular n-gon, equidistant seating",
+        "lighting": "deep indigo walls, cool amber center",
+        "mood": "focused, demanding, honest",
+        "principles": [
+            "equal_standing",
+            "topic_centric",
+            "transparent_reasoning",
+            "disciplined_environment"
+        ]
+    },
+    "party_roster": {
+        "total_parties": 16,
+        "parties": [
+            {
+                "id": 1,
+                "name": "essence",
+                "kind": "object",
+                "title": "Core State Keeper",
+                "primary_goal": "Hold the nucleus of practitioner state",
+                "source_path": "src/grid/essence/",
+                "files": 2,
+                "code_size_kb": 1.2,
+                "primary_vocabulary": [
+                    "EssentialState",
+                    "core_state"
+                ],
+                "contains_product_vocabulary": false,
+                "contains_cognitive_vocabulary": true,
+                "lineage_commit": "1ade42c"
+            },
+            {
+                "id": 2,
+                "name": "awareness",
+                "kind": "object",
+                "title": "Context & Observer",
+                "primary_goal": "Track attention and domain shifts",
+                "source_path": "src/grid/awareness/",
+                "files": 3,
+                "code_size_kb": 14.6,
+                "primary_vocabulary": [
+                    "Context",
+                    "DomainTracking",
+                    "observer"
+                ],
+                "contains_product_vocabulary": false,
+                "contains_cognitive_vocabulary": true,
+                "lineage_commit": "1ade42c"
+            },
+            {
+                "id": 3,
+                "name": "patterns",
+                "kind": "object",
+                "title": "9 Cognition Patterns",
+                "primary_goal": "Detect Flow, Rhythm, Deviation, Cause, Time, etc.",
+                "source_path": "src/grid/patterns/",
+                "files": 4,
+                "code_size_kb": 25.7,
+                "primary_vocabulary": [
+                    "PatternRecognition",
+                    "HybridDetection",
+                    "EmbeddedAgentic"
+                ],
+                "contains_product_vocabulary": false,
+                "contains_cognitive_vocabulary": true,
+                "lineage_commit": "1ade42c"
+            },
+            {
+                "id": 4,
+                "name": "evolution",
+                "kind": "object",
+                "title": "Growth Through Fibonacci",
+                "primary_goal": "Evolve state using golden ratio, detect landscape shifts",
+                "source_path": "src/grid/evolution/",
+                "files": 5,
+                "code_size_kb": 40.0,
+                "primary_vocabulary": [
+                    "FibonacciEvolution",
+                    "LandscapeDetector",
+                    "golden_ratio",
+                    "RealtimeAdapter"
+                ],
+                "contains_product_vocabulary": false,
+                "contains_cognitive_vocabulary": true,
+                "lineage_commit": "1ade42c"
+            },
+            {
+                "id": 5,
+                "name": "cognition",
+                "kind": "object",
+                "title": "Cognitive Science Framework",
+                "primary_goal": "CognitiveFlow, PatternMatcher, TemporalContext",
+                "source_path": "cognition/",
+                "files": 15,
+                "code_size_kb": 3.7,
+                "primary_vocabulary": [
+                    "CognitiveEvent",
+                    "BackgroundFactor",
+                    "FlowManager",
+                    "PatternMatcher",
+                    "TemporalContext"
+                ],
+                "contains_product_vocabulary": false,
+                "contains_cognitive_vocabulary": true,
+                "lineage_commit": "253c7e1"
+            },
+            {
+                "id": 6,
+                "name": "cognitive_engine",
+                "kind": "object",
+                "title": "Cognitive Engine Proper",
+                "primary_goal": "CognitiveEngine, ScaffoldingEngine, System1/2 detection, bounded rationality",
+                "source_path": "src/cognitive/",
+                "files": 22,
+                "code_size_kb": 250.0,
+                "primary_vocabulary": [
+                    "CognitiveEngine",
+                    "ScaffoldingEngine",
+                    "CognitiveLoad",
+                    "MentalModel",
+                    "light_of_the_seven"
+                ],
+                "contains_product_vocabulary": false,
+                "contains_cognitive_vocabulary": true,
+                "lineage_commit": "1ade42c"
+            },
+            {
+                "id": 7,
+                "name": "intelligence",
+                "kind": "object",
+                "title": "AI Brain Bridge",
+                "primary_goal": "Spatial reasoning + knowledge graph navigation",
+                "source_path": "src/grid/intelligence/",
+                "files": 4,
+                "code_size_kb": 23.0,
+                "primary_vocabulary": [
+                    "AIBrainBridge",
+                    "KnowledgeGraphBridge",
+                    "SpatialPattern",
+                    "NavigationEnhancement"
+                ],
+                "contains_product_vocabulary": false,
+                "contains_cognitive_vocabulary": true,
+                "lineage_commit": "1ade42c"
+            },
+            {
+                "id": 8,
+                "name": "knowledge",
+                "kind": "object",
+                "title": "Structural Knowledge Graph",
+                "primary_goal": "GraphStore, ReasoningOrchestrator, EntityLinker",
+                "source_path": "src/grid/knowledge/",
+                "files": 9,
+                "code_size_kb": 101.7,
+                "primary_vocabulary": [
+                    "GraphStore",
+                    "StructuralLearning",
+                    "ReasoningOrchestrator",
+                    "EntityLinker"
+                ],
+                "contains_product_vocabulary": false,
+                "contains_cognitive_vocabulary": true,
+                "lineage_commit": "1ade42c"
+            },
+            {
+                "id": 9,
+                "name": "spark",
+                "kind": "object",
+                "title": "Universal Morphable Invoker",
+                "primary_goal": "ADSR lifecycle, persona morphing, Staircase pedagogy",
+                "source_path": "src/grid/spark/",
+                "files": 7,
+                "code_size_kb": 44.1,
+                "primary_vocabulary": [
+                    "Spark",
+                    "Persona",
+                    "Staircase",
+                    "SparkPhase",
+                    "ADSR"
+                ],
+                "contains_product_vocabulary": false,
+                "contains_cognitive_vocabulary": true,
+                "lineage_commit": "f2f741e"
+            },
+            {
+                "id": 10,
+                "name": "senses",
+                "kind": "object",
+                "title": "Multi-Modal Sensory Processing",
+                "primary_goal": "Process sensory metaphors — how input feels and relates",
+                "source_path": "src/grid/senses/",
+                "files": 4,
+                "code_size_kb": 13.4,
+                "primary_vocabulary": [
+                    "SensoryInput",
+                    "SensoryProcessor",
+                    "SensoryStore"
+                ],
+                "contains_product_vocabulary": false,
+                "contains_cognitive_vocabulary": true,
+                "lineage_commit": "1ade42c"
+            },
+            {
+                "id": 11,
+                "name": "processing",
+                "kind": "object",
+                "title": "Rhythm & Periodicity",
+                "primary_goal": "Periodic reflection, insight extraction, realtime interrupt",
+                "source_path": "src/grid/processing/",
+                "files": 4,
+                "code_size_kb": 11.8,
+                "primary_vocabulary": [
+                    "PeriodicProcessor",
+                    "InsightExtractor",
+                    "RealtimeProcessor"
+                ],
+                "contains_product_vocabulary": false,
+                "contains_cognitive_vocabulary": true,
+                "lineage_commit": "1ade42c"
+            },
+            {
+                "id": 12,
+                "name": "tracing",
+                "kind": "object",
+                "title": "Full Action Trace",
+                "primary_goal": "Immutable record of all actions, origins, and outcomes",
+                "source_path": "src/grid/tracing/",
+                "files": 5,
+                "code_size_kb": 29.2,
+                "primary_vocabulary": [
+                    "ActionTrace",
+                    "TraceManager",
+                    "TraceStore",
+                    "AISafetyTracer"
+                ],
+                "contains_product_vocabulary": true,
+                "contains_cognitive_vocabulary": true,
+                "lineage_commit": "1ade42c"
+            },
+            {
+                "id": 13,
+                "name": "xai",
+                "kind": "object",
+                "title": "Explainability",
+                "primary_goal": "Explain reasoning transparently to the practitioner",
+                "source_path": "src/grid/xai/",
+                "files": 6,
+                "code_size_kb": 73.9,
+                "primary_vocabulary": [
+                    "Explainer",
+                    "ThreadingFramework",
+                    "StreamAdapter",
+                    "VectorStore"
+                ],
+                "contains_product_vocabulary": true,
+                "contains_cognitive_vocabulary": true,
+                "lineage_commit": "1ade42c"
+            },
+            {
+                "id": 14,
+                "name": "agentic",
+                "kind": "object",
+                "title": "Round Table & Environmental Intelligence",
+                "primary_goal": "Orchestrate DRTP, environmental homeostasis, event-driven cases",
+                "source_path": "src/grid/agentic/",
+                "files": 15,
+                "code_size_kb": 100.0,
+                "primary_vocabulary": [
+                    "RoundTableFacilitator",
+                    "GridEnvironment",
+                    "EnvironmentalLLMProxy",
+                    "MagnitudinalCompass"
+                ],
+                "contains_product_vocabulary": false,
+                "contains_cognitive_vocabulary": true,
+                "lineage_commit": "8f8793e"
+            },
+            {
+                "id": 15,
+                "name": "safety",
+                "kind": "object",
+                "title": "The Guardian",
+                "primary_goal": "AI workflow safety, trust contracts, cognitive integrity",
+                "source_path": "safety/",
+                "files": 23,
+                "code_size_kb": 60.5,
+                "primary_vocabulary": [
+                    "Guardian",
+                    "FairPlay",
+                    "ContentSafety",
+                    "PrivacyEngine",
+                    "AISafetyTracer"
+                ],
+                "contains_product_vocabulary": true,
+                "contains_cognitive_vocabulary": true,
+                "lineage_commit": "91eecde",
+                "test_status": {
+                    "passed": 251,
+                    "skipped": 2,
+                    "failed": 0
+                }
+            },
+            {
+                "id": 16,
+                "name": "application",
+                "kind": "object",
+                "title": "Product Surface",
+                "primary_goal": "Mothership API, Stripe, FastAPI routers, middleware",
+                "source_path": "src/application/",
+                "files": 174,
+                "code_size_kb": 1717.7,
+                "primary_vocabulary": [
+                    "Mothership",
+                    "Stripe",
+                    "FastAPI",
+                    "routers",
+                    "middleware",
+                    "payment"
+                ],
+                "contains_product_vocabulary": true,
+                "contains_cognitive_vocabulary": true,
+                "lineage_commit": "1ade42c"
+            }
+        ]
+    },
+    "codebase_census": {
+        "categories": {
+            "cognitive_research": {
+                "files": 86,
+                "code_size_kb": 973.6,
+                "percentage": 22.0
+            },
+            "product_infrastructure": {
+                "files": 174,
+                "code_size_kb": 1717.7,
+                "percentage": 38.8
+            },
+            "safety_trust": {
+                "files": 118,
+                "code_size_kb": 1174.9,
+                "percentage": 26.5
+            },
+            "agentic_skills": {
+                "files": 72,
+                "code_size_kb": 559.1,
+                "percentage": 12.6
+            }
+        },
+        "total_files": 450,
+        "total_code_size_kb": 4425.3,
+        "semantic_cross_contamination": {
+            "product_files_with_cognitive_vocabulary": 65,
+            "product_cognitive_leakage_rate": 0.374,
+            "safety_files_with_cognitive_vocabulary": 29,
+            "safety_cognitive_leakage_rate": 0.246,
+            "cognitive_files_with_product_vocabulary": 0,
+            "cognitive_product_leakage_rate": 0.0
+        }
+    },
+    "ballot": {
+        "ballot_id": "DRTP-BALLOT-2026-02-24-0757",
+        "question": "Should GRID steer free-form toward a cognitive routine / research / practice platform?",
+        "options": [
+            "PRACTICE",
+            "DUAL",
+            "PRODUCT"
+        ],
+        "eligible_voters": 16,
+        "anonymity": "code-derived",
+        "quorum": "simple_majority",
+        "results": {
+            "PRACTICE": {
+                "count": 11,
+                "percentage": 68.75,
+                "voters": [
+                    "essence",
+                    "awareness",
+                    "patterns",
+                    "evolution",
+                    "cognition",
+                    "cognitive_engine",
+                    "intelligence",
+                    "knowledge",
+                    "spark",
+                    "senses",
+                    "processing"
+                ]
+            },
+            "DUAL": {
+                "count": 3,
+                "percentage": 18.75,
+                "voters": [
+                    "tracing",
+                    "xai",
+                    "safety"
+                ]
+            },
+            "PRODUCT": {
+                "count": 1,
+                "percentage": 6.25,
+                "voters": [
+                    "application"
+                ]
+            },
+            "UNCAST": {
+                "count": 1,
+                "percentage": 6.25,
+                "voters": [
+                    "config_infra"
+                ]
+            }
+        },
+        "outcome": "PRACTICE — SUPERMAJORITY",
+        "outcome_percentage": 68.75
+    },
+    "environmental_intelligence": {
+        "timeline": [
+            {
+                "timestamp": "2026-02-24T07:50:01+06:00",
+                "event": "session_opened",
+                "weights": {
+                    "practical": 0.0,
+                    "legal": 0.0,
+                    "psychological": 0.0
+                },
+                "temperature": 0.5,
+                "shift": null,
+                "nudge": "Synthesize points to maintain global GRID structure."
+            },
+            {
+                "timestamp": "2026-02-24T07:50:30+06:00",
+                "event": "round_1_statements",
+                "weights": {
+                    "practical": 0.3,
+                    "legal": 0.1,
+                    "psychological": 0.2
+                },
+                "temperature": 0.5,
+                "shift": null,
+                "nudge": "Synthesize points to maintain global GRID structure."
+            },
+            {
+                "timestamp": "2026-02-24T07:54:54+06:00",
+                "event": "founder_inquiry",
+                "weights": {
+                    "practical": 0.4,
+                    "legal": 0.0,
+                    "psychological": 0.6
+                },
+                "temperature": 0.5,
+                "shift": null,
+                "nudge": "Synthesize points to maintain global GRID structure."
+            },
+            {
+                "timestamp": "2026-02-24T07:55:57+06:00",
+                "event": "module_assembly",
+                "weights": {
+                    "practical": 0.2,
+                    "legal": 0.1,
+                    "psychological": 0.7
+                },
+                "temperature": 0.5,
+                "shift": null,
+                "nudge": "Synthesize points to maintain global GRID structure."
+            },
+            {
+                "timestamp": "2026-02-24T07:57:56+06:00",
+                "event": "ballot_processing",
+                "weights": {
+                    "practical": 0.6,
+                    "legal": 0.3,
+                    "psychological": 2.4
+                },
+                "temperature": 0.3,
+                "shift": "psychological_dominance",
+                "nudge": "Ground the psychological theory into a liquid, executable market step with legal safeguards."
+            }
+        ],
+        "final_api_output": {
+            "llm_parameters": {
+                "temperature": 0.3,
+                "top_p": 0.85,
+                "presence_penalty": 0.30,
+                "top_k": 8
+            },
+            "system_instruction": "Current room constraint: Ground the psychological theory into a liquid, executable market step with legal safeguards.",
+            "internal_state_weights": {
+                "practical": 0.6,
+                "legal": 0.3,
+                "psychological": 2.4
+            }
+        },
+        "shifts": [
+            {
+                "trigger": "psychological_dominance",
+                "dominant_dimension": "psychological",
+                "temperature": 0.3,
+                "top_p": 0.85,
+                "presence_penalty": 0.30,
+                "top_k": 8,
+                "nudge": "Ground the psychological theory into a liquid, executable market step with legal safeguards."
+            }
+        ],
+        "final_triad_normalized": {
+            "practical": 0.18,
+            "legal": 0.09,
+            "psychological": 0.73
+        }
+    },
+    "compass_history": [
+        {
+            "round": 1,
+            "direction": "Commit and stabilize before expanding",
+            "confidence": 0.82,
+            "trigger": "initial_convening"
+        },
+        {
+            "round": 2,
+            "direction": "GRID is a practice platform wearing a product costume — recognition, not pivot",
+            "confidence": 0.88,
+            "trigger": "founder_freeform_inquiry"
+        },
+        {
+            "round": 3,
+            "direction": "15/16 modules operate on cognitive primitives; disguise confined to payment/deployment",
+            "confidence": 0.91,
+            "trigger": "full_module_assembly"
+        },
+        {
+            "round": 4,
+            "direction": "Steer toward cognitive practice platform — grounded in a local executable runtime",
+            "confidence": 0.93,
+            "trigger": "anonymous_ballot_and_environmental_grounding"
+        }
+    ],
+    "final_compass": {
+        "direction": "GRID should steer toward a cognitive routine/research/practice platform with one structural anchor: the executable kernel. Strip the product frame but keep the engine.",
+        "reasoning": "68.75% of core modules vote PRACTICE. 37% of product code contains cognitive vocabulary. Environmental engine counter-shifts: ground psychology into executable form.",
+        "confidence": 0.93,
+        "key_factors": [
+            "11/16 modules pure cognitive with zero product vocabulary",
+            "37.4% semantic leakage from cognitive into product layer",
+            "Environmental counter-shift honored — executable grounding required",
+            "Spark invoker is the natural practice interface",
+            "Zero product vocabulary in cognitive core — clean boundary"
+        ],
+        "directives": [
+            {
+                "priority": 1,
+                "action": "demote",
+                "target": "application/mothership/",
+                "detail": "From 'the API' to 'one possible surface.' Entry point becomes Spark."
+            },
+            {
+                "priority": 2,
+                "action": "promote",
+                "target": "cognition/ + src/cognitive/",
+                "detail": "To first-class top-level status — root of the practice platform."
+            },
+            {
+                "priority": 3,
+                "action": "rebrand",
+                "target": "safety/",
+                "detail": "From 'API guardian' to 'cognitive integrity guardian.' 251 tests still hold; mission shifts."
+            },
+            {
+                "priority": 4,
+                "action": "elevate",
+                "target": "Round Table + Staircase",
+                "detail": "Primary interface via Spark staircase persona + RoundTableFacilitator. Frontend becomes practice room."
+            },
+            {
+                "priority": 5,
+                "action": "defer",
+                "target": "Stripe / billing",
+                "detail": "Not deleted — deferred. Monetization follows audience, does not lead."
+            }
+        ],
+        "preserved": [
+            "safety/ 251-test contract",
+            "local-first principle (Ollama/ChromaDB)",
+            "GridEnvironment homeostatic engine",
+            "git commit hygiene"
+        ],
+        "dissent": {
+            "source": "GridEnvironment",
+            "objection": "Ungrounded Ψ-dominance",
+            "resolution": "Honored — compass includes executable kernel as structural anchor"
+        }
+    }
+}

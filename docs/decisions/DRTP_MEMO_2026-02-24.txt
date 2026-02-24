@@ -1,0 +1,166 @@
+# MEMO: GRID Directional Identity Decision
+# ==========================================
+# DRTP Session: 2026-02-24T07:50:01+06:00
+# Protocol: Digital Round Table Protocol v2.5.0
+# Classification: Decision Record — Internal
+# ---
+
+FROM:    The Round Table (16 parties, equal standing)
+TO:      GRID Decision Fabric / Irfan Kabir
+RE:      Directional Identity — Cognitive Practice Platform
+DATE:    2026-02-24
+STATUS:  DECISION RECORDED — COMPASS CALIBRATED
+
+============================================================================
+EXECUTIVE SUMMARY
+============================================================================
+
+A full DRTP session was convened to answer one question:
+
+    "Should GRID steer free-form toward a cognitive routine / research /
+     practice platform, and not follow the conventional digital app /
+     product roadmap?"
+
+Sixteen core codebase modules were called as objects with equal standing.
+Each module's vote was derived from its actual code content — naming
+conventions, import graphs, functional purpose, and semantic vocabulary.
+
+RESULT:  11 of 16 modules voted PRACTICE (68.75% — supermajority).
+         3 voted DUAL (18.75%).  1 voted PRODUCT (6.25%).
+
+COMPASS: Steer toward cognitive practice platform, grounded in a local
+         executable runtime.  Confidence: 0.93.
+
+============================================================================
+WHAT WAS FOUND
+============================================================================
+
+1. CODEBASE COMPOSITION (450 files, 4,425 KB)
+
+   Category                 Files    KB       %
+   ─────────────────────────────────────────────
+   Cognitive / Research       86    973.6    22.0%
+   Product / Infrastructure  174  1,717.7    38.8%
+   Safety / Trust            118  1,174.9    26.5%
+   Agentic / Skills           72    559.1    12.6%
+   ─────────────────────────────────────────────
+   Total                     450  4,425.3   100.0%
+
+2. SEMANTIC CROSS-CONTAMINATION
+
+   Of 174 "product" files, 65 contain cognitive vocabulary (37.4%).
+   Of 118 "safety" files, 29 contain cognitive vocabulary (24.6%).
+   Of 86 "cognitive" files, 0 contain product vocabulary (0.0%).
+
+   → The cognitive core is semantically pure.
+   → The product layer is contaminated with cognitive constructs.
+   → The code already says what GRID is.
+
+3. MODULE VOTES
+
+   PRACTICE  (11): essence, awareness, patterns, evolution, cognition,
+                   cognitive_engine, intelligence, knowledge, spark,
+                   senses, processing
+   DUAL       (3): tracing, xai, safety
+   PRODUCT    (1): application + billing
+
+4. ENVIRONMENTAL STATE
+
+   Final triad: R=0.6, Z=0.3, Ψ=2.4
+   Shift triggered: psychological_dominance
+   Counter-shift applied: temperature→0.3, nudge→"Ground into executable"
+
+============================================================================
+WHAT WAS DECIDED
+============================================================================
+
+   #  Directive                   Detail
+   ── ─────────────────────────── ──────────────────────────────────────────
+   1  DEMOTE application/         From "the API" to optional surface.
+                                  Entry point becomes Spark invoker.
+
+   2  PROMOTE cognition/ +        To first-class top-level root.
+      src/cognitive/              250+ KB of cognitive science IS the core.
+
+   3  REBRAND safety/             From "API guardian" to "cognitive integrity
+                                  guardian." 251 tests still hold.
+
+   4  ELEVATE Round Table +       Primary interface via Spark staircase +
+      Staircase                   RoundTableFacilitator. Frontend = room.
+
+   5  DEFER Stripe / billing      Not deleted — deferred. Monetization
+                                  follows audience, does not lead.
+
+============================================================================
+WHAT DOES NOT CHANGE
+============================================================================
+
+   • safety/ 251-test contract holds.  No bypass.  No shortcut.
+   • Local-first principle holds.  All AI on Ollama/ChromaDB.
+   • GridEnvironment homeostatic engine continues to monitor balance.
+   • Git commit hygiene: 127 uncommitted files must be committed.
+   • Security contracts in safety/, security/, boundaries/ untouched.
+
+============================================================================
+DISSENT RECORD
+============================================================================
+
+   SOURCE:     GridEnvironment (Homeostatic Governor)
+   OBJECTION:  Ungrounded Ψ-dominance (psychological weight 4x practical)
+   RESOLUTION: Honored. Compass includes "executable kernel" as anchor.
+               The practice platform is not a research paper —
+               it is a local runtime that responds to cognitive state.
+
+============================================================================
+ENVIRONMENTAL INTELLIGENCE — FINAL API OUTPUT
+============================================================================
+
+   {
+     "llm_parameters": {
+       "temperature": 0.3,
+       "top_p": 0.85,
+       "presence_penalty": 0.30,
+       "top_k": 8
+     },
+     "system_instruction": "Ground the psychological theory into a liquid,
+                            executable market step with legal safeguards.",
+     "internal_state_weights": {
+       "practical": 0.6,
+       "legal": 0.3,
+       "psychological": 2.4
+     }
+   }
+
+============================================================================
+COMPASS HEADING
+============================================================================
+
+   DIRECTION:   Cognitive practice platform, locally executable,
+                with homeostatic balance monitoring.
+
+   CONFIDENCE:  0.93
+
+   KEY FACTORS:
+     1. 68.75% of modules are pure cognitive code
+     2. 37% of "product" code is cognitive-in-disguise
+     3. Environmental counter-shift demands executable grounding
+     4. Spark is the natural practice interface
+     5. Zero product vocabulary in cognitive core
+
+============================================================================
+ARTIFACTS PRODUCED
+============================================================================
+
+   File                                              Format    Purpose
+   ───────────────────────────────────────────────────────────────────────
+   docs/decisions/DRTP_SESSION_2026-02-24.md          MD       Full NLP record
+   docs/decisions/DRTP_SESSION_2026-02-24.json        JSON     Machine-readable
+   docs/decisions/DRTP_MEMO_2026-02-24.txt            TXT      This memo
+
+============================================================================
+
+Sealed by the Round Table.
+No party is larger or smaller than another.
+The compass points inward.
+
+— GRID DRTP v2.5.0
