@@ -137,7 +137,9 @@ describe("routeComponents", () => {
   it("has a component for every route in config", () => {
     for (const route of appConfig.routes) {
       expect(routeComponents[route.id]).toBeDefined();
-      expect(typeof routeComponents[route.id]).toBe("function");
+      // Lazy components are objects with $$typeof, not plain functions
+      const comp = routeComponents[route.id];
+      expect(typeof comp === "function" || typeof comp === "object").toBe(true);
     }
   });
 

@@ -43,8 +43,8 @@ export const Colors: Story = {
   render: () => (
     <Section title="Colors">
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-        {Object.entries(tokens.color).map(([name, value]) => (
-          <ColorSwatch key={name} name={name} value={value} />
+        {Object.entries(tokens.themes.dark).map(([name, value]) => (
+          <ColorSwatch key={name} name={name} value={value as string} />
         ))}
       </div>
     </Section>
