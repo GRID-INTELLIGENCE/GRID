@@ -1,107 +1,64 @@
-# Getting Started with Grid
+# Getting Started with GRID
 
-This guide will help you get up and running with the Grid unified development environment.
+This guide will help you get up and running with GRID (Geometric Resonance Intelligence Driver).
 
 ## Prerequisites
 
-- Python 3.9 or higher
-- Git
-- pip or poetry for package management
+- **Python 3.13** (required — GRID uses PEP 695 syntax)
+- **Git** 2.30+
+- **uv** (recommended) — install from [docs.astral.sh/uv](https://docs.astral.sh/uv/)
 
 ## Installation
 
-### Quick Start
+### For End Users (PyPI)
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd grid
-   ```
+```bash
+pip install grid-intelligence
+grid --help
+```
 
-2. **Run the setup script**
-   ```bash
-   python scripts/setup.py
-   ```
+### For Contributors
 
-3. **Activate the virtual environment**
-   ```bash
-   # Windows
-   venv\Scripts\activate
+```bash
+# Clone the repository
+git clone https://github.com/GRID-INTELLIGENCE/GRID.git
+cd GRID
 
-   # Unix/macOS
-   source venv/bin/activate
-   ```
+# Install with uv (creates .venv, installs all deps from lockfile)
+uv sync --group dev --group test
 
-4. **Start the development server**
-   ```bash
-   python -m src.cli.main serve
-   ```
-
-5. **Visit the API documentation**
-   Open http://localhost:8000/docs in your browser
-
-### Manual Installation
-
-If you prefer to set up manually:
-
-1. **Create virtual environment**
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # Windows: venv\Scripts\activate
-   ```
-
-2. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. **Set up environment variables**
-   ```bash
-   cp config/.env.example .env
-   # Edit .env with your configuration
-   ```
-
-4. **Install pre-commit hooks**
-   ```bash
-   pre-commit install
-   ```
+# Verify
+uv run pytest -q --tb=short
+uv run grid --help
+```
 
 ## Configuration
 
 ### Environment Variables
 
-The main configuration is handled through environment variables in the `.env` file:
+Copy the example environment file and edit it:
 
 ```bash
-# Application
-APP_NAME="My Grid App"
-ENVIRONMENT="development"
+cp .env.example .env
+```
 
-# Database
-DATABASE__URL="sqlite:///./app.db"
-DATABASE__ECHO=false
+Key settings:
 
-# API
-API__HOST="0.0.0.0"
-API__PORT=8000
-API__DEBUG=true
-
-# Security
-SECURITY__SECRET_KEY="your-secret-key-here"
-SECURITY__ACCESS_TOKEN_EXPIRE_MINUTES=30
+```env
+ENVIRONMENT=development
+DATABASE_URL=sqlite:///./app.db
+SECRET_KEY=change-this-to-random-string
+API_HOST=0.0.0.0
+API_PORT=8000
 ```
 
 ### Database Setup
 
-The framework supports multiple databases:
+GRID supports SQLite (default), PostgreSQL, and MySQL:
 
-- **SQLite** (default): `sqlite:///./app.db`
-- **PostgreSQL**: `postgresql://user:pass@localhost/dbname`
-- **MySQL**: `mysql://user:pass@localhost/dbname`
-
-To run migrations:
 ```bash
-python -m src.cli.main migrate
+# Run migrations
+uv run alembic upgrade head
 ```
 
 ## Development Workflow
@@ -109,100 +66,48 @@ python -m src.cli.main migrate
 ### Common Commands
 
 ```bash
-# Start development server
-python -m src.cli.main serve
+# Start the API server
+uv run grid serve
 
 # Run tests
-python -m src.cli.main test
+uv run pytest -q --tb=short
 
-# Code formatting
-python -m src.cli.main lint --fix
+# Run linter
+uv run ruff check work/ safety/ security/ boundaries/
 
-# Interactive shell
-python -m src.cli.main shell
-
-# Application status
-python -m src.cli.main status
+# Interactive RAG chat (requires Ollama)
+uv run grid chat
 ```
 
-### Using Make Commands
+### Session Start Protocol
+
+Before writing any new code, always verify the wall holds:
 
 ```bash
-# Install dependencies
-make install
-
-# Run development workflow
-make dev
-
-
+uv run pytest -q --tb=short && uv run ruff check work/ safety/ security/ boundaries/
 ```
 
 ## Project Structure
 
-Understanding the project structure:
-
 ```
-grid/
-├── src/                    # Source code
-│   ├── core/              # Core framework components
-│   ├── api/               # FastAPI web layer
-│   ├── cli/               # Command-line interface
-│   ├── database/          # Database layer
-│   ├── services/          # Business logic
-│   └── utils/             # Utilities
+GRID/
+├── src/
+│   ├── grid/              # Core runtime (API, CLI, config, agentic)
+│   ├── application/       # Mothership layer (middleware, skills, resonance)
+│   ├── cognitive/         # Cognitive engine (patterns, temporal, XAI)
+│   └── tools/             # RAG, cognitive tooling
+├── safety/                # AI safety: detectors, escalation, audit
+├── security/              # Network monitoring, forensics
+├── boundaries/            # Boundary contracts, overwatch, refusal
+├── frontend/              # React + TypeScript + Electron
 ├── tests/                 # Test suite
-├── config/                # Configuration files
 ├── docs/                  # Documentation
-├── scripts/               # Utility scripts
-├── examples/              # Example projects
-├── templates/             # Project templates
 └── .github/               # CI/CD workflows
 ```
 
 ## Next Steps
 
-1. **Explore the examples**: Check out the `examples/` directory for sample projects
-2. **Read the documentation**: Visit `docs/` for detailed guides
-3. **Create your first project**: Use templates in `templates/` to scaffold new projects
-4. **Configure your environment**: Update `.env` for your specific needs
-
-## Getting Help
-
-- Check the [API documentation](http://localhost:8000/docs) when the server is running
-- Review the test files for usage examples
-- Look at the examples directory for complete project samples
-- Check the documentation in the `docs/` folder
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Port already in use**
-   ```bash
-   # Kill process on port 8000
-   lsof -ti:8000 | xargs kill -9  # Unix
-   netstat -ano | findstr :8000   # Windows
-   ```
-
-2. **Database connection errors**
-   - Check your DATABASE__URL in .env
-   - Ensure database server is running
-   - Run migrations: `python -m src.cli.main migrate`
-
-3. **Import errors**
-   - Ensure virtual environment is activated
-   - Install dependencies: `pip install -r requirements.txt`
-   - Check PYTHONPATH includes project root
-
-### Debug Mode
-
-Enable debug mode by setting in your `.env`:
-```bash
-API__DEBUG=true
-ENVIRONMENT=development
-```
-
-This will provide:
-- Detailed error messages
-- Debug logging
-- Auto-reload on code changes
+1. Read the [INSTALLATION.md](INSTALLATION.md) for platform-specific details
+2. Check [CONTRIBUTING.md](../CONTRIBUTING.md) for contribution guidelines
+3. Explore the `examples/` directory for usage samples
+4. Visit the [live demo](https://grid-intelligence.netlify.app)
