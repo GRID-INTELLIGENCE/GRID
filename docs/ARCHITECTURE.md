@@ -2,8 +2,8 @@
 
 **GRID (Geometric Resonance Intelligence Driver)** - Comprehensive Architecture Overview
 
-Version: 2.2.0
-Last Updated: January 2026
+Version: 2.5.0
+Last Updated: February 2026
 Status: Production Ready
 
 ---
@@ -710,6 +710,62 @@ graph TB
     style A1 fill:#2196F3
     style L1 fill:#9C27B0
 ```
+
+### Environmental Intelligence
+
+Homeostatic middleware layer that monitors conversational balance and adjusts LLM parameters dynamically.
+
+```mermaid
+graph TB
+    subgraph "Environmental Intelligence Engine"
+        subgraph "Triad Dimensions"
+            P["Practical (R)<br/>Revenue, Execution, Market"]
+            L["Legal (Z)<br/>Defense, Ownership, Compliance"]
+            Psi["Psychological (Ψ)<br/>Wellness, Mindset, Impact"]
+        end
+
+        subgraph "GridEnvironment"
+            SCAN["_scan_lexicon()<br/>Keyword Detection"]
+            RECAL["_recalibrate()<br/>Le Chatelier's Shift"]
+            API["_generate_api_output()<br/>LLM Parameters"]
+        end
+
+        subgraph "ArenaAmbiance"
+            TEMP["Temperature"]
+            FREQ["Frequency Penalty"]
+            DRIFT["Focus Drift"]
+            DENS["Density"]
+        end
+
+        subgraph "Integration"
+            PROXY["EnvironmentalLLMProxy<br/>Wraps BaseLLMProvider"]
+            ROUND["RoundTableFacilitator<br/>4-Phase Orchestrator"]
+        end
+    end
+
+    P --> SCAN
+    L --> SCAN
+    Psi --> SCAN
+    SCAN --> RECAL
+    RECAL --> TEMP
+    RECAL --> FREQ
+    RECAL --> DRIFT
+    RECAL --> DENS
+    TEMP --> API
+    FREQ --> API
+    DRIFT --> API
+    DENS --> API
+    API --> PROXY
+    PROXY --> ROUND
+
+    style P fill:#FF9800
+    style L fill:#2196F3
+    style Psi fill:#9C27B0
+    style PROXY fill:#4CAF50
+    style ROUND fill:#4CAF50
+```
+
+**Key principle:** When one dimension dominates beyond a threshold (default 0.2), the engine applies Le Chatelier's counter-shift — adjusting temperature, drift, and density to steer the LLM naturally toward neglected dimensions without explicit topic commands.
 
 ---
 

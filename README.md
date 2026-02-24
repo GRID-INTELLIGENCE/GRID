@@ -110,7 +110,7 @@ $ grid analyze src/
 
 | 🎯 Metric | 📈 Value | 🎯 Metric | 📈 Value |
 |-----------|----------|-----------|----------|
-| **Python Version** | 3.13+ | **Tests Passing** | 378+ ✅ |
+| **Python Version** | 3.13+ | **Tests Passing** | 438+ ✅ |
 | **Code Coverage** | ≥80% | **Architecture** | DDD + Event-Driven |
 | **Lint Errors** | 0 (ruff clean) | **RAG Precision** | +33-40% |
 | **Security** | Production-Ready | **Package Manager** | UV |
@@ -123,7 +123,7 @@ $ grid analyze src/
 
 ![Lines of Code](https://img.shields.io/badge/Lines%20of%20Code-50k%2B-blue?style=flat-square)
 ![Files](https://img.shields.io/badge/Files-748-green?style=flat-square)
-![Tests](https://img.shields.io/badge/Tests-378%2B-success?style=flat-square)
+![Tests](https://img.shields.io/badge/Tests-438%2B-success?style=flat-square)
 ![Lint](https://img.shields.io/badge/Lint-0%20errors-brightgreen?style=flat-square)
 
 </div>
@@ -142,6 +142,14 @@ GRID (Geometric Resonance Intelligence Driver) is a comprehensive framework for 
 - **Domain-Driven Design**: Professional architectural patterns with service layer decoupling
 
 ## 🚀 What's New (February 2026)
+
+### v2.5.0 — Environmental Intelligence & Round Table
+
+- ✅ **GRID Environmental Intelligence** — Homeostatic middleware using Le Chatelier's Principle to maintain conversational balance across three dimensions (Practical, Legal, Psychological)
+- ✅ **Round Table Facilitator** — 4-phase multi-agent discussion orchestrator (open → discuss → synthesize → close) with environment-aware LLM parameter adjustment
+- ✅ **EnvironmentalLLMProxy** — Wraps any `BaseLLMProvider` with dynamic parameter adjustment based on conversational equilibrium
+- ✅ **RoundTablePage** — Frontend page for initiating and visualizing round table discussions
+- ✅ **60 New Tests** — 43 environment tests (9 classes) + 17 round table facilitator tests; all passing
 
 ### v2.4.1 — Consolidation & Snapshot Integrity
 
@@ -246,7 +254,7 @@ We're not perfect—early on, 29 tests were still failing. But we documented eve
 Nov 2025 → First commit. Blank templates. Beginning.
 Dec 2025 → Architecture cleanup. Security foundation. Domain-driven design.
 Jan 2026 → Cognitive layer. RAG optimization (+33-40% precision). Production hardening.
-Feb 2026 → 540+ files. 283+ tests. 100% core pass rate. Version 2.2+. Production-ready. ✨
+Feb 2026 → 540+ files. 283+ tests. 100% core pass rate. Environmental Intelligence. Version 2.5+. Production-ready. ✨
 ```
 
 <div align="center">
@@ -554,7 +562,7 @@ See `docs/UV_USAGE.md` for full copy-paste commands.
 ### New Systems (2026)
 
 - **🔐 Authentication & Billing**: JWT-based auth with token revocation, tier-based subscriptions with usage tracking
-- **🤖 Agentic System**: Event-driven case management with continuous learning
+- **🤖 Agentic System**: Event-driven case management with continuous learning, plus Environmental Intelligence (homeostatic LLM parameter tuning) and Round Table multi-agent facilitation
 - **🏗️ DDD Architecture**: Domain-driven design with service layer decoupling
 - **📁 Organized Structure**: Clean root directory with logical organization
 - **🏗️ Unified Fabric**: High-performance async event bus and distributed safety layer
@@ -607,7 +615,7 @@ e:\grid/
 ```
 src/
 ├── grid/                   # Core intelligence package
-│   ├── agentic/           # Event-driven agentic system
+│   ├── agentic/           # Event-driven agentic system + environmental intelligence
 │   ├── context/           # User context management
 │   ├── workflow/          # Workflow orchestration
 │   └── io/                # Input/output handling

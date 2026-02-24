@@ -281,3 +281,59 @@ pytest tests/test_databricks_agentic.py
 - **Agent Evolution System**: `docs/AGENT_EVOLUTION_SYSTEM.md`
 - **Case Filing Template**: `docs/CASE_FILING_TEMPLATE.md`
 - **Event-Driven Architecture**: `docs/EVENT_DRIVEN_ARCHITECTURE.md`
+
+---
+
+## Environmental Intelligence Engine
+
+### 9. Grid Environment (`grid/agentic/grid_environment.py`)
+
+Homeostatic middleware that monitors conversational balance across three dimensions and dynamically adjusts LLM generation parameters using Le Chatelier's Principle.
+
+**Core classes:**
+
+- **`GridDimension`** (`StrEnum`): The three pillars — `PRACTICAL`, `LEGAL`, `PSYCHOLOGICAL`
+- **`ArenaAmbiance`** (`BaseModel`): Atmospheric state governing AI generation — `temperature`, `frequency_penalty`, `focus_drift`, `density` (all `Field(ge=0.0, le=1.0)`)
+- **`EnvironmentalShift`** (`BaseModel`): A recorded recalibration event with `trigger`, `old_ambiance`, `new_ambiance`, and `timestamp`
+- **`GridEnvironment`**: The engine — scans lexicon for dimension signals (`_scan_lexicon()`), recalibrates ambiance when imbalance exceeds threshold, generates API-ready output (`_generate_api_output()`), and maintains a shift history
+- **`EnvironmentalLLMProxy`**: Wraps any `BaseLLMProvider`, overrides `generate()` with environment-adjusted parameters while passing through `stream()` and `agenerate()`
+
+**Recalibration rules (Le Chatelier's table):**
+
+| Condition | Temperature | Focus Drift | Density |
+|---|---|---|---|
+| Legal > Psych + 0.2 | 0.7 | 0.4 | — |
+| Practical > Legal + 0.2 | — | 0.1 | 0.8 |
+| Psych > Practical + 0.2 | 0.3 | — | 0.9 |
+| Balanced (within threshold) | 0.5 | 0.2 | 0.5 |
+
+### 10. Round Table Facilitator (`grid/agentic/roundtable_facilitator.py`)
+
+4-phase orchestrator for multi-agent round table discussions with environment-aware parameter adjustment.
+
+**Phases:** `open` → `discuss` → `synthesize` → `close`
+
+- Coordinates contributions from multiple agents across discussion rounds
+- Integrates with `GridEnvironment` to maintain balanced discourse
+- Produces a `RoundTableResult` with all contributions, synthesis, and environmental shift history
+
+### 11. Round Table Schemas (`grid/agentic/roundtable_schemas.py`)
+
+Pydantic models for round table sessions:
+
+- **`RoundTableConfig`**: Session configuration (topic, agents, rounds, environment settings)
+- **`RoundTableContribution`**: Individual agent contribution with role, content, and dimension
+- **`RoundTableResult`**: Complete session result with contributions, synthesis, and metadata
+
+### Testing
+
+```bash
+# Run environment tests (43 tests, 9 classes)
+pytest tests/unit/test_grid_environment.py -v
+
+# Run round table facilitator tests (17 tests)
+pytest tests/unit/test_roundtable_facilitator.py -v
+
+# Run all agentic tests
+pytest tests/unit/test_grid_environment.py tests/unit/test_roundtable_facilitator.py -v
+```

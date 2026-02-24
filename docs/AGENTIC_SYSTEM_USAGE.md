@@ -377,3 +377,104 @@ If Databricks integration fails:
 - **Case Filing Template**: `docs/CASE_FILING_TEMPLATE.md`
 - **Event Architecture**: `docs/EVENT_DRIVEN_ARCHITECTURE.md`
 - **API Reference**: `application/mothership/routers/agentic.py`
+
+---
+
+## Environmental Intelligence & Round Table
+
+### Overview
+
+The Environmental Intelligence engine adds a homeostatic layer to the agentic system. It monitors conversational balance across three dimensions (Practical, Legal, Psychological) and dynamically adjusts LLM generation parameters to maintain equilibrium. The Round Table Facilitator uses this engine to orchestrate multi-agent discussions.
+
+### Using GridEnvironment Directly
+
+```python
+from grid.agentic import GridEnvironment, GridDimension
+
+# Create an environment with default ambiance
+env = GridEnvironment()
+
+# Observe a message — the engine scans for dimension signals
+env.observe("We need to finalize the revenue projections and market strategy.")
+
+# Check the current dimension scores
+scores = env.scores
+print(f"Practical: {scores[GridDimension.PRACTICAL]}")
+print(f"Legal: {scores[GridDimension.LEGAL]}")
+print(f"Psychological: {scores[GridDimension.PSYCHOLOGICAL]}")
+
+# Get the current ambiance (LLM parameters)
+ambiance = env.ambiance
+print(f"Temperature: {ambiance.temperature}")
+print(f"Frequency Penalty: {ambiance.frequency_penalty}")
+print(f"Focus Drift: {ambiance.focus_drift}")
+print(f"Density: {ambiance.density}")
+
+# Get API-ready output for LLM calls
+api_params = env.api_output()
+print(api_params)  # {"temperature": 0.5, "frequency_penalty": 0.2, ...}
+```
+
+### Using EnvironmentalLLMProxy
+
+```python
+from grid.agentic import EnvironmentalLLMProxy, GridEnvironment
+
+# Wrap any BaseLLMProvider with environment-aware parameter adjustment
+env = GridEnvironment()
+proxy = EnvironmentalLLMProxy(provider=your_llm_provider, environment=env)
+
+# Generate with environment-adjusted parameters
+# The proxy automatically merges environment parameters with your request
+response = proxy.generate(
+    prompt="Discuss the implications of this contract.",
+    temperature=0.8  # Will be overridden by environment if recalibration triggered
+)
+```
+
+### Using the Round Table Facilitator
+
+```python
+from grid.agentic import RoundTableFacilitator, GridEnvironment
+
+# Create a facilitator with an environment
+env = GridEnvironment()
+facilitator = RoundTableFacilitator(environment=env)
+
+# Run a round table discussion
+result = await facilitator.run(
+    topic="Should we expand into the European market?",
+    agents=["strategist", "legal_counsel", "wellness_advisor"],
+    rounds=3
+)
+
+# Inspect contributions by phase
+for contribution in result.contributions:
+    print(f"[{contribution.phase}] {contribution.role}: {contribution.content}")
+
+# Check environmental shifts during the discussion
+for shift in result.shifts:
+    print(f"Shift triggered by: {shift.trigger}")
+    print(f"  Old temp: {shift.old_ambiance.temperature} → New: {shift.new_ambiance.temperature}")
+```
+
+### Environment Configuration
+
+The `GridEnvironment` can be configured with:
+
+- **`threshold`** (`float`, default `0.2`): Minimum imbalance required to trigger recalibration
+- **`lexicon`** (`dict`): Custom keyword-to-dimension mappings for domain-specific vocabulary
+
+```python
+from grid.agentic import GridEnvironment, GridDimension
+
+# Custom lexicon for a fintech domain
+custom_lexicon = {
+    "AML": GridDimension.LEGAL,
+    "KYC": GridDimension.LEGAL,
+    "runway": GridDimension.PRACTICAL,
+    "burnout": GridDimension.PSYCHOLOGICAL,
+}
+
+env = GridEnvironment(threshold=0.15, extra_lexicon=custom_lexicon)
+```

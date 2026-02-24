@@ -5,6 +5,26 @@ All notable changes to the GRID project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0] - 2026-02-24
+
+### Highlights
+
+**GRID Environmental Intelligence** — homeostatic middleware that sits between the round table facilitator and LLM providers. Monitors conversational balance across three dimensions (Practical, Legal, Psychological) and dynamically adjusts LLM generation parameters using Le Chatelier's Principle. Includes a full round table facilitation layer, frontend page, and comprehensive test coverage.
+
+### Added
+
+- **Grid Environment Engine** (`src/grid/agentic/grid_environment.py`) — `GridDimension`, `ArenaAmbiance`, `EnvironmentalShift`, `GridEnvironment`, and `EnvironmentalLLMProxy` classes implementing the homeostatic triad (Practical/Legal/Psychological) with negative feedback recalibration
+- **Round Table Facilitator** (`src/grid/agentic/roundtable_facilitator.py`) — 4-phase orchestrator (open → discuss → synthesize → close) that coordinates multi-agent round table discussions with environment-aware LLM parameter adjustment
+- **Round Table Schemas** (`src/grid/agentic/roundtable_schemas.py`) — Pydantic models for round table sessions, contributions, and results
+- **RoundTablePage** (`frontend/src/pages/RoundTablePage.tsx`) — Frontend page for initiating and visualizing round table discussions
+- **Frontend route/schema** — `roundtable` route with `compass` icon added to `app.config.json`, `app-schema.ts`, and `schema/index.ts`
+- **Test suite** — 43 environment tests (`tests/unit/test_grid_environment.py`) across 9 test classes + 17 round table facilitator tests (`tests/unit/test_roundtable_facilitator.py`); 60 new tests total
+- `dev/navigation_graph.json` updated with round table route
+
+### Changed
+
+- **Agentic `__init__.py`** — Exports extended with `ArenaAmbiance`, `EnvironmentalLLMProxy`, `GridDimension`, `GridEnvironment`, `RoundTableFacilitator`, `RoundTableResult`
+
 ## [2.4.1] - 2026-02-24
 
 ### Highlights
@@ -94,7 +114,8 @@ Repository cleanup: removed tracked artifacts, updated `.gitignore`, refreshed d
 
 ---
 
-[2.4.1]: https://github.com/caraxesthebloodwyrm02/GRID/compare/17fa605...HEAD
+[2.5.0]: https://github.com/caraxesthebloodwyrm02/GRID/compare/ee0a497...HEAD
+[2.4.1]: https://github.com/caraxesthebloodwyrm02/GRID/compare/17fa605...ee0a497
 [2.4.0]: https://github.com/caraxesthebloodwyrm02/GRID/compare/222eae7...17fa605
 [2.3.0]: https://github.com/caraxesthebloodwyrm02/GRID/compare/6534d65...222eae7
 [2.2.0]: https://github.com/caraxesthebloodwyrm02/GRID/compare/HEAD~3...6534d65

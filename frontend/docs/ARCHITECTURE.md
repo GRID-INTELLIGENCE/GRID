@@ -6,13 +6,13 @@
 
 ## Current Status Summary
 
-| Layer        | Technology                                | Description                                                              |
-| ------------ | ----------------------------------------- | ------------------------------------------------------------------------ |
-| **Runtime**  | Electron 40                               | Desktop shell with IPC bridge for secure API communication               |
-| **Frontend** | React 19 + TypeScript + Vite              | SPA with config-driven routing and TanStack Query for data fetching      |
-| **Styling**  | Tailwind CSS v4                           | Utility-first CSS with custom design tokens                              |
-| **Backend**  | FastAPI (port 8000) + Ollama (port 11434) | REST API for GRID services, local LLM integration via Ollama             |
-| **Testing**  | Vitest 4 + Testing Library                | 123 tests across 10 files covering utils, schema, clients, and all pages |
+| Layer        | Technology                                | Description                                                                |
+| ------------ | ----------------------------------------- | -------------------------------------------------------------------------- |
+| **Runtime**  | Electron 40                               | Desktop shell with IPC bridge for secure API communication                 |
+| **Frontend** | React 19 + TypeScript + Vite              | SPA with config-driven routing and TanStack Query for data fetching        |
+| **Styling**  | Tailwind CSS v4                           | Utility-first CSS with custom design tokens                                |
+| **Backend**  | FastAPI (port 8000) + Ollama (port 11434) | REST API for GRID services, local LLM integration via Ollama               |
+| **Testing**  | Vitest 4 + Testing Library                | 123+ tests across 10+ files covering utils, schema, clients, and all pages |
 
 ---
 
@@ -47,7 +47,7 @@ flowchart TB
     router["HashRouter<br/><i>Client Routing</i>"]
     shell["AppShell<br/><i>Layout + Nav</i>"]
 
-    subgraph Pages["📄 PAGES (10)"]
+    subgraph Pages["📄 PAGES (11)"]
       dashboard["Dashboard"]
       chat["ChatPage"]
       rag["RagQuery"]
@@ -56,6 +56,7 @@ flowchart TB
       security["Security"]
       obs["Observability"]
       knowledge["Knowledge"]
+      roundtable["RoundTable"]
     end
 
     subgraph DataLayer["🔄 DATA LAYER"]
@@ -152,7 +153,7 @@ flowchart TB
 | **Electron** | `preload.ts`        | Context bridge — securely exposes APIs to renderer         |
 | **React**    | `App.tsx`           | Root component with routing                                |
 | **React**    | `AppShell`          | Layout wrapper with Sidebar + Header                       |
-| **React**    | Pages (10)          | Feature-specific UI components                             |
+| **React**    | Pages (11)          | Feature-specific UI components                             |
 | **React**    | `TanStack Query`    | Data fetching, caching, state sync                         |
 | **React**    | `GridClient`        | Typed wrapper for GRID API calls                           |
 | **React**    | `OllamaClient`      | Typed wrapper for Ollama LLM calls                         |
@@ -275,7 +276,7 @@ flowchart TB
   subgraph Renderer["React Renderer"]
     app["App.tsx"]
     router["HashRouter"]
-    pages["Pages (10)"]
+    pages["Pages (11)"]
     schema["Schema Layer"]
     clients["API Clients"]
     app --> router --> pages
@@ -369,7 +370,7 @@ flowchart TB
     outlet["Outlet<br/>(Page Content)"]
   end
 
-  subgraph Pages["10 Pages"]
+  subgraph Pages["11 Pages"]
     dashboard["Dashboard"]
     chat["ChatPage"]
     rag["RagQuery"]
@@ -380,6 +381,7 @@ flowchart TB
     knowledge["Knowledge"]
     terminal["TerminalPage"]
     settings["SettingsPage"]
+    roundtable["RoundTablePage"]
   end
 
   subgraph DataLayer["Data Layer"]
@@ -445,7 +447,7 @@ graph TD
   src --> appTsx["App.tsx"]
   src --> mainTsx["main.tsx"]
   src --> indexCss["index.css"]
-  src --> pages["pages/ (10)"]
+  src --> pages["pages/ (11)"]
   src --> components["components/"]
   src --> schema["schema/"]
   src --> lib["lib/"]
@@ -481,6 +483,7 @@ graph TD
 | **Knowledge**     | `Knowledge.tsx`        | RAG engine stats, conversation metrics, signal quality, session mgmt     |
 | **Terminal**      | `TerminalPage.tsx`     | Interactive terminal (placeholder)                                       |
 | **Settings**      | `SettingsPage.tsx`     | API connection configuration display                                     |
+| **Round Table**   | `RoundTablePage.tsx`   | Multi-agent round table discussions with environmental intelligence      |
 
 ---
 

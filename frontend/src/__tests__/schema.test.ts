@@ -37,12 +37,19 @@ describe("appConfig", () => {
   });
 
   it("all routes have required fields", () => {
+    const navRouteIds = new Set([
+      ...appConfig.navigation.primary,
+      ...appConfig.navigation.secondary,
+    ]);
     for (const route of appConfig.routes) {
       expect(route.id).toBeTruthy();
       expect(route.path).toMatch(/^\//);
       expect(route.title).toBeTruthy();
-      expect(route.navLabel).toBeTruthy();
-      expect(route.icon).toBeTruthy();
+      // navLabel and icon are only required for navigable routes
+      if (navRouteIds.has(route.id)) {
+        expect(route.navLabel).toBeTruthy();
+        expect(route.icon).toBeTruthy();
+      }
     }
   });
 
@@ -114,6 +121,7 @@ describe("iconRegistry", () => {
       "sparkles",
       "radar",
       "cog",
+      "compass",
     ];
     for (const key of expectedKeys) {
       expect(iconRegistry[key]).toBeDefined();
