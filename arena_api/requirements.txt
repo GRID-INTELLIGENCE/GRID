@@ -32,7 +32,7 @@ pydantic-settings==2.13.1
 # Testing
 pytest==8.3.4
 pytest-asyncio==0.24.0
-pytest-cov==6.0.0
+pytest-cov==7.0.0
 # httpx already listed above for testing
 
 # Code Quality
