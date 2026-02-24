@@ -2,6 +2,7 @@
 
 <div align="center">
 
+[![PyPI version](https://img.shields.io/pypi/v/grid-intelligence.svg)](https://pypi.org/project/grid-intelligence/)
 [![Tests](https://github.com/GRID-INTELLIGENCE/GRID/actions/workflows/minimal-ci.yml/badge.svg?branch=main)](https://github.com/GRID-INTELLIGENCE/GRID/actions/workflows/minimal-ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python 3.13+](https://img.shields.io/badge/python-3.13%2B-blue.svg)](https://www.python.org/downloads/)
@@ -18,6 +19,15 @@
 ### 🎯 Local-First AI · 🔒 Privacy-First · ⚡ Production-Ready
 
 </div>
+
+## Quick Install
+
+```bash
+pip install grid-intelligence
+grid --help
+```
+
+For contributor/development setup, see [INSTALLATION.md](docs/INSTALLATION.md).
 
 ## 🎬 Interactive Demo
 
