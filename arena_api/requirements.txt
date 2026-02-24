@@ -3,9 +3,9 @@
 # Core dependencies for the dynamic API architecture
 
 # Web Framework (SECURITY UPDATE: Patched CORS bypass CVE)
-fastapi==0.115.6
-uvicorn[standard]==0.34.0
-starlette==0.41.3
+fastapi==0.132.0
+uvicorn[standard]==0.41.0
+starlette==0.52.1
 
 # Authentication & Security
 python-jose[cryptography]==3.5.0
@@ -26,8 +26,8 @@ redis==5.2.1
 aioredis==2.0.1
 
 # Data Validation (SECURITY UPDATE)
-pydantic==2.10.0
-pydantic-settings==2.7.1
+pydantic==2.12.5
+pydantic-settings==2.13.1
 
 # Testing
 pytest==8.3.4
