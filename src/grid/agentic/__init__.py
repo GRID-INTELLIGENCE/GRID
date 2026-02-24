@@ -11,6 +11,14 @@ from .events import (
     CaseExecutedEvent,
     CaseReferenceGeneratedEvent,
 )
+from .grid_environment import (
+    ArenaAmbiance,
+    EnvironmentalLLMProxy,
+    GridDimension,
+    GridEnvironment,
+)
+from .roundtable_facilitator import RoundTableFacilitator
+from .roundtable_schemas import RoundTableResult
 from .schemas import (
     AgentExperienceResponse,
     CaseCreateRequest,
@@ -22,7 +30,11 @@ from .schemas import (
 __all__ = [
     "AgenticSystem",
     "AgentExecutor",
+    "ArenaAmbiance",
     "EventBus",
+    "EnvironmentalLLMProxy",
+    "GridDimension",
+    "GridEnvironment",
     "CaseCreatedEvent",
     "CaseCategorizedEvent",
     "CaseReferenceGeneratedEvent",
@@ -34,4 +46,6 @@ __all__ = [
     "CaseEnrichRequest",
     "CaseExecuteRequest",
     "AgentExperienceResponse",
+    "RoundTableFacilitator",
+    "RoundTableResult",
 ]

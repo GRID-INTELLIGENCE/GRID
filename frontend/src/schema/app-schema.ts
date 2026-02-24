@@ -11,7 +11,8 @@ export type IconKey =
   | "message-square"
   | "sparkles"
   | "radar"
-  | "cog";
+  | "cog"
+  | "compass";
 
 export type RouteKey =
   | "dashboard"
@@ -25,7 +26,8 @@ export type RouteKey =
   | "terminal"
   | "settings"
   | "register"
-  | "login";
+  | "login"
+  | "roundtable";
 
 export type EndpointKey =
   | "health"

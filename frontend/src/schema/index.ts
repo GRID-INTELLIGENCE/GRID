@@ -7,12 +7,14 @@ import { Observability } from "@/pages/Observability";
 import { RagQuery } from "@/pages/RagQuery";
 import { Security } from "@/pages/Security";
 import { SettingsPage } from "@/pages/SettingsPage";
+import { RoundTablePage } from "@/pages/RoundTablePage";
 import { TerminalPage } from "@/pages/TerminalPage";
 import type { LucideIcon } from "lucide-react";
 import {
   Activity,
   Brain,
   Cog,
+  Compass,
   Database,
   LayoutDashboard,
   MessageSquare,
@@ -43,6 +45,7 @@ export const iconRegistry: Record<IconKey, LucideIcon> = {
   activity: Activity,
   brain: Brain,
   cog: Cog,
+  compass: Compass,
   database: Database,
   "layout-dashboard": LayoutDashboard,
   "message-square": MessageSquare,
@@ -68,6 +71,7 @@ export const routeComponents: Record<RouteKey, ComponentType> = {
   settings: SettingsPage,
   register: Register,
   login: Login,
+  roundtable: RoundTablePage,
 };
 
 const routesById = new Map<RouteKey, RouteConfig>(
