@@ -48,7 +48,6 @@ on:
 
 permissions:
   contents: write
-  id-token: write
 
 env:
   PYTHONUNBUFFERED: "1"
@@ -270,6 +269,7 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
+          attestations: false
           skip-existing: true
           verbose: true
 
