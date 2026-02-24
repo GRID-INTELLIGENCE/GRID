@@ -34,6 +34,11 @@ export default defineConfig({
           // App chunks
           "grid-client": ["./src/lib/grid-client.ts"],
           "state-persistence": ["./src/lib/state-persistence.ts"],
+          analytics: [
+            "./src/lib/analytics/types.ts",
+            "./src/lib/analytics/storage.ts",
+            "./src/hooks/use-analytics.ts",
+          ],
         },
         // Optimize asset naming for caching
         assetFileNames: (assetInfo) => {
