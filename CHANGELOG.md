@@ -5,6 +5,13 @@ All notable changes to the GRID project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.1] - 2026-02-24
+
+### Changed
+
+- **Test reorganization** — Relocated tests into themed directories for improved discoverability; removed deprecated components and temporary artifacts
+- **Codebase hygiene** — Cognitive architecture alignment pass; cleaned up stale modules and resolved structural inconsistencies
+
 ## [2.5.0] - 2026-02-24
 
 ### Highlights
@@ -114,7 +121,8 @@ Repository cleanup: removed tracked artifacts, updated `.gitignore`, refreshed d
 
 ---
 
-[2.5.0]: https://github.com/GRID-INTELLIGENCE/GRID/compare/ee0a497...HEAD
+[2.5.1]: https://github.com/GRID-INTELLIGENCE/GRID/compare/v2.5.0...v2.5.1
+[2.5.0]: https://github.com/GRID-INTELLIGENCE/GRID/compare/ee0a497...v2.5.0
 [2.4.1]: https://github.com/GRID-INTELLIGENCE/GRID/compare/17fa605...ee0a497
 [2.4.0]: https://github.com/GRID-INTELLIGENCE/GRID/compare/222eae7...17fa605
 [2.3.0]: https://github.com/GRID-INTELLIGENCE/GRID/compare/6534d65...222eae7
