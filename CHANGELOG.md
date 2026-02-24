@@ -5,56 +5,66 @@ All notable changes to the GRID project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.1] - 2026-02-24
+
+### Changed
+
+- **Packaging** - Added `src/mycelium` to wheel packaging targets in `pyproject.toml` so Mycelium ships in distributable builds
+- **Version alignment** - Synchronized package metadata and changelog for patch release consistency
+- **CI metadata checks** - Added version/changelog consistency verification in CI and release workflows
+- **Repository hygiene** - Removed tracked frontend coverage artifacts and transient release log artifacts from version control
+- **Contributor guidance** - Added pipeline green checklist and release runbook documentation for consistent execution
+
 ## [2.6.0] - 2026-02-24
 
 ### Highlights
 
-**Mycelium Frontend** — Interactive comprehension layer with adaptive synthesis, concept exploration, and accessibility-first design. Includes a full interactive page, a standalone demo/presentation page, and comprehensive test coverage.
+**Mycelium Frontend** â€” Interactive comprehension layer with adaptive synthesis, concept exploration, and accessibility-first design. Includes a full interactive page, a standalone demo/presentation page, and comprehensive test coverage.
 
 ### Added
 
-- **MyceliumPage** (`frontend/src/pages/MyceliumPage.tsx`) — Main interactive page with text input, adaptive synthesis, keyword-driven concept exploration, feedback loop (Simpler/Deeper), concept browser panel, and accessibility settings
-- **MyceliumDemo** (`frontend/src/pages/MyceliumDemo.tsx`) — Self-contained presentation page showcasing 3 personas, 3 source texts, 5 concept lenses with multi-lens switching
-- **6 Mycelium components** (`frontend/src/components/mycelium/`) — OutputDisplay, LensCard, HighlightPill, FeedbackBar, DepthControl, SensoryPicker
-- **useMycelium hook** (`frontend/src/hooks/use-mycelium.ts`) — useReducer FSM with 9 action types, bridge abstraction for Electron IPC/browser fallback
-- **Type definitions** (`frontend/src/types/mycelium.ts`) — Full type coverage for synthesis results, navigation, personas, sensory profiles
-- **Shared keyword extraction** (`frontend/src/lib/text-utils.ts`) — Deduplicated stop-word filtering and frequency counting utility
-- **Browser shim** (`frontend/src/lib/browser-shim.ts`) — Extended with `window.mycelium` for consistent browser-mode demo data across all pages
-- **Test suite** (`frontend/src/__tests__/MyceliumPage.test.tsx`) — 17 tests covering rendering, input validation, synthesis, keyboard shortcuts, error states, concept exploration, and feedback depth adjustment
-- **Frontend routes** — `mycelium` and `mycelium-demo` routes added to `app.config.json`, `app-schema.ts`, and `schema/index.ts`
+- **MyceliumPage** (`frontend/src/pages/MyceliumPage.tsx`) â€” Main interactive page with text input, adaptive synthesis, keyword-driven concept exploration, feedback loop (Simpler/Deeper), concept browser panel, and accessibility settings
+- **MyceliumDemo** (`frontend/src/pages/MyceliumDemo.tsx`) â€” Self-contained presentation page showcasing 3 personas, 3 source texts, 5 concept lenses with multi-lens switching
+- **6 Mycelium components** (`frontend/src/components/mycelium/`) â€” OutputDisplay, LensCard, HighlightPill, FeedbackBar, DepthControl, SensoryPicker
+- **useMycelium hook** (`frontend/src/hooks/use-mycelium.ts`) â€” useReducer FSM with 9 action types, bridge abstraction for Electron IPC/browser fallback
+- **Type definitions** (`frontend/src/types/mycelium.ts`) â€” Full type coverage for synthesis results, navigation, personas, sensory profiles
+- **Shared keyword extraction** (`frontend/src/lib/text-utils.ts`) â€” Deduplicated stop-word filtering and frequency counting utility
+- **Browser shim** (`frontend/src/lib/browser-shim.ts`) â€” Extended with `window.mycelium` for consistent browser-mode demo data across all pages
+- **Test suite** (`frontend/src/__tests__/MyceliumPage.test.tsx`) â€” 17 tests covering rendering, input validation, synthesis, keyboard shortcuts, error states, concept exploration, and feedback depth adjustment
+- **Frontend routes** â€” `mycelium` and `mycelium-demo` routes added to `app.config.json`, `app-schema.ts`, and `schema/index.ts`
 
 ### Changed
 
-- **Performance** — Bridge instance memoized with `useMemo`, all callbacks stabilized via destructured hook return, `filteredConcepts` wrapped in `useMemo`, textarea resize batched with `requestAnimationFrame`
-- **Architecture** — `clearExplored` dispatch replaces wasteful `explore("")` IPC call; `eslint-disable` removed after fixing bridge stability
-- **Frontend CI** (`.github/workflows/frontend.yml`) — Fixed self-referential path trigger from `frontend-ci.yml` to `frontend.yml`
+- **Performance** â€” Bridge instance memoized with `useMemo`, all callbacks stabilized via destructured hook return, `filteredConcepts` wrapped in `useMemo`, textarea resize batched with `requestAnimationFrame`
+- **Architecture** â€” `clearExplored` dispatch replaces wasteful `explore("")` IPC call; `eslint-disable` removed after fixing bridge stability
+- **Frontend CI** (`.github/workflows/frontend.yml`) â€” Fixed self-referential path trigger from `frontend-ci.yml` to `frontend.yml`
 
 ## [2.5.1] - 2026-02-24
 
 ### Changed
 
-- **Test reorganization** — Relocated tests into themed directories for improved discoverability; removed deprecated components and temporary artifacts
-- **Codebase hygiene** — Cognitive architecture alignment pass; cleaned up stale modules and resolved structural inconsistencies
+- **Test reorganization** â€” Relocated tests into themed directories for improved discoverability; removed deprecated components and temporary artifacts
+- **Codebase hygiene** â€” Cognitive architecture alignment pass; cleaned up stale modules and resolved structural inconsistencies
 
 ## [2.5.0] - 2026-02-24
 
 ### Highlights
 
-**GRID Environmental Intelligence** — homeostatic middleware that sits between the round table facilitator and LLM providers. Monitors conversational balance across three dimensions (Practical, Legal, Psychological) and dynamically adjusts LLM generation parameters using Le Chatelier's Principle. Includes a full round table facilitation layer, frontend page, and comprehensive test coverage.
+**GRID Environmental Intelligence** â€” homeostatic middleware that sits between the round table facilitator and LLM providers. Monitors conversational balance across three dimensions (Practical, Legal, Psychological) and dynamically adjusts LLM generation parameters using Le Chatelier's Principle. Includes a full round table facilitation layer, frontend page, and comprehensive test coverage.
 
 ### Added
 
-- **Grid Environment Engine** (`src/grid/agentic/grid_environment.py`) — `GridDimension`, `ArenaAmbiance`, `EnvironmentalShift`, `GridEnvironment`, and `EnvironmentalLLMProxy` classes implementing the homeostatic triad (Practical/Legal/Psychological) with negative feedback recalibration
-- **Round Table Facilitator** (`src/grid/agentic/roundtable_facilitator.py`) — 4-phase orchestrator (open → discuss → synthesize → close) that coordinates multi-agent round table discussions with environment-aware LLM parameter adjustment
-- **Round Table Schemas** (`src/grid/agentic/roundtable_schemas.py`) — Pydantic models for round table sessions, contributions, and results
-- **RoundTablePage** (`frontend/src/pages/RoundTablePage.tsx`) — Frontend page for initiating and visualizing round table discussions
-- **Frontend route/schema** — `roundtable` route with `compass` icon added to `app.config.json`, `app-schema.ts`, and `schema/index.ts`
-- **Test suite** — 43 environment tests (`tests/unit/test_grid_environment.py`) across 9 test classes + 17 round table facilitator tests (`tests/unit/test_roundtable_facilitator.py`); 60 new tests total
+- **Grid Environment Engine** (`src/grid/agentic/grid_environment.py`) â€” `GridDimension`, `ArenaAmbiance`, `EnvironmentalShift`, `GridEnvironment`, and `EnvironmentalLLMProxy` classes implementing the homeostatic triad (Practical/Legal/Psychological) with negative feedback recalibration
+- **Round Table Facilitator** (`src/grid/agentic/roundtable_facilitator.py`) â€” 4-phase orchestrator (open â†’ discuss â†’ synthesize â†’ close) that coordinates multi-agent round table discussions with environment-aware LLM parameter adjustment
+- **Round Table Schemas** (`src/grid/agentic/roundtable_schemas.py`) â€” Pydantic models for round table sessions, contributions, and results
+- **RoundTablePage** (`frontend/src/pages/RoundTablePage.tsx`) â€” Frontend page for initiating and visualizing round table discussions
+- **Frontend route/schema** â€” `roundtable` route with `compass` icon added to `app.config.json`, `app-schema.ts`, and `schema/index.ts`
+- **Test suite** â€” 43 environment tests (`tests/unit/test_grid_environment.py`) across 9 test classes + 17 round table facilitator tests (`tests/unit/test_roundtable_facilitator.py`); 60 new tests total
 - `dev/navigation_graph.json` updated with round table route
 
 ### Changed
 
-- **Agentic `__init__.py`** — Exports extended with `ArenaAmbiance`, `EnvironmentalLLMProxy`, `GridDimension`, `GridEnvironment`, `RoundTableFacilitator`, `RoundTableResult`
+- **Agentic `__init__.py`** â€” Exports extended with `ArenaAmbiance`, `EnvironmentalLLMProxy`, `GridDimension`, `GridEnvironment`, `RoundTableFacilitator`, `RoundTableResult`
 
 ## [2.4.1] - 2026-02-24
 
@@ -145,6 +155,8 @@ Repository cleanup: removed tracked artifacts, updated `.gitignore`, refreshed d
 
 ---
 
+[2.6.1]: https://github.com/GRID-INTELLIGENCE/GRID/compare/v2.6.0...v2.6.1
+[2.6.0]: https://github.com/GRID-INTELLIGENCE/GRID/compare/v2.5.1...v2.6.0
 [2.5.1]: https://github.com/GRID-INTELLIGENCE/GRID/compare/v2.5.0...v2.5.1
 [2.5.0]: https://github.com/GRID-INTELLIGENCE/GRID/compare/ee0a497...v2.5.0
 [2.4.1]: https://github.com/GRID-INTELLIGENCE/GRID/compare/17fa605...ee0a497

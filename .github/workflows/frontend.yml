@@ -23,6 +23,13 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - name: Ensure coverage artifacts are not tracked
+        run: |
+          if git -C .. ls-files frontend/coverage | grep -q .; then
+            echo "::error::frontend/coverage artifacts are tracked. Remove them from git and keep them generated-only."
+            exit 1
+          fi
+
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:

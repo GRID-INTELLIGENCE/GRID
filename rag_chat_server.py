@@ -3,7 +3,7 @@
 RAG Chat HTTP Server - Simple web interface for GRID RAG chat.
 
 Run: uv run python rag_chat_server.py
-Open: http://localhost:8765
+Open: http://localhost:8766
 """
 
 from __future__ import annotations

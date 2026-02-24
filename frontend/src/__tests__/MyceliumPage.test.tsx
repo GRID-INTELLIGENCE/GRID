@@ -1,6 +1,6 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { MyceliumPage } from "@/pages/MyceliumPage";
 import { renderWithProviders } from "./test-utils";
 import {
@@ -11,8 +11,22 @@ import {
 } from "./setup";
 
 describe("MyceliumPage", () => {
-  it("renders the page header and input area", () => {
+  beforeEach(() => {
+    mockMyceliumSynthesize.mockClear();
+    mockMyceliumExplore.mockClear();
+    mockMyceliumFeedback.mockClear();
+    mockMyceliumConcepts.mockClear();
+  });
+
+  async function renderPage() {
     renderWithProviders(<MyceliumPage />);
+    await waitFor(() => {
+      expect(mockMyceliumConcepts).toHaveBeenCalledTimes(1);
+    });
+  }
+
+  it("renders the page header and input area", async () => {
+    await renderPage();
     expect(screen.getByText("Mycelium")).toBeInTheDocument();
     expect(
       screen.getByText("Paste text. Get the essence.")
@@ -20,15 +34,15 @@ describe("MyceliumPage", () => {
     expect(screen.getByLabelText("Text to synthesize")).toBeInTheDocument();
   });
 
-  it("shows the Synthesize button disabled when input is empty", () => {
-    renderWithProviders(<MyceliumPage />);
+  it("shows the Synthesize button disabled when input is empty", async () => {
+    await renderPage();
     const btn = screen.getByRole("button", { name: /synthesize/i });
     expect(btn).toBeDisabled();
   });
 
   it("enables the Synthesize button when text is entered", async () => {
     const user = userEvent.setup();
-    renderWithProviders(<MyceliumPage />);
+    await renderPage();
 
     const textarea = screen.getByLabelText("Text to synthesize");
     await user.type(textarea, "The speed of light is constant.");
@@ -39,7 +53,7 @@ describe("MyceliumPage", () => {
 
   it("displays character count when text is entered", async () => {
     const user = userEvent.setup();
-    renderWithProviders(<MyceliumPage />);
+    await renderPage();
 
     const textarea = screen.getByLabelText("Text to synthesize");
     await user.type(textarea, "Hello world");
@@ -48,7 +62,7 @@ describe("MyceliumPage", () => {
 
   it("displays word count and reading time when text is entered", async () => {
     const user = userEvent.setup();
-    renderWithProviders(<MyceliumPage />);
+    await renderPage();
 
     const textarea = screen.getByLabelText("Text to synthesize");
     await user.type(textarea, "Hello world");
@@ -58,7 +72,7 @@ describe("MyceliumPage", () => {
 
   it("calls synthesize and displays the gist", async () => {
     const user = userEvent.setup();
-    renderWithProviders(<MyceliumPage />);
+    await renderPage();
 
     const textarea = screen.getByLabelText("Text to synthesize");
     await user.type(textarea, "Electromagnetic radiation is a form of energy.");
@@ -79,7 +93,7 @@ describe("MyceliumPage", () => {
 
   it("displays highlights after synthesis", async () => {
     const user = userEvent.setup();
-    renderWithProviders(<MyceliumPage />);
+    await renderPage();
 
     await user.type(
       screen.getByLabelText("Text to synthesize"),
@@ -93,8 +107,8 @@ describe("MyceliumPage", () => {
     });
   });
 
-  it("shows depth control with three options", () => {
-    renderWithProviders(<MyceliumPage />);
+  it("shows depth control with three options", async () => {
+    await renderPage();
     expect(
       screen.getByRole("radio", { name: /espresso/i })
     ).toBeInTheDocument();
@@ -108,7 +122,7 @@ describe("MyceliumPage", () => {
 
   it("switches depth when clicking a depth option", async () => {
     const user = userEvent.setup();
-    renderWithProviders(<MyceliumPage />);
+    await renderPage();
 
     const espresso = screen.getByRole("radio", { name: /espresso/i });
     await user.click(espresso);
@@ -117,7 +131,7 @@ describe("MyceliumPage", () => {
 
   it("opens accessibility settings panel", async () => {
     const user = userEvent.setup();
-    renderWithProviders(<MyceliumPage />);
+    await renderPage();
 
     const settingsBtn = screen.getByLabelText("Accessibility settings");
     await user.click(settingsBtn);
@@ -130,7 +144,7 @@ describe("MyceliumPage", () => {
 
   it("shows feedback bar after synthesis", async () => {
     const user = userEvent.setup();
-    renderWithProviders(<MyceliumPage />);
+    await renderPage();
 
     await user.type(
       screen.getByLabelText("Text to synthesize"),
@@ -148,7 +162,7 @@ describe("MyceliumPage", () => {
 
   it("clears input and results when Clear is clicked", async () => {
     const user = userEvent.setup();
-    renderWithProviders(<MyceliumPage />);
+    await renderPage();
 
     const textarea = screen.getByLabelText("Text to synthesize");
     await user.type(textarea, "Some text to clear.");
@@ -159,16 +173,13 @@ describe("MyceliumPage", () => {
   });
 
   it("loads concepts on mount", async () => {
-    renderWithProviders(<MyceliumPage />);
-    await waitFor(() => {
-      expect(mockMyceliumConcepts).toHaveBeenCalled();
-    });
+    await renderPage();
   });
 
   // ── P3.1: Ctrl+Enter keyboard shortcut ──────────────────────────
   it("triggers synthesis on Ctrl+Enter", async () => {
     const user = userEvent.setup();
-    renderWithProviders(<MyceliumPage />);
+    await renderPage();
 
     const textarea = screen.getByLabelText("Text to synthesize");
     await user.type(textarea, "Quantum physics is fascinating.");
@@ -188,7 +199,7 @@ describe("MyceliumPage", () => {
       new Error("Backend unavailable")
     );
 
-    renderWithProviders(<MyceliumPage />);
+    await renderPage();
 
     const textarea = screen.getByLabelText("Text to synthesize");
     await user.type(textarea, "Some text that will fail.");
@@ -203,7 +214,7 @@ describe("MyceliumPage", () => {
   // ── P3.3: Concept exploration flow ──────────────────────────────
   it("explores a concept when clicking a keyword, then closes it", async () => {
     const user = userEvent.setup();
-    renderWithProviders(<MyceliumPage />);
+    await renderPage();
 
     // Synthesize first
     await user.type(
@@ -245,7 +256,7 @@ describe("MyceliumPage", () => {
   // ── P3.4: Feedback button depth adjustment ──────────────────────
   it("calls feedback and re-synthesizes when clicking Simpler", async () => {
     const user = userEvent.setup();
-    renderWithProviders(<MyceliumPage />);
+    await renderPage();
 
     // Synthesize first
     await user.type(
@@ -279,7 +290,7 @@ describe("MyceliumPage", () => {
 
   it("calls feedback and re-synthesizes when clicking Deeper", async () => {
     const user = userEvent.setup();
-    renderWithProviders(<MyceliumPage />);
+    await renderPage();
 
     await user.type(
       screen.getByLabelText("Text to synthesize"),
