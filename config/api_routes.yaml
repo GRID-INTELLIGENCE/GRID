@@ -29,6 +29,8 @@ routers:
     enabled: true
   - module: "grid.AGENT.api.router:router"
     enabled: false
+  - module: "application.mothership.routers.reasoning:router"
+    enabled: true
   - module: "application.mothership.routers.intelligence:router"
     prefix: "/intelligence"
     enabled: true

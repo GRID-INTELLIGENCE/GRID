@@ -118,6 +118,7 @@ def create_api_router(prefix: str = "/api/v1") -> APIRouter:
             {"module": "application.mothership.routers.billing:router", "enabled": True},
             {"module": "application.mothership.routers.inference:router", "enabled": True},
             {"module": "application.mothership.routers.privacy:router", "enabled": True},
+            {"module": "application.mothership.routers.reasoning:router", "enabled": True},
             {
                 "module": "application.resonance.api.router:router",
                 "prefix": "/resonance",
