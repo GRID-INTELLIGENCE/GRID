@@ -54,9 +54,7 @@ class Party(BaseModel):
         description="What kind of entity this party represents",
     )
     title: str = Field(..., description="Role or designation")
-    primary_goal: str = Field(
-        ..., description="What this party seeks from the discussion"
-    )
+    primary_goal: str = Field(..., description="What this party seeks from the discussion")
 
 
 class PartyRoster(BaseModel):
@@ -88,12 +86,8 @@ class MagnitudinalCompass(BaseModel):
     by other GRID subsystems as a decision compass.
     """
 
-    direction: str = Field(
-        ..., description="The synthesised directional statement"
-    )
-    reasoning: str = Field(
-        ..., description="How the direction was derived from the discussion"
-    )
+    direction: str = Field(..., description="The synthesised directional statement")
+    reasoning: str = Field(..., description="How the direction was derived from the discussion")
     confidence: float = Field(
         default=1.0,
         ge=0.0,
@@ -140,19 +134,13 @@ class RoundTableResult(BaseModel):
     """
 
     topic: str = Field(..., description="The discussed topic")
-    ambiance: str = Field(
-        ..., description="The constructed environment and setting"
-    )
-    parties: list[Party] = Field(
-        ..., description="All parties who participated (equal standing)"
-    )
+    ambiance: str = Field(..., description="The constructed environment and setting")
+    parties: list[Party] = Field(..., description="All parties who participated (equal standing)")
     history: list[DiscussionEntry] = Field(
         default_factory=list,
         description="Ordered transcript of transparent statements",
     )
-    compass: MagnitudinalCompass = Field(
-        ..., description="The resulting magnitudinal compass"
-    )
+    compass: MagnitudinalCompass = Field(..., description="The resulting magnitudinal compass")
     triad_weights: TriadWeights = Field(
         default_factory=TriadWeights,
         description="Final GRID triad balance (Practical / Legal / Psychological)",

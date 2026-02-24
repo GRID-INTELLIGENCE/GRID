@@ -160,9 +160,7 @@ class TestInferParties:
 
     def test_rejects_roster_with_fewer_than_two(self) -> None:
         """PartyRoster requires at least 2 parties."""
-        bad = json.dumps(
-            {"roles": [{"name": "A", "title": "T", "primary_goal": "G"}]}
-        )
+        bad = json.dumps({"roles": [{"name": "A", "title": "T", "primary_goal": "G"}]})
         llm = _make_mock_llm([bad])
         facilitator = RoundTableFacilitator(llm)
 
@@ -272,9 +270,7 @@ class TestFacilitateFullFlow:
         llm = _make_mock_llm(responses)
         facilitator = RoundTableFacilitator(llm)
 
-        result = facilitator.facilitate(
-            "The directive magnitudinal compassing of GRID"
-        )
+        result = facilitator.facilitate("The directive magnitudinal compassing of GRID")
 
         assert isinstance(result, RoundTableResult)
         assert result.topic == "The directive magnitudinal compassing of GRID"
@@ -287,8 +283,12 @@ class TestFacilitateFullFlow:
 
     def test_parties_are_flat_list(self) -> None:
         responses = [
-            "ambiance", SAMPLE_ROSTER_JSON,
-            "s1", "s2", "s3", "s4",
+            "ambiance",
+            SAMPLE_ROSTER_JSON,
+            "s1",
+            "s2",
+            "s3",
+            "s4",
             SAMPLE_COMPASS_JSON,
         ]
         llm = _make_mock_llm(responses)
