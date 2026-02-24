@@ -5,6 +5,16 @@ Append new entries at the top. One decision per entry.
 
 ---
 
+## 2026-02-24 — Community Readiness: Entry Point Cleanup & CVE Fix
+
+**Decision**: Removed 4 broken `[project.scripts]` entries from `pyproject.toml` (`grid-agentic`, `grid-workflow`, `grid-context`, `databricks-cli`). Bumped `grid-safety` to 1.0.1 to publish the `python-jose` removal (CVE-2024-23342 fix) to PyPI. Added PyPI badge, CONTRIBUTING.md, and updated stale installation docs.
+
+**Why**: Users installing via `pip install grid-intelligence` hit broken entry points and pulled in a vulnerable transitive dependency. The repo lacked basic community-facing metadata (description, topics, contribution guide).
+
+**Alternatives considered**: Creating stub `__main__.py` files for the 3 missing entry points — rejected because stub commands with no behavior mislead users. Moving `src/integration` into the wheel for `databricks-cli` — rejected because it requires Databricks credentials and adds unnecessary weight.
+
+---
+
 ## 2026-02-24 — Release v2.4.1
 
 **Decision**: Tagged and released v2.4.1 from main (commit `def11d7`). Merged 11 Dependabot PRs, deferred 5 breaking-change PRs (#9 FastAPI, #13 pytest-asyncio, #18 npm group, #19 zod 4, #20 eslint 10). Fixed release workflow (`tomllib` stdlib instead of third-party `toml`, `uv venv` for build job). PyPI publish deferred (trusted publisher not yet configured on PyPI).
