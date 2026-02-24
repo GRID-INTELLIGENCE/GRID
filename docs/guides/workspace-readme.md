@@ -7,7 +7,7 @@ This is the primary development drive containing the GRID (Generalized Reasoning
 
 ```
 E:\
-├── grid/                    # Primary GRID repository (caraxesthebloodwyrm02/GRID)
+├── grid/                    # Primary GRID repository (GRID-INTELLIGENCE/GRID)
 │   ├── src/                 # Core GRID source code
 │   ├── tests/               # Test suites (1400+ tests)
 │   ├── docs/                # Documentation
@@ -35,7 +35,7 @@ E:\
 
 ## Git Remotes (GRID Repo)
 
-- **origin**: `https://github.com/caraxesthebloodwyrm02/GRID.git` (primary)
+- **origin**: `https://github.com/GRID-INTELLIGENCE/GRID.git` (primary)
 - **origin_irfan**: `https://github.com/irfankabir02/GRID.git` (mirror)
 
 ## Environment Variables

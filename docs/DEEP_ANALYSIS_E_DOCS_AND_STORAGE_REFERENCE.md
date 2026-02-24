@@ -23,7 +23,7 @@ All documents are in **E:\docs** (flat directory). INDEX.md is the master index;
 ### 1.2 GRID & Discovery
 | File | Description | Key path refs |
 |------|-------------|---------------|
-| GRID_JUNCTION.md | E:\grid junction → E:\_projects\GRID; canonical caraxesthebloodwyrm02/GRID | E:\grid, E:\_projects\GRID |
+| GRID_JUNCTION.md | E:\grid junction → E:\_projects\GRID; canonical GRID-INTELLIGENCE/GRID | E:\grid, E:\_projects\GRID |
 | GRID_DISCOVERY_CHECKLIST.md | Where GRID was searched (F:\FileHistory, OneDrive, E:\, Build, Storage) | F:\, E:\grid, E:\_projects, E:\Storage, E:\Build, E:\.worktrees |
 | ONEDRIVE_GRID_SEARCH_DELIVERABLE.md | Script E:\scripts\search_onedrive_grid_paths.ps1; how to interpret matches | E:\scripts, E:\grid, PROJECT_GRID |
 

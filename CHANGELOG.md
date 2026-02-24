@@ -114,8 +114,8 @@ Repository cleanup: removed tracked artifacts, updated `.gitignore`, refreshed d
 
 ---
 
-[2.5.0]: https://github.com/caraxesthebloodwyrm02/GRID/compare/ee0a497...HEAD
-[2.4.1]: https://github.com/caraxesthebloodwyrm02/GRID/compare/17fa605...ee0a497
-[2.4.0]: https://github.com/caraxesthebloodwyrm02/GRID/compare/222eae7...17fa605
-[2.3.0]: https://github.com/caraxesthebloodwyrm02/GRID/compare/6534d65...222eae7
-[2.2.0]: https://github.com/caraxesthebloodwyrm02/GRID/compare/HEAD~3...6534d65
+[2.5.0]: https://github.com/GRID-INTELLIGENCE/GRID/compare/ee0a497...HEAD
+[2.4.1]: https://github.com/GRID-INTELLIGENCE/GRID/compare/17fa605...ee0a497
+[2.4.0]: https://github.com/GRID-INTELLIGENCE/GRID/compare/222eae7...17fa605
+[2.3.0]: https://github.com/GRID-INTELLIGENCE/GRID/compare/6534d65...222eae7
+[2.2.0]: https://github.com/GRID-INTELLIGENCE/GRID/compare/HEAD~3...6534d65

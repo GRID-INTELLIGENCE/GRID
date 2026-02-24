@@ -22,7 +22,7 @@ E:\scripts\search_onedrive_grid_paths.ps1
 ## Interpretation
 
 - **No matches:** Either no GRID path references exist in OneDrive, or they are in unsupported file types. Once the E:\grid junction exists, any correct `PROJECT_GRID=E:\grid` or `E:/grid` workspace paths resolve without change.
-- **Matches:** List shows file path, line number, and line. For `.env`/`.env.editor`/templates, ensure `PROJECT_GRID=E:\grid`. For `.code-workspace`, ensure folder path is `E:/grid` or `E:\grid`. After the junction is in place, no edit is required unless the path was wrong. For docs/markdown, optionally add a note that E:\grid is a junction to `E:\_projects\grid-rag-enhanced` and repo is `caraxesthebloodwyrm02/GRID`.
+- **Matches:** List shows file path, line number, and line. For `.env`/`.env.editor`/templates, ensure `PROJECT_GRID=E:\grid`. For `.code-workspace`, ensure folder path is `E:/grid` or `E:\grid`. After the junction is in place, no edit is required unless the path was wrong. For docs/markdown, optionally add a note that E:\grid is a junction to `E:\_projects\grid-rag-enhanced` and repo is `GRID-INTELLIGENCE/GRID`.
 
 ## Status
 

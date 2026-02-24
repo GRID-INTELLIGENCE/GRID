@@ -1,7 +1,7 @@
 # GRID Ecosystem - E:\ Drive Documentation
 
 **Date:** February 7, 2026  
-**Primary Repository:** `caraxesthebloodwyrm02/GRID`  
+**Primary Repository:** `GRID-INTELLIGENCE/GRID`  
 **Location:** `E:\grid`
 
 ---
@@ -71,7 +71,7 @@ E:\
 ### Remotes
 
 ```
-origin         https://github.com/caraxesthebloodwyrm02/GRID.git (primary)
+origin         https://github.com/GRID-INTELLIGENCE/GRID.git (primary)
 origin_irfan   https://github.com/irfankabir02/GRID.git (mirror)
 ```
 
@@ -142,8 +142,8 @@ python -m pytest tests/grid/security/ -v
 
 **Tasks Completed:**
 1. ✅ Located USB drive (F:\ with ESD-USB)
-2. ✅ Verified E:\grid repo exists with caraxesthebloodwyrm02/GRID origin
-3. ✅ Confirmed dual remotes: origin (caraxesthebloodwyrm02) and origin_irfan (irfankabir02)
+2. ✅ Verified E:\grid repo exists with GRID-INTELLIGENCE/GRID origin
+3. ✅ Confirmed dual remotes: origin (GRID-INTELLIGENCE) and origin_irfan (irfankabir02)
 4. ✅ Verified all directories restored: Coinbase, wellness_studio, SSL, analysis_outputs, tests, docs
 5. ✅ Applied E:\ layout redesign with PROJECT_GRID paths correct
 6. ✅ Created E:\README.md documentation
@@ -234,7 +234,7 @@ uvicorn application.mothership.main:app --host 0.0.0.0 --port 8080
 
 ## Notes
 
-- **Primary remote:** `origin` (caraxesthebloodwyrm02/GRID)
+- **Primary remote:** `origin` (GRID-INTELLIGENCE/GRID)
 - **Mirror remote:** `origin_irfan` (irfankabir02/GRID)
 - **Default branch:** `main` (7 commits ahead of origin/main)
 - **Test status:** 1,989 tests collected, dependencies installed
@@ -243,4 +243,4 @@ uvicorn application.mothership.main:app --host 0.0.0.0 --port 8080
 ---
 
 **Maintainer:** caraxesthebloodwyrm  
-**Repository:** https://github.com/caraxesthebloodwyrm02/GRID
+**Repository:** https://github.com/GRID-INTELLIGENCE/GRID

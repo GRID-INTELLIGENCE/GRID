@@ -51,7 +51,7 @@
 | Path | Found | Notes |
 |------|--------|--------|
 | **E:\** (root) | grid (junction), grid.worktrees | As expected. |
-| **E:\Build** | Yes | **GRID**, **GRID-main**, **GRID-main.old**, **caraxesthebloodwyrm02-GRID-c9d13087f0ccd76595e0db5891cad817f0545f06**, **grid.worktrees**, **GRID.zip** — multiple GRID sources (some new vs restore plan) |
+| **E:\Build** | Yes | **GRID**, **GRID-main**, **GRID-main.old**, **GRID-INTELLIGENCE-GRID-c9d13087f0ccd76595e0db5891cad817f0545f06**, **grid.worktrees**, **GRID.zip** — multiple GRID sources (some new vs restore plan) |
 | **E:\Storage\E-Drive-Backup-20260206-174528** | Yes | **scripts\disable_grid_servers.ps1** — reference/script only. |
 | **E:\Storage\Selected-Dirs-Backup-20260206-175159** | Yes | **analysis_outputs\grid** (folder); eufle file_metrics with "grid" in filename (e.g. onboarding_gridstral, grid_bridge); venv libs (scipy/sympy/torch *grid* — not GRID project). |
 | **E:\.worktrees** | Yes | **copilot-worktree-2026-02-01T20-18-14**, **copilot-worktree-2026-02-07T01-40-39** — each has .env.editor.template with PROJECT_GRID ref. |
@@ -92,14 +92,14 @@
 
 ## 10. Remote / cloud
 
-- **GitHub:** caraxesthebloodwyrm02/GRID — canonical repo (clone/compare).
+- **GitHub:** GRID-INTELLIGENCE/GRID — canonical repo (clone/compare).
 - **Other clouds:** Not scanned; add Dropbox/Google Drive if used.
 
 ---
 
 ## Summary
 
-- **Full repo / backup:** F:\FileHistory\GRID\DELOREAN, F:\.pytest_cache.zip, E:\_projects\grid-rag-enhanced (via E:\grid), E:\Build\GRID-main.old, E:\Build\GRID.zip, E:\Build\GRID, E:\Build\GRID-main, E:\Build\caraxesthebloodwyrm02-GRID-..., and user Downloads (GRID-main.zip, GRID-main (1).zip).
+- **Full repo / backup:** F:\FileHistory\GRID\DELOREAN, F:\.pytest_cache.zip, E:\_projects\grid-rag-enhanced (via E:\grid), E:\Build\GRID-main.old, E:\Build\GRID.zip, E:\Build\GRID, E:\Build\GRID-main, E:\Build\GRID-INTELLIGENCE-GRID-..., and user Downloads (GRID-main.zip, GRID-main (1).zip).
 - **References only:** E:\.env.editor.template, E:\OrganizedWorkspace.code-workspace, E:\config\unified-server-configuration.json, E:\.worktrees\*\.env.editor.template, E:\Storage\...\disable_grid_servers.ps1, E:\Storage\...\analysis_outputs\grid and eufle file_metrics.
 - **OneDrive:** No GRID folder names in quick scan; content search script available for manual run.
 - **Recovery drive:** Created per Microsoft steps; does not contain GRID unless a full image including E:\ exists elsewhere.

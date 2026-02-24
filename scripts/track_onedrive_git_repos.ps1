@@ -85,7 +85,7 @@ foreach ($root in $roots) {
         $configPath = Join-Path $repoRoot ".git\config"
         if (Test-Path $configPath) {
             $configContent = Get-Content $configPath -Raw -ErrorAction SilentlyContinue
-            if ($configContent -match "caraxesthebloodwyrm02|irfankabir02|GRID") { $isGrid = $true }
+            if ($configContent -match "GRID-INTELLIGENCE|irfankabir02|GRID") { $isGrid = $true }
         }
 
         # --- Recent commits log (last 5 for version-history correlation) ---

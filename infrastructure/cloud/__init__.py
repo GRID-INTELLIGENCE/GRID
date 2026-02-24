@@ -100,7 +100,7 @@ class GeminiConfig:
 
     # Pre-deployment configuration
     studio_project_url: str | None = None
-    studio_email: str = "caraxesthebloodwyrm02@gmail.com"  # Default studio integration email
+    studio_email: str = "GRID-INTELLIGENCE@gmail.com"  # Default studio integration email
     pending_deployment: bool = True
     mock_responses: bool = False
     allow_mock_in_production: bool = False

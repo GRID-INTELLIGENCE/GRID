@@ -56,9 +56,9 @@ publish = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/caraxesthebloodwyrm02/GRID"
-Repository = "https://github.com/caraxesthebloodwyrm02/GRID"
-Issues = "https://github.com/caraxesthebloodwyrm02/GRID/issues"
+Homepage = "https://github.com/GRID-INTELLIGENCE/GRID"
+Repository = "https://github.com/GRID-INTELLIGENCE/GRID"
+Issues = "https://github.com/GRID-INTELLIGENCE/GRID/issues"
 
 [project.scripts]
 safety-api = "safety.api.main:run"

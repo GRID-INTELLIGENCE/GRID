@@ -4,7 +4,7 @@ import pytest
 
 # Try to import legacy module, skip if not available
 try:
-    from grid.pattern.engine import PatternEngine
+    from grid.patterns.engine import PatternEngine
 
     HAS_LEGACY_SRC = True
 except (ImportError, ModuleNotFoundError):

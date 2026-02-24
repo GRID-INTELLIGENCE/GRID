@@ -104,9 +104,9 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/caraxesthebloodwyrm02/GRID"
-Repository = "https://github.com/caraxesthebloodwyrm02/GRID"
-Issues = "https://github.com/caraxesthebloodwyrm02/GRID/issues"
+Homepage = "https://github.com/GRID-INTELLIGENCE/GRID"
+Repository = "https://github.com/GRID-INTELLIGENCE/GRID"
+Issues = "https://github.com/GRID-INTELLIGENCE/GRID/issues"
 
 [project.scripts]
 # Core CLI commands
@@ -254,6 +254,16 @@ norecursedirs = [
     "tmp",
     "checkpoints",
     "seed",
+    ".uv-cache",
+    ".mypy_cache",
+    ".ruff_cache",
+    ".rag_db",
+    "knowledge_base",
+    "work",
+    "workspace",
+    "dev",
+    "grid",
+    "cognition",
 ]
 
 # Default addopts: strict markers, cache, deselect scratch

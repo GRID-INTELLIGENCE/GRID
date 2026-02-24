@@ -55,7 +55,7 @@ Set `SAFETY_DEGRADED_MODE=true` to run without Redis (e.g. for tests).
 
 The Cognitive Privacy Shield is GRID's core safety and privacy API. For pipeline details, integration points, and key files, see:
 
-- [Safety Layer & Cognitive Privacy Shield — Architecture](https://github.com/caraxesthebloodwyrm02/GRID/blob/main/docs/SAFETY_ARCHITECTURE.md) (in the GRID repo)
+- [Safety Layer & Cognitive Privacy Shield — Architecture](https://github.com/GRID-INTELLIGENCE/GRID/blob/main/docs/SAFETY_ARCHITECTURE.md) (in the GRID repo)
 
 ## License
 

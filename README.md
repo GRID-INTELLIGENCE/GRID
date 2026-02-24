@@ -2,14 +2,14 @@
 
 <div align="center">
 
-[![Tests](https://github.com/caraxesthebloodwyrm02/GRID/actions/workflows/minimal-ci.yml/badge.svg?branch=main)](https://github.com/caraxesthebloodwyrm02/GRID/actions/workflows/minimal-ci.yml)
+[![Tests](https://github.com/GRID-INTELLIGENCE/GRID/actions/workflows/minimal-ci.yml/badge.svg?branch=main)](https://github.com/GRID-INTELLIGENCE/GRID/actions/workflows/minimal-ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python 3.13+](https://img.shields.io/badge/python-3.13%2B-blue.svg)](https://www.python.org/downloads/)
 [![Linter: Ruff](https://img.shields.io/badge/linter-ruff-261230.svg)](https://github.com/astral-sh/ruff)
 
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/caraxesthebloodwyrm02/GRID/pulls)
-[![Maintained](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/caraxesthebloodwyrm02/GRID/graphs/commit-activity)
-[![Made with Love](https://img.shields.io/badge/Made%20with-❤️-red.svg)](https://github.com/caraxesthebloodwyrm02/GRID)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/GRID-INTELLIGENCE/GRID/pulls)
+[![Maintained](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/GRID-INTELLIGENCE/GRID/graphs/commit-activity)
+[![Made with Love](https://img.shields.io/badge/Made%20with-❤️-red.svg)](https://github.com/GRID-INTELLIGENCE/GRID)
 
 </div>
 

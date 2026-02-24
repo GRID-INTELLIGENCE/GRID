@@ -80,7 +80,7 @@ Let me compare the branches to see if merging is needed:
 
 ### Planner Response
 
-The `caraxesthebloodwyrm02/GRID` repo is ahead of `irfankabir02/GRID`. No merge needed - current repo is up to date. Let me update the todo and check for the directories to restore:
+The `GRID-INTELLIGENCE/GRID` repo is ahead of `irfankabir02/GRID`. No merge needed - current repo is up to date. Let me update the todo and check for the directories to restore:
 
 *Updated todo list*
 
