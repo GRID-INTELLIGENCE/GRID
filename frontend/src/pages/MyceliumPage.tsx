@@ -1,17 +1,20 @@
 import { DepthControl } from "@/components/mycelium/DepthControl";
 import { FeedbackBar } from "@/components/mycelium/FeedbackBar";
 import { LensCard } from "@/components/mycelium/LensCard";
+import { NetworkViz } from "@/components/mycelium/NetworkViz";
 import { OutputDisplay } from "@/components/mycelium/OutputDisplay";
 import { SensoryPicker } from "@/components/mycelium/SensoryPicker";
+import { SynthesisProgress } from "@/components/mycelium/SynthesisProgress";
 import { Button } from "@/components/ui/button";
+import { useAnalyticsContext } from "@/context/AnalyticsContext";
 import { useMycelium } from "@/hooks/use-mycelium";
 import { cn } from "@/lib/utils";
 import {
   ChevronRight,
-  Loader2,
   Search,
   Settings2,
   Sparkles,
+  Sprout,
   X,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -37,6 +40,7 @@ export function MyceliumPage() {
     loadConcepts,
     clear,
   } = useMycelium();
+  const { track } = useAnalyticsContext();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [showSettings, setShowSettings] = useState(false);
   const [conceptSearch, setConceptSearch] = useState("");
@@ -46,6 +50,15 @@ export function MyceliumPage() {
   useEffect(() => {
     loadConcepts();
   }, [loadConcepts]);
+
+  // Track synthesis completion/error
+  useEffect(() => {
+    if (result) track("synthesis", "complete", depth, result.compression_ratio);
+  }, [result, depth, track]);
+
+  useEffect(() => {
+    if (error) track("error", "synthesis_error", error);
+  }, [error, track]);
 
   // Auto-resize textarea
   const handleInput = useCallback(
@@ -74,9 +87,10 @@ export function MyceliumPage() {
   // Click a keyword → explore it as a concept
   const handleKeywordClick = useCallback(
     (keyword: string) => {
+      track("concept", "explore", keyword);
       explore(keyword);
     },
-    [explore]
+    [explore, track]
   );
 
   // P1.3: Memoize filtered concepts
@@ -96,8 +110,10 @@ export function MyceliumPage() {
     return { chars: input.length, words, readingMinutes };
   }, [input]);
 
+  const isEmpty = !input.trim() && !result;
+
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
+    <div className="mx-auto max-w-4xl space-y-6">
       {/* Page header — minimal */}
       <header className="flex items-center justify-between">
         <div>
@@ -111,7 +127,10 @@ export function MyceliumPage() {
         <div className="flex items-center gap-2">
           <DepthControl
             value={depth}
-            onChange={setDepth}
+            onChange={(d) => {
+              track("depth", "change", d);
+              setDepth(d);
+            }}
             disabled={isProcessing}
           />
           <button
@@ -147,7 +166,32 @@ export function MyceliumPage() {
               <X className="h-3.5 w-3.5" />
             </button>
           </div>
-          <SensoryPicker value={sensoryProfile} onChange={setSensory} />
+          <SensoryPicker
+            value={sensoryProfile}
+            onChange={(p) => {
+              track("sensory", "change", p);
+              setSensory(p);
+            }}
+          />
+        </div>
+      )}
+
+      {/* Hero empty state */}
+      {isEmpty && (
+        <div className="flex flex-col items-center justify-center py-16 text-center animate-fade-in">
+          <div className="mb-4 rounded-2xl bg-[var(--primary)]/10 p-4">
+            <Sprout
+              className="h-10 w-10 text-[var(--primary)] animate-pulse-organic"
+              aria-hidden="true"
+            />
+          </div>
+          <h2 className="text-lg font-medium text-[var(--foreground)]">
+            Ready to synthesize
+          </h2>
+          <p className="mt-1 max-w-xs text-sm text-[var(--muted-foreground)]">
+            Paste any text below and Mycelium will extract the essence at your
+            chosen depth.
+          </p>
         </div>
       )}
 
@@ -172,18 +216,20 @@ export function MyceliumPage() {
         </div>
 
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <Button
               onClick={synthesize}
               disabled={!input.trim() || isProcessing}
               size="default"
             >
               {isProcessing ? (
-                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                <SynthesisProgress active={isProcessing} />
               ) : (
-                <Sparkles className="h-4 w-4" aria-hidden="true" />
+                <>
+                  <Sparkles className="h-4 w-4" aria-hidden="true" />
+                  Synthesize
+                </>
               )}
-              {isProcessing ? "Synthesizing..." : "Synthesize"}
             </Button>
 
             {input.trim() && (
@@ -224,8 +270,14 @@ export function MyceliumPage() {
           {/* Feedback bar */}
           <div className="flex items-center justify-between border-t border-[var(--border)] pt-4">
             <FeedbackBar
-              onSimpler={() => feedback(true, false)}
-              onDeeper={() => feedback(false, true)}
+              onSimpler={() => {
+                track("feedback", "simpler");
+                feedback(true, false);
+              }}
+              onDeeper={() => {
+                track("feedback", "deeper");
+                feedback(false, true);
+              }}
               disabled={isProcessing}
             />
             <button
@@ -253,16 +305,24 @@ export function MyceliumPage() {
         </div>
       )}
 
-      {/* Concept explorer — opened by keyword click or explicit toggle */}
+      {/* Concept explorer — slide-in side panel */}
       {exploredConcept && (
-        <LensCard
-          result={exploredConcept}
-          onTryDifferent={() => tryDifferent(exploredConcept.concept)}
-          onClose={clearExplored}
-        />
+        <div
+          className="animate-fade-in"
+          style={{
+            animation:
+              "slide-in-right var(--motion-duration-normal) var(--motion-easing-decelerate)",
+          }}
+        >
+          <LensCard
+            result={exploredConcept}
+            onTryDifferent={() => tryDifferent(exploredConcept.concept)}
+            onClose={clearExplored}
+          />
+        </div>
       )}
 
-      {/* Concept browser panel */}
+      {/* Concept browser panel with network viz */}
       {showConceptPanel && !exploredConcept && (
         <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-4 space-y-3 animate-fade-in">
           <div className="flex items-center justify-between">
@@ -278,6 +338,19 @@ export function MyceliumPage() {
               <X className="h-3.5 w-3.5" />
             </button>
           </div>
+
+          {/* Network visualization */}
+          {concepts.length > 0 && (
+            <div className="flex justify-center">
+              <NetworkViz
+                concepts={concepts}
+                onConceptClick={(c) => {
+                  explore(c);
+                  setShowConceptPanel(false);
+                }}
+              />
+            </div>
+          )}
 
           <input
             type="search"

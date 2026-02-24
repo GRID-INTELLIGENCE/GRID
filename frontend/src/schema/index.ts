@@ -1,16 +1,3 @@
-import { Cognitive } from "@/pages/Cognitive";
-import { Login } from "@/pages/Login";
-import { Register } from "@/pages/Register";
-import { Dashboard } from "@/pages/Dashboard";
-import { Knowledge } from "@/pages/Knowledge";
-import { Observability } from "@/pages/Observability";
-import { RagQuery } from "@/pages/RagQuery";
-import { Security } from "@/pages/Security";
-import { SettingsPage } from "@/pages/SettingsPage";
-import { RoundTablePage } from "@/pages/RoundTablePage";
-import { MyceliumPage } from "@/pages/MyceliumPage";
-import { TerminalPage } from "@/pages/TerminalPage";
-import { MyceliumDemo } from "@/pages/MyceliumDemo";
 import type { LucideIcon } from "lucide-react";
 import {
   Activity,
@@ -30,9 +17,7 @@ import {
   Terminal,
   Zap,
 } from "lucide-react";
-import type { ComponentType } from "react";
-import { ChatPage } from "../pages/ChatPage";
-import { IntelligencePage } from "../pages/IntelligencePage";
+import { lazy, type ComponentType } from "react";
 import type {
   AppConfig,
   EndpointKey,
@@ -64,22 +49,44 @@ export const iconRegistry: Record<IconKey, LucideIcon> = {
   presentation: Presentation,
 };
 
+/** Helper to lazy-load a named export from a page module */
+function lazyRoute<T extends Record<string, ComponentType>>(
+  loader: () => Promise<T>,
+  exportName: keyof T
+): React.LazyExoticComponent<ComponentType> {
+  return lazy(() =>
+    loader().then((mod) => ({ default: mod[exportName] as ComponentType }))
+  );
+}
+
 export const routeComponents: Record<RouteKey, ComponentType> = {
-  dashboard: Dashboard,
-  chat: ChatPage,
-  rag: RagQuery,
-  intelligence: IntelligencePage,
-  cognitive: Cognitive,
-  security: Security,
-  observability: Observability,
-  knowledge: Knowledge,
-  terminal: TerminalPage,
-  settings: SettingsPage,
-  register: Register,
-  login: Login,
-  roundtable: RoundTablePage,
-  mycelium: MyceliumPage,
-  "mycelium-demo": MyceliumDemo,
+  dashboard: lazyRoute(() => import("@/pages/Dashboard"), "Dashboard"),
+  chat: lazyRoute(() => import("@/pages/ChatPage"), "ChatPage"),
+  rag: lazyRoute(() => import("@/pages/RagQuery"), "RagQuery"),
+  intelligence: lazyRoute(
+    () => import("@/pages/IntelligencePage"),
+    "IntelligencePage"
+  ),
+  cognitive: lazyRoute(() => import("@/pages/Cognitive"), "Cognitive"),
+  security: lazyRoute(() => import("@/pages/Security"), "Security"),
+  observability: lazyRoute(
+    () => import("@/pages/Observability"),
+    "Observability"
+  ),
+  knowledge: lazyRoute(() => import("@/pages/Knowledge"), "Knowledge"),
+  terminal: lazyRoute(() => import("@/pages/TerminalPage"), "TerminalPage"),
+  settings: lazyRoute(() => import("@/pages/SettingsPage"), "SettingsPage"),
+  register: lazyRoute(() => import("@/pages/Register"), "Register"),
+  login: lazyRoute(() => import("@/pages/Login"), "Login"),
+  roundtable: lazyRoute(
+    () => import("@/pages/RoundTablePage"),
+    "RoundTablePage"
+  ),
+  mycelium: lazyRoute(() => import("@/pages/MyceliumPage"), "MyceliumPage"),
+  "mycelium-demo": lazyRoute(
+    () => import("@/pages/MyceliumDemo"),
+    "MyceliumDemo"
+  ),
 };
 
 const routesById = new Map<RouteKey, RouteConfig>(

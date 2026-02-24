@@ -1,4 +1,6 @@
 import type { Preview } from "@storybook/react-vite";
+import { ThemeProvider } from "../src/context/ThemeContext";
+import { AnalyticsProvider } from "../src/context/AnalyticsContext";
 import "../src/index.css";
 
 const preview: Preview = {
@@ -16,9 +18,13 @@ const preview: Preview = {
   },
   decorators: [
     (Story) => (
-      <div className="dark min-h-screen bg-[var(--color-background)] p-6 text-[var(--color-foreground)]">
-        <Story />
-      </div>
+      <ThemeProvider>
+        <AnalyticsProvider>
+          <div className="min-h-screen bg-[var(--background)] p-6 text-[var(--foreground)]">
+            <Story />
+          </div>
+        </AnalyticsProvider>
+      </ThemeProvider>
     ),
   ],
 };

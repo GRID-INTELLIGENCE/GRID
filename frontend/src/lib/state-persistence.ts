@@ -14,7 +14,9 @@ export function createPersistedQueryClient(): QueryClient {
   const client = new QueryClient({
     defaultOptions: {
       queries: {
-        staleTime: 10_000,
+        staleTime: 5 * 60 * 1000, // 5 minutes (Electron, no tab switching)
+        gcTime: 30 * 60 * 1000, // 30 minutes
+        refetchOnWindowFocus: false, // Electron — no tab switching
         retry: 1,
       },
     },

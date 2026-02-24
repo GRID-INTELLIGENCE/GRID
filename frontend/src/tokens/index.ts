@@ -5,10 +5,12 @@
 
 import tokens from "./tokens.json";
 
-export type ColorToken = keyof typeof tokens.color;
+export type ThemeName = keyof typeof tokens.themes;
+export type ColorToken = keyof (typeof tokens.themes)["dark"];
 export type RadiusToken = keyof typeof tokens.radius;
 export type SpaceToken = keyof typeof tokens.space;
 export type TypographyToken = keyof typeof tokens.typography;
+export type MotionToken = keyof typeof tokens.motion;
 export type ZIndexToken = keyof (typeof tokens)["z-index"];
 export type ShadowToken = keyof typeof tokens.shadow;
 export type TransitionToken = keyof typeof tokens.transition;

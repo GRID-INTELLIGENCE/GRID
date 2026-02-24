@@ -1,6 +1,8 @@
+import { memo } from "react";
 import { cn } from "@/lib/utils";
 import type { NavigationResult } from "@/types/mycelium";
-import { Lightbulb, RefreshCw } from "lucide-react";
+import { Grid3X3, Lightbulb, RefreshCw, Workflow } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 interface LensCardProps {
   result: NavigationResult;
@@ -8,17 +10,28 @@ interface LensCardProps {
   onClose: () => void;
 }
 
-export function LensCard({ result, onTryDifferent, onClose }: LensCardProps) {
+const lensIcons: Record<string, LucideIcon> = {
+  workflow: Workflow,
+  grid: Grid3X3,
+};
+
+export const LensCard = memo(function LensCard({
+  result,
+  onTryDifferent,
+  onClose,
+}: LensCardProps) {
+  const LensIcon = lensIcons[result.lens.pattern] ?? Lightbulb;
+
   return (
     <div
-      className="rounded-xl border border-[var(--primary)]/20 bg-[var(--card)] p-5 space-y-4 animate-fade-in"
+      className="rounded-xl border border-[var(--primary)]/20 bg-[var(--card)] p-5 space-y-4 animate-grow"
       role="region"
       aria-label={`Exploring: ${result.concept}`}
     >
       {/* Header */}
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-2">
-          <Lightbulb
+          <LensIcon
             className="h-4 w-4 text-[var(--primary)]"
             aria-hidden="true"
           />
@@ -86,4 +99,4 @@ export function LensCard({ result, onTryDifferent, onClose }: LensCardProps) {
       )}
     </div>
   );
-}
+});

@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { cn } from "@/lib/utils";
 import type { Highlight } from "@/types/mycelium";
 
@@ -13,9 +14,14 @@ const priorityStyles: Record<Highlight["priority"], string> = {
 interface HighlightPillProps {
   highlight: Highlight;
   onClick?: () => void;
+  index?: number;
 }
 
-export function HighlightPill({ highlight, onClick }: HighlightPillProps) {
+export const HighlightPill = memo(function HighlightPill({
+  highlight,
+  onClick,
+  index = 0,
+}: HighlightPillProps) {
   return (
     <button
       type="button"
@@ -26,15 +32,19 @@ export function HighlightPill({ highlight, onClick }: HighlightPillProps) {
         "cursor-pointer select-none",
         priorityStyles[highlight.priority]
       )}
+      style={{
+        animation: `scale-in var(--motion-duration-normal) var(--motion-easing-organic) backwards`,
+        animationDelay: `${index * 50}ms`,
+      }}
       aria-label={`${highlight.priority} keyword: ${highlight.text}`}
     >
       {highlight.priority === "critical" && (
         <span
-          className="h-1.5 w-1.5 rounded-full bg-current"
+          className="h-1.5 w-1.5 rounded-full bg-current animate-pulse-organic"
           aria-hidden="true"
         />
       )}
       {highlight.text}
     </button>
   );
-}
+});
