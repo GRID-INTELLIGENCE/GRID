@@ -41,7 +41,11 @@ describe("ChatPage", () => {
   });
 
   it("shows Ollama Online badge when healthy", async () => {
+    const user = userEvent.setup();
     renderWithProviders(<ChatPage />);
+    // Default mode is "resonance"; switch to Ollama mode
+    const toggleButton = screen.getByText("Trust Layer");
+    await user.click(toggleButton);
     await waitFor(() => {
       expect(screen.getByText("Ollama Online")).toBeInTheDocument();
     });
@@ -51,14 +55,22 @@ describe("ChatPage", () => {
     window.ollama.api = vi
       .fn()
       .mockResolvedValue({ ok: false, status: 0, data: null });
+    const user = userEvent.setup();
     renderWithProviders(<ChatPage />);
+    // Switch to Ollama mode to see Ollama status badge
+    const toggleButton = screen.getByText("Trust Layer");
+    await user.click(toggleButton);
     await waitFor(() => {
       expect(screen.getByText("Ollama Offline")).toBeInTheDocument();
     });
   });
 
   it("shows model selector with available models", async () => {
+    const user = userEvent.setup();
     renderWithProviders(<ChatPage />);
+    // Switch to Ollama mode to reveal model selector
+    const toggleButton = screen.getByText("Trust Layer");
+    await user.click(toggleButton);
     await waitFor(() => {
       const select = screen.getByRole("combobox");
       expect(select).toBeInTheDocument();
@@ -78,9 +90,12 @@ describe("ChatPage", () => {
   });
 
   it("send button is disabled when input is empty", async () => {
+    const user = userEvent.setup();
     renderWithProviders(<ChatPage />);
+    // Switch to Ollama mode so we can verify the Ollama-specific disabled state
+    const toggleButton = screen.getByText("Trust Layer");
+    await user.click(toggleButton);
     await waitFor(() => {
-      // Wait for Ollama health check to complete
       expect(screen.getByText("Ollama Online")).toBeInTheDocument();
     });
     // The send button (icon button) should still be disabled with empty input

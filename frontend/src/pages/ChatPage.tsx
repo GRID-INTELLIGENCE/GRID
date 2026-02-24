@@ -6,7 +6,15 @@ import { ollamaClient } from "@/lib/grid-client";
 import { cn } from "@/lib/utils";
 import { appConfig } from "@/schema";
 import { apiClient } from "@/api/client";
-import { Bot, Circle, Loader2, RefreshCw, Send, Shield, User } from "lucide-react";
+import {
+  Bot,
+  Circle,
+  Loader2,
+  RefreshCw,
+  Send,
+  Shield,
+  User,
+} from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 type ChatMode = "ollama" | "resonance";
@@ -86,8 +94,12 @@ export function ChatPage() {
 
       const responseText = [
         result.message || "Processed.",
-        result.context ? `\n\n**Context:** ${typeof result.context === 'object' ? JSON.stringify(result.context.content || result.context, null, 2).slice(0, 500) : result.context}` : "",
-        result.paths ? `\n\n**Paths Available:** ${typeof result.paths === 'object' ? (result.paths.total_options || 'multiple') + ' options' : result.paths}` : "",
+        result.context
+          ? `\n\n**Context:** ${typeof result.context === "object" ? JSON.stringify(result.context.content || result.context, null, 2).slice(0, 500) : result.context}`
+          : "",
+        result.paths
+          ? `\n\n**Paths Available:** ${typeof result.paths === "object" ? (result.paths.total_options || "multiple") + " options" : result.paths}`
+          : "",
       ].join("");
 
       setMessages((prev) => {
@@ -115,86 +127,89 @@ export function ChatPage() {
     }
   }, []);
 
-  const sendViaOllama = useCallback(async (text: string) => {
-    const userMsg: ChatMessage = {
-      id: `user-${Date.now()}`,
-      role: "user",
-      content: text,
-      timestamp: Date.now(),
-    };
+  const sendViaOllama = useCallback(
+    async (text: string) => {
+      const userMsg: ChatMessage = {
+        id: `user-${Date.now()}`,
+        role: "user",
+        content: text,
+        timestamp: Date.now(),
+      };
 
-    const assistantMsg: ChatMessage = {
-      id: `assistant-${Date.now()}`,
-      role: "assistant",
-      content: "",
-      timestamp: Date.now(),
-      model: selectedModel,
-    };
+      const assistantMsg: ChatMessage = {
+        id: `assistant-${Date.now()}`,
+        role: "assistant",
+        content: "",
+        timestamp: Date.now(),
+        model: selectedModel,
+      };
 
-    setMessages((prev) => [...prev, userMsg, assistantMsg]);
-    setInput("");
-    setIsStreaming(true);
+      setMessages((prev) => [...prev, userMsg, assistantMsg]);
+      setInput("");
+      setIsStreaming(true);
 
-    try {
-      const history = [
-        { role: "system" as const, content: cfg.systemPrompt },
-        ...messages.map((m) => ({ role: m.role, content: m.content })),
-        { role: "user" as const, content: text },
-      ];
+      try {
+        const history = [
+          { role: "system" as const, content: cfg.systemPrompt },
+          ...messages.map((m) => ({ role: m.role, content: m.content })),
+          { role: "user" as const, content: text },
+        ];
 
-      const handle = await ollamaClient.chat(selectedModel, history);
-      const cleanup = handle.onToken((token: OllamaToken) => {
-        if (token.type === "token" && token.content) {
-          setMessages((prev) => {
-            const updated = [...prev];
-            const last = updated[updated.length - 1];
-            if (last.role === "assistant") {
-              last.content += token.content;
-            }
-            return updated;
-          });
-        }
-        if (token.type === "done") {
-          setMessages((prev) => {
-            const updated = [...prev];
-            const last = updated[updated.length - 1];
-            if (last.role === "assistant") {
-              last.model = token.model;
-              last.duration = token.total_duration
-                ? Math.round(token.total_duration / 1_000_000)
-                : undefined;
-              last.tokenCount = token.eval_count;
-            }
-            return updated;
-          });
-          setIsStreaming(false);
-          cleanup();
-        }
-        if (token.type === "error") {
-          setMessages((prev) => {
-            const updated = [...prev];
-            const last = updated[updated.length - 1];
-            if (last.role === "assistant") {
-              last.content = `Error: ${token.error}`;
-            }
-            return updated;
-          });
-          setIsStreaming(false);
-          cleanup();
-        }
-      });
-    } catch (err) {
-      setMessages((prev) => {
-        const updated = [...prev];
-        const last = updated[updated.length - 1];
-        if (last.role === "assistant") {
-          last.content = `Connection error: ${err instanceof Error ? err.message : String(err)}`;
-        }
-        return updated;
-      });
-      setIsStreaming(false);
-    }
-  }, [messages, selectedModel, cfg.systemPrompt]);
+        const handle = await ollamaClient.chat(selectedModel, history);
+        const cleanup = handle.onToken((token: OllamaToken) => {
+          if (token.type === "token" && token.content) {
+            setMessages((prev) => {
+              const updated = [...prev];
+              const last = updated[updated.length - 1];
+              if (last.role === "assistant") {
+                last.content += token.content;
+              }
+              return updated;
+            });
+          }
+          if (token.type === "done") {
+            setMessages((prev) => {
+              const updated = [...prev];
+              const last = updated[updated.length - 1];
+              if (last.role === "assistant") {
+                last.model = token.model;
+                last.duration = token.total_duration
+                  ? Math.round(token.total_duration / 1_000_000)
+                  : undefined;
+                last.tokenCount = token.eval_count;
+              }
+              return updated;
+            });
+            setIsStreaming(false);
+            cleanup();
+          }
+          if (token.type === "error") {
+            setMessages((prev) => {
+              const updated = [...prev];
+              const last = updated[updated.length - 1];
+              if (last.role === "assistant") {
+                last.content = `Error: ${token.error}`;
+              }
+              return updated;
+            });
+            setIsStreaming(false);
+            cleanup();
+          }
+        });
+      } catch (err) {
+        setMessages((prev) => {
+          const updated = [...prev];
+          const last = updated[updated.length - 1];
+          if (last.role === "assistant") {
+            last.content = `Connection error: ${err instanceof Error ? err.message : String(err)}`;
+          }
+          return updated;
+        });
+        setIsStreaming(false);
+      }
+    },
+    [messages, selectedModel, cfg.systemPrompt]
+  );
 
   const sendMessage = useCallback(async () => {
     const text = input.trim();
@@ -234,7 +249,9 @@ export function ChatPage() {
           <Button
             variant={chatMode === "resonance" ? "default" : "outline"}
             size="sm"
-            onClick={() => setChatMode(chatMode === "resonance" ? "ollama" : "resonance")}
+            onClick={() =>
+              setChatMode(chatMode === "resonance" ? "ollama" : "resonance")
+            }
             className="gap-1.5 text-xs"
           >
             <Shield className="h-3 w-3" />
@@ -262,7 +279,13 @@ export function ChatPage() {
 
           {/* Status badge */}
           <Badge
-            variant={chatMode === "resonance" ? "success" : (ollamaOnline ? "success" : "warning")}
+            variant={
+              chatMode === "resonance"
+                ? "success"
+                : ollamaOnline
+                  ? "success"
+                  : "warning"
+            }
             className="gap-1.5"
           >
             <Circle
@@ -270,10 +293,16 @@ export function ChatPage() {
                 "h-2 w-2 fill-current",
                 chatMode === "resonance"
                   ? "text-[var(--success)]"
-                  : ollamaOnline ? "text-[var(--success)]" : "text-[var(--warning)]"
+                  : ollamaOnline
+                    ? "text-[var(--success)]"
+                    : "text-[var(--warning)]"
               )}
             />
-            {chatMode === "resonance" ? "Resonance Active" : (ollamaOnline ? "Ollama Online" : "Ollama Offline")}
+            {chatMode === "resonance"
+              ? "Resonance Active"
+              : ollamaOnline
+                ? "Ollama Online"
+                : "Ollama Offline"}
           </Badge>
 
           <Button
@@ -376,7 +405,11 @@ export function ChatPage() {
           <Button
             size="icon"
             onClick={sendMessage}
-            disabled={!input.trim() || isStreaming || (chatMode === "ollama" && !ollamaOnline)}
+            disabled={
+              !input.trim() ||
+              isStreaming ||
+              (chatMode === "ollama" && !ollamaOnline)
+            }
           >
             {isStreaming ? (
               <Loader2 className="h-4 w-4 animate-spin" />

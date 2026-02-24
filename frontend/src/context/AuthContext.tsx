@@ -1,5 +1,11 @@
-import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
-import { apiClient } from '../api/client';
+import React, {
+  createContext,
+  useContext,
+  useReducer,
+  useEffect,
+  ReactNode,
+} from "react";
+import { apiClient } from "../api/client";
 
 interface User {
   id: number;
@@ -18,7 +24,8 @@ interface AuthState {
 }
 
 interface AuthAction {
-  type: 'SET_LOADING' | 'SET_USER' | 'SET_ERROR' | 'LOGOUT' | 'CLEAR_ERROR';
+  type: "SET_LOADING" | "SET_USER" | "SET_ERROR" | "LOGOUT" | "CLEAR_ERROR";
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   payload?: any;
 }
 
@@ -31,9 +38,9 @@ const initialState: AuthState = {
 
 function authReducer(state: AuthState, action: AuthAction): AuthState {
   switch (action.type) {
-    case 'SET_LOADING':
+    case "SET_LOADING":
       return { ...state, isLoading: action.payload };
-    case 'SET_USER':
+    case "SET_USER":
       return {
         ...state,
         user: action.payload,
@@ -41,18 +48,18 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
         isLoading: false,
         error: null,
       };
-    case 'SET_ERROR':
+    case "SET_ERROR":
       return {
         ...state,
         error: action.payload,
         isLoading: false,
       };
-    case 'LOGOUT':
+    case "LOGOUT":
       return {
         ...initialState,
         isLoading: false,
       };
-    case 'CLEAR_ERROR':
+    case "CLEAR_ERROR":
       return { ...state, error: null };
     default:
       return state;
@@ -71,7 +78,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
@@ -89,13 +96,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (apiClient.isAuthenticated()) {
         try {
           const user = await apiClient.getCurrentUser();
-          dispatch({ type: 'SET_USER', payload: user });
-        } catch (error) {
+          dispatch({ type: "SET_USER", payload: user });
+        } catch {
           // Token might be expired, clear it
           await logout();
         }
       } else {
-        dispatch({ type: 'SET_LOADING', payload: false });
+        dispatch({ type: "SET_LOADING", payload: false });
       }
     };
 
@@ -104,16 +111,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = async (username: string, password: string): Promise<void> => {
     try {
-      dispatch({ type: 'SET_LOADING', payload: true });
-      dispatch({ type: 'CLEAR_ERROR' });
+      dispatch({ type: "SET_LOADING", payload: true });
+      dispatch({ type: "CLEAR_ERROR" });
 
       await apiClient.login({ username, password });
       const user = await apiClient.getCurrentUser();
 
-      dispatch({ type: 'SET_USER', payload: user });
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.detail || 'Login failed';
-      dispatch({ type: 'SET_ERROR', payload: errorMessage });
+      dispatch({ type: "SET_USER", payload: user });
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { detail?: string } } };
+      const errorMessage = err.response?.data?.detail || "Login failed";
+      dispatch({ type: "SET_ERROR", payload: errorMessage });
       throw error;
     }
   };
@@ -123,9 +131,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       await apiClient.logout();
     } catch (error) {
       // Even if logout fails on server, clear local state
-      console.warn('Logout failed on server:', error);
+      console.warn("Logout failed on server:", error);
     } finally {
-      dispatch({ type: 'LOGOUT' });
+      dispatch({ type: "LOGOUT" });
     }
   };
 
@@ -133,15 +141,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       if (apiClient.isAuthenticated()) {
         const user = await apiClient.getCurrentUser();
-        dispatch({ type: 'SET_USER', payload: user });
+        dispatch({ type: "SET_USER", payload: user });
       }
-    } catch (error) {
-      dispatch({ type: 'SET_ERROR', payload: 'Failed to refresh user data' });
+    } catch {
+      dispatch({ type: "SET_ERROR", payload: "Failed to refresh user data" });
     }
   };
 
   const clearError = (): void => {
-    dispatch({ type: 'CLEAR_ERROR' });
+    dispatch({ type: "CLEAR_ERROR" });
   };
 
   const value: AuthContextType = {
@@ -152,9 +160,5 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     clearError,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

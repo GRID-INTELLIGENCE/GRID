@@ -23,7 +23,7 @@ describe("SettingsPage", () => {
   it("renders Backend URL setting with resolved value", () => {
     renderWithProviders(<SettingsPage />);
     expect(screen.getByText("Backend URL")).toBeInTheDocument();
-    expect(screen.getByText("http://127.0.0.1:8000")).toBeInTheDocument();
+    expect(screen.getByText("http://127.0.0.1:8080")).toBeInTheDocument();
   });
 
   it("renders Ollama URL setting with resolved value", () => {
