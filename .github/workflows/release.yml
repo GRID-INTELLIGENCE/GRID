@@ -263,7 +263,7 @@ jobs:
         uses: actions/download-artifact@v7
         with:
           name: dist-packages
-          path: dist/
+          path: .
 
       - name: "Publish to PyPI"
         uses: pypa/gh-action-pypi-publish@release/v1
@@ -290,7 +290,7 @@ jobs:
         uses: actions/download-artifact@v7
         with:
           name: dist-packages
-          path: dist/
+          path: .
 
       - name: "Download Release Notes"
         uses: actions/download-artifact@v7
