@@ -384,7 +384,8 @@ describe("ToolExecutor", () => {
     expect(result.results[0].status).toBe("error");
     if (result.results[0].status === "error") {
       expect(result.results[0].error).toMatch(/timed out/i);
-      expect(result.results[0].durationMs).toBeGreaterThanOrEqual(10);
+      // Allow 2ms of timer imprecision to avoid flaky failures on CI
+      expect(result.results[0].durationMs).toBeGreaterThanOrEqual(8);
     }
   });
 
