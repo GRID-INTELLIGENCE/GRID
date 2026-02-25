@@ -11,6 +11,19 @@ from typing import Any
 from boundaries.logger_ws import get_logger
 from boundaries.refusal import RefusalRights, check_refusal
 
+try:
+    from boundaries.provenance import (
+        create_dpr,
+        DPRCreateInput,
+        DecisionType,
+        AuthorityType,
+        SafetyVerdict,
+        SafetyVerdictResult,
+    )
+    _PROVENANCE_AVAILABLE = True
+except Exception:
+    _PROVENANCE_AVAILABLE = False
+
 
 @dataclass
 class Boundary:
@@ -110,6 +123,9 @@ class BoundaryEngine:
             self._logger.log_boundary_check(
                 boundary_id, allowed=True, scope=scope, payload={"reason": "refusal_honoured"}
             )
+            self._emit_provenance(
+                boundary_id, "pass", actor_id, "boundary_check_refusal_honoured",
+            )
             return True
         boundary = next((b for b in self.boundaries if b.id == boundary_id), None)
         if not boundary:
@@ -121,6 +137,9 @@ class BoundaryEngine:
                 scope=scope,
                 payload={"reason": "unknown_boundary_id"},
             )
+            self._emit_provenance(
+                boundary_id, "block", actor_id, "boundary_check_unknown_id",
+            )
             return False
         allowed = self._evaluate_rule(boundary.rule, subject)
         self._logger.log_boundary_check(boundary_id, allowed, scope=scope, payload={"subject": subject})
@@ -128,6 +147,10 @@ class BoundaryEngine:
             self._logger.log_boundary_violation(
                 boundary_id, scope=scope, actor_id=actor_id, payload={"subject": subject}
             )
+        self._emit_provenance(
+            boundary_id, "pass" if allowed else "block", actor_id,
+            f"boundary_enforcement_{'allowed' if allowed else 'denied'}",
+        )
         return allowed
 
     def _evaluate_rule(self, rule: dict[str, Any] | None, subject: str) -> bool:
@@ -185,10 +208,53 @@ class BoundaryEngine:
                 scope=scope,
                 payload={"reason": "unknown_guardrail_id"},
             )
+            self._emit_provenance(
+                guardrail_id, "block", actor_id, "guardrail_check_unknown_id",
+            )
             return ("block", False)
         ref = check_refusal(trigger=guardrail_id, scope=scope, rights=self.refusal_rights)
         if ref is not None and guardrail.overridable_by_refusal:
             self._logger.log_guardrail_overridden(guardrail_id, scope=scope, actor_id=actor_id, payload=context)
+            self._emit_provenance(
+                guardrail_id, "pass", actor_id, "guardrail_override_by_refusal",
+            )
             return (guardrail.action, True)
         self._logger.log_guardrail_triggered(guardrail_id, guardrail.action, scope=scope, payload=context)
+        verdict = "block" if guardrail.action == "block" else "warn"
+        self._emit_provenance(
+            guardrail_id, verdict, actor_id,
+            f"guardrail_triggered_{guardrail.action}",
+        )
         return (guardrail.action, False)
+
+    def _emit_provenance(
+        self,
+        gate_id: str,
+        verdict: str,
+        actor_id: str | None,
+        action_taken: str,
+    ) -> None:
+        """Emit a Decision Provenance Record for this safety gate check."""
+        if not _PROVENANCE_AVAILABLE:
+            return
+        try:
+            create_dpr(
+                DPRCreateInput(
+                    decision_type=DecisionType.GATE_VERDICT,
+                    action_taken=action_taken,
+                    reasoning_summary=f"Gate {gate_id}: {verdict}",
+                    authority_type=AuthorityType.SYSTEM_POLICY,
+                    actor_id=actor_id or "system",
+                    safety_verdicts=[
+                        SafetyVerdict(
+                            gate_id=gate_id,
+                            gate_type="boundary",
+                            verdict=SafetyVerdictResult(verdict),
+                            latency_ms=0.0,
+                            confidence=1.0,
+                        )
+                    ],
+                ),
+            )
+        except Exception:
+            pass
