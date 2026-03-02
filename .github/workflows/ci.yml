@@ -345,7 +345,7 @@ jobs:
         run: uv run twine check dist/*
 
       - name: "Upload build artifacts"
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: dist-packages
           path: dist/
