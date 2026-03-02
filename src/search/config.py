@@ -55,3 +55,9 @@ class SearchConfig(BaseSettings):
     guardrail_pii_redact: bool = True
     guardrail_fail_open: bool = False  # if True, allow on guardrail error
     search_full_pipeline: bool = False  # if False, skip fusion/ranking/facets
+
+    # Admin gating: when True, schema/index/delete routes require admin
+    guardrail_admin_gating: bool = False
+    guardrail_admin_identities: list[str] = Field(default_factory=list)
+    guardrail_admin_header: str = "X-Admin-Role"
+    guardrail_admin_header_value: str = "admin"

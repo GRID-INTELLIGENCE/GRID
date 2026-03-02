@@ -1,12 +1,18 @@
 """Tests for search.retrieval.structured, semantic, keyword retrievers."""
 
-import pytest
 from abc import ABC
+
+import pytest
 
 from search.indexing.pipeline import IndexingPipeline
 from search.indexing.structured_store import StructuredFieldIndex
 from search.models import (
-    Document, FieldSchema, FieldType, FilterClause, FilterOp, IndexSchema,
+    Document,
+    FieldSchema,
+    FieldType,
+    FilterClause,
+    FilterOp,
+    IndexSchema,
 )
 from search.retrieval.base import BaseRetriever
 from search.retrieval.keyword import KeywordRetriever

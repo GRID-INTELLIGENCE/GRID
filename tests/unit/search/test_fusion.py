@@ -1,8 +1,9 @@
 """Tests for search.retrieval.fusion."""
 
-from search.models import QueryIntent, ScoredCandidate, SearchQuery
-from search.retrieval.fusion import HybridFusion, INTENT_WEIGHTS
 from unittest.mock import MagicMock
+
+from search.models import QueryIntent, ScoredCandidate, SearchQuery
+from search.retrieval.fusion import INTENT_WEIGHTS, HybridFusion
 
 
 def _make_fusion():
@@ -60,6 +61,7 @@ class TestRRFFusion:
         keyword.retrieve.return_value = []
 
         from search.models import FilterClause, FilterOp
+
         query = SearchQuery(text="x", filters=[FilterClause(field="f", op=FilterOp.EQ, value="v")])
         results = fusion.fuse(query)
         ids = {r.doc_id for r in results}
@@ -69,6 +71,7 @@ class TestRRFFusion:
         fusion, structured, semantic, keyword = _make_fusion()
         structured.retrieve.return_value = []
         from search.models import FilterClause, FilterOp
+
         query = SearchQuery(text="x", filters=[FilterClause(field="f", op=FilterOp.EQ, value="v")])
         results = fusion.fuse(query)
         assert results == []

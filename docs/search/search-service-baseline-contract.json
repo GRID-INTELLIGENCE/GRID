@@ -112,7 +112,10 @@
     "guardrail_audit_enabled": { "default": true, "env": "SEARCH_GUARDRAIL_AUDIT_ENABLED" },
     "guardrail_pii_redact": { "default": true, "env": "SEARCH_GUARDRAIL_PII_REDACT" },
     "guardrail_fail_open": { "default": false, "env": "SEARCH_GUARDRAIL_FAIL_OPEN" },
-    "max_page_size": { "default": 1000, "env": "SEARCH_MAX_PAGE_SIZE" }
+    "max_page_size": { "default": 1000, "env": "SEARCH_MAX_PAGE_SIZE" },
+    "guardrail_admin_gating": { "default": false, "env": "SEARCH_GUARDRAIL_ADMIN_GATING" },
+    "guardrail_admin_identities": { "default": [], "env": "SEARCH_GUARDRAIL_ADMIN_IDENTITIES" },
+    "guardrail_admin_header": { "default": "X-Admin-Role", "env": "SEARCH_GUARDRAIL_ADMIN_HEADER" }
   },
 
   "verification": {
@@ -124,8 +127,14 @@
     "lint": "ruff check src/search/"
   },
 
+  "admin_gating": {
+    "status": "implemented",
+    "gated_routes": ["PUT /{index_name}/schema", "POST /{index_name}/index", "DELETE /{index_name}"],
+    "mechanism": "X-Admin-Role: admin header OR identity in guardrail_admin_identities",
+    "when": "guardrail_admin_gating=true"
+  },
+
   "deferred_phase4": [
-    "Gate schema/index/delete routes behind admin role",
     "Implement SEARCH_FULL_PIPELINE for optional fusion/ranking/facets",
     "Implement real AccessControl with index/field allowlists"
   ],

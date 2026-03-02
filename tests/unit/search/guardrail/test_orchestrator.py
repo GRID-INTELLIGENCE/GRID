@@ -44,7 +44,9 @@ class TestGuardrailOrchestrator:
     ):
         test_config.guardrail_auth_required = True
         orch = GuardrailOrchestrator(config=test_config, policy=GuardrailPolicy(phases={"pre_query": ["auth"]}))
-        result = await orch.run_pre_query(GuardrailContext(request=guardrail_context_no_identity.request, config=test_config))
+        result = await orch.run_pre_query(
+            GuardrailContext(request=guardrail_context_no_identity.request, config=test_config)
+        )
         assert result.blocked
         assert "Authentication" in (result.block_reason or "")
 

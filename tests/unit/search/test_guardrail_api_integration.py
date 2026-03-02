@@ -46,47 +46,65 @@ def client_guardrail_no_auth(guardrail_config_no_auth, sample_documents):
     app = FastAPI()
     app.include_router(create_search_router(engine, config=guardrail_config_no_auth))
     c = TestClient(app)
-    c.put("/api/search/products/schema", json={
-        "name": "products",
-        "fields": {
-            "title": {"type": "text", "searchable": True},
-            "description": {"type": "text", "searchable": True},
-            "price": {"type": "float", "filterable": True},
+    c.put(
+        "/api/search/products/schema",
+        json={
+            "name": "products",
+            "fields": {
+                "title": {"type": "text", "searchable": True},
+                "description": {"type": "text", "searchable": True},
+                "price": {"type": "float", "filterable": True},
+            },
         },
-    })
-    c.post("/api/search/products/index", json={
-        "documents": [d.model_dump() for d in sample_documents],
-    })
+    )
+    c.post(
+        "/api/search/products/index",
+        json={
+            "documents": [d.model_dump() for d in sample_documents],
+        },
+    )
     return c
 
 
 @pytest.mark.integration
 class TestGuardrailApiIntegration:
     def test_search_without_auth_blocked_when_required(self, client_with_guardrail):
-        client_with_guardrail.put("/api/search/products/schema", json={
-            "name": "products",
-            "fields": {
-                "title": {"type": "text", "searchable": True},
-                "price": {"type": "float", "filterable": True},
+        client_with_guardrail.put(
+            "/api/search/products/schema",
+            json={
+                "name": "products",
+                "fields": {
+                    "title": {"type": "text", "searchable": True},
+                    "price": {"type": "float", "filterable": True},
+                },
             },
-        })
-        client_with_guardrail.post("/api/search/products/index", json={
-            "documents": [{"id": "p1", "fields": {"title": "Headphones", "price": 79.99}}],
-        })
+        )
+        client_with_guardrail.post(
+            "/api/search/products/index",
+            json={
+                "documents": [{"id": "p1", "fields": {"title": "Headphones", "price": 79.99}}],
+            },
+        )
         resp = client_with_guardrail.post("/api/search/products/query", json={"query": "headphones"})
         assert resp.status_code in (401, 403)
 
     def test_search_with_auth_succeeds_when_required(self, client_with_guardrail):
-        client_with_guardrail.put("/api/search/products/schema", json={
-            "name": "products",
-            "fields": {
-                "title": {"type": "text", "searchable": True},
-                "price": {"type": "float", "filterable": True},
+        client_with_guardrail.put(
+            "/api/search/products/schema",
+            json={
+                "name": "products",
+                "fields": {
+                    "title": {"type": "text", "searchable": True},
+                    "price": {"type": "float", "filterable": True},
+                },
             },
-        })
-        client_with_guardrail.post("/api/search/products/index", json={
-            "documents": [{"id": "p1", "fields": {"title": "Headphones", "price": 79.99}}],
-        })
+        )
+        client_with_guardrail.post(
+            "/api/search/products/index",
+            json={
+                "documents": [{"id": "p1", "fields": {"title": "Headphones", "price": 79.99}}],
+            },
+        )
         resp = client_with_guardrail.post(
             "/api/search/products/query",
             json={"query": "headphones"},

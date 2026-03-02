@@ -27,16 +27,22 @@ def security_client(guardrail_config_strict):
     app = FastAPI()
     app.include_router(create_search_router(engine, config=guardrail_config_strict))
     c = TestClient(app)
-    c.put("/api/search/products/schema", json={
-        "name": "products",
-        "fields": {
-            "title": {"type": "text", "searchable": True},
-            "price": {"type": "float", "filterable": True},
+    c.put(
+        "/api/search/products/schema",
+        json={
+            "name": "products",
+            "fields": {
+                "title": {"type": "text", "searchable": True},
+                "price": {"type": "float", "filterable": True},
+            },
         },
-    })
-    c.post("/api/search/products/index", json={
-        "documents": [{"id": "p1", "fields": {"title": "Test", "price": 10}}],
-    })
+    )
+    c.post(
+        "/api/search/products/index",
+        json={
+            "documents": [{"id": "p1", "fields": {"title": "Test", "price": 10}}],
+        },
+    )
     return c
 
 

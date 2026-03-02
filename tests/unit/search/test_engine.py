@@ -3,7 +3,7 @@
 import pytest
 
 from search.engine import SearchEngine
-from search.models import IndexSchema, FieldSchema, FieldType
+from search.models import FieldSchema, FieldType, IndexSchema
 
 
 class TestIndexManagement:

@@ -41,6 +41,33 @@ class HealthResponse(BaseModel):
 
 
 # ---------------------------------------------------------------------------
+# Admin gating
+# ---------------------------------------------------------------------------
+
+
+def _require_admin(request: Request, cfg: SearchConfig) -> None:
+    """Raise 403 if admin gating is enabled and caller is not admin."""
+    if not getattr(cfg, "guardrail_admin_gating", False):
+        return
+    identity = getattr(request.state, "identity", None)
+    if identity is None and request:
+        auth = request.headers.get("Authorization")
+        if auth and (auth.startswith("Bearer ") or auth.startswith("ApiKey ")):
+            identity = auth.split(" ", 1)[1].strip() or None
+    admin_header = getattr(cfg, "guardrail_admin_header", "X-Admin-Role")
+    admin_value = getattr(cfg, "guardrail_admin_header_value", "admin")
+    admin_identities = getattr(cfg, "guardrail_admin_identities", []) or []
+    if request and request.headers.get(admin_header) == admin_value:
+        return
+    if identity and identity in admin_identities:
+        return
+    raise HTTPException(
+        status_code=403,
+        detail="Admin role required for this operation",
+    )
+
+
+# ---------------------------------------------------------------------------
 # Router factory
 # ---------------------------------------------------------------------------
 
@@ -68,10 +95,15 @@ def create_search_router(
             config=cfg,
         )
 
-    # -- Schema management --------------------------------------------------
+    # -- Schema management (admin-gated) -------------------------------------
 
     @router.put("/{index_name}/schema")
-    def create_or_update_schema(index_name: str, req: SchemaCreateRequest) -> dict[str, str]:
+    def create_or_update_schema(
+        request: Request,
+        index_name: str,
+        req: SchemaCreateRequest,
+    ) -> dict[str, str]:
+        _require_admin(request, cfg)
         schema = IndexSchema(name=index_name, fields=req.fields)
         try:
             engine.create_index(schema)
@@ -79,10 +111,15 @@ def create_search_router(
             raise HTTPException(status_code=409, detail=str(exc)) from exc
         return {"status": "created", "index": index_name}
 
-    # -- Document indexing --------------------------------------------------
+    # -- Document indexing (admin-gated) -------------------------------------
 
     @router.post("/{index_name}/index")
-    def index_documents(index_name: str, req: IndexDocumentsRequest) -> dict[str, Any]:
+    def index_documents(
+        request: Request,
+        index_name: str,
+        req: IndexDocumentsRequest,
+    ) -> dict[str, Any]:
+        _require_admin(request, cfg)
         try:
             count = engine.index_documents(index_name, req.documents)
         except KeyError as exc:
@@ -164,10 +201,11 @@ def create_search_router(
         except KeyError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
 
-    # -- Index management ---------------------------------------------------
+    # -- Index management (admin-gated) --------------------------------------
 
     @router.delete("/{index_name}")
-    def delete_index(index_name: str) -> dict[str, str]:
+    def delete_index(request: Request, index_name: str) -> dict[str, str]:
+        _require_admin(request, cfg)
         try:
             engine.delete_index(index_name)
         except KeyError as exc:

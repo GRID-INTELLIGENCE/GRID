@@ -56,31 +56,56 @@ def sample_documents():
     from search.models import Document
 
     return [
-        Document(id="p1", fields={
-            "title": "Wireless Bluetooth Headphones",
-            "description": "Noise-cancelling over-ear headphones with 30h battery",
-            "price": 79.99, "category": "electronics", "in_stock": True,
-        }),
-        Document(id="p2", fields={
-            "title": "USB-C Charging Cable",
-            "description": "Fast charging braided cable 2m length",
-            "price": 12.99, "category": "electronics", "in_stock": True,
-        }),
-        Document(id="p3", fields={
-            "title": "Running Shoes",
-            "description": "Lightweight trail running shoes with grip sole",
-            "price": 129.99, "category": "footwear", "in_stock": True,
-        }),
-        Document(id="p4", fields={
-            "title": "Leather Wallet",
-            "description": "Genuine leather bifold wallet with RFID blocking",
-            "price": 34.99, "category": "accessories", "in_stock": False,
-        }),
-        Document(id="p5", fields={
-            "title": "Mechanical Keyboard",
-            "description": "RGB backlit mechanical keyboard with blue switches",
-            "price": 89.99, "category": "electronics", "in_stock": True,
-        }),
+        Document(
+            id="p1",
+            fields={
+                "title": "Wireless Bluetooth Headphones",
+                "description": "Noise-cancelling over-ear headphones with 30h battery",
+                "price": 79.99,
+                "category": "electronics",
+                "in_stock": True,
+            },
+        ),
+        Document(
+            id="p2",
+            fields={
+                "title": "USB-C Charging Cable",
+                "description": "Fast charging braided cable 2m length",
+                "price": 12.99,
+                "category": "electronics",
+                "in_stock": True,
+            },
+        ),
+        Document(
+            id="p3",
+            fields={
+                "title": "Running Shoes",
+                "description": "Lightweight trail running shoes with grip sole",
+                "price": 129.99,
+                "category": "footwear",
+                "in_stock": True,
+            },
+        ),
+        Document(
+            id="p4",
+            fields={
+                "title": "Leather Wallet",
+                "description": "Genuine leather bifold wallet with RFID blocking",
+                "price": 34.99,
+                "category": "accessories",
+                "in_stock": False,
+            },
+        ),
+        Document(
+            id="p5",
+            fields={
+                "title": "Mechanical Keyboard",
+                "description": "RGB backlit mechanical keyboard with blue switches",
+                "price": 89.99,
+                "category": "electronics",
+                "in_stock": True,
+            },
+        ),
     ]
 
 

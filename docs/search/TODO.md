@@ -2,9 +2,9 @@
 
 Baseline contract: [search-service-baseline-contract.json](./search-service-baseline-contract.json)
 
-## Phase 4 (pending)
+## Phase 4 (partial)
 
-- [ ] **Admin gating** – Gate schema, index, delete routes behind admin role
+- [x] **Admin gating** – Gate schema, index, delete routes behind admin role (done)
 - [ ] **SEARCH_FULL_PIPELINE** – Implement optional fusion/ranking/facets when flag is false
 - [ ] **AccessControl** – Implement real index/field allowlists (replace stub)
 

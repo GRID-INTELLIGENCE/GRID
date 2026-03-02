@@ -69,10 +69,12 @@ class TestFilters:
         assert result == {"d1", "d2", "d3"}
 
     def test_intersection(self, store):
-        result = store.filter([
-            FilterClause(field="category", op=FilterOp.EQ, value="electronics"),
-            FilterClause(field="price", op=FilterOp.GT, value=100),
-        ])
+        result = store.filter(
+            [
+                FilterClause(field="category", op=FilterOp.EQ, value="electronics"),
+                FilterClause(field="price", op=FilterOp.GT, value=100),
+            ]
+        )
         assert result == {"d3"}
 
     def test_empty_result(self, store):
