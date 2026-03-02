@@ -369,7 +369,7 @@ extend-ignore = [
 "**/audit_logger.py" = ["F401"]  # Optional cloud logging
 "**/*learning*.py" = ["F401"]  # Optional learning imports
 "tests/**/*.py" = ["F401", "E722", "S110", "B017", "ASYNC251", "ASYNC110", "ASYNC210", "ASYNC220", "ASYNC221", "ASYNC230", "ASYNC240", "S311", "S603", "S607", "S108", "S324", "PERF401"]  # test patterns
-"**/verify*.py" = ["F841", "PERF102"]  # Verify scripts may have unused vars / dict iteration
+"**/verify*.py" = ["F841", "PERF102", "I001"]  # Verify scripts: unused vars; import order (path hack before first-party)
 # Non-src directories with intentional patterns
 "arena_api/**/*.py" = ["F821", "S110", "S104", "PERF401", "ASYNC240"]  # Arena API prototypes
 "cognition/**/*.py" = ["PERF401", "S324"]  # Cognitive processing patterns
@@ -384,7 +384,7 @@ extend-ignore = [
 "tests/conftest.py" = ["F811"]  # Fixture redefinitions are intentional
 
 [tool.ruff.lint.isort]
-known-first-party = ["grid", "application", "cognitive", "tools"]
+known-first-party = ["grid", "application", "cognitive", "tools", "mycelium"]
 
 [tool.mypy]
 python_version = "3.13"
@@ -403,8 +403,17 @@ strict_equality = true
 explicit_package_bases = true
 namespace_packages = true
 mypy_path = "src"
-# Exclude root-level directories that are also in src/ to avoid duplication errors
-exclude = ["^application/", "^grid/", "^tools/", "^cognitive/", "^tests/", "^integration/databricks/"]
+# Exclude root-level dirs (match both / and \ for Windows)
+# Exclude path segment "nul" to avoid ValueError on Windows (relpath to device \\\\.\\nul)
+exclude = [
+    "^application[/\\\\]",
+    "^grid[/\\\\]",
+    "^tools[/\\\\]",
+    "^cognitive[/\\\\]",
+    "^tests[/\\\\]",
+    "^integration[/\\\\]databricks[/\\\\]",
+    "(^|[/\\\\])nul([/\\\\]|$)",
+]
 
 # Overrides: prune duplicates periodically (see docs/guides/DEPLOYMENT_PRUNE_REBUILD.md)
 [[tool.mypy.overrides]]

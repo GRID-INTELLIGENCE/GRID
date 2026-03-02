@@ -792,6 +792,8 @@ Pipeline green checklist for release-bound changes:
 
 ### Pre-Push Validation
 
+**Before push:** Run `make test` and `make lint` to confirm no regressions.
+
 Optimized pre-push hook ensures:
 
 1. **Brain Integrity**: Validates `seed/topics_seed.json` structure

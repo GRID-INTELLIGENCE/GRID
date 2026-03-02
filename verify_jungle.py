@@ -8,11 +8,14 @@ and verifies that the safety engine creates a 'walkable neighborhood'.
 import sys
 from pathlib import Path
 
-# Add src to path
+# Add src to path (must run before first-party imports)
 sys.path.append(str(Path(__file__).parent / "src"))
 
-from mycelium.domains import DomainResolver, DomainType
+# isort: off — path hack above; first-party imports follow
 from mycelium.concurrency import JungleEngine
+from mycelium.domains import DomainResolver, DomainType
+# isort: on
+
 
 def run_midnight_walk():
     print("🌙 Starting Midnight Walk in the Mycelium Jungle...")
@@ -59,6 +62,7 @@ def run_midnight_walk():
     print(f"Result: {report}")
 
     print("\n✅ Verification Complete. Environment is safe for a midnight walk.")
+
 
 if __name__ == "__main__":
     run_midnight_walk()

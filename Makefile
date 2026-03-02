@@ -2,7 +2,7 @@
 # Streamlines local development with uv
 # Note: Dotfiles (.agentignore, .cursorrules, .python-version, .secrets.baseline) in config/
 
-.PHONY: help install run test lint format export-requirements check-venv clean
+.PHONY: help install run test lint format wall export-requirements check-venv clean
 
 # Default target
 .DEFAULT_GOAL := help
@@ -29,16 +29,24 @@ test: ## Run tests
 	@echo "$(BLUE)Running tests...$(NC)"
 	uv run pytest tests/unit tests/integration -q --tb=short
 
+# Mypy: explicit src dirs to avoid walking src/nul (Windows NUL device path crash)
+MYPY_SRC_DIRS = src/application src/cognitive src/data src/grid src/infrastructure src/integration src/mycelium src/security src/tools src/unified_fabric src/vection
+MYPY_SRC_FILES = src/main.py src/benchmark_rag.py src/rag_chat.py src/test_semantic_chunking.py
+
 lint: ## Run static analysis (Ruff + Mypy)
 	@echo "$(BLUE)Linting...$(NC)"
 	uv run ruff check .
 	@echo "$(BLUE)Type checking...$(NC)"
-	-uv run mypy grid/ tools/ application/
+	-uv run mypy $(MYPY_SRC_DIRS) $(MYPY_SRC_FILES)
 
 format: ## Auto-format code
 	@echo "$(BLUE)Formatting...$(NC)"
 	uv run ruff format .
 	uv run ruff check . --fix
+
+wall: ## Run daily wall check (pytest + ruff) before new code
+	@echo "$(BLUE)Running wall check...$(NC)"
+	uv run pytest -q --tb=short && uv run ruff check src/ safety/ security/ boundaries/
 
 check-venv: ## Validate virtual environment health
 	@echo "$(BLUE)Checking venv health...$(NC)"
