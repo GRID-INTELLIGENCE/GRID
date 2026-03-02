@@ -57,11 +57,11 @@ class RAGEngine:
                         f"Please start Ollama for embeddings and LLM: ollama serve"
                     )
                 else:
-                    print(f"Warning: Ollama not accessible at {config.ollama_base_url}. Local LLM will fail.")
+                    logger.warning("Ollama not accessible at %s. Local LLM will fail.", config.ollama_base_url)
         elif config.llm_mode == ModelMode.COPILOT:
-            print("Using GitHub Copilot SDK - no Ollama required")
+            logger.info("Using GitHub Copilot SDK - no Ollama required")
         elif config.llm_mode == ModelMode.EXTERNAL:
-            print("Using external API provider (OpenAI/Anthropic/etc.) - no Ollama required")
+            logger.info("Using external API provider (OpenAI/Anthropic/etc.) - no Ollama required")
 
         # Try to find available models for Ollama provider
         if config.embedding_provider == "ollama":
@@ -70,8 +70,9 @@ class RAGEngine:
                     preferred=config.embedding_model, base_url=config.ollama_base_url
                 )
                 if available_embedding_model and available_embedding_model != config.embedding_model:
-                    print(
-                        f"Info: Using available Ollama model '{available_embedding_model}' instead of '{config.embedding_model}'"
+                    logger.info(
+                        "Using available Ollama model '%s' instead of '%s'",
+                        available_embedding_model, config.embedding_model,
                     )
                     config.embedding_model = available_embedding_model
             except Exception:  # noqa: S110 intentional silent handling
@@ -81,8 +82,9 @@ class RAGEngine:
             try:
                 available_llm_model = find_llm_model(preferred=config.llm_model_local, base_url=config.ollama_base_url)
                 if available_llm_model and available_llm_model != config.llm_model_local:
-                    print(
-                        f"Info: Using available Ollama LLM '{available_llm_model}' instead of '{config.llm_model_local}'"
+                    logger.info(
+                        "Using available Ollama LLM '%s' instead of '%s'",
+                        available_llm_model, config.llm_model_local,
                     )
                     config.llm_model_local = available_llm_model
             except Exception:  # noqa: S110 intentional silent handling
@@ -99,7 +101,7 @@ class RAGEngine:
         from .vector_store.registry import VectorStoreRegistry
 
         provider = config.vector_store_provider.lower()
-        print(f"DEBUG: Initializing vector store with provider: {provider}")
+        logger.debug("Initializing vector store with provider: %s", provider)
 
         try:
             if provider == "databricks":
@@ -110,13 +112,13 @@ class RAGEngine:
                     schema=config.databricks_schema,
                 )
             elif provider == "chromadb":
-                print("DEBUG: Calling VectorStoreRegistry.create for chromadb")
+                logger.debug("Calling VectorStoreRegistry.create for chromadb")
                 self.vector_store = VectorStoreRegistry.create(
                     provider,
                     collection_name=config.collection_name,
                     persist_directory=config.vector_store_path,
                 )
-                print(f"DEBUG: vector_store after create: {self.vector_store}")
+                logger.debug("vector_store after create: %s", self.vector_store)
             elif provider == "pinecone":
                 # Pinecone configuration from environment or config
                 import os
@@ -137,11 +139,11 @@ class RAGEngine:
                 self.vector_store = VectorStoreRegistry.create(provider)
             else:
                 available = ", ".join(VectorStoreRegistry.list_backends())
-                print(f"DEBUG: Provider {provider} not found in if/elif. Available: {available}")
+                logger.debug("Provider %s not found in if/elif. Available: %s", provider, available)
                 raise ValueError(f"Unknown vector_store_provider: {provider}. Options: {available}")
         except Exception as e:
-            print(f"DEBUG: Failed to initialize vector store: {e}")
-            logger.error(f"Failed to initialize vector store: {e}")
+            logger.debug("Failed to initialize vector store: %s", e)
+            logger.error("Failed to initialize vector store: %s", e)
             raise
 
         # Initialize query cache if enabled
@@ -209,7 +211,7 @@ class RAGEngine:
             if expected_dim > 0:
                 actual_dim = len(self.embedding_provider.embed("test"))
                 if expected_dim != actual_dim:
-                    print(f"⚠️  Dimension mismatch: Index={expected_dim}D, Model={actual_dim}D. Rebuilding...")
+                    logger.warning("Dimension mismatch: Index=%dD, Model=%dD. Rebuilding...", expected_dim, actual_dim)
                     rebuild = True
 
         """Index a repository.

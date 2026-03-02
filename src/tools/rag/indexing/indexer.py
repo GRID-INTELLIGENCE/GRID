@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import os
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timezone
@@ -12,6 +13,11 @@ from ..embeddings.base import BaseEmbeddingProvider
 from ..utils import get_agent_ignore_patterns
 from ..vector_store.base import BaseVectorStore
 from .semantic_chunker import SemanticChunker
+
+logger = logging.getLogger(__name__)
+# Honour the existing RAG_INDEX_DEBUG env var via the logging framework
+if os.getenv("RAG_INDEX_DEBUG", "").lower() in {"1", "true", "yes"}:
+    logger.setLevel(logging.DEBUG)
 
 if TYPE_CHECKING:
     from ..config import RAGConfig
@@ -197,8 +203,6 @@ def index_repository(
     if not repo.exists():
         raise ValueError(f"Repository path does not exist: {repo_path}")
 
-    debug = os.getenv("RAG_INDEX_DEBUG", "").lower() in {"1", "true", "yes"}
-
     try:
         repo_resolved = repo.resolve()
     except Exception:
@@ -373,12 +377,10 @@ def index_repository(
 
     for file_str in file_iterator:
         file_path = Path(file_str)
-        if debug:
-            print(f"DEBUG: Processing {file_path}")
+        logger.debug("Processing %s", file_path)
 
         if not file_path.exists():
-            if debug:
-                print(f"DEBUG: File not found: {file_path}")
+            logger.debug("File not found: %s", file_path)
             continue
 
         # Check if file matches include patterns
@@ -391,8 +393,7 @@ def index_repository(
             continue
 
         if not is_text_file(file_path, text_extensions):
-            if debug:
-                print(f"DEBUG: Not a text file: {file_path.name}, suffix: {file_path.suffix}")
+            logger.debug("Not a text file: %s, suffix: %s", file_path.name, file_path.suffix)
             continue
 
         # Skip files larger than 1MB to avoid indexing huge artifacts
@@ -404,18 +405,15 @@ def index_repository(
             continue
 
         # Read file content
-        if debug:
-            print(f"DEBUG: Reading content for {file_path}")
+        logger.debug("Reading content for %s", file_path)
         content = read_file_content(file_path)
         if content is None:
-            if debug:
-                print(f"DEBUG: Content is None for {file_path}")
+            logger.debug("Content is None for %s", file_path)
             metrics.files_skipped += 1
             metrics.add_skip_reason("Failed to read")
             continue
         if not content.strip():
-            if debug:
-                print(f"DEBUG: Content is empty for {file_path}")
+            logger.debug("Content is empty for %s", file_path)
             metrics.files_skipped += 1
             metrics.add_skip_reason("Empty file")
             continue
@@ -426,8 +424,7 @@ def index_repository(
 
             should_index, quality = should_index_file(file_path, quality_threshold, content)
             if not should_index:
-                if debug:
-                    print(f"DEBUG: Skipping {file_path}: quality={quality.score:.2f}, reasons={quality.reasons}")
+                logger.debug("Skipping %s: quality=%.2f, reasons=%s", file_path, quality.score, quality.reasons)
                 metrics.files_skipped += 1
                 metrics.add_skip_reason(f"Low quality ({quality.score:.2f})")
                 continue
@@ -465,15 +462,12 @@ def index_repository(
 
     total_chunks = len(chunk_texts)
     if total_chunks > 50000:
-        print(f"\n⚠️  WARNING: {total_chunks:,} chunks detected!")
-        print("   This is unusually high. Recommended: < 20,000")
-        print("   Consider:")
-        print(f"   - Increasing chunk_size (current: {chunk_size})")
-        print("   - Using --curate flag for selective indexing")
-        print("   - Adding more exclude directories")
-
-        # Non-interactive mode: just warn and continue
-        print("Continuing with warning...")
+        logger.warning(
+            "%d chunks detected! This is unusually high (recommended: < 20,000). "
+            "Consider increasing chunk_size (current: %d), using --curate, "
+            "or adding more exclude directories.",
+            total_chunks, chunk_size,
+        )
 
     print(f"Created {total_chunks} chunks from repository")
 
@@ -485,8 +479,7 @@ def index_repository(
 
     # Generate embeddings
     if embedding_provider is None:
-        if not quiet:
-            print("Warning: No embedding provider provided, using simple fallback")
+        logger.warning("No embedding provider provided, using simple fallback")
         embedding_provider = SimpleEmbedding()
 
     if not quiet:
@@ -497,7 +490,7 @@ def index_repository(
     limit = 4000
     long_chunks = [i for i, text in enumerate(chunk_texts) if len(text) > limit]
     if long_chunks:
-        print(f"Warning: {len(long_chunks)} chunks exceed recommended length ({limit} chars) and will be truncated")
+        logger.warning("%d chunks exceed recommended length (%d chars) and will be truncated", len(long_chunks), limit)
 
     # Generate embeddings with batch support for performance
     embeddings_list = []
@@ -530,8 +523,9 @@ def index_repository(
                 error_str = str(e).lower()
                 if "context length" in error_str or "exceeds" in error_str:
                     # Fall back to sequential for this batch
-                    print(
-                        f"Warning: Batch embedding failed, falling back to sequential for batch {batch_start}-{batch_end}"
+                    logger.warning(
+                        "Batch embedding failed, falling back to sequential for batch %d-%d",
+                        batch_start, batch_end,
                     )
                     for j, text in enumerate(batch_texts):
                         idx = batch_start + j
@@ -545,7 +539,7 @@ def index_repository(
                         except Exception as inner_e:
                             inner_error_str = str(inner_e).lower()
                             if "context length" in inner_error_str or "exceeds" in inner_error_str:
-                                print(f"Warning: Skipping chunk {idx} (length: {len(text)} chars) - too long")
+                                logger.warning("Skipping chunk %d (length: %d chars) - too long", idx, len(text))
                                 metrics.chunks_failed += 1
                                 metrics.chunks_created -= 1
                                 continue
@@ -577,7 +571,7 @@ def index_repository(
             except Exception as e:
                 error_str = str(e).lower()
                 if "context length" in error_str or "exceeds" in error_str:
-                    print(f"Warning: Skipping chunk {i} (length: {len(text)} chars) - too long even after truncation")
+                    logger.warning("Skipping chunk %d (length: %d chars) - too long even after truncation", i, len(text))
                     # Skip this chunk - don't add to valid_indices
                     metrics.chunks_failed += 1
                     metrics.chunks_created -= 1  # Decrement since we counted it earlier
@@ -586,11 +580,10 @@ def index_repository(
                     raise  # Re-raise other errors
 
     # Filter lists to only include valid chunks
-    if not quiet:
-        print(f"DEBUG: Total chunks: {len(chunk_texts)}, Valid: {len(valid_indices)}", flush=True)
+    logger.debug("Total chunks: %d, Valid: %d", len(chunk_texts), len(valid_indices))
 
     if len(valid_indices) < len(chunk_texts):
-        print(f"Info: Processed {len(valid_indices)}/{len(chunk_texts)} chunks successfully")
+        logger.info("Processed %d/%d chunks successfully", len(valid_indices), len(chunk_texts))
         chunk_ids = [chunk_ids[i] for i in valid_indices]
         chunk_texts = [chunk_texts[i] for i in valid_indices]
         chunk_metadatas = [chunk_metadatas[i] for i in valid_indices]
@@ -603,13 +596,11 @@ def index_repository(
         batch_embeddings = embeddings_list[i : i + batch_size]
         batch_metadatas = chunk_metadatas[i : i + batch_size]
 
-        if not quiet:
-            print(f"DEBUG: Adding batch {i // batch_size + 1} ({len(batch_ids)} items) to store...", flush=True)
+        logger.debug("Adding batch %d (%d items) to store...", i // batch_size + 1, len(batch_ids))
 
         vector_store.add(ids=batch_ids, documents=batch_texts, embeddings=batch_embeddings, metadatas=batch_metadatas)
 
-        if not quiet:
-            print(f"DEBUG: Current store count: {vector_store.count()}", flush=True)
+        logger.debug("Current store count: %d", vector_store.count())
 
         if (i // batch_size + 1) % 10 == 0:
             if not quiet:
@@ -687,9 +678,10 @@ def update_index(
                 current_dim = 0
 
         if existing_dim > 0 and current_dim > 0 and existing_dim != current_dim:
-            print(
-                f"⚠️  Embedding dimension mismatch for incremental update: store={existing_dim}D, model={current_dim}D. "
-                "Resetting vector store collection to avoid corruption..."
+            logger.warning(
+                "Embedding dimension mismatch for incremental update: store=%dD, model=%dD. "
+                "Resetting vector store collection to avoid corruption...",
+                existing_dim, current_dim,
             )
             reset_fn = getattr(vector_store, "reset", None)
             if callable(reset_fn):
@@ -855,14 +847,12 @@ def update_index(
 
         deleted_paths = sorted([p for p in manifest.keys() if p not in current_rel_paths])
         for rel_path_str in deleted_paths:
-            if not quiet:
-                print(f"Removing chunks for deleted file: {rel_path_str}")
+            logger.info("Removing chunks for deleted file: %s", rel_path_str)
             try:
                 vector_store.delete(where={"path": rel_path_str})
                 vector_store.delete(where={"path": Path(rel_path_str).as_posix()})
             except Exception as e:
-                if not quiet:
-                    print(f"Warning: Could not delete chunks for {rel_path_str}: {e}")
+                logger.warning("Could not delete chunks for %s: %s", rel_path_str, e)
 
         if deleted_paths:
             dbx_tracker.delete_paths(deleted_paths)
@@ -899,8 +889,7 @@ def update_index(
             print(f"Found {len(changed_files)} changed/new files to index")
 
         if embedding_provider is None:
-            if not quiet:
-                print("Warning: No embedding provider provided, using simple fallback")
+            logger.warning("No embedding provider provided, using simple fallback")
             embedding_provider = SimpleEmbedding()
 
         updated_states = []
@@ -965,7 +954,7 @@ def update_index(
                 except Exception as e:
                     error_str = str(e).lower()
                     if "context length" in error_str or "exceeds" in error_str:
-                        print(f"Warning: Skipping chunk {i} in {rel_path_str} - too long")
+                        logger.warning("Skipping chunk %d in %s - too long", i, rel_path_str)
                         continue
                     raise
 
@@ -1000,16 +989,14 @@ def update_index(
     # Detect deleted files and remove their chunks
     deleted_files = tracker.get_deleted_files(repo, current_files)
     for rel_path in deleted_files:
-        if not quiet:
-            print(f"Removing chunks for deleted file: {rel_path}")
+        logger.info("Removing chunks for deleted file: %s", rel_path)
         try:
             # Backward/forward compatibility: older indexes may store Windows-style paths
             # while curated/normalized indexes store POSIX paths.
             vector_store.delete(where={"path": rel_path})
             vector_store.delete(where={"path": Path(rel_path).as_posix()})
         except Exception as e:
-            if not quiet:
-                print(f"Warning: Could not delete chunks for {rel_path}: {e}")
+            logger.warning("Could not delete chunks for %s: %s", rel_path, e)
         tracker.remove_file(rel_path)
 
     # Detect changed files
@@ -1026,8 +1013,7 @@ def update_index(
 
     # Initialize embedding provider
     if embedding_provider is None:
-        if not quiet:
-            print("Warning: No embedding provider provided, using simple fallback")
+        logger.warning("No embedding provider provided, using simple fallback")
         embedding_provider = SimpleEmbedding()
 
     # Process changed files
@@ -1095,7 +1081,7 @@ def update_index(
             except Exception as e:
                 error_str = str(e).lower()
                 if "context length" in error_str or "exceeds" in error_str:
-                    print(f"Warning: Skipping chunk {i} in {rel_path} - too long")
+                    logger.warning("Skipping chunk %d in %s - too long", i, rel_path)
                     continue
                 raise
 

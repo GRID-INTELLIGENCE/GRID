@@ -3,7 +3,7 @@
 <div align="center">
 
 [![PyPI version](https://img.shields.io/pypi/v/grid-intelligence.svg)](https://pypi.org/project/grid-intelligence/)
-[![Tests](https://github.com/GRID-INTELLIGENCE/GRID/actions/workflows/minimal-ci.yml/badge.svg?branch=main)](https://github.com/GRID-INTELLIGENCE/GRID/actions/workflows/minimal-ci.yml)
+[![Tests](https://github.com/GRID-INTELLIGENCE/GRID/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/GRID-INTELLIGENCE/GRID/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python 3.13+](https://img.shields.io/badge/python-3.13%2B-blue.svg)](https://www.python.org/downloads/)
 [![Linter: Ruff](https://img.shields.io/badge/linter-ruff-261230.svg)](https://github.com/astral-sh/ruff)

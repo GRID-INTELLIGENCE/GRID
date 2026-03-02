@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import logging
 import time
-from typing import List, Optional
 
 from mycelium.concurrency import JungleEngine
 from mycelium.domains import DomainResolver
@@ -22,12 +21,12 @@ logger = logging.getLogger(__name__)
 class TracebackLocomotion:
     """The mechanical actuator for moving safely across the filesystem."""
 
-    def __init__(self, engine: JungleEngine, resolver: Optional[DomainResolver] = None):
+    def __init__(self, engine: JungleEngine, resolver: DomainResolver | None = None):
         self.engine = engine
         self.resolver = resolver or DomainResolver(root="e:\\GRID-main")
         self.lamp = DomainLamp(self.resolver)
 
-    def traverse(self, traceback_nodes: List[str]) -> dict:
+    def traverse(self, traceback_nodes: list[str]) -> dict:
         """
         Executes a contiguous walk down a traceback sequence.
         Will Halt if the Lamp reveals a fatal hazard or if the

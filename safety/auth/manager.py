@@ -6,7 +6,7 @@ import redis
 from jwt.exceptions import InvalidTokenError as JWTError
 from passlib.context import CryptContext
 
-from ...src.grid.core.config import settings
+from grid.core.config import settings
 
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

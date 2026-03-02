@@ -14,7 +14,6 @@ Maps the 7 API architecture principles to the Jungle Engine:
 from __future__ import annotations
 
 import logging
-from typing import Optional
 
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
@@ -74,7 +73,7 @@ class WalkResponse(BaseModel):
 @router.get("/domains/resolve", response_model=DomainResponse)
 async def resolve_domain(
     path: str = Query(..., description="Filesystem path to resolve"),
-    target_domain: Optional[str] = Query(None, description="Target domain for jump calculation"),
+    target_domain: str | None = Query(None, description="Target domain for jump calculation"),
 ):
     """Column Alpha: Resolve a path into its functional domain."""
     # Security: validate input through SafetyGuard

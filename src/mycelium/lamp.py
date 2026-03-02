@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from typing import Optional
 
 from mycelium.domains import DomainResolver, DomainType, ResolvedDomain
 
@@ -22,7 +21,7 @@ class IlluminatedPath:
     domain: DomainType
     is_protected: bool
     refractive_index: float  # High for ENGINE (dense logic), Low for DYNAMIC (chaotic context)
-    accelerative_jump: Optional[str] = None
+    accelerative_jump: str | None = None
     warnings: list[str] = None
 
 
@@ -41,7 +40,7 @@ class DomainLamp:
         else:
             return 0.5  # Dynamic context, highly variable, low density
 
-    def illuminate(self, path: str, current_domain: Optional[DomainType] = None) -> IlluminatedPath:
+    def illuminate(self, path: str, current_domain: DomainType | None = None) -> IlluminatedPath:
         """
         Projects light onto the path. Returns an IlluminatedPath outlining
         the domain, friction, and any boundary jumps required.

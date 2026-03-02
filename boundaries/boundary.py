@@ -1,4 +1,9 @@
 """
+LIMITATIONS
+This file implements safety patterns using keyword matching and rule-based checks.
+These are insufficient for production safety without integration with a trained classifier or ML model.
+All verdicts must be reviewed by human operators for high-risk scenarios.
+
 Boundary engine: enforce boundaries, consent, and guardrails.
 Integrates with refusal rights (right to say no) and WebSocket logging.
 """
@@ -13,13 +18,14 @@ from boundaries.refusal import RefusalRights, check_refusal
 
 try:
     from boundaries.provenance import (
-        create_dpr,
-        DPRCreateInput,
-        DecisionType,
         AuthorityType,
+        DecisionType,
+        DPRCreateInput,
         SafetyVerdict,
         SafetyVerdictResult,
+        create_dpr,
     )
+
     _PROVENANCE_AVAILABLE = True
 except Exception:
     _PROVENANCE_AVAILABLE = False
@@ -124,7 +130,10 @@ class BoundaryEngine:
                 boundary_id, allowed=True, scope=scope, payload={"reason": "refusal_honoured"}
             )
             self._emit_provenance(
-                boundary_id, "pass", actor_id, "boundary_check_refusal_honoured",
+                boundary_id,
+                "pass",
+                actor_id,
+                "boundary_check_refusal_honoured",
             )
             return True
         boundary = next((b for b in self.boundaries if b.id == boundary_id), None)
@@ -138,7 +147,10 @@ class BoundaryEngine:
                 payload={"reason": "unknown_boundary_id"},
             )
             self._emit_provenance(
-                boundary_id, "block", actor_id, "boundary_check_unknown_id",
+                boundary_id,
+                "block",
+                actor_id,
+                "boundary_check_unknown_id",
             )
             return False
         allowed = self._evaluate_rule(boundary.rule, subject)
@@ -148,7 +160,9 @@ class BoundaryEngine:
                 boundary_id, scope=scope, actor_id=actor_id, payload={"subject": subject}
             )
         self._emit_provenance(
-            boundary_id, "pass" if allowed else "block", actor_id,
+            boundary_id,
+            "pass" if allowed else "block",
+            actor_id,
             f"boundary_enforcement_{'allowed' if allowed else 'denied'}",
         )
         return allowed
@@ -209,20 +223,28 @@ class BoundaryEngine:
                 payload={"reason": "unknown_guardrail_id"},
             )
             self._emit_provenance(
-                guardrail_id, "block", actor_id, "guardrail_check_unknown_id",
+                guardrail_id,
+                "block",
+                actor_id,
+                "guardrail_check_unknown_id",
             )
             return ("block", False)
         ref = check_refusal(trigger=guardrail_id, scope=scope, rights=self.refusal_rights)
         if ref is not None and guardrail.overridable_by_refusal:
             self._logger.log_guardrail_overridden(guardrail_id, scope=scope, actor_id=actor_id, payload=context)
             self._emit_provenance(
-                guardrail_id, "pass", actor_id, "guardrail_override_by_refusal",
+                guardrail_id,
+                "pass",
+                actor_id,
+                "guardrail_override_by_refusal",
             )
             return (guardrail.action, True)
         self._logger.log_guardrail_triggered(guardrail_id, guardrail.action, scope=scope, payload=context)
         verdict = "block" if guardrail.action == "block" else "warn"
         self._emit_provenance(
-            guardrail_id, verdict, actor_id,
+            guardrail_id,
+            verdict,
+            actor_id,
             f"guardrail_triggered_{guardrail.action}",
         )
         return (guardrail.action, False)

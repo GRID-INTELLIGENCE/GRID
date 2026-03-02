@@ -1,4 +1,11 @@
-"""DPR creation and serialization for DCoC."""
+"""
+LIMITATIONS
+This file implements safety patterns using keyword matching and rule-based checks.
+These are insufficient for production safety without integration with a trained classifier or ML model.
+All verdicts must be reviewed by human operators for high-risk scenarios.
+
+DPR creation and serialization for DCoC.
+"""
 
 from __future__ import annotations
 
@@ -6,7 +13,7 @@ import json
 import uuid
 from datetime import UTC, datetime
 
-from boundaries.provenance.chain import compute_hash, compute_chain_hash
+from boundaries.provenance.chain import compute_chain_hash, compute_hash
 from boundaries.provenance.signer import sign_record
 from boundaries.provenance.types import (
     ChainRef,
