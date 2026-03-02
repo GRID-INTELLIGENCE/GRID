@@ -99,7 +99,7 @@ class RAGEngine:
         from .vector_store.registry import VectorStoreRegistry
 
         provider = config.vector_store_provider.lower()
-        print(f"DEBUG: Initializing vector store with provider: {provider}")
+        logger.debug("Initializing vector store with provider: %s", provider)
 
         try:
             if provider == "databricks":
@@ -110,13 +110,13 @@ class RAGEngine:
                     schema=config.databricks_schema,
                 )
             elif provider == "chromadb":
-                print("DEBUG: Calling VectorStoreRegistry.create for chromadb")
+                logger.debug("Calling VectorStoreRegistry.create for chromadb")
                 self.vector_store = VectorStoreRegistry.create(
                     provider,
                     collection_name=config.collection_name,
                     persist_directory=config.vector_store_path,
                 )
-                print(f"DEBUG: vector_store after create: {self.vector_store}")
+                logger.debug("vector_store after create: %s", self.vector_store)
             elif provider == "pinecone":
                 # Pinecone configuration from environment or config
                 import os
@@ -137,10 +137,10 @@ class RAGEngine:
                 self.vector_store = VectorStoreRegistry.create(provider)
             else:
                 available = ", ".join(VectorStoreRegistry.list_backends())
-                print(f"DEBUG: Provider {provider} not found in if/elif. Available: {available}")
+                logger.debug("Provider %s not found in if/elif. Available: %s", provider, available)
                 raise ValueError(f"Unknown vector_store_provider: {provider}. Options: {available}")
         except Exception as e:
-            print(f"DEBUG: Failed to initialize vector store: {e}")
+            logger.debug("Failed to initialize vector store: %s", e)
             logger.error(f"Failed to initialize vector store: {e}")
             raise
 

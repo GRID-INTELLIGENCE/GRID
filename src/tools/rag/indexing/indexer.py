@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import os
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timezone
@@ -12,6 +13,8 @@ from ..embeddings.base import BaseEmbeddingProvider
 from ..utils import get_agent_ignore_patterns
 from ..vector_store.base import BaseVectorStore
 from .semantic_chunker import SemanticChunker
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from ..config import RAGConfig
@@ -398,7 +401,7 @@ def index_repository(
         # Skip files larger than 1MB to avoid indexing huge artifacts
         try:
             if file_path.stat().st_size > 1024 * 1024:
-                print(f"Skipping large file: {file_path}")
+                logger.debug("Skipping large file: %s", file_path)
                 continue
         except Exception:  # noqa: S112 intentional skip on error
             continue
@@ -587,7 +590,7 @@ def index_repository(
 
     # Filter lists to only include valid chunks
     if not quiet:
-        print(f"DEBUG: Total chunks: {len(chunk_texts)}, Valid: {len(valid_indices)}", flush=True)
+        print(f"Total chunks: {len(chunk_texts)}, Valid: {len(valid_indices)}", flush=True)
 
     if len(valid_indices) < len(chunk_texts):
         print(f"Info: Processed {len(valid_indices)}/{len(chunk_texts)} chunks successfully")
@@ -604,12 +607,12 @@ def index_repository(
         batch_metadatas = chunk_metadatas[i : i + batch_size]
 
         if not quiet:
-            print(f"DEBUG: Adding batch {i // batch_size + 1} ({len(batch_ids)} items) to store...", flush=True)
+            print(f"Adding batch {i // batch_size + 1} ({len(batch_ids)} items) to store...", flush=True)
 
         vector_store.add(ids=batch_ids, documents=batch_texts, embeddings=batch_embeddings, metadatas=batch_metadatas)
 
         if not quiet:
-            print(f"DEBUG: Current store count: {vector_store.count()}", flush=True)
+            print(f"Current store count: {vector_store.count()}", flush=True)
 
         if (i // batch_size + 1) % 10 == 0:
             if not quiet:
