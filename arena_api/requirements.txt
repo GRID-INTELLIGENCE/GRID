@@ -65,7 +65,7 @@ mkdocs-material==9.7.2
 kubernetes==35.0.0
 
 # AI/ML Safety (SECURITY UPDATE)
-transformers==4.48.3
+transformers==5.2.0
 torch==2.10.0
 scikit-learn==1.8.0
 pandas==2.2.3
