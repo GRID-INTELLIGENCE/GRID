@@ -1,0 +1,150 @@
+{
+  "meta": {
+    "id": "ssc-grid-001",
+    "version": "1.0.0",
+    "title": "Search Service Baseline Protocol",
+    "purpose": "Defines the baseline acceptable protocol for the enterprise search service: gates, guardrails, API contract, and verification. Grounded in implemented behaviour.",
+    "scope": "Applies to all /api/search/* endpoints and the guardrail-wrapped search pipeline.",
+    "related_schema": "Seeds/afloat/docs/search-service-agreement.schema.json",
+    "source_modules": [
+      "src/search/",
+      "src/search/guardrail/",
+      "src/search/api/routes.py",
+      "src/search/api/middleware.py",
+      "src/search/query/parser.py"
+    ]
+  },
+
+  "protocol": {
+    "description": "Baseline acceptable behaviour. All search operations must satisfy these conditions.",
+    "gates": [
+      {
+        "gate_id": "auth",
+        "when": "guardrail_enabled=true AND guardrail_auth_required=true",
+        "check": "Identity present (Bearer/ApiKey in Authorization header or request.state.identity)",
+        "pass": "Continue",
+        "block": { "status": 401, "error": "Authentication required" },
+        "source": "guardrail/tools/auth.py"
+      },
+      {
+        "gate_id": "rate_limit",
+        "when": "guardrail_enabled=true",
+        "check": "Requests within guardrail_rate_limit_per_minute per identity/IP",
+        "pass": "Continue",
+        "block": { "status": 429, "error": "Rate limit exceeded" },
+        "source": "guardrail/tools/rate_limit.py"
+      },
+      {
+        "gate_id": "query_sanitize",
+        "when": "guardrail_enabled=true",
+        "check": "Query length <= 10000, no injection patterns (SQL-like, script tags, template injection)",
+        "pass": "Continue",
+        "block": { "status": 403, "error": "Query contains disallowed patterns" },
+        "source": "guardrail/tools/sanitize.py, query/parser.py::sanitize"
+      },
+      {
+        "gate_id": "access_control",
+        "when": "guardrail_enabled=true",
+        "check": "Caller may access requested index (stub: ALLOW when index_name present)",
+        "pass": "Continue",
+        "block": { "status": 403, "error": "Index name required" },
+        "source": "guardrail/tools/access_control.py",
+        "note": "Phase 4: implement index/field allowlists"
+      },
+      {
+        "gate_id": "pii_redact",
+        "when": "guardrail_enabled=true AND guardrail_pii_redact=true",
+        "check": "Post-query: SSN, email, phone patterns redacted in results",
+        "pass": "Response modified in place",
+        "block": "N/A (modifies response)",
+        "source": "guardrail/tools/pii.py"
+      },
+      {
+        "gate_id": "result_filter",
+        "when": "guardrail_enabled=true",
+        "check": "Post-query: sensitive fields redacted, hits capped at max_page_size",
+        "pass": "Response modified in place",
+        "block": "N/A",
+        "source": "guardrail/tools/result_filter.py"
+      },
+      {
+        "gate_id": "audit",
+        "when": "guardrail_enabled=true AND guardrail_audit_enabled=true",
+        "check": "Log identity, index, query_hash, outcome, latency",
+        "pass": "Fire-and-forget log",
+        "block": "N/A",
+        "source": "guardrail/tools/audit.py"
+      }
+    ],
+    "pipeline_order": {
+      "pre_query": ["auth", "rate_limit", "sanitize", "access_control"],
+      "post_query": ["pii_redact", "result_filter", "audit"]
+    },
+    "orchestrator": {
+      "pattern": "Policy-driven parallel execution via asyncio.gather",
+      "block_rule": "Any tool returning BLOCK stops the request",
+      "source": "guardrail/orchestrator.py"
+    }
+  },
+
+  "api_contract": {
+    "endpoints": [
+      { "method": "PUT", "path": "/api/search/{index_name}/schema", "guardrail": "not applied (admin path, Phase 4)" },
+      { "method": "POST", "path": "/api/search/{index_name}/index", "guardrail": "not applied (admin path, Phase 4)" },
+      { "method": "POST", "path": "/api/search/{index_name}/query", "guardrail": "applied when guardrail_enabled=true" },
+      { "method": "DELETE", "path": "/api/search/{index_name}", "guardrail": "not applied (admin path, Phase 4)" },
+      { "method": "GET", "path": "/api/search/{index_name}/stats", "guardrail": "not applied" },
+      { "method": "GET", "path": "/api/search/health", "guardrail": "not applied" }
+    ],
+    "response_codes": {
+      "200": "Success",
+      "401": "Auth required and missing/invalid",
+      "403": "Guardrail blocked (sanitize, access_control, or post-query)",
+      "404": "Index not found",
+      "429": "Rate limit exceeded"
+    }
+  },
+
+  "config_knobs": {
+    "guardrail_enabled": { "default": false, "env": "SEARCH_GUARDRAIL_ENABLED" },
+    "guardrail_auth_required": { "default": true, "env": "SEARCH_GUARDRAIL_AUTH_REQUIRED" },
+    "guardrail_rate_limit_per_minute": { "default": 60, "env": "SEARCH_GUARDRAIL_RATE_LIMIT_PER_MINUTE" },
+    "guardrail_audit_enabled": { "default": true, "env": "SEARCH_GUARDRAIL_AUDIT_ENABLED" },
+    "guardrail_pii_redact": { "default": true, "env": "SEARCH_GUARDRAIL_PII_REDACT" },
+    "guardrail_fail_open": { "default": false, "env": "SEARCH_GUARDRAIL_FAIL_OPEN" },
+    "max_page_size": { "default": 1000, "env": "SEARCH_MAX_PAGE_SIZE" }
+  },
+
+  "verification": {
+    "unit_tests": "pytest tests/unit/search/ -v",
+    "guardrail_tests": "pytest tests/unit/search/guardrail/ -v",
+    "integration_tests": "pytest tests/unit/search/test_guardrail_api_integration.py -v",
+    "security_tests": "pytest tests/unit/search/test_search_guardrail_security.py -v",
+    "regression": "GUARDRAIL_ENABLED=false pytest tests/unit/search/ -v",
+    "lint": "ruff check src/search/"
+  },
+
+  "deferred_phase4": [
+    "Gate schema/index/delete routes behind admin role",
+    "Implement SEARCH_FULL_PIPELINE for optional fusion/ranking/facets",
+    "Implement real AccessControl with index/field allowlists"
+  ],
+
+  "deferred_phase5": [
+    "Default GUARDRAIL_ENABLED=true",
+    "Document migration path and deprecation notices"
+  ],
+
+  "changelog": [
+    {
+      "version": "1.0.0",
+      "date": "2026-03-02",
+      "changes": [
+        "Initial baseline contract. Synthesised from implemented search module and guardrail transformation.",
+        "Seven gates documented: auth, rate_limit, sanitize, access_control, pii_redact, result_filter, audit.",
+        "API contract and config knobs aligned with SearchConfig and routes.",
+        "Verification commands and deferred Phase 4/5 items recorded."
+      ]
+    }
+  ]
+}

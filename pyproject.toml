@@ -156,6 +156,7 @@ packages = [
     "src/cognitive",
     "src/tools",
     "src/mycelium",
+    "src/search",
 ]
 exclude = [
     "src/api/**",
@@ -293,6 +294,7 @@ markers = [
     "asyncio: Async tests",
     "database: Tests requiring database",
     "redteam: Red-team / adversarial tests",
+    "security: Security guardrail and auth tests",
     "smoke: Quick smoke tests for CI gating",
 ]
 
