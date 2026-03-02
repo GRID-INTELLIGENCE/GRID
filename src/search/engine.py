@@ -124,7 +124,7 @@ class SearchEngine:
             state.documents[doc.id] = doc
             state.doc_texts[doc.id] = state.pipeline.build_search_text(doc)
 
-        state.keyword_retriever.update(state.pipeline.bm25, state.pipeline.bm25_doc_ids)
+        state.keyword_retriever.update(state.pipeline.bm25, state.pipeline.bm25_doc_ids, state.pipeline.bm25_texts)
         return count
 
     def delete_index(self, index_name: str) -> None:
@@ -175,25 +175,47 @@ class SearchEngine:
         parsed.intent = intent_result.intent
         parsed.intent_confidence = intent_result.confidence
 
-        parsed.expanded_terms = state.expander.expand(parsed.text)
+        if self.config.search_full_pipeline:
+            parsed.expanded_terms = state.expander.expand(parsed.text)
+        else:
+            parsed.expanded_terms = []
 
-        n_retrieve = max(size * self.config.retrieval_multiplier, self.config.default_retrieval_size)
-        candidates = state.fusion.fuse(parsed, n_results=n_retrieve)
+        if self.config.search_full_pipeline:
+            n_retrieve = max(size * self.config.retrieval_multiplier, self.config.default_retrieval_size)
+            candidates = state.fusion.fuse(parsed, n_results=n_retrieve)
+        else:
+            # Basic path: keyword retrieval honoring filters
+            allowed_ids = None
+            if parsed.filters:
+                struct_results = state.fusion.structured.retrieve(parsed.filters)
+                if not struct_results:
+                    return SearchResponse(page=page, size=size, took_ms=self._elapsed(t0))
+                allowed_ids = {c.doc_id for c in struct_results}
+            
+            # For basic path, we get enough for the current page
+            candidates = state.keyword_retriever.retrieve(
+                parsed.text, 
+                n_results=page * size, 
+                allowed_ids=allowed_ids
+            )
 
         if not candidates:
             return SearchResponse(page=page, size=size, took_ms=self._elapsed(t0))
 
-        bm25_scores: dict[str, float] = {}
-        vector_scores: dict[str, float] = {}
+        if self.config.search_full_pipeline:
+            bm25_scores: dict[str, float] = {}
+            vector_scores: dict[str, float] = {}
 
-        ranked = state.ranking.rank(
-            parsed,
-            candidates,
-            state.documents,
-            state.doc_texts,
-            bm25_scores,
-            vector_scores,
-        )
+            ranked = state.ranking.rank(
+                parsed,
+                candidates,
+                state.documents,
+                state.doc_texts,
+                bm25_scores,
+                vector_scores,
+            )
+        else:
+            ranked = candidates
 
         start = (page - 1) * size
         page_candidates = ranked[start : start + size]
@@ -203,9 +225,10 @@ class SearchEngine:
                 document=state.documents[c.doc_id],
                 score=c.score,
                 explanation={
-                    "source": c.source,
+                    "source": c.source or ("keyword" if not self.config.search_full_pipeline else "unknown"),
                     "intent": intent_result.intent.value,
                     "intent_confidence": intent_result.confidence,
+                    "pipeline": "full" if self.config.search_full_pipeline else "basic",
                 },
             )
             for c in page_candidates
@@ -213,7 +236,7 @@ class SearchEngine:
         ]
 
         facets: dict[str, FacetResult] = {}
-        if facet_fields:
+        if self.config.search_full_pipeline and facet_fields:
             result_ids = {c.doc_id for c in ranked}
             facets = state.facet_aggregator.aggregate(result_ids, facet_fields)
 
