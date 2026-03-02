@@ -9,6 +9,7 @@ from typing import Any
 from .policy import GuardrailPolicy
 from .registry import GuardrailToolRegistry, create_default_registry
 from .tools.base import GuardrailContext, GuardrailToolResult, ToolResult
+from .auth import AuthSignature
 
 
 @dataclass
@@ -45,12 +46,48 @@ class GuardrailOrchestrator:
         self.registry = registry or create_default_registry(self.policy)
         self.config = config
 
+    def activate_profile(
+        self,
+        profile_name: str,
+        user_id: str | None = None,
+        auth_signature: AuthSignature | None = None,
+        user_permissions: set[str] | None = None,
+        user_role: str = "basic"
+    ) -> bool:
+        """Activate a persona profile with authentication and narrowed scope."""
+        success = self.policy.activate_profile(
+            profile_name=profile_name,
+            user_id=user_id,
+            auth_signature=auth_signature,
+            user_permissions=user_permissions,
+            user_role=user_role
+        )
+
+        if success:
+            # Update registry with new policy phases
+            self.registry = create_default_registry(self.policy)
+
+        return success
+
     async def run_pre_query(self, ctx: GuardrailContext) -> GuardrailResult:
         """Run pre-query tools in parallel. Block if any returns BLOCK."""
         ctx.config = self.config
+        ctx.profile = self.policy.active_profile_obj
+        ctx.budget_tracker = {}  # Reset budget tracker for new request
+
+        # Pass policy reference for budget limit access
+        if ctx.config:
+            ctx.config.policy = self.policy
+
         tools = self.registry.get_tools_for_phase("pre_query")
         if not tools:
             return GuardrailResult(blocked=False)
+
+        # Check budget limits before execution
+        for tool_name, _ in tools:
+            budget_limit = self.policy.get_budget_limit(tool_name)
+            if budget_limit > 0:
+                ctx.budget_tracker[tool_name] = 0
 
         tasks = [_run_tool(name, fn, ctx) for name, fn in tools]
         results: list[GuardrailToolResult] = await asyncio.gather(*tasks)
@@ -75,9 +112,21 @@ class GuardrailOrchestrator:
         """Run post-query tools in parallel on the response."""
         ctx.config = self.config
         ctx.response = response
+        ctx.profile = self.policy.active_profile_obj
+
+        # Pass policy reference for budget limit access
+        if ctx.config:
+            ctx.config.policy = self.policy
+
         tools = self.registry.get_tools_for_phase("post_query")
         if not tools:
             return GuardrailResult(blocked=False)
+
+        # Check budget limits for post-query tools
+        for tool_name, _ in tools:
+            budget_limit = self.policy.get_budget_limit(tool_name)
+            if budget_limit > 0 and tool_name not in ctx.budget_tracker:
+                ctx.budget_tracker[tool_name] = 0
 
         tasks = [_run_tool(name, fn, ctx) for name, fn in tools]
         results: list[GuardrailToolResult] = await asyncio.gather(*tasks)
