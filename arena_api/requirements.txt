@@ -52,7 +52,7 @@ locust==2.43.3
 python-dotenv==1.2.1
 
 # Logging
-rich==13.9.4
+rich==14.3.3
 
 # Development Tools
 pre-commit==4.5.1
