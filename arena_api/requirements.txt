@@ -38,7 +38,7 @@ pytest-cov==7.0.0
 # Code Quality
 flake8==7.1.1
 mypy==1.19.1
-black==24.10.0
+black==26.1.0
 isort==8.0.0
 
 # Security Scanning
