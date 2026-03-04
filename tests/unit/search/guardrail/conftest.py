@@ -41,6 +41,14 @@ def guardrail_config_auth_optional(test_config):
 
 @pytest.fixture
 def guardrail_context_no_identity(test_config) -> GuardrailContext:
+    from search.config import SearchConfig
+
+    cfg = SearchConfig(
+        embedding_provider=test_config.embedding_provider,
+        vector_store_backend=test_config.vector_store_backend,
+        cross_encoder_enabled=test_config.cross_encoder_enabled,
+        guardrail_auth_required=True,
+    )
     ctx = RequestContext(
         identity=None,
         index_name="products",
@@ -48,4 +56,4 @@ def guardrail_context_no_identity(test_config) -> GuardrailContext:
         page=1,
         size=10,
     )
-    return GuardrailContext(request=ctx, config=test_config)
+    return GuardrailContext(request=ctx, config=cfg)

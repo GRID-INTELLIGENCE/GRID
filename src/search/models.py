@@ -149,6 +149,7 @@ class RequestContext:
     index_name: str = ""
     query_text: str = ""
     filters: list[FilterClause] = dc_field(default_factory=list)
+    facet_fields: list[str] = dc_field(default_factory=list)
     page: int = 1
     size: int = 10
     ip_address: str | None = None

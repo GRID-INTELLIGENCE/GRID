@@ -516,7 +516,7 @@ class StreamContext:
         try:
             from vection.core.security.session_isolation import validate_session_boundary
 
-            if not validate_session_boundary(signal, self.session_id):
+            if not validate_session_boundary(signal, signal.session_id):
                 # Silent drop. Attacker believes the signal was shared.
                 return
         except ImportError:

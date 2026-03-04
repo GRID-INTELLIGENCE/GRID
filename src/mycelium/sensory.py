@@ -200,9 +200,7 @@ class SensoryMode:
             parts.append(f"Tone: {self._state.urgency_level}.")
 
         if self._state.adaptations:
-            parts.append(
-                f"{len(self._state.adaptations)} custom adjustment(s) active."
-            )
+            parts.append(f"{len(self._state.adaptations)} custom adjustment(s) active.")
 
         return " ".join(parts)
 
@@ -245,14 +243,11 @@ class SensoryMode:
         for line in lines:
             stripped = line.strip()
             # Detect heading-like lines (short, ending without period, ALL CAPS already or title-like)
-            if (
-                stripped
-                and len(stripped) < 60
-                and not stripped.endswith(".")
-                and stripped.endswith(":")
-            ):
+            if stripped and len(stripped) < 60 and not stripped.endswith(".") and stripped.endswith(":"):
                 result.append(stripped.upper())
-            elif stripped.startswith(("IN BRIEF", "KEY POINTS", "SUMMARY", "STEP BY STEP", "EXAMPLE", "DETAILS", "THINK OF IT LIKE")):
+            elif stripped.startswith(
+                ("IN BRIEF", "KEY POINTS", "SUMMARY", "STEP BY STEP", "EXAMPLE", "DETAILS", "THINK OF IT LIKE")
+            ):
                 result.append(stripped.upper())
             else:
                 result.append(line)

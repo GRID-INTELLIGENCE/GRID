@@ -35,9 +35,7 @@ class ResonanceSignal:
     semantic_similarity: float = 0.0  # 0.0–1.0
     emotional_amplification: float = 0.0  # 0.0–1.0
     timestamp: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
-    signal_id: str = field(
-        default_factory=lambda: f"res_{datetime.now(UTC).timestamp():.0f}"
-    )
+    signal_id: str = field(default_factory=lambda: f"res_{datetime.now(UTC).timestamp():.0f}")
     metadata: dict[str, Any] = field(default_factory=dict)
 
 
@@ -61,12 +59,8 @@ class PathwaysIntegrationAdapter:
         if self._initialized:
             return
 
-        self._event_bus.subscribe(
-            "pathways.resonance.*", self._handle_resonance_event, domain="pathways"
-        )
-        self._event_bus.subscribe(
-            "pathways.knowledge.*", self._handle_knowledge_event, domain="pathways"
-        )
+        self._event_bus.subscribe("pathways.resonance.*", self._handle_resonance_event, domain="pathways")
+        self._event_bus.subscribe("pathways.knowledge.*", self._handle_knowledge_event, domain="pathways")
 
         self._initialized = True
         logger.info("PathwaysIntegrationAdapter initialized")
@@ -97,8 +91,7 @@ class PathwaysIntegrationAdapter:
         user_id = trusted_user_id if trusted_user_id is not None else "pathways-system"
         # Safety validation
         report = await self._safety_bridge.validate(
-            f"Resonance signal: strength={signal.connection_strength} "
-            f"similarity={signal.semantic_similarity}",
+            f"Resonance signal: strength={signal.connection_strength} similarity={signal.semantic_similarity}",
             SafetyContext(
                 project="pathways",
                 domain="resonance",

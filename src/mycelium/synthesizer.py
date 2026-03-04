@@ -40,20 +40,131 @@ logger = logging.getLogger(__name__)
 # Common English stop words — not worth highlighting
 _STOP_WORDS: frozenset[str] = frozenset(
     {
-        "the", "a", "an", "and", "or", "but", "in", "on", "at", "to", "for",
-        "of", "with", "by", "from", "is", "are", "was", "were", "be", "been",
-        "being", "have", "has", "had", "do", "does", "did", "will", "would",
-        "could", "should", "may", "might", "shall", "can", "need", "must",
-        "it", "its", "this", "that", "these", "those", "i", "you", "he", "she",
-        "we", "they", "me", "him", "her", "us", "them", "my", "your", "his",
-        "our", "their", "what", "which", "who", "whom", "where", "when", "why",
-        "how", "all", "each", "every", "both", "few", "more", "most", "other",
-        "some", "such", "no", "not", "only", "own", "same", "so", "than",
-        "too", "very", "just", "about", "above", "after", "again", "also",
-        "any", "because", "before", "between", "during", "if", "into", "then",
-        "there", "through", "under", "until", "up", "while", "as", "over",
-        "here", "out", "even", "new", "like", "well", "back", "way",
-        "get", "got", "make", "made", "still", "much", "many", "since",
+        "the",
+        "a",
+        "an",
+        "and",
+        "or",
+        "but",
+        "in",
+        "on",
+        "at",
+        "to",
+        "for",
+        "of",
+        "with",
+        "by",
+        "from",
+        "is",
+        "are",
+        "was",
+        "were",
+        "be",
+        "been",
+        "being",
+        "have",
+        "has",
+        "had",
+        "do",
+        "does",
+        "did",
+        "will",
+        "would",
+        "could",
+        "should",
+        "may",
+        "might",
+        "shall",
+        "can",
+        "need",
+        "must",
+        "it",
+        "its",
+        "this",
+        "that",
+        "these",
+        "those",
+        "i",
+        "you",
+        "he",
+        "she",
+        "we",
+        "they",
+        "me",
+        "him",
+        "her",
+        "us",
+        "them",
+        "my",
+        "your",
+        "his",
+        "our",
+        "their",
+        "what",
+        "which",
+        "who",
+        "whom",
+        "where",
+        "when",
+        "why",
+        "how",
+        "all",
+        "each",
+        "every",
+        "both",
+        "few",
+        "more",
+        "most",
+        "other",
+        "some",
+        "such",
+        "no",
+        "not",
+        "only",
+        "own",
+        "same",
+        "so",
+        "than",
+        "too",
+        "very",
+        "just",
+        "about",
+        "above",
+        "after",
+        "again",
+        "also",
+        "any",
+        "because",
+        "before",
+        "between",
+        "during",
+        "if",
+        "into",
+        "then",
+        "there",
+        "through",
+        "under",
+        "until",
+        "up",
+        "while",
+        "as",
+        "over",
+        "here",
+        "out",
+        "even",
+        "new",
+        "like",
+        "well",
+        "back",
+        "way",
+        "get",
+        "got",
+        "make",
+        "made",
+        "still",
+        "much",
+        "many",
+        "since",
     }
 )
 
@@ -120,9 +231,7 @@ class Synthesizer:
         # Build layered output based on depth
         gist = self._build_gist(scored_sentences)
         summary = self._build_summary(scored_sentences, effective_depth)
-        explanation = self._build_explanation(
-            scored_sentences, highlights, effective_depth
-        )
+        explanation = self._build_explanation(scored_sentences, highlights, effective_depth)
         analogy = self._build_analogy(keywords, effective_depth)
         patterns = self._detect_text_patterns(sentences, words)
 
@@ -141,6 +250,42 @@ class Synthesizer:
             depth_used=effective_depth,
             patterns_applied=patterns,
         )
+
+    def synthesize_multiple(
+        self,
+        texts: list[str],
+        persona: PersonaProfile | None = None,
+    ) -> SynthesisResult:
+        """Synthesize multiple text chunks into a single result.
+
+        Concatenates texts with source markers, runs pattern detection
+        across the combined content, and extracts keywords from the
+        merged set. Used by KnowledgeFederator for cross-corpus synthesis.
+
+        Args:
+            texts: List of text chunks (may include [Source] prefixes).
+            persona: Optional persona override.
+
+        Returns:
+            SynthesisResult from the combined content.
+        """
+        if not texts:
+            return SynthesisResult(
+                gist="(no content to synthesize)",
+                source_length=0,
+                compression_ratio=0.0,
+            )
+
+        old_persona = self._persona
+        if persona is not None:
+            self._persona = persona
+
+        try:
+            combined = "\n\n".join(texts)
+            return self.synthesize(combined)
+        finally:
+            if persona is not None:
+                self._persona = old_persona
 
     def extract_keywords(self, text: str, top_n: int = 10) -> list[Highlight]:
         """Extract keywords/highlights from text. Standalone utility."""
@@ -238,10 +383,22 @@ class Synthesizer:
             signal_score = 0.0
             lower_sent = sentence.lower()
             signal_phrases = [
-                "in summary", "in conclusion", "the key", "most important",
-                "this means", "in other words", "the main", "essentially",
-                "the result", "therefore", "this shows", "defined as",
-                "for example", "specifically", "the purpose", "the goal",
+                "in summary",
+                "in conclusion",
+                "the key",
+                "most important",
+                "this means",
+                "in other words",
+                "the main",
+                "essentially",
+                "the result",
+                "therefore",
+                "this shows",
+                "defined as",
+                "for example",
+                "specifically",
+                "the purpose",
+                "the goal",
             ]
             for phrase in signal_phrases:
                 if phrase in lower_sent:
@@ -249,12 +406,7 @@ class Synthesizer:
                     break
 
             # Composite score
-            score = (
-                position_score * 0.25
-                + keyword_density * 0.35
-                + length_score * 0.15
-                + signal_score * 0.25
-            )
+            score = position_score * 0.25 + keyword_density * 0.35 + length_score * 0.15 + signal_score * 0.25
 
             scored.append(
                 _SentenceScore(
@@ -270,9 +422,7 @@ class Synthesizer:
 
     # --- Keyword extraction ---
 
-    def _extract_keywords(
-        self, words: list[str], top_n: int = 10
-    ) -> list[tuple[str, int]]:
+    def _extract_keywords(self, words: list[str], top_n: int = 10) -> list[tuple[str, int]]:
         """Extract top keywords by term frequency, excluding stop words."""
         # Filter stop words and very short words
         meaningful = [w for w in words if w not in _STOP_WORDS and len(w) > 2]
@@ -292,9 +442,7 @@ class Synthesizer:
         sorted_kw = sorted(boosted.items(), key=lambda x: x[1], reverse=True)
         return [(word, int(score)) for word, score in sorted_kw[:top_n]]
 
-    def _build_highlights(
-        self, keywords: list[tuple[str, int]], source_text: str
-    ) -> list[Highlight]:
+    def _build_highlights(self, keywords: list[tuple[str, int]], source_text: str) -> list[Highlight]:
         """Convert extracted keywords into Highlight objects with context."""
         highlights: list[Highlight] = []
         lower_source = source_text.lower()
@@ -348,9 +496,7 @@ class Synthesizer:
         best = max(scored, key=lambda s: s.score)
         return best.text
 
-    def _build_summary(
-        self, scored: list[_SentenceScore], depth: Depth
-    ) -> str:
+    def _build_summary(self, scored: list[_SentenceScore], depth: Depth) -> str:
         """Build a multi-sentence summary. Length depends on depth."""
         if not scored:
             return ""
@@ -400,9 +546,7 @@ class Synthesizer:
 
         return " ".join(parts)
 
-    def _build_analogy(
-        self, keywords: list[tuple[str, int]], depth: Depth
-    ) -> str:
+    def _build_analogy(self, keywords: list[tuple[str, int]], depth: Depth) -> str:
         """Generate a simple analogy if possible. Uses geometric metaphors."""
         if depth == Depth.ESPRESSO or not keywords:
             return ""
@@ -432,9 +576,7 @@ class Synthesizer:
 
     # --- Pattern detection ---
 
-    def _detect_text_patterns(
-        self, sentences: list[str], words: list[str]
-    ) -> list[str]:
+    def _detect_text_patterns(self, sentences: list[str], words: list[str]) -> list[str]:
         """Detect structural patterns in the text. Returns pattern names."""
         patterns: list[str] = []
 
@@ -454,31 +596,76 @@ class Synthesizer:
                     patterns.append("rhythm")
 
         # Flow: text follows a logical progression (heuristic: connective words)
-        connectives = {"therefore", "thus", "consequently", "because", "since",
-                       "however", "moreover", "furthermore", "finally", "then",
-                       "while", "when", "during", "through", "rather",
-                       "described", "given", "following", "where"}
+        connectives = {
+            "therefore",
+            "thus",
+            "consequently",
+            "because",
+            "since",
+            "however",
+            "moreover",
+            "furthermore",
+            "finally",
+            "then",
+            "while",
+            "when",
+            "during",
+            "through",
+            "rather",
+            "described",
+            "given",
+            "following",
+            "where",
+        }
         connective_count = sum(1 for w in words if w in connectives)
         if connective_count >= 2:
             patterns.append("flow")
 
         # Deviation: presence of contrast/exception words
-        contrasts = {"however", "but", "although", "despite", "except",
-                     "unlike", "whereas", "nevertheless", "conversely"}
+        contrasts = {
+            "however",
+            "but",
+            "although",
+            "despite",
+            "except",
+            "unlike",
+            "whereas",
+            "nevertheless",
+            "conversely",
+        }
         contrast_count = sum(1 for w in words if w in contrasts)
         if contrast_count >= 2:
             patterns.append("deviation")
 
         # Spatial: structural/organizational language
-        spatial_words = {"structure", "layer", "component", "architecture",
-                         "framework", "hierarchy", "module", "system", "network"}
+        spatial_words = {
+            "structure",
+            "layer",
+            "component",
+            "architecture",
+            "framework",
+            "hierarchy",
+            "module",
+            "system",
+            "network",
+        }
         spatial_count = sum(1 for w in words if w in spatial_words)
         if spatial_count >= 2:
             patterns.append("spatial")
 
         # Cause: causal language
-        causal = {"causes", "leads", "results", "produces", "triggers",
-                  "enables", "prevents", "affects", "influences", "determines"}
+        causal = {
+            "causes",
+            "leads",
+            "results",
+            "produces",
+            "triggers",
+            "enables",
+            "prevents",
+            "affects",
+            "influences",
+            "determines",
+        }
         causal_count = sum(1 for w in words if w in causal)
         if causal_count >= 2:
             patterns.append("cause")

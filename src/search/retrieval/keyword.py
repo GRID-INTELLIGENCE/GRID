@@ -50,12 +50,14 @@ class KeywordRetriever(BaseRetriever):
         indexed.sort(key=lambda x: x[1], reverse=True)
 
         candidates: list[ScoredCandidate] = []
-        for doc_id, score in indexed[:n_results]:
-            if score <= 0:
+        for doc_id, score in indexed:
+            if score < 0:
                 break
             if allowed_ids is not None and doc_id not in allowed_ids:
                 continue
             candidates.append(ScoredCandidate(doc_id=doc_id, score=score, source="keyword"))
+            if len(candidates) >= n_results:
+                break
 
         return candidates
 
@@ -78,7 +80,7 @@ class KeywordRetriever(BaseRetriever):
 
             # Get the original document text (assuming it's stored)
             # For fallback, we'll use a simple scoring based on term matches
-            doc_text = getattr(self, '_doc_texts', [None] * len(self._doc_ids))[i]
+            doc_text = getattr(self, "_doc_texts", [None] * len(self._doc_ids))[i]
             if doc_text is None:
                 continue
 
@@ -99,11 +101,7 @@ class KeywordRetriever(BaseRetriever):
                     score += 0.5
 
             if score > 0:
-                candidates.append(ScoredCandidate(
-                    doc_id=doc_id,
-                    score=score,
-                    source="keyword"
-                ))
+                candidates.append(ScoredCandidate(doc_id=doc_id, score=score, source="keyword"))
 
         # Sort by score descending and limit results
         candidates.sort(key=lambda x: x.score, reverse=True)

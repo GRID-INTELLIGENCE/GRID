@@ -15,7 +15,7 @@ class TestSanitizeTool:
         guardrail_context.request.query_text = "x" * 15_000
         result = sanitize_tool(guardrail_context)
         assert result.result == ToolResult.BLOCK
-        assert "max length" in (result.message or "")
+        assert "budget limit" in (result.message or "")
 
     def test_block_dangerous_pattern_semicolon(self, guardrail_context):
         guardrail_context.request.query_text = "test; drop table"

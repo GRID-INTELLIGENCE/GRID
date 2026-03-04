@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import os
+from collections import deque
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timezone
 from pathlib import Path
@@ -98,21 +99,26 @@ def chunk_text(
     max_chunk_size: int = 4000,  # Nomic V1 handles this easily
     min_chunk_size: int = 50,
 ) -> list[str]:
-    """Split text into overlapping chunks with recursive splitting for oversized sections."""
+    """Split text into overlapping chunks with recursive splitting for oversized sections.
+
+    Uses a queue to process sections so oversized sections are split and re-queued
+    without mutating the iterated sequence (avoids unbounded growth and undefined behavior).
+    """
     if not text:
         return []
 
-    # Split by separator first
-    sections = text.split(separator)
+    # Queue of sections to process (avoids mutating list while iterating)
+    sections_queue: deque[str] = deque(text.split(separator))
     chunks = []
     current_chunk = ""
 
-    for section in sections:
-        # Check if the individual section alone exceeds max_chunk_size
+    while sections_queue:
+        section = sections_queue.popleft()
+        # Split oversized section and re-queue remainder instead of mutating during iteration
         if len(section) > max_chunk_size:
-            # Recursive split instead of truncation
             sub_sections = [section[i : i + max_chunk_size] for i in range(0, len(section), max_chunk_size - overlap)]
-            sections.extend(sub_sections[1:])  # Add remaining to processing queue
+            for sub in reversed(sub_sections[1:]):
+                sections_queue.appendleft(sub)
             section = sub_sections[0]
 
         if len(current_chunk) + len(section) + len(separator) > chunk_size and current_chunk:
@@ -133,13 +139,11 @@ def chunk_text(
     final_chunks = []
     for chunk in chunks:
         if len(chunk) > max_chunk_size:
-            # Should have been handled by recursive section logic, but as a last resort:
             sub = [chunk[i : i + max_chunk_size] for i in range(0, len(chunk), max_chunk_size - overlap)]
             final_chunks.extend(sub)
         else:
             final_chunks.append(chunk)
 
-    # Final filter for minimum chunk quality
     return [c for c in final_chunks if len(c) >= min_chunk_size]
 
 
@@ -199,8 +203,6 @@ def index_repository(
     repo = Path(repo_path)
     if not repo.exists():
         raise ValueError(f"Repository path does not exist: {repo_path}")
-
-    debug = os.getenv("RAG_INDEX_DEBUG", "").lower() in {"1", "true", "yes"}
 
     try:
         repo_resolved = repo.resolve()
@@ -376,12 +378,10 @@ def index_repository(
 
     for file_str in file_iterator:
         file_path = Path(file_str)
-        if debug:
-            print(f"DEBUG: Processing {file_path}")
+        logger.debug("Processing %s", file_path)
 
         if not file_path.exists():
-            if debug:
-                print(f"DEBUG: File not found: {file_path}")
+            logger.debug("File not found: %s", file_path)
             continue
 
         # Check if file matches include patterns
@@ -394,8 +394,7 @@ def index_repository(
             continue
 
         if not is_text_file(file_path, text_extensions):
-            if debug:
-                print(f"DEBUG: Not a text file: {file_path.name}, suffix: {file_path.suffix}")
+            logger.debug("Not a text file: %s, suffix: %s", file_path.name, file_path.suffix)
             continue
 
         # Skip files larger than 1MB to avoid indexing huge artifacts
@@ -407,18 +406,15 @@ def index_repository(
             continue
 
         # Read file content
-        if debug:
-            print(f"DEBUG: Reading content for {file_path}")
+        logger.debug("Reading content for %s", file_path)
         content = read_file_content(file_path)
         if content is None:
-            if debug:
-                print(f"DEBUG: Content is None for {file_path}")
+            logger.debug("Content is None for %s", file_path)
             metrics.files_skipped += 1
             metrics.add_skip_reason("Failed to read")
             continue
         if not content.strip():
-            if debug:
-                print(f"DEBUG: Content is empty for {file_path}")
+            logger.debug("Content is empty for %s", file_path)
             metrics.files_skipped += 1
             metrics.add_skip_reason("Empty file")
             continue
@@ -429,8 +425,12 @@ def index_repository(
 
             should_index, quality = should_index_file(file_path, quality_threshold, content)
             if not should_index:
-                if debug:
-                    print(f"DEBUG: Skipping {file_path}: quality={quality.score:.2f}, reasons={quality.reasons}")
+                logger.debug(
+                    "Skipping %s: quality=%.2f, reasons=%s",
+                    file_path,
+                    quality.score,
+                    quality.reasons,
+                )
                 metrics.files_skipped += 1
                 metrics.add_skip_reason(f"Low quality ({quality.score:.2f})")
                 continue
@@ -496,11 +496,10 @@ def index_repository(
         print(f"Generating embeddings using {embedding_provider.__class__.__name__}...")
 
     # Filter out chunks that are too long (will be handled by embedding provider, but warn)
-    # Using 4000 as a safe upper bound for Nomic V1, or the provided max_chunk_size
     limit = 4000
-    long_chunks = [i for i, text in enumerate(chunk_texts) if len(text) > limit]
-    if long_chunks:
-        print(f"Warning: {len(long_chunks)} chunks exceed recommended length ({limit} chars) and will be truncated")
+    long_count = sum(1 for text in chunk_texts if len(text) > limit)
+    if long_count:
+        print(f"Warning: {long_count} chunks exceed recommended length ({limit} chars) and will be truncated")
 
     # Generate embeddings with batch support for performance
     embeddings_list = []
@@ -598,25 +597,32 @@ def index_repository(
         chunk_texts = [chunk_texts[i] for i in valid_indices]
         chunk_metadatas = [chunk_metadatas[i] for i in valid_indices]
 
-    # Add to vector store in batches to avoid memory issues
-    batch_size = 100
-    for i in range(0, len(chunk_ids), batch_size):
-        batch_ids = chunk_ids[i : i + batch_size]
-        batch_texts = chunk_texts[i : i + batch_size]
-        batch_embeddings = embeddings_list[i : i + batch_size]
-        batch_metadatas = chunk_metadatas[i : i + batch_size]
+    # Add to vector store in batches; trim in-memory lists after each batch to reduce peak memory
+    store_batch_size = 100
+    batch_num = 0
+    while chunk_ids:
+        batch_ids = chunk_ids[:store_batch_size]
+        batch_texts = chunk_texts[:store_batch_size]
+        batch_embeddings = embeddings_list[:store_batch_size]
+        batch_metadatas = chunk_metadatas[:store_batch_size]
 
+        batch_num += 1
         if not quiet:
-            print(f"Adding batch {i // batch_size + 1} ({len(batch_ids)} items) to store...", flush=True)
+            print(f"Adding batch {batch_num} ({len(batch_ids)} items) to store...", flush=True)
 
         vector_store.add(ids=batch_ids, documents=batch_texts, embeddings=batch_embeddings, metadatas=batch_metadatas)
 
         if not quiet:
             print(f"Current store count: {vector_store.count()}", flush=True)
 
-        if (i // batch_size + 1) % 10 == 0:
-            if not quiet:
-                print(f"Indexed {min(i + batch_size, len(chunk_ids))} chunks...")
+        if batch_num % 10 == 0 and not quiet:
+            print(f"Indexed {batch_num * store_batch_size} chunks...")
+
+        # Drop batch from lists so we don't hold full corpus in memory until the end
+        chunk_ids = chunk_ids[store_batch_size:]
+        chunk_texts = chunk_texts[store_batch_size:]
+        embeddings_list = embeddings_list[store_batch_size:]
+        chunk_metadatas = chunk_metadatas[store_batch_size:]
 
     if not quiet:
         print(f"Indexing completed. Total documents: {vector_store.count()}")

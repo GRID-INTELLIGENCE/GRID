@@ -103,3 +103,16 @@ class TestFacetHelpers:
     def test_get_numeric_values_scoped(self, store):
         vals = store.get_numeric_values("price", doc_ids={"d2"})
         assert vals == pytest.approx([19.99])
+
+
+class TestBooleanNormalization:
+    def test_string_booleans_are_normalized_correctly(self, schema):
+        idx = StructuredFieldIndex(schema)
+        idx.add("d1", {"active": "false"})
+        idx.add("d2", {"active": "true"})
+
+        false_result = idx.filter([FilterClause(field="active", op=FilterOp.EQ, value=False)])
+        true_result = idx.filter([FilterClause(field="active", op=FilterOp.EQ, value=True)])
+
+        assert false_result == {"d1"}
+        assert true_result == {"d2"}

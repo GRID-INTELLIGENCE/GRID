@@ -35,7 +35,7 @@ def _get_safety_validated_message(message: str, tool_name: str, ctx: GuardrailCo
             # Convert to descriptive noun form
             message = re.sub(
                 r"\b(I|we|you)\b.*\b(kill|hurt|attack|damage|harm|threat|violence)\b",
-                lambda m: f"Homicide threat detected" if "kill" in m.group(0).lower() else f"Threat pattern detected",
+                lambda m: "Homicide threat detected" if "kill" in m.group(0).lower() else "Threat pattern detected",
                 message,
                 flags=re.IGNORECASE,
             )
@@ -81,7 +81,11 @@ def sanitize_tool(ctx: GuardrailContext) -> GuardrailToolResult:
     patterns_to_check = BASE_DANGEROUS_PATTERNS
     if ctx.profile and hasattr(ctx.profile, "patterns") and "sanitize" in ctx.profile.patterns:
         try:
-            valid = [p for p in ctx.profile.patterns["sanitize"] if isinstance(p, str) and len(p) <= MAX_PROFILE_PATTERN_LENGTH]
+            valid = [
+                p
+                for p in ctx.profile.patterns["sanitize"]
+                if isinstance(p, str) and len(p) <= MAX_PROFILE_PATTERN_LENGTH
+            ]
             patterns_to_check = [re.compile(p) for p in valid] if valid else BASE_DANGEROUS_PATTERNS
         except (re.error, TypeError):
             patterns_to_check = BASE_DANGEROUS_PATTERNS
@@ -97,7 +101,7 @@ def sanitize_tool(ctx: GuardrailContext) -> GuardrailToolResult:
                 "query_length": len(query),
                 "budget_limit": budget_limit,
                 "profile_name": ctx.profile.name if ctx.profile else None,
-                "timestamp": datetime.now(datetime.UTC).isoformat().replace("+00:00", "Z"),
+                "timestamp": datetime.now().isoformat(),
             }
 
             message = _get_safety_validated_message("Query contains disallowed patterns", "sanitize", ctx)

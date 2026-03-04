@@ -43,6 +43,9 @@ class HealthResponse(BaseModel):
 # ---------------------------------------------------------------------------
 # Admin gating
 # ---------------------------------------------------------------------------
+# In production, admin should be backed by guardrail_admin_identities (trusted
+# identity list) or a signed token. Header-only (X-Admin-Role) is spoofable;
+# when admin_identities is non-empty, we require identity to be in that list.
 
 
 def _require_admin(request: Request, cfg: SearchConfig) -> None:
@@ -57,6 +60,17 @@ def _require_admin(request: Request, cfg: SearchConfig) -> None:
     admin_header = getattr(cfg, "guardrail_admin_header", "X-Admin-Role")
     admin_value = getattr(cfg, "guardrail_admin_header_value", "admin")
     admin_identities = getattr(cfg, "guardrail_admin_identities", []) or []
+
+    # When identities list is configured, require identity in list (no header-only).
+    if admin_identities:
+        if identity and identity in admin_identities:
+            return
+        raise HTTPException(
+            status_code=403,
+            detail="Admin role required for this operation",
+        )
+
+    # Backward compatibility: when identities list is empty, allow header or identity.
     if request and request.headers.get(admin_header) == admin_value:
         return
     if identity and identity in admin_identities:
@@ -139,13 +153,25 @@ def create_search_router(
             if auth and (auth.startswith("Bearer ") or auth.startswith("ApiKey ")):
                 identity = auth.split(" ", 1)[1].strip() or None
         client_host = request.client.host if request and request.client else None
+        parsed_filters = []
+        index_state = engine._indices.get(index_name)
+        if index_state is not None:
+            parsed_for_guardrail = index_state.parser.parse(
+                req.query,
+                page=req.page,
+                size=req.size,
+                facet_fields=req.facet_fields or None,
+            )
+            parsed_filters = parsed_for_guardrail.filters
         ctx = GuardrailContext(
             request=RequestContext(
                 identity=identity,
                 index_name=index_name,
                 query_text=req.query,
+                filters=parsed_filters,
                 page=req.page,
                 size=req.size,
+                facet_fields=req.facet_fields or [],
                 ip_address=client_host,
             ),
             config=cfg,

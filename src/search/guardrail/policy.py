@@ -37,7 +37,7 @@ class GuardrailPolicy:
         user_id: str | None = None,
         auth_signature: AuthSignature | None = None,
         user_permissions: set[str] | None = None,
-        user_role: str = "basic"
+        user_role: str = "basic",
     ) -> bool:
         """Activate a persona profile with signature-based authentication and narrowed scope.
 
@@ -53,9 +53,7 @@ class GuardrailPolicy:
         """
         # Narrow accessibility scope based on role and permissions
         narrowed_profile = self.auth.narrow_access_scope(
-            requested_profile=profile_name,
-            user_permissions=user_permissions or set(),
-            user_role=user_role
+            requested_profile=profile_name, user_permissions=user_permissions or set(), user_role=user_role
         )
 
         if narrowed_profile is None:
@@ -92,11 +90,7 @@ class GuardrailPolicy:
         return True
 
     def create_profile_signature(
-        self,
-        profile_name: str,
-        user_id: str,
-        timestamp: int | None = None,
-        extra_data: dict[str, Any] | None = None
+        self, profile_name: str, user_id: str, timestamp: int | None = None, extra_data: dict[str, Any] | None = None
     ) -> AuthSignature | None:
         """Create authentication signature for profile access."""
         profile = self.profiles.get(profile_name)
@@ -105,13 +99,11 @@ class GuardrailPolicy:
 
         if timestamp is None:
             import time
+
             timestamp = int(time.time())
 
         return self.auth.generate_profile_signature(
-            profile=profile,
-            user_id=user_id,
-            timestamp=timestamp,
-            extra_data=extra_data
+            profile=profile, user_id=user_id, timestamp=timestamp, extra_data=extra_data
         )
 
     def get_budget_limit(self, tool_name: str) -> int:
@@ -171,11 +163,7 @@ class GuardrailPolicy:
                 phase_overrides=profile_data.get("phase_overrides", {}),
             )
 
-        return cls(
-            phases=phases,
-            profiles=profiles,
-            active_profile=data.get("active_profile")
-        )
+        return cls(phases=phases, profiles=profiles, active_profile=data.get("active_profile"))
 
     @classmethod
     def load(cls, path: Path) -> GuardrailPolicy:
@@ -217,7 +205,7 @@ class GuardrailPolicy:
                         "perpetrator_voice_prevention": True,
                         "citation_honesty": True,
                         "limitations_header": True,
-                    }
+                    },
                 ),
                 "developer": GuardrailProfile(
                     name="developer",
@@ -241,7 +229,7 @@ class GuardrailPolicy:
                         "perpetrator_voice_prevention": True,
                         "citation_honesty": True,
                         "limitations_header": True,
-                    }
+                    },
                 ),
                 "designer": GuardrailProfile(
                     name="designer",
@@ -256,7 +244,7 @@ class GuardrailPolicy:
                             r"\b\d{3}[-\s]?\d{2}[-\s]?\d{4}\b",  # SSN
                             r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b",  # Email
                             r"\b\d{3}[-.]?\d{3}[-.]?\d{4}\b",  # Phone
-                        ]
+                        ],
                     },
                     budget_limits={
                         "sanitize": 8000,  # Longer for design content
@@ -267,7 +255,7 @@ class GuardrailPolicy:
                         "perpetrator_voice_prevention": True,
                         "citation_honesty": True,
                         "limitations_header": True,
-                    }
+                    },
                 ),
                 "manager": GuardrailProfile(
                     name="manager",
@@ -288,9 +276,7 @@ class GuardrailPolicy:
                         "limitations_header": True,
                         "compliance_reporting": True,
                     },
-                    phase_overrides={
-                        "post_query": ["pii_redact", "result_filter", "audit", "compliance_report"]
-                    }
-                )
-            }
+                    phase_overrides={"post_query": ["pii_redact", "result_filter", "audit", "compliance_report"]},
+                ),
+            },
         )

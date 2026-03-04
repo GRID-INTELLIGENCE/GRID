@@ -44,8 +44,14 @@ def get_embedding_provider(provider_type: str | None = None, config: RAGConfig |
 
         return OllamaEmbeddingProvider(model=config.embedding_model, base_url=config.ollama_base_url)
     elif provider_type == EmbeddingProviderType.HUGGINGFACE.value:
-        from .huggingface import HuggingFaceEmbeddingProvider
-
+        try:
+            from .huggingface import HuggingFaceEmbeddingProvider
+        except ImportError as e:
+            raise ImportError(
+                "HuggingFace embedding provider is not available (numpy or sentence-transformers "
+                "may be missing or broken). Use provider_type='ollama' or 'simple', or fix the "
+                "environment. Original error: " + str(e)
+            ) from e
         return HuggingFaceEmbeddingProvider(model_name=config.embedding_model)
     elif provider_type == EmbeddingProviderType.OPENAI.value:
         from .openai import OpenAIEmbeddingProvider

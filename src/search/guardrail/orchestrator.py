@@ -3,13 +3,16 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 from dataclasses import dataclass, field
 from typing import Any
 
+from .auth import AuthSignature
 from .policy import GuardrailPolicy
 from .registry import GuardrailToolRegistry, create_default_registry
 from .tools.base import GuardrailContext, GuardrailToolResult, ToolResult
-from .auth import AuthSignature
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -52,7 +55,7 @@ class GuardrailOrchestrator:
         user_id: str | None = None,
         auth_signature: AuthSignature | None = None,
         user_permissions: set[str] | None = None,
-        user_role: str = "basic"
+        user_role: str = "basic",
     ) -> bool:
         """Activate a persona profile with authentication and narrowed scope."""
         success = self.policy.activate_profile(
@@ -60,7 +63,7 @@ class GuardrailOrchestrator:
             user_id=user_id,
             auth_signature=auth_signature,
             user_permissions=user_permissions,
-            user_role=user_role
+            user_role=user_role,
         )
 
         if success:
@@ -77,7 +80,10 @@ class GuardrailOrchestrator:
 
         # Pass policy reference for budget limit access
         if ctx.config:
-            ctx.config.policy = self.policy
+            try:
+                ctx.config.policy = self.policy
+            except (AttributeError, TypeError, ValueError):
+                logger.debug("Unable to attach policy onto config object %s", type(ctx.config).__name__)
 
         tools = self.registry.get_tools_for_phase("pre_query")
         if not tools:
@@ -116,7 +122,10 @@ class GuardrailOrchestrator:
 
         # Pass policy reference for budget limit access
         if ctx.config:
-            ctx.config.policy = self.policy
+            try:
+                ctx.config.policy = self.policy
+            except (AttributeError, TypeError, ValueError):
+                logger.debug("Unable to attach policy onto config object %s", type(ctx.config).__name__)
 
         tools = self.registry.get_tools_for_phase("post_query")
         if not tools:

@@ -830,13 +830,15 @@ async def websocket_feedback(
 
 
 # =============================================================================
-# Debug Endpoints
+# Debug Endpoints (only active when DEBUG=1|true|yes)
 # =============================================================================
 
 
 @router.get("/debug/config", tags=["debug"], summary="Get Debug Config")
 async def get_debug_config() -> dict[str, Any]:
-    """Get current debug configuration."""
+    """Get current debug configuration. Returns 404 when DEBUG env is not set."""
+    if os.getenv("DEBUG", "").lower() not in ("1", "true", "yes"):
+        raise HTTPException(status_code=404, detail="Not found")
     return {
         "timestamp": datetime.now(UTC),
         "logger_level": logging.getLogger().getEffectiveLevel(),

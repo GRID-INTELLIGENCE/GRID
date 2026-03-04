@@ -1,9 +1,7 @@
-"""Simple fallback embedding provider."""
+"""Simple fallback embedding provider (no numpy dependency)."""
 
 import math
 import re
-
-import numpy as np
 
 from .base import BaseEmbeddingProvider
 
@@ -41,7 +39,7 @@ class SimpleEmbedding(BaseEmbeddingProvider):
         # Filter out very short words
         return [w for w in words if len(w) > 1]
 
-    def embed(self, text: str) -> list[float] | np.ndarray:
+    def embed(self, text: str) -> list[float]:
         """Generate simple word-based embedding.
 
         Args:
@@ -54,7 +52,7 @@ class SimpleEmbedding(BaseEmbeddingProvider):
         words = self._tokenize(text.lower())
 
         if not words:
-            return np.zeros(self.embedding_dim, dtype=float).tolist()
+            return [0.0] * self.embedding_dim
 
         # Count word frequencies
         word_counts: dict[str, int] = {}
@@ -68,7 +66,7 @@ class SimpleEmbedding(BaseEmbeddingProvider):
             for word, count in word_counts.items():
                 idx = hash(word) % vocab_size
                 embedding[idx] += float(count) / len(words)
-            return np.array(embedding, dtype=float)
+            return embedding
 
         # TF-IDF (simplified)
         tfidf_scores: dict[str, float] = {}
@@ -86,9 +84,9 @@ class SimpleEmbedding(BaseEmbeddingProvider):
             idx = hash(word) % vocab_size
             embedding[idx] += score
 
-        return np.array(embedding, dtype=float)
+        return embedding
 
-    def embed_batch(self, texts: list[str]) -> list[list[float]] | np.ndarray:
+    def embed_batch(self, texts: list[str]) -> list[list[float]]:
         """Generate embeddings for multiple texts.
 
         Args:
@@ -99,7 +97,7 @@ class SimpleEmbedding(BaseEmbeddingProvider):
         """
         return [self.embed(text) for text in texts]
 
-    def embed_documents(self, texts: list[str]) -> list[list[float]] | np.ndarray:
+    def embed_documents(self, texts: list[str]) -> list[list[float]]:
         """Alias for embed_batch for API compatibility.
 
         Args:

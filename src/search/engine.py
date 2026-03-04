@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import re
 import time
 from dataclasses import dataclass, field
 from typing import Any
@@ -13,7 +14,9 @@ from .indexing.pipeline import IndexingPipeline
 from .models import (
     Document,
     FacetResult,
+    FieldType,
     IndexSchema,
+    ScoredCandidate,
     SearchHit,
     SearchResponse,
 )
@@ -27,6 +30,7 @@ from .retrieval.semantic import SemanticRetriever
 from .retrieval.structured import StructuredRetriever
 
 logger = logging.getLogger(__name__)
+TOKEN_PATTERN = re.compile(r"\b\w+\b")
 
 
 @dataclass
@@ -125,6 +129,8 @@ class SearchEngine:
             state.doc_texts[doc.id] = state.pipeline.build_search_text(doc)
 
         state.keyword_retriever.update(state.pipeline.bm25, state.pipeline.bm25_doc_ids, state.pipeline.bm25_texts)
+        self._refresh_expander_vocabulary(state)
+        self._refresh_intent_field_values(state)
         return count
 
     def delete_index(self, index_name: str) -> None:
@@ -180,9 +186,38 @@ class SearchEngine:
         else:
             parsed.expanded_terms = []
 
+        search_text = self._build_search_text(parsed)
+        bm25_scores: dict[str, float] = {}
+        vector_scores: dict[str, float] = {}
+
         if self.config.search_full_pipeline:
             n_retrieve = max(size * self.config.retrieval_multiplier, self.config.default_retrieval_size)
-            candidates = state.fusion.fuse(parsed, n_results=n_retrieve)
+            if not search_text and parsed.filters:
+                # Filter-only query: return structured matches directly.
+                candidates = state.fusion.structured.retrieve(parsed.filters)[:n_retrieve]
+            else:
+                candidates = state.fusion.fuse(parsed, n_results=n_retrieve)
+
+            if search_text:
+                allowed_ids: set[str] | None = None
+                if parsed.filters:
+                    structured_matches = state.fusion.structured.retrieve(parsed.filters)
+                    if not structured_matches:
+                        return SearchResponse(page=page, size=size, took_ms=self._elapsed(t0))
+                    allowed_ids = {c.doc_id for c in structured_matches}
+
+                kw_results = state.keyword_retriever.retrieve(
+                    search_text,
+                    n_results=n_retrieve,
+                    allowed_ids=allowed_ids,
+                )
+                sem_results = state.fusion.semantic.retrieve(
+                    search_text,
+                    n_results=n_retrieve,
+                    allowed_ids=allowed_ids,
+                )
+                bm25_scores = self._scores_to_map(kw_results)
+                vector_scores = self._scores_to_map(sem_results)
         else:
             # Basic path: keyword retrieval honoring filters
             allowed_ids = None
@@ -191,21 +226,28 @@ class SearchEngine:
                 if not struct_results:
                     return SearchResponse(page=page, size=size, took_ms=self._elapsed(t0))
                 allowed_ids = {c.doc_id for c in struct_results}
-            
-            # For basic path, we get enough for the current page
-            candidates = state.keyword_retriever.retrieve(
-                parsed.text, 
-                n_results=page * size, 
-                allowed_ids=allowed_ids
-            )
+
+                if not parsed.text.strip():
+                    # Filter-only query on basic pipeline.
+                    candidates = struct_results
+                else:
+                    # For basic path, fetch enough for current page.
+                    candidates = state.keyword_retriever.retrieve(
+                        parsed.text,
+                        n_results=page * size,
+                        allowed_ids=allowed_ids,
+                    )
+            else:
+                candidates = state.keyword_retriever.retrieve(
+                    parsed.text,
+                    n_results=page * size,
+                    allowed_ids=allowed_ids,
+                )
 
         if not candidates:
             return SearchResponse(page=page, size=size, took_ms=self._elapsed(t0))
 
         if self.config.search_full_pipeline:
-            bm25_scores: dict[str, float] = {}
-            vector_scores: dict[str, float] = {}
-
             ranked = state.ranking.rank(
                 parsed,
                 candidates,
@@ -222,7 +264,7 @@ class SearchEngine:
 
         hits = [
             SearchHit(
-                document=state.documents[c.doc_id],
+                document=state.documents[c.doc_id].model_copy(deep=True),
                 score=c.score,
                 explanation={
                     "source": c.source or ("keyword" if not self.config.search_full_pipeline else "unknown"),
@@ -298,3 +340,47 @@ class SearchEngine:
     @staticmethod
     def _elapsed(t0: float) -> float:
         return round((time.perf_counter() - t0) * 1000, 2)
+
+    @staticmethod
+    def _build_search_text(parsed: Any) -> str:
+        base_text = (parsed.text or "").strip()
+        if parsed.expanded_terms:
+            return f"{base_text} {' '.join(parsed.expanded_terms)}".strip()
+        return base_text
+
+    @staticmethod
+    def _scores_to_map(candidates: list[ScoredCandidate]) -> dict[str, float]:
+        scores: dict[str, float] = {}
+        for candidate in candidates:
+            previous = scores.get(candidate.doc_id)
+            if previous is None or candidate.score > previous:
+                scores[candidate.doc_id] = candidate.score
+        return scores
+
+    def _refresh_expander_vocabulary(self, state: _IndexState) -> None:
+        terms: list[str] = []
+        for text in state.pipeline.bm25_texts:
+            terms.extend(TOKEN_PATTERN.findall(text.lower()))
+        if terms:
+            try:
+                state.expander.build_vocabulary(terms)
+            except Exception:
+                logger.debug("Query expander vocabulary refresh failed", exc_info=True)
+
+    def _refresh_intent_field_values(self, state: _IndexState) -> None:
+        for field_name, field_schema in state.schema.fields.items():
+            if field_schema.type != FieldType.KEYWORD:
+                continue
+
+            values = sorted(
+                {
+                    str(doc.fields[field_name]).strip()
+                    for doc in state.documents.values()
+                    if field_name in doc.fields and str(doc.fields[field_name]).strip()
+                }
+            )
+            if values:
+                try:
+                    state.intent_classifier.register_field_values(field_name, values)
+                except Exception:
+                    logger.debug("Intent field value refresh failed for field '%s'", field_name, exc_info=True)

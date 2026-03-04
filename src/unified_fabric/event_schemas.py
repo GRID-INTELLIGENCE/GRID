@@ -134,6 +134,39 @@ def bootstrap_default_schemas() -> None:
                 optional_keys=("asset", "confidence", "metadata"),
                 description="Coinbase trading signal events",
             ),
+            EventSchema(
+                event_type="pathways.resonance.*",
+                domain="pathways",
+                required_keys=("trigger_content", "connection_strength"),
+                optional_keys=(
+                    "resonating_content",
+                    "semantic_similarity",
+                    "emotional_amplification",
+                    "timestamp",
+                ),
+                description="Pathways semantic resonance events",
+            ),
+            EventSchema(
+                event_type="pathways.knowledge.query",
+                domain="pathways",
+                required_keys=("question",),
+                optional_keys=("top_k", "scope", "metadata"),
+                description="Pathways knowledge query request",
+            ),
+            EventSchema(
+                event_type="pathways.knowledge.result",
+                domain="pathways",
+                required_keys=("question", "results"),
+                optional_keys=("scope", "metadata"),
+                description="Pathways knowledge query result",
+            ),
+            EventSchema(
+                event_type="grid.knowledge.federated",
+                domain="grid",
+                required_keys=("question", "sources"),
+                optional_keys=("results", "patterns_applied", "metadata"),
+                description="Federated knowledge query result combining GRID and Pathways",
+            ),
         ]
     )
 

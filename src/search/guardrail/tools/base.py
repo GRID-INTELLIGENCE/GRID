@@ -23,6 +23,7 @@ class GuardrailToolResult:
     result: ToolResult
     message: str | None = None
     context: dict[str, Any] = field(default_factory=dict)
+    provenance: dict[str, Any] = field(default_factory=dict)  # Pattern match details and metadata
 
 
 @dataclass
@@ -33,3 +34,5 @@ class GuardrailContext:
     response: Any = None  # SearchResponse | None for pre_query phase
     config: Any = None  # SearchConfig for guardrail settings
     schema: Any = None  # IndexSchema | None for field-level checks
+    profile: Any = None  # GuardrailProfile for persona-specific settings
+    budget_tracker: dict[str, int] = field(default_factory=dict)  # Tool -> chars used

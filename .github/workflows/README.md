@@ -27,7 +27,7 @@ Consolidated quality checks, security scanning, tests, and build verification.
 | **validation** | no | Schema/contract validation (manual dispatch only) |
 | **ci-status** | gate | Summary — fails if secrets-scan, smoke-test, or test failed |
 
-**Setup:** All Python jobs use `astral-sh/setup-uv@v7.3.0` with `python-version: "3.13"`.
+**Setup:** All Python jobs use `astral-sh/setup-uv@v7.3.0` with `python-version: "3.13"`. CI sets `PYTHONPATH=src` so imports resolve (source layout). Ruff format check covers `src/`, `tests/`, `scripts/`. Mypy runs on `src/grid/`, `src/application/`, `src/tools/`, `src/search/`, `src/cognitive/`, `src/mycelium/`.
 
 **Duration:** ~2-5 minutes
 

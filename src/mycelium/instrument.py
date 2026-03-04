@@ -136,9 +136,7 @@ class Instrument:
         max_highlights = max(1, min(max_highlights, MAX_HIGHLIGHTS))
 
         # Record this as a persona signal
-        self._persona_engine.observe(
-            InteractionSignal(signal_type="query", content=text[:200])
-        )
+        self._persona_engine.observe(InteractionSignal(signal_type="query", content=text[:200]))
 
         # Sync persona across components
         self._sync_persona()
@@ -146,9 +144,7 @@ class Instrument:
         effective_depth = depth or self._depth_override
 
         # 1. Core synthesis
-        result = self._synthesizer.synthesize(
-            text, depth=effective_depth, max_highlights=max_highlights
-        )
+        result = self._synthesizer.synthesize(text, depth=effective_depth, max_highlights=max_highlights)
 
         # 2. Apply scaffolding
         if scaffold:
@@ -300,9 +296,7 @@ class Instrument:
             return
         # Cap observation length to prevent memory abuse
         capped = text[:2000]
-        self._persona_engine.observe(
-            InteractionSignal(signal_type="query", content=capped)
-        )
+        self._persona_engine.observe(InteractionSignal(signal_type="query", content=capped))
         self._sync_persona()
 
     # ------------------------------------------------------------------
@@ -327,22 +321,12 @@ class Instrument:
             pattern: Which pattern lens the feedback is about.
         """
         if too_complex is not None or too_simple is not None:
-            self._scaffold.feedback(
-                too_complex=too_complex, too_simple=too_simple
-            )
+            self._scaffold.feedback(too_complex=too_complex, too_simple=too_simple)
             # Also feed into persona engine
             if too_complex:
-                self._persona_engine.observe(
-                    InteractionSignal(
-                        signal_type="feedback", content="too complex"
-                    )
-                )
+                self._persona_engine.observe(InteractionSignal(signal_type="feedback", content="too complex"))
             elif too_simple:
-                self._persona_engine.observe(
-                    InteractionSignal(
-                        signal_type="feedback", content="too simple"
-                    )
-                )
+                self._persona_engine.observe(InteractionSignal(signal_type="feedback", content="too simple"))
 
         if resonance and concept and pattern:
             self._persona_engine.record_resonance(concept, pattern, resonance)
@@ -377,9 +361,7 @@ class Instrument:
     # Extensibility
     # ------------------------------------------------------------------
 
-    def register_concept(
-        self, concept: str, lenses: list[dict[str, str]]
-    ) -> None:
+    def register_concept(self, concept: str, lenses: list[dict[str, str]]) -> None:
         """Add custom concept lenses to the Navigator.
 
         Args:
@@ -460,8 +442,7 @@ class Instrument:
             return self._sensory.format_output(result.lens.eli5)
 
         return self._sensory.format_output(
-            f"I don't have a built-in explanation for '{topic}' yet. "
-            f"You can add one with register_concept()."
+            f"I don't have a built-in explanation for '{topic}' yet. You can add one with register_concept()."
         )
 
     def __repr__(self) -> str:

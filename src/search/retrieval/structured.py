@@ -21,5 +21,5 @@ class StructuredRetriever:
         if not filters:
             return []
 
-        matching_ids = self.structured_index.filter(filters)
+        matching_ids = sorted(self.structured_index.filter(filters))
         return [ScoredCandidate(doc_id=doc_id, score=1.0, source="structured") for doc_id in matching_ids]

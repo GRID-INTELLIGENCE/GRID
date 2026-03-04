@@ -2,9 +2,14 @@
 
 from .base import BaseEmbeddingProvider
 from .factory import EmbeddingProviderType, get_embedding_provider
-from .huggingface import HuggingFaceEmbeddingProvider
 from .nomic_v2 import OllamaEmbeddingProvider
 from .simple import SimpleEmbedding, SimpleEmbeddings
+
+# HuggingFace provider (optional: requires numpy and sentence-transformers; deactivate if env fails)
+try:
+    from .huggingface import HuggingFaceEmbeddingProvider
+except ImportError:
+    HuggingFaceEmbeddingProvider = None  # type: ignore[assignment,misc]
 
 # OpenAI provider (optional dependency)
 try:

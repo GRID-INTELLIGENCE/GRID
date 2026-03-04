@@ -26,6 +26,7 @@ CSV_ENCODING = "utf-8"
 @dataclass(frozen=True)
 class Record:
     """A sales record with category, quantity, and price."""
+
     category: str
     quantity: int
     price: float
@@ -182,7 +183,9 @@ def aggregate_sales(records: Iterable[Record]) -> dict[str, float]:
     return totals
 
 
-def aggregate_sales_with_progress(records: Iterable[Record], progress_callback: Callable[[int, Record], None] | None = None) -> dict[str, float]:
+def aggregate_sales_with_progress(
+    records: Iterable[Record], progress_callback: Callable[[int, Record], None] | None = None
+) -> dict[str, float]:
     """Aggregate total sales with optional progress tracking.
 
     Args:
@@ -209,9 +212,7 @@ import sys
 
 
 def process_multiple_csvs(
-    file_paths: list[str | Path],
-    min_quantity: int = DEFAULT_MIN_QUANTITY,
-    max_workers: int | None = None
+    file_paths: list[str | Path], min_quantity: int = DEFAULT_MIN_QUANTITY, max_workers: int | None = None
 ) -> dict[str, float]:
     """
     Process multiple CSV files concurrently and aggregate sales.
@@ -239,10 +240,7 @@ def process_multiple_csvs(
     # Use ThreadPoolExecutor for concurrent file reading (I/O bound)
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         # Submit all file parsing tasks
-        future_to_path = {
-            executor.submit(parse_csv, path): path
-            for path in file_paths
-        }
+        future_to_path = {executor.submit(parse_csv, path): path for path in file_paths}
 
         # Collect results as they complete
         for future in as_completed(future_to_path):
@@ -272,7 +270,7 @@ def process_streaming_pipeline(
     min_quantity: int = DEFAULT_MIN_QUANTITY,
     max_workers: int | None = None,
     progress_callback: Callable[[str, PipelineMetrics], None] | None = None,
-    enable_metrics: bool = True
+    enable_metrics: bool = True,
 ) -> tuple[dict[str, float], PipelineMetrics | None]:
     """
     Process CSV files with full streaming and discoverability features.
@@ -357,9 +355,7 @@ def process_streaming_pipeline(
 
 
 def _process_single_file_streaming(
-    file_path: str | Path,
-    min_quantity: int,
-    progress_callback: Callable[[str | Path, int], None]
+    file_path: str | Path, min_quantity: int, progress_callback: Callable[[str | Path, int], None]
 ) -> list[Record]:
     """Process a single file with streaming and return filtered records."""
     try:
@@ -426,29 +422,23 @@ def write_results(totals: dict[str, float], output_file: str) -> None:
 
 def main() -> None:
     """Command-line interface for the CSV pipeline."""
-    parser = argparse.ArgumentParser(
-        description="Process CSV sales data: parse, filter, and aggregate by category."
-    )
+    parser = argparse.ArgumentParser(description="Process CSV sales data: parse, filter, and aggregate by category.")
     parser.add_argument("file", help="Path to CSV file")
     parser.add_argument(
-        "--min-quantity", type=int, default=DEFAULT_MIN_QUANTITY,
-        help="Minimum quantity to include in results (default: 0)"
+        "--min-quantity",
+        type=int,
+        default=DEFAULT_MIN_QUANTITY,
+        help="Minimum quantity to include in results (default: 0)",
     )
+    parser.add_argument("--output", "-o", help="Output file for results (default: stdout)")
     parser.add_argument(
-        "--output", "-o", help="Output file for results (default: stdout)"
-    )
-    parser.add_argument(
-        "--log-level", choices=["DEBUG", "INFO", "WARNING", "ERROR"],
-        default="INFO", help="Set logging level"
+        "--log-level", choices=["DEBUG", "INFO", "WARNING", "ERROR"], default="INFO", help="Set logging level"
     )
 
     args = parser.parse_args()
 
     # Configure logging
-    logging.basicConfig(
-        level=getattr(logging, args.log_level),
-        format="%(levelname)s: %(message)s"
-    )
+    logging.basicConfig(level=getattr(logging, args.log_level), format="%(levelname)s: %(message)s")
 
     run_pipeline(args.file, args.min_quantity, args.output)
 

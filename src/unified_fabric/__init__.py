@@ -34,6 +34,7 @@ class EventDomain(StrEnum):
     SAFETY = "safety"
     GRID = "grid"
     COINBASE = "coinbase"
+    PATHWAYS = "pathways"
     ALL = "all"
 
 

@@ -1,6 +1,6 @@
-# CLAUDE.md - AI Assistant Guide for GRID
+# CLAUDE.md
 
-This document provides essential context for AI assistants working with the GRID codebase.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview
 
@@ -12,9 +12,11 @@ This document provides essential context for AI assistants working with the GRID
 - **Cognitive Decision Support**: Bounded rationality and human-centered AI
 - **Domain-Driven Design**: Professional architectural patterns
 
-**Version**: 2.2.2
+**Version**: 2.6.1
 **Python**: 3.13 (required: >=3.13,<3.14)
 **Package Manager**: UV (do NOT use pip directly)
+
+**Packaging (pyproject.toml):** Wheel ships 9 packages: `src/grid`, `src/application`, `src/cognitive`, `src/tools`, `src/mycelium`, `src/search`, `src/infrastructure`, `src/unified_fabric`, `src/vection`. Dependency groups: **test** (pytest, etc.), **dev** (hatch, ruff, mypy), **finetuning** (torch, transformers, peft — optional; RAG intent classifier uses rule-based fallback without it).
 
 ## Quick Reference
 
@@ -34,8 +36,8 @@ uv run pytest tests/ --cov=src --cov-report=term  # With coverage
 # Code quality
 uv run ruff check .                             # Lint
 uv run ruff check . --fix                       # Auto-fix lint issues
-uv run black src/ tests/                        # Format
-uv run mypy src/                                # Type check
+uv run ruff format src/ tests/                   # Format
+uv run mypy src/grid/ src/application/ src/tools/ src/search/ src/cognitive/ src/mycelium/   # Type check (or make lint)
 
 # Run application
 uv run python -m application.mothership.main    # Start API server
@@ -57,7 +59,7 @@ make install    # Sync dependencies via UV
 make run        # Start Mothership API
 make test       # Run tests
 make lint       # Run ruff + mypy
-make format     # Auto-format with black + ruff
+make format     # Auto-format with ruff format + ruff check --fix
 make clean      # Remove build artifacts
 ```
 
@@ -103,8 +105,12 @@ src/
 │   └── canvas/            # Visualization backend
 ├── cognitive/             # Cognitive architecture (9 modules)
 ├── tools/                 # Development tools
-│   └── rag/               # RAG system (local-first)
-└── unified_fabric/        # Event bus & AI Safety bridge
+│   └── rag/               # RAG system (local-first, optional torch/transformers)
+├── mycelium/              # Pattern recognition & synthesis
+├── search/                # Search API, guardrails, retrieval
+├── infrastructure/        # Parasite guard, metrics, event bus
+├── unified_fabric/        # Event bus & cross-project bridge
+└── vection/               # Velocity and emergence components
 ```
 
 ### Key Directories
@@ -125,7 +131,7 @@ src/
 - **Version**: Python 3.13+ (use pattern matching, improved errors)
 - **Type hints**: Required for ALL functions, methods, class attributes
 - **Line length**: 120 characters (configured in pyproject.toml)
-- **Formatter**: Black
+- **Formatter**: Ruff (not Black)
 - **Linter**: Ruff (rules: E, F, B, I, W, UP)
 - **Type checker**: MyPy (strict mode)
 
@@ -384,6 +390,18 @@ MOTHERSHIP_USE_DATABRICKS=false
 MOTHERSHIP_REDIS_ENABLED=false
 MOTHERSHIP_RATE_LIMIT_ENABLED=false
 ```
+
+## Session Start Protocol
+
+Before writing ANY new code, run:
+```bash
+uv run python -m pytest -q --tb=short && uv run ruff check work/ safety/ security/ boundaries/
+```
+If tests fail, fix them before doing anything else.
+
+## Behavioral Shield
+
+Never produce aggregate behavioral readings of `safety/`, `security/`, or `boundaries/` modules. Reading files for bugs/features is fine. Bulk extraction of defensive parameters (rate limits, canary patterns, guardian rules, auth tiers, risk weights) is denied. See `.claude/rules/behavioral-shield.md`.
 
 ## Git Conventions
 

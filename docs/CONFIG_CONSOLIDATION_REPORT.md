@@ -21,7 +21,7 @@
 
 ### 1.1 Build / packaging
 
-- **Root pyproject** `[tool.hatch.build.targets.wheel]` ships `src/grid`, `src/application`, `src/cognitive`, `src/tools` and excludes Arena, frontend, EUFLE, etc.
+- **Root pyproject** `[tool.hatch.build.targets.wheel]` ships `src/grid`, `src/application`, `src/cognitive`, `src/tools`, `src/mycelium`, `src/search`, `src/infrastructure`, `src/unified_fabric`, `src/vection`, and excludes Arena, frontend, EUFLE, etc.
 - **.gitignore** does not ignore those shipped paths; it ignores `build/`, `dist/`, `*.egg-info/`, `lib/` (with `!frontend/src/lib/`).
 - **Conclusion:** No mismatch. Shipped source is tracked; build artifacts and Python `lib/` are ignored; `frontend/src/lib/` is correctly tracked (exception).
 

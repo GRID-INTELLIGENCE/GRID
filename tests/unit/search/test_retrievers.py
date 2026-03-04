@@ -89,7 +89,7 @@ class TestKeywordRetriever:
         results = retriever.retrieve("machine learning")
         assert len(results) > 0
         assert all(r.source == "keyword" for r in results)
-        assert all(r.score > 0 for r in results)
+        assert all(r.score >= 0 for r in results)
 
     def test_no_bm25_returns_empty(self):
         retriever = KeywordRetriever()
@@ -102,3 +102,15 @@ class TestKeywordRetriever:
         results = retriever.retrieve("learning", allowed_ids={"b"})
         ids = {r.doc_id for r in results}
         assert ids <= {"b"}
+
+    def test_allowed_ids_applied_before_result_cap(self):
+        class _FakeBM25:
+            @staticmethod
+            def get_scores(tokens):
+                return [10.0, 9.0, 8.0, 7.0]
+
+        retriever = KeywordRetriever()
+        retriever.update(_FakeBM25(), ["a", "b", "c", "d"])
+
+        results = retriever.retrieve("query", n_results=2, allowed_ids={"d"})
+        assert [r.doc_id for r in results] == ["d"]

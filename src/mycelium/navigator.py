@@ -262,11 +262,16 @@ class PatternNavigator:
     adapts to context.
     """
 
-    def __init__(self, persona: PersonaProfile | None = None) -> None:
+    def __init__(
+        self,
+        persona: PersonaProfile | None = None,
+        discovery_engine: Any | None = None,
+    ) -> None:
         self._persona = persona or PersonaProfile()
         self._exploration_history: list[dict[str, Any]] = []
         # Track which lenses resonated per concept
         self._resonance_map: dict[str, dict[str, ResonanceLevel]] = {}
+        self._discovery_engine = discovery_engine
 
     @property
     def persona(self) -> PersonaProfile:
@@ -309,9 +314,7 @@ class PatternNavigator:
         lens = self._select_lens(concept_key, lenses, preferred_pattern)
 
         # Record exploration
-        self._exploration_history.append(
-            {"concept": concept_key, "pattern": lens.pattern}
-        )
+        self._exploration_history.append({"concept": concept_key, "pattern": lens.pattern})
 
         depth_note = self._explain_selection(lens, preferred_pattern)
 
@@ -321,6 +324,52 @@ class PatternNavigator:
             alternatives_available=len(lenses) - 1,
             depth_note=depth_note,
         )
+
+    async def explore_with_discovery(
+        self,
+        concept: str,
+        preferred_pattern: str | None = None,
+    ) -> NavigationResult | None:
+        """Explore a concept, auto-discovering lenses if unknown.
+
+        Like explore(), but when a concept is unknown and a discovery engine
+        is configured, queries the federated knowledge base to auto-generate
+        lenses before giving up.
+
+        Args:
+            concept: The concept to explore.
+            preferred_pattern: Optional preferred cognitive pattern.
+
+        Returns:
+            NavigationResult, or None if concept truly unknown.
+        """
+        # Try synchronous explore first
+        result = self.explore(concept, preferred_pattern)
+        if result is not None:
+            return result
+
+        # Attempt discovery if engine is available
+        if self._discovery_engine is None:
+            return None
+
+        concept_key = concept.lower().strip()
+        try:
+            discovered = await self._discovery_engine.discover_lenses(concept_key)
+        except Exception as e:
+            logger.error("Lens discovery failed for '%s': %s", concept, e)
+            return None
+
+        if not discovered:
+            return None
+
+        # Register discovered lenses and retry
+        self.register_concept(concept_key, discovered)
+        logger.info(
+            "Auto-discovered %d lenses for '%s' — registered and exploring",
+            len(discovered),
+            concept_key,
+        )
+        return self.explore(concept_key, preferred_pattern)
 
     def try_different(
         self,
@@ -348,9 +397,7 @@ class PatternNavigator:
             if last["concept"] == concept_key:
                 self._record_resonance(concept_key, last["pattern"], feedback)
                 # Also update persona
-                self._persona.record_resonance(
-                    concept_key, last["pattern"], feedback
-                )
+                self._persona.record_resonance(concept_key, last["pattern"], feedback)
 
         # Find a lens we haven't tried yet, or the least-tried one
         tried_patterns = self._resonance_map.get(concept_key, {})
@@ -363,8 +410,10 @@ class PatternNavigator:
             best_pattern = max(
                 tried_patterns,
                 key=lambda p: (
-                    0 if tried_patterns[p] == ResonanceLevel.SILENT
-                    else 1 if tried_patterns[p] == ResonanceLevel.HUM
+                    0
+                    if tried_patterns[p] == ResonanceLevel.SILENT
+                    else 1
+                    if tried_patterns[p] == ResonanceLevel.HUM
                     else 2
                 ),
                 default=None,
@@ -373,9 +422,7 @@ class PatternNavigator:
             alternatives = [l for l in lenses if l.pattern != best_pattern]
             lens = alternatives[0] if alternatives else lenses[0]
 
-        self._exploration_history.append(
-            {"concept": concept_key, "pattern": lens.pattern}
-        )
+        self._exploration_history.append({"concept": concept_key, "pattern": lens.pattern})
 
         return NavigationResult(
             concept=concept_key,
@@ -406,7 +453,8 @@ class PatternNavigator:
         _CONCEPT_LENSES[concept_key] = existing
         logger.info(
             "PatternNavigator: registered %d lenses for '%s'",
-            len(lenses), concept_key,
+            len(lenses),
+            concept_key,
         )
 
     def feedback(self, concept: str, pattern: str, level: ResonanceLevel) -> None:
@@ -443,9 +491,7 @@ class PatternNavigator:
             "analytical": ["deviation", "repetition", "combination"],
             "kinesthetic": ["rhythm", "flow"],
         }
-        style_patterns = style_pattern_map.get(
-            self._persona.cognitive_style.value, []
-        )
+        style_patterns = style_pattern_map.get(self._persona.cognitive_style.value, [])
         for sp in style_patterns:
             for lens in lenses:
                 if lens.pattern == sp:
@@ -454,17 +500,13 @@ class PatternNavigator:
         # 4. Default: first lens
         return lenses[0]
 
-    def _record_resonance(
-        self, concept: str, pattern: str, level: ResonanceLevel
-    ) -> None:
+    def _record_resonance(self, concept: str, pattern: str, level: ResonanceLevel) -> None:
         """Record resonance for a concept-pattern pair."""
         if concept not in self._resonance_map:
             self._resonance_map[concept] = {}
         self._resonance_map[concept][pattern] = level
 
-    def _explain_selection(
-        self, lens: PatternLens, preferred: str | None
-    ) -> str:
+    def _explain_selection(self, lens: PatternLens, preferred: str | None) -> str:
         """Brief note explaining why this lens was chosen."""
         if preferred:
             return f"Using '{lens.pattern}' pattern as you requested."

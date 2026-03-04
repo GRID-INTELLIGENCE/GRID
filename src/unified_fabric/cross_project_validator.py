@@ -28,8 +28,12 @@ class CrossProjectPolicyValidator:
         allowed_projects: Iterable[str] | None = None,
         allowed_domains: Iterable[str] | None = None,
     ) -> None:
-        self.allowed_projects = {p.lower() for p in (allowed_projects or {"grid", "coinbase", "wellness_studio"})}
-        self.allowed_domains = {d.lower() for d in (allowed_domains or {"safety", "grid", "coinbase", "revenue"})}
+        self.allowed_projects = {
+            p.lower() for p in (allowed_projects or {"grid", "coinbase", "wellness_studio", "pathways"})
+        }
+        self.allowed_domains = {
+            d.lower() for d in (allowed_domains or {"safety", "grid", "coinbase", "revenue", "pathways"})
+        }
 
     def validate_context(self, context: dict[str, Any]) -> PolicyValidationResult:
         """Validate basic context requirements."""

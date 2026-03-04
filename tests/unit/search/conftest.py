@@ -32,6 +32,8 @@ def test_config():
         embedding_provider="simple",
         vector_store_backend="in_memory",
         cross_encoder_enabled=False,
+        guardrail_enabled=False,
+        guardrail_auth_required=False,
     )
 
 

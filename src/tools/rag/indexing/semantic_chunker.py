@@ -63,8 +63,7 @@ class SemanticChunker:
                             metadata={"start_line": current_start_line, "end_line": i - 1, "type": "code_block"},
                         )
                     )
-                    # Handle overlap by keeping the last few lines if needed
-                    overlap_lines = chunk_text.split("\n")[-3:]  # Simple overlap
+                    overlap_lines = chunk_text.split("\n")[-3:]
                     current_chunk_lines = overlap_lines + [line]
                     current_start_line = i - len(overlap_lines)
                 else:
@@ -72,12 +71,12 @@ class SemanticChunker:
             else:
                 current_chunk_lines.append(line)
 
-            # Also break if the chunk is too large
-            if len("\n".join(current_chunk_lines)) > self.max_chunk_size:
-                chunk_text = "\n".join(current_chunk_lines)
+            # Single join per iteration for size check (avoids repeated O(n) joins)
+            current_text = "\n".join(current_chunk_lines)
+            if len(current_text) > self.max_chunk_size:
                 chunks.append(
                     SemanticChunk(
-                        content=chunk_text,
+                        content=current_text,
                         metadata={"start_line": current_start_line, "end_line": i, "type": "code_split"},
                     )
                 )
@@ -122,11 +121,11 @@ class SemanticChunker:
             else:
                 current_chunk_lines.append(line)
 
-            if len("\n".join(current_chunk_lines)) > self.max_chunk_size:
-                chunk_text = "\n".join(current_chunk_lines)
+            current_text = "\n".join(current_chunk_lines)
+            if len(current_text) > self.max_chunk_size:
                 chunks.append(
                     SemanticChunk(
-                        content=chunk_text,
+                        content=current_text,
                         metadata={"start_line": current_start_line, "end_line": i, "type": "markdown_split"},
                     )
                 )

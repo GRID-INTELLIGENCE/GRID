@@ -21,7 +21,7 @@ This is not a failure. It is a fact. The foundation is genuinely strong. But the
 
 ```
 name = "grid-intelligence"
-version = "2.2.2"
+version = "2.6.1"
 requires-python = ">=3.13,<3.14"
 build-system: hatchling
 packages: src/grid, src/application, src/cognitive, src/tools

@@ -14,6 +14,7 @@ from .models import GuardrailProfile
 @dataclass
 class AuthSignature:
     """Signature for profile authentication."""
+
     profile_name: str
     signature: str
     timestamp: int
@@ -34,7 +35,7 @@ class GuardrailAuth:
         user_id: str,
         timestamp: int,
         nonce: str | None = None,
-        extra_data: dict[str, Any] | None = None
+        extra_data: dict[str, Any] | None = None,
     ) -> AuthSignature:
         """Generate authenticated signature for profile access."""
         if nonce is None:
@@ -50,11 +51,7 @@ class GuardrailAuth:
             payload += f":{extra_str}"
 
         # Generate HMAC signature
-        signature = hmac.new(
-            self.secret_key.encode(),
-            payload.encode(),
-            hashlib.sha256
-        ).hexdigest()
+        signature = hmac.new(self.secret_key.encode(), payload.encode(), hashlib.sha256).hexdigest()
 
         return AuthSignature(
             profile_name=profile.name,
@@ -64,8 +61,8 @@ class GuardrailAuth:
             metadata={
                 "user_id": user_id,
                 "extra_data": extra_data or {},
-                "payload_hash": hashlib.sha256(payload.encode()).hexdigest()
-            }
+                "payload_hash": hashlib.sha256(payload.encode()).hexdigest(),
+            },
         )
 
     def validate_profile_signature(
@@ -73,10 +70,11 @@ class GuardrailAuth:
         profile: GuardrailProfile,
         auth_sig: AuthSignature,
         user_id: str,
-        max_age_seconds: int = 300  # 5 minutes default
+        max_age_seconds: int = 300,  # 5 minutes default
     ) -> bool:
         """Validate signature for profile access."""
         import time
+
         current_time = int(time.time())
 
         # Check timestamp freshness
@@ -89,18 +87,13 @@ class GuardrailAuth:
             user_id=user_id,
             timestamp=auth_sig.timestamp,
             nonce=auth_sig.nonce,
-            extra_data=auth_sig.metadata.get("extra_data")
+            extra_data=auth_sig.metadata.get("extra_data"),
         )
 
         # Use constant-time comparison
         return hmac.compare_digest(auth_sig.signature, expected_sig.signature)
 
-    def narrow_access_scope(
-        self,
-        requested_profile: str,
-        user_permissions: set[str],
-        user_role: str
-    ) -> str | None:
+    def narrow_access_scope(self, requested_profile: str, user_permissions: set[str], user_role: str) -> str | None:
         """Narrow accessibility scope based on user permissions and role.
 
         Returns the requested profile if allowed, otherwise None (deny access).
@@ -110,7 +103,7 @@ class GuardrailAuth:
             "developer": {"developer", "basic"},
             "designer": {"designer", "basic"},
             "manager": {"manager", "designer", "developer", "basic"},
-            "admin": {"admin", "manager", "designer", "developer", "basic"}
+            "admin": {"admin", "manager", "designer", "developer", "basic"},
         }
 
         # Get allowed profiles for this role
@@ -139,14 +132,12 @@ def get_default_auth() -> GuardrailAuth:
 
 
 def create_auth_signature(
-    profile: GuardrailProfile,
-    user_id: str,
-    timestamp: int | None = None,
-    auth: GuardrailAuth | None = None
+    profile: GuardrailProfile, user_id: str, timestamp: int | None = None, auth: GuardrailAuth | None = None
 ) -> AuthSignature:
     """Convenience function to create auth signature."""
     if timestamp is None:
         import time
+
         timestamp = int(time.time())
 
     auth = auth or get_default_auth()
@@ -154,10 +145,7 @@ def create_auth_signature(
 
 
 def validate_auth_signature(
-    profile: GuardrailProfile,
-    auth_sig: AuthSignature,
-    user_id: str,
-    auth: GuardrailAuth | None = None
+    profile: GuardrailProfile, auth_sig: AuthSignature, user_id: str, auth: GuardrailAuth | None = None
 ) -> bool:
     """Convenience function to validate auth signature."""
     auth = auth or get_default_auth()

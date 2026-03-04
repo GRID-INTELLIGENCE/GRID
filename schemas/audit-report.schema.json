@@ -1,0 +1,220 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://grid.dev/schemas/audit-report.schema.json",
+  "title": "Audit Report Contract",
+  "description": "JSON-Schema contract for gap/audit reports: diagnostics, errors, warnings, action items, verification commands, and knowledge-graph relationships.",
+  "type": "object",
+  "$defs": {
+    "severity": {
+      "type": "string",
+      "enum": ["critical", "high", "medium", "low"],
+      "description": "Severity of a finding (🔴 critical, 🟠 high, 🟡 medium, 🟢 low)."
+    },
+    "impact": {
+      "type": "string",
+      "enum": ["blocking", "degrading", "enhancement"],
+      "description": "Impact: blocking (🎯), degrading (⚠️), enhancement (💡)."
+    },
+    "diagnostic": {
+      "type": "object",
+      "description": "A single diagnostic finding from an audit or verification run.",
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "category": { "type": "string", "minLength": 1 },
+        "message": { "type": "string", "minLength": 1 },
+        "severity": { "$ref": "#/$defs/severity" },
+        "impact": { "$ref": "#/$defs/impact" },
+        "source": { "type": "string", "description": "Tool or component that produced this (e.g. ruff, mypy, IDE verification)." },
+        "location": {
+          "type": "object",
+          "properties": {
+            "path": { "type": "string" },
+            "line": { "type": "integer", "minimum": 0 },
+            "column": { "type": "integer", "minimum": 0 }
+          },
+          "additionalProperties": false
+        },
+        "metadata": { "type": "object" }
+      },
+      "required": ["id", "category", "message", "severity", "impact"],
+      "additionalProperties": false
+    },
+    "error_entry": {
+      "type": "object",
+      "description": "A structured error (validation failure, exception, or hard failure).",
+      "properties": {
+        "code": { "type": "string", "minLength": 1 },
+        "message": { "type": "string", "minLength": 1 },
+        "severity": { "$ref": "#/$defs/severity" },
+        "source": { "type": "string" },
+        "location": {
+          "type": "object",
+          "properties": {
+            "path": { "type": "string" },
+            "line": { "type": "integer", "minimum": 0 },
+            "column": { "type": "integer", "minimum": 0 }
+          },
+          "additionalProperties": false
+        },
+        "recoverable": { "type": "boolean", "default": false }
+      },
+      "required": ["code", "message", "severity"],
+      "additionalProperties": false
+    },
+    "warning_entry": {
+      "type": "object",
+      "description": "A non-blocking warning or advisory finding.",
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "message": { "type": "string", "minLength": 1 },
+        "severity": { "$ref": "#/$defs/severity" },
+        "impact": { "$ref": "#/$defs/impact" },
+        "source": { "type": "string" },
+        "location": {
+          "type": "object",
+          "properties": {
+            "path": { "type": "string" },
+            "line": { "type": "integer", "minimum": 0 }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": ["id", "message", "severity"],
+      "additionalProperties": false
+    },
+    "action_item": {
+      "type": "object",
+      "description": "A recommended fix or next step.",
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 },
+        "description": { "type": "string" },
+        "priority": { "$ref": "#/$defs/severity" },
+        "impact": { "$ref": "#/$defs/impact" },
+        "fix": { "type": "string", "description": "Specific action (e.g. install extension, change setting)." },
+        "related_diagnostic_ids": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "IDs of diagnostics this action addresses."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "in_progress", "done", "skipped"],
+          "default": "pending"
+        }
+      },
+      "required": ["id", "title", "priority", "impact"],
+      "additionalProperties": false
+    },
+    "verification_command": {
+      "type": "object",
+      "description": "A command to run to verify a fix or state.",
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "command": { "type": "string", "minLength": 1 },
+        "description": { "type": "string" },
+        "expected_outcome": { "type": "string" },
+        "related_action_id": { "type": "string" }
+      },
+      "required": ["id", "command"],
+      "additionalProperties": false
+    },
+    "knowledge_graph_node": {
+      "type": "object",
+      "description": "A node in the knowledge-graph (artifact, reference, or concept).",
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "type": {
+          "type": "string",
+          "enum": ["file", "symbol", "document", "config", "diagnostic", "action", "concept"]
+        },
+        "label": { "type": "string" },
+        "path": { "type": "string" },
+        "metadata": { "type": "object" }
+      },
+      "required": ["id", "type"],
+      "additionalProperties": false
+    },
+    "knowledge_graph_edge": {
+      "type": "object",
+      "description": "A directed relationship between two nodes.",
+      "properties": {
+        "from_id": { "type": "string", "minLength": 1 },
+        "to_id": { "type": "string", "minLength": 1 },
+        "relation": {
+          "type": "string",
+          "enum": ["addresses", "causes", "depends_on", "references", "verified_by", "part_of"]
+        }
+      },
+      "required": ["from_id", "to_id", "relation"],
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "diagnostics": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/diagnostic" },
+      "description": "Structured diagnostics from the audit/verification run."
+    },
+    "errors": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/error_entry" },
+      "description": "Structured errors (validation failures, exceptions)."
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/warning_entry" },
+      "description": "Non-blocking warnings and advisories."
+    },
+    "action_items": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/action_item" },
+      "description": "Recommended fixes and next steps."
+    },
+    "verification_commands": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/verification_command" },
+      "description": "Commands to run to verify fixes or state."
+    },
+    "knowledge_graph": {
+      "type": "object",
+      "description": "Relationships between diagnostics, actions, references, and artifacts.",
+      "properties": {
+        "nodes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/knowledge_graph_node" }
+        },
+        "edges": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/knowledge_graph_edge" }
+        }
+      },
+      "required": ["nodes", "edges"],
+      "additionalProperties": false
+    },
+    "executive_summary": {
+      "type": "object",
+      "properties": {
+        "total_gaps": { "type": "integer", "minimum": 0 },
+        "critical_count": { "type": "integer", "minimum": 0 },
+        "high_count": { "type": "integer", "minimum": 0 },
+        "medium_count": { "type": "integer", "minimum": 0 },
+        "low_count": { "type": "integer", "minimum": 0 },
+        "blocking_count": { "type": "integer", "minimum": 0 },
+        "degrading_count": { "type": "integer", "minimum": 0 },
+        "enhancement_count": { "type": "integer", "minimum": 0 },
+        "generated_at": { "type": "string", "format": "date-time" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "diagnostics",
+    "errors",
+    "warnings",
+    "action_items",
+    "verification_commands",
+    "knowledge_graph"
+  ],
+  "additionalProperties": false
+}

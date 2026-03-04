@@ -39,9 +39,7 @@ def adapter(mock_safety_bridge, mock_event_bus):
             "unified_fabric.pathways_adapter.get_safety_bridge",
             return_value=mock_safety_bridge,
         ),
-        patch(
-            "unified_fabric.pathways_adapter.get_event_bus", return_value=mock_event_bus
-        ),
+        patch("unified_fabric.pathways_adapter.get_event_bus", return_value=mock_event_bus),
     ):
         return PathwaysIntegrationAdapter()
 
@@ -106,9 +104,7 @@ async def test_process_resonance_success(adapter, mock_event_bus):
 
 
 @pytest.mark.asyncio
-async def test_process_resonance_uses_pathways_system_when_no_trusted_user_id(
-    adapter, mock_safety_bridge
-):
+async def test_process_resonance_uses_pathways_system_when_no_trusted_user_id(adapter, mock_safety_bridge):
     """Default: SafetyContext.user_id is pathways-system, never from signal.metadata."""
     signal = ResonanceSignal(
         trigger_content="test",
@@ -124,9 +120,7 @@ async def test_process_resonance_uses_pathways_system_when_no_trusted_user_id(
 
 
 @pytest.mark.asyncio
-async def test_process_resonance_uses_trusted_user_id_when_provided(
-    adapter, mock_safety_bridge
-):
+async def test_process_resonance_uses_trusted_user_id_when_provided(adapter, mock_safety_bridge):
     """When trusted_user_id is passed by caller, it is used for safety/audit."""
     signal = ResonanceSignal(
         trigger_content="test",

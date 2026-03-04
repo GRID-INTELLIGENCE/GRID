@@ -32,7 +32,7 @@ print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# Check if running as root
+# Check if running as root (admin-only; elevation documented in docs/LINUX_BASH_SCOPE.md § 3.1)
 if [ "$EUID" -ne 0 ]; then
     print_error "Please run as root or with sudo"
     exit 1

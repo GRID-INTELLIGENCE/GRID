@@ -87,21 +87,22 @@ uv sync --group dev --group test
 
 Do not use `python -m venv` or bare `pip install` for this repo. Use uv so the environment matches the lockfile.
 
+**Optional dependency groups:**
+
+- `uv sync --group dev --group test` — default for development (includes hatch, ruff, mypy, pytest).
+- `uv sync --group finetuning` — adds torch, transformers, peft, datasets, accelerate for LoRA/fine-tuning and optional RAG intent classifier model. Without this group, RAG intent classification uses a rule-based fallback.
+
 ### Step 4: Configure Environment
 
 ```bash
-cp .env.example .env
+cp config/environment/.env.example .env
 ```
 
-Edit `.env` with your settings:
+Edit `.env` with your settings. See the **ENV VAR REFERENCE** block at the top of `config/environment/.env.example` for which subsystem reads which variable. Key points:
 
-```env
-ENVIRONMENT=development
-DATABASE_URL=sqlite:///./app.db
-SECRET_KEY=change-this-to-random-string
-API_HOST=0.0.0.0
-API_PORT=8000
-```
+- **DATABASE_URL**: Use `sqlite+aiosqlite:///...` for SQLite; on Windows absolute paths use **4 slashes** (e.g. `sqlite+aiosqlite:////e:/path/to/data/safety.db`).
+- **REDIS_URL**: Default `redis://localhost:6379`; WSL2 users override as needed.
+- **CHROMA_HOST**, **OLLAMA_HOST**: Used by Docker and MCP RAG servers (defaults in .env.example).
 
 ### Step 5: Verify Installation
 
@@ -175,4 +176,4 @@ uv run uvicorn grid.api.main:app --port 8001
 - [ ] Package imports: `uv run python -c "import grid"`
 - [ ] CLI works: `uv run grid --help`
 - [ ] Tests pass: `uv run pytest -q --tb=short`
-- [ ] Linter clean: `uv run ruff check work/ safety/ security/ boundaries/`
+- [ ] Linter clean: `uv run ruff check .` and `uv run mypy src/grid/ src/application/ src/tools/ src/search/ src/cognitive/ src/mycelium/` (or `make lint`)

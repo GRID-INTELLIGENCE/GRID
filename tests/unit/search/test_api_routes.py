@@ -24,6 +24,7 @@ def admin_gating_config():
         vector_store_backend="in_memory",
         cross_encoder_enabled=False,
         guardrail_admin_gating=True,
+        guardrail_auth_required=False,
     )
 
 
@@ -124,6 +125,57 @@ class TestSearchEndpoint:
     def test_search_nonexistent_404(self, client):
         resp = client.post("/api/search/nope/query", json={"query": "x"})
         assert resp.status_code == 404
+
+    def test_guardrail_receives_parsed_filters(self, monkeypatch, sample_documents):
+        from search.guardrail.orchestrator import GuardrailResult
+
+        captured_filters = []
+
+        class _FakeOrchestrator:
+            def __init__(self, *args, **kwargs):
+                pass
+
+            async def run_pre_query(self, ctx):
+                captured_filters.clear()
+                captured_filters.extend(ctx.request.filters)
+                return GuardrailResult(blocked=False)
+
+            async def run_post_query(self, ctx, response):
+                return GuardrailResult(blocked=False)
+
+        monkeypatch.setattr("search.api.routes.GuardrailOrchestrator", _FakeOrchestrator)
+
+        cfg = SearchConfig(
+            embedding_provider="simple",
+            vector_store_backend="in_memory",
+            cross_encoder_enabled=False,
+            guardrail_enabled=True,
+            guardrail_auth_required=False,
+        )
+        engine = SearchEngine(config=cfg)
+        app = FastAPI()
+        app.include_router(create_search_router(engine, config=cfg))
+        client = TestClient(app)
+
+        client.put(
+            "/api/search/products/schema",
+            json={
+                "name": "products",
+                "fields": {
+                    "title": {"type": "text", "searchable": True},
+                    "price": {"type": "float", "filterable": True},
+                },
+            },
+        )
+        client.post(
+            "/api/search/products/index",
+            json={"documents": [d.model_dump() for d in sample_documents]},
+        )
+
+        resp = client.post("/api/search/products/query", json={"query": "headphones price:>50"})
+        assert resp.status_code == 200
+        assert captured_filters
+        assert captured_filters[0].field == "price"
 
 
 class TestDeleteEndpoint:

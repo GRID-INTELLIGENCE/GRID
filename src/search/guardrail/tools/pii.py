@@ -25,16 +25,19 @@ def _get_safety_validated_message(message: str, tool_name: str, ctx: GuardrailCo
 
     # Check perpetrator voice prevention
     perpetrator_patterns = [
-        re.compile(r'\b(I|we|you)\b.*\b(kill|hurt|attack|damage)\b', re.IGNORECASE),
-        re.compile(r'\b(I|we|you)\b.*\b(harm|threat|violence)\b', re.IGNORECASE),
+        re.compile(r"\b(I|we|you)\b.*\b(kill|hurt|attack|damage)\b", re.IGNORECASE),
+        re.compile(r"\b(I|we|you)\b.*\b(harm|threat|violence)\b", re.IGNORECASE),
     ]
 
     for pattern in perpetrator_patterns:
         if pattern.search(message):
             # Convert to descriptive noun form
-            message = re.sub(r'\b(I|we|you)\b.*\b(kill|hurt|attack|damage|harm|threat|violence)\b',
-                           lambda m: f"Homicide threat detected" if 'kill' in m.group(0).lower()
-                                   else f"Threat pattern detected", message, flags=re.IGNORECASE)
+            message = re.sub(
+                r"\b(I|we|you)\b.*\b(kill|hurt|attack|damage|harm|threat|violence)\b",
+                lambda m: "Homicide threat detected" if "kill" in m.group(0).lower() else "Threat pattern detected",
+                message,
+                flags=re.IGNORECASE,
+            )
 
     # Add LIMITATIONS header if required
     if ctx.profile and ctx.profile.safety_rules.get("limitations_header", False):
@@ -75,7 +78,7 @@ def pii_redact_tool(ctx: GuardrailContext) -> GuardrailToolResult:
     # ReDoS mitigation: reject pattern strings > 500 chars (profile patterns from admin config)
     MAX_PROFILE_PATTERN_LENGTH = 500
     patterns_to_use = BASE_PII_PATTERNS
-    if ctx.profile and hasattr(ctx.profile, 'patterns') and "pii_redact" in ctx.profile.patterns:
+    if ctx.profile and hasattr(ctx.profile, "patterns") and "pii_redact" in ctx.profile.patterns:
         try:
             profile_patterns = []
             for pattern_str in ctx.profile.patterns["pii_redact"]:
@@ -97,20 +100,21 @@ def pii_redact_tool(ctx: GuardrailContext) -> GuardrailToolResult:
 
     # Check budget limit
     budget_limit = 15000  # Default
-    if ctx.profile and hasattr(ctx.profile, 'budget_limits'):
+    if ctx.profile and hasattr(ctx.profile, "budget_limits"):
         budget_limit = ctx.profile.budget_limits.get("pii_redact", 15000)
 
     total_chars = 0
     for hit in ctx.response.hits:
         if hasattr(hit, "document") and hit.document and hasattr(hit.document, "fields"):
             if isinstance(hit.document.fields, dict):
-                for field_name, field_value in hit.document.fields.items():
+                for field_value in hit.document.fields.values():
                     if isinstance(field_value, str):
                         total_chars += len(field_value)
 
     if total_chars > budget_limit:
         message = _get_safety_validated_message(
-            f"Content exceeds PII redaction budget limit ({budget_limit} characters)", "pii_redact", ctx)
+            f"Content exceeds PII redaction budget limit ({budget_limit} characters)", "pii_redact", ctx
+        )
         return GuardrailToolResult(
             tool_name="pii_redact",
             result=ToolResult.BLOCK,

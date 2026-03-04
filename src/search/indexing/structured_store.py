@@ -156,7 +156,18 @@ class StructuredFieldIndex:
             if field_schema.type == FieldType.FLOAT:
                 return float(value)
             if field_schema.type == FieldType.BOOLEAN:
-                return bool(value)
+                if isinstance(value, bool):
+                    return value
+                if isinstance(value, str):
+                    normalized = value.strip().lower()
+                    if normalized in {"true", "1", "yes", "y", "on"}:
+                        return True
+                    if normalized in {"false", "0", "no", "n", "off"}:
+                        return False
+                    return None
+                if isinstance(value, (int, float)):
+                    return bool(value)
+                return None
             if field_schema.type == FieldType.DATETIME:
                 if isinstance(value, datetime):
                     return value.isoformat()

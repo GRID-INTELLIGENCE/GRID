@@ -81,21 +81,11 @@ class SafetyReport:
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 _PII_PATTERNS: dict[str, re.Pattern[str]] = {
-    "email_address": re.compile(
-        r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}", re.ASCII
-    ),
-    "phone_number": re.compile(
-        r"\b\d{3}[-.]?\d{3}[-.]?\d{4}\b"
-    ),
-    "social_security_number": re.compile(
-        r"\b\d{3}-\d{2}-\d{4}\b"
-    ),
-    "credit_card_number": re.compile(
-        r"\b\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}\b"
-    ),
-    "ip_address": re.compile(
-        r"\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b"
-    ),
+    "email_address": re.compile(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}", re.ASCII),
+    "phone_number": re.compile(r"\b\d{3}[-.]?\d{3}[-.]?\d{4}\b"),
+    "social_security_number": re.compile(r"\b\d{3}-\d{2}-\d{4}\b"),
+    "credit_card_number": re.compile(r"\b\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}\b"),
+    "ip_address": re.compile(r"\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b"),
 }
 
 # Max text length to scan for PII (avoids regex cost on huge inputs)
@@ -153,9 +143,7 @@ class SafetyGuard:
         if original_length > MAX_INPUT_LENGTH:
             return SafetyReport(
                 verdict=SafetyVerdict.REJECT,
-                reasons=[
-                    f"Input exceeds maximum length ({original_length:,} > {MAX_INPUT_LENGTH:,} chars)"
-                ],
+                reasons=[f"Input exceeds maximum length ({original_length:,} > {MAX_INPUT_LENGTH:,} chars)"],
                 original_length=original_length,
                 processing_time_ms=_elapsed_ms(start),
             )
@@ -178,8 +166,7 @@ class SafetyGuard:
         if pii_types:
             pii_found = True
             reasons.append(
-                f"Possible PII detected: {', '.join(pii_types)}. "
-                f"Processing locally only — no data transmitted."
+                f"Possible PII detected: {', '.join(pii_types)}. Processing locally only — no data transmitted."
             )
 
         self._check_count += 1
@@ -234,20 +221,13 @@ class SafetyGuard:
 
         if isinstance(value, str):
             if max_length is not None and len(value) > max_length:
-                reasons.append(
-                    f"{name} exceeds maximum length ({len(value)} > {max_length})"
-                )
+                reasons.append(f"{name} exceeds maximum length ({len(value)} > {max_length})")
             if allowed_values is not None and value not in allowed_values:
-                reasons.append(
-                    f"{name} has invalid value '{value}'. "
-                    f"Allowed: {', '.join(sorted(allowed_values))}"
-                )
+                reasons.append(f"{name} has invalid value '{value}'. Allowed: {', '.join(sorted(allowed_values))}")
 
         if isinstance(value, list):
             if max_val is not None and len(value) > max_val:
-                reasons.append(
-                    f"{name} list exceeds maximum size ({len(value)} > {int(max_val)})"
-                )
+                reasons.append(f"{name} list exceeds maximum size ({len(value)} > {int(max_val)})")
 
         verdict = SafetyVerdict.REJECT if reasons else SafetyVerdict.PASS
         return SafetyReport(
@@ -288,7 +268,8 @@ class SafetyGuard:
             trimmed = len(history) - max_size
             logger.info(
                 "SafetyGuard: trimmed %d oldest entries from history (cap=%d)",
-                trimmed, max_size,
+                trimmed,
+                max_size,
             )
             return history[-max_size:]
         return history
@@ -307,10 +288,7 @@ class SafetyGuard:
         if total > MAX_LENSES_PER_CONCEPT:
             return SafetyReport(
                 verdict=SafetyVerdict.REJECT,
-                reasons=[
-                    f"Concept '{concept}' would have {total} lenses "
-                    f"(max {MAX_LENSES_PER_CONCEPT})"
-                ],
+                reasons=[f"Concept '{concept}' would have {total} lenses (max {MAX_LENSES_PER_CONCEPT})"],
             )
         return SafetyReport(verdict=SafetyVerdict.PASS)
 

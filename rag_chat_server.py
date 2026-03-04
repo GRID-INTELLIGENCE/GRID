@@ -432,6 +432,7 @@ async def chat(request: Request):
 
     except Exception as e:
         import traceback
+
         return {"error": f"{str(e)}\n{traceback.format_exc()}"}
 
 

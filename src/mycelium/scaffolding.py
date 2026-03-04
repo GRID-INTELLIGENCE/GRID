@@ -201,9 +201,7 @@ class AdaptiveScaffold:
         if Strategy.SIMPLIFICATION in strategies:
             content = self._simplify_vocabulary(content)
             for i, section in enumerate(sections):
-                sections[i]["content"] = self._simplify_vocabulary(
-                    section["content"]
-                )
+                sections[i]["content"] = self._simplify_vocabulary(section["content"])
 
         return ScaffoldedOutput(
             content=content,

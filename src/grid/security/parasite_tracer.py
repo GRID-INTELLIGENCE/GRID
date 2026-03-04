@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import asyncio
 import contextvars
-import gc
+import gc  # used for tracer object discovery and lifecycle inspection
 import inspect
 import logging
 import os

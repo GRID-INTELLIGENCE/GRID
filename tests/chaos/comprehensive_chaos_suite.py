@@ -26,7 +26,7 @@ Date: 2026-02-05
 from __future__ import annotations
 
 import asyncio
-import gc
+import gc  # used for test isolation and chaos-run cleanup between scenarios
 import os
 import random
 import sys

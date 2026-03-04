@@ -136,18 +136,35 @@ Or use **migrate_to_wsl.sh** to copy project into WSL filesystem for better I/O 
 |--------|---------|---------------|
 | **security/install.sh** | Network security install & config | `bash security/install.sh` |
 | **scripts/migrate_to_wsl.sh** | Migrate repo into WSL fs, benchmark | `bash scripts/migrate_to_wsl.sh` [--dry-run \| --skip-benchmark \| --force] |
-| **scripts/eufle.sh** | EUFLE launcher (mounts E:, sets PYTHONPATH) | `bash scripts/eufle.sh` |
-| **scripts/eufle_launcher.sh** | EUFLE launcher wrapper | `bash scripts/eufle_launcher.sh` |
+| **scripts/eufle.sh** | EUFLE launcher (requires E: mounted; exits with instructions if not; sets PYTHONPATH) | `bash scripts/eufle.sh` |
+| **scripts/eufle_launcher.sh** | EUFLE launcher (same as eufle.sh) | `bash scripts/eufle_launcher.sh` |
+
+**EUFLE activation:** Launchers set `PYTHONPATH`, `EUFLE_HOME`, and `LLAMACPP_PATH`. To override the default llama.cpp path: `export LLAMACPP_PATH=/your/path; bash scripts/eufle.sh`. Optional: activate a venv before running if EUFLE uses one.
+
 | **scripts/opencode_wrapper.sh** | OpenCode CLI via WSL | `wsl bash scripts/opencode_wrapper.sh --version` |
 | **scripts/quick_health_check.sh** | Quick health check | `bash scripts/quick_health_check.sh` |
 | **scripts/deploy.sh** | Deployment | `bash scripts/deploy.sh` |
 | **scripts/monitor_wsl_performance.sh** | WSL performance monitoring | `bash scripts/monitor_wsl_performance.sh` |
 | **scripts/run_post_11pm_contract.sh** | Post-11pm contract run | `bash scripts/run_post_11pm_contract.sh` |
 | **scripts/woven_seed_tracing.sh** | Seed tracing | `bash scripts/woven_seed_tracing.sh` |
+| **scripts/wsl_startup.sh** | WSL startup (source from ~/.bashrc for GRID_HOME + venv on PATH) | Add to ~/.bashrc: `[ -f /mnt/e/Seeds/GRID-main/scripts/wsl_startup.sh ] && . /mnt/e/Seeds/GRID-main/scripts/wsl_startup.sh` |
 | **infrastructure/docker/docker-entrypoint.sh** | Docker entrypoint | Used by Docker; not for direct bash run |
 | **docker/docker-entrypoint.sh** | Docker entrypoint | Same |
 
-### 3.1 Script conventions
+### 3.1 Elevation boundary (risk reduction)
+
+Scripts avoid `sudo` inside launchers. Elevation is **one-time setup** or **explicit admin** only.
+
+| Script | Elevation | When |
+|--------|-----------|------|
+| eufle.sh, eufle_launcher.sh | None | Require /mnt/e/EUFLE to exist (E: mounted and EUFLE at E:\EUFLE); if not, script exits with exact `sudo mount` command or dir-missing message. |
+| wsl_startup.sh | None | Source from ~/.bashrc; sets GRID_HOME and PATH when /mnt/e/Seeds/GRID-main exists; no sudo. |
+| migrate_to_wsl.sh | None | May print "Install with: sudo apt install …"; user runs in their shell. |
+| deploy.sh | **Admin (root/sudo)** | Run explicitly: `sudo bash scripts/deploy.sh`. Writes /opt, /etc/systemd, /var/log. |
+| security/install.sh | See security docs | Any sudo documented in security/QUICK_START.md. |
+| Docs (INSTALLATION, WSL) | **One-time setup** | `sudo apt`, `sudo nano /etc/wsl.conf` are one-time; not part of daily scripts. |
+
+### 3.2 Script conventions
 
 - Shebang: `#!/bin/bash`
 - Fail fast: `set -e` or `set -euo pipefail`
@@ -221,13 +238,14 @@ Fix failing tests before making changes.
 | **docs/guides/WSL_SETUP_COMPLETE_RUNBOOK.md** | WSL mount, setup_llamacpp.sh, diagnostics, Path B (WSL + llama-cli). |
 | **docs/guides/opencode_usage.md** | WSL2 install (bash), path issues, API keys in `~/.bashrc` / `~/.zshrc`. |
 | **docs/guides/USAGE_INSTRUCTIONS.md** | `source venv/bin/activate` (Linux/Mac). |
+| **docs/guides/POWERSHELL_PROFILE_AND_WSL_STARTUP.md** | PowerShell profile install (eg, ee, ea); WSL startup script (source wsl_startup.sh from ~/.bashrc). |
 | **security/install.sh** | Bash install script: Python check, deps, config, security init, helper scripts. |
 | **security/QUICK_START.md** | Linux/Mac: `bash security/install.sh`; commands for monitor, whitelist, enable/disable. |
 | **scripts/migrate_to_wsl.sh** | Bash: migrate GRID to WSL fs, benchmark, --dry-run, --force. |
-| **scripts/eufle.sh** | Bash: mount E:, set PYTHONPATH/EUFLE_HOME, run eufle.py. |
+| **scripts/eufle.sh** | Bash: require E: mounted (exit with instructions if not), set PYTHONPATH/EUFLE_HOME, run eufle.py. |
 | **Makefile** | make install, run, test, lint, format, clean (bash/make on Linux/Mac). |
 | **README.md** | Pip install (end-user); Platforms: Windows, Mac, Linux. |
 
 ---
 
-*This doc synthesizes bash and Linux scope only. For full project setup, see **docs/INSTALLATION.md** and **docs/project/CLAUDE.md**.*
+*This doc synthesizes bash and Linux scope only. For full project setup, see **docs/INSTALLATION.md** and **docs/project/CLAUDE.md**. For simplifying bash conducts and reducing elevation/risk, see **docs/guides/BASH_CONDUCTS_APPROACH.md**.*

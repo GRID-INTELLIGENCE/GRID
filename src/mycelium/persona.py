@@ -76,45 +76,117 @@ class PersonaEngine:
     # Vocabulary indicators for expertise detection
     _JARGON_PATTERNS: dict[str, list[str]] = {
         "tech": [
-            "api", "backend", "frontend", "database", "server", "deploy",
-            "cache", "endpoint", "middleware", "async", "latency", "throughput",
-            "microservice", "container", "kubernetes", "docker", "redis",
+            "api",
+            "backend",
+            "frontend",
+            "database",
+            "server",
+            "deploy",
+            "cache",
+            "endpoint",
+            "middleware",
+            "async",
+            "latency",
+            "throughput",
+            "microservice",
+            "container",
+            "kubernetes",
+            "docker",
+            "redis",
         ],
         "science": [
-            "hypothesis", "variable", "correlation", "methodology", "empirical",
-            "quantitative", "qualitative", "peer-reviewed", "statistical",
+            "hypothesis",
+            "variable",
+            "correlation",
+            "methodology",
+            "empirical",
+            "quantitative",
+            "qualitative",
+            "peer-reviewed",
+            "statistical",
         ],
         "legal": [
-            "jurisdiction", "plaintiff", "defendant", "statute", "compliance",
-            "liability", "precedent", "arbitration", "indemnity",
+            "jurisdiction",
+            "plaintiff",
+            "defendant",
+            "statute",
+            "compliance",
+            "liability",
+            "precedent",
+            "arbitration",
+            "indemnity",
         ],
         "medical": [
-            "diagnosis", "prognosis", "pathology", "etiology", "contraindication",
-            "pharmacological", "symptomatic", "chronic", "acute",
+            "diagnosis",
+            "prognosis",
+            "pathology",
+            "etiology",
+            "contraindication",
+            "pharmacological",
+            "symptomatic",
+            "chronic",
+            "acute",
         ],
         "finance": [
-            "portfolio", "derivative", "amortization", "equity", "liquidity",
-            "hedge", "arbitrage", "yield", "dividend", "collateral",
+            "portfolio",
+            "derivative",
+            "amortization",
+            "equity",
+            "liquidity",
+            "hedge",
+            "arbitrage",
+            "yield",
+            "dividend",
+            "collateral",
         ],
     }
 
     # Simple sentence patterns indicating cognitive style
     _STYLE_INDICATORS: dict[CognitiveStyle, list[str]] = {
         CognitiveStyle.VISUAL: [
-            "show me", "picture", "diagram", "looks like", "visualize",
-            "graph", "chart", "map", "color", "layout",
+            "show me",
+            "picture",
+            "diagram",
+            "looks like",
+            "visualize",
+            "graph",
+            "chart",
+            "map",
+            "color",
+            "layout",
         ],
         CognitiveStyle.NARRATIVE: [
-            "tell me", "story", "example", "like when", "imagine",
-            "analogy", "metaphor", "scenario", "walk me through",
+            "tell me",
+            "story",
+            "example",
+            "like when",
+            "imagine",
+            "analogy",
+            "metaphor",
+            "scenario",
+            "walk me through",
         ],
         CognitiveStyle.ANALYTICAL: [
-            "compare", "data", "statistics", "versus", "trade-off",
-            "pros and cons", "benchmark", "measure", "quantify",
+            "compare",
+            "data",
+            "statistics",
+            "versus",
+            "trade-off",
+            "pros and cons",
+            "benchmark",
+            "measure",
+            "quantify",
         ],
         CognitiveStyle.KINESTHETIC: [
-            "try it", "hands-on", "practice", "exercise", "build",
-            "experiment", "interactive", "step by step", "do it",
+            "try it",
+            "hands-on",
+            "practice",
+            "exercise",
+            "build",
+            "experiment",
+            "interactive",
+            "step by step",
+            "do it",
         ],
     }
 
@@ -184,9 +256,7 @@ class PersonaEngine:
         logger.info("PersonaEngine: explicit traits set: %s", list(traits.keys()))
         return self._current_profile
 
-    def record_resonance(
-        self, concept: str, pattern: str, level: ResonanceLevel
-    ) -> None:
+    def record_resonance(self, concept: str, pattern: str, level: ResonanceLevel) -> None:
         """Record whether an explanation resonated. Feeds back into profile."""
         self._current_profile.record_resonance(concept, pattern, level)
         self._feedback_history.append(
@@ -220,13 +290,11 @@ class PersonaEngine:
         if len(self._response_times) > _MAX_RESPONSE_TIMES:
             self._response_times = self._response_times[-_MAX_RESPONSE_TIMES:]
         if len(self._current_profile.resonance_history) > _MAX_RESONANCE_HISTORY:
-            self._current_profile.resonance_history = (
-                self._current_profile.resonance_history[-_MAX_RESONANCE_HISTORY:]
-            )
+            self._current_profile.resonance_history = self._current_profile.resonance_history[-_MAX_RESONANCE_HISTORY:]
         if len(self._current_profile.preferred_patterns) > _MAX_PREFERRED_PATTERNS:
-            self._current_profile.preferred_patterns = (
-                self._current_profile.preferred_patterns[-_MAX_PREFERRED_PATTERNS:]
-            )
+            self._current_profile.preferred_patterns = self._current_profile.preferred_patterns[
+                -_MAX_PREFERRED_PATTERNS:
+            ]
 
     # --- Internal analysis methods ---
 
@@ -368,13 +436,9 @@ class PersonaEngine:
         # Trait-level confidence
         trait_conf: dict[str, float] = {
             "expertise": min(len(self._word_history) / 50, 0.9),
-            "cognitive_style": min(
-                sum(1 for s in self._signals if s.signal_type == "query") / 10, 0.8
-            ),
+            "cognitive_style": min(sum(1 for s in self._signals if s.signal_type == "query") / 10, 0.8),
             "tone": min(len(self._feedback_history) / 5, 0.85),
-            "depth": min(
-                (len(self._feedback_history) + len(self._response_times)) / 10, 0.9
-            ),
+            "depth": min((len(self._feedback_history) + len(self._response_times)) / 10, 0.9),
         }
 
         return PersonaSnapshot(

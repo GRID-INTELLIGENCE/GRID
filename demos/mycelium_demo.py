@@ -142,28 +142,30 @@ def run_demo() -> dict:
 
             result = m.synthesize(scenario["text"])
 
-            scenario_result["personas"].append({
-                "id": persona["id"],
-                "label": persona["label"],
-                "icon": persona["icon"],
-                "description": persona["description"],
-                "depth": persona["depth"],
-                "gist": result.gist,
-                "highlights": [
-                    {
-                        "text": h.text,
-                        "priority": h.priority.name.lower(),
-                        "context": h.context[:80] if h.context else "",
-                        "category": h.category,
-                    }
-                    for h in result.highlights[:6]
-                ],
-                "summary": result.summary,
-                "explanation": result.explanation,
-                "analogy": result.analogy,
-                "compression_ratio": round(result.compression_ratio, 3),
-                "patterns": result.patterns_applied,
-            })
+            scenario_result["personas"].append(
+                {
+                    "id": persona["id"],
+                    "label": persona["label"],
+                    "icon": persona["icon"],
+                    "description": persona["description"],
+                    "depth": persona["depth"],
+                    "gist": result.gist,
+                    "highlights": [
+                        {
+                            "text": h.text,
+                            "priority": h.priority.name.lower(),
+                            "context": h.context[:80] if h.context else "",
+                            "category": h.category,
+                        }
+                        for h in result.highlights[:6]
+                    ],
+                    "summary": result.summary,
+                    "explanation": result.explanation,
+                    "analogy": result.analogy,
+                    "compression_ratio": round(result.compression_ratio, 3),
+                    "patterns": result.patterns_applied,
+                }
+            )
 
         results["scenarios"].append(scenario_result)
 
@@ -253,7 +255,5 @@ if __name__ == "__main__":
         print_report(results)
         # Also write JSON to file for the presentation
         output_path = Path(__file__).parent / "mycelium_demo_data.json"
-        output_path.write_text(
-            json.dumps(results, indent=2, ensure_ascii=False), encoding="utf-8"
-        )
+        output_path.write_text(json.dumps(results, indent=2, ensure_ascii=False), encoding="utf-8")
         sys.stderr.write(f"  JSON data written to: {output_path}\n\n")

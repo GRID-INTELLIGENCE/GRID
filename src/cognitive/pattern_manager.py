@@ -41,6 +41,7 @@ class PatternModel:
     usage_count: int = 0
     metadata: dict[str, Any] = field(default_factory=dict)
     parameters: dict[str, Any] = field(default_factory=dict)
+    resonance_history: list[dict[str, Any]] = field(default_factory=list)
 
 
 @dataclass
@@ -62,7 +63,7 @@ class PatternMatch:
     matched: bool
     pattern_name: str
     context: str | None = None
-    confidence: float
+    confidence: float = 0.0
     features: dict[str, Any] = field(default_factory=dict)
 
 
@@ -174,6 +175,78 @@ class AdvancedPatternManager:
 
         return update
 
+    def learn_from_resonance(
+        self,
+        pattern_id: str,
+        features: dict[str, Any],
+        connection_strength: float,
+        semantic_similarity: float = 0.0,
+        emotional_amplification: float = 0.0,
+    ) -> LearningUpdate | None:
+        """Update a pattern model using resonance signal instead of binary feedback.
+
+        Unlike learn_from_match() which uses ±0.1, this uses gradient-based
+        adjustment: connection_strength * learning_rate. This produces
+        proportional confidence changes based on how strongly the temporal
+        connection resonated.
+
+        Args:
+            pattern_id: Pattern ID to update
+            features: Observed features including resonance context
+            connection_strength: How strongly the temporal connection resonated (0.0–1.0)
+            semantic_similarity: Semantic similarity between trigger and resonating content
+            emotional_amplification: Emotional weight of the connection
+
+        Returns:
+            Learning update result, or None if pattern not found
+        """
+        if pattern_id not in self._patterns:
+            logger.warning("Pattern %s not found for resonance learning", pattern_id)
+            return None
+
+        model = self._patterns[pattern_id]
+
+        # Gradient-based confidence adjustment instead of binary ±0.1
+        confidence_delta = connection_strength * self._learning_rate
+        old_confidence = model.confidence
+        new_confidence = min(1.0, old_confidence + confidence_delta)
+        model.confidence = new_confidence
+        model.usage_count += 1
+        model.last_seen = datetime.now(UTC)
+
+        # Record resonance in pattern's history
+        resonance_entry = {
+            "connection_strength": connection_strength,
+            "semantic_similarity": semantic_similarity,
+            "emotional_amplification": emotional_amplification,
+            "confidence_delta": confidence_delta,
+            "timestamp": datetime.now(UTC).isoformat(),
+            "features": {k: v for k, v in features.items() if isinstance(v, (str, int, float, bool))},
+        }
+        model.resonance_history.append(resonance_entry)
+
+        # Update parameters based on features
+        self._update_pattern_parameters(model, features)
+
+        update = LearningUpdate(
+            pattern_id=pattern_id,
+            was_correct=True,  # resonance is always a positive signal
+            user_feedback="resonance",
+            confidence_adjustment=confidence_delta,
+            context=features,
+        )
+        self._feedback_history.append(update)
+
+        logger.info(
+            "Pattern %s resonance update: strength=%.2f, confidence=%.2f→%.2f",
+            pattern_id,
+            connection_strength,
+            old_confidence,
+            new_confidence,
+        )
+
+        return update
+
     def match_pattern(
         self,
         features: dict[str, Any],
@@ -221,6 +294,18 @@ class AdvancedPatternManager:
             return matches[0]
         else:
             return None
+
+    def _update_pattern_parameters(self, model: PatternModel, features: dict[str, Any]) -> None:
+        """Update pattern parameters with observed feature values using EMA."""
+        for key, value in features.items():
+            if not isinstance(value, (int, float)):
+                continue
+            if key in model.parameters:
+                # Exponential moving average
+                old = model.parameters[key]
+                model.parameters[key] = old + self._learning_rate * (value - old)
+            else:
+                model.parameters[key] = value
 
     def _calculate_feature_match(self, features: dict[str, Any], pattern_params: dict[str, Any]) -> float:
         """Calculate feature similarity score."""

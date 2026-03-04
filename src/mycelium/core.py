@@ -198,8 +198,7 @@ class SynthesisResult:
         return {
             "gist": self.gist,
             "highlights": [
-                {"text": h.text, "priority": h.priority.value, "category": h.category}
-                for h in self.highlights
+                {"text": h.text, "priority": h.priority.value, "category": h.category} for h in self.highlights
             ],
             "summary": self.summary,
             "explanation": self.explanation,

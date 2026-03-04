@@ -11,14 +11,16 @@ from collections.abc import Iterable
 SAFETY_DOMAIN = "safety"
 GRID_DOMAIN = "grid"
 COINBASE_DOMAIN = "coinbase"
+PATHWAYS_DOMAIN = "pathways"
 ALL_DOMAIN = "all"
 
-KNOWN_DOMAINS = {SAFETY_DOMAIN, GRID_DOMAIN, COINBASE_DOMAIN}
+KNOWN_DOMAINS = {SAFETY_DOMAIN, GRID_DOMAIN, COINBASE_DOMAIN, PATHWAYS_DOMAIN}
 
 DOMAIN_PREFIXES = {
     "safety.": SAFETY_DOMAIN,
     "grid.": GRID_DOMAIN,
     "coinbase.": COINBASE_DOMAIN,
+    "pathways.": PATHWAYS_DOMAIN,
 }
 
 
@@ -64,6 +66,7 @@ __all__ = [
     "SAFETY_DOMAIN",
     "GRID_DOMAIN",
     "COINBASE_DOMAIN",
+    "PATHWAYS_DOMAIN",
     "ALL_DOMAIN",
     "KNOWN_DOMAINS",
     "infer_domain",

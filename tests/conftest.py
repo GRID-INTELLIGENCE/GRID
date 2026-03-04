@@ -176,44 +176,6 @@ def reset_services():
 
 from unittest.mock import AsyncMock, Mock
 
-# ---------------------------------------------------------------------------
-# Service Availability Fixtures
-# These fixtures check if external services are available and skip tests
-# gracefully if they are not. Session-scoped to check once per test session.
-# ---------------------------------------------------------------------------
-
-
-@pytest.fixture(scope="session")
-def ollama_available():
-    """Check if Ollama service is running at localhost:11434.
-
-    Returns True if available, False otherwise.
-    Tests using this fixture should skip if False.
-    """
-    try:
-        import httpx
-
-        r = httpx.get("http://localhost:11434/api/tags", timeout=2.0)
-        return r.status_code == 200
-    except Exception:
-        return False
-
-
-@pytest.fixture(scope="session")
-def api_server_available():
-    """Check if API server is running at localhost:8000.
-
-    Returns True if available, False otherwise.
-    Tests using this fixture should skip if False.
-    """
-    try:
-        import httpx
-
-        r = httpx.get("http://localhost:8000/health", timeout=2.0)
-        return r.status_code == 200
-    except Exception:
-        return False
-
 
 @pytest.fixture(scope="session")
 def ollama_models_available(ollama_available):

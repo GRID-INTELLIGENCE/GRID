@@ -199,7 +199,7 @@ jobs:
       - name: "Run Tests"
         run: uv run pytest tests/unit -v --tb=short -m "not slow"
         env:
-          PYTHONPATH: .
+          PYTHONPATH: src
           BLOCKER_DISABLED: "1"
           GRID_ENVIRONMENT: testing
 

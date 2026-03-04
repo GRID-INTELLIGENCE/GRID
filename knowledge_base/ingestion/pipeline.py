@@ -11,6 +11,18 @@ import json
 import logging
 import subprocess
 from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from grid.security.subprocess_wrapper import SecureSubprocess
+
+try:
+    from grid.security.subprocess_wrapper import SecureSubprocess
+
+    _SECURE_SUBPROCESS_AVAILABLE = True
+except ImportError:
+    SecureSubprocess = None  # type: ignore[misc, assignment]
+    _SECURE_SUBPROCESS_AVAILABLE = False
 from collections.abc import Iterator
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -28,6 +40,33 @@ from ..core.config import KnowledgeBaseConfig
 from ..core.database import KnowledgeBaseDB
 
 logger = logging.getLogger(__name__)
+
+# Optional secure subprocess runner (allowlist, timeout, audit)
+_INGESTION_RUNNER: SecureSubprocess | None = (
+    SecureSubprocess(
+        allowed_commands=["git", "detect-secrets"],
+        default_timeout=30,
+        enable_audit_logging=False,
+    )
+    if _SECURE_SUBPROCESS_AVAILABLE and SecureSubprocess is not None
+    else None
+)
+
+
+def _run_subprocess(cmd: list[str], timeout: int = 30, cwd: str | Path | None = None) -> tuple[int, str, str]:
+    """Run a command via SecureSubprocess when available, else subprocess.run (shell=False)."""
+    if _INGESTION_RUNNER is not None:
+        result = _INGESTION_RUNNER.run(cmd, cwd=cwd, timeout=timeout, capture_output=True, text=True)
+        return result.returncode, result.stdout or "", result.stderr or ""
+    r = subprocess.run(
+        cmd,
+        capture_output=True,
+        text=True,
+        timeout=timeout,
+        shell=False,
+        cwd=str(cwd) if cwd else None,
+    )
+    return r.returncode, r.stdout or "", r.stderr or ""
 
 
 @dataclass
@@ -245,15 +284,12 @@ class FileConnector(DataConnector):
     def _get_git_metadata(self, file_path: Path) -> dict[str, Any] | None:
         """Get git metadata for a file."""
         try:
-            # Get git commit SHA
-            result = subprocess.run(
+            returncode, stdout, _ = _run_subprocess(
                 ["git", "log", "-n", "1", "--pretty=format:%H", "--", str(file_path)],
-                capture_output=True,
-                text=True,
                 timeout=10,
             )
-            if result.returncode == 0 and result.stdout.strip():
-                commit_sha = result.stdout.strip()
+            if returncode == 0 and stdout.strip():
+                commit_sha = stdout.strip()
                 return {"git_commit": commit_sha, "doc_version": f"main@{commit_sha}"}
         except Exception as e:
             logger.debug(f"Could not get git metadata for {file_path}: {e}")
@@ -601,11 +637,12 @@ class DataIngestionPipeline:
                 return changed_files
 
             # Use git diff to get changed files
-            result = subprocess.run(
-                ["git", "diff", "--name-only", f"{since_sha}..HEAD"], capture_output=True, text=True, timeout=30
+            returncode, stdout, _ = _run_subprocess(
+                ["git", "diff", "--name-only", f"{since_sha}..HEAD"],
+                timeout=30,
             )
-            if result.returncode == 0:
-                changed_files = [Path(f.strip()) for f in result.stdout.split("\n") if f.strip()]
+            if returncode == 0:
+                changed_files = [Path(f.strip()) for f in stdout.split("\n") if f.strip()]
                 return changed_files
         except Exception as e:
             logger.error(f"Error getting changed files: {e}")
@@ -614,13 +651,12 @@ class DataIngestionPipeline:
     def check_for_secrets(self, file_path: Path) -> bool:
         """Check if file contains secrets using detect-secrets."""
         try:
-            result = subprocess.run(
-                ["detect-secrets", "scan", str(file_path)], capture_output=True, text=True, timeout=30
+            returncode, stdout, _ = _run_subprocess(
+                ["detect-secrets", "scan", str(file_path)],
+                timeout=30,
             )
-            if result.returncode == 0:
-                output = result.stdout
-                # Check if any secrets were found
-                return "No secrets detected" not in output
+            if returncode == 0:
+                return "No secrets detected" not in stdout
         except FileNotFoundError:
             logger.warning("detect-secrets not installed, skipping secret scan")
         except Exception as e:

@@ -42,14 +42,16 @@ class TestSearch:
         response = indexed_engine.search("products", "keyboard")
         for hit in response.hits:
             assert hit.document.id
-            assert hit.score > 0
+            assert hit.score >= 0
 
     def test_search_with_filter(self, indexed_engine):
         response = indexed_engine.search("products", "category:electronics")
+        assert response.total > 0
         for hit in response.hits:
             assert hit.document.fields["category"] == "electronics"
 
     def test_search_with_facets(self, indexed_engine):
+        indexed_engine.config.search_full_pipeline = True
         response = indexed_engine.search("products", "cable", facet_fields=["category"])
         assert "category" in response.facets
 
@@ -65,7 +67,17 @@ class TestSearch:
         response = indexed_engine.search("products", "headphones wireless")
         assert response.total > 0
         for hit in response.hits:
-            assert hit.score > 0
+            assert hit.score >= 0
+
+    def test_search_hits_do_not_mutate_indexed_documents(self, indexed_engine):
+        response = indexed_engine.search("products", "headphones")
+        assert response.hits
+
+        hit = response.hits[0]
+        hit.document.fields["title"] = "mutated title"
+
+        indexed_doc = indexed_engine._indices["products"].documents[hit.document.id]
+        assert indexed_doc.fields["title"] != "mutated title"
 
     def test_search_nonexistent_index_raises(self, search_engine):
         with pytest.raises(KeyError):

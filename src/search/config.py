@@ -48,7 +48,7 @@ class SearchConfig(BaseSettings):
     latency_window_size: int = 10_000
 
     # Guardrail configuration (auth, security, safety)
-    guardrail_enabled: bool = False
+    guardrail_enabled: bool = True
     guardrail_auth_required: bool = True
     guardrail_rate_limit_per_minute: int = 60
     guardrail_audit_enabled: bool = True
@@ -56,7 +56,9 @@ class SearchConfig(BaseSettings):
     guardrail_fail_open: bool = False  # if True, allow on guardrail error
     search_full_pipeline: bool = False  # if False, skip fusion/ranking/facets
 
-    # Admin gating: when True, schema/index/delete routes require admin
+    # Admin gating: when True, schema/index/delete routes require admin.
+    # In production, set guardrail_admin_identities to a list of trusted identities;
+    # when non-empty, header-only admin is disabled and identity must be in the list.
     guardrail_admin_gating: bool = False
     guardrail_admin_identities: list[str] = Field(default_factory=list)
     guardrail_admin_header: str = "X-Admin-Role"

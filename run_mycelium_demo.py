@@ -8,9 +8,9 @@ from mycelium import Instrument
 
 
 def run_demo():
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print(" MYCELIUM DEMONSTRATION")
-    print("="*60 + "\n")
+    print("=" * 60 + "\n")
 
     m = Instrument()
 
@@ -59,7 +59,8 @@ def run_demo():
     cognitive_result = m.synthesize(complex_text)
     print(f"Sensory Gist: {cognitive_result.gist}")
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
+
 
 if __name__ == "__main__":
     run_demo()

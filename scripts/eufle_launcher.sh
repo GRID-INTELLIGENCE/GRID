@@ -1,20 +1,20 @@
 #!/bin/bash
-# EUFLE Launcher Script
-# This script ensures the environment is properly set before running EUFLE
+# EUFLE Launcher Script (user-space; no sudo inside script)
 
-# Mount E: drive if not already mounted
+set -e
+
+if [ ! -d /mnt/e ]; then
+    echo "E: not mounted. Run once (WSL): sudo mount -t drvfs E: /mnt/e"
+    exit 1
+fi
 if [ ! -d /mnt/e/EUFLE ]; then
-    echo "Mounting E: drive..."
-    sudo mount -t drvfs E: /mnt/e
+    echo "EUFLE directory not found at /mnt/e/EUFLE. Ensure E: is mounted and the EUFLE project exists at E:\\EUFLE."
+    exit 1
 fi
 
-# Set environment variables
 export PYTHONPATH=/mnt/e/EUFLE:$PYTHONPATH
 export EUFLE_HOME=/mnt/e/EUFLE
-export LLAMACPP_PATH=/home/irfan/eufle_work/llama.cpp/build/bin
+export LLAMACPP_PATH="${LLAMACPP_PATH:-/home/irfan/eufle_work/llama.cpp/build/bin}"
 
-# Change to EUFLE directory
 cd /mnt/e/EUFLE
-
-# Run EUFLE with all arguments passed to this script
-python3 eufle.py "$@"
+exec python3 eufle.py "$@"

@@ -12,7 +12,7 @@ This script performs:
 5. Precise accountability report generation
 """
 
-import gc
+import gc  # used for analysis-time scope cleanup and object enumeration
 import json
 import os
 import sys

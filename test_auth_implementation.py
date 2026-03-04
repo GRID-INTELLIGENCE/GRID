@@ -3,9 +3,9 @@
 
 import asyncio
 import time
-from src.search.guardrail.policy import GuardrailPolicy
+
 from src.search.guardrail.orchestrator import GuardrailOrchestrator
-from src.search.guardrail.auth import AuthSignature
+from src.search.guardrail.policy import GuardrailPolicy
 
 
 def test_signature_based_auth():
@@ -32,12 +32,7 @@ def test_signature_based_auth():
     assert auth_sig is not None, "Should create signature for developer profile"
 
     # Try to activate with valid signature
-    success = policy.activate_profile(
-        "developer",
-        user_id=user_id,
-        auth_signature=auth_sig,
-        user_role="developer"
-    )
+    success = policy.activate_profile("developer", user_id=user_id, auth_signature=auth_sig, user_role="developer")
     print(f"Developer profile with valid sig: {'SUCCESS' if success else 'FAILED'}")
     assert success, "Developer profile should activate with valid signature"
     assert policy.active_profile == "developer"
@@ -47,12 +42,7 @@ def test_signature_based_auth():
     old_timestamp = timestamp - 600  # 10 minutes ago (expired)
     invalid_sig = policy.create_profile_signature("developer", user_id, old_timestamp)
 
-    success = policy.activate_profile(
-        "developer",
-        user_id=user_id,
-        auth_signature=invalid_sig,
-        user_role="developer"
-    )
+    success = policy.activate_profile("developer", user_id=user_id, auth_signature=invalid_sig, user_role="developer")
     print(f"Developer profile with expired sig: {'SUCCESS' if success else 'FAILED'}")
     assert not success, "Developer profile should reject expired signature"
     assert policy.active_profile != "developer"
@@ -77,12 +67,7 @@ def test_narrowed_accessibility_scope():
     timestamp = int(time.time())
     auth_sig = policy.create_profile_signature("developer", user_id, timestamp)
 
-    success = policy.activate_profile(
-        "developer",
-        user_id=user_id,
-        auth_signature=auth_sig,
-        user_role="developer"
-    )
+    success = policy.activate_profile("developer", user_id=user_id, auth_signature=auth_sig, user_role="developer")
     print(f"Developer user -> developer: {'ALLOWED' if success else 'DENIED'}")
     assert success, "Developer user should access developer profile"
 
@@ -98,7 +83,7 @@ def test_narrowed_accessibility_scope():
     success = policy.activate_profile(
         "manager",
         user_permissions=user_permissions,
-        user_role="basic"  # Low role but explicit permission
+        user_role="basic",  # Low role but explicit permission
     )
     print(f"Basic user with admin permission -> manager: {'ALLOWED' if success else 'DENIED'}")
     # This should work since manager is allowed for users with admin permission
@@ -115,12 +100,7 @@ async def test_orchestrator_integration():
     timestamp = int(time.time())
     auth_sig = orchestrator.policy.create_profile_signature("designer", user_id, timestamp)
 
-    success = orchestrator.activate_profile(
-        "designer",
-        user_id=user_id,
-        auth_signature=auth_sig,
-        user_role="designer"
-    )
+    success = orchestrator.activate_profile("designer", user_id=user_id, auth_signature=auth_sig, user_role="designer")
     print(f"Orchestrator designer activation: {'SUCCESS' if success else 'FAILED'}")
     assert success, "Orchestrator should activate designer profile with valid auth"
     assert orchestrator.policy.active_profile == "designer"

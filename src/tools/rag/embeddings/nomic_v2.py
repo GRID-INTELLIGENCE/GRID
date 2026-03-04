@@ -3,7 +3,6 @@
 from typing import cast
 
 import httpx
-import numpy as np
 
 from .base import BaseEmbeddingProvider
 
@@ -215,7 +214,7 @@ class OllamaEmbeddingProvider(BaseEmbeddingProvider):
         self._dimension = len(embedding)
         return cast(list[float], embedding)
 
-    async def async_embed_batch(self, texts: list[str]) -> list[list[float] | np.ndarray]:
+    async def async_embed_batch(self, texts: list[str]) -> list[list[float]]:
         """Generate embeddings for multiple texts using native async batch API."""
         from grid.services.embeddings.embedding_client import OllamaEmbeddingClient
 
@@ -226,9 +225,9 @@ class OllamaEmbeddingProvider(BaseEmbeddingProvider):
             return await super().async_embed_batch(texts)
         if resp.embeddings:
             self._dimension = len(resp.embeddings[0])
-        return cast(list[list[float] | np.ndarray], resp.embeddings)
+        return cast(list[list[float]], resp.embeddings)
 
-    def embed_batch(self, texts: list[str]) -> list[list[float] | np.ndarray]:
+    def embed_batch(self, texts: list[str]) -> list[list[float]]:
         """Generate embeddings for multiple texts using batch API if available.
 
         Args:
@@ -239,7 +238,7 @@ class OllamaEmbeddingProvider(BaseEmbeddingProvider):
         """
         # but we can optimize with async if needed later
         results = [self.embed(text) for text in texts]
-        return cast(list[list[float] | np.ndarray], results)
+        return cast(list[list[float]], results)
 
     @property
     def dimension(self) -> int:

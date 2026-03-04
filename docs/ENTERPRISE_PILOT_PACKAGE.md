@@ -1,6 +1,6 @@
 # GRID Enterprise Pilot Package
 
-> **Version:** 2.2.2  
+> **Version:** 2.6.1 (as of 2026-02; see `pyproject.toml`, `CHANGELOG.md`)  
 > **Target:** Enterprise clients in Bangladesh (Grameenphone, bKash, banks, telcos)  
 > **Positioning:** GRID is the trust infrastructure platform that giants *use*.
 

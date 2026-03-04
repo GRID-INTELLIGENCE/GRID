@@ -13,7 +13,7 @@ Comprehensive test suite validating all 7 parasitical call pattern fixes:
 """
 
 import asyncio
-import gc
+import gc  # used for test isolation (force collection before asserting cleanup)
 import json
 from unittest.mock import MagicMock
 
