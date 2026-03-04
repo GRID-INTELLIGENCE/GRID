@@ -111,6 +111,8 @@ I'm no enlightened selfless giver. I want nice things just as much as the next p
 └────────────────────────────────────────────────────────────────┘
 ```
 
+*Current release: 2.6.1 (see `pyproject.toml`, `CHANGELOG.md`).*
+
 This exists now.
 
 Not as a dream. Not as a "someday." As a fact. A callable, installable, usable fact.
@@ -169,6 +171,8 @@ To every person who wrote documentation I read at 2am, answered Stack Overflow q
 
 ### Documentation checkpoint (March 2026)
 Shell integration and WSL documentation: integrity verification of the Cursor/VS Code PowerShell shell integration script (SHA256, authenticity, safety), WSL status and pending steps for full installation, and Linux/Bash scope consolidated into single references. Enterprise-grade alignment with community guidelines and upstream docs. Checkpoint celebrated; next: stage, commit, and push as community contribution.
+
+See: [SHELL_INTEGRATION_SCRIPT_REPORT](../SHELL_INTEGRATION_SCRIPT_REPORT.md), [WSL_STATUS_AND_PENDING_STEPS](../WSL_STATUS_AND_PENDING_STEPS.md), [LINUX_BASH_SCOPE](../LINUX_BASH_SCOPE.md), [COMMUNITY_CONTRIBUTION_SHELL_WSL](../COMMUNITY_CONTRIBUTION_SHELL_WSL.md).
 
 ### The Future
 This acknowledgement file will grow as the journey continues. Every meaningful contribution, every person whose work touched this project, every frequency that found its way here — there's space for all of it.
