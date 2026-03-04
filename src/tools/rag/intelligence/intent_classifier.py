@@ -4,14 +4,14 @@ Intent Classifier for Intelligent RAG.
 This module provides intent classification for user queries, allowing the RAG
 system to choose different retrieval and generation strategies based on the
 user's goal (e.g., finding a definition vs. understanding an implementation).
+
+torch and transformers are optional (finetuning group). If not installed,
+classification falls back to rule-based heuristics.
 """
 
 import logging
 from dataclasses import dataclass
 from enum import StrEnum
-
-import torch
-from transformers import pipeline
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -65,6 +65,19 @@ class IntentClassifier:
             use_gpu: Whether to attempt to use GPU if available.
         """
         self.model_name = model_name
+        self.classifier = None
+        self.device = -1
+
+        try:
+            import torch
+            from transformers import pipeline
+        except ImportError:
+            logger.warning(
+                "torch/transformers not installed; intent classifier will use rule-based fallback. "
+                "Install with: uv sync --group finetuning"
+            )
+            self._set_label_map()
+            return
 
         # Determine device
         if device is None:
@@ -80,12 +93,14 @@ class IntentClassifier:
         logger.info(f"Initializing IntentClassifier with {model_name} on {self.device}")
 
         try:
-            # Use the zero-shot-classification pipeline for flexibility
             self.classifier = pipeline("zero-shot-classification", model=model_name, device=self.device)
         except Exception as e:
             logger.error(f"Failed to load intent classification model: {e}")
-            self.classifier = None
 
+        self._set_label_map()
+
+    def _set_label_map(self) -> None:
+        """Set label_map and candidate_labels (shared by model and fallback paths)."""
         # Map display names/descriptions to Intent enum for better zero-shot performance
         self.label_map = {
             "explaining a concept or definition": Intent.DEFINITION,
