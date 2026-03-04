@@ -143,6 +143,15 @@ dev = [
     "pre-commit>=4.5.1",
     "pip-audit>=2.10.0",
 ]
+# Practical stack for fast LoRA/QLoRA iteration (early-stage fine-tuning).
+# Install: uv sync --group finetuning
+finetuning = [
+    "torch>=2.0.0",
+    "transformers>=4.36.0",
+    "peft>=0.7.0",
+    "datasets>=2.16.0",
+    "accelerate>=0.25.0",
+]
 
 [build-system]
 requires = ["hatchling"]
@@ -157,19 +166,11 @@ packages = [
     "src/tools",
     "src/mycelium",
     "src/search",
+    "src/infrastructure",
+    "src/unified_fabric",
+    "src/vection",
 ]
 exclude = [
-    "src/api/**",
-    "src/cli/**",
-    "src/core/**",
-    "src/database/**",
-    "src/kernel/**",
-    "src/nl_dev/**",
-    "src/physics/**",
-    "src/plugins/**",
-    "src/throughput_engine/**",
-    "src/utils/**",
-    "src/valuation/**",
     "**/__pycache__/**",
     "**/*.pyc",
     "dev/**",
@@ -386,7 +387,7 @@ extend-ignore = [
 "tests/conftest.py" = ["F811"]  # Fixture redefinitions are intentional
 
 [tool.ruff.lint.isort]
-known-first-party = ["grid", "application", "cognitive", "tools"]
+known-first-party = ["grid", "application", "cognitive", "tools", "mycelium", "search", "infrastructure", "unified_fabric", "vection"]
 
 [tool.mypy]
 python_version = "3.13"
@@ -408,7 +409,7 @@ mypy_path = "src"
 # Exclude root-level directories that are also in src/ to avoid duplication errors
 exclude = ["^application/", "^grid/", "^tools/", "^cognitive/", "^tests/", "^integration/databricks/"]
 
-# Overrides: prune duplicates periodically (see docs/guides/DEPLOYMENT_PRUNE_REBUILD.md)
+# Overrides: third-party and optional local modules (prune phantom refs periodically)
 [[tool.mypy.overrides]]
 module = [
     "sentence_transformers.*",
@@ -440,76 +441,19 @@ module = [
     "structlog.*",
     "prometheus_fastapi_instrumentator.*",
     "neo4j.*",
-    "EQ.*",
-    "backend.*",
     "pandas.*",
     "aiofiles.*",
     "aio_pika.*",
     "light_of_the_seven.*",
-    "application.mothership.ner_service",
-    "application.mothership.config.security.secret_validation",
-    "application.mothership.config.utils",
-    "grid.cognitive.engine",
-    "config.cognitive_settings",
-    "config.quality_gates",
-    "src.grid.persistence.database",
-    "EQ.integration",
-    ".event_bus.event_system",
-    ".ai_ml.intelligence_system",
-    ".api_gateway.gateway",
-    ".service_mesh.mesh",
-    "case_filing",
-    "continuous_learning",
-    "processing_unit",
-    "advanced_protocols",
-    "reference_generator",
-    "tools.rag.core.config",
-    "tools.rag.core.embeddings.factory",
-    "tools.rag.core.indexer",
-    "tools.rag.core.llm.factory",
-    "tools.rag.core.utils",
-    "tools.rag.core.vector_store.base",
-    "tools.rag.core.vector_store.chromadb_store",
-    "tools.rag.core.vector_store.databricks_store",
-    "tools.rag.core.vector_store.registry",
-    "tools.rag.core.vector_store",
-    "tools.rag.retrieval.types",
-    "tools.rag.retrieval.config",
-    "tools.rag.retrieval.store",
-    "tools.rag.retrieval.embeddings.simple",
-    "tools.rag.file_tracker",
-    "tools.rag.retrieval.reranker",
     "nest_asyncio",
     "openai",
     "faiss",
     "mlflow",
-    "cognitive_layer.navigation.input_processor",
-    "datakit.tool.semantic_grep",
-    "EQ",
-    "vection.interfaces.context_interface",
-    "audit_logger",
-    "vection.workers.pool",
-    "vection.workers.base",
-    "gateway",
-    "infrastructure.api_gateway.gateway",
     "jsonschema",
     "openapi_spec_validator",
 ]
 ignore_missing_imports = true
 follow_imports = "skip"
-
-[[tool.mypy.overrides]]
-module = [
-    "src.application.mothership.ner_service",
-    "src.tools.pulse_monitor",
-    "src.tools.ambient_sound",
-    "src.tools.zoology_mapper",
-    "application.mothership.ner_service",
-    "tools.pulse_monitor",
-    "tools.ambient_sound",
-    "tools.zoology_mapper",
-]
-ignore_missing_imports = true
 
 [tool.coverage.run]
 source = ["src"]

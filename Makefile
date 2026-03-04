@@ -33,7 +33,7 @@ lint: ## Run static analysis (Ruff + Mypy)
 	@echo "$(BLUE)Linting...$(NC)"
 	uv run ruff check .
 	@echo "$(BLUE)Type checking...$(NC)"
-	-uv run mypy grid/ tools/ application/
+	-uv run mypy src/grid/ src/application/ src/tools/ src/search/ src/cognitive/ src/mycelium/
 
 format: ## Auto-format code
 	@echo "$(BLUE)Formatting...$(NC)"
