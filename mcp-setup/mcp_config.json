@@ -7,13 +7,13 @@
       "name": "grid-rag",
       "description": "RAG-powered knowledge base and document search",
       "enabled": true,
-      "command": "e:\\grid\\.venv\\Scripts\\python.exe",
+      "command": "E:\\Seeds\\GRID-main\\.venv\\Scripts\\python.exe",
       "args": [
         "mcp-setup/server/grid_rag_mcp_server.py"
       ],
-      "cwd": "e:\\grid",
+      "cwd": "E:\\Seeds\\GRID-main",
       "env": {
-        "PYTHONPATH": "e:\\grid\\src;e:\\grid",
+        "PYTHONPATH": "E:\\Seeds\\GRID-main\\src;E:\\Seeds\\GRID-main",
         "RAG_EMBEDDING_PROVIDER": "ollama",
         "RAG_EMBEDDING_MODEL": "nomic-embed-text-v2-moe:latest",
         "RAG_LLM_MODE": "ollama",
@@ -33,13 +33,13 @@
       "name": "grid-agentic",
       "description": "Agentic system for enhanced workflows with cognitive awareness",
       "enabled": false,
-      "command": "e:\\grid\\.venv\\Scripts\\python.exe",
+      "command": "E:\\Seeds\\GRID-main\\.venv\\Scripts\\python.exe",
       "args": [
         "workspace/mcp/servers/agentic/server.py"
       ],
-      "cwd": "e:\\grid",
+      "cwd": "E:\\Seeds\\GRID-main",
       "env": {
-        "PYTHONPATH": "e:\\grid\\src;e:\\grid"
+        "PYTHONPATH": "E:\\Seeds\\GRID-main\\src;E:\\Seeds\\GRID-main"
       },
       "port": 8004,
       "health_check": {
@@ -52,13 +52,13 @@
       "name": "memory",
       "description": "In-memory data storage and retrieval",
       "enabled": false,
-      "command": "e:\\grid\\.venv\\Scripts\\python.exe",
+      "command": "E:\\Seeds\\GRID-main\\.venv\\Scripts\\python.exe",
       "args": [
         "workspace/mcp/servers/memory/server.py"
       ],
-      "cwd": "e:\\grid",
+      "cwd": "E:\\Seeds\\GRID-main",
       "env": {
-        "PYTHONPATH": "e:\\grid\\src;e:\\grid"
+        "PYTHONPATH": "E:\\Seeds\\GRID-main\\src;E:\\Seeds\\GRID-main"
       },
       "port": 8003,
       "health_check": {
@@ -71,15 +71,15 @@
       "name": "filesystem",
       "description": "Filesystem MCP server for controlled local file operations",
       "enabled": false,
-      "command": "e:\\grid\\.venv\\Scripts\\python.exe",
+      "command": "E:\\Seeds\\GRID-main\\.venv\\Scripts\\python.exe",
       "args": [
         "workspace/mcp/servers/filesystem/server.py"
       ],
-      "cwd": "e:\\grid",
+      "cwd": "E:\\Seeds\\GRID-main",
       "env": {
-        "PYTHONPATH": "e:\\grid\\src;e:\\grid"
+        "PYTHONPATH": "E:\\Seeds\\GRID-main\\src;E:\\Seeds\\GRID-main"
       },
-      "port": 8006,
+      "port": 8008,
       "health_check": {
         "endpoint": "/health",
         "interval_seconds": 30,
@@ -90,16 +90,16 @@
       "name": "database",
       "description": "SQLite database MCP server (local-only)",
       "enabled": false,
-      "command": "e:\\grid\\.venv\\Scripts\\python.exe",
+      "command": "E:\\Seeds\\GRID-main\\.venv\\Scripts\\python.exe",
       "args": [
         "workspace/mcp/servers/database/server.py"
       ],
-      "cwd": "e:\\grid",
+      "cwd": "E:\\Seeds\\GRID-main",
       "env": {
-        "PYTHONPATH": "e:\\grid\\src;e:\\grid",
-        "DATABASE_URL": "sqlite:///e:/grid/.db/grid.db"
+        "PYTHONPATH": "E:\\Seeds\\GRID-main\\src;E:\\Seeds\\GRID-main",
+        "DATABASE_URL": "sqlite:///E:/Seeds/GRID-main/.db/grid.db"
       },
-      "port": 8007,
+      "port": 8009,
       "health_check": {
         "endpoint": "/health",
         "interval_seconds": 30,
@@ -110,14 +110,14 @@
       "name": "grid-rag-enhanced",
       "description": "Enhanced RAG with conversation memory and multi-hop reasoning",
       "enabled": true,
-      "command": "e:\\grid\\.venv\\Scripts\\python.exe",
+      "command": "E:\\Seeds\\GRID-main\\.venv\\Scripts\\python.exe",
       "args": [
         "-m",
         "grid.mcp.enhanced_rag_server"
       ],
-      "cwd": "e:\\grid",
+      "cwd": "E:\\Seeds\\GRID-main",
       "env": {
-        "PYTHONPATH": "e:\\grid\\src;e:\\grid",
+        "PYTHONPATH": "E:\\Seeds\\GRID-main\\src;E:\\Seeds\\GRID-main",
         "RAG_EMBEDDING_PROVIDER": "ollama",
         "RAG_EMBEDDING_MODEL": "nomic-embed-text-v2-moe:latest",
         "RAG_LLM_MODE": "ollama",
@@ -137,13 +137,13 @@
       "name": "grid-enhanced-tools",
       "description": "Enhanced development tools (profiling, security, docs, quality)",
       "enabled": true,
-      "command": "e:\\grid\\.venv\\Scripts\\python.exe",
+      "command": "E:\\Seeds\\GRID-main\\.venv\\Scripts\\python.exe",
       "args": [
         "mcp-setup/server/enhanced_tools_mcp_server.py"
       ],
-      "cwd": "e:\\grid",
+      "cwd": "E:\\Seeds\\GRID-main",
       "env": {
-        "PYTHONPATH": "e:\\grid\\src;e:\\grid"
+        "PYTHONPATH": "E:\\Seeds\\GRID-main\\src;E:\\Seeds\\GRID-main"
       },
       "port": 8001,
       "health_check": {
@@ -156,13 +156,13 @@
       "name": "portfolio-safety-lens",
       "description": "Portfolio Safety Lens - Context-aware secure portfolio analytics with full guardrails",
       "enabled": true,
-      "command": "e:\\grid\\.venv\\Scripts\\python.exe",
+      "command": "E:\\Seeds\\GRID-main\\.venv\\Scripts\\python.exe",
       "args": [
         "mcp-setup/server/portfolio_safety_mcp_server.py"
       ],
-      "cwd": "e:\\grid",
+      "cwd": "E:\\Seeds\\GRID-main",
       "env": {
-        "PYTHONPATH": "e:\\grid\\src;e:\\grid;e:\\Coinbase"
+        "PYTHONPATH": "E:\\Seeds\\GRID-main\\src;E:\\Seeds\\GRID-main"
       },
       "port": 8005,
       "health_check": {
@@ -175,13 +175,13 @@
       "name": "code-analysis",
       "description": "Static analysis, code quality checks, and security scanning",
       "enabled": true,
-      "command": "e:\\grid\\.venv\\Scripts\\python.exe",
+      "command": "E:\\Seeds\\GRID-main\\.venv\\Scripts\\python.exe",
       "args": [
         "mcp-setup/server/code_analysis_mcp_server.py"
       ],
-      "cwd": "e:\\grid",
+      "cwd": "E:\\Seeds\\GRID-main",
       "env": {
-        "PYTHONPATH": "e:\\grid\\src;e:\\grid"
+        "PYTHONPATH": "E:\\Seeds\\GRID-main\\src;E:\\Seeds\\GRID-main"
       },
       "port": 8006,
       "health_check": {
@@ -194,13 +194,13 @@
       "name": "test-runner",
       "description": "Test execution, coverage analysis, and test discovery",
       "enabled": true,
-      "command": "e:\\grid\\.venv\\Scripts\\python.exe",
+      "command": "E:\\Seeds\\GRID-main\\.venv\\Scripts\\python.exe",
       "args": [
         "mcp-setup/server/test_runner_mcp_server.py"
       ],
-      "cwd": "e:\\grid",
+      "cwd": "E:\\Seeds\\GRID-main",
       "env": {
-        "PYTHONPATH": "e:\\grid\\src;e:\\grid"
+        "PYTHONPATH": "E:\\Seeds\\GRID-main\\src;E:\\Seeds\\GRID-main"
       },
       "port": 8007,
       "health_check": {

@@ -8,8 +8,8 @@
       "cwd": "${workspaceFolder}",
       "env": {
         "PYTHONPATH": "${workspaceFolder}/src:${workspaceFolder}",
-        "RAG_EMBEDDING_PROVIDER": "huggingface",
-        "RAG_EMBEDDING_MODEL": "BAAI/bge-small-en-v1.5",
+        "RAG_EMBEDDING_PROVIDER": "ollama",
+        "RAG_EMBEDDING_MODEL": "nomic-embed-text-v2-moe:latest",
         "RAG_LLM_MODE": "ollama",
         "RAG_LLM_MODEL_OLLAMA": "qwen3-coder:480b-cloud",
         "RAG_VECTOR_STORE_PROVIDER": "chromadb",
