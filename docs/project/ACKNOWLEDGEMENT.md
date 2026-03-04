@@ -167,6 +167,9 @@ To every person who wrote documentation I read at 2am, answered Stack Overflow q
 - **Every IDE** — that caught errors before they became disasters
 - **Git** — for making mistakes reversible and progress trackable
 
+### Documentation checkpoint (March 2026)
+Shell integration and WSL documentation: integrity verification of the Cursor/VS Code PowerShell shell integration script (SHA256, authenticity, safety), WSL status and pending steps for full installation, and Linux/Bash scope consolidated into single references. Enterprise-grade alignment with community guidelines and upstream docs. Checkpoint celebrated; next: stage, commit, and push as community contribution.
+
 ### The Future
 This acknowledgement file will grow as the journey continues. Every meaningful contribution, every person whose work touched this project, every frequency that found its way here — there's space for all of it.
 
