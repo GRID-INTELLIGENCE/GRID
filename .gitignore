@@ -4,6 +4,10 @@
 # Organized by category - prevents accidental commit of secrets and sensitive data
 # ============================================================================
 
+# Root-level debug and ad-hoc test scripts (do not commit)
+/debug_*.py
+/test_*_fix.py
+
 # ==========================
 # ENVIRONMENT & SECRETS
 # ==========================
@@ -697,13 +701,15 @@ tmpclaude-*
 diff_ac.txt
 pytest_out*.txt
 test_results.txt
+test_results*.txt
+test_run*.txt
 nul
+resonance_telemetry_events.jsonl
 
 # ==========================
 # GENERATED REPORTS & TELEMETRY
 # ==========================
 bandit-report.json
 config.secrets.baseline
-resonance_telemetry_events.jsonl
 tmp_scan_*.py
 Virtual Environments.MD
