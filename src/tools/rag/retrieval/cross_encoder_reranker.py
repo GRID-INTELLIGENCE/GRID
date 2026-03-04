@@ -37,7 +37,13 @@ class CrossEncoderReranker(BaseReranker):
                 "sentence-transformers required for CrossEncoderReranker. Install with: uv add sentence-transformers"
             )
 
-        self.model = CrossEncoder(model_name, device=device)
+        try:
+            self.model = CrossEncoder(model_name, device=device)
+        except (AttributeError, ModuleNotFoundError, TypeError) as e:
+            raise ImportError(
+                f"CrossEncoder failed to load (e.g. transformers 5.x incompatibility): {e}. "
+                "Use transformers<5 or a sentence-transformers version compatible with your transformers."
+            ) from e
         self.max_candidates = max_candidates
         self.model_name = model_name
 
@@ -52,8 +58,16 @@ class CrossEncoderReranker(BaseReranker):
         # Create query-document pairs
         pairs = [[query, doc] for doc in candidates]
 
-        # Score all pairs at once (efficient batch processing)
-        scores = self.model.predict(pairs)
+        try:
+            # Score all pairs at once (efficient batch processing).
+            # Guard: sentence-transformers 5.2.x may break under transformers 5.x (e.g. FeatureExtractionMixin removed).
+            scores = self.model.predict(pairs)
+        except (AttributeError, ModuleNotFoundError, TypeError) as e:
+            logger.warning(
+                "Cross-encoder predict failed (e.g. transformers 5.x incompatibility): %s. Returning passthrough order.",
+                e,
+            )
+            return [(i, 1.0) for i in range(min(len(candidates), top_k))]
 
         # Create indexed scores and sort by descending score
         indexed_scores = [(i, float(score)) for i, score in enumerate(scores)]
