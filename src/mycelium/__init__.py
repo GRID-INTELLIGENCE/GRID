@@ -16,7 +16,7 @@ Design philosophy:
   - Suggest, never impose (resonance principle)
 """
 
-from mycelium.core import (
+from .core import (
     Depth,
     PersonaProfile,
     ResonanceLevel,
@@ -24,7 +24,7 @@ from mycelium.core import (
     Spore,
     SynthesisResult,
 )
-from mycelium.instrument import Instrument
+from .instrument import Instrument
 
 __all__ = [
     "Depth",

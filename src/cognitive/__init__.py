@@ -18,40 +18,40 @@ Main components:
 - CognitiveRouter: Cognitive-aware request routing
 """
 
-from cognitive.cognitive_engine import (
+from .cognitive_engine import (
     Adaptation,
     CognitiveEngine,
     InteractionEvent,
     ScaffoldingAction,
     get_cognitive_engine,
 )
-from cognitive.interaction_tracker import (
+from .interaction_tracker import (
     ActionType,
     InteractionSummary,
     InteractionTracker,
     Sentiment,
     get_interaction_tracker,
 )
-from cognitive.interaction_tracker import (
+from .interaction_tracker import (
     InteractionEvent as TrackedEvent,
 )
-from cognitive.light_of_the_seven.cognitive_layer.schemas.cognitive_state import (
+from .light_of_the_seven.cognitive_layer.schemas.cognitive_state import (
     CognitiveLoadType,
     CognitiveState,
     ProcessingMode,
 )
-from cognitive.light_of_the_seven.cognitive_layer.schemas.decision_context import (
+from .light_of_the_seven.cognitive_layer.schemas.decision_context import (
     DecisionContext,
     DecisionType,
     DecisionUrgency,
 )
-from cognitive.light_of_the_seven.cognitive_layer.schemas.user_cognitive_profile import (
+from .light_of_the_seven.cognitive_layer.schemas.user_cognitive_profile import (
     DecisionStyle,
     ExpertiseLevel,
     LearningStyle,
     UserCognitiveProfile,
 )
-from cognitive.patterns import (
+from .patterns import (
     CausePattern,
     ColorPattern,
     CombinationPattern,
@@ -70,21 +70,21 @@ from cognitive.patterns import (
     get_pattern_explanation,
     get_pattern_matcher,
 )
-from cognitive.profile_store import ProfileStore, get_profile_store
-from cognitive.router import (
+from .profile_store import ProfileStore, get_profile_store
+from .router import (
     Adaptation as RouterAdaptation,
 )
-from cognitive.router import (
+from .router import (
     CognitiveRequestHandler,
     CognitiveRouter,
     Route,
     RouteType,
     get_cognitive_router,
 )
-from cognitive.scaffolding_engine import (
+from .scaffolding_engine import (
     ScaffoldingAction as ScaffoldAction,
 )
-from cognitive.scaffolding_engine import (
+from .scaffolding_engine import (
     ScaffoldingEngine,
     ScaffoldingResult,
     ScaffoldingStrategy,
