@@ -3,9 +3,9 @@ from __future__ import annotations
 import logging
 import time
 import uuid
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Annotated, Any
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field, field_validator
 
 if TYPE_CHECKING:
@@ -26,7 +26,13 @@ if TYPE_CHECKING:
         NavigationInputProcessor,
     )
 
-from application.mothership.dependencies import Auth, RateLimited, RequestContext
+from application.mothership.dependencies import (
+    Auth,
+    PublicRateLimited,
+    RateLimited,
+    RequestContext,
+    get_optional_authentication,
+)
 from application.mothership.schemas import ApiResponse, ResponseMeta
 
 logger = logging.getLogger(__name__)
@@ -277,8 +283,8 @@ def _to_plan_out(plan: NavigationPlan) -> NavigationPlanOut:
 @router.post("/plan", response_model=ApiResponse[NavigationPlanOut])
 async def create_navigation_plan(
     payload: NavigationRequestPayload,
-    _: RateLimited,
-    auth: Auth,
+    _: PublicRateLimited,
+    auth: Annotated[dict[str, Any], Depends(get_optional_authentication)],
     request_context: RequestContext,
 ) -> ApiResponse[NavigationPlanOut]:
     """

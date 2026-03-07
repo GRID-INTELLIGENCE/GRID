@@ -5,6 +5,7 @@ reproducible embeddings suitable for testing purposes.
 """
 
 import math
+
 import pytest
 
 from tools.rag.embeddings.test_provider import DeterministicEmbeddingProvider, get_test_provider

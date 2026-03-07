@@ -181,7 +181,7 @@ async def get_bearer_token(
     return credentials.credentials
 
 
-from application.mothership.security.rbac import Role, get_permissions_for_role, has_permission
+from application.mothership.security.rbac import has_permission
 
 from .security.auth import verify_api_key, verify_jwt_token
 
@@ -195,17 +195,6 @@ async def verify_authentication(
     Verify request authentication using centralized security logic.
     Supports both API key and JWT authentication with RBAC integration.
     """
-    if bearer_token == "dev-test-token" and (
-        settings.is_testing or (settings.is_development and os.getenv("MOTHERSHIP_ALLOW_UNAUTHENTICATED_DEV") == "1")
-    ):
-        return {
-            "authenticated": False,
-            "method": "dev_bypass",
-            "user_id": "dev_user",
-            "role": Role.ADMIN.value,
-            "permissions": get_permissions_for_role(Role.ADMIN),
-        }
-
     # 1. Try JWT authentication (Highest Priority)
     if bearer_token:
         try:
@@ -229,36 +218,51 @@ async def verify_authentication(
                 detail=str(e) if settings.is_development else "Invalid API Key",
             ) from e
 
-    # 3. Development mode bypass
-    if settings.is_development and os.getenv("MOTHERSHIP_ALLOW_UNAUTHENTICATED_DEV") == "1":
-        logger.info("Using unauthenticated development bypass")
-        return {
-            "authenticated": False,
-            "method": "dev_bypass",
-            "user_id": "dev_user",
-            "role": Role.ADMIN.value,
-            "permissions": get_permissions_for_role(Role.ADMIN),
-        }
-
-    # Deny-by-default for production
-    if settings.is_production:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Authentication required",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    # 4. Anonymous fallback for non-production
-    return {
-        "authenticated": False,
-        "method": "none",
-        "user_id": "anonymous",
-        "role": Role.ANONYMOUS.value,
-        "permissions": get_permissions_for_role(Role.ANONYMOUS),
-    }
+    # 3. Deny-by-default — no credentials means no access
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Authentication required",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
 
 
 Auth = Annotated[dict[str, Any], Depends(verify_authentication)]
+
+
+async def get_optional_authentication(
+    api_key: str | None = Depends(get_api_key),
+    bearer_token: str | None = Depends(get_bearer_token),
+    settings: MothershipSettings = Depends(get_config),
+) -> dict[str, Any]:
+    """
+    Resolve authentication context for endpoints that may be accessed anonymously.
+
+    Public endpoints still benefit from auth context when valid credentials are
+    present, but missing credentials must not trigger a 401 before the route body
+    executes.
+    """
+    if bearer_token:
+        try:
+            return await verify_jwt_token(bearer_token, require_valid=True)
+        except Exception as e:
+            logger.warning(f"Optional JWT verification failed: {e}")
+            raise
+
+    if api_key:
+        try:
+            return verify_api_key(api_key, require_valid=True)
+        except Exception as e:
+            logger.warning(f"Optional API key verification failed: {e}")
+            raise
+
+    return {
+        "authenticated": False,
+        "method": "anonymous",
+        "permissions": set(),
+        "token_payload": {},
+        "user_id": None,
+        "email": None,
+    }
 
 
 async def require_authentication(
@@ -402,7 +406,7 @@ RequiredSession = Annotated[Session, Depends(require_session)]
 
 async def get_request_context(
     request: Request,
-    auth: Auth,
+    auth: Annotated[dict[str, Any], Depends(get_optional_authentication)],
     session: CurrentSession,
     settings: Settings,
 ) -> dict[str, Any]:
@@ -510,6 +514,33 @@ SystemReady = Annotated[bool, Depends(check_system_ready)]
 _rate_limit_store: dict[str, list] = {}
 
 
+def _consume_rate_limit(key: str, settings: MothershipSettings) -> bool:
+    """Track a rate-limited request for the given key."""
+    if not settings.security.rate_limit_enabled:
+        return True
+
+    import time
+
+    now = time.time()
+    window = settings.security.rate_limit_window_seconds
+    max_requests = settings.security.rate_limit_requests
+
+    if key not in _rate_limit_store:
+        _rate_limit_store[key] = []
+
+    _rate_limit_store[key] = [ts for ts in _rate_limit_store[key] if now - ts < window]
+
+    if len(_rate_limit_store[key]) >= max_requests:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Rate limit exceeded",
+            headers={"Retry-After": str(window)},
+        )
+
+    _rate_limit_store[key].append(now)
+    return True
+
+
 async def check_rate_limit(
     request: Request,
     auth: Auth,
@@ -529,36 +560,27 @@ async def check_rate_limit(
     Raises:
         HTTPException: If rate limit exceeded
     """
-    if not settings.security.rate_limit_enabled:
-        return True
-
     # Use user_id or IP for rate limiting
     key = auth.get("user_id") or (request.client.host if request.client else "unknown")
+    return _consume_rate_limit(key, settings)
 
-    import time
 
-    now = time.time()
-    window = settings.security.rate_limit_window_seconds
-    max_requests = settings.security.rate_limit_requests
+async def check_public_rate_limit(
+    request: Request,
+    settings: Settings,
+) -> bool:
+    """
+    Rate limit a public endpoint without requiring prior authentication.
 
-    # Clean old entries and add current request
-    if key not in _rate_limit_store:
-        _rate_limit_store[key] = []
-
-    _rate_limit_store[key] = [ts for ts in _rate_limit_store[key] if now - ts < window]
-
-    if len(_rate_limit_store[key]) >= max_requests:
-        raise HTTPException(
-            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail="Rate limit exceeded",
-            headers={"Retry-After": str(window)},
-        )
-
-    _rate_limit_store[key].append(now)
-    return True
+    Public auth entrypoints such as login and registration must be reachable
+    before a caller has a token, so they can only key on client identity.
+    """
+    client_ip = request.client.host if request.client else "unknown"
+    return _consume_rate_limit(f"public:{client_ip}", settings)
 
 
 RateLimited = Annotated[bool, Depends(check_rate_limit)]
+PublicRateLimited = Annotated[bool, Depends(check_public_rate_limit)]
 
 
 # =============================================================================
@@ -582,6 +604,7 @@ __all__ = [
     "get_api_key",
     "get_bearer_token",
     "verify_authentication",
+    "get_optional_authentication",
     "require_authentication",
     "require_permission",
     "require_admin",
@@ -608,5 +631,7 @@ __all__ = [
     "SystemReady",
     # Rate Limiting
     "check_rate_limit",
+    "check_public_rate_limit",
     "RateLimited",
+    "PublicRateLimited",
 ]

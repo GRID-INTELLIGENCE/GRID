@@ -235,6 +235,8 @@ class TestAPISecurityDefaults:
         defaults = APISecurityDefaults()
         assert "/health" in defaults.public_endpoints
         assert "/ping" in defaults.public_endpoints
+        assert "/api/v1/auth/login" in defaults.public_endpoints
+        assert "/api/v1/auth/refresh" in defaults.public_endpoints
 
 
 class TestSecurityAudit:
@@ -909,6 +911,8 @@ class TestFactoryDefaultsVerification:
         assert "/health" in defaults.public_endpoints
         assert "/ping" in defaults.public_endpoints
         assert "/" in defaults.public_endpoints
+        assert "/api/v1/auth/login" in defaults.public_endpoints
+        assert "/api/v1/auth/refresh" in defaults.public_endpoints
 
 
 # =============================================================================

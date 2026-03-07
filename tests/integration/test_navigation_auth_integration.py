@@ -12,6 +12,7 @@ import time
 import pytest
 from fastapi.testclient import TestClient
 
+from application.mothership.config import reload_settings
 from application.mothership.main import create_app
 from application.mothership.security.jwt import reset_jwt_manager
 
@@ -20,12 +21,25 @@ from application.mothership.security.jwt import reset_jwt_manager
 # =============================================================================
 
 
+def _build_test_client() -> TestClient:
+    """Create a deterministic test client."""
+    reload_settings()
+    reset_jwt_manager()
+    app = create_app()
+    client = TestClient(app)
+    client.headers.update(
+        {
+            "X-Request-ID": "test-request-id",
+            "X-Correlation-ID": "test-correlation-id",
+        }
+    )
+    return client
+
+
 @pytest.fixture
 def client() -> TestClient:
     """Create a test client."""
-    reset_jwt_manager()
-    app = create_app()
-    return TestClient(app)
+    return _build_test_client()
 
 
 @pytest.fixture

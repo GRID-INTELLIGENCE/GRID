@@ -516,6 +516,7 @@ def setup_middleware(app: FastAPI, settings: Any) -> None:
             strict_mode=getattr(settings.security, "strict_mode", False),
             audit_logging=audit_logging_enabled,
             sanitize_inputs=getattr(settings.security, "input_sanitization_enabled", True),
+            enforce_auth=not getattr(settings, "is_testing", False),
             enforce_https=settings.is_production if hasattr(settings, "is_production") else False,
             max_body_size=getattr(settings.security, "max_request_size_bytes", 10 * 1024 * 1024),
             block_insecure_transport=getattr(settings.security, "block_insecure_transport", False),

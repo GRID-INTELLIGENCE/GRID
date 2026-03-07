@@ -5,6 +5,18 @@ Append new entries at the top. One decision per entry.
 
 ---
 
+## 2026-03-07 — Security Review: 57 Findings Across 4 Domains
+
+**Decision**: Completed comprehensive read-only security review of GRID v2.6.1. Identified 57 findings (7 CRITICAL, 17 HIGH, 21 MEDIUM, 12 LOW) across Auth/JWT, API/Input Validation, MCP/Skills/RAG, and Deps/Infrastructure domains. Spot-checked and verified all CRITICAL and HIGH findings against source. Established 7 release gates that must pass before next tagged release.
+
+**Why**: No formal security review had been conducted since the safety-first architecture was established. The review identified systemic issues: dev bypasses in production auth paths, security infrastructure not wired to API boundaries, parallel JWT implementations with different guarantees, and a broken violation checker in the sandbox exec fallback.
+
+**Alternatives considered**: External penetration test — deferred until P0 findings are remediated (no point testing bypasses that are already known). Automated SAST-only approach — rejected because the most critical findings (bypass logic, architectural gaps) require contextual code review, not pattern matching.
+
+**Report**: `docs/security/SECURITY_REVIEW_2026-03-07.md`
+
+---
+
 ## 2026-03-07 — Strategic Audit: Schema Expansion, Fabric Persistence, Doc Consolidation
 
 **Decision**: Executed 9-item strategic audit across P0/P1/P2 priorities. Key changes: (1) Deleted dead `src/realtime/glimpse/` stub (zero imports). (2) Moved celery/aio-pika/schedule to optional `workers` dependency group. (3) Added BoundaryEngine fail-closed tests. (4) Created 4 Alembic migrations (billing core, audit_log, agentic_cases, cockpit — 13 tables), fixing a broken revision chain caused by missing `f3b4c5d6e7f8`. (5) Added Redis Streams persistence to Unified Fabric (`DynamicEventBus`) with `replay_from_redis()` for cross-restart replay. (6) Fixed 3x duplicated block in `CognitiveEngine.track_interaction` and removed `unittest.mock.Mock` placeholder. (7) Deepened XAI `ExplanationGenerator` with `explain_cognitive_state`, `explain_temporal_reasoning`, and `explain_pattern_detection`. (8) Added `openapi-typescript` codegen to frontend. (9) Archived 116 stale docs into `docs/archive/` with freshness policy.

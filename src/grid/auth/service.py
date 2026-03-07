@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-import logging
 import base64
 import hashlib
 import hmac
+import logging
 import os
 import uuid
 from datetime import UTC, datetime, timedelta
@@ -28,7 +28,7 @@ def _hash_password(password: str) -> str:
         salt = bcrypt.gensalt()
         return bcrypt.hashpw(password.encode("utf-8"), salt).decode("utf-8")
     salt = base64.urlsafe_b64encode(os.urandom(16)).decode("ascii")
-    digest = hashlib.sha256(f"{salt}:{password}".encode("utf-8")).hexdigest()
+    digest = hashlib.sha256(f"{salt}:{password}".encode()).hexdigest()
     return f"sha256${salt}${digest}"
 
 
@@ -38,7 +38,7 @@ def _verify_password(password: str, password_hash: str) -> bool:
     if not password_hash.startswith("sha256$"):
         return False
     _, salt, expected_digest = password_hash.split("$", 2)
-    digest = hashlib.sha256(f"{salt}:{password}".encode("utf-8")).hexdigest()
+    digest = hashlib.sha256(f"{salt}:{password}".encode()).hexdigest()
     return hmac.compare_digest(digest, expected_digest)
 
 

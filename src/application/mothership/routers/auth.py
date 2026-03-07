@@ -12,7 +12,7 @@ from typing import Any
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, EmailStr, Field
 
-from application.mothership.dependencies import Auth, RateLimited, RequestContext, Settings
+from application.mothership.dependencies import Auth, PublicRateLimited, RateLimited, RequestContext, Settings
 from application.mothership.schemas import ApiResponse, ResponseMeta
 from application.mothership.security.credential_validation import validate_production_credentials
 from application.mothership.security.jwt import get_jwt_manager
@@ -89,7 +89,7 @@ class RegisterRequest(BaseModel):
 @router.post("/register", response_model=ApiResponse[UserResponse], status_code=status.HTTP_201_CREATED)
 async def register_user(
     request: RegisterRequest,
-    _: RateLimited,
+    _: PublicRateLimited,
     request_context: RequestContext,
 ) -> ApiResponse[UserResponse]:
     """
@@ -146,14 +146,14 @@ async def register_user(
 @router.post("/login", response_model=ApiResponse[TokenResponse])
 async def login(
     request: LoginRequest,
-    _: RateLimited,
+    _: PublicRateLimited,
     settings: Settings,
     request_context: RequestContext,
 ) -> ApiResponse[TokenResponse]:
     """
     Authenticate user and generate JWT tokens.
 
-    **Development Mode:**
+    **Development / Testing Mode:**
     - Any username/password combination is accepted
     - Tokens are generated for testing purposes
 
@@ -176,9 +176,10 @@ async def login(
     """
     request_id = request_context.get("request_id", "unknown")
     auth_result = None
+    allow_test_credential_bypass = settings.is_development or settings.is_testing
 
-    # Production credential validation
-    if not settings.is_development:
+    # Only production-like environments enforce credential validation.
+    if not allow_test_credential_bypass:
         auth_result = await validate_production_credentials(request.username, request.password)
 
         if not auth_result.success:
@@ -214,7 +215,7 @@ async def login(
         granted_scopes = ["read"]  # Default to read-only
 
     # Get user details from auth result in production, or use defaults in dev
-    if not settings.is_development and auth_result and auth_result.user:
+    if not allow_test_credential_bypass and auth_result and auth_result.user:
         user_id = auth_result.user.user_id
         email = auth_result.user.email or f"{request.username}@example.com"
     else:
@@ -260,7 +261,7 @@ async def login(
 @router.post("/refresh", response_model=ApiResponse[RefreshResponse])
 async def refresh_token(
     request: RefreshRequest,
-    _: RateLimited,
+    _: PublicRateLimited,
     settings: Settings,
     request_context: RequestContext,
 ) -> ApiResponse[RefreshResponse]:

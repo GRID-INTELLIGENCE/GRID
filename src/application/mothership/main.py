@@ -624,13 +624,13 @@ Local integration backend for the Mothership Cockpit system.
 The API supports multiple authentication methods:
 - API Key (X-API-Key header)
 - JWT Bearer Token (Authorization header)
-
-**NO BYPASS PERMITTED** - All requests require authentication.
+@@
+ **NO BYPASS PERMITTED** - All requests require authentication.
         """,
         version=settings.app_version,
-        docs_url="/docs" if settings.is_development else None,
-        redoc_url="/redoc" if settings.is_development else None,
-        openapi_url="/openapi.json" if settings.is_development else None,
+        docs_url="/docs" if settings.is_development or settings.is_testing else None,
+        redoc_url="/redoc" if settings.is_development or settings.is_testing else None,
+        openapi_url="/openapi.json" if settings.is_development or settings.is_testing else None,
         lifespan=lifespan,
     )
 

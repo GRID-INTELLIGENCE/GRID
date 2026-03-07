@@ -73,7 +73,7 @@ class DeterministicEmbeddingProvider(BaseEmbeddingProvider):
         combined_seed = int(text_hash[:8], 16) ^ self._seed
 
         # Generate deterministic random embedding
-        rng = random.Random(combined_seed)
+        rng = random.Random(combined_seed)  # noqa: S311 - deterministic test-only provider
         embedding = [float(rng.gauss(0.0, 1.0)) for _ in range(self._dimension)]
 
         # Normalize to unit length (common for embeddings)
@@ -148,7 +148,7 @@ class DeterministicEmbeddingProvider(BaseEmbeddingProvider):
         emb1 = self.embed(text1)
         emb2 = self.embed(text2)
 
-        dot_product = sum(a * b for a, b in zip(emb1, emb2))
+        dot_product = sum(a * b for a, b in zip(emb1, emb2, strict=False))
         norm1 = math.sqrt(sum(value * value for value in emb1))
         norm2 = math.sqrt(sum(value * value for value in emb2))
 

@@ -17,14 +17,31 @@ from application.mothership.main import create_app
 # Import routers for testing
 
 
+def _build_test_client(app=None) -> TestClient:
+    """Create a deterministic test client for auth-focused integration tests."""
+    from application.mothership.config import reload_settings
+    from application.mothership.security.jwt import reset_jwt_manager
+
+    reload_settings()
+    reset_jwt_manager()
+    test_app = app or create_app()
+    client = TestClient(test_app)
+    client.headers.update(
+        {
+            "X-Request-ID": "test-request-id",
+            "X-Correlation-ID": "test-correlation-id",
+        }
+    )
+    return client
+
+
 class TestHealthEndpoints:
     """Test health check endpoints"""
 
     @pytest.fixture
     def client(self):
         """Create test client with health router"""
-        app = create_app()
-        return TestClient(app)
+        return _build_test_client()
 
     def test_health_check_basic(self, client):
         """Scenario: Basic health check should return system status"""
@@ -117,25 +134,24 @@ class TestAuthEndpoints:
     @pytest.fixture
     def client(self):
         """Create test client with auth router"""
-        app = create_app()
-        return TestClient(app)
+        return _build_test_client()
 
     @pytest.fixture
     def mock_user_data(self):
         """Mock user data for testing"""
         return {"username": "test_user", "password": "test_password", "scopes": ["read", "write"]}
 
-    @patch("application.mothership.security.jwt.get_jwt_manager")
+    @patch("application.mothership.routers.auth.get_jwt_manager")
     def test_login_success(self, mock_jwt_manager, client, mock_user_data):
         """Scenario: Successful login should return tokens"""
         # Mock JWT manager
         jwt_manager = Mock()
-        jwt_manager.create_tokens.return_value = {
-            "access_token": "mock_access_token",
-            "refresh_token": "mock_refresh_token",
-            "expires_in": 3600,
-            "scopes": mock_user_data["scopes"],
-        }
+        jwt_manager.create_token_pair.return_value = Mock(
+            access_token="mock_access_token",
+            refresh_token="mock_refresh_token",
+            token_type="bearer",
+            expires_in=3600,
+        )
         mock_jwt_manager.return_value = jwt_manager
 
         response = client.post("/api/v1/auth/login", json=mock_user_data)
@@ -260,7 +276,7 @@ class TestAgenticEndpoints:
         app.dependency_overrides[get_processing_unit] = lambda: mock_processing_unit
         app.dependency_overrides[get_agentic_system] = lambda: mock_agentic_system
 
-        client = TestClient(app)
+        client = _build_test_client(app)
 
         # Login to get token
         login_response = client.post("/api/v1/auth/login", json={"username": "test_user", "password": "test_password"})

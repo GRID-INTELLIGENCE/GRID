@@ -1,13 +1,13 @@
-import os
-import shutil
-import subprocess
-import sys
-import uuid
 import base64
 import hashlib
 import hmac
 import json
+import os
+import shutil
+import subprocess
+import sys
 import types
+import uuid
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -18,6 +18,25 @@ _PROJECT_ROOT = Path(__file__).resolve().parents[1]
 _PYTEST_TEMP_ROOT = _PROJECT_ROOT / ".pytest_tmp_root"
 _PYTEST_TEMP_ROOT.mkdir(parents=True, exist_ok=True)
 os.environ.setdefault("PYTEST_DEBUG_TEMPROOT", str(_PYTEST_TEMP_ROOT))
+
+
+def _prime_test_environment() -> None:
+    """Set critical test env vars before app modules are imported."""
+    os.environ["MOTHERSHIP_ENVIRONMENT"] = "test"
+    os.environ.setdefault("MOTHERSHIP_SECRET_KEY", "test-secret-key-at-least-32-chars-long-placeholder")
+    os.environ["MOTHERSHIP_RATE_LIMIT_ENABLED"] = "false"
+    os.environ["MOTHERSHIP_DATABASE_URL"] = "sqlite:///:memory:"
+    os.environ["MOTHERSHIP_USE_DATABRICKS"] = "false"
+    os.environ["MOTHERSHIP_REDIS_ENABLED"] = "false"
+    os.environ.setdefault("GRID_TEST_TMPDIR", os.path.join(_PROJECT_ROOT, ".test_tmp"))
+    os.makedirs(os.environ["GRID_TEST_TMPDIR"], exist_ok=True)
+    os.environ.setdefault("GRID_SANDBOX_TMPDIR", os.path.join(_PROJECT_ROOT, ".test_tmp", "sandbox"))
+    os.makedirs(os.environ["GRID_SANDBOX_TMPDIR"], exist_ok=True)
+    os.environ["RAG_VECTOR_STORE_PROVIDER"] = os.environ.get("RAG_VECTOR_STORE_PROVIDER", "in_memory")
+    os.environ["SAFETY_BYPASS_REDIS"] = "true"
+
+
+_prime_test_environment()
 
 
 def _base64url_encode(value: bytes) -> str:
@@ -209,29 +228,7 @@ def setup_env():
     """
     import os
 
-    os.environ["MOTHERSHIP_ENVIRONMENT"] = "test"
-    # Generate secure test key: python -c "import secrets; print(secrets.token_urlsafe(32))"
-    os.environ["MOTHERSHIP_SECRET_KEY"] = os.environ.get(
-        "MOTHERSHIP_SECRET_KEY", "test-secret-key-at-least-32-chars-long-placeholder"
-    )
-    os.environ["MOTHERSHIP_RATE_LIMIT_ENABLED"] = "false"
-
-    # CRITICAL: Disable database connections in test mode to prevent hangs
-    # Use in-memory SQLite: each pytest-xdist worker gets its own DB, avoiding
-    # file locking when running with -n auto. For file-based SQLite, use worker_id.
-    os.environ["MOTHERSHIP_DATABASE_URL"] = "sqlite:///:memory:"
-    os.environ["MOTHERSHIP_USE_DATABRICKS"] = "false"
-    os.environ["MOTHERSHIP_REDIS_ENABLED"] = "false"
-    os.environ.setdefault("GRID_TEST_TMPDIR", os.path.join(ROOT_DIR, ".test_tmp"))
-    os.makedirs(os.environ["GRID_TEST_TMPDIR"], exist_ok=True)
-    os.environ.setdefault("GRID_SANDBOX_TMPDIR", os.path.join(ROOT_DIR, ".test_tmp", "sandbox"))
-    os.makedirs(os.environ["GRID_SANDBOX_TMPDIR"], exist_ok=True)
-
-    # Avoid loading chromadb in tests (chromadb.config.Settings + pydantic v1 fails on Python 3.13+)
-    os.environ["RAG_VECTOR_STORE_PROVIDER"] = os.environ.get("RAG_VECTOR_STORE_PROVIDER", "in_memory")
-
-    # Bypass Redis safety checks in test mode (middleware fails closed without Redis)
-    os.environ["SAFETY_BYPASS_REDIS"] = "true"
+    _prime_test_environment()
 
     # DON'T call reload_settings() here - it can trigger DB connections
     # Settings will be loaded lazily when needed with test environment
@@ -258,10 +255,7 @@ def tmp_path() -> Path:
 @pytest.fixture(autouse=True)
 def reset_services():
     """Reset singleton services before and after each test for isolation."""
-    os.environ["MOTHERSHIP_ENVIRONMENT"] = "test"
-    os.environ["MOTHERSHIP_DATABASE_URL"] = "sqlite:///:memory:"
-    os.environ["MOTHERSHIP_USE_DATABRICKS"] = "false"
-    os.environ["MOTHERSHIP_REDIS_ENABLED"] = "false"
+    _prime_test_environment()
     try:
         from application.mothership.config import reload_settings
 
@@ -282,10 +276,7 @@ def reset_services():
     except ImportError:
         pass
     yield
-    os.environ["MOTHERSHIP_ENVIRONMENT"] = "test"
-    os.environ["MOTHERSHIP_DATABASE_URL"] = "sqlite:///:memory:"
-    os.environ["MOTHERSHIP_USE_DATABRICKS"] = "false"
-    os.environ["MOTHERSHIP_REDIS_ENABLED"] = "false"
+    _prime_test_environment()
     try:
         from application.mothership.config import reload_settings
 

@@ -11,12 +11,18 @@ import json
 import logging
 import time
 import uuid
-from typing import Any
+from typing import Annotated, Any
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field, field_validator
 
-from application.mothership.dependencies import Auth, RateLimited, RequestContext
+from application.mothership.dependencies import (
+    Auth,
+    PublicRateLimited,
+    RateLimited,
+    RequestContext,
+    get_optional_authentication,
+)
 from application.mothership.schemas import ApiResponse, ResponseMeta
 
 logger = logging.getLogger(__name__)
@@ -77,8 +83,8 @@ def _safe_request_id(request_context: RequestContext | None) -> str:
 async def create_navigation_plan(
     payload: NavigationRequest,
     request_context: RequestContext,
-    auth: Auth,
-    _: RateLimited,
+    auth: Annotated[dict[str, Any], Depends(get_optional_authentication)],
+    _: PublicRateLimited,
 ) -> ApiResponse[NavigationPlan]:
     """
     Create a navigation plan.
@@ -212,14 +218,6 @@ def _mock_plan_result(payload: NavigationRequest, request_id: str) -> dict:
         "processing_time_ms": 1500.0,  # Simulated
         "request_id": request_id,
     }
-
-
-from fastapi import APIRouter, Query
-
-# ... (rest of imports)
-
-# ... (existing code)
-
 
 @router.post("/plan-stream", response_class=EventSourceResponse)
 @router.get("/plan-stream", response_class=EventSourceResponse)
