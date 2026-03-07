@@ -10,7 +10,6 @@ from typing import Any
 
 import chromadb
 import numpy as np
-from sentence_transformers import SentenceTransformer
 
 from .enrichment import RAGMetadataEnricher
 
@@ -50,6 +49,8 @@ class EnhancedRAG:
 
     def __init__(self, config: RetrievalConfig, db_path: str = ".rag_db"):
         self.config = config
+        from sentence_transformers import SentenceTransformer
+
         self.model = SentenceTransformer(config.model_name)
         self.client = chromadb.PersistentClient(path=db_path)
         self.collection = self.client.get_or_create_collection("documents")

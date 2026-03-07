@@ -9,20 +9,20 @@ from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field, field_validator
 
 if TYPE_CHECKING:
-    from light_of_the_seven.light_of_the_seven.cognitive_layer.decision_support.decision_matrix import (  # type: ignore
+    from light_of_the_seven.cognitive_layer.decision_support.decision_matrix import (  # type: ignore[import-not-found]
         DecisionMatrixGenerator,
     )
-    from light_of_the_seven.light_of_the_seven.cognitive_layer.integration.capability_registry import (  # type: ignore
+    from light_of_the_seven.cognitive_layer.integration.capability_registry import (  # type: ignore[import-not-found]
         CapabilityRegistry,
     )
-    from light_of_the_seven.light_of_the_seven.cognitive_layer.integration.scope_manager import (
-        ScopeManager,  # type: ignore
+    from light_of_the_seven.cognitive_layer.integration.scope_manager import (  # type: ignore[import-not-found]
+        ScopeManager,
     )
-    from light_of_the_seven.light_of_the_seven.cognitive_layer.navigation.enhanced_path_navigator import (  # type: ignore
+    from light_of_the_seven.cognitive_layer.navigation.enhanced_path_navigator import (  # type: ignore[import-not-found]
         EnhancedPathNavigator,
         NavigationPlan,
     )
-    from light_of_the_seven.light_of_the_seven.cognitive_layer.navigation.input_processor import (  # type: ignore
+    from light_of_the_seven.cognitive_layer.navigation.input_processor import (  # type: ignore[import-not-found]
         NavigationInputProcessor,
     )
 
@@ -44,10 +44,15 @@ _DECISION_MATRIX: DecisionMatrixGenerator | None = None
 def _get_navigator() -> EnhancedPathNavigator:
     global _NAVIGATOR
     if _NAVIGATOR is None:
-        # Local-first: use the in-repo navigator and learning components only.
-        from light_of_the_seven.light_of_the_seven.cognitive_layer.navigation.enhanced_path_navigator import (
-            EnhancedPathNavigator,
-        )
+        try:
+            from light_of_the_seven.cognitive_layer.navigation.enhanced_path_navigator import (
+                EnhancedPathNavigator,
+            )
+        except ImportError as e:
+            raise HTTPException(
+                status_code=status.HTTP_501_NOT_IMPLEMENTED,
+                detail="Navigation module not available: light_of_the_seven.cognitive_layer.navigation is not installed.",
+            ) from e
 
         _NAVIGATOR = EnhancedPathNavigator(enable_learning=True)
     return _NAVIGATOR
@@ -56,9 +61,15 @@ def _get_navigator() -> EnhancedPathNavigator:
 def _get_processor() -> NavigationInputProcessor:
     global _PROCESSOR
     if _PROCESSOR is None:
-        from light_of_the_seven.light_of_the_seven.cognitive_layer.navigation.input_processor import (
-            NavigationInputProcessor,
-        )
+        try:
+            from light_of_the_seven.cognitive_layer.navigation.input_processor import (
+                NavigationInputProcessor,
+            )
+        except ImportError as e:
+            raise HTTPException(
+                status_code=status.HTTP_501_NOT_IMPLEMENTED,
+                detail="Navigation input processor not available: light_of_the_seven.cognitive_layer.navigation is not installed.",
+            ) from e
 
         _PROCESSOR = NavigationInputProcessor()
     return _PROCESSOR
@@ -67,7 +78,13 @@ def _get_processor() -> NavigationInputProcessor:
 def _get_scope_manager() -> ScopeManager:
     global _SCOPE_MANAGER
     if _SCOPE_MANAGER is None:
-        from light_of_the_seven.light_of_the_seven.cognitive_layer.integration.scope_manager import ScopeManager
+        try:
+            from light_of_the_seven.cognitive_layer.integration.scope_manager import ScopeManager
+        except ImportError as e:
+            raise HTTPException(
+                status_code=status.HTTP_501_NOT_IMPLEMENTED,
+                detail="Scope manager not available: light_of_the_seven.cognitive_layer.integration.scope_manager is not installed.",
+            ) from e
 
         _SCOPE_MANAGER = ScopeManager()
     return _SCOPE_MANAGER
@@ -76,9 +93,15 @@ def _get_scope_manager() -> ScopeManager:
 def _get_capability_registry() -> CapabilityRegistry:
     global _CAPABILITY_REGISTRY
     if _CAPABILITY_REGISTRY is None:
-        from light_of_the_seven.light_of_the_seven.cognitive_layer.integration.capability_registry import (
-            CapabilityRegistry,
-        )
+        try:
+            from light_of_the_seven.cognitive_layer.integration.capability_registry import (
+                CapabilityRegistry,
+            )
+        except ImportError as e:
+            raise HTTPException(
+                status_code=status.HTTP_501_NOT_IMPLEMENTED,
+                detail="Capability registry not available: light_of_the_seven.cognitive_layer.integration.capability_registry is not installed.",
+            ) from e
 
         _CAPABILITY_REGISTRY = CapabilityRegistry()
     return _CAPABILITY_REGISTRY
@@ -87,9 +110,15 @@ def _get_capability_registry() -> CapabilityRegistry:
 def _get_decision_matrix() -> DecisionMatrixGenerator:
     global _DECISION_MATRIX
     if _DECISION_MATRIX is None:
-        from light_of_the_seven.light_of_the_seven.cognitive_layer.decision_support.decision_matrix import (
-            DecisionMatrixGenerator,
-        )
+        try:
+            from light_of_the_seven.cognitive_layer.decision_support.decision_matrix import (
+                DecisionMatrixGenerator,
+            )
+        except ImportError as e:
+            raise HTTPException(
+                status_code=status.HTTP_501_NOT_IMPLEMENTED,
+                detail="Decision matrix not available: light_of_the_seven.cognitive_layer.decision_support is not installed.",
+            ) from e
 
         _DECISION_MATRIX = DecisionMatrixGenerator()
     return _DECISION_MATRIX
@@ -198,7 +227,7 @@ def _to_plan_out(plan: NavigationPlan) -> NavigationPlanOut:
 
     We avoid leaking internal objects by converting to primitives only.
     """
-    from light_of_the_seven.light_of_the_seven.cognitive_layer.navigation.enhanced_path_navigator import (
+    from light_of_the_seven.cognitive_layer.navigation.enhanced_path_navigator import (  # type: ignore[import-not-found]
         NavigationPath,
         NavigationPlan,
         NavigationStep,
@@ -260,42 +289,20 @@ async def create_navigation_plan(
     - "Learning" is local-only and can be disabled per request.
     - Authentication context (if present) is passed through into planning context for auditing/traceability.
     """
-    from light_of_the_seven.light_of_the_seven.cognitive_layer.navigation.input_processor import (
-        InputProcessingError,  # type: ignore[import-not-found]
-    )
-    from light_of_the_seven.light_of_the_seven.cognitive_layer.navigation.schemas.navigation_input import (  # type: ignore[import-not-found]
-        NavigationRequest,
-    )
+    try:
+        from light_of_the_seven.cognitive_layer.navigation.input_processor import (  # type: ignore[import-not-found]
+            InputProcessingError,
+        )
+        from light_of_the_seven.cognitive_layer.navigation.schemas.navigation_input import (  # type: ignore[import-not-found]
+            NavigationRequest,
+        )
+    except ImportError as e:
+        raise HTTPException(
+            status_code=status.HTTP_501_NOT_IMPLEMENTED,
+            detail="Navigation module not available: light_of_the_seven.cognitive_layer.navigation is not installed.",
+        ) from e
 
     request_id = _safe_request_id(request_context)
-    # #region agent log
-    import json
-
-    import aiofiles
-
-    try:
-        async with aiofiles.open(r"e:\grid\.cursor\debug.log", mode="a", encoding="utf-8") as f:
-            await f.write(
-                json.dumps(
-                    {
-                        "sessionId": "debug-session",
-                        "runId": "run1",
-                        "hypothesisId": "E",
-                        "location": "routers/navigation.py:258",
-                        "message": "navigation.py router handling request",
-                        "data": {
-                            "router_module": "navigation",
-                            "goal": str(payload.goal)[:100] if hasattr(payload, "goal") else "unknown",
-                            "request_id": request_id,
-                        },
-                        "timestamp": int(time.time() * 1000),
-                    }
-                )
-                + "\n"
-            )
-    except Exception:  # noqa: S110 intentional silent handling
-        pass
-    # #endregion
 
     # Build a context dict with conservative, safety-oriented defaults.
     ctx: dict[str, Any] = dict(payload.context or {})
@@ -320,13 +327,6 @@ async def create_navigation_plan(
         "adaptation_threshold": payload.adaptation_threshold,
         "source": payload.source or "api",
     }
-
-    # Phase 2: AI Brain & Knowledge Graph Integration
-    # -----------------------------------------------
-    # NOTE: Kept local-first and minimal at the router layer.
-    # The AI Brain and RAG integration should be wired via services/dependencies
-    # to avoid import-time side effects and optional dependency failures here.
-    # -----------------------------------------------
 
     processor = _get_processor()
     navigator = _get_navigator()
