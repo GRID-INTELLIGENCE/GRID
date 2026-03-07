@@ -28,7 +28,6 @@ import ctypes
 import ctypes.wintypes
 import os
 import platform
-from typing import Any
 
 # ── Windows API constants ──
 
@@ -43,7 +42,7 @@ DEFAULT_USERNAME: str = os.environ.get("USERNAME", os.environ.get("USER", "USER"
 class _CREDENTIAL(ctypes.Structure):
     """Win32 CREDENTIAL structure for CredReadW / CredWriteW."""
 
-    _fields_: list[tuple[str, Any]] = [
+    _fields_ = [
         ("Flags", ctypes.wintypes.DWORD),
         ("Type", ctypes.wintypes.DWORD),
         ("TargetName", ctypes.wintypes.LPWSTR),
@@ -62,7 +61,7 @@ class _CREDENTIAL(ctypes.Structure):
 class _CREDENTIAL_WRITE(ctypes.Structure):
     """Win32 CREDENTIAL structure with c_void_p blob for CredWriteW."""
 
-    _fields_: list[tuple[str, Any]] = [
+    _fields_ = [
         ("Flags", ctypes.wintypes.DWORD),
         ("Type", ctypes.wintypes.DWORD),
         ("TargetName", ctypes.wintypes.LPWSTR),
