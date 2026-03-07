@@ -14,8 +14,12 @@ import math
 import os
 import time
 from dataclasses import dataclass
+from typing import Any
 
-import redis
+try:
+    import redis
+except ImportError:
+    redis = None  # type: ignore[assignment]
 
 from safety.guardian.engine import (
     GuardianEngine,
@@ -40,8 +44,8 @@ logger = get_logger("detectors.pre_check")
 # ---------------------------------------------------------------------------
 # Redis client for dynamic blocklist (sync client — pre-check is sync)
 # ---------------------------------------------------------------------------
-_redis_client: redis.Redis | None = None
-_redis_unavailable: bool = False
+_redis_client: Any | None = None
+_redis_unavailable: bool = redis is None
 
 
 # ---------------------------------------------------------------------------
@@ -69,11 +73,14 @@ def _get_guardian() -> GuardianEngine:
     return engine
 
 
-def _get_redis() -> redis.Redis | None:
+def _get_redis() -> Any | None:
     global _redis_client, _redis_unavailable
     if _redis_unavailable:
         return None
     if _redis_client is None:
+        if redis is None:
+            _redis_unavailable = True
+            return None
         url = os.getenv("REDIS_URL", "redis://localhost:6379")
         _redis_client = redis.Redis.from_url(url, decode_responses=True, socket_connect_timeout=0.5)
         # Quick connectivity check

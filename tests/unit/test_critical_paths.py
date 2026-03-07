@@ -59,6 +59,7 @@ class TestDatabaseConnectivity:
 
     def test_async_engine_creation(self) -> None:
         """Test async engine can be created for testing."""
+        pytest.importorskip("aiosqlite", exc_type=ImportError)
         from sqlalchemy.ext.asyncio import create_async_engine
 
         engine = create_async_engine("sqlite+aiosqlite:///:memory:")

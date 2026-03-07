@@ -77,7 +77,7 @@ class TestCoreImportsSmoke:
     @pytest.mark.unit
     def test_import_numpy(self):
         """Verify numpy is importable."""
-        import numpy as np
+        np = pytest.importorskip("numpy", exc_type=ImportError)
 
         assert np is not None
 

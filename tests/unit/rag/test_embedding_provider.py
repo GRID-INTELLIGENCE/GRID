@@ -4,7 +4,7 @@ Tests verify the deterministic embedding provider produces consistent,
 reproducible embeddings suitable for testing purposes.
 """
 
-import numpy as np
+import math
 import pytest
 
 from tools.rag.embeddings.test_provider import DeterministicEmbeddingProvider, get_test_provider
@@ -70,7 +70,7 @@ class TestDeterministicEmbeddingProviderEmbed:
     def test_embed_is_normalized(self, provider):
         """Test that embeddings are normalized to unit length."""
         embedding = provider.embed("normalize test")
-        norm = float(np.linalg.norm(embedding))  # type: ignore[arg-type]
+        norm = math.sqrt(sum(value * value for value in embedding))
         assert abs(norm - 1.0) < 1e-5, f"Expected unit norm, got {norm}"
 
     def test_embed_empty_string(self, provider):

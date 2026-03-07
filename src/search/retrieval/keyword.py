@@ -80,7 +80,8 @@ class KeywordRetriever(BaseRetriever):
 
             # Get the original document text (assuming it's stored)
             # For fallback, we'll use a simple scoring based on term matches
-            doc_text = getattr(self, "_doc_texts", [None] * len(self._doc_ids))[i]
+            doc_texts = getattr(self, "_doc_texts", [])
+            doc_text = doc_texts[i] if i < len(doc_texts) else None
             if doc_text is None:
                 continue
 

@@ -15,7 +15,25 @@ from contextvars import ContextVar
 from typing import Any
 
 import structlog
-from loguru import logger as loguru_logger
+
+try:
+    from loguru import logger as loguru_logger
+except ImportError:
+    class _LoguruFallback:
+        def remove(self, *args: Any, **kwargs: Any) -> None:
+            return None
+
+        def add(self, *args: Any, **kwargs: Any) -> int:
+            return 0
+
+        def log(self, level: str, message: str, **kwargs: Any) -> None:
+            logging.getLogger("safety.loguru_fallback").log(
+                getattr(logging, level.upper(), logging.INFO),
+                message.format(**kwargs) if kwargs else message,
+            )
+
+    loguru_logger = _LoguruFallback()
+
 
 # ---------------------------------------------------------------------------
 # Context variables (set in middleware, propagated everywhere)

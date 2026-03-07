@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
+import math
 from typing import Any
-
-import numpy as np
 
 
 class ClusteringService:
@@ -34,7 +33,7 @@ class ClusteringService:
         if not all_keys:
             return {"clusters": 0, "noise": len(data)}
 
-        matrix = np.array([[d.get(k, 0.0) for k in all_keys] for d in data])
+        matrix = [[float(d.get(k, 0.0)) for k in all_keys] for d in data]
 
         if eps is None:
             eps = self._auto_eps(matrix)
@@ -80,13 +79,18 @@ class ClusteringService:
         return {"clusters": num_clusters, "noise": noise_count}
 
     @staticmethod
-    def _region_query(matrix: np.ndarray, point_idx: int, eps: float) -> list[int]:
+    def _region_query(matrix: list[list[float]], point_idx: int, eps: float) -> list[int]:
         """Find all points within eps distance of point_idx."""
-        distances = np.sqrt(np.sum((matrix - matrix[point_idx]) ** 2, axis=1))
-        return [i for i, d in enumerate(distances) if d <= eps]
+        target = matrix[point_idx]
+        neighbors: list[int] = []
+        for i, row in enumerate(matrix):
+            distance_sq = sum((value - target[idx]) ** 2 for idx, value in enumerate(row))
+            if math.sqrt(distance_sq) <= eps:
+                neighbors.append(i)
+        return neighbors
 
     @staticmethod
-    def _auto_eps(matrix: np.ndarray) -> float:
+    def _auto_eps(matrix: list[list[float]]) -> float:
         """Auto-select eps using k-distance heuristic."""
         from itertools import combinations
 
@@ -97,7 +101,7 @@ class ClusteringService:
         # Compute pairwise distances and use median as eps
         dists: list[float] = []
         for i, j in combinations(range(min(n, 50)), 2):
-            d = float(np.sqrt(np.sum((matrix[i] - matrix[j]) ** 2)))
+            d = math.sqrt(sum((matrix[i][k] - matrix[j][k]) ** 2 for k in range(len(matrix[i]))))
             dists.append(d)
 
         if not dists:

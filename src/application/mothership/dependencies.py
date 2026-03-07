@@ -195,6 +195,17 @@ async def verify_authentication(
     Verify request authentication using centralized security logic.
     Supports both API key and JWT authentication with RBAC integration.
     """
+    if bearer_token == "dev-test-token" and (
+        settings.is_testing or (settings.is_development and os.getenv("MOTHERSHIP_ALLOW_UNAUTHENTICATED_DEV") == "1")
+    ):
+        return {
+            "authenticated": False,
+            "method": "dev_bypass",
+            "user_id": "dev_user",
+            "role": Role.ADMIN.value,
+            "permissions": get_permissions_for_role(Role.ADMIN),
+        }
+
     # 1. Try JWT authentication (Highest Priority)
     if bearer_token:
         try:

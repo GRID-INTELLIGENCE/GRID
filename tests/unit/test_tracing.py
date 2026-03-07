@@ -8,6 +8,8 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
+pytest.importorskip("opentelemetry.exporter.otlp.proto.grpc.trace_exporter", exc_type=ImportError)
+
 from application.tracing import SpanContext, get_tracer, setup_fastapi_tracing, setup_tracing
 
 

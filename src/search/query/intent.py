@@ -9,10 +9,9 @@ remaining usable when the full transformers pipeline is not loaded.
 from __future__ import annotations
 
 import logging
+import math
 from dataclasses import dataclass
 from typing import Any
-
-import numpy as np
 
 from ..models import QueryIntent, SearchQuery
 
@@ -134,20 +133,32 @@ class SearchIntentClassifier:
     def _best_field_similarity(self, text: str) -> float:
         if self.embedding_provider is None:
             return 0.0
-        query_emb = np.array(self.embedding_provider.embed(text), dtype=np.float32)
-        norm_q = np.linalg.norm(query_emb)
+        query_emb = self._to_vector(self.embedding_provider.embed(text))
+        norm_q = self._vector_norm(query_emb)
         if norm_q == 0:
             return 0.0
-        query_emb = query_emb / norm_q
+        query_emb = [value / norm_q for value in query_emb]
 
         best = 0.0
         for pairs in self._field_value_embeddings.values():
             for _, field_emb in pairs:
-                vec = np.array(field_emb, dtype=np.float32)
-                norm_v = np.linalg.norm(vec)
+                vec = self._to_vector(field_emb)
+                norm_v = self._vector_norm(vec)
                 if norm_v == 0:
                     continue
-                sim = float(np.dot(query_emb, vec / norm_v))
+                sim = self._dot_product(query_emb, [value / norm_v for value in vec])
                 if sim > best:
                     best = sim
         return best
+
+    @staticmethod
+    def _to_vector(values: Any) -> list[float]:
+        return [float(value) for value in values]
+
+    @staticmethod
+    def _vector_norm(values: list[float]) -> float:
+        return math.sqrt(sum(value * value for value in values))
+
+    @staticmethod
+    def _dot_product(left: list[float], right: list[float]) -> float:
+        return sum(a * b for a, b in zip(left, right))

@@ -5,7 +5,31 @@ import time
 from dataclasses import dataclass
 from typing import Any, Literal
 
-import stripe
+try:
+    import stripe
+except ImportError:
+    class _StripeCustomerStub:
+        @staticmethod
+        def create(*args: Any, **kwargs: Any) -> Any:
+            raise RuntimeError("Stripe SDK is not installed")
+
+    class _StripeSubscriptionStub:
+        @staticmethod
+        def create(*args: Any, **kwargs: Any) -> Any:
+            raise RuntimeError("Stripe SDK is not installed")
+
+    class _StripeSubscriptionItemStub:
+        @staticmethod
+        def create_usage_record(*args: Any, **kwargs: Any) -> Any:
+            raise RuntimeError("Stripe SDK is not installed")
+
+    class _StripeStub:
+        api_key: str | None = None
+        Customer = _StripeCustomerStub
+        Subscription = _StripeSubscriptionStub
+        SubscriptionItem = _StripeSubscriptionItemStub
+
+    stripe = _StripeStub()
 
 from grid.config.runtime_settings import RuntimeSettings
 

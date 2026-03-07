@@ -30,7 +30,7 @@ class InMemoryRateLimiter:
             return True
 
 
-_limiters: dict[int, InMemoryRateLimiter] = {}
+_default_limiter = InMemoryRateLimiter()
 
 
 def rate_limit_tool(ctx: GuardrailContext) -> GuardrailToolResult:
@@ -40,10 +40,17 @@ def rate_limit_tool(ctx: GuardrailContext) -> GuardrailToolResult:
     """
     config = ctx.config
     limit = getattr(config, "guardrail_rate_limit_per_minute", 60) if config else 60
-    limiter_id = id(config) if config else 0
-    if limiter_id not in _limiters:
-        _limiters[limiter_id] = InMemoryRateLimiter(limit)
-    rl = _limiters[limiter_id]
+    rl = None
+    if config is not None:
+        rl = getattr(config, "_search_rate_limiter", None)
+        if not isinstance(rl, InMemoryRateLimiter) or rl.requests_per_minute != limit:
+            rl = InMemoryRateLimiter(limit)
+            object.__setattr__(config, "_search_rate_limiter", rl)
+    else:
+        global _default_limiter
+        if _default_limiter.requests_per_minute != limit:
+            _default_limiter = InMemoryRateLimiter(limit)
+        rl = _default_limiter
 
     key = ctx.request.identity or ctx.request.ip_address or "anonymous"
     if not rl.check(key):

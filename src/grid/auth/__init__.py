@@ -1,7 +1,12 @@
-from .middleware import AuthMiddleware
 from .rbac import ROLE_PERMISSIONS, Permission, Role, get_permissions_for_role, has_permission
-from .service import AuthService
 from .token_manager import TokenManager
+
+try:
+    from .middleware import AuthMiddleware
+    from .service import AuthService
+except ImportError:
+    AuthMiddleware = None  # type: ignore[assignment]
+    AuthService = None  # type: ignore[assignment]
 
 __all__ = [
     "TokenManager",

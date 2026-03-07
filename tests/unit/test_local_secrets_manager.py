@@ -2,6 +2,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+pytest.importorskip("cryptography", exc_type=ImportError)
+
 from src.grid.security.local_secrets_manager import LocalSecretsManager
 
 

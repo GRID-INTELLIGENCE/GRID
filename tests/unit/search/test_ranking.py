@@ -1,7 +1,9 @@
 """Tests for search.ranking (features, ltr_model, scorer)."""
 
-import numpy as np
 import pytest
+
+np = pytest.importorskip("numpy", exc_type=ImportError)
+pytest.importorskip("sklearn", exc_type=ImportError)
 
 from search.models import Document, FieldSchema, FieldType, IndexSchema, ScoredCandidate
 from search.ranking.features import FEATURE_NAMES, FeatureExtractor

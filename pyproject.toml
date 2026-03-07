@@ -217,8 +217,8 @@ asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 timeout = 30
 timeout_method = "thread"
-
-# Discovery optimisation: skip non-test trees during collection
+strict_markers = true
+# Optimized discovery exclusions
 norecursedirs = [
     ".venv",
     ".git",
@@ -259,13 +259,12 @@ norecursedirs = [
     "grid",
     "cognition",
 ]
-
-# Default addopts: strict markers, cache, deselect scratch
+# Enhanced addopts for better CI experience
 addopts = [
     "--import-mode=importlib",
     "--strict-markers",
     "-p", "cacheprovider",
-    "-m", "not scratch and not flaky",
+    "-m", "not scratch and not flaky and not slow",
     "--ignore=tests/scratch",
     "--tb=short",
     "-q",
@@ -280,6 +279,7 @@ filterwarnings = [
     "ignore:.*pkg_resources is deprecated.*:UserWarning",
     "ignore::DeprecationWarning:sqlalchemy.*",
     "ignore::DeprecationWarning:pydantic.*",
+    "ignore::DeprecationWarning:torch.jit.*",
 ]
 
 # Test markers

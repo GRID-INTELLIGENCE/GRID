@@ -19,8 +19,6 @@ except ImportError:
 import uuid
 from dataclasses import dataclass, field
 
-import redis.asyncio as redis
-
 
 @dataclass(frozen=True)
 class Subscription:

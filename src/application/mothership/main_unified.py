@@ -28,7 +28,12 @@ from application.api_docs import setup_api_docs
 # Observability & Documentation
 from application.monitoring import get_metrics_router, setup_metrics
 from application.skills.api import router as skills_router
-from application.tracing import setup_tracing
+
+try:
+    from application.tracing import setup_tracing
+except ImportError:
+    def setup_tracing(*args: Any, **kwargs: Any) -> None:
+        return None
 
 try:
     from dotenv import load_dotenv

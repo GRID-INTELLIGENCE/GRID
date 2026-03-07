@@ -4,14 +4,21 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-
-import numpy as np
+from typing import Any
 
 from ..config import SearchConfig
 from ..models import Document, IndexSchema, ScoredCandidate, SearchQuery
 from .cross_encoder import SearchCrossEncoder
-from .features import FeatureExtractor
-from .ltr_model import LTRModel
+
+try:
+    from .features import FeatureExtractor
+except ImportError:
+    FeatureExtractor = None  # type: ignore[assignment]
+
+try:
+    from .ltr_model import LTRModel
+except ImportError:
+    LTRModel = None  # type: ignore[assignment]
 
 logger = logging.getLogger(__name__)
 
@@ -26,20 +33,26 @@ class RankingPipeline:
 
     def __init__(self, schema: IndexSchema, config: SearchConfig | None = None) -> None:
         self.config = config or SearchConfig()
-        self.feature_extractor = FeatureExtractor(
-            schema,
-            freshness_decay_hours=self.config.freshness_decay_hours,
-            popularity_fields=self.config.popularity_fields,
-        )
+        self.feature_extractor = None
+        if FeatureExtractor is not None:
+            self.feature_extractor = FeatureExtractor(
+                schema,
+                freshness_decay_hours=self.config.freshness_decay_hours,
+                popularity_fields=self.config.popularity_fields,
+            )
+        else:
+            logger.warning("Feature extractor unavailable; learning-to-rank disabled")
 
-        self._ltr: LTRModel | None = None
-        if self.config.ltr_model_path:
+        self._ltr: Any = None
+        if self.config.ltr_model_path and LTRModel is not None:
             try:
                 self._ltr = LTRModel()
                 self._ltr.load(self.config.ltr_model_path)
             except Exception:
                 logger.warning("Failed to load LTR model from %s", self.config.ltr_model_path)
                 self._ltr = None
+        elif self.config.ltr_model_path:
+            logger.warning("LTR model path configured but scientific stack is unavailable; skipping LTR loading")
 
         self._cross_encoder: SearchCrossEncoder | None = None
         if self.config.cross_encoder_enabled:
@@ -69,7 +82,7 @@ class RankingPipeline:
         if not valid_candidates:
             return candidates
 
-        if self._ltr and self._ltr.is_fitted:
+        if self._ltr and self._ltr.is_fitted and self.feature_extractor is not None:
             feature_matrix = self.feature_extractor.extract_batch(
                 query.text,
                 docs,
@@ -99,11 +112,13 @@ class RankingPipeline:
 
     def train_ltr(
         self,
-        features: np.ndarray,
-        labels: np.ndarray,
+        features: Any,
+        labels: Any,
         save_path: str | None = None,
     ) -> dict[str, float]:
         """Train (or retrain) the LTR model on labelled data."""
+        if LTRModel is None or self.feature_extractor is None:
+            raise ImportError("Learning-to-rank requires NumPy/scikit-learn dependencies")
         self._ltr = LTRModel()
         metrics = self._ltr.train(features, labels)
         if save_path:

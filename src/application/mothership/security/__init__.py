@@ -32,13 +32,22 @@ from .defaults import (
     SecurityDefaults,
     get_security_defaults,
 )
-from .jwt import (
-    JWTManager,
-    TokenPair,
-    TokenPayload,
-    get_jwt_manager,
-    reset_jwt_manager,
-)
+
+try:
+    from .jwt import (
+        JWTManager,
+        TokenPair,
+        TokenPayload,
+        get_jwt_manager,
+        reset_jwt_manager,
+    )
+except ImportError:
+    JWTManager = None  # type: ignore[assignment]
+    TokenPair = None  # type: ignore[assignment]
+    TokenPayload = None  # type: ignore[assignment]
+    get_jwt_manager = None  # type: ignore[assignment]
+    reset_jwt_manager = None  # type: ignore[assignment]
+
 from .rbac import (
     Permission,
     Role,

@@ -44,7 +44,15 @@ from application.api_docs import setup_api_docs
 # Observability & Documentation
 from application.monitoring import get_metrics_router, setup_metrics
 from application.skills.api import router as skills_router
-from application.tracing import setup_fastapi_tracing, setup_tracing
+
+try:
+    from application.tracing import setup_fastapi_tracing, setup_tracing
+except ImportError:
+    def setup_fastapi_tracing(*args: Any, **kwargs: Any) -> None:
+        return None
+
+    def setup_tracing(*args: Any, **kwargs: Any) -> None:
+        return None
 
 try:
     from dotenv import load_dotenv
@@ -60,16 +68,24 @@ from .db.engine import dispose_async_engine, get_async_engine
 from .dependencies import get_cockpit_service, get_uow, reset_cockpit_service
 from .exceptions import MothershipError
 from .middleware.data_corruption import DataCorruptionDetectionMiddleware
-from .middleware.drt_middleware_unified import UnifiedDRTMiddleware, set_unified_drt_middleware
 from .middleware.stream_monitor import StreamMonitorMiddleware
 from .routers import create_api_router
 from .routers.agentic import router as agentic_router
 from .routers.cockpit import router as cockpit_router
 from .routers.corruption_monitoring import router as corruption_router
-from .routers.drt_monitoring_unified import router as drt_router
 from .routers.health import router as health_router
 from .routers.payment import get_payment_gateway
 from .routers.safety import router as safety_router
+
+try:
+    from .middleware.drt_middleware_unified import UnifiedDRTMiddleware, set_unified_drt_middleware
+    from .routers.drt_monitoring_unified import router as drt_router
+except ImportError:
+    UnifiedDRTMiddleware = None  # type: ignore[assignment]
+    drt_router = None  # type: ignore[assignment]
+
+    def set_unified_drt_middleware(*args: Any, **kwargs: Any) -> None:
+        return None
 
 # Security Infrastructure
 from .security.api_sentinels import API_DEFAULTS, apply_defaults
@@ -739,35 +755,33 @@ The API supports multiple authentication methods:
 
     # 6. DRT (Don't Repeat Themselves) Monitoring Middleware
     # Monitors endpoint behaviors for attack vector similarities and escalates protections
-    try:
-        # Create unified middleware instance with settings from SecuritySettings
-        # Register DRT middleware via add_middleware (single instance)
-        app.add_middleware(
-            UnifiedDRTMiddleware,
-            enabled=settings.security.drt_enabled,
-            similarity_threshold=settings.security.drt_behavioral_similarity_threshold,
-            retention_hours=settings.security.drt_retention_hours,
-            enforcement_mode=settings.security.drt_enforcement_mode,
-            websocket_monitoring_enabled=settings.security.drt_websocket_monitoring_enabled,
-            api_movement_logging_enabled=settings.security.drt_api_movement_logging_enabled,
-            penalty_points_enabled=settings.security.drt_penalty_points_enabled,
-            slo_evaluation_interval_seconds=settings.security.drt_slo_evaluation_interval_seconds,
-            slo_violation_penalty_base=settings.security.drt_slo_violation_penalty_base,
-            report_generation_enabled=settings.security.drt_report_generation_enabled,
-            sampling_rate=1.0,
-            escalation_timeout_minutes=60,
-            rate_limit_multiplier=0.5,
-            alert_on_escalation=True,
-        )
-        # Store reference for shutdown handling and router access
-        # Note: Starlette wraps the middleware, so we retrieve the actual instance
-        # from the middleware stack after registration
-        drt_middleware = app.middleware_stack  # type: ignore[reportAttributeAccessIssue]
-        app.state.drt_middleware = drt_middleware  # type: ignore[reportAttributeAccessIssue]
-        set_unified_drt_middleware(drt_middleware)
-        logger.info("Unified DRT behavioral monitoring middleware enabled")
-    except Exception as e:
-        logger.warning(f"DRT monitoring middleware not available: {e}")
+    if UnifiedDRTMiddleware is not None:
+        try:
+            app.add_middleware(
+                UnifiedDRTMiddleware,
+                enabled=settings.security.drt_enabled,
+                similarity_threshold=settings.security.drt_behavioral_similarity_threshold,
+                retention_hours=settings.security.drt_retention_hours,
+                enforcement_mode=settings.security.drt_enforcement_mode,
+                websocket_monitoring_enabled=settings.security.drt_websocket_monitoring_enabled,
+                api_movement_logging_enabled=settings.security.drt_api_movement_logging_enabled,
+                penalty_points_enabled=settings.security.drt_penalty_points_enabled,
+                slo_evaluation_interval_seconds=settings.security.drt_slo_evaluation_interval_seconds,
+                slo_violation_penalty_base=settings.security.drt_slo_violation_penalty_base,
+                report_generation_enabled=settings.security.drt_report_generation_enabled,
+                sampling_rate=1.0,
+                escalation_timeout_minutes=60,
+                rate_limit_multiplier=0.5,
+                alert_on_escalation=True,
+            )
+            drt_middleware = app.middleware_stack  # type: ignore[reportAttributeAccessIssue]
+            app.state.drt_middleware = drt_middleware  # type: ignore[reportAttributeAccessIssue]
+            set_unified_drt_middleware(drt_middleware)
+            logger.info("Unified DRT behavioral monitoring middleware enabled")
+        except Exception as e:
+            logger.warning(f"DRT monitoring middleware not available: {e}")
+    else:
+        logger.warning("DRT monitoring middleware not available: optional dependencies missing")
 
     # 6b. Accountability Contract Enforcement Middleware
     # Enforces accountability contracts with RBAC and claims support
@@ -885,8 +899,9 @@ The API supports multiple authentication methods:
     app.include_router(corruption_router)
     logger.info("Corruption monitoring API endpoints registered")
 
-    app.include_router(drt_router)
-    logger.info("DRT monitoring API endpoints registered")
+    if drt_router is not None:
+        app.include_router(drt_router)
+        logger.info("DRT monitoring API endpoints registered")
 
     # Safety enforcement endpoints (protected by SafetyMiddleware)
     app.include_router(safety_router)

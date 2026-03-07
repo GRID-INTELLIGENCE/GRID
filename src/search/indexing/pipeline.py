@@ -15,6 +15,22 @@ logger = logging.getLogger(__name__)
 TOKEN_PATTERN = re.compile(r"\b\w+\b")
 
 
+class _FallbackBM25:
+    def __init__(self, corpus: list[list[str]]) -> None:
+        self._corpus = [set(tokens) for tokens in corpus]
+
+    def get_scores(self, tokens: list[str]) -> list[float]:
+        query_terms = set(tokens)
+        if not query_terms:
+            return [0.0] * len(self._corpus)
+        scores: list[float] = []
+        for doc_terms in self._corpus:
+            exact_matches = len(query_terms & doc_terms)
+            substring_matches = sum(0.5 for term in query_terms if any(term in doc_term for doc_term in doc_terms))
+            scores.append(float(exact_matches * 2 + substring_matches))
+        return scores
+
+
 class IndexingPipeline:
     """Orchestrates document ingestion into vector, keyword, and structured stores."""
 
@@ -138,5 +154,5 @@ class IndexingPipeline:
 
             self._bm25_instance = BM25Okapi(self._bm25_corpus)
         except ImportError:
-            logger.warning("rank_bm25 not installed; BM25 keyword search disabled")
-            self._bm25_instance = None
+            logger.warning("rank_bm25 not installed; using fallback keyword scorer")
+            self._bm25_instance = _FallbackBM25(self._bm25_corpus)

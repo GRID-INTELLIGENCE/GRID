@@ -3,6 +3,12 @@ import shutil
 import subprocess
 import sys
 import uuid
+import base64
+import hashlib
+import hmac
+import json
+import types
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
@@ -12,6 +18,101 @@ _PROJECT_ROOT = Path(__file__).resolve().parents[1]
 _PYTEST_TEMP_ROOT = _PROJECT_ROOT / ".pytest_tmp_root"
 _PYTEST_TEMP_ROOT.mkdir(parents=True, exist_ok=True)
 os.environ.setdefault("PYTEST_DEBUG_TEMPROOT", str(_PYTEST_TEMP_ROOT))
+
+
+def _base64url_encode(value: bytes) -> str:
+    return base64.urlsafe_b64encode(value).rstrip(b"=").decode("ascii")
+
+
+def _base64url_decode(value: str) -> bytes:
+    padding = "=" * (-len(value) % 4)
+    return base64.urlsafe_b64decode(value + padding)
+
+
+def _install_jwt_test_shim() -> None:
+    try:
+        import jwt  # noqa: F401
+
+        return
+    except ImportError:
+        pass
+
+    jwt_module = types.ModuleType("jwt")
+    exceptions_module = types.ModuleType("jwt.exceptions")
+
+    class InvalidTokenError(Exception):
+        pass
+
+    def encode(payload: dict[str, object], key: str, algorithm: str = "HS256", **_: object) -> str:
+        if algorithm != "HS256":
+            raise ValueError(f"Unsupported JWT algorithm without PyJWT: {algorithm}")
+
+        header = {"alg": algorithm, "typ": "JWT"}
+        header_segment = _base64url_encode(json.dumps(header, separators=(",", ":"), sort_keys=True).encode("utf-8"))
+        payload_segment = _base64url_encode(
+            json.dumps(payload, separators=(",", ":"), sort_keys=True).encode("utf-8")
+        )
+        signing_input = f"{header_segment}.{payload_segment}"
+        signature = hmac.new(key.encode("utf-8"), signing_input.encode("ascii"), hashlib.sha256).digest()
+        return f"{signing_input}.{_base64url_encode(signature)}"
+
+    def decode(
+        token: str,
+        key: str | None = None,
+        algorithms: list[str] | None = None,
+        options: dict[str, object] | None = None,
+        **_: object,
+    ) -> dict[str, object]:
+        selected_algorithms = algorithms or ["HS256"]
+        if len(selected_algorithms) != 1 or selected_algorithms[0] != "HS256":
+            raise ValueError(f"Unsupported JWT algorithm without PyJWT: {selected_algorithms}")
+
+        verify_signature = True
+        verify_exp = True
+        if options is not None:
+            verify_signature = bool(options.get("verify_signature", True))
+            verify_exp = bool(options.get("verify_exp", True))
+
+        try:
+            header_segment, payload_segment, signature_segment = token.split(".")
+            header = json.loads(_base64url_decode(header_segment).decode("utf-8"))
+            if header.get("alg") != "HS256":
+                raise InvalidTokenError("Algorithm mismatch")
+
+            if verify_signature:
+                if key is None:
+                    raise InvalidTokenError("Missing secret key")
+                signing_input = f"{header_segment}.{payload_segment}"
+                expected_signature = hmac.new(
+                    key.encode("utf-8"),
+                    signing_input.encode("ascii"),
+                    hashlib.sha256,
+                ).digest()
+                actual_signature = _base64url_decode(signature_segment)
+                if not hmac.compare_digest(expected_signature, actual_signature):
+                    raise InvalidTokenError("Signature verification failed")
+
+            payload = json.loads(_base64url_decode(payload_segment).decode("utf-8"))
+            exp = payload.get("exp")
+            if verify_exp and exp is not None and float(exp) < datetime.now(UTC).timestamp():
+                raise InvalidTokenError("Signature has expired")
+            return payload
+        except ValueError as exc:
+            raise InvalidTokenError("Malformed token") from exc
+        except (TypeError, json.JSONDecodeError) as exc:
+            raise InvalidTokenError("Invalid token payload") from exc
+
+    jwt_module.encode = encode
+    jwt_module.decode = decode
+    jwt_module.InvalidTokenError = InvalidTokenError
+    jwt_module.exceptions = exceptions_module
+    exceptions_module.InvalidTokenError = InvalidTokenError
+
+    sys.modules["jwt"] = jwt_module
+    sys.modules["jwt.exceptions"] = exceptions_module
+
+
+_install_jwt_test_shim()
 
 
 def pytest_configure(config):
@@ -157,6 +258,22 @@ def tmp_path() -> Path:
 @pytest.fixture(autouse=True)
 def reset_services():
     """Reset singleton services before and after each test for isolation."""
+    os.environ["MOTHERSHIP_ENVIRONMENT"] = "test"
+    os.environ["MOTHERSHIP_DATABASE_URL"] = "sqlite:///:memory:"
+    os.environ["MOTHERSHIP_USE_DATABRICKS"] = "false"
+    os.environ["MOTHERSHIP_REDIS_ENABLED"] = "false"
+    try:
+        from application.mothership.config import reload_settings
+
+        reload_settings()
+    except ImportError:
+        pass
+    try:
+        from application.mothership.security.jwt import reset_jwt_manager
+
+        reset_jwt_manager()
+    except ImportError:
+        pass
     try:
         from application.resonance.api.dependencies import reset_resonance_service
 
@@ -165,6 +282,22 @@ def reset_services():
     except ImportError:
         pass
     yield
+    os.environ["MOTHERSHIP_ENVIRONMENT"] = "test"
+    os.environ["MOTHERSHIP_DATABASE_URL"] = "sqlite:///:memory:"
+    os.environ["MOTHERSHIP_USE_DATABRICKS"] = "false"
+    os.environ["MOTHERSHIP_REDIS_ENABLED"] = "false"
+    try:
+        from application.mothership.config import reload_settings
+
+        reload_settings()
+    except ImportError:
+        pass
+    try:
+        from application.mothership.security.jwt import reset_jwt_manager
+
+        reset_jwt_manager()
+    except ImportError:
+        pass
     try:
         from application.resonance.api.dependencies import reset_resonance_service
 

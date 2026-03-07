@@ -7,18 +7,96 @@ Uses PyJWT for secure token handling.
 
 from __future__ import annotations
 
+import base64
+import hashlib
+import hmac
+import json
 import logging
 import os
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
-import jwt
-from jwt.exceptions import InvalidTokenError as JWTError
+try:
+    import jwt
+    from jwt.exceptions import InvalidTokenError as JWTError
+except ImportError:
+    jwt = None  # type: ignore[assignment]
+
+    class JWTError(Exception):
+        pass
 from pydantic import BaseModel, Field
 
 from .secret_validation import SecretStrength, SecretValidationError, generate_secure_secret, validate_secret_strength
 
 logger = logging.getLogger(__name__)
+
+
+def _base64url_encode(value: bytes) -> str:
+    return base64.urlsafe_b64encode(value).rstrip(b"=").decode("ascii")
+
+
+def _base64url_decode(value: str) -> bytes:
+    padding = "=" * (-len(value) % 4)
+    return base64.urlsafe_b64decode(value + padding)
+
+
+def _encode_jwt(payload: dict[str, Any], secret_key: str, algorithm: str) -> str:
+    if jwt is not None:
+        return jwt.encode(payload, secret_key, algorithm=algorithm)
+    if algorithm != "HS256":
+        raise ValueError(f"Unsupported JWT algorithm without PyJWT: {algorithm}")
+
+    header = {"alg": algorithm, "typ": "JWT"}
+    header_segment = _base64url_encode(json.dumps(header, separators=(",", ":"), sort_keys=True).encode("utf-8"))
+    payload_segment = _base64url_encode(json.dumps(payload, separators=(",", ":"), sort_keys=True).encode("utf-8"))
+    signing_input = f"{header_segment}.{payload_segment}"
+    signature = hmac.new(secret_key.encode("utf-8"), signing_input.encode("ascii"), hashlib.sha256).digest()
+    return f"{signing_input}.{_base64url_encode(signature)}"
+
+
+def _decode_jwt(
+    token: str,
+    secret_key: str | None,
+    algorithm: str,
+    *,
+    verify_signature: bool = True,
+    verify_exp: bool = True,
+) -> dict[str, Any]:
+    if jwt is not None:
+        if verify_signature:
+            return jwt.decode(token, secret_key, algorithms=[algorithm], options={"verify_exp": verify_exp})
+        return jwt.decode(token, algorithms=[algorithm], options={"verify_signature": False, "verify_exp": False})
+    if algorithm != "HS256":
+        raise ValueError(f"Unsupported JWT algorithm without PyJWT: {algorithm}")
+
+    try:
+        header_segment, payload_segment, signature_segment = token.split(".")
+        header = json.loads(_base64url_decode(header_segment).decode("utf-8"))
+        if header.get("alg") != algorithm:
+            raise JWTError("Algorithm mismatch")
+
+        if verify_signature:
+            if secret_key is None:
+                raise JWTError("Missing secret key")
+            signing_input = f"{header_segment}.{payload_segment}"
+            expected_signature = hmac.new(
+                secret_key.encode("utf-8"),
+                signing_input.encode("ascii"),
+                hashlib.sha256,
+            ).digest()
+            actual_signature = _base64url_decode(signature_segment)
+            if not hmac.compare_digest(expected_signature, actual_signature):
+                raise JWTError("Signature verification failed")
+
+        payload = json.loads(_base64url_decode(payload_segment).decode("utf-8"))
+        exp = payload.get("exp")
+        if verify_exp and exp is not None and float(exp) < datetime.now(UTC).timestamp():
+            raise JWTError("Signature has expired")
+        return payload
+    except ValueError as exc:
+        raise JWTError("Malformed token") from exc
+    except (TypeError, json.JSONDecodeError) as exc:
+        raise JWTError("Invalid token payload") from exc
 
 
 class TokenPayload(BaseModel):
@@ -190,7 +268,7 @@ class JWTManager:
             payload["metadata"] = metadata
 
         try:
-            token = jwt.encode(payload, self.secret_key, algorithm=self.algorithm)
+            token = _encode_jwt(payload, self.secret_key, self.algorithm)
             return token
         except Exception as e:
             logger.exception("Failed to create access token")
@@ -233,7 +311,7 @@ class JWTManager:
             payload["user_id"] = user_id
 
         try:
-            token = jwt.encode(payload, self.secret_key, algorithm=self.algorithm)
+            token = _encode_jwt(payload, self.secret_key, self.algorithm)
             return token
         except Exception as e:
             logger.exception("Failed to create refresh token")
@@ -295,11 +373,7 @@ class JWTManager:
             ValueError: If token type doesn't match expected
         """
         try:
-            payload = jwt.decode(
-                token,
-                self.secret_key,
-                algorithms=[self.algorithm],
-            )
+            payload = _decode_jwt(token, self.secret_key, self.algorithm)
 
             # Validate token type if specified
             if expected_type and payload.get("type") != expected_type:
@@ -364,7 +438,7 @@ class JWTManager:
             Decoded payload dictionary
         """
         try:
-            return jwt.decode(token, algorithms=[self.algorithm], options={"verify_signature": False})
+            return _decode_jwt(token, None, self.algorithm, verify_signature=False, verify_exp=False)
         except Exception as e:
             logger.warning("Failed to decode token: %s", str(e))
             return {}

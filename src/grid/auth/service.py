@@ -1,15 +1,45 @@
+from __future__ import annotations
+
 import logging
+import base64
+import hashlib
+import hmac
+import os
 import uuid
 from datetime import UTC, datetime, timedelta
-from typing import TypedDict, cast
+from typing import TYPE_CHECKING, TypedDict, cast
 
-import bcrypt
+try:
+    import bcrypt
+except ImportError:
+    bcrypt = None  # type: ignore[assignment]
 
 from grid.auth.token_manager import TokenManager
 from grid.config.runtime_settings import RuntimeSettings
-from grid.infrastructure.database import DatabaseManager
+
+if TYPE_CHECKING:
+    from grid.infrastructure.database import DatabaseManager
 
 logger = logging.getLogger(__name__)
+
+
+def _hash_password(password: str) -> str:
+    if bcrypt is not None:
+        salt = bcrypt.gensalt()
+        return bcrypt.hashpw(password.encode("utf-8"), salt).decode("utf-8")
+    salt = base64.urlsafe_b64encode(os.urandom(16)).decode("ascii")
+    digest = hashlib.sha256(f"{salt}:{password}".encode("utf-8")).hexdigest()
+    return f"sha256${salt}${digest}"
+
+
+def _verify_password(password: str, password_hash: str) -> bool:
+    if bcrypt is not None:
+        return bcrypt.checkpw(password.encode("utf-8"), password_hash.encode("utf-8"))
+    if not password_hash.startswith("sha256$"):
+        return False
+    _, salt, expected_digest = password_hash.split("$", 2)
+    digest = hashlib.sha256(f"{salt}:{password}".encode("utf-8")).hexdigest()
+    return hmac.compare_digest(digest, expected_digest)
 
 
 class _UserRow(TypedDict):
@@ -50,8 +80,7 @@ class AuthService:
             raise ValueError("Username already exists")
 
         # Hash password
-        salt = bcrypt.gensalt()
-        pw_hash = bcrypt.hashpw(password.encode("utf-8"), salt).decode("utf-8")
+        pw_hash = _hash_password(password)
 
         user_id = str(uuid.uuid4())
         await self.db.execute(
@@ -68,7 +97,7 @@ class AuthService:
             raise ValueError("Invalid credentials")
 
         user = cast(_UserRow, dict(user_raw))
-        if not bcrypt.checkpw(password.encode("utf-8"), user["password_hash"].encode("utf-8")):
+        if not _verify_password(password, user["password_hash"]):
             raise ValueError("Invalid credentials")
 
         # Issue tokens

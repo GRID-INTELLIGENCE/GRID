@@ -10,9 +10,9 @@ based on simple hashing and does not capture semantic meaning.
 from __future__ import annotations
 
 import hashlib
+import math
+import random
 from typing import ClassVar
-
-import numpy as np
 
 from .base import BaseEmbeddingProvider
 
@@ -73,17 +73,16 @@ class DeterministicEmbeddingProvider(BaseEmbeddingProvider):
         combined_seed = int(text_hash[:8], 16) ^ self._seed
 
         # Generate deterministic random embedding
-        rng = np.random.default_rng(combined_seed)  # type: ignore[attr-defined]
-        embedding: np.ndarray = rng.standard_normal(self._dimension).astype(np.float32)  # type: ignore[assignment,union-attr]
+        rng = random.Random(combined_seed)
+        embedding = [float(rng.gauss(0.0, 1.0)) for _ in range(self._dimension)]
 
         # Normalize to unit length (common for embeddings)
-        norm: float = float(np.linalg.norm(embedding))  # type: ignore[arg-type]
+        norm = math.sqrt(sum(value * value for value in embedding))
         if norm > 0:
-            embedding = embedding / norm
+            embedding = [value / norm for value in embedding]
 
-        result = embedding.tolist()
-        self._cache[text] = result
-        return result
+        self._cache[text] = embedding
+        return embedding
 
     def embed(self, text: str) -> list[float]:
         """Generate embedding for text.
@@ -146,12 +145,12 @@ class DeterministicEmbeddingProvider(BaseEmbeddingProvider):
         Returns:
             Cosine similarity score between -1 and 1
         """
-        emb1: np.ndarray = np.array(self.embed(text1))  # type: ignore[assignment]
-        emb2: np.ndarray = np.array(self.embed(text2))  # type: ignore[assignment]
+        emb1 = self.embed(text1)
+        emb2 = self.embed(text2)
 
-        dot_product: float = float(np.dot(emb1, emb2))  # type: ignore[arg-type]
-        norm1: float = float(np.linalg.norm(emb1))  # type: ignore[arg-type]
-        norm2: float = float(np.linalg.norm(emb2))  # type: ignore[arg-type]
+        dot_product = sum(a * b for a, b in zip(emb1, emb2))
+        norm1 = math.sqrt(sum(value * value for value in emb1))
+        norm2 = math.sqrt(sum(value * value for value in emb2))
 
         if norm1 == 0 or norm2 == 0:
             return 0.0

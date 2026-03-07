@@ -782,6 +782,8 @@ class MothershipSettings:
         """Load all settings from environment variables."""
         env = os.environ
         env_str = env.get("MOTHERSHIP_ENVIRONMENT", "development").lower()
+        if env_str == "test":
+            env_str = Environment.TESTING.value
         try:
             environment = Environment(env_str)
         except ValueError:
