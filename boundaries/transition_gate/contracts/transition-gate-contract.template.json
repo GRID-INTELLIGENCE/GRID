@@ -1,0 +1,310 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "transition-gate-contract-template-v1",
+  "title": "Transition Gate Agent Contract Template",
+  "description": "Schema for machine-readable contracts governing sealed-envelope transfers between partitions. Each agent (source/seal side, receiving/verify side) gets its own contract file conforming to this template.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "contract_id",
+    "contract_version",
+    "agent_role",
+    "partition",
+    "security_primitives",
+    "pipeline",
+    "never_rules",
+    "scope_enforcement",
+    "audit"
+  ],
+  "properties": {
+    "contract_id": {
+      "type": "string",
+      "description": "Unique identifier for this contract instance (UUID4 recommended)."
+    },
+    "contract_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Semantic version of this contract."
+    },
+    "agent_role": {
+      "type": "string",
+      "enum": ["source", "receiver"],
+      "description": "Whether this agent seals envelopes (source) or verifies them (receiver)."
+    },
+    "partition": {
+      "type": "object",
+      "required": ["label", "root_path", "purpose"],
+      "properties": {
+        "label": {
+          "type": "string",
+          "description": "Human-readable partition label (e.g. 'E:\\' or 'C:\\')."
+        },
+        "root_path": {
+          "type": "string",
+          "description": "Filesystem root path for this partition's workspace."
+        },
+        "purpose": {
+          "type": "string",
+          "enum": ["source_build", "deployment_target", "hybrid"],
+          "description": "The role this partition plays in the transfer pipeline."
+        },
+        "staging_path": {
+          "type": "string",
+          "description": "Path where sealed envelopes are staged (DROP for source, PICKUP for receiver)."
+        }
+      }
+    },
+    "security_primitives": {
+      "type": "object",
+      "required": ["user_fingerprint", "machine_fingerprint", "nonce", "payload_hash", "envelope_expiry"],
+      "properties": {
+        "user_fingerprint": {
+          "type": "object",
+          "properties": {
+            "algorithm": { "type": "string", "const": "HMAC-SHA256" },
+            "key_source": {
+              "type": "string",
+              "description": "How the shared secret is obtained (e.g. 'windows_credential_manager', 'env_var', 'keyring')."
+            },
+            "key_name": {
+              "type": "string",
+              "description": "Name/identifier of the stored secret."
+            },
+            "binding_factors": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "What the HMAC message includes (e.g. ['machine_fingerprint', 'partition_label'])."
+            }
+          }
+        },
+        "machine_fingerprint": {
+          "type": "object",
+          "properties": {
+            "algorithm": { "type": "string", "const": "SHA-256" },
+            "attributes": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "OS attributes hashed (e.g. ['node_name', 'platform_system', 'platform_machine', 'username'])."
+            }
+          }
+        },
+        "nonce": {
+          "type": "object",
+          "properties": {
+            "format": { "type": "string", "const": "uuid4_hex" },
+            "registry_path": {
+              "type": "string",
+              "description": "Filesystem path to the persistent nonce registry JSON."
+            },
+            "single_use": { "type": "boolean", "const": true },
+            "burn_on_verify": { "type": "boolean", "const": true }
+          }
+        },
+        "payload_hash": {
+          "type": "object",
+          "properties": {
+            "algorithm": { "type": "string", "const": "SHA-256" },
+            "serialization": {
+              "type": "string",
+              "const": "canonical_json",
+              "description": "Payload is serialized to JSON with sorted keys and no extra whitespace before hashing."
+            }
+          }
+        },
+        "envelope_expiry": {
+          "type": "object",
+          "properties": {
+            "max_age_seconds": {
+              "type": "number",
+              "minimum": 60,
+              "maximum": 3600,
+              "default": 600,
+              "description": "Maximum age of an envelope before it is rejected as stale."
+            }
+          }
+        }
+      }
+    },
+    "pipeline": {
+      "type": "object",
+      "required": ["steps"],
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Human-readable summary of this pipeline."
+        },
+        "fail_mode": {
+          "type": "string",
+          "enum": ["fail_closed", "fail_open"],
+          "default": "fail_closed",
+          "description": "What happens when a step fails. Must be fail_closed for security."
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["step_number", "name", "description", "on_failure"],
+            "properties": {
+              "step_number": { "type": "integer", "minimum": 1 },
+              "name": { "type": "string" },
+              "description": { "type": "string" },
+              "command": {
+                "type": "string",
+                "description": "Optional shell command or function call for this step."
+              },
+              "expected_output": {
+                "type": "string",
+                "description": "What a passing result looks like."
+              },
+              "on_failure": {
+                "type": "string",
+                "enum": ["abort", "reject_envelope", "log_and_continue", "escalate"],
+                "description": "Action to take if this step fails."
+              },
+              "timeout_seconds": {
+                "type": "number",
+                "description": "Maximum time allowed for this step."
+              }
+            }
+          }
+        }
+      }
+    },
+    "never_rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "rule", "severity"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique rule identifier (e.g. 'NR-01')."
+          },
+          "rule": {
+            "type": "string",
+            "description": "Plain-language description of what must never happen."
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["critical", "high", "medium"],
+            "description": "How severe a violation of this rule would be."
+          },
+          "enforcement": {
+            "type": "string",
+            "enum": ["automated", "review", "both"],
+            "description": "How this rule is enforced."
+          }
+        }
+      },
+      "description": "Invariants that must never be violated by this agent."
+    },
+    "scope_enforcement": {
+      "type": "object",
+      "required": ["known_permissions", "default_permission", "principle"],
+      "properties": {
+        "known_permissions": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "All recognized permission strings (e.g. ['deploy', 'run_tests', 'read_only', ...])."
+        },
+        "default_permission": {
+          "type": "string",
+          "description": "Permission used when no scope is explicitly declared."
+        },
+        "principle": {
+          "type": "string",
+          "const": "least_privilege",
+          "description": "The principle governing scope assignment."
+        },
+        "unknown_permission_action": {
+          "type": "string",
+          "enum": ["reject", "log_and_reject", "escalate"],
+          "default": "reject",
+          "description": "What to do when an unrecognized permission is requested."
+        }
+      }
+    },
+    "audit": {
+      "type": "object",
+      "required": ["enabled", "format", "log_path"],
+      "properties": {
+        "enabled": { "type": "boolean", "default": true },
+        "format": {
+          "type": "string",
+          "enum": ["ndjson", "json", "csv"],
+          "default": "ndjson"
+        },
+        "log_path": {
+          "type": "string",
+          "description": "Path to the audit log file."
+        },
+        "retention_days": {
+          "type": "integer",
+          "minimum": 7,
+          "default": 90,
+          "description": "How long audit entries are retained."
+        },
+        "overwatch_integration": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether audit events are also fed to Overwatch for alerting."
+        }
+      }
+    },
+    "kpis": {
+      "type": "object",
+      "description": "Key performance indicators tracked by this agent.",
+      "properties": {
+        "transfer_success_rate": {
+          "type": "object",
+          "properties": {
+            "target": { "type": "number", "minimum": 0, "maximum": 1 },
+            "window": { "type": "string" }
+          }
+        },
+        "verification_latency_ms": {
+          "type": "object",
+          "properties": {
+            "p50_target": { "type": "number" },
+            "p99_target": { "type": "number" }
+          }
+        },
+        "replay_attempt_rate": {
+          "type": "object",
+          "properties": {
+            "alert_threshold": { "type": "number" },
+            "window": { "type": "string" }
+          }
+        }
+      }
+    },
+    "overwatch_escalation": {
+      "type": "object",
+      "properties": {
+        "threshold_count": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 3,
+          "description": "Number of events of the same type within the window to trigger escalation."
+        },
+        "window_minutes": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 60,
+          "description": "Time window for escalation threshold."
+        },
+        "notify_channels": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Channels to notify on escalation (e.g. ['slack', 'email', 'pagerduty'])."
+        },
+        "escalation_events": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Event types that count toward escalation (e.g. ['rejected:fingerprint_mismatch', 'rejected:nonce_replay_or_expired'])."
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

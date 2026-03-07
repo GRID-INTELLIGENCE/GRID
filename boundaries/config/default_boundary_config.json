@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "rightToRefuse": {
     "preserved": true,
     "scope": "global",
@@ -18,14 +18,57 @@
   "preparedness": {
     "enabled": true,
     "riskTiers": [
-      {"id": "tier0", "name": "Minimal", "level": 0, "requiresApproval": false, "scope": "experiment"},
-      {"id": "tier1", "name": "Low", "level": 1, "requiresApproval": false, "scope": "protocol"},
-      {"id": "tier2", "name": "Medium", "level": 2, "requiresApproval": true, "scope": "capability"},
-      {"id": "tier3", "name": "High", "level": 3, "requiresApproval": true, "scope": "system"}
+      {
+        "id": "tier0",
+        "name": "Minimal",
+        "level": 0,
+        "requiresApproval": false,
+        "scope": "experiment"
+      },
+      {
+        "id": "tier1",
+        "name": "Low",
+        "level": 1,
+        "requiresApproval": false,
+        "scope": "protocol"
+      },
+      {
+        "id": "tier2",
+        "name": "Medium",
+        "level": 2,
+        "requiresApproval": true,
+        "scope": "capability"
+      },
+      {
+        "id": "tier3",
+        "name": "High",
+        "level": 3,
+        "requiresApproval": true,
+        "scope": "system"
+      }
     ],
     "gates": [
-      {"id": "gate_protocol", "name": "Protocol change", "riskTierId": "tier2", "actionRequired": "require_approval", "approvalAuthority": "lab_lead"},
-      {"id": "gate_capability", "name": "Capability expansion", "riskTierId": "tier3", "actionRequired": "block", "approvalAuthority": "preparedness_review"}
+      {
+        "id": "gate_protocol",
+        "name": "Protocol change",
+        "riskTierId": "tier2",
+        "actionRequired": "require_approval",
+        "approvalAuthority": "lab_lead"
+      },
+      {
+        "id": "gate_capability",
+        "name": "Capability expansion",
+        "riskTierId": "tier3",
+        "actionRequired": "block",
+        "approvalAuthority": "preparedness_review"
+      },
+      {
+        "id": "gate_transfer",
+        "name": "Cross-partition transfer",
+        "riskTierId": "tier1",
+        "actionRequired": "log_and_allow",
+        "approvalAuthority": "operator"
+      }
     ],
     "biosecurityScope": {
       "benignOnly": true,
@@ -36,8 +79,108 @@
   "overwatch": {
     "enabled": true,
     "logDir": "logs/boundaries",
-    "alertOn": ["boundary_violation", "guardrail_triggered", "preparedness_gate", "service_refused"],
-    "escalation": {"thresholdCount": 3, "windowMinutes": 60, "notifyChannels": []},
+    "alertOn": [
+      "boundary_violation",
+      "guardrail_triggered",
+      "preparedness_gate",
+      "service_refused",
+      "gate_verification",
+      "gate_transfer_sealed"
+    ],
+    "escalation": {
+      "thresholdCount": 3,
+      "windowMinutes": 60,
+      "notifyChannels": []
+    },
     "persistAlerts": true
+  },
+  "transitionGate": {
+    "enabled": true,
+    "sourcePartition": {
+      "label": "E:\\",
+      "rootPath": "E:\\Seeds",
+      "stagingPath": "E:\\Fruits\\releases"
+    },
+    "targetPartition": {
+      "label": "C:\\",
+      "rootPath": "C:\\Users\\USER\\cascadeprojects",
+      "incomingPath": "C:\\Users\\USER\\cascadeprojects\\gate\\incoming",
+      "resultsPath": "C:\\Users\\USER\\cascadeprojects\\gate\\results"
+    },
+    "securityPrimitives": {
+      "userFingerprint": {
+        "algorithm": "HMAC-SHA256",
+        "keySource": "windows_credential_manager",
+        "keyName": "TransitionGate"
+      },
+      "machineFingerprint": {
+        "algorithm": "SHA-256",
+        "attributes": [
+          "node_name",
+          "platform_system",
+          "platform_machine",
+          "username"
+        ]
+      },
+      "nonce": {
+        "format": "uuid4_hex",
+        "singleUse": true,
+        "burnOnVerify": true
+      },
+      "payloadHash": {
+        "algorithm": "SHA-256",
+        "serialization": "canonical_json"
+      },
+      "envelopeExpiry": {
+        "maxAgeSeconds": 600
+      }
+    },
+    "scopeEnforcement": {
+      "knownPermissions": [
+        "deploy",
+        "run_tests",
+        "start_server",
+        "read_only",
+        "write_results",
+        "network"
+      ],
+      "defaultPermission": "read_only",
+      "principle": "least_privilege",
+      "unknownPermissionAction": "reject"
+    },
+    "audit": {
+      "enabled": true,
+      "format": "ndjson",
+      "sealLogPath": "logs/boundaries/gate_seal_audit.ndjson",
+      "verifyLogPath": "gate/audit.ndjson",
+      "retentionDays": 90,
+      "overwatchIntegration": true
+    },
+    "projects": {
+      "GRID-main": {
+        "testCommand": "uv run pytest tests/unit tests/integration -q --tb=short",
+        "lintCommand": "uv run ruff check .",
+        "port": 8080,
+        "defaultScopePermissions": ["deploy", "run_tests", "start_server"]
+      },
+      "afloat": {
+        "testCommand": "npm run test",
+        "lintCommand": "npm run lint",
+        "port": 3000,
+        "defaultScopePermissions": ["deploy", "start_server"]
+      },
+      "echoes": {
+        "testCommand": "uv run pytest tests/ -q --tb=short",
+        "lintCommand": "uv run ruff check .",
+        "port": 8000,
+        "defaultScopePermissions": ["deploy", "run_tests", "start_server"]
+      },
+      "light_of_the_seven": {
+        "testCommand": "uv run pytest tests/ -q --tb=short",
+        "lintCommand": "uv run ruff check .",
+        "port": 8001,
+        "defaultScopePermissions": ["deploy", "run_tests"]
+      }
+    }
   }
 }

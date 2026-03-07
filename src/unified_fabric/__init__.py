@@ -104,7 +104,7 @@ class DynamicEventBus:
     Each component subscribes to relevant events and processes asynchronously.
     """
 
-    def __init__(self, bus_id: str = "unified"):
+    def __init__(self, bus_id: str = "unified", redis_url: str | None = None):
         self.bus_id = bus_id
         self._handlers: dict[str, list[EventHandler]] = defaultdict(list)
         self._domain_handlers: dict[str, dict[str, list[EventHandler]]] = defaultdict(lambda: defaultdict(list))
@@ -114,19 +114,31 @@ class DynamicEventBus:
         self._running = False
         self._queue: asyncio.Queue = asyncio.Queue()
         self._worker_task: asyncio.Task | None = None
+        self._redis_url = redis_url
+        self._redis: Any = None  # redis.asyncio.Redis when connected
 
         logger.info(f"DynamicEventBus '{bus_id}' initialized")
 
-    async def start(self):
-        """Start the event bus worker"""
+    async def start(self) -> None:
+        """Start the event bus worker and optional Redis connection."""
         if self._running:
             return
+        if self._redis_url:
+            try:
+                import redis.asyncio as aioredis
+
+                self._redis = aioredis.from_url(self._redis_url)
+                await self._redis.ping()
+                logger.info("EventBus Redis persistence connected")
+            except Exception as exc:
+                logger.warning("EventBus Redis connection failed, running in-memory only: %s", exc)
+                self._redis = None
         self._running = True
         self._worker_task = asyncio.create_task(self._process_events())
         logger.info(f"EventBus '{self.bus_id}' started")
 
-    async def stop(self):
-        """Stop the event bus worker"""
+    async def stop(self) -> None:
+        """Stop the event bus worker and close Redis."""
         self._running = False
         if self._worker_task:
             self._worker_task.cancel()
@@ -134,6 +146,9 @@ class DynamicEventBus:
                 await self._worker_task
             except asyncio.CancelledError:
                 pass
+        if self._redis is not None:
+            await self._redis.aclose()
+            self._redis = None
         logger.info(f"EventBus '{self.bus_id}' stopped")
 
     def subscribe(self, event_type: str, handler: EventHandler, domain: str | EventDomain = "all") -> None:
@@ -183,7 +198,10 @@ class DynamicEventBus:
             )
             return
 
-        # Add to history
+        # Persist to Redis stream (non-blocking, best-effort)
+        await self._persist_to_redis(event)
+
+        # Add to in-memory history
         self._event_history.append(event)
         if len(self._event_history) > self._max_history:
             self._event_history.pop(0)
@@ -273,6 +291,57 @@ class DynamicEventBus:
 
         logger.debug(f"Event '{event.event_type}' dispatched to {handlers_called} handlers")
 
+    async def _persist_to_redis(self, event: Event) -> None:
+        """Persist event to a Redis stream for durable cross-restart replay."""
+        if self._redis is None:
+            return
+        try:
+            stream_key = f"fabric:events:{event.source_domain}"
+            await self._redis.xadd(
+                stream_key,
+                {"data": event.to_json()},
+                maxlen=10_000,
+                approximate=True,
+            )
+        except Exception as exc:
+            logger.warning("Redis persist failed for %s: %s", event.event_type, exc)
+
+    async def replay_from_redis(
+        self,
+        handler: EventHandler,
+        domain: str = "all",
+        limit: int = 100,
+    ) -> int:
+        """Replay events from Redis streams for cross-restart bootstrapping.
+
+        Args:
+            handler: Async handler to receive replayed events.
+            domain: Domain stream to replay from, or "all" for every domain.
+            limit: Maximum events to replay per domain.
+
+        Returns:
+            Number of events replayed.
+        """
+        if self._redis is None:
+            return 0
+        domains = [d.value for d in EventDomain if d != EventDomain.ALL] if domain == "all" else [domain]
+        replayed = 0
+        for d in domains:
+            stream_key = f"fabric:events:{d}"
+            try:
+                entries = await self._redis.xrevrange(stream_key, count=limit)
+                for _entry_id, fields in reversed(entries):
+                    data = fields.get(b"data") or fields.get("data")
+                    if data is None:
+                        continue
+                    raw = data.decode() if isinstance(data, bytes) else data
+                    event = Event.from_json(raw)
+                    await handler(event)
+                    replayed += 1
+            except Exception as exc:
+                logger.warning("Redis replay failed for domain %s: %s", d, exc)
+        return replayed
+
     @staticmethod
     def _pattern_match(event_type: str, pattern: str) -> bool:
         if pattern == "*":
@@ -341,16 +410,25 @@ class DynamicEventBus:
 _event_bus: DynamicEventBus | None = None
 
 
-def get_event_bus() -> DynamicEventBus:
-    """Get the singleton event bus instance"""
+def get_event_bus(redis_url: str | None = None) -> DynamicEventBus:
+    """Get the singleton event bus instance.
+
+    Args:
+        redis_url: Optional Redis URL for durable event persistence.
+            Only used on first call (when the singleton is created).
+    """
     global _event_bus
     if _event_bus is None:
-        _event_bus = DynamicEventBus()
+        _event_bus = DynamicEventBus(redis_url=redis_url)
     return _event_bus
 
 
-async def init_event_bus() -> DynamicEventBus:
-    """Initialize and start the event bus"""
-    bus = get_event_bus()
+async def init_event_bus(redis_url: str | None = None) -> DynamicEventBus:
+    """Initialize and start the event bus.
+
+    Args:
+        redis_url: Optional Redis URL for durable event persistence.
+    """
+    bus = get_event_bus(redis_url=redis_url)
     await bus.start()
     return bus

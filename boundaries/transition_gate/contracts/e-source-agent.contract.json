@@ -1,0 +1,266 @@
+{
+  "contract_id": "e-source-agent-v1-2026",
+  "contract_version": "1.0.0",
+  "agent_role": "source",
+  "partition": {
+    "label": "E:\\",
+    "root_path": "E:\\Seeds",
+    "purpose": "source_build",
+    "staging_path": "E:\\Fruits\\releases"
+  },
+  "security_primitives": {
+    "user_fingerprint": {
+      "algorithm": "HMAC-SHA256",
+      "key_source": "windows_credential_manager",
+      "key_name": "TransitionGate",
+      "binding_factors": ["machine_fingerprint", "partition_label"]
+    },
+    "machine_fingerprint": {
+      "algorithm": "SHA-256",
+      "attributes": ["node_name", "platform_system", "platform_machine", "username"]
+    },
+    "nonce": {
+      "format": "uuid4_hex",
+      "registry_path": "E:\\Fruits\\releases\\.nonce_registry.json",
+      "single_use": true,
+      "burn_on_verify": true
+    },
+    "payload_hash": {
+      "algorithm": "SHA-256",
+      "serialization": "canonical_json"
+    },
+    "envelope_expiry": {
+      "max_age_seconds": 600
+    }
+  },
+  "pipeline": {
+    "description": "9-step seal pipeline: validate source state, build artifacts, seal envelope, stage for transfer.",
+    "fail_mode": "fail_closed",
+    "steps": [
+      {
+        "step_number": 1,
+        "name": "checkpoint_clean",
+        "description": "Verify all tracked repos have clean git status (no uncommitted changes). Run Seeds-Checkpoint.ps1 -Validate.",
+        "command": "powershell -File E:\\Seeds\\Seeds-Checkpoint.ps1 -Validate",
+        "expected_output": "All repos clean.",
+        "on_failure": "abort",
+        "timeout_seconds": 30
+      },
+      {
+        "step_number": 2,
+        "name": "tests_pass",
+        "description": "Run the full test suite for the target project. For GRID-main: make test. For afloat: npm run test. For echoes: uv run pytest tests/ -q --tb=short.",
+        "command": "make test",
+        "expected_output": "All tests passed (exit code 0).",
+        "on_failure": "abort",
+        "timeout_seconds": 300
+      },
+      {
+        "step_number": 3,
+        "name": "lint_pass",
+        "description": "Run linting for the target project. For GRID-main: make lint. For afloat: npm run lint. For echoes: uv run ruff check .",
+        "command": "make lint",
+        "expected_output": "No lint errors (exit code 0).",
+        "on_failure": "abort",
+        "timeout_seconds": 120
+      },
+      {
+        "step_number": 4,
+        "name": "preparedness_gate",
+        "description": "Check the PreparednessFramework gate for the transfer operation. Gate gate_protocol must return require_approval or log_and_allow. Gate gate_capability must not be blocked without approval.",
+        "command": "python -c \"from boundaries import PreparednessFramework; pf = PreparednessFramework(); print(pf.check_gate('gate_protocol'))\"",
+        "expected_output": "('require_approval', True) or ('log_and_allow', True)",
+        "on_failure": "abort",
+        "timeout_seconds": 10
+      },
+      {
+        "step_number": 5,
+        "name": "build_artifacts",
+        "description": "Collect and serialize the artifacts to be transferred. For GRID-main: the payload is a manifest dict with project name, version, commit SHA, file list, and build metadata.",
+        "command": "python -m boundaries.transition_gate.cli build --project GRID-main",
+        "expected_output": "Payload dict ready for sealing.",
+        "on_failure": "abort",
+        "timeout_seconds": 60
+      },
+      {
+        "step_number": 6,
+        "name": "seal_envelope",
+        "description": "Seal the payload into a TransitionEnvelope using seal_envelope(). Computes payload_hash, machine_fingerprint, user_fingerprint, generates nonce, captures timestamp.",
+        "command": "python -m boundaries.transition_gate.cli seal --payload-file artifacts.json --secret-from credential_manager",
+        "expected_output": "Sealed envelope written to E:\\Fruits\\releases\\envelope_<id>.json",
+        "on_failure": "abort",
+        "timeout_seconds": 15
+      },
+      {
+        "step_number": 7,
+        "name": "scope_declaration",
+        "description": "Attach a ScopeDeclaration to the sealed envelope specifying exactly which permissions the receiver gets. Follow least-privilege: only grant deploy, run_tests, or read_only as needed.",
+        "command": null,
+        "expected_output": "Scope declaration embedded in envelope with explicit permissions list.",
+        "on_failure": "abort",
+        "timeout_seconds": 5
+      },
+      {
+        "step_number": 8,
+        "name": "transfer",
+        "description": "Copy the sealed envelope JSON from E:\\Fruits\\releases\\ to C:\\Users\\USER\\cascadeprojects\\gate\\incoming\\. Use robocopy or Copy-Item with verification.",
+        "command": "robocopy E:\\Fruits\\releases C:\\Users\\USER\\cascadeprojects\\gate\\incoming envelope_*.json /MOV /R:3 /W:5",
+        "expected_output": "1 File(s) copied.",
+        "on_failure": "abort",
+        "timeout_seconds": 30
+      },
+      {
+        "step_number": 9,
+        "name": "overwatch_log",
+        "description": "Log the transfer event to Overwatch for monitoring. Emit a gate_transfer_sealed event with envelope_id, timestamp, target partition, and scope summary.",
+        "command": null,
+        "expected_output": "Event logged to logs/boundaries/ and Overwatch alert pipeline.",
+        "on_failure": "log_and_continue",
+        "timeout_seconds": 5
+      }
+    ]
+  },
+  "never_rules": [
+    {
+      "id": "NR-S01",
+      "rule": "Never seal an envelope without running tests first. tests_passed must reflect actual test execution, not a hardcoded True.",
+      "severity": "critical",
+      "enforcement": "automated"
+    },
+    {
+      "id": "NR-S02",
+      "rule": "Never embed the user_secret in the envelope or write it to any file. The secret is used only transiently for HMAC computation.",
+      "severity": "critical",
+      "enforcement": "both"
+    },
+    {
+      "id": "NR-S03",
+      "rule": "Never reuse a nonce across envelopes. Each seal_envelope() call must generate a fresh UUID4 nonce via NonceRegistry.generate().",
+      "severity": "critical",
+      "enforcement": "automated"
+    },
+    {
+      "id": "NR-S04",
+      "rule": "Never grant scope permissions beyond what the specific transfer requires. Default to read_only; escalate only with explicit justification.",
+      "severity": "high",
+      "enforcement": "review"
+    },
+    {
+      "id": "NR-S05",
+      "rule": "Never transfer unsealed artifacts. The sealed envelope JSON is the ONLY object that may cross the partition boundary.",
+      "severity": "critical",
+      "enforcement": "automated"
+    },
+    {
+      "id": "NR-S06",
+      "rule": "Never bypass the PreparednessFramework gate. If gate_capability returns ('block', False), the transfer must not proceed.",
+      "severity": "high",
+      "enforcement": "automated"
+    },
+    {
+      "id": "NR-S07",
+      "rule": "Never modify the payload after computing payload_hash. Any post-hash mutation invalidates the envelope's integrity proof.",
+      "severity": "critical",
+      "enforcement": "automated"
+    },
+    {
+      "id": "NR-S08",
+      "rule": "Never skip the checkpoint_clean step. Dirty git state means the source of truth is ambiguous and the envelope cannot be trusted.",
+      "severity": "high",
+      "enforcement": "automated"
+    },
+    {
+      "id": "NR-S09",
+      "rule": "Never hardcode the user_secret in source code, config files, or environment variable defaults. Retrieve it from Windows Credential Manager or a secure keyring at runtime only.",
+      "severity": "critical",
+      "enforcement": "both"
+    },
+    {
+      "id": "NR-S10",
+      "rule": "Never transfer to a target partition path outside the declared target_partition in the envelope. The receiving path must match the contract.",
+      "severity": "high",
+      "enforcement": "automated"
+    }
+  ],
+  "scope_enforcement": {
+    "known_permissions": [
+      "deploy",
+      "run_tests",
+      "start_server",
+      "read_only",
+      "write_results",
+      "network"
+    ],
+    "default_permission": "read_only",
+    "principle": "least_privilege",
+    "unknown_permission_action": "reject"
+  },
+  "audit": {
+    "enabled": true,
+    "format": "ndjson",
+    "log_path": "E:\\Seeds\\GRID-main\\logs\\boundaries\\gate_seal_audit.ndjson",
+    "retention_days": 90,
+    "overwatch_integration": true
+  },
+  "kpis": {
+    "transfer_success_rate": {
+      "target": 0.95,
+      "window": "7d"
+    },
+    "verification_latency_ms": {
+      "p50_target": 50,
+      "p99_target": 500
+    },
+    "replay_attempt_rate": {
+      "alert_threshold": 0.01,
+      "window": "24h"
+    }
+  },
+  "overwatch_escalation": {
+    "threshold_count": 3,
+    "window_minutes": 60,
+    "notify_channels": [],
+    "escalation_events": [
+      "seal_without_tests",
+      "nonce_generation_failure",
+      "preparedness_gate_blocked",
+      "transfer_io_failure"
+    ]
+  },
+  "projects": {
+    "GRID-main": {
+      "test_command": "uv run pytest tests/unit tests/integration -q --tb=short",
+      "lint_command": "uv run ruff check .",
+      "build_command": null,
+      "source_path": "E:\\Seeds\\GRID-main",
+      "default_scope_permissions": ["deploy", "run_tests", "start_server"]
+    },
+    "afloat": {
+      "test_command": "npm run test",
+      "lint_command": "npm run lint",
+      "build_command": "npm run build",
+      "source_path": "E:\\Seeds\\afloat",
+      "default_scope_permissions": ["deploy", "start_server"]
+    },
+    "echoes": {
+      "test_command": "uv run pytest tests/ -q --tb=short",
+      "lint_command": "uv run ruff check .",
+      "build_command": null,
+      "source_path": "E:\\Seeds\\echoes",
+      "default_scope_permissions": ["deploy", "run_tests", "start_server"]
+    },
+    "light_of_the_seven": {
+      "test_command": "uv run pytest tests/ -q --tb=short",
+      "lint_command": "uv run ruff check .",
+      "build_command": null,
+      "source_path": "E:\\Seeds\\light_of_the_seven",
+      "default_scope_permissions": ["deploy", "run_tests"]
+    }
+  },
+  "port_assignments": {
+    "GRID-main": 8080,
+    "afloat": 3000,
+    "echoes": 8000,
+    "light_of_the_seven": 8001
+  }
+}

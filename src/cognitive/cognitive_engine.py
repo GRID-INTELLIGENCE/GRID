@@ -15,7 +15,6 @@ import logging
 import time
 from datetime import datetime, timedelta
 from typing import Any
-from unittest.mock import Mock
 
 from cognitive.light_of_the_seven.cognitive_layer.cognitive_load.load_estimator import CognitiveLoadEstimator
 from cognitive.light_of_the_seven.cognitive_layer.cognitive_load.scaffolding import ScaffoldingManager
@@ -157,9 +156,6 @@ class CognitiveEngine:
         self.profile_store = profile_store
         self.pattern_matcher = pattern_matcher
 
-        # Get metrics collector
-        self.metrics_collector = Mock()  # Placeholder for metrics collector
-
         # In-memory cognitive state cache
         self._state_cache: dict[str, tuple[CognitiveState, datetime]] = {}
 
@@ -168,9 +164,6 @@ class CognitiveEngine:
 
         # Recent interactions for pattern detection (last 100 per user)
         self._interaction_history: dict[str, list[InteractionEvent]] = {}
-
-        # Processing mode history for mode detection
-        self._mode_history: dict[str, list[tuple[ProcessingMode, datetime]]] = {}
 
         # Temporal router for temporal awareness
         self.temporal_router = TemporalRouter()  # Add temporal router
@@ -230,75 +223,10 @@ class CognitiveEngine:
         # Cache the state
         self._state_cache[event.user_id] = (cognitive_state, datetime.now())
 
-        # Detect processing mode
-        detected_mode = self.detect_processing_mode(cognitive_state)
-        cognitive_state.processing_mode = detected_mode
-        cognitive_state.mode_confidence = self._calculate_mode_confidence(event.user_id, detected_mode)
-
-        # Check mental model alignment
-        mental_alignment = await self._check_mental_model_alignment(event.user_id, event)
-        cognitive_state.mental_model_alignment = mental_alignment["alignment"]
-        cognitive_state.model_mismatches = mental_alignment["mismatches"]
-
-        # Add interaction context
-        cognitive_state.context.update(
-            {
-                "time_pressure": operation.get("time_pressure", 0.0),
-                "event": event.to_dict(),
-                "interaction_count": len(self._interaction_history[event.user_id]),
-            }
-        )
-        cognitive_state.context["domain"] = ActivityDomain.SOFTWARE_DEVELOPMENT.value
-
-        # Cache the state
-        self._state_cache[event.user_id] = (cognitive_state, datetime.now())
-
-        # Detect processing mode
-        detected_mode = self.detect_processing_mode(cognitive_state)
-        cognitive_state.processing_mode = detected_mode
-        cognitive_state.mode_confidence = self._calculate_mode_confidence(event.user_id, detected_mode)
-
-        # Check mental model alignment
-        mental_alignment = await self._check_mental_model_alignment(event.user_id, event)
-        cognitive_state.mental_model_alignment = mental_alignment["alignment"]
-        cognitive_state.model_mismatches = mental_alignment["mismatches"]
-
-        # Add interaction context
-        cognitive_state.context.update(
-            {
-                "time_pressure": operation.get("time_pressure", 0.0),
-                "event": event.to_dict(),
-                "interaction_count": len(self._interaction_history[event.user_id]),
-            }
-        )
-        cognitive_state.context["domain"] = ActivityDomain.SOFTWARE_DEVELOPMENT.value
-
-        # Cache the state
-        self._state_cache[event.user_id] = (cognitive_state, datetime.now())
-
-        # Update metrics
-        if hasattr(self.metrics_collector, "enabled") and self.metrics_collector.enabled:
-            self.metrics_collector.set_gauge(
-                "cognitive_load",
-                cognitive_state.estimated_load,
-                {"user_id": event.user_id, "domain": "software_development"},
-            )
-            self.metrics_collector.set_gauge(
-                "processing_mode",
-                0 if cognitive_state.processing_mode == ProcessingMode.SYSTEM_1 else 1,
-                {"user_id": event.user_id},
-            )
-            self.metrics_collector.set_gauge(
-                "mental_model_alignment", cognitive_state.mental_model_alignment, {"user_id": event.user_id}
-            )
-            self.metrics_collector.set_gauge(
-                "processing_mode",
-                0 if cognitive_state.processing_mode == ProcessingMode.SYSTEM_1 else 1,
-                {"user_id": event.user_id},
-            )
-            self.metrics_collector.set_gauge(
-                "mental_model_alignment", cognitive_state.mental_model_alignment, {"user_id": event.user_id}
-            )
+        # Track mode history for confidence calculation
+        if event.user_id not in self._mode_history:
+            self._mode_history[event.user_id] = []
+        self._mode_history[event.user_id].append((detected_mode, datetime.now()))
 
         logger.debug(
             f"Tracked interaction for {event.user_id}: "

@@ -985,7 +985,6 @@ name = "grid-intelligence"
 version = "2.6.1"
 source = { editable = "." }
 dependencies = [
-    { name = "aio-pika" },
     { name = "aiosqlite" },
     { name = "alembic" },
     { name = "annotated-doc" },
@@ -994,7 +993,6 @@ dependencies = [
     { name = "asyncpg" },
     { name = "bcrypt" },
     { name = "beautifulsoup4" },
-    { name = "celery" },
     { name = "chromadb" },
     { name = "click" },
     { name = "databricks-sdk" },
@@ -1035,7 +1033,6 @@ dependencies = [
     { name = "redis" },
     { name = "requests" },
     { name = "rich" },
-    { name = "schedule" },
     { name = "scikit-learn" },
     { name = "sentence-transformers" },
     { name = "setuptools" },
@@ -1081,10 +1078,14 @@ test = [
     { name = "pytest-timeout" },
     { name = "pytest-xdist" },
 ]
+workers = [
+    { name = "aio-pika" },
+    { name = "celery" },
+    { name = "schedule" },
+]
 
 [package.metadata]
 requires-dist = [
-    { name = "aio-pika", specifier = ">=9.0.0" },
     { name = "aiosqlite", specifier = ">=0.19.0" },
     { name = "alembic", specifier = ">=1.13.0" },
     { name = "annotated-doc", specifier = ">=0.0.2" },
@@ -1093,7 +1094,6 @@ requires-dist = [
     { name = "asyncpg", specifier = ">=0.29.0" },
     { name = "bcrypt", specifier = ">=4.1.0" },
     { name = "beautifulsoup4", specifier = ">=4.12.0" },
-    { name = "celery", specifier = ">=5.3.0" },
     { name = "chromadb", specifier = ">=1.4.1" },
     { name = "click", specifier = ">=8.0.0" },
     { name = "databricks-sdk", specifier = ">=0.40.0" },
@@ -1136,7 +1136,6 @@ requires-dist = [
     { name = "redis", specifier = ">=5.0.0" },
     { name = "requests", specifier = ">=2.28.0" },
     { name = "rich", specifier = ">=13.0.0" },
-    { name = "schedule", specifier = ">=1.2.2" },
     { name = "scikit-learn", specifier = ">=1.5.0" },
     { name = "sentence-transformers", specifier = ">=5.2.0" },
     { name = "setuptools", specifier = "<81" },
@@ -1175,6 +1174,11 @@ test = [
     { name = "pytest-cov", specifier = ">=4.1.0" },
     { name = "pytest-timeout", specifier = ">=2.1.0" },
     { name = "pytest-xdist", specifier = ">=3.5.0" },
+]
+workers = [
+    { name = "aio-pika", specifier = ">=9.0.0" },
+    { name = "celery", specifier = ">=5.3.0" },
+    { name = "schedule", specifier = ">=1.2.2" },
 ]
 
 [[package]]

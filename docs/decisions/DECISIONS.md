@@ -5,6 +5,16 @@ Append new entries at the top. One decision per entry.
 
 ---
 
+## 2026-03-07 — Strategic Audit: Schema Expansion, Fabric Persistence, Doc Consolidation
+
+**Decision**: Executed 9-item strategic audit across P0/P1/P2 priorities. Key changes: (1) Deleted dead `src/realtime/glimpse/` stub (zero imports). (2) Moved celery/aio-pika/schedule to optional `workers` dependency group. (3) Added BoundaryEngine fail-closed tests. (4) Created 4 Alembic migrations (billing core, audit_log, agentic_cases, cockpit — 13 tables), fixing a broken revision chain caused by missing `f3b4c5d6e7f8`. (5) Added Redis Streams persistence to Unified Fabric (`DynamicEventBus`) with `replay_from_redis()` for cross-restart replay. (6) Fixed 3x duplicated block in `CognitiveEngine.track_interaction` and removed `unittest.mock.Mock` placeholder. (7) Deepened XAI `ExplanationGenerator` with `explain_cognitive_state`, `explain_temporal_reasoning`, and `explain_pattern_detection`. (8) Added `openapi-typescript` codegen to frontend. (9) Archived 116 stale docs into `docs/archive/` with freshness policy.
+
+**Why**: Audit identified structural gaps (minimal schema, in-memory-only fabric, thin boundary tests) and maintenance risks (dead stubs, stale docs, unused core deps). Torch was already correctly placed in `finetuning` group.
+
+**Alternatives considered**: Generating full Alembic auto-migrations — rejected because the dual-stack architecture (root `alembic/` + mothership `migrations/`) requires manual revision control. Using Redis pub/sub instead of Streams — rejected because pub/sub is fire-and-forget with no replay capability.
+
+---
+
 ## 2026-02-24 — Community Readiness: Entry Point Cleanup & CVE Fix
 
 **Decision**: Removed 4 broken `[project.scripts]` entries from `pyproject.toml` (`grid-agentic`, `grid-workflow`, `grid-context`, `databricks-cli`). Bumped `grid-safety` to 1.0.1 to publish the `python-jose` removal (CVE-2024-23342 fix) to PyPI. Added PyPI badge, CONTRIBUTING.md, and updated stale installation docs.
