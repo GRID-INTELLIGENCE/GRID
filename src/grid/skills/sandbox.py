@@ -353,8 +353,9 @@ else:
             stdout_text = stdout.decode("utf-8") if stdout else ""
             stderr_text = stderr.decode("utf-8") if stderr else ""
 
-            # Check for security violations
-            violations = self._check_security_violations(execution_id, work_dir)
+            # Check for security violations (read executed script for pattern check)
+            script_code = script_path.read_text(encoding="utf-8", errors="replace")
+            violations = self._check_security_violations(execution_id, work_dir, skill_code=script_code)
 
             return SandboxResult(
                 execution_id=execution_id,
@@ -438,7 +439,7 @@ else:
             stderr=stderr_text,
             resource_usage=await self._get_resource_usage(execution_id),
             error_message=error_message,
-            security_violations=self._check_security_violations(execution_id, work_dir),
+            security_violations=self._check_security_violations(execution_id, work_dir, skill_code=skill_code),
         )
 
     def _get_execution_environment(self) -> dict[str, str]:
@@ -522,9 +523,11 @@ else:
             "disk_usage_mb": 0,
         }
 
-    def _check_security_violations(self, execution_id: str, work_dir: Path) -> list[str]:
-        """Check for security violations."""
-        violations = []
+    def _check_security_violations(
+        self, execution_id: str, work_dir: Path, skill_code: str | None = None
+    ) -> list[str]:
+        """Check for security violations. If skill_code is provided, check for suspicious patterns in executed code."""
+        violations: list[str] = []
 
         try:
             # Check for unauthorized file access
@@ -533,22 +536,19 @@ else:
                     f"Unauthorized file access: {file_path}" for file_path in work_dir.rglob("*") if file_path.is_file()
                 )
 
-            # Check for network access attempts
-            # This would require more sophisticated monitoring in production
-
-            # Check for suspicious patterns
-            suspicious_patterns = [
-                "import os",
-                "import subprocess",
-                "import socket",
-                "eval(",
-                "exec(",
-                "__import__",
-            ]
-
-            for pattern in suspicious_patterns:
-                if pattern in violations:
-                    violations.append(f"Suspicious pattern detected: {pattern}")
+            # Check for suspicious patterns in executed code (CRIT-4/HIGH-17: check skill_code, not violations)
+            if skill_code is not None:
+                suspicious_patterns = [
+                    "import os",
+                    "import subprocess",
+                    "import socket",
+                    "eval(",
+                    "exec(",
+                    "__import__",
+                ]
+                for pattern in suspicious_patterns:
+                    if pattern in skill_code:
+                        violations.append(f"Suspicious pattern detected: {pattern}")
 
         except Exception as e:
             logger.error(f"Security violation check failed: {e}")

@@ -6,9 +6,10 @@ import logging
 from collections.abc import AsyncIterator
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from application.mothership.dependencies import RequiredAuth
 from application.mothership.db.engine import get_async_sessionmaker
 from application.mothership.repositories.agentic import AgenticRepository
 from application.mothership.schemas.agentic import (
@@ -68,9 +69,6 @@ def get_processing_unit():
         )
 
     return processor
-
-
-from application.mothership.dependencies import RequiredAuth
 
 
 @router.post("/cases", response_model=CaseResponse, status_code=status.HTTP_201_CREATED)
@@ -150,6 +148,7 @@ async def create_case(
 @router.get("/cases/{case_id}", response_model=CaseResponse)
 async def get_case(
     case_id: str,
+    auth: RequiredAuth,
     agentic_system: AgenticSystem = Depends(get_agentic_system),
 ) -> CaseResponse:
     """Get case status and details."""
@@ -190,6 +189,7 @@ async def get_case(
 async def enrich_case(
     case_id: str,
     request: CaseEnrichRequest,
+    auth: RequiredAuth,
     processing_unit=Depends(get_processing_unit),
     agentic_system: AgenticSystem = Depends(get_agentic_system),
 ) -> CaseResponse:
@@ -248,6 +248,7 @@ async def enrich_case(
 async def execute_case(
     case_id: str,
     request: CaseExecuteRequest,
+    auth: RequiredAuth,
     agentic_system: AgenticSystem = Depends(get_agentic_system),
 ) -> CaseResponse:
     """Execute a case (lawyer processes case)."""
@@ -321,10 +322,14 @@ async def execute_case(
         ) from e
 
 
+MAX_ITERATIONS_CAP = 50
+
+
 @router.post("/cases/{case_id}/execute-iterative", summary="Execute iterative lawyer phase")
 async def execute_case_iterative(
     case_id: str,
-    max_iterations: int = 3,
+    auth: RequiredAuth,
+    max_iterations: int = Query(default=3, ge=1, le=MAX_ITERATIONS_CAP),
     processing_unit: ProcessingUnit = Depends(get_processing_unit),
 ):
     """Execute the lawyer phase iteratively for a case."""
@@ -356,6 +361,7 @@ async def execute_case_iterative(
 @router.get("/cases/{case_id}/reference", summary="Get case reference file contents")
 async def get_reference_file(
     case_id: str,
+    auth: RequiredAuth,
     processing_unit=Depends(get_processing_unit),
 ) -> ReferenceFileResponse:
     """Get reference file for a case."""
@@ -378,6 +384,7 @@ async def get_reference_file(
 
 @router.get("/experience", response_model=AgentExperienceResponse)
 async def get_agent_experience(
+    auth: RequiredAuth,
     agentic_system: AgenticSystem = Depends(get_agentic_system),
 ) -> AgentExperienceResponse:
     """Get agent experience summary."""

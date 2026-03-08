@@ -135,23 +135,31 @@ class ValidationErrorDetail(BaseModel):
 # =============================================================================
 
 
+def _error_response(
+    request: Request,
+    code: str,
+    message: str,
+    details: dict[str, Any],
+    status_code: int = 500,
+    headers: dict[str, str] | None = None,
+) -> JSONResponse:
+    """Build a standard JSON error response (single place for consistency)."""
+    request_id = getattr(request.state, "request_id", None) or request.headers.get("X-Request-ID")
+    content = ErrorResponse(
+        success=False,
+        error={"code": code, "message": message, "details": details},
+        request_id=request_id,
+        timestamp=datetime.now(UTC).isoformat(),
+    ).model_dump()
+    return JSONResponse(status_code=status_code, content=content, headers=headers or {})
+
+
 async def mothership_error_handler(request: Request, exc: Exception) -> JSONResponse:
     """Handle custom Mothership exceptions."""
     exc = cast(MothershipError, exc)
     logger.error("MothershipError: %s - %s", exc.code, exc.message)
-
-    return JSONResponse(
-        status_code=exc.status_code,
-        content=ErrorResponse(
-            success=False,
-            error={
-                "code": exc.code,
-                "message": exc.message,
-                "details": exc.details,
-            },
-            request_id=request.headers.get("X-Request-ID"),
-            timestamp=datetime.now(UTC).isoformat(),
-        ).model_dump(),
+    return _error_response(
+        request, exc.code, exc.message, exc.details, status_code=exc.status_code
     )
 
 
@@ -159,18 +167,12 @@ async def http_exception_handler(request: Request, exc: Exception) -> JSONRespon
     """Handle standard HTTP exceptions."""
     exc = cast(HTTPException, exc)
     headers = dict(exc.headers) if exc.headers else {}
-    return JSONResponse(
+    return _error_response(
+        request,
+        f"HTTP_{exc.status_code}",
+        exc.detail,
+        {},
         status_code=exc.status_code,
-        content=ErrorResponse(
-            success=False,
-            error={
-                "code": f"HTTP_{exc.status_code}",
-                "message": exc.detail,
-                "details": {},
-            },
-            request_id=request.headers.get("X-Request-ID"),
-            timestamp=datetime.now(UTC).isoformat(),
-        ).model_dump(),
         headers=headers,
     )
 
@@ -186,42 +188,25 @@ async def validation_error_handler(request: Request, exc: Exception) -> JSONResp
         }
         for error in exc.errors()
     ]
-
-    return JSONResponse(
+    return _error_response(
+        request,
+        "VALIDATION_ERROR",
+        "Request validation failed",
+        {"errors": errors},
         status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-        content=ErrorResponse(
-            success=False,
-            error={
-                "code": "VALIDATION_ERROR",
-                "message": "Request validation failed",
-                "details": {"errors": errors},
-            },
-            request_id=request.headers.get("X-Request-ID"),
-            timestamp=datetime.now(UTC).isoformat(),
-        ).model_dump(),
     )
 
 
 async def generic_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     """Handle unexpected exceptions."""
     logger.exception("Unexpected error: %s", exc)
-
-    # Don't expose internal errors in production
-    settings = get_settings()
-    message = str(exc) if settings.is_development else "Internal server error"
-
-    return JSONResponse(
+    message = str(exc) if get_settings().is_development else "Internal server error"
+    return _error_response(
+        request,
+        "INTERNAL_ERROR",
+        message,
+        {},
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        content=ErrorResponse(
-            success=False,
-            error={
-                "code": "INTERNAL_ERROR",
-                "message": message,
-                "details": {},
-            },
-            request_id=request.headers.get("X-Request-ID"),
-            timestamp=datetime.now(UTC).isoformat(),
-        ).model_dump(),
     )
 
 

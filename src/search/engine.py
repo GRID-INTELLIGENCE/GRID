@@ -343,18 +343,17 @@ class SearchEngine:
 
     @staticmethod
     def _build_search_text(parsed: Any) -> str:
-        base_text = (parsed.text or "").strip()
-        if parsed.expanded_terms:
-            return f"{base_text} {' '.join(parsed.expanded_terms)}".strip()
-        return base_text
+        base = (parsed.text or "").strip()
+        if not parsed.expanded_terms:
+            return base
+        return f"{base} {' '.join(parsed.expanded_terms)}".strip()
 
     @staticmethod
     def _scores_to_map(candidates: list[ScoredCandidate]) -> dict[str, float]:
+        """Build doc_id -> max score map in a single pass."""
         scores: dict[str, float] = {}
-        for candidate in candidates:
-            previous = scores.get(candidate.doc_id)
-            if previous is None or candidate.score > previous:
-                scores[candidate.doc_id] = candidate.score
+        for c in candidates:
+            scores[c.doc_id] = max(scores.get(c.doc_id, 0), c.score)
         return scores
 
     def _refresh_expander_vocabulary(self, state: _IndexState) -> None:

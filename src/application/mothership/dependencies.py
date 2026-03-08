@@ -62,6 +62,23 @@ Settings = Annotated[MothershipSettings, Depends(get_config)]
 # State & Repository Dependencies
 # =============================================================================
 
+# Cached persistence mode to avoid os.getenv on every request
+_persistence_mode: str | None = None
+
+
+def _get_persistence_mode() -> str:
+    """Return MOTHERSHIP_PERSISTENCE_MODE (cached for performance)."""
+    global _persistence_mode
+    if _persistence_mode is None:
+        _persistence_mode = os.getenv("MOTHERSHIP_PERSISTENCE_MODE", "memory").lower().strip()
+    return _persistence_mode
+
+
+def reset_persistence_mode_cache() -> None:
+    """Clear cached persistence mode (for tests that change env)."""
+    global _persistence_mode
+    _persistence_mode = None
+
 
 async def get_store() -> StateStore:
     """
@@ -83,8 +100,7 @@ async def get_uow() -> Any:
     Returns:
         UnitOfWork instance
     """
-    mode = os.getenv("MOTHERSHIP_PERSISTENCE_MODE", "memory").lower().strip()
-    if mode == "db":
+    if _get_persistence_mode() == "db":
         return DbUnitOfWork()
     return get_unit_of_work()
 
