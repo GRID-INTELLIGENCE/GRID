@@ -473,6 +473,7 @@ current_mypy_errors.txt
 dev/temp/
 dev/logs/
 dev/cache/
+dev/*.json
 
 # Reports
 reports/
@@ -502,6 +503,7 @@ data/skills_diagnostics/
 
 # Artifacts
 artifacts/*.json
+artifacts/*.jsonl
 artifacts/*.png
 artifacts/repo_analysis/
 artifacts/spacetime_viz/
