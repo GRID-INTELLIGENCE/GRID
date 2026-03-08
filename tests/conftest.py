@@ -34,6 +34,10 @@ def _prime_test_environment() -> None:
     os.makedirs(os.environ["GRID_SANDBOX_TMPDIR"], exist_ok=True)
     os.environ["RAG_VECTOR_STORE_PROVIDER"] = os.environ.get("RAG_VECTOR_STORE_PROVIDER", "in_memory")
     os.environ["SAFETY_BYPASS_REDIS"] = "true"
+    # CRIT-1: Allow dev-test-token in tests only (never in production)
+    os.environ.setdefault("ENABLE_DEV_TOKEN", "1")
+    # CRIT-2: Allow dev login bypass in tests for auth flow tests
+    os.environ.setdefault("ALLOW_DEV_LOGIN_BYPASS", "1")
 
 
 _prime_test_environment()

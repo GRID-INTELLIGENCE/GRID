@@ -343,6 +343,37 @@ def validate_url(url: str, require_https: bool = False) -> bool:
     return bool(re.match(pattern, url))
 
 
+def validate_url_allowlist(url: str, allowed_hosts: list[str], require_https: bool = True) -> bool:
+    """
+    Validate that a URL is allowed for outbound requests (HIGH-14: SSRF mitigation).
+
+    Use for webhook callbacks, redirects, or any user-influenced or config URL
+    before making an outbound HTTP request. Reject if host is not in allowed_hosts.
+
+    Args:
+        url: URL to validate
+        allowed_hosts: List of allowed host names (e.g. ["api.stripe.com", "hooks.example.com"])
+        require_https: Require HTTPS (default True for outbound)
+
+    Returns:
+        True if URL is valid and host is in allowed_hosts
+    """
+    if not url or not allowed_hosts:
+        return False
+    if require_https and not url.strip().lower().startswith("https://"):
+        return False
+    try:
+        from urllib.parse import urlparse
+        parsed = urlparse(url.strip())
+        host = (parsed.hostname or "").lower()
+        if not host:
+            return False
+        allowed = {h.lower().strip() for h in allowed_hosts if h}
+        return host in allowed or any(host == a or host.endswith("." + a) for a in allowed)
+    except Exception:
+        return False
+
+
 def validate_ip_address(ip: str) -> bool:
     """
     Validate IPv4 or IPv6 address.
@@ -640,6 +671,7 @@ __all__ = [
     "validate_email",
     "validate_uuid",
     "validate_url",
+    "validate_url_allowlist",
     "validate_ip_address",
     "validate_identifier",
     "validate_semver",

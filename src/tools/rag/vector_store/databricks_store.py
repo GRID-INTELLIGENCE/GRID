@@ -528,8 +528,9 @@ class DatabricksVectorStore(BaseVectorStore):
 
         try:
             with self._connect() as conn:
-                # Set query timeout
-                conn.execute(text(f"SET STATEMENT SET @@session.statement_timeout = {self._query_timeout}"))
+                # Set query timeout (HIGH-16: timeout is config-only int, never user input)
+                _timeout_sec = int(self._query_timeout)
+                conn.execute(text(f"SET STATEMENT_TIMEOUT = {_timeout_sec}"))
                 results = conn.execute(text(sql), params)
                 rows = results.fetchall()
         except (OperationalError, SQLAlchemyError) as e:

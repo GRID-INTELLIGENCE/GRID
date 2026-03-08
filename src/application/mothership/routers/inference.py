@@ -92,7 +92,7 @@ async def create_inference(
         raise HTTPException(status_code=503, detail="Inference service not available")
     except Exception as e:
         logger.exception("Inference failed: %s", e)
-        raise HTTPException(status_code=500, detail=f"Inference failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.post("/async")
@@ -108,7 +108,7 @@ async def create_async_inference(
         return {"task_id": task_id, "status": "queued", "message": "Inference request queued for processing"}
     except Exception as e:
         logger.exception("Failed to queue inference: %s", e)
-        raise HTTPException(status_code=500, detail=f"Failed to queue inference: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.get("/status/{task_id}")
@@ -118,11 +118,11 @@ async def get_inference_status(task_id: str, auth: Auth):
         user_id = auth.get("user_id", "anonymous")
         status = await _get_task_status(task_id, user_id)
         return status
-    except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+    except ValueError:
+        raise HTTPException(status_code=404, detail="Task not found")
     except Exception as e:
         logger.exception("Failed to get task status: %s", e)
-        raise HTTPException(status_code=500, detail=f"Failed to get task status: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.get("/models")

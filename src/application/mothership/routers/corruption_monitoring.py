@@ -13,6 +13,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field
 
+from application.mothership.dependencies import AdminAuth
 from grid.resilience.data_corruption_penalty import (
     CorruptionSeverity,
     CorruptionType,
@@ -243,15 +244,14 @@ async def get_corruption_stats() -> CorruptionStatsResponse:
     description="Reset all corruption penalties for a specific endpoint (admin only)",
 )
 async def reset_endpoint_penalties(
+    auth: AdminAuth,
     endpoint: str,
     reason: str = Query(..., description="Reason for resetting penalties"),
 ) -> dict[str, Any]:
     """Reset all penalties for a specific endpoint.
 
-    This is an admin-only operation that should be used after fixing
-    the underlying issues that caused the corruption.
+    Requires admin auth (HIGH-12). Use after fixing the underlying issues.
     """
-    # In a real implementation, you'd want to add authentication here
     if endpoint in corruption_tracker._penalties:
         del corruption_tracker._penalties[endpoint]
         corruption_tracker._endpoint_penalties.pop(endpoint, None)

@@ -15,6 +15,7 @@ if TYPE_CHECKING:
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
+from ..dependencies import AdminAuth
 from ..repositories.drt import (
     DRTAttackVectorRepository,
     DRTBehavioralSignatureRepository,
@@ -98,7 +99,9 @@ async def get_drt_status(middleware: ComprehensiveDRTMiddleware = Depends(get_dr
 
 @router.post("/attack-vectors")
 async def add_attack_vector(
-    request: AttackVectorAddRequest, middleware: ComprehensiveDRTMiddleware = Depends(get_drt_middleware)
+    auth: AdminAuth,
+    request: AttackVectorAddRequest,
+    middleware: ComprehensiveDRTMiddleware = Depends(get_drt_middleware),
 ) -> dict[str, str]:
     from ..middleware.drt_middleware import BehavioralSignature as _BehavioralSignature
 
@@ -124,7 +127,9 @@ async def get_escalated_endpoints(
 
 @router.post("/escalate/{path:path}")
 async def escalate_endpoint(
-    path: str, middleware: ComprehensiveDRTMiddleware = Depends(get_drt_middleware)
+    auth: AdminAuth,
+    path: str,
+    middleware: ComprehensiveDRTMiddleware = Depends(get_drt_middleware),
 ) -> dict[str, str]:
     normalized = f"/{path}" if not path.startswith("/") else path
     middleware._escalate_endpoint(normalized)
@@ -133,7 +138,9 @@ async def escalate_endpoint(
 
 @router.post("/de-escalate/{path:path}")
 async def de_escalate_endpoint(
-    path: str, middleware: ComprehensiveDRTMiddleware = Depends(get_drt_middleware)
+    auth: AdminAuth,
+    path: str,
+    middleware: ComprehensiveDRTMiddleware = Depends(get_drt_middleware),
 ) -> dict[str, str]:
     normalized = f"/{path}" if not path.startswith("/") else path
     if normalized in middleware.ESCALATED_ENDPOINTS:
@@ -160,7 +167,9 @@ async def get_behavioral_history(
 
 @router.post("/false-positives", response_model=FalsePositiveResponse)
 async def mark_false_positive(
-    request: FalsePositiveRequest, middleware: ComprehensiveDRTMiddleware = Depends(get_drt_middleware)
+    auth: AdminAuth,
+    request: FalsePositiveRequest,
+    middleware: ComprehensiveDRTMiddleware = Depends(get_drt_middleware),
 ) -> FalsePositiveResponse:
     """Mark a violation as a false positive."""
     from ..db.engine import get_async_sessionmaker
@@ -306,7 +315,9 @@ async def get_false_positive_patterns(
 
 @router.delete("/false-positive-patterns/{pattern_id}")
 async def deactivate_false_positive_pattern(
-    pattern_id: str, middleware: ComprehensiveDRTMiddleware = Depends(get_drt_middleware)
+    auth: AdminAuth,
+    pattern_id: str,
+    middleware: ComprehensiveDRTMiddleware = Depends(get_drt_middleware),
 ) -> dict[str, str]:
     """Deactivate a false positive pattern."""
     try:

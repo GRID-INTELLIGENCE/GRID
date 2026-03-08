@@ -7,16 +7,24 @@ Provides JWT token generation, refresh, validation, and user registration endpoi
 from __future__ import annotations
 
 import logging
+import os
 from typing import Any
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr, Field
 
-from application.mothership.dependencies import Auth, PublicRateLimited, RateLimited, RequestContext, Settings
+from application.mothership.dependencies import (
+    Auth,
+    PublicRateLimited,
+    RateLimited,
+    RequestContext,
+    Settings,
+    get_optional_authentication,
+)
 from application.mothership.schemas import ApiResponse, ResponseMeta
 from application.mothership.security.credential_validation import validate_production_credentials
 from application.mothership.security.jwt import get_jwt_manager
-from application.mothership.security.token_revocation import get_token_validator
+from application.mothership.security.token_revocation import get_token_validator, is_token_revoked
 
 logger = logging.getLogger(__name__)
 
@@ -176,7 +184,17 @@ async def login(
     """
     request_id = request_context.get("request_id", "unknown")
     auth_result = None
-    allow_test_credential_bypass = settings.is_development or settings.is_testing
+    # CRIT-2: Require explicit ALLOW_DEV_LOGIN_BYPASS=1; never set in production.
+    allow_test_credential_bypass = (
+        (settings.is_development or settings.is_testing)
+        and os.getenv("ALLOW_DEV_LOGIN_BYPASS", "").strip() == "1"
+    )
+    if allow_test_credential_bypass:
+        logger.warning(
+            "DEV LOGIN BYPASS: credentials not validated (username=%s, request_id=%s). Set ALLOW_DEV_LOGIN_BYPASS=0 to enforce.",
+            request.username,
+            request_id,
+        )
 
     # Only production-like environments enforce credential validation.
     if not allow_test_credential_bypass:
@@ -291,6 +309,16 @@ async def refresh_token(
     )
 
     try:
+        # CRIT-3: Check revocation before issuing new access token (revocation key is JTI everywhere).
+        payload = jwt_manager.verify_token(request.refresh_token, expected_type="refresh")
+        if payload.jti and await is_token_revoked(payload.jti):
+            logger.warning("Refresh rejected: token revoked (jti=%s, request_id=%s)", payload.jti, request_id)
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Refresh token has been revoked",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
         # Generate new access token from refresh token
         new_access_token = jwt_manager.refresh_access_token(request.refresh_token)
 
@@ -319,34 +347,29 @@ async def refresh_token(
 
 @router.get("/validate", response_model=ApiResponse[ValidateResponse])
 async def validate_token(
-    auth: Auth,
     request_context: RequestContext,
+    auth: dict[str, Any] = Depends(get_optional_authentication),
 ) -> ApiResponse[ValidateResponse]:
     """
     Validate the current authentication token.
 
-    This endpoint can be used to check if a token is still valid
-    and retrieve information about the authenticated user.
-
-    Args:
-        auth: Authentication context (automatically validated)
-        request_context: Request context
-
-    Returns:
-        API response with token validation result
+    Callable without a token; returns 200 with valid=False when unauthenticated.
+    Use to check whether the current request is authenticated.
     """
     request_id = request_context.get("request_id", "unknown")
-
-    # If we got here, the token is valid (dependencies validated it)
     token_payload = auth.get("token_payload", {})
+    permissions = auth.get("permissions") or set()
+    scopes = (
+        list(token_payload.get("scopes"))
+        if token_payload.get("scopes") is not None
+        else list(permissions)
+    )
 
     response_data = ValidateResponse(
         valid=auth.get("authenticated", False),
         user_id=auth.get("user_id"),
         email=auth.get("email"),
-        scopes=list(
-            token_payload.get("scopes") if token_payload.get("scopes") is not None else auth.get("permissions", [])
-        ),
+        scopes=scopes,
         expires_at=token_payload.get("exp"),
     )
 

@@ -23,6 +23,7 @@ class TokenRevocationList:
 
     Stores revoked token JTIs (JWT IDs) with automatic expiration.
     Uses the domain gateway's persistence layer for storage.
+    All revocation keys use JTI only (key_prefix + jti); never raw token strings (CRIT-3).
     """
 
     def __init__(self, key_prefix: str = "revoked_token:"):

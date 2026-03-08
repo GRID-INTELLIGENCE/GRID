@@ -9,8 +9,8 @@ from pathlib import Path
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from application.mothership.dependencies import RequiredAuth
 from application.mothership.db.engine import get_async_sessionmaker
+from application.mothership.dependencies import RequiredAuth
 from application.mothership.repositories.agentic import AgenticRepository
 from application.mothership.schemas.agentic import (
     AgentExperienceResponse,
@@ -20,6 +20,7 @@ from application.mothership.schemas.agentic import (
     CaseResponse,
     ReferenceFileResponse,
 )
+from application.mothership.security.input_sanitizer_helper import sanitize_text_for_llm
 from grid.agentic import AgenticSystem
 from grid.agentic.event_bus import get_event_bus
 from grid.agentic.events import CaseCategorizedEvent, CaseCreatedEvent, CaseReferenceGeneratedEvent
@@ -83,9 +84,11 @@ async def create_case(
     This endpoint receives raw input and processes it through the receptionist workflow.
     """
     try:
+        # InputSanitizer: reject unsafe raw_input before processing (SECURITY_REVIEW)
+        safe_raw_input = sanitize_text_for_llm(request.raw_input, "raw_input")
         # Process input through processing unit
         result = processing_unit.process_input(
-            raw_input=request.raw_input,
+            raw_input=safe_raw_input,
             user_context=request.user_context,
             examples=request.examples or [],
             scenarios=request.scenarios or [],
@@ -94,7 +97,7 @@ async def create_case(
         # Emit case.created event
         created_event = CaseCreatedEvent(
             case_id=result.case_id,
-            raw_input=request.raw_input,
+            raw_input=safe_raw_input,
             user_id=request.user_id,
             examples=request.examples or [],
             scenarios=request.scenarios or [],
@@ -138,10 +141,10 @@ async def create_case(
         )
 
     except Exception as e:
-        logger.error(f"Error creating case: {e}", exc_info=True)
+        logger.error("Error creating case: %s", e, exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error creating case: {str(e)}",
+            detail="Internal server error",
         ) from e
 
 
@@ -195,9 +198,11 @@ async def enrich_case(
 ) -> CaseResponse:
     """Enrich an existing case with additional user input."""
     try:
+        # InputSanitizer: reject unsafe additional_context (SECURITY_REVIEW)
+        safe_additional_context = sanitize_text_for_llm(request.additional_context, "additional_context")
         enriched = processing_unit.enrich_with_user_input(
             case_id=case_id,
-            additional_context=request.additional_context,
+            additional_context=safe_additional_context,
             examples=request.examples or [],
             scenarios=request.scenarios or [],
         )
@@ -237,10 +242,10 @@ async def enrich_case(
         )
 
     except Exception as e:
-        logger.error(f"Error enriching case {case_id}: {e}", exc_info=True)
+        logger.error("Error enriching case %s: %s", case_id, e, exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error enriching case: {str(e)}",
+            detail="Internal server error",
         ) from e
 
 
@@ -315,10 +320,10 @@ async def execute_case(
         )
 
     except Exception as e:
-        logger.error(f"Error executing case {case_id}: {e}", exc_info=True)
+        logger.error("Error executing case %s: %s", case_id, e, exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error executing case: {str(e)}",
+            detail="Internal server error",
         ) from e
 
 
@@ -354,8 +359,8 @@ async def execute_case_iterative(
 
         return result
     except Exception as e:
-        logger.error(f"Error in iterative execution: {e}")
-        raise HTTPException(status_code=500, detail=str(e)) from e
+        logger.error("Error in iterative execution: %s", e, exc_info=True)
+        raise HTTPException(status_code=500, detail="Internal server error") from e
 
 
 @router.get("/cases/{case_id}/reference", summary="Get case reference file contents")

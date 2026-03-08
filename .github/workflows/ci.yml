@@ -338,6 +338,18 @@ jobs:
       - name: "Install build tools"
         run: uv pip install build twine
 
+      - name: "Assert no DEBUG in production build (Phase 4)"
+        run: |
+          if [ -n "${DEBUG}" ] && [ "${DEBUG}" != "0" ] && [ "${DEBUG}" != "false" ]; then
+            echo "::error::DEBUG must not be set for production build (security guardrail)"
+            exit 1
+          fi
+          if [ -n "${ECHOES_API_DEBUG}" ] && [ "${ECHOES_API_DEBUG}" != "0" ] && [ "${ECHOES_API_DEBUG}" != "false" ]; then
+            echo "::error::ECHOES_API_DEBUG must not be set for production build (security guardrail)"
+            exit 1
+          fi
+          echo "DEBUG and ECHOES_API_DEBUG not set for build"
+
       - name: "Build package"
         run: uv run python -m build
 

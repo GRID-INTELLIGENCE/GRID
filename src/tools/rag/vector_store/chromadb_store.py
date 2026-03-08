@@ -3,11 +3,22 @@
 Chromadb and Settings are imported lazily in __init__ to avoid pulling in
 chromadb.config.Settings at module load time (avoids pydantic v1 inference
 issues on Python 3.13+ when tests only need RAGConfig or other RAG code).
+
+HIGH-10: allow_reset is gated by env; default False. Set GRID_CHROMA_ALLOW_RESET=true
+only in dev/test when admin auth or equivalent is in place for reset operations.
 """
 
+from __future__ import annotations
+
+import os
 from typing import Any, cast
 
 from .base import BaseVectorStore
+
+
+def _chroma_allow_reset() -> bool:
+    """Allow reset only when explicitly enabled (default False for production safety)."""
+    return os.getenv("GRID_CHROMA_ALLOW_RESET", "false").strip().lower() in ("true", "1", "yes")
 
 
 class ChromaDBVectorStore(BaseVectorStore):
@@ -37,7 +48,8 @@ class ChromaDBVectorStore(BaseVectorStore):
 
         # Initialize ChromaDB client (lazy import avoids pydantic/ConfigError at module load)
         self.client = chromadb.PersistentClient(
-            path=persist_directory, settings=Settings(anonymized_telemetry=False, allow_reset=True)
+            path=persist_directory,
+            settings=Settings(anonymized_telemetry=False, allow_reset=_chroma_allow_reset()),
         )
 
         # Get or create collection

@@ -323,7 +323,10 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> CallToolResult:
 
 async def handle_performance_profiler(args: dict[str, Any]) -> dict[str, Any]:
     """Handle performance profiling."""
-    target = args["target"]
+    try:
+        target = _sanitize_target_for_command(args["target"])
+    except ValueError as e:
+        return {"success": False, "error": str(e), "target": args.get("target", "")}
     profiler_type = args.get("profiler_type", "cpu")
     args.get("output_format", "json")
 
@@ -350,7 +353,10 @@ async def handle_performance_profiler(args: dict[str, Any]) -> dict[str, Any]:
 
 async def handle_security_auditor(args: dict[str, Any]) -> dict[str, Any]:
     """Handle security auditing."""
-    target = args["target"]
+    try:
+        target = _sanitize_target_for_command(args["target"])
+    except ValueError as e:
+        return {"success": False, "error": str(e), "target": args.get("target", "")}
     audit_type = args.get("audit_type", "all")
     severity_level = args.get("severity_level", "medium")
 
@@ -386,7 +392,10 @@ async def handle_security_auditor(args: dict[str, Any]) -> dict[str, Any]:
 
 async def handle_test_coverage_analyzer(args: dict[str, Any]) -> dict[str, Any]:
     """Handle test coverage analysis."""
-    target = args["target"]
+    try:
+        target = _sanitize_target_for_command(args["target"])
+    except ValueError as e:
+        return {"success": False, "error": str(e), "target": args.get("target", "")}
     coverage_type = args.get("coverage_type", "line")
     threshold = args.get("threshold", 80.0)
 
@@ -416,19 +425,64 @@ async def handle_test_coverage_analyzer(args: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _is_safe_module_name(name: str) -> bool:
+    """Allow only valid Python module names (no code injection). Max length 64."""
+    if not name or len(name) > 64:
+        return False
+    import re
+    return bool(re.match(r"^[a-zA-Z_][a-zA-Z0-9_.]*$", name))
+
+
+def _sanitize_target_for_command(target: str, max_length: int = 512) -> str:
+    """
+    Sanitize target path/arg before passing to subprocess (SECURITY_REVIEW: MCP entry point).
+    Allows only path-safe characters; rejects shell metacharacters and injection patterns.
+    """
+    import re
+    if not target or not isinstance(target, str):
+        raise ValueError("target is required and must be a non-empty string")
+    if len(target) > max_length:
+        raise ValueError(f"target length exceeds {max_length}")
+    # Allow alphanumeric, underscore, hyphen, dot, path separators, space
+    if not re.match(r"^[a-zA-Z0-9_.\-/\\:\s]+$", target):
+        raise ValueError("target contains disallowed characters (only path-safe characters allowed)")
+    return target.strip()
+
+
 async def handle_documentation_generator(args: dict[str, Any]) -> dict[str, Any]:
     """Handle documentation generation."""
-    target = args["target"]
+    try:
+        target = _sanitize_target_for_command(args["target"])
+    except ValueError as e:
+        return {
+            "success": False,
+            "target": args.get("target", ""),
+            "doc_type": args.get("doc_type", "api"),
+            "output_dir": args.get("output_dir", "docs/generated"),
+            "generated_files": [],
+            "output": str(e),
+        }
     doc_type = args.get("doc_type", "api")
     output_dir = args.get("output_dir", "docs/generated")
 
     # Ensure output directory exists
     Path(output_dir).mkdir(parents=True, exist_ok=True)
 
+    # CRIT-6: Never pass user-controlled target into python -c (code injection).
+    # For readme, use pydoc which accepts module name as argv (no -c injection).
     if doc_type == "api":
         cmd = ["python", "-m", "sphinx", "-b", "html", target, output_dir]
     elif doc_type == "readme":
-        cmd = ["python", "-c", f"import {target}; help({target})"]
+        if not _is_safe_module_name(target):
+            return {
+                "success": False,
+                "target": target,
+                "doc_type": doc_type,
+                "output_dir": output_dir,
+                "generated_files": [],
+                "output": f"Rejected: invalid or disallowed module name '{target}'",
+            }
+        cmd = ["python", "-m", "pydoc", target]
     else:
         cmd = ["python", "-m", "pydoc", target]
 
@@ -446,7 +500,10 @@ async def handle_documentation_generator(args: dict[str, Any]) -> dict[str, Any]
 
 async def handle_dependency_health_monitor(args: dict[str, Any]) -> dict[str, Any]:
     """Handle dependency health monitoring."""
-    target = args["target"]
+    try:
+        target = _sanitize_target_for_command(args["target"])
+    except ValueError as e:
+        return {"success": False, "error": str(e), "target": args.get("target", "")}
     check_type = args.get("check_type", "health")
     include_dev = args.get("include_dev", True)
 
@@ -479,7 +536,10 @@ async def handle_dependency_health_monitor(args: dict[str, Any]) -> dict[str, An
 
 async def handle_code_quality_gate(args: dict[str, Any]) -> dict[str, Any]:
     """Handle code quality gating."""
-    target = args["target"]
+    try:
+        target = _sanitize_target_for_command(args["target"])
+    except ValueError as e:
+        return {"success": False, "error": str(e), "target": args.get("target", "")}
     quality_metrics = args.get("quality_metrics", ["lint", "complexity", "style", "type_check"])
     fail_threshold = args.get("fail_threshold", 8.0)
 

@@ -32,6 +32,11 @@ from .defaults import (
     SecurityDefaults,
     get_security_defaults,
 )
+from .input_sanitizer_helper import (
+    get_llm_sanitizer,
+    sanitize_dict_for_llm,
+    sanitize_text_for_llm,
+)
 
 try:
     from .jwt import (
@@ -95,6 +100,9 @@ __all__ = [
     "THREAT_PATTERNS",
     "SanitizationResult",
     "InputSanitizer",
+    "get_llm_sanitizer",
+    "sanitize_dict_for_llm",
+    "sanitize_text_for_llm",
     "SQLiFilter",
     "XSSDetector",
     # API Sentinels - Defaults

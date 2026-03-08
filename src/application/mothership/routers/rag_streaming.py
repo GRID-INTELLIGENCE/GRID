@@ -13,6 +13,7 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 from starlette.websockets import WebSocketDisconnect
 
+from application.mothership.security.input_sanitizer_helper import sanitize_text_for_llm
 from tools.rag.conversational_rag import ConversationalRAGEngine, create_conversational_rag_engine
 
 logger = logging.getLogger(__name__)
@@ -92,6 +93,8 @@ async def query_rag_stream(request: RAGQueryRequest) -> StreamingResponse:
     4. Answer generation
     5. Final result
     """
+    # InputSanitizer: reject unsafe query before LLM/RAG (SECURITY_REVIEW)
+    safe_query = sanitize_text_for_llm(request.query, "query")
     engine = get_rag_engine()
 
     async def generate_stream() -> AsyncGenerator[str]:
@@ -102,7 +105,7 @@ async def query_rag_stream(request: RAGQueryRequest) -> StreamingResponse:
             StreamChunk(
                 type="analysis_started",
                 data={
-                    "query": request.query,
+                    "query": safe_query,
                     "session_id": request.session_id,
                     "timestamp": asyncio.get_event_loop().time(),
                 },
@@ -111,7 +114,7 @@ async def query_rag_stream(request: RAGQueryRequest) -> StreamingResponse:
         )
 
         # Stage 2: Retrieval process
-        yield StreamChunk(type="retrieval_started", data={"query": request.query}).to_json() + "\n"
+        yield StreamChunk(type="retrieval_started", data={"query": safe_query}).to_json() + "\n"
 
         # Stage 3: Simulate retrieval progress
         for progress in range(0, 101, 20):
@@ -127,7 +130,7 @@ async def query_rag_stream(request: RAGQueryRequest) -> StreamingResponse:
         # Stage 4: Execute query
         try:
             result = await engine.query(
-                query_text=request.query,
+                query_text=safe_query,
                 top_k=request.top_k,
                 temperature=request.temperature,
                 session_id=request.session_id,
@@ -203,7 +206,7 @@ async def query_rag_stream(request: RAGQueryRequest) -> StreamingResponse:
             )
 
         except Exception as e:
-            yield StreamChunk(type="error", data={"error": str(e), "query": request.query}).to_json() + "\n"
+            yield StreamChunk(type="error", data={"error": str(e), "query": safe_query}).to_json() + "\n"
 
     return StreamingResponse(
         generate_stream(),
@@ -219,6 +222,13 @@ async def query_rag_stream(request: RAGQueryRequest) -> StreamingResponse:
 async def query_rag_batch(requests: list[RAGQueryRequest]) -> dict[str, Any]:
     """Execute multiple RAG queries in batch with progress streaming."""
     engine = get_rag_engine()
+    # Sanitize each query before processing (SECURITY_REVIEW)
+    safe_queries: list[str] = []
+    for i, req in enumerate(requests):
+        try:
+            safe_queries.append(sanitize_text_for_llm(req.query, f"query[{i}]"))
+        except HTTPException:
+            raise
 
     async def batch_process() -> AsyncGenerator[str]:
         """Process batch queries with progress streaming."""
@@ -229,6 +239,7 @@ async def query_rag_batch(requests: list[RAGQueryRequest]) -> dict[str, Any]:
 
         results = []
         for i, request in enumerate(requests):
+            safe_query = safe_queries[i]
             # Progress update
             yield (
                 StreamChunk(
@@ -237,7 +248,7 @@ async def query_rag_batch(requests: list[RAGQueryRequest]) -> dict[str, Any]:
                         "current": i + 1,
                         "total": total_queries,
                         "progress": int((i + 1) / total_queries * 100),
-                        "query": request.query,
+                        "query": safe_query,
                     },
                 ).to_json()
                 + "\n"
@@ -246,7 +257,7 @@ async def query_rag_batch(requests: list[RAGQueryRequest]) -> dict[str, Any]:
             # Execute query
             try:
                 result = await engine.query(
-                    query_text=request.query,
+                    query_text=safe_query,
                     top_k=request.top_k,
                     temperature=request.temperature,
                     session_id=request.session_id,
@@ -254,15 +265,15 @@ async def query_rag_batch(requests: list[RAGQueryRequest]) -> dict[str, Any]:
                     enable_multi_hop=request.enable_multi_hop,
                 )
 
-                results.append({"query": request.query, **result})
+                results.append({"query": safe_query, **result})
 
             except Exception as e:
-                results.append({"query": request.query, "error": str(e)})
+                results.append({"query": safe_query, "error": str(e)})
 
             yield (
                 StreamChunk(
                     type="query_completed",
-                    data={"index": i, "query": request.query, "success": "error" not in results[-1]},
+                    data={"index": i, "query": safe_query, "success": "error" not in results[-1]},
                 ).to_json()
                 + "\n"
             )

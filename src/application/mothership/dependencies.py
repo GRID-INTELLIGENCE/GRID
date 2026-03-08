@@ -201,6 +201,9 @@ from application.mothership.security.rbac import has_permission
 
 from .security.auth import verify_api_key, verify_jwt_token
 
+# CRIT-1: Literal dev-test-token must never grant access in production; gate behind ENABLE_DEV_TOKEN.
+DEV_TEST_TOKEN_LITERAL = "dev-test-token"
+
 
 async def verify_authentication(
     api_key: str | None = Depends(get_api_key),
@@ -211,6 +214,28 @@ async def verify_authentication(
     Verify request authentication using centralized security logic.
     Supports both API key and JWT authentication with RBAC integration.
     """
+    # CRIT-1: Literal dev-test-token only when ENABLE_DEV_TOKEN=1 and not production
+    if bearer_token and bearer_token.strip() == DEV_TEST_TOKEN_LITERAL:
+        allow_dev_token = os.getenv("ENABLE_DEV_TOKEN", "").strip().lower() in ("1", "true", "yes")
+        is_production = getattr(settings, "environment", None) == "production"
+        if not allow_dev_token or is_production:
+            logger.warning("Rejected bearer token 'dev-test-token' (ENABLE_DEV_TOKEN not set or production)")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Authentication required",
+                headers={"WWW-Authenticate": "Bearer"},
+            ) from None
+        # Explicitly allowed: return test auth context (do not try JWT decode). method=dev_bypass so require_authentication allows.
+        from application.mothership.security.rbac import Role, get_permissions_for_role
+        return {
+            "authenticated": False,
+            "method": "dev_bypass",
+            "permissions": get_permissions_for_role(Role.ADMIN),
+            "token_payload": {},
+            "user_id": "test_user",
+            "email": "test@local.dev",
+        }
+
     # 1. Try JWT authentication (Highest Priority)
     if bearer_token:
         try:
@@ -271,6 +296,7 @@ async def get_optional_authentication(
             logger.warning(f"Optional API key verification failed: {e}")
             raise
 
+    # CRIT-7: Anonymous must never have admin or elevated permissions.
     return {
         "authenticated": False,
         "method": "anonymous",

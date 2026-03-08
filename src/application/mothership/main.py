@@ -198,7 +198,7 @@ async def validation_error_handler(request: Request, exc: Exception) -> JSONResp
 
 
 async def generic_exception_handler(request: Request, exc: Exception) -> JSONResponse:
-    """Handle unexpected exceptions."""
+    """Handle unexpected exceptions. G8: Never send stack or raw exception to client in production."""
     logger.exception("Unexpected error: %s", exc)
     message = str(exc) if get_settings().is_development else "Internal server error"
     return _error_response(

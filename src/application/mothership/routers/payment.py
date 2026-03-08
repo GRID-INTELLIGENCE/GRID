@@ -186,10 +186,10 @@ async def create_payment(
             detail=f"Payment gateway error: {e.message}",
         ) from e
     except Exception as e:
-        logger.exception("Payment creation failed")
+        logger.exception("Payment creation failed: %s", e)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Payment creation failed: {str(e)}",
+            detail="Internal server error",
         ) from e
 
 
@@ -336,17 +336,18 @@ async def payment_webhook(
 
         return {"processed": True, "duplicate": False, "event_id": event_id, "event_type": event_type}
     except ValueError as e:
+        logger.warning("Invalid webhook: %s", e)
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid webhook: {str(e)}",
+            detail="Invalid webhook",
         ) from e
     except HTTPException:
         raise
     except Exception as e:
-        logger.exception("Webhook processing failed")
+        logger.exception("Webhook processing failed: %s", e)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Webhook processing failed: {str(e)}",
+            detail="Internal server error",
         ) from e
 
 

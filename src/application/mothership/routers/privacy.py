@@ -123,7 +123,7 @@ async def detect_pii(request: DetectionRequest, auth: Auth):
         raise HTTPException(status_code=503, detail="Privacy service not available")
     except Exception as e:
         logger.exception("PII detection failed: %s", e)
-        raise HTTPException(status_code=500, detail=f"PII detection failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.post("/mask", response_model=PrivacyMaskResponse)
@@ -161,7 +161,7 @@ async def mask_pii(request: PrivacyRequest, auth: Auth):
         raise HTTPException(status_code=503, detail="Privacy service not available")
     except Exception as e:
         logger.exception("PII masking failed: %s", e)
-        raise HTTPException(status_code=500, detail=f"PII masking failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.post("/batch", response_model=BatchPrivacyResponse)
@@ -211,7 +211,7 @@ async def batch_privacy_processing(request: PrivacyBatchRequest, auth: Auth):
         raise HTTPException(status_code=503, detail="Privacy service not available")
     except Exception as e:
         logger.exception("Batch processing failed: %s", e)
-        raise HTTPException(status_code=500, detail=f"Batch processing failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.get("/levels")
