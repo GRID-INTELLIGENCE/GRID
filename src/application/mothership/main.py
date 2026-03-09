@@ -20,7 +20,6 @@ Usage:
 from __future__ import annotations
 
 import asyncio
-import importlib
 import logging
 import os
 import sys
@@ -347,16 +346,6 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
     # Startup
     try:
-        # Enable async task tracking when DEBUG_ASYNC=true (non-invasive)
-        if os.getenv("DEBUG_ASYNC", "").lower() == "true":
-            try:
-                from grid.debug.async_tracker import enable_async_tracking
-
-                enable_async_tracking()
-                logger.info("Async task tracking enabled (DEBUG_ASYNC=true)")
-            except ImportError as e:
-                logger.debug("Async tracking unavailable: %s", e)
-
         # Initialize database engine explicitly to catch connection errors early
         get_async_engine()
         logger.info("Database engine initialized")
@@ -863,23 +852,6 @@ The API supports multiple authentication methods:
 
     # Include skills health router
     api_router.include_router(skills_router)
-
-    # Include Grid Pulse router (Radar)
-    if os.getenv("MOTHERSHIP_ENABLE_GRID_PULSE") == "1":
-        try:
-            pulse = importlib.import_module("grid.api.routers.pulse")
-
-            api_router.include_router(pulse.router)
-        except ModuleNotFoundError as e:
-            logger.warning(
-                "Grid Pulse router not loaded due to missing optional dependency: %s",
-                str(e),
-            )
-        except SystemExit as e:
-            logger.warning(
-                "Grid Pulse router not loaded due to startup restriction: %s",
-                str(e),
-            )
 
     app.include_router(corruption_router)
     logger.info("Corruption monitoring API endpoints registered")

@@ -1,5 +1,5 @@
 {
-    "python.defaultInterpreterPath": ".venv/Scripts/python.exe",
+    "python.defaultInterpreterPath": "${workspaceFolder}/.venv",
     "python.languageServer": "Pylance",
     "python.analysis.typeCheckingMode": "standard",
     "python.analysis.extraPaths": [
@@ -116,7 +116,26 @@
         ]
     ],
     "terminal.integrated.defaultProfile.windows": "PowerShell",
+    "terminal.integrated.profiles.linux": {
+        "bash": {
+            "path": "/bin/bash",
+            "args": [
+                "-l"
+            ],
+            "icon": "terminal-bash"
+        }
+    },
+    "terminal.integrated.defaultProfile.linux": "bash",
     "terminal.integrated.env.windows": {
+        "COGNITIVE_HOME": "${workspaceFolder}/src/cognitive",
+        "ENV": "development",
+        "GRID_HOME": "${workspaceFolder}/src/grid",
+        "PROJECT_ROOT": "${workspaceFolder}",
+        "PYTHONPATH": "${workspaceFolder}/src;${workspaceFolder}/safety;${workspaceFolder}/security;${workspaceFolder}/boundaries",
+        "PYTHON_VERSION": "3.13",
+        "RESONANCE_HOME": "${workspaceFolder}/src/application/resonance"
+    },
+    "terminal.integrated.env.linux": {
         "COGNITIVE_HOME": "${workspaceFolder}/src/cognitive",
         "ENV": "development",
         "GRID_HOME": "${workspaceFolder}/src/grid",

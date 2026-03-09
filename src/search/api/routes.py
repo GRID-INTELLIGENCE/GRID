@@ -73,8 +73,6 @@ def _require_admin(request: Request, cfg: SearchConfig) -> None:
     # Backward compatibility: when identities list is empty, allow header or identity.
     if request and request.headers.get(admin_header) == admin_value:
         return
-    if identity and identity in admin_identities:
-        return
     raise HTTPException(
         status_code=403,
         detail="Admin role required for this operation",

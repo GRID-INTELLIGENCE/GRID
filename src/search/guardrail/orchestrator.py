@@ -25,7 +25,6 @@ class GuardrailResult:
 
 
 async def _run_tool(
-    name: str,
     fn: Any,
     ctx: GuardrailContext,
 ) -> GuardrailToolResult:
@@ -95,7 +94,7 @@ class GuardrailOrchestrator:
             if budget_limit > 0:
                 ctx.budget_tracker[tool_name] = 0
 
-        tasks = [_run_tool(name, fn, ctx) for name, fn in tools]
+        tasks = [_run_tool(fn, ctx) for _, fn in tools]
         results: list[GuardrailToolResult] = await asyncio.gather(*tasks)
 
         blocked = any(r.result == ToolResult.BLOCK for r in results)
@@ -137,7 +136,7 @@ class GuardrailOrchestrator:
             if budget_limit > 0 and tool_name not in ctx.budget_tracker:
                 ctx.budget_tracker[tool_name] = 0
 
-        tasks = [_run_tool(name, fn, ctx) for name, fn in tools]
+        tasks = [_run_tool(fn, ctx) for _, fn in tools]
         results: list[GuardrailToolResult] = await asyncio.gather(*tasks)
 
         blocked = any(r.result == ToolResult.BLOCK for r in results)
