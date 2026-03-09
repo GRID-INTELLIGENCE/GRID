@@ -85,6 +85,10 @@ class TestDevTokenProduction:
         with patch.dict(os.environ, env, clear=False):
             from importlib import reload
 
+            # Reset both dependencies and config modules to clear cached settings
+            import application.mothership.config as config_module
+
+            reload(config_module)
             import application.mothership.dependencies as deps
 
             reload(deps)
@@ -92,8 +96,10 @@ class TestDevTokenProduction:
 
             app = create_app()
             client = TestClient(app, raise_server_exceptions=False)
-            response = client.get(
-                "/api/agentic/skills",
+            # Use an endpoint that requires authentication (agentic router uses RequiredAuth)
+            response = client.post(
+                "/api/v1/agentic/cases",
+                json={"raw_input": "test", "examples": [], "scenarios": []},
                 headers={"Authorization": "Bearer dev-test-token"},
             )
             assert response.status_code in (401, 403), (
