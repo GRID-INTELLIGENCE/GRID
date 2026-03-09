@@ -39,6 +39,25 @@ class PathValidator:
         )
 
     @staticmethod
+    def _normalize_path(path: str | Path) -> str:
+        """
+        Normalize path separators to forward slashes for consistent handling.
+
+        This ensures Windows-style backslashes are treated as path separators
+        even on Linux systems, preventing path traversal attacks that use
+        backslashes to evade detection.
+
+        Args:
+            path: The path to normalize
+
+        Returns:
+            Path string with normalized separators
+        """
+        path_str = str(path)
+        # Normalize backslashes to forward slashes
+        return path_str.replace("\\", "/")
+
+    @staticmethod
     def validate_path(path: str | Path, base_path: str | Path) -> Path:
         """
         Validate that a path is within the allowed base path.
@@ -61,8 +80,11 @@ class PathValidator:
         if PathValidator._is_windows_absolute_path(path_str):
             raise SecurityError(f"Access denied: Windows absolute path not allowed: {path}")
 
+        # Normalize path separators to catch Windows-style traversal on Linux
+        normalized_path = PathValidator._normalize_path(path)
+
         # Handle absolute paths - only allow if they're within base
-        target_path = Path(path)
+        target_path = Path(normalized_path)
         if target_path.is_absolute():
             target = target_path.resolve()
         else:
