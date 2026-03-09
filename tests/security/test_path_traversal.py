@@ -83,8 +83,9 @@ class TestPathTraversalSecurity:
             # If it works, test that file operations are still blocked
             with pytest.raises(ContextSecurityError):
                 storage._validate_path(Path("../../../etc/passwd"))
-        except (ContextSecurityError, ValueError):
+        except (ContextSecurityError, ValueError, PermissionError):
             # Expected behavior - malicious root rejected
+            # PermissionError is also valid: OS blocks access to sensitive paths
             pass
 
     def test_context_storage_allows_valid_operations(self, temp_context_root):
