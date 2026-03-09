@@ -144,4 +144,3 @@ def websocket_client(app: FastAPI):
         return client.websocket_connect(path)
 
     return connect_websocket
-
