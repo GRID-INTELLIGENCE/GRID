@@ -7,7 +7,7 @@ Provides TestClient, WebSocket client, and service mocks for testing.
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import pytest
 from fastapi import FastAPI
@@ -15,6 +15,21 @@ from fastapi.testclient import TestClient
 
 if TYPE_CHECKING:
     from application.resonance.services.resonance_service import ResonanceService
+
+
+async def _mock_verify_authentication() -> dict[str, Any]:
+    """Mock auth dependency that allows all requests for testing."""
+    return {
+        "authenticated": True,
+        "method": "test_bypass",
+        "user_id": "test_user",
+        "permissions": {"read", "write"},
+    }
+
+
+async def _mock_check_rate_limit() -> bool:
+    """Mock rate limit dependency that allows all requests for testing."""
+    return True
 
 
 @pytest.fixture
@@ -25,9 +40,15 @@ def app() -> FastAPI:
     Returns:
         FastAPI application instance
     """
+    from application.mothership.dependencies import check_rate_limit, verify_authentication
     from application.resonance.api.router import router
 
     app = FastAPI()
+    # Override the underlying dependency functions for unauthenticated testing
+    # Auth = Annotated[dict[str, Any], Depends(verify_authentication)]
+    # RateLimited = Annotated[bool, Depends(check_rate_limit)]
+    app.dependency_overrides[verify_authentication] = _mock_verify_authentication
+    app.dependency_overrides[check_rate_limit] = _mock_check_rate_limit
     app.include_router(router, prefix="/api/v1/resonance", tags=["resonance"])
     return app
 
