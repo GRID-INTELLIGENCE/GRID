@@ -430,10 +430,10 @@ async def chat(request: Request):
             "intent": context.intent,
         }
 
-    except Exception as e:
-        import traceback
-
-        return {"error": f"{str(e)}\n{traceback.format_exc()}"}
+    except Exception:
+        # SECURITY: Do not leak stack traces or error details to clients
+        # Return generic error message for security
+        return {"error": "An internal error occurred. Please try again."}
 
 
 if __name__ == "__main__":
