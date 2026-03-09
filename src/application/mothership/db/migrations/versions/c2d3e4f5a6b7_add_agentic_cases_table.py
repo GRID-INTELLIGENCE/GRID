@@ -33,7 +33,10 @@ def upgrade() -> None:
         sa.Column("relationships", sa.JSON, nullable=True, comment="Detected relationships"),
         sa.Column("reference_file_path", sa.String(500), nullable=True, comment="Path to reference file"),
         sa.Column(
-            "status", sa.String(50), nullable=False, server_default="created",
+            "status",
+            sa.String(50),
+            nullable=False,
+            server_default="created",
             comment="Case status: created, categorized, reference_generated, executed, completed",
         ),
         sa.Column("agent_role", sa.String(100), nullable=True, comment="Agent role used for execution"),
@@ -41,7 +44,9 @@ def upgrade() -> None:
         sa.Column("outcome", sa.String(50), nullable=True, comment="Case outcome: success, partial, failure"),
         sa.Column("solution", sa.Text, nullable=True, comment="Solution applied"),
         sa.Column("agent_experience", sa.JSON, nullable=True, comment="Agent experience data"),
-        sa.Column("created_at", sa.DateTime, nullable=False, server_default=sa.func.now(), comment="Creation timestamp"),
+        sa.Column(
+            "created_at", sa.DateTime, nullable=False, server_default=sa.func.now(), comment="Creation timestamp"
+        ),
         sa.Column("updated_at", sa.DateTime, nullable=True, comment="Last update timestamp"),
         sa.Column("completed_at", sa.DateTime, nullable=True, comment="Completion timestamp"),
         sa.Column("execution_time_seconds", sa.Float, nullable=True, comment="Execution time in seconds"),

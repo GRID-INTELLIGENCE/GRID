@@ -364,6 +364,7 @@ def validate_url_allowlist(url: str, allowed_hosts: list[str], require_https: bo
         return False
     try:
         from urllib.parse import urlparse
+
         parsed = urlparse(url.strip())
         host = (parsed.hostname or "").lower()
         if not host:

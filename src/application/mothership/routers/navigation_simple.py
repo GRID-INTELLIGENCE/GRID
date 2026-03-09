@@ -219,6 +219,7 @@ def _mock_plan_result(payload: NavigationRequest, request_id: str) -> dict:
         "request_id": request_id,
     }
 
+
 @router.post("/plan-stream", response_class=EventSourceResponse)
 @router.get("/plan-stream", response_class=EventSourceResponse)
 async def streaming_navigation_plan(

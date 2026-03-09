@@ -39,7 +39,10 @@ def upgrade() -> None:
         sa.Column("id", sa.String(64), primary_key=True),
         sa.Column("user_id", sa.String(128), nullable=False, index=True),
         sa.Column(
-            "api_key_id", sa.String(64), sa.ForeignKey("mothership_api_keys.id"), nullable=True,
+            "api_key_id",
+            sa.String(64),
+            sa.ForeignKey("mothership_api_keys.id"),
+            nullable=True,
         ),
         sa.Column("endpoint", sa.String(512), nullable=False, index=True),
         sa.Column("cost_units", sa.Integer, nullable=False, server_default=sa.text("1")),
@@ -89,7 +92,10 @@ def upgrade() -> None:
         sa.Column("id", sa.String(64), primary_key=True),
         sa.Column("user_id", sa.String(128), nullable=False, index=True),
         sa.Column(
-            "subscription_id", sa.String(64), sa.ForeignKey("mothership_subscriptions.id"), nullable=True,
+            "subscription_id",
+            sa.String(64),
+            sa.ForeignKey("mothership_subscriptions.id"),
+            nullable=True,
         ),
         sa.Column("amount_cents", sa.Integer, nullable=False, server_default=sa.text("0")),
         sa.Column("currency", sa.String(16), nullable=False, server_default="USD"),

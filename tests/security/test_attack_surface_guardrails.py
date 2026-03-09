@@ -50,9 +50,7 @@ class TestDevTokenRejectedWhenEnvDisabled:
             "/api/v1/agentic/cases/some-id",
             headers={"Authorization": "Bearer dev-test-token"},
         )
-        assert response.status_code == 401, (
-            f"Expected 401 when ENABLE_DEV_TOKEN not set, got {response.status_code}"
-        )
+        assert response.status_code == 401, f"Expected 401 when ENABLE_DEV_TOKEN not set, got {response.status_code}"
 
 
 class TestSandboxDetectsSuspiciousPattern:
@@ -64,9 +62,7 @@ class TestSandboxDetectsSuspiciousPattern:
         work_dir = Path.cwd()
         execution_id = "test-exec-1"
         skill_code_with_os = "import os\ndef main(args):\n    return os.getcwd()"
-        violations = sandbox._check_security_violations(
-            execution_id, work_dir, skill_code=skill_code_with_os
-        )
+        violations = sandbox._check_security_violations(execution_id, work_dir, skill_code=skill_code_with_os)
         assert any("Suspicious pattern" in v and "import os" in v for v in violations), (
             f"Expected suspicious pattern for 'import os', got: {violations}"
         )
@@ -77,9 +73,7 @@ class TestSandboxDetectsSuspiciousPattern:
         work_dir = Path.cwd()
         execution_id = "test-exec-2"
         skill_code = "import subprocess\ndef main(args):\n    return {}"
-        violations = sandbox._check_security_violations(
-            execution_id, work_dir, skill_code=skill_code
-        )
+        violations = sandbox._check_security_violations(execution_id, work_dir, skill_code=skill_code)
         assert any("Suspicious pattern" in v and "subprocess" in v for v in violations), (
             f"Expected suspicious pattern for subprocess, got: {violations}"
         )

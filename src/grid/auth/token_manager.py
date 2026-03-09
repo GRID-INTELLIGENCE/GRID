@@ -16,6 +16,7 @@ except ImportError:
     class JWTError(Exception):
         pass
 
+
 from grid.config.runtime_settings import RuntimeSettings
 from grid.infrastructure.cache import CacheFactory
 

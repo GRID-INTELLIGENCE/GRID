@@ -354,9 +354,7 @@ else:
             stderr_text = stderr.decode("utf-8") if stderr else ""
 
             # Check for security violations (read executed script for pattern check)
-            script_code = await asyncio.to_thread(
-                script_path.read_text, encoding="utf-8", errors="replace"
-            )
+            script_code = await asyncio.to_thread(script_path.read_text, encoding="utf-8", errors="replace")
             violations = self._check_security_violations(execution_id, work_dir, skill_code=script_code)
 
             return SandboxResult(
@@ -525,9 +523,7 @@ else:
             "disk_usage_mb": 0,
         }
 
-    def _check_security_violations(
-        self, execution_id: str, work_dir: Path, skill_code: str | None = None
-    ) -> list[str]:
+    def _check_security_violations(self, execution_id: str, work_dir: Path, skill_code: str | None = None) -> list[str]:
         """Check for security violations. If skill_code is provided, check for suspicious patterns in executed code."""
         violations: list[str] = []
 

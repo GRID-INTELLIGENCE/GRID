@@ -185,10 +185,9 @@ async def login(
     request_id = request_context.get("request_id", "unknown")
     auth_result = None
     # CRIT-2: Require explicit ALLOW_DEV_LOGIN_BYPASS=1; never set in production.
-    allow_test_credential_bypass = (
-        (settings.is_development or settings.is_testing)
-        and os.getenv("ALLOW_DEV_LOGIN_BYPASS", "").strip() == "1"
-    )
+    allow_test_credential_bypass = (settings.is_development or settings.is_testing) and os.getenv(
+        "ALLOW_DEV_LOGIN_BYPASS", ""
+    ).strip() == "1"
     if allow_test_credential_bypass:
         logger.warning(
             "DEV LOGIN BYPASS: credentials not validated (username=%s, request_id=%s). Set ALLOW_DEV_LOGIN_BYPASS=0 to enforce.",
@@ -359,11 +358,7 @@ async def validate_token(
     request_id = request_context.get("request_id", "unknown")
     token_payload = auth.get("token_payload", {})
     permissions = auth.get("permissions") or set()
-    scopes = (
-        list(token_payload.get("scopes"))
-        if token_payload.get("scopes") is not None
-        else list(permissions)
-    )
+    scopes = list(token_payload.get("scopes")) if token_payload.get("scopes") is not None else list(permissions)
 
     response_data = ValidateResponse(
         valid=auth.get("authenticated", False),

@@ -587,7 +587,7 @@ async def summon_handler(
             handler.metrics.record_failure("Circuit breaker open")
             logger.warning(f"Handler '{key}' summoned but circuit is OPEN")
             return await _get_invocation_fallback(key, request_id)
-            
+
         # Catch-all for not available (e.g. state is neither ACTIVE nor DEPRECATED nor DISABLED)
         logger.warning(f"Handler '{key}' summoned but is not available (state: {handler.state})")
         return InvocationResponse(

@@ -32,8 +32,10 @@ from application.skills.api import router as skills_router
 try:
     from application.tracing import setup_tracing
 except ImportError:
+
     def setup_tracing(*args: Any, **kwargs: Any) -> None:
         return None
+
 
 try:
     from dotenv import load_dotenv

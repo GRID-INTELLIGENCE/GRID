@@ -62,7 +62,10 @@ def upgrade() -> None:
         sa.Column("completed_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
         sa.Column(
-            "session_id", sa.String(64), sa.ForeignKey("mothership_cockpit_sessions.id"), nullable=True,
+            "session_id",
+            sa.String(64),
+            sa.ForeignKey("mothership_cockpit_sessions.id"),
+            nullable=True,
         ),
         sa.Column("user_id", sa.String(128), nullable=True, index=True),
         sa.Column("parent_operation_id", sa.String(64), nullable=True),

@@ -8,6 +8,7 @@ from typing import Any, Literal
 try:
     import stripe
 except ImportError:
+
     class _StripeCustomerStub:
         @staticmethod
         def create(*args: Any, **kwargs: Any) -> Any:

@@ -47,11 +47,13 @@ from application.skills.api import router as skills_router
 try:
     from application.tracing import setup_fastapi_tracing, setup_tracing
 except ImportError:
+
     def setup_fastapi_tracing(*args: Any, **kwargs: Any) -> None:
         return None
 
     def setup_tracing(*args: Any, **kwargs: Any) -> None:
         return None
+
 
 try:
     from dotenv import load_dotenv
@@ -85,6 +87,7 @@ except ImportError:
 
     def set_unified_drt_middleware(*args: Any, **kwargs: Any) -> None:
         return None
+
 
 # Security Infrastructure
 from .security.api_sentinels import API_DEFAULTS, apply_defaults
@@ -157,9 +160,7 @@ async def mothership_error_handler(request: Request, exc: Exception) -> JSONResp
     """Handle custom Mothership exceptions."""
     exc = cast(MothershipError, exc)
     logger.error("MothershipError: %s - %s", exc.code, exc.message)
-    return _error_response(
-        request, exc.code, exc.message, exc.details, status_code=exc.status_code
-    )
+    return _error_response(request, exc.code, exc.message, exc.details, status_code=exc.status_code)
 
 
 async def http_exception_handler(request: Request, exc: Exception) -> JSONResponse:

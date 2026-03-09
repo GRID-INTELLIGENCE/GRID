@@ -227,6 +227,7 @@ async def verify_authentication(
             ) from None
         # Explicitly allowed: return test auth context (do not try JWT decode). method=dev_bypass so require_authentication allows.
         from application.mothership.security.rbac import Role, get_permissions_for_role
+
         return {
             "authenticated": False,
             "method": "dev_bypass",

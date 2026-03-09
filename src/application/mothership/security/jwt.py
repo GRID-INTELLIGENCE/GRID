@@ -24,6 +24,8 @@ except ImportError:
 
     class JWTError(Exception):
         pass
+
+
 from pydantic import BaseModel, Field
 
 from .secret_validation import SecretStrength, SecretValidationError, generate_secure_secret, validate_secret_strength
