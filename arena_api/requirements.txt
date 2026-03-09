@@ -68,7 +68,7 @@ kubernetes==35.0.0
 transformers==4.48.3
 torch==2.10.0
 scikit-learn==1.8.0
-pandas==2.2.3
+pandas==3.0.1
 numpy==2.4.2
 
 # Compliance & Audit (CRITICAL SECURITY UPDATE: Crypto vulnerabilities patched)
