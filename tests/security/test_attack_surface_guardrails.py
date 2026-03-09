@@ -2,7 +2,8 @@
 Phase 4 — Security-focused tests for attack surface guardrails.
 
 Covers: agentic auth required, dev token rejected when env disabled,
-sandbox suspicious-pattern detection, webhook signature rejection.
+sandbox suspicious-pattern detection, webhook signature rejection,
+validate_url_allowlist for outbound HTTP (SSRF mitigation).
 """
 
 from __future__ import annotations
@@ -12,6 +13,7 @@ from pathlib import Path
 from fastapi.testclient import TestClient
 
 from application.mothership.main import create_app
+from application.mothership.utils import validate_url_allowlist
 from grid.skills.sandbox import SandboxConfig, SkillsSandbox
 
 
@@ -102,3 +104,28 @@ class TestWebhookSignatureRejected:
         if response.status_code == 400:
             detail = response.json().get("detail", "")
             assert "signature" in detail.lower() or "Missing" in detail
+
+
+class TestValidateUrlAllowlist:
+    """validate_url_allowlist must be used for outbound HTTP (webhooks/callbacks). SSRF mitigation."""
+
+    def test_rejects_disallowed_host(self) -> None:
+        """URL with host not in allowed_hosts returns False."""
+        assert validate_url_allowlist("https://evil.com/cb", ["api.stripe.com"], True) is False
+
+    def test_accepts_allowed_host(self) -> None:
+        """URL with host in allowed_hosts returns True."""
+        assert validate_url_allowlist("https://api.stripe.com/v1/events", ["api.stripe.com"], True) is True
+
+    def test_rejects_http_when_require_https(self) -> None:
+        """HTTP URL when require_https=True returns False."""
+        assert validate_url_allowlist("http://hooks.example.com/cb", ["hooks.example.com"], True) is False
+
+    def test_accepts_http_when_require_https_false(self) -> None:
+        """HTTP URL when require_https=False can be allowed."""
+        assert validate_url_allowlist("http://hooks.example.com/cb", ["hooks.example.com"], False) is True
+
+    def test_rejects_empty_url_or_hosts(self) -> None:
+        """Empty url or allowed_hosts returns False."""
+        assert validate_url_allowlist("", ["api.stripe.com"], True) is False
+        assert validate_url_allowlist("https://api.stripe.com/", [], True) is False

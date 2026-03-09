@@ -354,7 +354,9 @@ else:
             stderr_text = stderr.decode("utf-8") if stderr else ""
 
             # Check for security violations (read executed script for pattern check)
-            script_code = script_path.read_text(encoding="utf-8", errors="replace")
+            script_code = await asyncio.to_thread(
+                script_path.read_text, encoding="utf-8", errors="replace"
+            )
             violations = self._check_security_violations(execution_id, work_dir, skill_code=script_code)
 
             return SandboxResult(
@@ -546,9 +548,11 @@ else:
                     "exec(",
                     "__import__",
                 ]
-                for pattern in suspicious_patterns:
-                    if pattern in skill_code:
-                        violations.append(f"Suspicious pattern detected: {pattern}")
+                violations.extend(
+                    f"Suspicious pattern detected: {pattern}"
+                    for pattern in suspicious_patterns
+                    if pattern in skill_code
+                )
 
         except Exception as e:
             logger.error(f"Security violation check failed: {e}")

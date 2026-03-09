@@ -42,7 +42,7 @@ In a new PowerShell window: run `proj` — you should see the project list. Then
 
 ## 2. WSL startup script
 
-Optional: run GRID-related env (e.g. `GRID_HOME`, venv on `PATH`) when you start a WSL bash session.
+Optional: run workspace env and shortcut helpers (`eg`, `ee`, `ea`, `proj`, `pst`, `Show-Ports`, `Test-All`) when you start a WSL bash session.
 
 ### Use the script (source from ~/.bashrc)
 
@@ -58,7 +58,8 @@ fi
 Then `source ~/.bashrc` or open a new WSL terminal. The script:
 
 - Does nothing if `/mnt/e` is missing (e.g. not WSL or mount not done).
-- Sets `GRID_HOME` and adds GRID `.venv/bin` to `PATH` when `/mnt/e/Seeds/GRID-main` exists.
+- Sets `GRID_HOME`, `SEEDS_ROOT`, and exposes Windows-installed Python tools where needed.
+- Adds WSL shell helpers mirroring the common workspace shortcuts: `eg`, `ee`, `ea`, `proj`, `pst`, `Show-Ports`, `Test-All`.
 - No sudo; user-space only.
 
 ### If /mnt/e is not mounted
@@ -72,5 +73,5 @@ Run once (in WSL): `sudo mount -t drvfs E: /mnt/e`. See **docs/guides/WSL_SETUP_
 | Goal | Command / action |
 |------|------------------|
 | Activate PowerShell shortcuts | Run `Install-PowerShellProfile.ps1` once; then `. $PROFILE` or new terminal |
-| WSL: load GRID env on login | Add the `if [ -f ... wsl_startup.sh ]; then . ... fi` block to `~/.bashrc` |
+| WSL: load workspace env and shortcuts on login | Add the `if [ -f ... wsl_startup.sh ]; then . ... fi` block to `~/.bashrc` |
 | Full shortcut table | **E:\.vscode\cli-shortcuts.md** or **E:\AGENTS.md** (CLI shortcuts section) |

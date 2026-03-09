@@ -21,8 +21,10 @@ from urllib.parse import urlparse
 
 import yaml
 
-# Setup logging
-logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+# Setup logging - use configurable level, default INFO for production safety
+_log_level_name = os.getenv("SECURITY_LOG_LEVEL", "INFO").upper()
+_log_level = getattr(logging, _log_level_name, logging.INFO)
+logging.basicConfig(level=_log_level, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 

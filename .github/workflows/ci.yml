@@ -268,7 +268,10 @@ jobs:
         run: uv sync --frozen --group dev --group test
 
       - name: "Run unit tests"
-        run: uv run pytest tests/unit/ -v --tb=short -x
+        run: uv run pytest tests/unit/ tests/security/ tests/api/ -v --tb=short -x
+
+      - name: "Assert no DEBUG in production (Phase 4 gate)"
+        run: GRID_ENV=production uv run python scripts/assert_no_debug_in_prod.py
 
       - name: "Run async function tests"
         run: uv run pytest tests/test_async_boolean.py -v --tb=short || true

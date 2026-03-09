@@ -2,7 +2,7 @@
 # Streamlines local development with uv
 # Note: Dotfiles (.agentignore, .cursorrules, .python-version, .secrets.baseline) in config/
 
-.PHONY: help install run test lint format export-requirements check-venv clean
+.PHONY: help install run test lint format export-requirements check-venv clean guard-no-debug
 
 # Default target
 .DEFAULT_GOAL := help
@@ -25,15 +25,19 @@ run: ## Run the Mothership API locally
 	@echo "$(GREEN)Starting Mothership API...$(NC)"
 	uv run python -m application.mothership.main
 
-test: ## Run tests
+test: ## Run tests (unit, integration, security, api guardrails)
 	@echo "$(BLUE)Running tests...$(NC)"
-	uv run pytest tests/unit tests/integration -q --tb=short
+	uv run pytest tests/unit tests/integration tests/security tests/api -q --tb=short
 
 lint: ## Run static analysis (Ruff + Mypy)
 	@echo "$(BLUE)Linting...$(NC)"
 	uv run ruff check .
 	@echo "$(BLUE)Type checking...$(NC)"
 	-uv run mypy src/grid/ src/application/ src/tools/ src/search/ src/cognitive/ src/mycelium/
+
+guard-no-debug: ## Assert no DEBUG/ENABLE_DEV_TOKEN in production (run after test+lint for Session Verify)
+	@echo "$(BLUE)Checking no debug flags in production...$(NC)"
+	GRID_ENV=production uv run python scripts/assert_no_debug_in_prod.py
 
 format: ## Auto-format code
 	@echo "$(BLUE)Formatting...$(NC)"

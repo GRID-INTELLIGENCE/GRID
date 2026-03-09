@@ -15,5 +15,6 @@ Key controls:
 - **Body limits:** Mothership 10 MB (`RequestSizeLimitMiddleware`), Safety 50 KB, Knowledge Base 5 MB, RAG Chat 1 MB.
 - **Timeouts:** Knowledge Base 60 s, RAG Chat 30 s per request.
 - **Error handling:** Generic 500 in production — no `str(e)` to client (G8).
-- **Debug flags:** `scripts/assert_no_debug_in_prod.py` — wire into CI to block DEBUG/ENABLE_DEV_TOKEN in production.
+- **Debug flags:** `scripts/assert_no_debug_in_prod.py` — wire into CI and Session Verify to block DEBUG/ENABLE_DEV_TOKEN in production.
+- **Outbound URLs:** Any outbound HTTP to user- or config-supplied URLs (webhooks, callbacks, redirects) must call `application.mothership.utils.validate_url_allowlist` before requesting (SSRF mitigation).
 - **Tests:** `uv run pytest tests/api/test_phase3_security_guardrails.py tests/security/test_attack_surface_guardrails.py tests/api/test_security_governance.py -v`
