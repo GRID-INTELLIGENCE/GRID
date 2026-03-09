@@ -1,5 +1,6 @@
 """Centralized path validation utility for GRID security."""
 
+import re
 from collections.abc import Sequence
 from pathlib import Path
 
@@ -12,6 +13,30 @@ class SecurityError(Exception):
 
 class PathValidator:
     """Centralized utility for validating file paths to prevent path traversal attacks."""
+
+    # Pattern for Windows absolute paths (e.g., C:\, D:\)
+    _WINDOWS_ABSOLUTE_PATTERN = re.compile(r"^[a-zA-Z]:[/\\]")
+    # Pattern for UNC paths (e.g., \\server\share)
+    _UNC_PATTERN = re.compile(r"^[/\\]{2}")
+
+    @staticmethod
+    def _is_windows_absolute_path(path: str) -> bool:
+        """
+        Check if a path string is a Windows-style absolute path.
+
+        This check is platform-independent - it detects Windows paths
+        even when running on Linux/Unix systems.
+
+        Args:
+            path: The path string to check
+
+        Returns:
+            True if the path appears to be a Windows absolute or UNC path
+        """
+        path_str = str(path)
+        return bool(
+            PathValidator._WINDOWS_ABSOLUTE_PATTERN.match(path_str) or PathValidator._UNC_PATTERN.match(path_str)
+        )
 
     @staticmethod
     def validate_path(path: str | Path, base_path: str | Path) -> Path:
@@ -29,6 +54,12 @@ class PathValidator:
             SecurityError: If the path is outside the allowed base path
         """
         base = Path(base_path).resolve()
+
+        # Check for Windows-style absolute paths regardless of current platform
+        # This prevents Windows paths from being treated as relative on Linux
+        path_str = str(path)
+        if PathValidator._is_windows_absolute_path(path_str):
+            raise SecurityError(f"Access denied: Windows absolute path not allowed: {path}")
 
         # Handle absolute paths - only allow if they're within base
         target_path = Path(path)
