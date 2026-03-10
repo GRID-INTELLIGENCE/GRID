@@ -7,7 +7,7 @@ Provides TestClient, WebSocket client, and service mocks for testing.
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 import pytest
 from fastapi import FastAPI
@@ -15,21 +15,6 @@ from fastapi.testclient import TestClient
 
 if TYPE_CHECKING:
     from application.resonance.services.resonance_service import ResonanceService
-
-
-async def _mock_verify_authentication() -> dict[str, Any]:
-    """Mock auth dependency that allows all requests for testing."""
-    return {
-        "authenticated": True,
-        "method": "test_bypass",
-        "user_id": "test_user",
-        "permissions": {"read", "write"},
-    }
-
-
-async def _mock_check_rate_limit() -> bool:
-    """Mock rate limit dependency that allows all requests for testing."""
-    return True
 
 
 @pytest.fixture
@@ -40,15 +25,9 @@ def app() -> FastAPI:
     Returns:
         FastAPI application instance
     """
-    from application.mothership.dependencies import check_rate_limit, verify_authentication
     from application.resonance.api.router import router
 
     app = FastAPI()
-    # Override the underlying dependency functions for unauthenticated testing
-    # Auth = Annotated[dict[str, Any], Depends(verify_authentication)]
-    # RateLimited = Annotated[bool, Depends(check_rate_limit)]
-    app.dependency_overrides[verify_authentication] = _mock_verify_authentication
-    app.dependency_overrides[check_rate_limit] = _mock_check_rate_limit
     app.include_router(router, prefix="/api/v1/resonance", tags=["resonance"])
     return app
 
@@ -56,26 +35,35 @@ def app() -> FastAPI:
 @pytest.fixture
 def client(app: FastAPI) -> TestClient:
     """
-    Create TestClient for API testing.
+    Create TestClient for API testing with dev-test-token authentication.
+
+    The ENABLE_DEV_TOKEN=1 environment variable is set in tests/conftest.py,
+    allowing the dev-test-token to bypass authentication in test environments.
 
     Args:
         app: FastAPI application
 
     Returns:
-        TestClient instance
+        TestClient instance with Authorization header set
     """
-    return TestClient(app)
+    return TestClient(
+        app,
+        headers={"Authorization": "Bearer dev-test-token"},
+    )
 
 
 @pytest.fixture
-def service() -> ResonanceService:
+def service() -> "ResonanceService":
     """
     Create ResonanceService instance for testing.
 
     Returns:
         ResonanceService instance
     """
-    from application.resonance.api.dependencies import get_resonance_service, reset_resonance_service
+    from application.resonance.api.dependencies import (
+        get_resonance_service,
+        reset_resonance_service,
+    )
 
     reset_resonance_service()
     return get_resonance_service()
@@ -98,7 +86,7 @@ def cleanup_service():
 
 
 @pytest.fixture
-def sample_activity_id(service: ResonanceService) -> str:
+def sample_activity_id(service: "ResonanceService") -> str:
     """
     Create a sample activity for testing.
 
@@ -135,9 +123,7 @@ def websocket_client(app: FastAPI):
     Returns:
         WebSocket test client function
     """
-    from fastapi.testclient import TestClient
-
-    client = TestClient(app)
+    client = TestClient(app, headers={"Authorization": "Bearer dev-test-token"})
 
     def connect_websocket(path: str):
         """Connect to WebSocket endpoint."""
