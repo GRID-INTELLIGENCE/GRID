@@ -53,7 +53,7 @@ def client(app: FastAPI) -> TestClient:
 
 
 @pytest.fixture
-def service() -> "ResonanceService":
+def service() -> ResonanceService:
     """
     Create ResonanceService instance for testing.
 
@@ -86,7 +86,7 @@ def cleanup_service():
 
 
 @pytest.fixture
-def sample_activity_id(service: "ResonanceService") -> str:
+def sample_activity_id(service: ResonanceService) -> str:
     """
     Create a sample activity for testing.
 
