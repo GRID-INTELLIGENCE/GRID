@@ -19,6 +19,7 @@ import structlog
 try:
     from loguru import logger as loguru_logger
 except ImportError:
+
     class _LoguruFallback:
         def remove(self, *args: Any, **kwargs: Any) -> None:
             return None

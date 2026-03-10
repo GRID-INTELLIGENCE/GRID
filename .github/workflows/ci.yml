@@ -139,7 +139,8 @@ jobs:
         run: uv run ruff check . --output-format=full
 
       - name: "Run ruff format check"
-        run: uv run ruff format --check src/ tests/ scripts/
+        # Match Makefile "ruff format ." scope so CI and local are consistent
+        run: uv run ruff format --check .
 
       - name: "Run mypy"
         run: uv run mypy src/grid/ src/application/ src/tools/ src/search/ src/cognitive/ src/mycelium/ --ignore-missing-imports || true

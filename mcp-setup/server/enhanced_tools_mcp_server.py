@@ -430,6 +430,7 @@ def _is_safe_module_name(name: str) -> bool:
     if not name or len(name) > 64:
         return False
     import re
+
     return bool(re.match(r"^[a-zA-Z_][a-zA-Z0-9_.]*$", name))
 
 
@@ -439,6 +440,7 @@ def _sanitize_target_for_command(target: str, max_length: int = 512) -> str:
     Allows only path-safe characters; rejects shell metacharacters and injection patterns.
     """
     import re
+
     if not target or not isinstance(target, str):
         raise ValueError("target is required and must be a non-empty string")
     if len(target) > max_length:

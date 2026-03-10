@@ -33,9 +33,7 @@ class TestBoundaryEngineFailClosed(unittest.TestCase):
 
     @patch("boundaries.boundary.get_logger")
     @patch("boundaries.boundary.check_refusal", return_value=None)
-    def test_unknown_boundary_id_returns_false(
-        self, mock_refusal: MagicMock, mock_get_logger: MagicMock
-    ) -> None:
+    def test_unknown_boundary_id_returns_false(self, mock_refusal: MagicMock, mock_get_logger: MagicMock) -> None:
         mock_get_logger.return_value = MagicMock()
         engine = BoundaryEngine(_engine_config())
         result = engine.check_boundary("nonexistent_boundary", "any_subject")
@@ -43,9 +41,7 @@ class TestBoundaryEngineFailClosed(unittest.TestCase):
 
     @patch("boundaries.boundary.get_logger")
     @patch("boundaries.boundary.check_refusal", return_value=None)
-    def test_unknown_guardrail_id_returns_block(
-        self, mock_refusal: MagicMock, mock_get_logger: MagicMock
-    ) -> None:
+    def test_unknown_guardrail_id_returns_block(self, mock_refusal: MagicMock, mock_get_logger: MagicMock) -> None:
         mock_get_logger.return_value = MagicMock()
         engine = BoundaryEngine(_engine_config())
         action, overridden = engine.check_guardrail("nonexistent_guardrail")
@@ -58,14 +54,19 @@ class TestBoundaryEngineRuleEvaluation(unittest.TestCase):
 
     @patch("boundaries.boundary.get_logger")
     @patch("boundaries.boundary.check_refusal", return_value=None)
-    def test_boundary_with_deny_rule_blocks_subject(
-        self, mock_refusal: MagicMock, mock_get_logger: MagicMock
-    ) -> None:
+    def test_boundary_with_deny_rule_blocks_subject(self, mock_refusal: MagicMock, mock_get_logger: MagicMock) -> None:
         mock_get_logger.return_value = MagicMock()
-        config = _engine_config(boundaries=[{
-            "id": "b1", "name": "Test Boundary", "type": "access",
-            "enforcement": "hard", "rule": {"deny": ["blocked_user"]},
-        }])
+        config = _engine_config(
+            boundaries=[
+                {
+                    "id": "b1",
+                    "name": "Test Boundary",
+                    "type": "access",
+                    "enforcement": "hard",
+                    "rule": {"deny": ["blocked_user"]},
+                }
+            ]
+        )
         engine = BoundaryEngine(config)
         self.assertFalse(engine.check_boundary("b1", "blocked_user"))
         self.assertTrue(engine.check_boundary("b1", "allowed_user"))
@@ -76,10 +77,17 @@ class TestBoundaryEngineRuleEvaluation(unittest.TestCase):
         self, mock_refusal: MagicMock, mock_get_logger: MagicMock
     ) -> None:
         mock_get_logger.return_value = MagicMock()
-        config = _engine_config(boundaries=[{
-            "id": "b2", "name": "Allow-List Boundary", "type": "access",
-            "enforcement": "hard", "rule": {"allow": ["admin", "operator"]},
-        }])
+        config = _engine_config(
+            boundaries=[
+                {
+                    "id": "b2",
+                    "name": "Allow-List Boundary",
+                    "type": "access",
+                    "enforcement": "hard",
+                    "rule": {"allow": ["admin", "operator"]},
+                }
+            ]
+        )
         engine = BoundaryEngine(config)
         self.assertTrue(engine.check_boundary("b2", "admin"))
         self.assertTrue(engine.check_boundary("b2", "operator"))
@@ -87,14 +95,18 @@ class TestBoundaryEngineRuleEvaluation(unittest.TestCase):
 
     @patch("boundaries.boundary.get_logger")
     @patch("boundaries.boundary.check_refusal", return_value=None)
-    def test_boundary_with_no_rule_allows_all(
-        self, mock_refusal: MagicMock, mock_get_logger: MagicMock
-    ) -> None:
+    def test_boundary_with_no_rule_allows_all(self, mock_refusal: MagicMock, mock_get_logger: MagicMock) -> None:
         mock_get_logger.return_value = MagicMock()
-        config = _engine_config(boundaries=[{
-            "id": "b3", "name": "Open Boundary", "type": "access",
-            "enforcement": "soft",
-        }])
+        config = _engine_config(
+            boundaries=[
+                {
+                    "id": "b3",
+                    "name": "Open Boundary",
+                    "type": "access",
+                    "enforcement": "soft",
+                }
+            ]
+        )
         engine = BoundaryEngine(config)
         self.assertTrue(engine.check_boundary("b3", "anyone"))
 
@@ -105,9 +117,15 @@ class TestConsentLifecycle(unittest.TestCase):
     @patch("boundaries.boundary.get_logger")
     def test_consent_default_state_is_pending(self, mock_get_logger: MagicMock) -> None:
         mock_get_logger.return_value = MagicMock()
-        config = _engine_config(consents=[{
-            "id": "c1", "name": "Data Collection", "scope": "user_data",
-        }])
+        config = _engine_config(
+            consents=[
+                {
+                    "id": "c1",
+                    "name": "Data Collection",
+                    "scope": "user_data",
+                }
+            ]
+        )
         engine = BoundaryEngine(config)
         self.assertEqual(engine.get_consent_state("c1"), "pending")
         self.assertFalse(engine.require_consent("c1"))
@@ -115,9 +133,15 @@ class TestConsentLifecycle(unittest.TestCase):
     @patch("boundaries.boundary.get_logger")
     def test_grant_then_require_returns_true(self, mock_get_logger: MagicMock) -> None:
         mock_get_logger.return_value = MagicMock()
-        config = _engine_config(consents=[{
-            "id": "c1", "name": "Data Collection", "scope": "user_data",
-        }])
+        config = _engine_config(
+            consents=[
+                {
+                    "id": "c1",
+                    "name": "Data Collection",
+                    "scope": "user_data",
+                }
+            ]
+        )
         engine = BoundaryEngine(config)
         engine.grant_consent("c1", actor_id="user_1")
         self.assertTrue(engine.require_consent("c1"))
@@ -126,9 +150,15 @@ class TestConsentLifecycle(unittest.TestCase):
     @patch("boundaries.boundary.get_logger")
     def test_revoke_after_grant_blocks_access(self, mock_get_logger: MagicMock) -> None:
         mock_get_logger.return_value = MagicMock()
-        config = _engine_config(consents=[{
-            "id": "c1", "name": "Data Collection", "scope": "user_data",
-        }])
+        config = _engine_config(
+            consents=[
+                {
+                    "id": "c1",
+                    "name": "Data Collection",
+                    "scope": "user_data",
+                }
+            ]
+        )
         engine = BoundaryEngine(config)
         engine.grant_consent("c1")
         self.assertTrue(engine.require_consent("c1"))
@@ -139,9 +169,15 @@ class TestConsentLifecycle(unittest.TestCase):
     @patch("boundaries.boundary.get_logger")
     def test_deny_consent_blocks_access(self, mock_get_logger: MagicMock) -> None:
         mock_get_logger.return_value = MagicMock()
-        config = _engine_config(consents=[{
-            "id": "c1", "name": "Data Collection", "scope": "user_data",
-        }])
+        config = _engine_config(
+            consents=[
+                {
+                    "id": "c1",
+                    "name": "Data Collection",
+                    "scope": "user_data",
+                }
+            ]
+        )
         engine = BoundaryEngine(config)
         engine.deny_consent("c1")
         self.assertFalse(engine.require_consent("c1"))
@@ -164,10 +200,16 @@ class TestGuardrailActions(unittest.TestCase):
         self, mock_refusal: MagicMock, mock_get_logger: MagicMock
     ) -> None:
         mock_get_logger.return_value = MagicMock()
-        config = _engine_config(guardrails=[{
-            "id": "g1", "name": "Content Filter", "kind": "content",
-            "action": "warn",
-        }])
+        config = _engine_config(
+            guardrails=[
+                {
+                    "id": "g1",
+                    "name": "Content Filter",
+                    "kind": "content",
+                    "action": "warn",
+                }
+            ]
+        )
         engine = BoundaryEngine(config)
         action, overridden = engine.check_guardrail("g1")
         self.assertEqual(action, "warn")
@@ -175,14 +217,19 @@ class TestGuardrailActions(unittest.TestCase):
 
     @patch("boundaries.boundary.get_logger")
     @patch("boundaries.boundary.check_refusal", return_value={"trigger": "g2"})
-    def test_refusal_overrides_when_allowed(
-        self, mock_refusal: MagicMock, mock_get_logger: MagicMock
-    ) -> None:
+    def test_refusal_overrides_when_allowed(self, mock_refusal: MagicMock, mock_get_logger: MagicMock) -> None:
         mock_get_logger.return_value = MagicMock()
-        config = _engine_config(guardrails=[{
-            "id": "g2", "name": "Optional Guard", "kind": "optional",
-            "action": "block", "overridableByRefusal": True,
-        }])
+        config = _engine_config(
+            guardrails=[
+                {
+                    "id": "g2",
+                    "name": "Optional Guard",
+                    "kind": "optional",
+                    "action": "block",
+                    "overridableByRefusal": True,
+                }
+            ]
+        )
         engine = BoundaryEngine(config)
         action, overridden = engine.check_guardrail("g2")
         self.assertEqual(action, "block")
@@ -194,10 +241,17 @@ class TestGuardrailActions(unittest.TestCase):
         self, mock_refusal: MagicMock, mock_get_logger: MagicMock
     ) -> None:
         mock_get_logger.return_value = MagicMock()
-        config = _engine_config(guardrails=[{
-            "id": "g3", "name": "Hard Guard", "kind": "security",
-            "action": "block", "overridableByRefusal": False,
-        }])
+        config = _engine_config(
+            guardrails=[
+                {
+                    "id": "g3",
+                    "name": "Hard Guard",
+                    "kind": "security",
+                    "action": "block",
+                    "overridableByRefusal": False,
+                }
+            ]
+        )
         engine = BoundaryEngine(config)
         action, overridden = engine.check_guardrail("g3")
         self.assertEqual(action, "block")

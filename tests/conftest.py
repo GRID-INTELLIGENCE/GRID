@@ -72,9 +72,7 @@ def _install_jwt_test_shim() -> None:
 
         header = {"alg": algorithm, "typ": "JWT"}
         header_segment = _base64url_encode(json.dumps(header, separators=(",", ":"), sort_keys=True).encode("utf-8"))
-        payload_segment = _base64url_encode(
-            json.dumps(payload, separators=(",", ":"), sort_keys=True).encode("utf-8")
-        )
+        payload_segment = _base64url_encode(json.dumps(payload, separators=(",", ":"), sort_keys=True).encode("utf-8"))
         signing_input = f"{header_segment}.{payload_segment}"
         signature = hmac.new(key.encode("utf-8"), signing_input.encode("ascii"), hashlib.sha256).digest()
         return f"{signing_input}.{_base64url_encode(signature)}"

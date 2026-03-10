@@ -23,3 +23,7 @@ target-version = "py313"
 
 [tool.ruff.lint]
 select = ["E", "F", "B", "I", "W", "UP"]
+
+[tool.ruff.lint.isort]
+# Align with root so import order is consistent in CI and local (avoids I001 drift)
+known-first-party = ["grid", "application", "cognitive", "tools", "mycelium", "search", "infrastructure", "unified_fabric", "vection", "safety"]
