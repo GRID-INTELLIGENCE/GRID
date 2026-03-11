@@ -107,8 +107,14 @@ class TestStreamingEndpointSecurity:
             RequestIDMiddleware,
             SecurityHeadersMiddleware,
         )
-        from application.mothership.middleware.circuit_breaker import CircuitBreakerMiddleware
+        from application.mothership.middleware.circuit_breaker import (
+            CircuitBreakerMiddleware,
+            reset_circuit_manager,
+        )
         from application.mothership.middleware.security_enforcer import SecurityEnforcerMiddleware
+
+        # Reset global circuit breaker state to prevent cross-test contamination
+        reset_circuit_manager()
 
         app = FastAPI()
 
@@ -210,7 +216,7 @@ class TestStreamingEndpointSecurity:
 
         response = client.post(
             "/api/v1/navigation/plan-stream",
-            data="not json data",
+            content=b"not json data",
             headers={"Content-Type": "text/plain", "Accept": "text/event-stream"},
         )
 
@@ -381,6 +387,22 @@ class TestStreamingEndpointReliability:
         """Create FastAPI app with reliable streaming endpoint."""
         from application.mothership.api_core import get_ghost_registry, register_handler
         from application.mothership.middleware import setup_middleware
+        from application.mothership.middleware.circuit_breaker import reset_circuit_manager
+
+        # Reset global singletons to prevent cross-test contamination
+        reset_circuit_manager()
+        try:
+            import grid.resilience.metrics as _metrics_mod
+
+            _metrics_mod._global_collector = None
+        except ImportError:
+            pass
+        try:
+            import grid.resilience.accountability.calculator as _calc_mod
+
+            _calc_mod._global_calculator = None
+        except ImportError:
+            pass
 
         app = FastAPI()
 
@@ -463,6 +485,8 @@ class TestStreamingEndpointReliability:
                 raise HTTPException(status_code=422, detail="Missing goal")
 
             result = await summon_handler("navigation.stream", data)
+            if result.data is None:
+                raise HTTPException(status_code=500, detail="Handler returned no data stream")
             return EventSourceResponse(result.data)
 
         # Include health router for health check tests
@@ -576,8 +600,13 @@ class TestStreamingEndpointReliability:
 
         # Test security health check
         response = client.get("/health/security")
-        assert response.status_code == 200
-        data = response.json()["data"]
+        body = response.json()
+        assert response.status_code == 200, (
+            f"Expected 200 but got {response.status_code}; "
+            f"checks={body.get('data', {}).get('checks', [])}; "
+            f"message={body.get('message')}"
+        )
+        data = body["data"]
         assert data["compliant"] is True
         assert data["checks_passed"] > 0
 
@@ -725,7 +754,7 @@ class TestStreamingPerformance:
                 await asyncio.sleep(0.05)
 
         @app.post("/api/concurrent-stream")
-        async def concurrent_stream_endpoint(data: dict):
+        async def concurrent_stream_endpoint(data: dict):  # noqa: ARG001
             """Concurrent streaming endpoint."""
             return EventSourceResponse(concurrent_stream_generator())
 
@@ -739,7 +768,7 @@ class TestStreamingPerformance:
 
         # Register fast streaming handler
         @register_handler("fast.stream", timeout_ms=5000)
-        async def fast_stream_handler(payload: dict[str, Any]) -> AsyncGenerator[dict[str, Any]]:
+        async def fast_stream_handler(payload: dict[str, Any]) -> AsyncGenerator[dict[str, Any]]:  # noqa: ARG001
             """Fast streaming handler."""
             for i in range(3):
                 yield {"event": f"event_{i}", "data": {"value": i}}
@@ -753,8 +782,9 @@ class TestStreamingPerformance:
 
             result = await summon_handler("fast.stream", {})
             events = []
-            async for event in result.data:
-                events.append(event)
+            if result.data is not None:
+                async for event in result.data:
+                    events.append(event)
             return events
 
         events = asyncio.run(test_invocation())
@@ -795,7 +825,7 @@ class TestStreamingPerformance:
 
         # Register high-throughput handler
         @register_handler("throughput.stream", timeout_ms=10000)
-        async def throughput_stream_handler(payload: dict[str, Any]) -> AsyncGenerator[dict[str, Any]]:
+        async def throughput_stream_handler(payload: dict[str, Any]) -> AsyncGenerator[dict[str, Any]]:  # noqa: ARG001
             """High-throughput streaming handler."""
             for i in range(100):
                 yield {"event": "data", "data": {"value": i, "timestamp": datetime.now(UTC).isoformat()}}
@@ -809,8 +839,9 @@ class TestStreamingPerformance:
 
             result = await summon_handler("throughput.stream", {})
             count = 0
-            async for _ in result.data:
-                count += 1
+            if result.data is not None:
+                async for _ in result.data:
+                    count += 1
             return count
 
         event_count = asyncio.run(test_invocation())
@@ -828,30 +859,35 @@ class TestStreamingPerformance:
 
         # Register memory-intensive handler
         @register_handler("memory.stream", timeout_ms=15000)
-        async def memory_stream_handler(payload: dict[str, Any]) -> AsyncGenerator[dict[str, Any]]:
+        async def memory_stream_handler(payload: dict[str, Any]) -> AsyncGenerator[dict[str, Any]]:  # noqa: ARG001
             """Memory-intensive streaming handler."""
+            _ = payload  # Acknowledge payload usage
             large_data = {"data": "x" * 10000}  # 10KB per event
 
             for _i in range(50):  # 50 events = 500KB total
                 yield {"event": "large_data", "data": large_data}
                 await asyncio.sleep(0.01)
 
-        # Test memory usage
-        import resource
+        # Ensure the handler is accessed to satisfy static analysis
+        _ = memory_stream_handler
 
-        start_memory = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        # Test memory usage
+        import resource  # type: ignore[import-untyped]
+
+        start_memory = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss  # type: ignore[attr-defined]
 
         async def test_invocation():
             from application.mothership.api_core import summon_handler
 
             result = await summon_handler("memory.stream", {})
             count = 0
-            async for _ in result.data:
-                count += 1
+            if result.data is not None:
+                async for _ in result.data:
+                    count += 1
             return count
 
         event_count = asyncio.run(test_invocation())
-        end_memory = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        end_memory = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss  # type: ignore[attr-defined]
 
         memory_used = end_memory - start_memory
 
@@ -973,11 +1009,9 @@ class TestStreamingProtocolCompliance:
 
         # Check for retry field
         events = list(response.iter_lines())
-        # Handle both bytes and string responses
-        if events and isinstance(events[0], bytes):
-            event_text = b"\n".join(events).decode()
-        else:
-            event_text = "\n".join(str(e) for e in events)
+        # Normalize to str then join (avoids bytes.join(list[str]) type error)
+        event_lines = [line.decode() if isinstance(line, bytes) else line for line in events]
+        event_text = "\n".join(event_lines)
 
         assert "retry: 5000" in event_text
 
@@ -1230,6 +1264,8 @@ class TestStreamingSecurityIntegration:
             from application.mothership.api_core import summon_handler
 
             result = await summon_handler("secure.stream", data)
+            if result.data is None:
+                raise HTTPException(status_code=500, detail="Handler returned no data stream")
             return EventSourceResponse(result.data)
 
         return app
@@ -1316,6 +1352,8 @@ class TestStreamingSecurityIntegration:
             from application.mothership.api_core import summon_handler
 
             result = await summon_handler("failing.secure.stream", data)
+            if result.data is None:
+                raise HTTPException(status_code=500, detail="Handler returned no data stream")
             return EventSourceResponse(result.data)
 
         # Use TestClient with raise_server_exceptions=False
@@ -1478,6 +1516,8 @@ class TestStreamingEndToEnd:
             from application.mothership.api_core import summon_handler
 
             result = await summon_handler("e2e.stream", data)
+            if result.data is None:
+                raise HTTPException(status_code=500, detail="Handler returned no data stream")
             return EventSourceResponse(result.data)
 
         return app
@@ -1564,9 +1604,13 @@ class TestStreamingEndToEnd:
 
         @app.post("/api/v1/e2e-stream")
         async def e2e_stream_endpoint(data: dict):
+            from sse_starlette.sse import EventSourceResponse
+
             from application.mothership.api_core import summon_handler
 
             result = await summon_handler("navigation.stream", data)
+            if result.data is None:
+                raise HTTPException(status_code=500, detail="Handler returned no data stream")
             return EventSourceResponse(result.data)
 
         client = TestClient(app, raise_server_exceptions=False)

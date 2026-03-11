@@ -78,20 +78,17 @@ class TestDevTokenProduction:
 
     def test_dev_token_rejected_without_enable_flag(self) -> None:
         """Without ENABLE_DEV_TOKEN, the dev-test-token must not grant access."""
+        from application.mothership.config import reload_settings
+
         env = {
             "ENABLE_DEV_TOKEN": "",
             "GRID_QUIET": "1",
         }
         with patch.dict(os.environ, env, clear=False):
-            from importlib import reload
-
-            # Reset both dependencies and config modules to clear cached settings
-            import application.mothership.config as config_module
-
-            reload(config_module)
-            import application.mothership.dependencies as deps
-
-            reload(deps)
+            # Reload settings from the patched env (clears LRU cache + singleton)
+            # instead of reload()ing entire modules, which breaks function identity
+            # of get_config and causes downstream dependency_overrides to silently miss.
+            reload_settings()
             from application.mothership.main import create_app
 
             app = create_app()
@@ -106,6 +103,9 @@ class TestDevTokenProduction:
                 f"Dev token should be rejected without ENABLE_DEV_TOKEN, got {response.status_code}"
             )
 
+        # Restore settings from the original (unpatched) env
+        reload_settings()
+
 
 # =============================================================================
 # Sandbox Violation Detection
@@ -118,9 +118,12 @@ class TestSandboxViolation:
     def test_exec_detected_in_skill_code(self) -> None:
         """The sandbox must detect exec() in skill code."""
         try:
-            from grid.skills.sandbox import _check_security_violations
+            from pathlib import Path
 
-            violations = _check_security_violations("exec('malicious')")
+            from grid.skills.sandbox import SandboxConfig, SkillsSandbox
+
+            sandbox = SkillsSandbox(config=SandboxConfig(allow_filesystem=False, timeout=5.0))
+            violations = sandbox._check_security_violations("exec-1", Path.cwd(), skill_code="exec('malicious')")
             assert len(violations) > 0, "exec() should be flagged as a security violation"
         except ImportError:
             pytest.skip("grid.skills.sandbox not available")
@@ -128,9 +131,14 @@ class TestSandboxViolation:
     def test_subprocess_detected_in_skill_code(self) -> None:
         """The sandbox must detect subprocess usage in skill code."""
         try:
-            from grid.skills.sandbox import _check_security_violations
+            from pathlib import Path
 
-            violations = _check_security_violations("import subprocess; subprocess.call(['rm', '-rf'])")
+            from grid.skills.sandbox import SandboxConfig, SkillsSandbox
+
+            sandbox = SkillsSandbox(config=SandboxConfig(allow_filesystem=False, timeout=5.0))
+            violations = sandbox._check_security_violations(
+                "exec-2", Path.cwd(), skill_code="import subprocess; subprocess.call(['rm', '-rf'])"
+            )
             assert len(violations) > 0, "subprocess should be flagged"
         except ImportError:
             pytest.skip("grid.skills.sandbox not available")
