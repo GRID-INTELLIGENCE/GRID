@@ -8,6 +8,7 @@ import subprocess
 import sys
 import types
 import uuid
+from collections.abc import Generator
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -123,11 +124,11 @@ def _install_jwt_test_shim() -> None:
         except (TypeError, json.JSONDecodeError) as exc:
             raise InvalidTokenError("Invalid token payload") from exc
 
-    jwt_module.encode = encode
-    jwt_module.decode = decode
-    jwt_module.InvalidTokenError = InvalidTokenError
-    jwt_module.exceptions = exceptions_module
-    exceptions_module.InvalidTokenError = InvalidTokenError
+    jwt_module.encode = encode  # type: ignore[attr-defined]
+    jwt_module.decode = decode  # type: ignore[attr-defined]
+    jwt_module.InvalidTokenError = InvalidTokenError  # type: ignore[attr-defined]
+    jwt_module.exceptions = exceptions_module  # type: ignore[attr-defined]
+    exceptions_module.InvalidTokenError = InvalidTokenError  # type: ignore[attr-defined]
 
     sys.modules["jwt"] = jwt_module
     sys.modules["jwt.exceptions"] = exceptions_module
@@ -237,7 +238,7 @@ def setup_env():
 
 
 @pytest.fixture
-def tmp_path() -> Path:
+def tmp_path() -> Generator[Path]:
     """Workspace-scoped temporary path fixture.
 
     Uses a deterministic writable directory inside the repo instead of pytest's
@@ -277,6 +278,13 @@ def reset_services():
             reset_resonance_service()
     except ImportError:
         pass
+    # Reset global singletons (circuit breaker, metrics, accountability, rate limiter)
+    try:
+        from tests.utils.reset_helpers import reset_all_singletons
+
+        reset_all_singletons()
+    except ImportError:
+        pass
     yield
     _prime_test_environment()
     try:
@@ -296,6 +304,13 @@ def reset_services():
 
         if reset_resonance_service:
             reset_resonance_service()
+    except ImportError:
+        pass
+    # Reset global singletons (circuit breaker, metrics, accountability, rate limiter)
+    try:
+        from tests.utils.reset_helpers import reset_all_singletons
+
+        reset_all_singletons()
     except ImportError:
         pass
 
