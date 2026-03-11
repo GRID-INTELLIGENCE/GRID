@@ -293,6 +293,18 @@ jobs:
           name: dist-packages
           path: .
 
+      - name: "Prepare dist directory"
+        run: |
+          if [[ "${{ needs.prepare.outputs.package }}" == "grid-safety" ]]; then
+            # grid-safety builds into safety/dist/; move to top-level dist/ for the publish action
+            if [[ -d safety/dist ]]; then
+              rm -rf dist
+              mv safety/dist dist
+            fi
+          fi
+          echo "Contents of dist/:"
+          ls -la dist/
+
       - name: "Publish to PyPI"
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
