@@ -162,15 +162,13 @@ jobs:
         run: uv run mypy src/grid/ src/application/ src/tools/ src/search/ src/cognitive/ src/mycelium/ --ignore-missing-imports || true
 
   # =========================================================================
-  # SECURITY - Security Scanning (optional)
+  # SECURITY - Security Scanning (Python + NPM)
   # =========================================================================
   security:
     name: "Security Scan"
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     needs: [secrets-scan]
-    if: github.event.inputs.run_security_scan == 'true' || github.ref == 'refs/heads/main'
-    continue-on-error: true
     steps:
       - name: "Checkout"
         uses: actions/checkout@v6
@@ -183,17 +181,72 @@ jobs:
           enable-cache: true
           cache-dependency-glob: "uv.lock"
 
-      - name: "Sync dependencies"
+      - name: "Sync Python dependencies"
         run: uv sync --frozen
+
+      - name: "Setup Node.js"
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: "frontend/package-lock.json"
 
       - name: "Install security tools"
         run: uv pip install bandit pip-audit
 
-      - name: "Run Bandit security scan"
-        run: uv run bandit -r src/grid src/application src/tools -ll || true
+      - name: "Run Bandit code security scan"
+        run: uv run bandit -r src/grid src/application src/tools -ll -f json -o bandit-report.json || true
 
-      - name: "Run pip-audit dependency check"
-        run: uv run pip-audit --desc || true
+      - name: "Run pip-audit Python dependency check"
+        run: |
+          uv run pip-audit --desc -f json > pip-audit-report.json || true
+          # Fail on critical/high vulnerabilities
+          if grep -q '"severity": "critical"\|"severity": "high"' pip-audit-report.json; then
+            echo "::error::Critical or high severity Python vulnerabilities found"
+            cat pip-audit-report.json | python3 -c "import sys,json; data=json.load(sys.stdin); [print(f'  - {v[\"name\"]}@{v[\"version\"]}: {v[\"fix\"]}') for v in data if v.get('severity') in ['CRITICAL','HIGH']]"
+            exit 1
+          fi
+
+      - name: "Install frontend dependencies"
+        working-directory: frontend
+        run: npm ci --ignore-scripts
+
+      - name: "Run npm audit NPM dependency check"
+        run: |
+          cd frontend
+          npm audit --json > npm-audit-report.json 2>/dev/null || true
+          # Fail on critical/high vulnerabilities
+          if jq -e '.metadata.vulnerabilities | (.critical > 0 or .high > 0)' npm-audit-report.json >/dev/null 2>&1; then
+            echo "::error::Critical or high severity NPM vulnerabilities found"
+            jq -r '.vulnerabilities[] | select(.severity == "critical" or .severity == "high") | "  - \(.name): \(.title)"' npm-audit-report.json
+            exit 1
+          fi
+
+      - name: "Generate security summary"
+        if: always()
+        run: |
+          echo "## Security Scan Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Python Dependencies (pip-audit)" >> $GITHUB_STEP_SUMMARY
+          if [ -f pip-audit-report.json ]; then
+            python3 -c "import json; data=json.load(open('pip-audit-report.json')); print(f'  - {len(data)} vulnerabilities detected')" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "  - No vulnerabilities detected" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### NPM Dependencies (npm audit)" >> $GITHUB_STEP_SUMMARY
+          if [ -f frontend/npm-audit-report.json ]; then
+            jq -r '.metadata.vulnerabilities | "  - Critical: \(.critical), High: \(.high), Moderate: \(.moderate), Low: \(.low)"' frontend/npm-audit-report.json >> $GITHUB_STEP_SUMMARY
+          else
+            echo "  - No vulnerabilities detected" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Code Security (Bandit)" >> $GITHUB_STEP_SUMMARY
+          if [ -f bandit-report.json ]; then
+            python3 -c "import json; data=json.load(open('bandit-report.json')); print(f'  - Errors: {data[\"errors\"]}, Issues: {len(data.get(\"results\", []))}')" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "  - No issues detected" >> $GITHUB_STEP_SUMMARY
+          fi
 
   # =========================================================================
   # SMOKE TEST - Quick Environment Verification
@@ -204,7 +257,7 @@ jobs:
     timeout-minutes: 10
     needs: [secrets-scan]
     env:
-      UV_TORCH_BACKEND: "cpu"  # Use CPU-only torch to avoid 2GB CUDA download
+      UV_TORCH_BACKEND: "cpu" # Use CPU-only torch to avoid 2GB CUDA download
     steps:
       - name: "Checkout"
         uses: actions/checkout@v6
@@ -265,7 +318,7 @@ jobs:
     timeout-minutes: 20
     needs: [smoke-test, lint]
     env:
-      UV_TORCH_BACKEND: "cpu"  # Use CPU-only torch to avoid 2GB CUDA download
+      UV_TORCH_BACKEND: "cpu" # Use CPU-only torch to avoid 2GB CUDA download
     steps:
       - name: "Checkout"
         uses: actions/checkout@v6
