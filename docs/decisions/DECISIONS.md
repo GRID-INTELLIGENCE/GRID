@@ -5,6 +5,27 @@ Append new entries at the top. One decision per entry.
 
 ---
 
+## 2026-03-12 — CI Enforcement: Two-Track Gate Design (Nourishment Principle)
+
+**Decision**: Introduced two distinct GitHub Actions gates at workspace root:
+1. `secrets-gate.yml` — deterministic pattern scan for secrets/credentials (hard-block, no judgment call).
+2. `boundary-gate.yml` + `scripts/boundary_review.py` — structural invariant review for `safety/`, `security/`, `boundaries/` changes (blocking only on CRITICAL/HIGH findings, always accompanied by rationale, recommendation, and a clear remediation path).
+
+The governing principle: **patterns and repetitions need nourishment, not restrictions.**
+
+A committed secret has no legitimate variant — the pattern IS the violation, restriction is the only correct response. But a weakened boundary invariant is a development signal, not a terminal event. Every blocking finding in the boundary gate must carry a `rationale` (why the invariant exists), a `recommendation` (how to preserve intent while making the change), and a documented path back to approval. The gate does not end the conversation; it redirects it.
+
+This maps directly to the GATE contract's AX-03/AX-04 axioms: every difference has a name and every response is proportional to the measured difference. Secrets have a scalar difference (present/absent) — response is binary. Boundary weakening has a dimensional difference (which invariant, which scope, what severity) — response is proportional and constructive.
+
+**Why**: The previous state had no root-level CI enforcement. The PR template had a "Requested AI review" checkbox backed by nothing. The boundary gate fulfills that contract; the secrets gate fulfills the GATE never-rule ("never store user_secret in any file").
+
+**Alternatives considered**:
+1. Single gate for both concerns — Rejected: deterministic pattern scanning and structural reasoning are categorically different operations. Mixing them produces ambiguous failure messages and makes it harder to reason about what failed.
+2. Block all findings regardless of severity — Rejected: violates the nourishment principle. LOW/MEDIUM findings become PR comments, not merge blocks — they inform without halting.
+3. Use a third-party SAST tool for boundary review — Rejected: the boundary invariants are domain-specific (GATE contract axioms, RefusalRights, Consent revocability) and require codebase-aware semantic analysis, not generic SAST rules.
+
+---
+
 ## 2026-02-24 — Community Readiness: Entry Point Cleanup & CVE Fix
 
 **Decision**: Removed 4 broken `[project.scripts]` entries from `pyproject.toml` (`grid-agentic`, `grid-workflow`, `grid-context`, `databricks-cli`). Bumped `grid-safety` to 1.0.1 to publish the `python-jose` removal (CVE-2024-23342 fix) to PyPI. Added PyPI badge, CONTRIBUTING.md, and updated stale installation docs.
