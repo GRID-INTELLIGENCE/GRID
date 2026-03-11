@@ -5,6 +5,48 @@ All notable changes to the GRID project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.0] - 2026-03-11
+
+### Highlights
+
+**Security Hardening & Search Guardrails** — Comprehensive API attack surface guardrails (Phases 1–4), sealed-envelope transition gate for cross-partition transfers, search engine with auth/security/safety guardrails, and CI pipeline hardening with git/config audit gates.
+
+### Added
+
+- **Search Engine with Guardrails** (`src/search/`) — Full search service with authentication, rate limiting, input sanitization, and admin-gated schema/index/delete routes
+- **Transition Gate** (`boundaries/transition_gate/`) — Sealed-envelope handshake for cross-partition artifact transfers with HMAC-SHA256 fingerprinting, single-use nonces, timing-safe comparison, and 9-step verification pipeline
+- **Reasoning Router** (`src/application/mothership/routers/reasoning.py`) — New reasoning endpoint with schema and unit tests
+- **Pathways Adapter** (`src/unified_fabric/`) — User-ID anti-spoofing and tracing for Unified Fabric
+- **CSV Data Processing Pipeline** (`src/tools/`) — Comprehensive CSV ingestion and transformation utilities
+- **Signature-Based Authentication** — Narrowed accessibility scope with signature verification
+- **CI Audit Gates** — `assert_no_debug` script, git hygiene checks (no untracked files in `src/` or `tests/`), and Phase 4 production gate in both Secrets Scan and Test jobs
+- **SECURITY.md** — Added GitHub security policy with vulnerability reporting instructions
+
+### Changed
+
+- **Version bump** from 2.6.1 to 2.7.0
+- **License classifier** fixed from `Other/Proprietary License` to `OSI Approved :: MIT License` in `pyproject.toml` to match actual MIT LICENSE file
+- **README.md** — Updated project stats (1130+ CI tests passing, 3200+ total collected, 800+ source files), refreshed "What's New" section for March 2026, corrected badge references
+- **CONTRIBUTING.md** — Updated linter commands, added test isolation guidelines, added `SECURITY.md` reference
+- **Mothership hardening** — Config `__all__` export safety, lifespan shutdown cleanup (ParasiteGuard, rate limiter), health router async/sync Redis ping handling
+- **Path validation** — Normalize backslashes and detect Windows absolute paths on Linux for cross-platform security
+- **RAG runtime guards** — Cross-encoder compatibility under transformers 5.x; intent classifier torch/transformers import guard
+- **Test isolation** — Replaced `importlib.reload()` in tests with `reload_settings()` to prevent dependency override identity mismatch; reset global singletons (circuit breaker, metrics, accountability) in streaming test fixtures
+
+### Fixed
+
+- **CI Test job failure** (run 22955473744) — Root cause: `importlib.reload()` on config/dependencies modules broke FastAPI `dependency_overrides` identity for `get_config`, causing `/health/security` to use real settings (rate limiting disabled) → HTTP 503. Fixed by using `reload_settings()` instead
+- **Cross-platform path traversal** — Windows backslash normalization and absolute path detection on Linux
+- **Dead code and platform configuration** cleanup across mothership routers
+- **Pytest collection** restored across grid with import guards and lazy loading
+- **Ecosystem audit** — Import guards, lazy loading, orphan module cleanup
+
+### Security
+
+- **CRIT-4/5 guardrails** — API attack surface hardening with mothership refactor
+- **Phase 1–4 API guardrails** — Tests, CI integration, and documentation for comprehensive endpoint protection
+- **Residual DEBUG prints** replaced with structured logger calls in RAG engine and indexer
+
 ## [2.6.1] - 2026-02-24
 
 ### Changed
@@ -155,6 +197,7 @@ Repository cleanup: removed tracked artifacts, updated `.gitignore`, refreshed d
 
 ---
 
+[2.7.0]: https://github.com/GRID-INTELLIGENCE/GRID/compare/v2.6.1...v2.7.0
 [2.6.1]: https://github.com/GRID-INTELLIGENCE/GRID/compare/v2.6.0...v2.6.1
 [2.6.0]: https://github.com/GRID-INTELLIGENCE/GRID/compare/v2.5.1...v2.6.0
 [2.5.1]: https://github.com/GRID-INTELLIGENCE/GRID/compare/v2.5.0...v2.5.1

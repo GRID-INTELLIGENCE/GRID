@@ -58,6 +58,9 @@ One commit, one concern. Security fixes separate from features separate from ref
 # Full suite
 uv run pytest -q --tb=short
 
+# CI test subset (unit + security + api)
+uv run pytest tests/unit/ tests/security/ tests/api/ -v --tb=short -x
+
 # Single module (faster during development)
 uv run pytest tests/unit -q --tb=short
 
@@ -68,10 +71,10 @@ uv run pytest --cov=src/grid -q --tb=short
 ### Running the Linter
 
 ```bash
-uv run ruff check work/ safety/ security/ boundaries/
+uv run ruff check .
 
 # Auto-fix
-uv run ruff check --fix work/ safety/ security/ boundaries/
+uv run ruff check --fix .
 ```
 
 ## Pipeline Green Checklist
@@ -92,6 +95,14 @@ Before opening a PR, run this checklist end-to-end:
 5. Ensure all GitHub workflow runs are green on the PR before merge
 
 See [`docs/release/pipeline-runbook.md`](docs/release/pipeline-runbook.md) for the full execution and post-execution routine.
+
+## Test Isolation Rules
+
+Tests must not leak state across files. Follow these rules:
+
+- **Never** use `importlib.reload()` on application modules in tests — it breaks FastAPI dependency override identity. Use `reload_settings()` or dedicated reset helpers instead.
+- **Always** reset global singletons in fixtures when your test modifies shared state (circuit breaker manager, metrics collector, accountability calculator).
+- **Always** use `patch.dict(os.environ, ...)` with a matching cleanup rather than mutating `os.environ` directly.
 
 ## Safety-Critical Code
 
@@ -121,6 +132,10 @@ When making architectural decisions (new abstractions, pattern choices, dependen
 **Why**: [One sentence rationale]
 **Alternatives considered**: [What was rejected and why]
 ```
+
+## Security Vulnerabilities
+
+If you discover a security vulnerability, **do not** open a public issue. Follow the instructions in [SECURITY.md](SECURITY.md) to report it responsibly.
 
 ## Getting Help
 

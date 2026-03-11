@@ -120,8 +120,8 @@ $ grid analyze src/
 
 | 🎯 Metric | 📈 Value | 🎯 Metric | 📈 Value |
 |-----------|----------|-----------|----------|
-| **Python Version** | 3.13+ | **Tests Passing** | 438+ ✅ |
-| **Code Coverage** | ≥80% | **Architecture** | DDD + Event-Driven |
+| **Python Version** | 3.13+ | **Tests Passing** | 1130+ ✅ |
+| **Code Coverage** | ≥75% | **Architecture** | DDD + Event-Driven |
 | **Lint Errors** | 0 (ruff clean) | **RAG Precision** | +33-40% |
 | **Security** | Production-Ready | **Package Manager** | UV |
 
@@ -131,9 +131,9 @@ $ grid analyze src/
 
 ### 🚀 Quick Stats
 
-![Lines of Code](https://img.shields.io/badge/Lines%20of%20Code-50k%2B-blue?style=flat-square)
-![Files](https://img.shields.io/badge/Files-748-green?style=flat-square)
-![Tests](https://img.shields.io/badge/Tests-438%2B-success?style=flat-square)
+![Lines of Code](https://img.shields.io/badge/Lines%20of%20Code-190k%2B-blue?style=flat-square)
+![Files](https://img.shields.io/badge/Files-800%2B-green?style=flat-square)
+![Tests](https://img.shields.io/badge/Tests-1130%2B-success?style=flat-square)
 ![Lint](https://img.shields.io/badge/Lint-0%20errors-brightgreen?style=flat-square)
 
 </div>
@@ -151,42 +151,44 @@ GRID (Geometric Resonance Intelligence Driver) is a comprehensive framework for 
 - **Event-Driven Agentic System**: Complete case management workflow with continuous learning
 - **Domain-Driven Design**: Professional architectural patterns with service layer decoupling
 
-## 🚀 What's New (February 2026)
+## 🚀 What's New
+
+### v2.7.0 — Security Hardening & Search Guardrails (March 2026)
+
+- ✅ **Search Engine with Guardrails** — Full search service with authentication, rate limiting, input sanitization, and admin-gated schema/index/delete routes
+- ✅ **Transition Gate** — Sealed-envelope handshake for cross-partition artifact transfers with HMAC-SHA256 fingerprinting, single-use nonces, and 9-step verification pipeline
+- ✅ **API Attack Surface Guardrails (Phases 1–4)** — Comprehensive endpoint protection with CI integration and documentation
+- ✅ **CI Audit Gates** — `assert_no_debug` script, git hygiene checks, Phase 4 production gate across Secrets Scan and Test jobs
+- ✅ **Reasoning Router** — New reasoning endpoint with schema and unit tests
+- ✅ **Pathways Adapter** — User-ID anti-spoofing and tracing for Unified Fabric
+- ✅ **Test Isolation Hardening** — Eliminated `importlib.reload()` in tests; reset global singletons to prevent cross-test contamination
+- ✅ **Cross-Platform Security** — Windows backslash normalization and absolute path detection on Linux for path traversal protection
+
+### v2.6.x — Mycelium Frontend & Packaging (February 2026)
+
+- ✅ **Mycelium Frontend** — Interactive comprehension layer with adaptive synthesis, concept exploration, and accessibility-first design
+- ✅ **Packaging** — Mycelium shipped in wheel builds; version/changelog consistency verification in CI
+
+<details>
+<summary><b>Earlier Releases</b> (Click to expand)</summary>
 
 ### v2.5.0 — Environmental Intelligence & Round Table
 
 - ✅ **GRID Environmental Intelligence** — Homeostatic middleware using Le Chatelier's Principle to maintain conversational balance across three dimensions (Practical, Legal, Psychological)
 - ✅ **Round Table Facilitator** — 4-phase multi-agent discussion orchestrator (open → discuss → synthesize → close) with environment-aware LLM parameter adjustment
-- ✅ **EnvironmentalLLMProxy** — Wraps any `BaseLLMProvider` with dynamic parameter adjustment based on conversational equilibrium
-- ✅ **RoundTablePage** — Frontend page for initiating and visualizing round table discussions
 - ✅ **60 New Tests** — 43 environment tests (9 classes) + 17 round table facilitator tests; all passing
-
-### v2.4.1 — Consolidation & Snapshot Integrity
-
-- ✅ **Main Consolidation Completed** — `main` remains the authoritative baseline after branch audit and merge mitigation review
-- ✅ **Unsafe Branch Mitigated** — `copilot-worktree-2026-02-17T11-02-39` explicitly rejected and logged in `docs/decisions/DECISIONS.md`
-- ✅ **Snapshot Functionality Verified** — Snapshot capture tests validated for structural and landscape tracking flows
-- ✅ **Async Skill Runtime Stability** — sync wrappers now safely resolve async handlers across running and non-running event loop contexts
-- ✅ **Test Collection Hardening** — RAG contract tests now skip cleanly when optional `chromadb` import fails at environment level
 
 ### v2.4.0 — Full Lint Remediation & Cleanup
 
 - ✅ **664→0 Lint Errors** — Complete ruff remediation across 251 files; codebase is lint-clean
 - ✅ **StrEnum Modernization** — 122 classes converted to PEP 695 `StrEnum` inheritance
-- ✅ **PERF401 Optimization** — 85 manual list constructions converted to comprehensions/`extend()`
-- ✅ **Repository Cleanup** — Removed tracked artifacts (bandit reports, telemetry dumps, tmp scripts)
-- ✅ **Documentation Refresh** — CHANGELOG.md, updated METADATA.md, validation report addendum
-- ✅ **Version Bump** — 2.3.0 → 2.4.0
 
 ### v2.3.0 — CI & Code Quality Hardening
 
-- ✅ **CI Pipeline Fixes** — Re-enabled push triggers, fixed test collection (`test_ollama.py`, `test_honor_decay_edge_cases.py`)
 - ✅ **Formatter Consolidation** — Replaced Black with Ruff format in CI; single toolchain for linting + formatting
-- ✅ **Expanded Ruff Rules** — Added S (security), SIM (simplify), C4 (comprehensions), PERF (performance) rules
-- ✅ **Blocking I/O Fix** — Fixed critical async function in `agentic_system.py`
-- ✅ **GUARDIAN Engine Hardening** — ReDoS guard, LIMITATIONS headers (Trust Layer Rule 3.2), encapsulation fixes, priority sort bug fix
-- ✅ **Pytest Timeout** — Default 300s timeout prevents CI hangs
-- ✅ **CI Matrix Aligned** — Test matrix matches `requires-python >=3.13`
+- ✅ **GUARDIAN Engine Hardening** — ReDoS guard, LIMITATIONS headers, encapsulation fixes
+
+</details>
 
 ### January 2026
 
@@ -196,7 +198,7 @@ GRID (Geometric Resonance Intelligence Driver) is a comprehensive framework for 
 - ✅ **Billing & Usage** - Tier-based subscription management with automatic overage calculation
 - ✅ **Security Hardening** - Comprehensive path traversal protection and validation
 - ✅ **Advanced RAG System** - 4-phase optimization with semantic chunking, hybrid search, cross-encoder reranking
-- ✅ **Enhanced Testing** - 283+ tests passing (100% core pass rate) with 15/15 Unified Fabric cases
+- ✅ **Enhanced Testing** - 1130+ tests passing (100% core pass rate) with 15/15 Unified Fabric cases
 - ✅ **Windows Compatibility** - Fixed pre-commit hooks and cross-platform path handling
 - ✅ **Performance Monitoring** - Real-time system metrics and optimization
 - ✅ **Dynamic Unified Fabric** - Event-driven architecture with distributed AI Safety across E:/
@@ -264,7 +266,8 @@ We're not perfect—early on, 29 tests were still failing. But we documented eve
 Nov 2025 → First commit. Blank templates. Beginning.
 Dec 2025 → Architecture cleanup. Security foundation. Domain-driven design.
 Jan 2026 → Cognitive layer. RAG optimization (+33-40% precision). Production hardening.
-Feb 2026 → 540+ files. 283+ tests. 100% core pass rate. Environmental Intelligence. Version 2.5+. Production-ready. ✨
+Feb 2026 → 540+ files. Environmental Intelligence. Mycelium Frontend. Version 2.6+. Production-ready.
+Mar 2026 → 800+ source files. 1130+ tests passing. Search guardrails. Transition gate. CI audit gates. Version 2.7.0. ✨
 ```
 
 <div align="center">
@@ -816,10 +819,10 @@ Optimized pre-push hook ensures:
 
 ### Test Coverage
 
-- **168+ tests passing** across unit, integration, and agentic systems (31 new auth/billing tests)
-- **100% pass rate** for new Unified Fabric core modules
-- **Comprehensive coverage** for core intelligence, agentic system, and DDD patterns
-- **CI/CD pipeline** with automated validation and deployment
+- **1130+ tests passing** in CI (unit + security + API), 3200+ total collected across all test directories
+- **100% pass rate** for core modules, Unified Fabric, and search guardrails
+- **Comprehensive coverage** for core intelligence, agentic system, DDD patterns, and transition gate
+- **CI/CD pipeline** with automated validation, git hygiene checks, and `assert_no_debug` production gate
 
 ### Performance Benchmarks
 
@@ -896,8 +899,8 @@ git push -u origin feature/your-feature-name
 ### Quality Gates
 
 Before merging to main:
-- ✅ All tests passing (283+ tests)
-- ✅ Code coverage ≥80%
+- ✅ All tests passing (1130+ tests)
+- ✅ Code coverage ≥75%
 - ✅ No linting errors (`ruff check`)
 - ✅ No type errors (`mypy src/`)
 - ✅ Security scan passing
