@@ -1,20 +1,19 @@
 """Tests for Decision Chain of Custody (DCoC) provenance library."""
 
 import os
-import pytest
 
 os.environ.setdefault("GRID_PROVENANCE_SECRET", "test-provenance-secret")
 
+from boundaries.provenance.chain import compute_hash
+from boundaries.provenance.record import create_dpr, get_chain_ref
+from boundaries.provenance.signer import sign_record, verify_signature
 from boundaries.provenance.types import (
-    DecisionType,
     AuthorityType,
+    DecisionType,
+    DPRCreateInput,
     SafetyVerdict,
     SafetyVerdictResult,
-    DPRCreateInput,
 )
-from boundaries.provenance.record import create_dpr, get_chain_ref
-from boundaries.provenance.chain import compute_hash, compute_chain_hash
-from boundaries.provenance.signer import sign_record, verify_signature
 
 
 def _make_input(**kwargs) -> DPRCreateInput:
@@ -93,10 +92,12 @@ class TestSigning:
 
 class TestPrivacyPreservation:
     def test_hashes_input_not_raw_text(self):
-        dpr = create_dpr(_make_input(
-            input_context="Sensitive user input about a meeting",
-            output_content="Brief response about priorities",
-        ))
+        dpr = create_dpr(
+            _make_input(
+                input_context="Sensitive user input about a meeting",
+                output_content="Brief response about priorities",
+            )
+        )
         assert dpr.input_context_hash
         assert dpr.output_hash
         assert dpr.input_context_hash == compute_hash("Sensitive user input about a meeting")
@@ -107,23 +108,27 @@ class TestPrivacyPreservation:
 
 class TestSafetyVerdicts:
     def test_records_verdicts(self):
-        dpr = create_dpr(_make_input(
-            safety_verdicts=[
-                SafetyVerdict("jwt_auth", "auth", SafetyVerdictResult.PASS, 1.0, 1.0),
-                SafetyVerdict("rate_limit", "rate_limit", SafetyVerdictResult.PASS, 3.0, 1.0),
-            ],
-        ))
+        dpr = create_dpr(
+            _make_input(
+                safety_verdicts=[
+                    SafetyVerdict("jwt_auth", "auth", SafetyVerdictResult.PASS, 1.0, 1.0),
+                    SafetyVerdict("rate_limit", "rate_limit", SafetyVerdictResult.PASS, 3.0, 1.0),
+                ],
+            )
+        )
         assert len(dpr.safety_verdicts) == 2
         assert dpr.safety_verdicts[0].gate_id == "jwt_auth"
 
     def test_records_blocked_verdicts(self):
-        dpr = create_dpr(_make_input(
-            decision_type=DecisionType.REFUSAL,
-            action_taken="service_refusal",
-            safety_verdicts=[
-                SafetyVerdict("rate_limit", "rate_limit", SafetyVerdictResult.BLOCK, 2.0, 1.0),
-            ],
-        ))
+        dpr = create_dpr(
+            _make_input(
+                decision_type=DecisionType.REFUSAL,
+                action_taken="service_refusal",
+                safety_verdicts=[
+                    SafetyVerdict("rate_limit", "rate_limit", SafetyVerdictResult.BLOCK, 2.0, 1.0),
+                ],
+            )
+        )
         assert dpr.decision_type == DecisionType.REFUSAL
         assert dpr.safety_verdicts[0].verdict == SafetyVerdictResult.BLOCK
 
@@ -140,6 +145,7 @@ class TestNominalization:
             "data_export",
         ]
         import re
+
         for action in actions:
             assert not re.match(r"^(I |you |we |do |make )", action, re.IGNORECASE)
             assert re.match(r"^[a-z_]+$", action)

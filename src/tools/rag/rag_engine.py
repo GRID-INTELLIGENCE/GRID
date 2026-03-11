@@ -153,6 +153,12 @@ class RAGEngine:
                 max_size=config.cache_size, ttl_seconds=config.cache_ttl, collection_name=config.collection_name
             )
 
+        # Initialize token counter for working memory metrics
+        self._token_counter = None
+        if config.cache_enabled:  # Reuse cache_enabled flag for metrics
+            from .token_counter import TokenCounter
+            self._token_counter = TokenCounter(token_limit=4000)
+
         # Initialize hybrid retriever if enabled
         self._hybrid_retriever = None
         if config.use_hybrid:
@@ -245,6 +251,26 @@ class RAGEngine:
                 quiet=quiet,
             )
 
+    def get_cache_stats(self) -> dict[str, Any]:
+        """Get cache statistics.
+        
+        Returns:
+            Cache stats dict or empty dict if cache disabled
+        """
+        if self._cache is not None:
+            return self._cache.get_stats()
+        return {}
+
+    def get_working_memory_stats(self) -> dict[str, Any]:
+        """Get working memory (token counting) statistics.
+        
+        Returns:
+            Working memory stats dict or empty dict if disabled
+        """
+        if self._token_counter is not None:
+            return self._token_counter.get_metrics()
+        return {}
+
     async def query(
         self, query_text: str, top_k: int | None = None, temperature: float = 0.7, include_sources: bool = True
     ) -> dict[str, Any]:
@@ -334,16 +360,26 @@ class RAGEngine:
             # Build context from retrieved documents
             context_parts = []
             sources = []
-
+            
+            # Extract document chunks for token counting
+            doc_chunks = []
             for i, (doc, metadata, distance) in enumerate(
                 zip(results["documents"], results["metadatas"], results["distances"], strict=False)
             ):
+                doc_chunks.append(doc)
                 source_info = {"index": i + 1, "distance": distance, "metadata": metadata}
                 sources.append(source_info)
 
-                context_parts.append(f"[{i + 1}] {doc}")
-
-            context = "\n\n".join(context_parts)
+            # Build context with token counting if available
+            if self._token_counter is not None:
+                context = self._token_counter.build_context_with_limit(doc_chunks)
+            else:
+                # Fallback: build context without token counting
+                for i, (doc, metadata, distance) in enumerate(
+                    zip(results["documents"], results["metadatas"], results["distances"], strict=False)
+                ):
+                    context_parts.append(f"[{i + 1}] {doc}")
+                context = "\n\n".join(context_parts)
 
             # Evaluate retrieval quality
             eval_metrics = self._evaluator.evaluate_retrieval(query=query_text, retrieved_docs=results["documents"])

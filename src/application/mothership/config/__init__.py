@@ -22,7 +22,10 @@ _quiet_mode = os.environ.get("GRID_QUIET", "").lower() in ("1", "true", "yes")
 from enum import Enum, StrEnum
 from functools import lru_cache
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from .pool_settings import PoolSettings
 
 try:
     from ..security.secret_validation import (  # type: ignore[import-not-found]
@@ -151,6 +154,11 @@ class DatabaseSettings:
         fallback_db_url = env.get("MOTHERSHIP_DB_FALLBACK_URL", "").strip() or "sqlite:///./mothership_fallback.db"
         sqlite_file = env.get("SQLITE_DB_PATH", "grid.db")
 
+        # Databricks-related vars (defined in all paths so return cls() can use them)
+        server_hostname = ""
+        http_path = ""
+        access_token = ""
+
         # Check for Databricks configuration
         use_databricks = _parse_bool(env.get("USE_DATABRICKS") or env.get("MOTHERSHIP_USE_DATABRICKS"))
 
@@ -179,15 +187,17 @@ class DatabaseSettings:
                 server_hostname = ""
                 http_path = ""
                 access_token = ""
-        else:
-            # Default to PostgreSQL in production, SQLite in development
-            default_db_url = env.get("MOTHERSHIP_DATABASE_URL", "").strip()
-            if not default_db_url:
-                env_mode = env.get("MOTHERSHIP_ENVIRONMENT", "development").lower()
-                if env_mode == "production":
-                    default_db_url = "postgresql://user:pass@localhost/mothership"
-                else:
-                    default_db_url = "sqlite:///./mothership.db"
+        # Default to SQLite in development/test; production REQUIRES explicit DATABASE_URL
+        default_db_url = env.get("MOTHERSHIP_DATABASE_URL", "").strip()
+        if not default_db_url:
+            env_mode = env.get("MOTHERSHIP_ENVIRONMENT", "development").lower()
+            if env_mode == "production":
+                raise ValueError(
+                    "CRITICAL: MOTHERSHIP_DATABASE_URL is required in production. "
+                    "Set explicit database URL (e.g., postgresql://user:pass@host/db). "
+                    "DO NOT use hardcoded credentials."
+                )
+            default_db_url = "sqlite:///./mothership.db"
 
             # Set empty strings when not using Databricks
             server_hostname = ""
@@ -200,6 +210,7 @@ class DatabaseSettings:
             pool_size=int(env.get("MOTHERSHIP_DB_POOL_SIZE", "5")),
             max_overflow=int(env.get("MOTHERSHIP_DB_MAX_OVERFLOW", "10")),
             pool_timeout=int(env.get("MOTHERSHIP_DB_POOL_TIMEOUT", "30")),
+            pool_recycle=int(env.get("MOTHERSHIP_DB_POOL_RECYCLE", "3600")),
             echo=_parse_bool(env.get("MOTHERSHIP_DB_ECHO")),
             use_databricks=use_databricks,
             databricks_server_hostname=server_hostname,
@@ -772,6 +783,9 @@ class MothershipSettings:
     cockpit: CockpitSettings = field(default_factory=CockpitSettings.from_env)
     payment: PaymentSettings = field(default_factory=PaymentSettings.from_env)
     billing: BillingSettings = field(default_factory=BillingSettings.from_env)
+    pool: PoolSettings = field(default_factory=lambda: __import__(
+        "application.mothership.config.pool_settings", fromlist=["PoolSettings"]
+    ).PoolSettings.from_env())
 
     # Inference abrasiveness configuration (fine-tuned control)
     # Lazy import to avoid circular dependencies - use getattr or lazy property
@@ -890,6 +904,10 @@ class MothershipSettings:
                         "WARNING: Gemini API key appears to be too short. Verify GEMINI_API_KEY is set correctly."
                     )
 
+        # Validate pool settings
+        pool_issues = self.pool.validate()
+        issues.extend(pool_issues)
+
         return issues
 
     def validate_critical_settings(self) -> None:
@@ -987,9 +1005,14 @@ class MothershipSettings:
                 "tracing_sample_rate": self.telemetry.tracing_sample_rate,
                 "log_level": self.telemetry.log_level.value,
             },
-            "cockpit": {
-                "websocket_enabled": self.cockpit.websocket_enabled,
-                "max_concurrent_sessions": self.cockpit.max_concurrent_sessions,
+            "pool": {
+                "worker_min": self.pool.worker_min,
+                "worker_max": self.pool.worker_max,
+                "component_min": self.pool.component_min,
+                "component_max": self.pool.component_max,
+                "health_check_interval": self.pool.health_check_interval,
+                "idle_timeout_seconds": self.pool.idle_timeout_seconds,
+                "naming_pattern": self.pool.naming_pattern,
             },
         }
 
@@ -1043,7 +1066,8 @@ __all__ = [
     # Main configuration
     "MothershipSettings",
     "get_settings",
-    # Subsystem settings
+    "PoolSettings",
+    "CacheSettings",
     "ServerSettings",
     "DatabaseSettings",
     "SecuritySettings",
@@ -1056,9 +1080,9 @@ __all__ = [
     "Environment",
     "LogLevel",
     # Inference abrasiveness (if available)
-    *(["AbrasivenessCadence"] if AbrasivenessCadence is not None else []),
-    *(["AbrasivenessThresholds"] if AbrasivenessThresholds is not None else []),
-    *(["InferenceAbrasivenessConfig"] if InferenceAbrasivenessConfig is not None else []),
-    *(["InferenceAbrasivenessLevel"] if InferenceAbrasivenessLevel is not None else []),
-    *(["InferenceCleanupSettings"] if InferenceCleanupSettings is not None else []),
+    *("AbrasivenessCadence" if AbrasivenessCadence is not None else []),
+    *("AbrasivenessThresholds" if AbrasivenessThresholds is not None else []),
+    *("InferenceAbrasivenessConfig" if InferenceAbrasivenessConfig is not None else []),
+    *("InferenceAbrasivenessLevel" if InferenceAbrasivenessLevel is not None else []),
+    *("InferenceCleanupSettings" if InferenceCleanupSettings is not None else []),
 ]

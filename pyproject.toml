@@ -451,6 +451,13 @@ module = [
     "config.cognitive_settings",
     "config.quality_gates",
     "src.grid.persistence.database",
+    "src.application.mothership.ner_service",
+    "src.tools.pulse_monitor",
+    "src.tools.ambient_sound",
+    "src.tools.zoology_mapper",
+    "tools.pulse_monitor",
+    "tools.ambient_sound",
+    "tools.zoology_mapper",
     "EQ.integration",
     ".event_bus.event_system",
     ".ai_ml.intelligence_system",
@@ -495,19 +502,6 @@ module = [
 ]
 ignore_missing_imports = true
 follow_imports = "skip"
-
-[[tool.mypy.overrides]]
-module = [
-    "src.application.mothership.ner_service",
-    "src.tools.pulse_monitor",
-    "src.tools.ambient_sound",
-    "src.tools.zoology_mapper",
-    "application.mothership.ner_service",
-    "tools.pulse_monitor",
-    "tools.ambient_sound",
-    "tools.zoology_mapper",
-]
-ignore_missing_imports = true
 
 [tool.coverage.run]
 source = ["src"]

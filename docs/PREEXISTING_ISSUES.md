@@ -10,10 +10,10 @@ This document catalogs issues discovered during testing that existed **prior to 
 
 ### 1.1 Test Collection Crashes
 
-| File | Issue | Impact |
-|------|-------|--------|
-| `tests/test_ollama.py` | Module-level `sys.exit(1)` on import | Crashes entire pytest collection |
-| `tests/security/test_security_suite.py` | Import error on collection | Blocks test discovery |
+| File | Issue | Impact | Status |
+|------|-------|--------|--------|
+| `tests/providers/test_ollama.py` | Module-level skip on import | Previously `sys.exit(1)`; now uses `pytest.skip(..., allow_module_level=True)` when Ollama unavailable | **Fixed** |
+| `tests/security/test_security_suite.py` | Import error on collection | Blocks test discovery | Open |
 
 ### 1.2 Missing Module Imports
 
@@ -80,17 +80,7 @@ KeyError: slice(None, 10, None)
 
 Many enums inherit from both `str` and `Enum`, causing lint warnings. Should use `StrEnum` (Python 3.11+).
 
-**Affected files (sample):**
-- `src/application/mothership/api_core.py:50` - `HandlerState`
-- `src/application/mothership/api_core.py:59` - `InvocationResult`
-- `src/application/mothership/config/inference_abrasiveness.py:42,52`
-- `src/application/mothership/middleware/circuit_breaker.py:47,55`
-- `src/application/mothership/models/__init__.py` - 6 classes
-- `src/application/mothership/models/cockpit.py` - 7 classes
-- `src/application/mothership/schemas/__init__.py` - 5 classes
-- `src/application/mothership/schemas/payment.py` - 4 classes
-- `src/application/mothership/security/api_sentinels.py` - 3 classes
-- `src/application/mothership/security/rbac.py` - 2 classes
+**Status:** `ruff check --select UP042` passes; mothership and core code use `StrEnum` where appropriate. Remaining `Enum` (non-string) usages are intentional.
 
 ### 3.2 Async Function Blocking I/O (ASYNC230)
 
@@ -156,15 +146,19 @@ DeprecationWarning: datetime.datetime.utcnow() is deprecated
 
 | Category | Count | Fixed |
 |----------|-------|-------|
-| Test collection crashes | 2 | 0 |
+| Test collection crashes | 2 | 1 (test_ollama uses pytest.skip) |
 | Missing module imports | 2 | 2 |
 | Middleware recursion | 1 | 1 |
 | Dict slicing bug | 1 | 1 |
-| Lint issues (StrEnum, ASYNC, etc.) | ~50+ | 0 |
+| Lint issues (StrEnum, ASYNC, etc.) | ~50+ | UP042 clean |
 | Deprecated APIs | 1 | 0 |
+| Hardcoded DEBUG / debug prints | — | Fixed in network_interceptor.py, nomic_v2.py |
+| CI DEBUG gate | — | Added: `scripts/assert_no_debug_in_prod.py` runs in CI (secrets-scan job). Currently `continue-on-error: true` until `src/tools/rag/rag_engine.py` and `src/tools/rag/indexing/indexer.py` DEBUG prints are removed. |
+| Duplicate mypy config | 1 | Consolidated `[[tool.mypy.overrides]]` in pyproject.toml |
+| Experimental scripts | — | `scripts/debug_*.py` archived to `archival/experimental_scripts/` |
 
 **Priority fixes for test suite reliability:**
-1. Remove or guard `sys.exit(1)` in `test_ollama.py`
+1. ~~Remove or guard `sys.exit(1)` in `test_ollama.py`~~ — **Done** (uses `pytest.skip`).
 2. Add proper imports or skip for `test_security_suite.py`
 3. Shorten/skip rate-limit tests in CI
 4. Fix `drt_monitoring.py` middleware references

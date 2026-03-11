@@ -6,6 +6,41 @@ Tests health checks, Kubernetes probes, security compliance, and system diagnost
 
 from __future__ import annotations
 
+import pytest
+from fastapi.testclient import TestClient
+
+
+class TestHealthAndCockpitIntegration:
+    """Integration tests hitting real Mothership app routes for health and cockpit."""
+
+    @pytest.fixture
+    def client(self) -> TestClient:
+        """Create TestClient with Mothership app (cockpit loaded via api_routes.yaml)."""
+        try:
+            from application.mothership.main import create_app
+        except Exception as e:
+            pytest.skip(f"Mothership app unavailable (optional deps): {e}")
+        app = create_app()
+        return TestClient(app)
+
+    def test_health_live_returns_200_and_alive(self, client: TestClient) -> None:
+        """GET /health/live returns 200 and alive=true."""
+        response = client.get("/health/live")
+        assert response.status_code == 200
+        data = response.json()
+        assert data.get("alive") is True
+        assert "timestamp" in data
+
+    def test_cockpit_health_returns_200_and_status(self, client: TestClient) -> None:
+        """GET /api/v1/cockpit/health returns 200 and status (healthy or degraded)."""
+        response = client.get("/api/v1/cockpit/health")
+        assert response.status_code == 200
+        data = response.json()
+        assert data.get("status") in ("healthy", "degraded")
+        assert "version" in data
+        assert "uptime_seconds" in data
+        assert "timestamp" in data
+
 
 class TestHealthCheckEndpoint:
     """Test health check endpoint."""

@@ -34,3 +34,7 @@ routers:
   - module: "application.mothership.routers.intelligence:router"
     prefix: "/intelligence"
     enabled: true
+  - module: "application.mothership.routers.cockpit:router"
+    prefix: "/cockpit"
+    tags: ["cockpit"]
+    enabled: true

@@ -52,7 +52,7 @@ class ArenaPhase(StrEnum):
 
     ATTACK = "attack"
     DECAY = "decay"
-    SUSTAIN = "sustains"
+    SUSTAIN = "sustain"
     RELEASE = "release"
     IDLE = "idle"
 
@@ -156,10 +156,15 @@ class ArenaService:
         self._setup_routes()
 
     def _setup_middleware(self) -> None:
-        """Setup CORS middleware."""
+        """Setup CORS middleware. Origins from ARENA_ALLOWED_ORIGINS (comma-separated)."""
+        allowed_origins = [
+            o.strip()
+            for o in os.getenv("ARENA_ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:8000").split(",")
+            if o.strip()
+        ]
         self.app.add_middleware(
             CORSMiddleware,
-            allow_origins=["*"],
+            allow_origins=allowed_origins,
             allow_credentials=True,
             allow_methods=["*"],
             allow_headers=["*"],

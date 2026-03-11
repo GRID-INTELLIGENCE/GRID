@@ -15,7 +15,10 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import StrEnum
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from ..config.pool_settings import PoolSettings
 
 logger = logging.getLogger(__name__)
 
@@ -235,15 +238,24 @@ class ComponentPool:
     - Load balancing across components
     """
 
-    def __init__(self, min_components: int = 2, max_components: int = 20):
-        self.min_components = min_components
-        self.max_components = max_components
+    def __init__(self, pool_settings: PoolSettings | None = None):
+        from ..config.pool_settings import PoolSettings
+
+        self._settings = pool_settings or PoolSettings.from_env()
         self.components: dict[str, Component] = {}
         self.component_types: dict[ComponentType, list[str]] = defaultdict(list)
         self._lock = asyncio.Lock()
         self._monitoring_task: asyncio.Task | None = None
         self._shutdown_event = asyncio.Event()
         self._initialized = False
+
+    @property
+    def min_components(self) -> int:
+        return self._settings.component_min
+
+    @property
+    def max_components(self) -> int:
+        return self._settings.component_max
 
     async def initialize(self):
         """Initialize the component pool."""
@@ -309,7 +321,9 @@ class ComponentPool:
 
     async def _add_component(self, component_type: ComponentType) -> str:
         """Add a new component to the pool."""
-        component_id = f"{component_type.value}_{len(self.components)}"
+        component_id = self._settings.generate_component_id(
+            component_type.value, len(self.components)
+        )
 
         if component_type == ComponentType.PROCESSOR:
             component = ProcessorComponent(component_id)
@@ -352,7 +366,7 @@ class ComponentPool:
             try:
                 await self._check_component_health()
                 await self._optimize_pool()
-                await asyncio.sleep(30)  # Increased from 5s to 30s for lower overhead
+                await asyncio.sleep(self._settings.health_check_interval)
             except Exception as e:
                 logger.error(f"Component monitoring error: {e}")
                 await asyncio.sleep(5)
@@ -373,7 +387,7 @@ class ComponentPool:
                 # Check for idle components that can be terminated
                 elif component.state == ComponentState.IDLE and len(self.components) > self.min_components:
                     idle_time = (datetime.now(UTC) - component.metrics.last_activity).total_seconds()
-                    if idle_time > 60:  # Idle for more than 1 minute
+                    if idle_time > self._settings.idle_timeout_seconds:
                         await self._remove_component(component_id)
 
     async def _optimize_pool(self):

@@ -11,8 +11,9 @@ from pathlib import Path
 # Add src to path
 sys.path.append(str(Path(__file__).parent / "src"))
 
-from mycelium.domains import DomainResolver, DomainType
 from mycelium.concurrency import JungleEngine
+from mycelium.domains import DomainResolver, DomainType
+
 
 def run_midnight_walk():
     print("🌙 Starting Midnight Walk in the Mycelium Jungle...")

@@ -1,0 +1,8 @@
+# Security-sensitive paths from ownership map (bus-factor 1 auth/secrets hotspots).
+# TODO: Add second owner for mandatory review (e.g. @org/security-team).
+# See ../docs/security_ownership_map_report.md and ownership-map-out/GRID-main/summary.json.
+
+/src/grid/auth/                        @caraxesthebloodwyrm02
+/safety/auth/                          @caraxesthebloodwyrm02
+/src/application/mothership/security/  @caraxesthebloodwyrm02
+/tests/auth/                           @caraxesthebloodwyrm02

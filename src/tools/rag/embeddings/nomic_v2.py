@@ -1,11 +1,14 @@
 """Nomic Embed Text V2 embedding provider using Ollama."""
 
+import logging
 from typing import cast
 
 import httpx
 import numpy as np
 
 from .base import BaseEmbeddingProvider
+
+logger = logging.getLogger(__name__)
 
 
 class OllamaEmbeddingProvider(BaseEmbeddingProvider):
@@ -64,7 +67,7 @@ class OllamaEmbeddingProvider(BaseEmbeddingProvider):
         original_length = len(text)
         text = self._truncate_text(text)
         if len(text) < original_length:
-            pass  # print(f"Warning: Text truncated from {original_length} to {len(text)} characters")
+            logger.debug("Text truncated from %s to %s characters", original_length, len(text))
 
         # STRICT MODE: Only use the configured model. No fallbacks.
         models_to_try = [self.model]
@@ -77,8 +80,6 @@ class OllamaEmbeddingProvider(BaseEmbeddingProvider):
                 try:
                     import ollama
 
-                    # DEBUG: Print what we are attempting
-                    # print(f"DEBUG: Attempting ollama.embeddings with {model_name}")
                     response = ollama.embeddings(model=model_name, prompt=text)
 
                     # Handle both dict response and EmbeddingsResponse object
@@ -87,13 +88,9 @@ class OllamaEmbeddingProvider(BaseEmbeddingProvider):
                     else:
                         embedding = response.get("embedding", [])
 
-                    # DEBUG: Print result status
-                    # if not embedding:
-                    #     print(f"DEBUG: Embedding is empty/None for {model_name}. Response keys/attrs: {dir(response)}")
-
                     if embedding:
                         if model_name != self.model:
-                            print(f"Info: Using model '{model_name}' instead of '{self.model}'")
+                            logger.info("Using model '%s' instead of '%s'", model_name, self.model)
                         self._dimension = len(embedding)
                         self.model = model_name  # Update to working model
                         return cast(list[float], embedding)
@@ -158,7 +155,7 @@ class OllamaEmbeddingProvider(BaseEmbeddingProvider):
                         raise ValueError(f"No embedding returned from Ollama for model {model_name}. Response: {data}")
 
                     if model_name != self.model:
-                        print(f"Info: Using model '{model_name}' instead of '{self.model}'")
+                        logger.info("Using model '%s' instead of '%s'", model_name, self.model)
                     self._dimension = len(embedding)
                     self.model = model_name  # Update to working model
                     return cast(list[float], embedding)

@@ -11,9 +11,7 @@ from __future__ import annotations
 
 import logging
 import threading
-import time
 from contextlib import contextmanager
-from typing import Dict, List, Set
 
 logger = logging.getLogger(__name__)
 
@@ -23,12 +21,12 @@ class JungleEngine:
 
     def __init__(self):
         self._lock = threading.RLock()
-        self._active_nodes: Set[str] = set()
-        self._dependency_graph: Dict[str, Set[str]] = {}
-        self._node_depths: Dict[str, int] = {}  # Z-axis value
-        self._locked_nodes: List[str] = [] # Global lock ordering
+        self._active_nodes: set[str] = set()
+        self._dependency_graph: dict[str, set[str]] = {}
+        self._node_depths: dict[str, int] = {}  # Z-axis value
+        self._locked_nodes: list[str] = [] # Global lock ordering
 
-    def is_path_safe(self, node_id: str, dependencies: List[str]) -> bool:
+    def is_path_safe(self, node_id: str, dependencies: list[str]) -> bool:
         """
         Safety Contract: Checks for dead-locks and circular waits.
         Returns True if the node is 'Walkable'.

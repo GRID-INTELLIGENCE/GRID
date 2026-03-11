@@ -1058,6 +1058,11 @@ class CockpitService:
         return self._state
 
     @property
+    def started(self) -> bool:
+        """Whether the cockpit service has been started."""
+        return self._started
+
+    @property
     def is_healthy(self) -> bool:
         """Check if cockpit is healthy."""
         return (

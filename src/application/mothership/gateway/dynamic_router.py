@@ -21,7 +21,10 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import StrEnum
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from ..config.pool_settings import PoolSettings
 
 from fastapi import HTTPException, Request, Response
 from fastapi.responses import JSONResponse
@@ -126,17 +129,27 @@ class AISafetyInterface:
 class WorkerPool:
     """Dynamic worker pool for request processing."""
 
-    def __init__(self, min_workers: int = 2, max_workers: int = 20):
-        self.min_workers = min_workers
-        self.max_workers = max_workers
+    def __init__(self, pool_settings: PoolSettings | None = None):
+        from ..config.pool_settings import PoolSettings
+
+        self._settings = pool_settings or PoolSettings.from_env()
         self.workers: dict[str, WorkerMetrics] = {}
         self.request_queue: asyncio.Queue = asyncio.Queue()
         self._lock = asyncio.Lock()
 
+    @property
+    def min_workers(self) -> int:
+        return self._settings.worker_min
+
+    @property
+    def max_workers(self) -> int:
+        return self._settings.worker_max
+
     async def initialize(self):
         """Initialize the worker pool."""
         for i in range(self.min_workers):
-            await self._add_worker(f"worker_{i}")
+            worker_id = self._settings.generate_worker_id(i)
+            await self._add_worker(worker_id)
 
     async def get_optimal_worker(self) -> str | None:
         """Get the best available worker based on metrics."""
@@ -211,7 +224,7 @@ class WorkerPool:
         """Scale up worker pool if needed."""
         current_workers = len(self.workers)
         if current_workers < self.max_workers:
-            new_worker_id = f"worker_{current_workers}"
+            new_worker_id = self._settings.generate_worker_id(current_workers)
             await self._add_worker(new_worker_id)
 
     async def _simulate_processing(self, request: Request) -> dict[str, Any]:

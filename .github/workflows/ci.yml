@@ -108,6 +108,10 @@ jobs:
             echo "✅ No obvious hardcoded secrets detected"
           fi
 
+      - name: "DEBUG gate (assert no debug in prod)"
+        run: python3 scripts/assert_no_debug_in_prod.py
+        continue-on-error: true  # Set to false once src/tools/rag DEBUG prints are removed
+
   # =========================================================================
   # LINT - Code Quality Checks (non-blocking until codebase clean)
   # =========================================================================

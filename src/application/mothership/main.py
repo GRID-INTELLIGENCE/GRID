@@ -64,7 +64,6 @@ from .middleware.drt_middleware_unified import UnifiedDRTMiddleware, set_unified
 from .middleware.stream_monitor import StreamMonitorMiddleware
 from .routers import create_api_router
 from .routers.agentic import router as agentic_router
-from .routers.cockpit import router as cockpit_router
 from .routers.corruption_monitoring import router as corruption_router
 from .routers.drt_monitoring_unified import router as drt_router
 from .routers.health import router as health_router
@@ -297,6 +296,40 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     settings = get_settings()
     logger.info(f"Starting {settings.app_name} v{settings.app_version}")
     logger.info(f"Environment: {settings.environment.value}")
+
+    # Security safeguard startup checks (SBP-001, SBP-004)
+    try:
+        from .security.safeguard_hooks import (
+            DocsExposureGuard,
+            SecretHygieneGuard,
+            get_policy_engine,
+        )
+        from .security.safeguard_hooks import (
+            PolicyVerdict as SafeguardVerdict,
+        )
+
+        secret_result = SecretHygieneGuard.check_secrets(environment=settings.environment.value)
+        if secret_result.verdict == SafeguardVerdict.DENY:
+            logger.critical("Secret hygiene safeguard: %s (SBP-001)", secret_result.reason)
+            if settings.is_production:
+                raise RuntimeError(
+                    f"Secret hygiene check failed: {secret_result.reason}"
+                ) from None
+        elif secret_result.verdict == SafeguardVerdict.WARN:
+            logger.warning("Secret hygiene warning: %s", secret_result.reason)
+
+        docs_result = DocsExposureGuard.check(
+            environment=settings.environment.value,
+            docs_url="/docs" if settings.is_development else None,
+            redoc_url="/redoc" if settings.is_development else None,
+        )
+        if docs_result.verdict == SafeguardVerdict.DENY:
+            logger.warning("Docs exposure safeguard: %s (SBP-004)", docs_result.reason)
+
+        get_policy_engine()
+        logger.info("Security safeguard policy engine initialized")
+    except ImportError as e:
+        logger.warning("Safeguard hooks not available: %s", e)
 
     # Ensure safety directory is on sys.path once for all safety imports
     _safety_dir = Path(__file__).parent.parent.parent.parent / "safety"
@@ -671,15 +704,42 @@ The API supports multiple authentication methods:
 
     # 1. Standard FastAPI/Starlette middlewares
 
-    # CORS middleware (with secure defaults)
+    # CORS middleware (with secure defaults) + safeguard validation
     from .security.cors import get_cors_config
+    from .security.safeguard_hooks import CORSPolicyGuard, PolicyVerdict
 
     cors_config = get_cors_config(
         origins=settings.security.cors_origins,
         allow_credentials=settings.security.cors_allow_credentials,
         environment=settings.environment.value,
     )
+    cors_guard_result = CORSPolicyGuard.validate(
+        origins=cors_config["allow_origins"],
+        allow_credentials=cors_config["allow_credentials"],
+        environment=settings.environment.value,
+    )
+    if cors_guard_result.verdict == PolicyVerdict.DENY:
+        logger.critical(
+            "CORS safeguard denied configuration: %s (SBP-002)",
+            cors_guard_result.reason,
+        )
+        if settings.is_production:
+            raise RuntimeError(
+                f"CORS configuration rejected by security safeguard: {cors_guard_result.reason}"
+            ) from None
+        cors_config["allow_origins"] = list(CORSPolicyGuard.KNOWN_SAFE_ORIGINS)
+        cors_config["allow_credentials"] = False
+        logger.warning("CORS overridden to safe defaults for development")
     app.add_middleware(CORSMiddleware, **cors_config)
+
+    # Safeguard middleware: WebSocket auth + throttle (TM-002)
+    try:
+        from .security.safeguard_middleware import SafeguardMiddleware
+
+        app.add_middleware(SafeguardMiddleware)
+        logger.info("Security safeguard middleware enabled (WebSocket auth + throttle)")
+    except Exception as e:
+        logger.warning("Safeguard middleware not available: %s", e)
 
     # GZip compression
     app.add_middleware(GZipMiddleware, minimum_size=1000)
@@ -846,7 +906,7 @@ The API supports multiple authentication methods:
     # Health check routes (no prefix for k8s compatibility)
     app.include_router(health_router)
 
-    # Main API routes with security defaults applied
+    # Main API routes with security defaults applied (cockpit loaded via api_routes.yaml)
     api_router = create_api_router(prefix="/api/v1")
 
     # Apply security defaults to API router
@@ -855,9 +915,6 @@ The API supports multiple authentication methods:
         logger.info("Security defaults applied to API router")
     except Exception as e:
         logger.error(f"Failed to apply security defaults to API router: {e}")
-
-    # Include cockpit router
-    api_router.include_router(cockpit_router, prefix="/cockpit", tags=["cockpit"])
 
     # Include agentic router
     api_router.include_router(agentic_router)

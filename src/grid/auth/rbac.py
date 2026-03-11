@@ -55,6 +55,7 @@ ROLE_PERMISSIONS: dict[Role, set[Permission]] = {
         Permission.DELETE,
         Permission.SENSITIVE_READ,
         Permission.BILLING_READ,
+        Permission.ADMIN,
     },
     Role.SUPER_ADMIN: {
         Permission.READ,

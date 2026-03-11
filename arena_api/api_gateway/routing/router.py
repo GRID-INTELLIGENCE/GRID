@@ -19,6 +19,7 @@ from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import httpx
+from fastapi import Response
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +38,16 @@ class DynamicRouter:
         self.request_transformer = RequestTransformer()
         self.route_cache = {}
         self.cache_ttl = 300  # 5 minutes
+
+        # Validate service discovery dependency
+        self._validate_dependencies()
+
+    def _validate_dependencies(self):
+        """Validate that required dependencies are available."""
+        if not self.client:
+            raise RuntimeError("HTTP client is required for routing")
+        if not self.circuit_breaker:
+            raise RuntimeError("Circuit breaker is required for fault tolerance")
 
     async def close(self):
         """Close the HTTP client."""
@@ -58,8 +69,6 @@ class DynamicRouter:
             Response from the routed service
         """
         from fastapi.responses import JSONResponse
-
-        from application.mothership.api.versioning import get_version_metadata
 
         try:
             # 1. Determine target service
@@ -85,14 +94,14 @@ class DynamicRouter:
                 status_code=status_code, content=response_data.get("data"), headers=response_data.get("headers")
             )
 
-            # Inject versioning headers based on path
+            # Inject versioning headers based on path (simplified versioning)
             version_str = "v1"
             if path.startswith("api/v2") or "/api/v2" in path:
                 version_str = "v2"
 
-            version_meta = get_version_metadata(version_str)
-            if version_meta:
-                version_meta.inject_headers(response)
+            # Simple version header injection
+            response.headers["X-API-Version"] = version_str
+            response.headers["X-Router-Timestamp"] = datetime.now(UTC).isoformat()
 
             return response
 

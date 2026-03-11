@@ -23,7 +23,7 @@ import os
 import time
 from contextlib import asynccontextmanager
 from datetime import UTC, datetime, timedelta, timezone
-from typing import Any, AsyncIterator
+from typing import Any, AsyncIterator, Awaitable, Callable
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
@@ -135,6 +135,7 @@ class ArenaAPIGateway:
         heartbeat_task.cancel()
         metrics_task.cancel()
         safety_task.cancel()
+        await asyncio.gather(heartbeat_task, metrics_task, safety_task, return_exceptions=True)
 
         await asyncio.gather(self.service_discovery.cleanup(), self.monitoring.cleanup(), return_exceptions=True)
         logger.info("Arena API Gateway shutdown complete")
@@ -308,4 +309,10 @@ app = gateway.app
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run("main:app", host="0.0.0.0", port=int(os.getenv("ARENA_API_PORT", "8000")), reload=True)
+    # Run from repo root: python -m arena_api.api_gateway
+    uvicorn.run(
+        "arena_api.api_gateway:app",
+        host="0.0.0.0",
+        port=int(os.getenv("ARENA_API_PORT", "8000")),
+        reload=True,
+    )

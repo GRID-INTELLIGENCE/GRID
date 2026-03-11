@@ -1,5 +1,4 @@
 """
-from datetime import timezone
 Mothership Cockpit API Router.
 
 Core API endpoints for cockpit state management, system control,
@@ -29,6 +28,7 @@ from ..schemas import (
     CockpitModeUpdateRequest,
     CockpitStateResponse,
     CockpitSummarySchema,
+    DependencyHealth,
     HealthCheckResponse,
     LivenessResponse,
     OperationModeSchema,
@@ -144,9 +144,9 @@ async def readiness_check(
     """
     state = cockpit.state
 
-    dependencies = {
+    dependencies: dict[str, DependencyHealth | bool] = {
         "state_initialized": state.state != SystemState.OFFLINE,
-        "cockpit_started": cockpit._started,
+        "cockpit_started": cockpit.started,
     }
 
     is_ready = all(dependencies.values())
@@ -182,6 +182,25 @@ async def liveness_check() -> LivenessResponse:
 # =============================================================================
 
 
+def _map_system_status(state: SystemState) -> SystemStatusSchema:
+    """Map domain system state to API system status schema."""
+    mapping = {
+        SystemState.ONLINE: SystemStatusSchema.OPERATIONAL,
+        SystemState.STARTING: SystemStatusSchema.INITIALIZING,
+        SystemState.SHUTDOWN: SystemStatusSchema.OFFLINE,
+        SystemState.OFFLINE: SystemStatusSchema.OFFLINE,
+        SystemState.DEGRADED: SystemStatusSchema.DEGRADED,
+        SystemState.MAINTENANCE: SystemStatusSchema.MAINTENANCE,
+        SystemState.ERROR: SystemStatusSchema.ERROR,
+    }
+    return mapping.get(state, SystemStatusSchema.ERROR)
+
+
+def _get_operation_mode(cockpit: Any) -> str:
+    """Get persisted operation mode from cockpit state metadata."""
+    return str(cockpit.state.metadata.get("operation_mode", OperationModeSchema.NORMAL.value))
+
+
 @router.get(
     "/state",
     response_model=ApiResponse[CockpitStateResponse],
@@ -199,7 +218,6 @@ async def get_state(
     mode, and aggregate metrics.
     """
     state = cockpit.state
-    state.to_dict()
 
     # Map to response schema
     summary = CockpitSummarySchema(
@@ -213,8 +231,8 @@ async def get_state(
     )
 
     response_data = CockpitStateResponse(
-        status=SystemStatusSchema(state.state.value),
-        mode=OperationModeSchema.NORMAL,  # Default mode
+        status=_map_system_status(state.state),
+        mode=OperationModeSchema(_get_operation_mode(cockpit)),
         version=state.version,
         uptime_seconds=state.uptime_seconds,
         started_at=state.started_at or datetime.now(UTC),
@@ -329,12 +347,12 @@ async def get_mode(
     """
     Get the current cockpit operation mode.
     """
-    # Default to normal mode since CockpitState doesn't track mode
+    current_mode = _get_operation_mode(cockpit)
     return ApiResponse(
         success=True,
         data={
-            "mode": "normal",
-            "description": "System operating normally",
+            "mode": current_mode,
+            "description": f"System operating in {current_mode} mode",
         },
     )
 
@@ -357,15 +375,16 @@ async def change_mode(
     Requires write permission. Mode changes affect how the
     system handles requests and background tasks.
     """
-    previous_mode = "normal"  # Current mode
+    previous_mode = _get_operation_mode(cockpit)
     new_mode = request.mode.value
+    cockpit.state.metadata["operation_mode"] = new_mode
+    cockpit.state.metadata["operation_mode_changed_at"] = datetime.now(UTC).isoformat()
+    cockpit.state.metadata["operation_mode_changed_by"] = context.get("user_id")
 
     # Log mode change
     logger.info(f"Mode change: {previous_mode} -> {new_mode} by user {context.get('user_id')} reason: {request.reason}")
 
     # Create alert for mode change
-    from ..models import AlertSeverity
-
     cockpit.alerts.create_alert(
         title=f"Operation Mode Changed to {new_mode.upper()}",
         message=request.reason or f"Mode changed from {previous_mode} to {new_mode}",
@@ -617,7 +636,7 @@ async def initiate_shutdown(
     cockpit.alerts.create_alert(
         title="System Shutdown Initiated",
         message=f"Shutdown initiated by {context.get('user_id')} (force={force})",
-        severity=AlertSeverity("warning"),
+        severity=AlertSeverity.WARNING,
         source="cockpit_api",
     )
 
@@ -725,6 +744,7 @@ async def get_statistics(
             "uptime_seconds": round(state.uptime_seconds, 2),
             "uptime_human": _format_uptime(state.uptime_seconds),
             "state": state.state.value,
+            "mode": _get_operation_mode(cockpit),
         },
     }
 

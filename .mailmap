@@ -1,0 +1,4 @@
+# Normalize author identities for ownership and bus-factor analysis.
+# Maps alternate email to canonical identity so tools (and security-ownership-map)
+# attribute all commits to one identity.
+Irfan Kabir <caraxesthebloodwyrm02@gmail.com> <irfankabir02@gmail.com>

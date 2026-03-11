@@ -21,8 +21,10 @@ from urllib.parse import urlparse
 
 import yaml
 
-# Setup logging
-logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+# Setup logging — level from env (default INFO); avoid hardcoded DEBUG in production
+_log_level_name = (os.environ.get("NETWORK_INTERCEPTOR_LOG_LEVEL") or "INFO").upper()
+_log_level = getattr(logging, _log_level_name, logging.INFO)
+logging.basicConfig(level=_log_level, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -102,7 +104,7 @@ class NetworkAccessControl:
                 "network_enabled": False,
                 "logging": {
                     "enabled": True,
-                    "log_level": "DEBUG",
+                    "log_level": os.environ.get("NETWORK_INTERCEPTOR_LOG_LEVEL", "INFO").upper(),
                     "log_blocked_requests": True,
                     "log_allowed_requests": True,
                 },
@@ -116,7 +118,7 @@ class NetworkAccessControl:
         # Network access log
         network_log = log_dir / "network_access.log"
         fh = logging.FileHandler(network_log)
-        fh.setLevel(logging.DEBUG)
+        fh.setLevel(_log_level)
         formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
         fh.setFormatter(formatter)
         logger.addHandler(fh)
