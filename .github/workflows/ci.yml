@@ -118,6 +118,12 @@ jobs:
           fi
           echo "✅ No untracked files in src/ or tests/"
 
+      - name: "Assert no DEBUG in production (Phase 4 gate)"
+        run: |
+          GRID_ENV=production python3 scripts/assert_no_debug_in_prod.py
+        env:
+          GRID_ENV: production
+
   # =========================================================================
   # LINT - Code Quality Checks (non-blocking until codebase clean)
   # =========================================================================
