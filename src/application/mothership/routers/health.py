@@ -113,7 +113,11 @@ async def _check_redis_connectivity(redis_url: str, timeout: float = 5.0) -> tup
 
         try:
             async with asyncio.timeout(timeout):
-                await client.ping()
+                ping_result = client.ping()
+                if asyncio.iscoroutine(ping_result):
+                    await ping_result
+                elif ping_result is not True:
+                    return False, "Redis ping returned unsuccessful result"
         finally:
             await client.close()
 

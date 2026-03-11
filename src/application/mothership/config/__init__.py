@@ -1057,10 +1057,16 @@ __all__ = [
     # Enums
     "Environment",
     "LogLevel",
-    # Inference abrasiveness (if available)
-    *(["AbrasivenessCadence"] if AbrasivenessCadence is not None else []),
-    *(["AbrasivenessThresholds"] if AbrasivenessThresholds is not None else []),
-    *(["InferenceAbrasivenessConfig"] if InferenceAbrasivenessConfig is not None else []),
-    *(["InferenceAbrasivenessLevel"] if InferenceAbrasivenessLevel is not None else []),
-    *(["InferenceCleanupSettings"] if InferenceCleanupSettings is not None else []),
 ]
+
+# Inference abrasiveness (if available)
+if AbrasivenessCadence is not None:
+    __all__.append("AbrasivenessCadence")
+if AbrasivenessThresholds is not None:
+    __all__.append("AbrasivenessThresholds")
+if InferenceAbrasivenessConfig is not None:
+    __all__.append("InferenceAbrasivenessConfig")
+if InferenceAbrasivenessLevel is not None:
+    __all__.append("InferenceAbrasivenessLevel")
+if InferenceCleanupSettings is not None:
+    __all__.append("InferenceCleanupSettings")

@@ -45,7 +45,7 @@ from application.monitoring import get_metrics_router, setup_metrics
 from application.skills.api import router as skills_router
 
 try:
-    from application.tracing import setup_fastapi_tracing, setup_tracing
+    from application.tracing import setup_fastapi_tracing, setup_tracing  # pyright: ignore[reportAssignmentType]
 except ImportError:
 
     def setup_fastapi_tracing(*args: Any, **kwargs: Any) -> None:
@@ -521,7 +521,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         # Wait for parasite sanitization to complete
         if hasattr(app.state, "parasite_guard"):
             try:
-                from infrastructure.parasite_guard import wait_for_sanitization
+                from infrastructure.parasite_guard.integration import wait_for_sanitization
 
                 await wait_for_sanitization(app.state.parasite_guard)
             except Exception as e:
@@ -542,13 +542,11 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
         # Shutdown safety enforcement infrastructure
         try:
-            from safety.api.rate_limiter import close_pool as close_rate_limiter_pool
             from safety.audit.db import close_db as close_safety_db
             from safety.workers.worker_utils import close_redis
 
             await close_safety_db()
             await close_redis()
-            await close_rate_limiter_pool()
             logger.info("Safety enforcement infrastructure shut down")
         except Exception as e:
             logger.warning(f"Error shutting down safety enforcement: {e}")
