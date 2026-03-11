@@ -598,6 +598,7 @@ pip.conf
 # ==========================
 
 scripts/*.py
+!scripts/assert_no_debug_in_prod.py
 !scripts/track_commit.py
 !scripts/validate_venv.py
 *.ps1

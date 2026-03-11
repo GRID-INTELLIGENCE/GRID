@@ -1,0 +1,15 @@
+---
+description: Git hygiene and session verify — check status before commits, respect scripts allowlist
+globs: "**/*.py"
+alwaysApply: false
+---
+
+# Git hygiene
+
+When suggesting commits, pushing, or session-verify flows:
+
+1. **Before commits:** Run `git status --short` so you see tracked vs untracked and avoid staging unintended paths.
+2. **Scripts allowlist:** Only scripts explicitly allowlisted in `.gitignore` (e.g. `scripts/assert_no_debug_in_prod.py`, `scripts/validate_venv.py`) are tracked. Do not assume other `scripts/*.py` are in version control.
+3. **Secrets and artifacts:** Do not add `.env`, secrets, build artifacts, or paths listed in `.gitignore` to commits.
+
+Reference: docs/governance/source_control.md, docs/TOOL_INVENTORY.md.

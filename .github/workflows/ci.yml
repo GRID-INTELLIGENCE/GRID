@@ -108,6 +108,16 @@ jobs:
             echo "✅ No obvious hardcoded secrets detected"
           fi
 
+      - name: "Git hygiene (no untracked in src/ or tests/)"
+        run: |
+          UNTRACKED=$(git status --porcelain | awk '/^\?\?/ { print $2 }' | grep -E '^(src/|tests/)' || true)
+          if [ -n "$UNTRACKED" ]; then
+            echo "::error::Untracked files in src/ or tests/ - add to .gitignore or commit:"
+            echo "$UNTRACKED"
+            exit 1
+          fi
+          echo "✅ No untracked files in src/ or tests/"
+
   # =========================================================================
   # LINT - Code Quality Checks (non-blocking until codebase clean)
   # =========================================================================

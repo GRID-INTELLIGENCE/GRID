@@ -18,3 +18,12 @@ Key controls:
 - **Debug flags:** `scripts/assert_no_debug_in_prod.py` — wire into CI and Session Verify to block DEBUG/ENABLE_DEV_TOKEN in production.
 - **Outbound URLs:** Any outbound HTTP to user- or config-supplied URLs (webhooks, callbacks, redirects) must call `application.mothership.utils.validate_url_allowlist` before requesting (SSRF mitigation).
 - **Tests:** `uv run pytest tests/api/test_phase3_security_guardrails.py tests/security/test_attack_surface_guardrails.py tests/api/test_security_governance.py -v`
+
+## Weekly git / coverage audit
+
+Run periodically (e.g. weekly or pre-release) to keep tracked vs untracked and .gitignore accurate:
+
+1. **Quick check:** `git status --porcelain` and `git check-ignore -v` for paths under `src/`, `tests/`, `.cursor/skills/`, `.cursor/rules/`, `.cursor/agents/`.
+2. **Skill:** Use the **git-repo-audit** skill (`.cursor/skills/git-repo-audit/`) for a repeatable audit and short report.
+3. **Subtractive analyst:** Invoke the subtractive-analyst subagent with a prompt focused on git tracked vs untracked and .gitignore recommendations.
+4. **CI:** The pipeline already runs a "Git hygiene" step (no untracked in `src/` or `tests/`); fix any failures before merge.

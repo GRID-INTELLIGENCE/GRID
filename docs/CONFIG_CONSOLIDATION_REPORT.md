@@ -83,11 +83,11 @@
 
 ## 4. Known issues / consolidation notes
 
-### 4.1 (Low) .cursor/ fully ignored
+### 4.1 (Low) .cursor/ partially tracked
 
-- **.gitignore:** `.cursor/` → entire `.cursor/` (including `.cursor/skills/`, `.cursor/rules/`) is untracked.
-- **Impact:** Team-wide Cursor rules/skills (e.g. `ide-verification`, `plan-to-reference`) are not in version control unless committed before adding to .gitignore or the rule is relaxed.
-- **Options:** (a) Keep as-is (user-local only); (b) Add `!.cursor/skills/` and `!.cursor/rules/` to track shared agent skills/rules.
+- **.gitignore:** `.cursor/` is ignored, but `.cursor/skills/`, `.cursor/rules/`, and `.cursor/agents/` are **explicitly tracked** via negated patterns (`!.cursor/skills/`, `!.cursor/rules/`, `!.cursor/agents/`). The rest of `.cursor/` (e.g. `commands/`, `devprograms/`, `plans/`) remains untracked.
+- **Impact:** Team-wide Cursor skills, rules, and agents can be version-controlled; add or commit files under those three dirs to share them. Other `.cursor/` content stays local unless you add further negations.
+- **Options:** To share commands, add `!.cursor/commands/` to .gitignore. **Current decision:** `.cursor/commands/` is **local-only** (not tracked); no negation is added, so command files (e.g. `workspace.md`) remain untracked by design.
 
 ### 4.2 (Low) .vscode partially ignored
 

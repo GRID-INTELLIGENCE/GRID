@@ -17,6 +17,17 @@
       "problemMatcher": []
     },
     {
+      "label": "Session: Verify git",
+      "detail": "Show git status (tracked/untracked) for session hygiene",
+      "type": "shell",
+      "command": "git status --short",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "Debug: Verify Wall + Health Checks",
       "detail": "Run The Wall + integration health checks",
       "type": "shell",
