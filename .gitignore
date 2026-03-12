@@ -700,6 +700,31 @@ test_results.txt
 nul
 
 # ==========================
+# SEARCH SORTER ARTIFACTS
+# ==========================
+
+# Standalone demo files (keep main implementation)
+demo_search_sorter.py
+grid_search_sorter.py
+
+# Temporary search analysis files
+search_analysis_*.txt
+search_results_*.json
+sorter_test_*.py
+*_search_demo.py
+
+# Search sorter cache and temp
+.search_cache/
+search_temp/
+.sorter_logs/
+
+# Additional demo and test artifacts
+test_results*.txt
+test_run*.txt
+verify_*.py
+*_demo.py
+
+# ==========================
 # GENERATED REPORTS & TELEMETRY
 # ==========================
 bandit-report.json
@@ -707,6 +732,8 @@ config.secrets.baseline
 resonance_telemetry_events.jsonl
 tmp_scan_*.py
 Virtual Environments.MD
-. r a g _ d b /  
- . r a g _ d b /  
+. r a g _ d b / 
+ 
+ . r a g _ d b / 
+ 
  
