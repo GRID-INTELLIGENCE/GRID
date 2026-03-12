@@ -1,0 +1,88 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "transition-gate-toolkit"
+version = "1.0.0"
+description = "Comprehensive toolkit for sealed envelope operations in the GRID transition gate system"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+authors = [
+    {name = "GRID Transition Gate Team"},
+]
+keywords = [
+    "security",
+    "cryptography",
+    "envelope",
+    "verification",
+    "audit",
+    "transition-gate",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Security",
+    "Topic :: Security :: Cryptography",
+    "Topic :: System :: Systems Administration",
+]
+
+dependencies = [
+    # Core dependencies inherited from boundaries package
+    # See Seeds/GRID-main/boundaries/pyproject.toml
+]
+
+[project.optional-dependencies]
+dev = [
+    "pyinstaller>=6.0",
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+]
+
+[project.scripts]
+tgate = "boundaries.toolkit.__main__:main"
+transition-gate = "boundaries.toolkit.__main__:main"
+transition-gate-toolkit = "boundaries.toolkit.__main__:main"
+
+[project.urls]
+Homepage = "https://github.com/seeds/transition-gate-toolkit"
+Repository = "https://github.com/seeds/transition-gate-toolkit"
+
+[tool.hatch.build.targets.wheel]
+packages = ["boundaries/toolkit"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/boundaries/toolkit",
+]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+[tool.ruff]
+line-length = 120
+select = ["E", "F", "I", "N", "W", "UP"]
+ignore = ["E501"]  # Line too long - handled by formatter
+
+[tool.ruff.isort]
+known-first-party = ["boundaries", "boundaries.toolkit"]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
