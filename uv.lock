@@ -982,7 +982,7 @@ wheels = [
 
 [[package]]
 name = "grid-intelligence"
-version = "2.6.1"
+version = "2.7.0"
 source = { editable = "." }
 dependencies = [
     { name = "aiosqlite" },
@@ -1183,7 +1183,7 @@ workers = [
 
 [[package]]
 name = "grid-safety"
-version = "1.0.1"
+version = "1.0.2"
 source = { directory = "safety" }
 dependencies = [
     { name = "asyncpg" },
