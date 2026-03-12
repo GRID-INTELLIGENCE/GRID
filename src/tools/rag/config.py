@@ -72,6 +72,7 @@ class RAGConfig:
     # Retrieval configuration
     top_k: int = 10
     similarity_threshold: float = 0.0
+    max_context_length: int = 4000  # Max total character length for retrieved context (RAG_MAX_CONTEXT_LENGTH)
 
     # Cache configuration
     cache_enabled: bool = True
@@ -140,6 +141,7 @@ class RAGConfig:
             # Retrieval config
             top_k=int(os.getenv("RAG_TOP_K", "10")),
             similarity_threshold=float(os.getenv("RAG_SIMILARITY_THRESHOLD", "0.0")),
+            max_context_length=int(os.getenv("RAG_MAX_CONTEXT_LENGTH", "4000")),
             # Cache config
             cache_enabled=os.getenv("RAG_CACHE_ENABLED", "true").lower() == "true",
             cache_size=int(os.getenv("RAG_CACHE_SIZE", "100")),

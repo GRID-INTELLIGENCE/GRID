@@ -16,8 +16,8 @@
         "PYTHONPATH": "E:\\Seeds\\GRID-main\\src;E:\\Seeds\\GRID-main",
         "RAG_EMBEDDING_PROVIDER": "ollama",
         "RAG_EMBEDDING_MODEL": "nomic-embed-text-v2-moe:latest",
-        "RAG_LLM_MODE": "ollama",
-        "RAG_LLM_MODEL_OLLAMA": "ministral:latest",
+        "RAG_LLM_MODE": "local",
+        "RAG_LLM_MODEL_LOCAL": "ministral:latest",
         "RAG_VECTOR_STORE_PROVIDER": "chromadb",
         "RAG_VECTOR_STORE_PATH": ".rag_db",
         "OLLAMA_BASE_URL": "http://localhost:11434"
@@ -100,33 +100,6 @@
         "DATABASE_URL": "sqlite:///E:/Seeds/GRID-main/.db/grid.db"
       },
       "port": 8009,
-      "health_check": {
-        "endpoint": "/health",
-        "interval_seconds": 30,
-        "timeout_seconds": 5
-      }
-    },
-    {
-      "name": "grid-rag-enhanced",
-      "description": "Enhanced RAG with conversation memory and multi-hop reasoning",
-      "enabled": true,
-      "command": "E:\\Seeds\\GRID-main\\.venv\\Scripts\\python.exe",
-      "args": [
-        "-m",
-        "grid.mcp.enhanced_rag_server"
-      ],
-      "cwd": "E:\\Seeds\\GRID-main",
-      "env": {
-        "PYTHONPATH": "E:\\Seeds\\GRID-main\\src;E:\\Seeds\\GRID-main",
-        "RAG_EMBEDDING_PROVIDER": "ollama",
-        "RAG_EMBEDDING_MODEL": "nomic-embed-text-v2-moe:latest",
-        "RAG_LLM_MODE": "ollama",
-        "RAG_LLM_MODEL_OLLAMA": "ministral:latest",
-        "RAG_VECTOR_STORE_PROVIDER": "chromadb",
-        "RAG_VECTOR_STORE_PATH": ".rag_db",
-        "OLLAMA_BASE_URL": "http://localhost:11434"
-      },
-      "port": 8002,
       "health_check": {
         "endpoint": "/health",
         "interval_seconds": 30,

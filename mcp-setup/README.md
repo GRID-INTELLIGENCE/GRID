@@ -57,7 +57,7 @@ The MCP configuration is stored in `mcp-setup/mcp_config.json`:
       "port": 8000,
       "env": {
         "RAG_EMBEDDING_MODEL": "BAAI/bge-small-en-v1.5",
-        "RAG_LLM_MODE": "ollama",
+        "RAG_LLM_MODE": "local",
         "RAG_VECTOR_STORE_PATH": ".rag_db"
       }
     }
@@ -71,10 +71,12 @@ The MCP configuration is stored in `mcp-setup/mcp_config.json`:
 |----------|---------|-------------|
 | `RAG_EMBEDDING_PROVIDER` | `huggingface` | Embedding provider (huggingface, ollama) |
 | `RAG_EMBEDDING_MODEL` | `BAAI/bge-small-en-v1.5` | Embedding model name |
-| `RAG_LLM_MODE` | `ollama` | LLM mode (ollama, openai) |
-| `RAG_LLM_MODEL_OLLAMA` | `qwen3-coder:480b-cloud` | Ollama model name |
+| `RAG_LLM_MODE` | `local` | LLM mode: `local` (Ollama), `cloud`, `copilot`, or `external` |
+| `RAG_LLM_MODEL_LOCAL` | `ministral:latest` | Local Ollama model name (used when `RAG_LLM_MODE=local`) |
 | `RAG_VECTOR_STORE_PATH` | `.rag_db` | ChromaDB storage path |
 | `OLLAMA_BASE_URL` | `http://localhost:11434` | Ollama API URL |
+
+**Note:** Rate limits and request timeouts for MCP servers may be configured in Cursor (or your IDE) rather than in this repo. The `mcp_config.json` `defaults.timeout_seconds` applies to this config schema; client-side limits (e.g. requests per minute) are separate.
 
 ## Available Tools
 
