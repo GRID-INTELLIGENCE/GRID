@@ -1,10 +1,14 @@
 """Google Gemini LLM provider."""
 
+import logging
 from typing import Any, AsyncGenerator
 
+from tools.rag.resilience import get_circuit_breaker
 from tools.rag.types import LLMProviderError
 
 from .base import BaseLLMProvider
+
+logger = logging.getLogger(__name__)
 
 
 class GeminiLLM(BaseLLMProvider):
@@ -30,6 +34,7 @@ class GeminiLLM(BaseLLMProvider):
         self.api_key = api_key
         self.timeout = timeout
         self._client = None
+        self._breaker = get_circuit_breaker("gemini")
 
     def _get_client(self):
         """Lazy load Gemini client."""
@@ -86,11 +91,12 @@ class GeminiLLM(BaseLLMProvider):
             else:
                 full_prompt = prompt
 
-            response = model.generate_content(
-                full_prompt,
-                generation_config=generation_config,
-                **kwargs,
-            )
+            with self._breaker:
+                response = model.generate_content(
+                    full_prompt,
+                    generation_config=generation_config,
+                    **kwargs,
+                )
             return response.text
         except Exception as e:
             raise LLMProviderError(f"Gemini API error: {e}") from e
@@ -130,16 +136,17 @@ class GeminiLLM(BaseLLMProvider):
             else:
                 full_prompt = prompt
 
-            response = model.generate_content(
-                full_prompt,
-                generation_config=generation_config,
-                stream=True,
-                **kwargs,
-            )
+            with self._breaker:
+                response = model.generate_content(
+                    full_prompt,
+                    generation_config=generation_config,
+                    stream=True,
+                    **kwargs,
+                )
 
-            for chunk in response:
-                if chunk.text:
-                    yield chunk.text
+                for chunk in response:
+                    if chunk.text:
+                        yield chunk.text
         except Exception as e:
             raise LLMProviderError(f"Gemini streaming error: {e}") from e
 

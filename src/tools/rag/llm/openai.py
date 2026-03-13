@@ -1,8 +1,13 @@
 """OpenAI LLM provider."""
 
+import logging
 from typing import Any, AsyncGenerator
 
+from tools.rag.resilience import get_circuit_breaker
+
 from .base import BaseLLMProvider
+
+logger = logging.getLogger(__name__)
 
 
 class OpenAILLM(BaseLLMProvider):
@@ -31,6 +36,7 @@ class OpenAILLM(BaseLLMProvider):
         self.base_url = base_url
         self.timeout = timeout
         self._client = None
+        self._breaker = get_circuit_breaker("openai")
 
     def _get_client(self):
         """Lazy load OpenAI client."""
@@ -88,14 +94,15 @@ class OpenAILLM(BaseLLMProvider):
         messages.append({"role": "user", "content": prompt})
 
         try:
-            response = client.chat.completions.create(
-                model=self.model,
-                messages=messages,
-                temperature=temperature,
-                max_tokens=max_tokens,
-                timeout=self.timeout,
-                **kwargs,
-            )
+            with self._breaker:
+                response = client.chat.completions.create(
+                    model=self.model,
+                    messages=messages,
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                    timeout=self.timeout,
+                    **kwargs,
+                )
             return response.choices[0].message.content or ""
         except Exception as e:
             raise RuntimeError(f"OpenAI API error: {e}") from e
@@ -128,19 +135,20 @@ class OpenAILLM(BaseLLMProvider):
         messages.append({"role": "user", "content": prompt})
 
         try:
-            stream = client.chat.completions.create(
-                model=self.model,
-                messages=messages,
-                temperature=temperature,
-                max_tokens=max_tokens,
-                stream=True,
-                timeout=self.timeout,
-                **kwargs,
-            )
+            with self._breaker:
+                stream = client.chat.completions.create(
+                    model=self.model,
+                    messages=messages,
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                    stream=True,
+                    timeout=self.timeout,
+                    **kwargs,
+                )
 
-            for chunk in stream:
-                if chunk.choices[0].delta.content:
-                    yield chunk.choices[0].delta.content
+                for chunk in stream:
+                    if chunk.choices[0].delta.content:
+                        yield chunk.choices[0].delta.content
         except Exception as e:
             raise RuntimeError(f"OpenAI streaming error: {e}") from e
 
@@ -172,14 +180,15 @@ class OpenAILLM(BaseLLMProvider):
         messages.append({"role": "user", "content": prompt})
 
         try:
-            response = await client.chat.completions.create(
-                model=self.model,
-                messages=messages,
-                temperature=temperature,
-                max_tokens=max_tokens,
-                timeout=self.timeout,
-                **kwargs,
-            )
+            with self._breaker:
+                response = await client.chat.completions.create(
+                    model=self.model,
+                    messages=messages,
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                    timeout=self.timeout,
+                    **kwargs,
+                )
             return response.choices[0].message.content or ""
         except Exception as e:
             raise RuntimeError(f"OpenAI async API error: {e}") from e
@@ -212,18 +221,19 @@ class OpenAILLM(BaseLLMProvider):
         messages.append({"role": "user", "content": prompt})
 
         try:
-            stream = await client.chat.completions.create(
-                model=self.model,
-                messages=messages,
-                temperature=temperature,
-                max_tokens=max_tokens,
-                stream=True,
-                timeout=self.timeout,
-                **kwargs,
-            )
+            with self._breaker:
+                stream = await client.chat.completions.create(
+                    model=self.model,
+                    messages=messages,
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                    stream=True,
+                    timeout=self.timeout,
+                    **kwargs,
+                )
 
-            async for chunk in stream:
-                if chunk.choices[0].delta.content:
-                    yield chunk.choices[0].delta.content
+                async for chunk in stream:
+                    if chunk.choices[0].delta.content:
+                        yield chunk.choices[0].delta.content
         except Exception as e:
             raise RuntimeError(f"OpenAI async streaming error: {e}") from e

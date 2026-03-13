@@ -6,11 +6,19 @@ Calls any OpenAI-compatible chat completions endpoint (e.g. LiteLLM proxy, local
 from __future__ import annotations
 
 import json
+import logging
 from typing import Any, AsyncIterator, Iterator
 
 import httpx
 
+from tools.rag.resilience import (
+    create_async_resilient_client,
+    get_circuit_breaker,
+)
+
 from .base import BaseLLMProvider
+
+logger = logging.getLogger(__name__)
 
 
 class OpenAICompatibleLLM(BaseLLMProvider):
@@ -36,7 +44,7 @@ class OpenAICompatibleLLM(BaseLLMProvider):
         self.api_key = (api_key or "").strip()
         self.timeout = timeout
         self._client: httpx.Client | None = None
-        self._aclient: httpx.AsyncClient | None = None
+        self._breaker = get_circuit_breaker("openai_compatible")
 
     def _url(self) -> str:
         return f"{self.api_base}/chat/completions"
@@ -52,10 +60,13 @@ class OpenAICompatibleLLM(BaseLLMProvider):
             self._client = httpx.Client(timeout=self.timeout, headers=self._headers())
         return self._client
 
-    def _async_client(self) -> httpx.AsyncClient:
-        if self._aclient is None:
-            self._aclient = httpx.AsyncClient(timeout=self.timeout, headers=self._headers())
-        return self._aclient
+    def _async_resilient_client(self):
+        """Build a per-request async resilient client (use as ``async with``)."""
+        return create_async_resilient_client(
+            service="openai_compatible",
+            timeout=self.timeout,
+            headers=self._headers(),
+        )
 
     def generate(
         self,
@@ -78,8 +89,9 @@ class OpenAICompatibleLLM(BaseLLMProvider):
             "max_tokens": max_tokens or 4096,
             **kwargs,
         }
-        resp = self._sync_client().post(self._url(), json=payload)
-        resp.raise_for_status()
+        with self._breaker:
+            resp = self._sync_client().post(self._url(), json=payload)
+            resp.raise_for_status()
         data = resp.json()
         choice = data.get("choices", [{}])[0]
         return (choice.get("message", {}).get("content") or "").strip()
@@ -104,20 +116,21 @@ class OpenAICompatibleLLM(BaseLLMProvider):
             "stream": True,
             **kwargs,
         }
-        with self._sync_client().stream("POST", self._url(), json=payload) as resp:
-            resp.raise_for_status()
-            for line in resp.iter_lines():
-                if not line or line.strip() == "data: [DONE]":
-                    continue
-                if line.startswith("data: "):
-                    try:
-                        chunk = json.loads(line[6:])
-                        delta = chunk.get("choices", [{}])[0].get("delta", {})
-                        content = delta.get("content")
-                        if content:
-                            yield content
-                    except json.JSONDecodeError:
+        with self._breaker:
+            with self._sync_client().stream("POST", self._url(), json=payload) as resp:
+                resp.raise_for_status()
+                for line in resp.iter_lines():
+                    if not line or line.strip() == "data: [DONE]":
                         continue
+                    if line.startswith("data: "):
+                        try:
+                            chunk = json.loads(line[6:])
+                            delta = chunk.get("choices", [{}])[0].get("delta", {})
+                            content = delta.get("content")
+                            if content:
+                                yield content
+                        except json.JSONDecodeError:
+                            continue
 
     async def async_generate(
         self,
@@ -140,11 +153,12 @@ class OpenAICompatibleLLM(BaseLLMProvider):
             "max_tokens": max_tokens or 4096,
             **kwargs,
         }
-        resp = await self._async_client().post(self._url(), json=payload)
-        resp.raise_for_status()
-        data = resp.json()
-        choice = data.get("choices", [{}])[0]
-        return (choice.get("message", {}).get("content") or "").strip()
+        async with self._async_resilient_client() as client:
+            resp = await client.post(self._url(), json=payload)
+            resp.raise_for_status()
+            data = resp.json()
+            choice = data.get("choices", [{}])[0]
+            return (choice.get("message", {}).get("content") or "").strip()
 
     async def async_stream(
         self,
@@ -166,17 +180,22 @@ class OpenAICompatibleLLM(BaseLLMProvider):
             "stream": True,
             **kwargs,
         }
-        async with self._async_client().stream("POST", self._url(), json=payload) as resp:
-            resp.raise_for_status()
-            async for line in resp.aiter_lines():
-                if not line or line.strip() == "data: [DONE]":
-                    continue
-                if line.startswith("data: "):
-                    try:
-                        chunk = json.loads(line[6:])
-                        delta = chunk.get("choices", [{}])[0].get("delta", {})
-                        content = delta.get("content")
-                        if content:
-                            yield content
-                    except json.JSONDecodeError:
+        async with self._async_resilient_client() as client:
+            # Streaming needs the raw httpx client for .stream().
+            # AsyncRateLimitedClient exposes it via _check_client();
+            # plain httpx.AsyncClient (no-apiguard fallback) *is* the client.
+            inner = client._check_client() if hasattr(client, "_check_client") else client  # noqa: SLF001
+            async with inner.stream("POST", self._url(), json=payload) as resp:
+                resp.raise_for_status()
+                async for line in resp.aiter_lines():
+                    if not line or line.strip() == "data: [DONE]":
                         continue
+                    if line.startswith("data: "):
+                        try:
+                            chunk = json.loads(line[6:])
+                            delta = chunk.get("choices", [{}])[0].get("delta", {})
+                            content = delta.get("content")
+                            if content:
+                                yield content
+                        except json.JSONDecodeError:
+                            continue

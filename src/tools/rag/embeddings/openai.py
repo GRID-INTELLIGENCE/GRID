@@ -2,10 +2,15 @@
 
 from __future__ import annotations
 
+import logging
 import os
 from typing import Any, cast
 
+from tools.rag.resilience import get_circuit_breaker
+
 from .base import BaseEmbeddingProvider
+
+logger = logging.getLogger(__name__)
 
 
 class OpenAIEmbeddingProvider(BaseEmbeddingProvider):
@@ -28,6 +33,7 @@ class OpenAIEmbeddingProvider(BaseEmbeddingProvider):
         self.api_key = api_key or os.getenv("OPENAI_API_KEY", "").strip()
         self.timeout = timeout
         self._dimension: int | None = None
+        self._breaker = get_circuit_breaker("openai")
 
         if not self.api_key:
             raise ValueError("OPENAI_API_KEY is required for OpenAI embeddings")
@@ -51,7 +57,8 @@ class OpenAIEmbeddingProvider(BaseEmbeddingProvider):
             Dense embedding vector as list of floats
         """
         client = self._client()
-        resp = client.embeddings.create(model=self.model, input=text)
+        with self._breaker:
+            resp = client.embeddings.create(model=self.model, input=text)
         vec = resp.data[0].embedding
         if self._dimension is None:
             self._dimension = len(vec)
@@ -70,7 +77,8 @@ class OpenAIEmbeddingProvider(BaseEmbeddingProvider):
             return []
 
         client = self._client()
-        resp = client.embeddings.create(model=self.model, input=texts)
+        with self._breaker:
+            resp = client.embeddings.create(model=self.model, input=texts)
         vectors: list[list[float]] = [d.embedding for d in resp.data]
         if self._dimension is None and vectors:
             self._dimension = len(vectors[0])

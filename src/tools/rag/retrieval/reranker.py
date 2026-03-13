@@ -5,6 +5,8 @@ from abc import ABC, abstractmethod
 
 import httpx
 
+from tools.rag.resilience import create_async_resilient_client, get_circuit_breaker
+
 logger = logging.getLogger(__name__)
 
 
@@ -38,6 +40,7 @@ class OllamaReranker(BaseReranker):
         self.base_url = base_url
         self.max_candidates = max_candidates or self.MAX_CANDIDATES
         self._client: httpx.AsyncClient | None = None
+        self._breaker = get_circuit_breaker("ollama")
 
     def _get_client(self) -> httpx.AsyncClient:
         """Get or create shared async client for connection pooling."""
@@ -61,15 +64,16 @@ class OllamaReranker(BaseReranker):
                 f"Score:"
             )
 
-            resp = await client.post(
-                "/api/generate",
-                json={
-                    "model": self.model,
-                    "prompt": prompt,
-                    "stream": False,
-                    "options": {"temperature": 0.0},
-                },
-            )
+            with self._breaker:
+                resp = await client.post(
+                    "/api/generate",
+                    json={
+                        "model": self.model,
+                        "prompt": prompt,
+                        "stream": False,
+                        "options": {"temperature": 0.0},
+                    },
+                )
 
             if resp.status_code == 200:
                 response_text = resp.model_dump_json().get("response", "0").strip()

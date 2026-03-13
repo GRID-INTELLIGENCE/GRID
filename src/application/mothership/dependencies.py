@@ -12,6 +12,14 @@ import os
 from typing import Annotated, Any
 
 from fastapi import Depends, Header, HTTPException, Query, Request, status
+
+try:
+    from apiguard import BucketRegistry
+
+    _HAS_APIGUARD = True
+except ModuleNotFoundError:  # pragma: no cover
+    _HAS_APIGUARD = False
+    BucketRegistry = None  # type: ignore[assignment,misc]
 from fastapi.security import APIKeyHeader, HTTPAuthorizationCredentials, HTTPBearer
 
 from .config import MothershipSettings, get_settings
@@ -553,34 +561,65 @@ SystemReady = Annotated[bool, Depends(check_system_ready)]
 # Rate Limiting Dependencies
 # =============================================================================
 
-# Simple in-memory rate limiter (use Redis in production)
-_rate_limit_store: dict[str, list] = {}
+# APIGuard-backed dependency rate limit registries
+_authenticated_rate_limit_registry: Any = None
+_public_rate_limit_registry: Any = None
+
+# Lightweight fallback for when apiguard is not installed
+_fallback_counters: dict[str, int] = {}
 
 
-def _consume_rate_limit(key: str, settings: MothershipSettings) -> bool:
+def _get_rate_limit_registry(settings: MothershipSettings, *, public: bool) -> Any:
+    global _authenticated_rate_limit_registry, _public_rate_limit_registry
+
+    if not _HAS_APIGUARD:
+        return None  # signal to use fallback path
+
+    target = _public_rate_limit_registry if public else _authenticated_rate_limit_registry
+    refill_rate = max(
+        settings.security.rate_limit_requests / max(settings.security.rate_limit_window_seconds, 1),
+        1.0 / max(settings.security.rate_limit_window_seconds, 1),
+    )
+
+    if target is None:
+        target = BucketRegistry(
+            default_capacity=settings.security.rate_limit_requests,
+            default_refill_rate=refill_rate,
+        )
+        if public:
+            _public_rate_limit_registry = target
+        else:
+            _authenticated_rate_limit_registry = target
+
+    return target
+
+
+def _consume_rate_limit(key: str, settings: MothershipSettings, *, public: bool = False) -> bool:
     """Track a rate-limited request for the given key."""
     if not settings.security.rate_limit_enabled:
         return True
 
-    import time
+    registry = _get_rate_limit_registry(settings, public=public)
+    if registry is None:
+        # Fallback: simple counter-based limiter (no apiguard)
+        count = _fallback_counters.get(key, 0) + 1
+        _fallback_counters[key] = count
+        if count > settings.security.rate_limit_requests:
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail="Rate limit exceeded",
+                headers={"Retry-After": str(settings.security.rate_limit_window_seconds)},
+            )
+        return True
 
-    now = time.time()
-    window = settings.security.rate_limit_window_seconds
-    max_requests = settings.security.rate_limit_requests
-
-    if key not in _rate_limit_store:
-        _rate_limit_store[key] = []
-
-    _rate_limit_store[key] = [ts for ts in _rate_limit_store[key] if now - ts < window]
-
-    if len(_rate_limit_store[key]) >= max_requests:
+    bucket = registry.get_bucket(key)
+    if not bucket.acquire():
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
             detail="Rate limit exceeded",
-            headers={"Retry-After": str(window)},
+            headers={"Retry-After": str(settings.security.rate_limit_window_seconds)},
         )
 
-    _rate_limit_store[key].append(now)
     return True
 
 
@@ -605,7 +644,7 @@ async def check_rate_limit(
     """
     # Use user_id or IP for rate limiting
     key = auth.get("user_id") or (request.client.host if request.client else "unknown")
-    return _consume_rate_limit(key, settings)
+    return _consume_rate_limit(key, settings, public=False)
 
 
 async def check_public_rate_limit(
@@ -619,7 +658,7 @@ async def check_public_rate_limit(
     before a caller has a token, so they can only key on client identity.
     """
     client_ip = request.client.host if request.client else "unknown"
-    return _consume_rate_limit(f"public:{client_ip}", settings)
+    return _consume_rate_limit(f"public:{client_ip}", settings, public=True)
 
 
 RateLimited = Annotated[bool, Depends(check_rate_limit)]

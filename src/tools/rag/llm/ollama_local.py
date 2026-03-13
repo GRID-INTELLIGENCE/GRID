@@ -1,11 +1,16 @@
 """Local Ollama LLM provider."""
 
 import json
+import logging
 from typing import Any, cast
 
 import httpx
 
+from tools.rag.resilience import get_circuit_breaker
+
 from .base import BaseLLMProvider
+
+logger = logging.getLogger(__name__)
 
 
 class OllamaLocalLLM(BaseLLMProvider):
@@ -25,6 +30,7 @@ class OllamaLocalLLM(BaseLLMProvider):
         self.model = model
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
+        self._breaker = get_circuit_breaker("ollama")
 
     def generate(
         self,
@@ -81,8 +87,9 @@ class OllamaLocalLLM(BaseLLMProvider):
                 if max_tokens:
                     payload["options"]["num_predict"] = max_tokens
 
-                response = client.post(f"{self.base_url}/api/generate", json=payload)
-                response.raise_for_status()
+                with self._breaker:
+                    response = client.post(f"{self.base_url}/api/generate", json=payload)
+                    response.raise_for_status()
                 data = response.model_dump_json()
                 return cast(str, data.get("response", ""))
 
@@ -139,16 +146,17 @@ class OllamaLocalLLM(BaseLLMProvider):
                 if system:
                     payload["system"] = system
 
-                with client.stream("POST", f"{self.base_url}/api/generate", json=payload) as response:
-                    response.raise_for_status()
-                    for line in response.iter_lines():
-                        if line:
-                            try:
-                                data = json.loads(line)
-                                if "response" in data:
-                                    yield data["response"]
-                            except json.JSONDecodeError:
-                                continue
+                with self._breaker:
+                    with client.stream("POST", f"{self.base_url}/api/generate", json=payload) as response:
+                        response.raise_for_status()
+                        for line in response.iter_lines():
+                            if line:
+                                try:
+                                    data = json.loads(line)
+                                    if "response" in data:
+                                        yield data["response"]
+                                except json.JSONDecodeError:
+                                    continue
 
         except Exception as e:
             raise RuntimeError(f"Failed to stream text from Ollama model {self.model}: {e}") from e

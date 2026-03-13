@@ -15,10 +15,10 @@ import logging
 from datetime import UTC, datetime
 from typing import Any
 
-from fastapi import APIRouter, Response, status
+from fastapi import APIRouter, Depends, Response, status
 from pydantic import BaseModel, Field
 
-from ..dependencies import Cockpit, Settings
+from application.mothership.dependencies import Cockpit, Settings
 from ..schemas import (
     ApiResponse,
     HealthCheckResponse,
@@ -32,6 +32,23 @@ from ..security.api_sentinels import (
 logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["health"])
+
+
+def _get_resilient_client(service_type: str = "external_api") -> Any:
+    """Lazily obtain an async HTTP client with APIGuard resilience.
+
+    Falls back to a plain ``httpx.AsyncClient`` when apiguard is absent.
+    """
+    try:
+        from application.mothership.middleware.apiguard_adapter import (
+            create_resilient_client,
+        )
+
+        return create_resilient_client(service_type)
+    except (ImportError, ModuleNotFoundError):
+        import httpx
+
+        return httpx.AsyncClient(timeout=30.0)
 
 
 # =============================================================================
@@ -146,12 +163,12 @@ async def _check_gemini_connectivity(api_key: str, timeout: float = 5.0) -> tupl
         return False, "Gemini API key not configured"
 
     try:
-        import httpx
-
-        async with httpx.AsyncClient(timeout=timeout) as client:
+        _client = _get_resilient_client("external_api")
+        async with _client as client:
             response = await client.get(
                 "https://generativelanguage.googleapis.com/v1/models",
                 headers={"x-goog-api-key": api_key},
+                timeout=timeout,
             )
 
             if response.status_code == 200:
@@ -184,16 +201,15 @@ async def _check_webhook_endpoints(endpoints: list[str], timeout: float = 5.0) -
         return True, "No webhook endpoints configured", {}
 
     try:
-        import httpx
-
         results: dict[str, bool] = {}
 
-        async with httpx.AsyncClient(timeout=timeout) as client:
+        _client = _get_resilient_client("external_api")
+        async with _client as client:
             for endpoint in endpoints:
                 try:
-                    # Use HEAD request to check reachability without sending data
-                    response = await client.head(endpoint)
-                    # Consider 2xx and 405 (method not allowed) as healthy
+                    # Use GET request for compatibility with current APIGuard client surface
+                    response = await client.get(endpoint, timeout=timeout)
+                    # Consider anything below 500 as reachable
                     results[endpoint] = response.status_code < 500
                 except Exception:
                     results[endpoint] = False

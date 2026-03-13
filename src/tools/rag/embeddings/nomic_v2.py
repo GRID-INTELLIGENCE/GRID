@@ -5,6 +5,8 @@ from typing import cast
 
 import httpx
 
+from tools.rag.resilience import get_circuit_breaker
+
 from .base import BaseEmbeddingProvider
 
 logger = logging.getLogger(__name__)
@@ -31,6 +33,7 @@ class OllamaEmbeddingProvider(BaseEmbeddingProvider):
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
         self._dimension: int | None = None
+        self._breaker = get_circuit_breaker("ollama")
         self.max_text_length = 6000  # Conservative limit for nomic models (~8192 tokens)
 
     def _truncate_text(self, text: str, max_chars: int | None = None) -> str:
@@ -121,9 +124,10 @@ class OllamaEmbeddingProvider(BaseEmbeddingProvider):
 
                 # Use HTTP API
                 with httpx.Client(timeout=self.timeout) as client:
-                    response = client.post(
-                        f"{self.base_url}/api/embeddings", json={"model": model_name, "prompt": text}
-                    )
+                    with self._breaker:
+                        response = client.post(
+                            f"{self.base_url}/api/embeddings", json={"model": model_name, "prompt": text}
+                        )
                     if response.status_code == 404:
                         last_error = Exception(f"Model '{model_name}' not found (404)")
                         continue  # Try next model

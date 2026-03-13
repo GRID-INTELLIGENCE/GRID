@@ -1,8 +1,13 @@
 """Anthropic LLM provider."""
 
+import logging
 from typing import Any, AsyncGenerator
 
+from tools.rag.resilience import get_circuit_breaker
+
 from .base import BaseLLMProvider
+
+logger = logging.getLogger(__name__)
 
 
 class AnthropicLLM(BaseLLMProvider):
@@ -31,6 +36,7 @@ class AnthropicLLM(BaseLLMProvider):
         self.base_url = base_url
         self.timeout = timeout
         self._client = None
+        self._breaker = get_circuit_breaker("anthropic")
 
     def _get_client(self):
         """Lazy load Anthropic client."""
@@ -87,15 +93,16 @@ class AnthropicLLM(BaseLLMProvider):
             max_tokens = 1024
 
         try:
-            message = client.messages.create(
-                model=self.model,
-                max_tokens=max_tokens,
-                temperature=temperature,
-                system=system,
-                messages=[{"role": "user", "content": prompt}],
-                timeout=self.timeout,
-                **kwargs,
-            )
+            with self._breaker:
+                message = client.messages.create(
+                    model=self.model,
+                    max_tokens=max_tokens,
+                    temperature=temperature,
+                    system=system,
+                    messages=[{"role": "user", "content": prompt}],
+                    timeout=self.timeout,
+                    **kwargs,
+                )
             return message.content[0].text
         except Exception as e:
             raise RuntimeError(f"Anthropic API error: {e}") from e
@@ -127,16 +134,17 @@ class AnthropicLLM(BaseLLMProvider):
             max_tokens = 1024
 
         try:
-            with client.messages.stream(
-                model=self.model,
-                max_tokens=max_tokens,
-                temperature=temperature,
-                system=system,
-                messages=[{"role": "user", "content": prompt}],
-                timeout=self.timeout,
-                **kwargs,
-            ) as stream:
-                yield from stream.text_stream
+            with self._breaker:
+                with client.messages.stream(
+                    model=self.model,
+                    max_tokens=max_tokens,
+                    temperature=temperature,
+                    system=system,
+                    messages=[{"role": "user", "content": prompt}],
+                    timeout=self.timeout,
+                    **kwargs,
+                ) as stream:
+                    yield from stream.text_stream
         except Exception as e:
             raise RuntimeError(f"Anthropic streaming error: {e}") from e
 
@@ -167,15 +175,16 @@ class AnthropicLLM(BaseLLMProvider):
             max_tokens = 1024
 
         try:
-            message = await client.messages.create(
-                model=self.model,
-                max_tokens=max_tokens,
-                temperature=temperature,
-                system=system,
-                messages=[{"role": "user", "content": prompt}],
-                timeout=self.timeout,
-                **kwargs,
-            )
+            with self._breaker:
+                message = await client.messages.create(
+                    model=self.model,
+                    max_tokens=max_tokens,
+                    temperature=temperature,
+                    system=system,
+                    messages=[{"role": "user", "content": prompt}],
+                    timeout=self.timeout,
+                    **kwargs,
+                )
             return message.content[0].text
         except Exception as e:
             raise RuntimeError(f"Anthropic async API error: {e}") from e
@@ -207,16 +216,17 @@ class AnthropicLLM(BaseLLMProvider):
             max_tokens = 1024
 
         try:
-            async with client.messages.stream(
-                model=self.model,
-                max_tokens=max_tokens,
-                temperature=temperature,
-                system=system,
-                messages=[{"role": "user", "content": prompt}],
-                timeout=self.timeout,
-                **kwargs,
-            ) as stream:
-                async for text in stream.text_stream:
-                    yield text
+            with self._breaker:
+                async with client.messages.stream(
+                    model=self.model,
+                    max_tokens=max_tokens,
+                    temperature=temperature,
+                    system=system,
+                    messages=[{"role": "user", "content": prompt}],
+                    timeout=self.timeout,
+                    **kwargs,
+                ) as stream:
+                    async for text in stream.text_stream:
+                        yield text
         except Exception as e:
             raise RuntimeError(f"Anthropic async streaming error: {e}") from e

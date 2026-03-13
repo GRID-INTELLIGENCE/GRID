@@ -52,6 +52,8 @@ dependencies = [
     "aiosqlite>=0.19.0",
     # Safety (Cognitive Privacy Shield)
     "grid-safety>=1.0.1",
+    # API Resilience
+    "grid-apiguard>=0.1.0",
     # Security & Authentication
     "PyJWT[crypto]>=2.8.0",
     "bcrypt>=4.1.0",
@@ -129,6 +131,7 @@ test = [
     "pytest-xdist>=3.5.0",
     "psutil>=5.9.0",
     "aiofiles>=23.2.1",
+    "email-validator>=2.0.0",
 ]
 dev = [
     "hatch",
@@ -210,6 +213,9 @@ torchaudio = { index = "pytorch-cpu" }
 # Local path override kept for development convenience.
 grid-safety = { path = "safety" }
 
+# APIGuard local development path
+grid-apiguard = { path = "C:/Users/USER/CascadeProjects/apiguard" }
+
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests", "safety/tests", "boundaries/tests"]
@@ -217,8 +223,6 @@ python_files = ["test_*.py"]
 python_functions = ["test_*"]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
-timeout = 30
-timeout_method = "thread"
 strict_markers = true
 # Optimized discovery exclusions
 norecursedirs = [
