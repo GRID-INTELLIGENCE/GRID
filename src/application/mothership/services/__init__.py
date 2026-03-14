@@ -205,7 +205,7 @@ class SessionService:
                 code="SESSION_EXPIRED",
                 status_code=401,
             )
-        session.touch()
+        session.touch(ttl=self._default_ttl)
         return session
 
     def terminate_session(self, session_id: str) -> Session:

@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import uuid
 from dataclasses import dataclass, field
-from datetime import UTC, datetime, timezone
+from datetime import UTC, datetime, timedelta, timezone
 from enum import Enum, StrEnum
 from typing import Any
 
@@ -156,10 +156,13 @@ class Session:
             return False
         return utc_now() > self.expires_at
 
-    def touch(self) -> None:
-        """Update last activity timestamp."""
-        self.last_activity_at = utc_now()
-        self.updated_at = utc_now()
+    def touch(self, ttl: timedelta | None = None) -> None:
+        """Update last activity timestamp and extend expiration (sliding window)."""
+        now = utc_now()
+        self.last_activity_at = now
+        self.updated_at = now
+        if ttl is not None and self.expires_at is not None:
+            self.expires_at = now + ttl
         if self.status == SessionStatus.IDLE:
             self.status = SessionStatus.ACTIVE
 
