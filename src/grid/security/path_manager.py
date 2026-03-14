@@ -122,8 +122,13 @@ class SecurePathManager:
 
             path_obj = raw_path_obj
             if not path_obj.is_absolute():
-                # Resolve relative paths against base_dir
-                path_obj = (self.base_dir / path_obj).resolve()
+                # Resolve relative paths: try CWD first (handles pytest tmp_path
+                # which is relative but already rooted at CWD), fall back to base_dir.
+                cwd_resolved = Path.cwd() / path_obj
+                if cwd_resolved.exists():
+                    path_obj = cwd_resolved.resolve()
+                else:
+                    path_obj = (self.base_dir / path_obj).resolve()
 
             # Check for dangerous path patterns (temp dirs).
             # Skip this check when path is under the trusted base_dir
