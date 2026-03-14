@@ -103,14 +103,21 @@ class BoundaryEngine:
     ) -> bool:
         """
         Check if subject is within boundary. Returns True if allowed.
-        If boundary is refusable and user has refused, treat as allowed (honour refusal).
+
+        Follows Prevention → Detection → Remediation order:
+        1. Prevention: Refusal rights and boundary existence checks
+        2. Detection: Rule evaluation against subject
+        3. Remediation: Logging and violation handling
         """
+
+        # PHASE 1: PREVENTION — Check refusal rights and boundary existence
         ref = check_refusal(trigger=boundary_id, scope=scope, rights=self.refusal_rights)
         if ref is not None:
             self._logger.log_boundary_check(
                 boundary_id, allowed=True, scope=scope, payload={"reason": "refusal_honoured"}
             )
             return True
+
         boundary = next((b for b in self.boundaries if b.id == boundary_id), None)
         if not boundary:
             # Fail-closed: unknown boundary IDs are denied, not allowed.
@@ -122,12 +129,17 @@ class BoundaryEngine:
                 payload={"reason": "unknown_boundary_id"},
             )
             return False
+
+        # PHASE 2: DETECTION — Evaluate boundary rules
         allowed = self._evaluate_rule(boundary.rule, subject)
+
+        # PHASE 3: REMEDIATION — Log and handle violations
         self._logger.log_boundary_check(boundary_id, allowed, scope=scope, payload={"subject": subject})
         if not allowed and boundary.enforcement == "hard":
             self._logger.log_boundary_violation(
                 boundary_id, scope=scope, actor_id=actor_id, payload={"subject": subject}
             )
+
         return allowed
 
     def _evaluate_rule(self, rule: dict[str, Any] | None, subject: str) -> bool:

@@ -7,13 +7,11 @@ Provides audit trail analysis, compliance documentation, and statistical summari
 from __future__ import annotations
 
 import json
-import time
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from boundaries.transition_gate.envelope import TransitionEnvelope
 from boundaries.transition_gate.gate_keeper import VerificationResult
 
 
@@ -210,8 +208,8 @@ class ReportGenerator:
             "",
             "## Executive Summary",
             "",
-            f"| Metric | Value |",
-            f"|--------|-------|",
+            "| Metric | Value |",
+            "|--------|-------|",
             f"| Total Verifications | {stats.total_verifications} |",
             f"| Passed | {stats.total_passed} ({stats.pass_rate:.1f}%) |",
             f"| Rejected | {stats.total_rejected} ({stats.rejection_rate:.1f}%) |",
@@ -219,8 +217,8 @@ class ReportGenerator:
             "",
             "## Performance Metrics",
             "",
-            f"| Metric | Value (ms) |",
-            f"|--------|------------|",
+            "| Metric | Value (ms) |",
+            "|--------|------------|",
             f"| Average Duration | {stats.avg_duration_ms:.2f} |",
             f"| Minimum Duration | {stats.min_duration_ms:.2f} |",
             f"| Maximum Duration | {stats.max_duration_ms:.2f} |",
@@ -233,8 +231,8 @@ class ReportGenerator:
                 [
                     "## Rejection Analysis",
                     "",
-                    f"| Reason | Count |",
-                    f"|--------|-------|",
+                    "| Reason | Count |",
+                    "|--------|-------|",
                 ]
             )
             for reason, count in sorted(stats.rejection_reasons.items(), key=lambda x: -x[1]):
@@ -247,8 +245,8 @@ class ReportGenerator:
                 [
                     "## Step-by-Step Performance",
                     "",
-                    f"| Step | Passed | Rejected | Error |",
-                    f"|------|--------|----------|-------|",
+                    "| Step | Passed | Rejected | Error |",
+                    "|------|--------|----------|-------|",
                 ]
             )
             for step_name, counts in sorted(stats.step_stats.items()):

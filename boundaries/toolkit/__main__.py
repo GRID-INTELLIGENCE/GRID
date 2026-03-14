@@ -43,10 +43,9 @@ from boundaries.transition_gate.envelope import (
     PERM_START_SERVER,
     PERM_WRITE_RESULTS,
     ScopeDeclaration,
-    TransitionEnvelope,
     seal_envelope,
 )
-from boundaries.transition_gate.gate_keeper import GateKeeper, verify_envelope
+from boundaries.transition_gate.gate_keeper import GateKeeper
 from boundaries.transition_gate.nonce import NonceRegistry
 
 
@@ -177,7 +176,7 @@ def cmd_seal(args: argparse.Namespace) -> int:
         }
         print(json.dumps(result, indent=2))
     else:
-        print(f"✅ Envelope sealed successfully")
+        print("✅ Envelope sealed successfully")
         print(f"   Envelope ID: {envelope.envelope_id}")
         print(f"   Output: {output_path}")
         print(f"   Payload hash: {envelope.payload_hash}")

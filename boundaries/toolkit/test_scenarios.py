@@ -21,9 +21,10 @@ from __future__ import annotations
 
 import json
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 from boundaries.transition_gate.envelope import (
     PERM_DEPLOY,
@@ -33,16 +34,10 @@ from boundaries.transition_gate.envelope import (
     TransitionEnvelope,
     seal_envelope,
 )
-from boundaries.transition_gate.fingerprint import (
-    compute_machine_fingerprint,
-    compute_payload_hash,
-    compute_user_fingerprint,
-)
 from boundaries.transition_gate.gate_keeper import (
     GateKeeper,
     RejectionReason,
     VerificationResult,
-    VerificationStatus,
 )
 from boundaries.transition_gate.nonce import NonceRegistry
 
@@ -532,7 +527,7 @@ def scenario_expired_envelope(tmp_path: Path) -> ScenarioResult:
 
     notes = [
         f"Envelope timestamp set to {old_timestamp} (2 hours ago)",
-        f"Max age threshold: 600 seconds (10 minutes)",
+        "Max age threshold: 600 seconds (10 minutes)",
         f"Envelope age: {time.time() - old_timestamp:.0f} seconds",
         "Should reject as expired",
         f"Got rejection reason: {result.reason}",
