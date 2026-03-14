@@ -79,7 +79,7 @@ class SecurePathManager:
         Args:
             base_dir: Base directory for relative path resolution
         """
-        self.base_dir = base_dir or Path.cwd()
+        self.base_dir = (base_dir or Path.cwd()).resolve()
         self._added_paths: set[str] = set()
 
     def validate_path(self, path: str | Path) -> PathValidationResult:
