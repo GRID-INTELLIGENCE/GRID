@@ -254,13 +254,19 @@ class SecuritySettings:
     rate_limit_window_seconds: int = 60
     max_request_size_bytes: int = 10 * 1024 * 1024  # 10MB default
 
+    # Auth provider: "internal" (default JWT) or "oauth2" (external OIDC)
+    auth_provider: str = "internal"
+    oauth2_issuer_url: str = ""
+    oauth2_client_id: str = ""
+    oauth2_audience: str = ""
+
     # Explicit security mode fields (previously accessed via getattr fallbacks)
     strict_mode: bool = False  # Enable strict security mode (blocks violations instead of logging)
     input_sanitization_enabled: bool = True  # Enable input sanitization for all requests
     circuit_breaker_enabled: bool = True  # Enable circuit breaker for external service calls
     block_insecure_transport: bool = False  # Block HTTP requests (require HTTPS) in strict mode
     # Parasite Guard (Total Rickall Defense)
-    parasite_guard_enabled: bool = True  # Enable/disable the guard system
+    parasite_guard_enabled: bool = True  # Enable parasite guard system
     parasite_guard_pruning_enabled: bool = True  # Enable automatic pruning of parasitic code paths (Production Ready)
 
     # DRT - Distributed Request Tracking (DRT) for focused monitoring
@@ -298,6 +304,11 @@ class SecuritySettings:
             rate_limit_requests=int(env.get("MOTHERSHIP_RATE_LIMIT_REQUESTS", "100")),
             rate_limit_window_seconds=int(env.get("MOTHERSHIP_RATE_LIMIT_WINDOW", "60")),
             max_request_size_bytes=int(env.get("MOTHERSHIP_MAX_REQUEST_SIZE_BYTES", str(10 * 1024 * 1024))),
+            # Auth provider
+            auth_provider=env.get("MOTHERSHIP_AUTH_PROVIDER", "internal"),
+            oauth2_issuer_url=env.get("MOTHERSHIP_OAUTH2_ISSUER_URL", ""),
+            oauth2_client_id=env.get("MOTHERSHIP_OAUTH2_CLIENT_ID", ""),
+            oauth2_audience=env.get("MOTHERSHIP_OAUTH2_AUDIENCE", ""),
             # Explicit security mode fields
             strict_mode=_parse_bool(env.get("MOTHERSHIP_SECURITY_STRICT_MODE"), False),
             input_sanitization_enabled=_parse_bool(env.get("MOTHERSHIP_INPUT_SANITIZATION_ENABLED"), True),

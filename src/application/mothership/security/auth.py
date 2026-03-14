@@ -13,7 +13,6 @@ from typing import Any
 from fastapi import HTTPException, status
 
 from ..config import get_settings
-from .jwt import get_jwt_manager
 
 logger = logging.getLogger(__name__)
 
@@ -224,7 +223,10 @@ def verify_api_key(api_key: str | None, require_valid: bool = True) -> dict[str,
 
 async def verify_jwt_token(token: str | None, require_valid: bool = True) -> dict[str, Any]:
     """
-    Verify JWT Bearer token authentication using implementation from jwt.py.
+    Verify JWT Bearer token authentication.
+
+    Routes through the active auth provider (internal JWT or external OAuth2).
+    Falls back to direct JWTManager verification for backward compatibility.
     """
     if not token:
         if require_valid:
@@ -237,18 +239,14 @@ async def verify_jwt_token(token: str | None, require_valid: bool = True) -> dic
             "permissions": get_permissions_for_role(Role.ANONYMOUS),
         }
 
-    settings = get_settings()
-    jwt_manager = get_jwt_manager(
-        secret_key=settings.security.secret_key,
-        algorithm=settings.security.algorithm,
-        environment=settings.environment.value,
-    )
+    # Use the pluggable auth provider
+    from .auth_provider import get_auth_provider
 
-    try:
-        # Strict validation
-        payload = jwt_manager.verify_token(token, expected_type="access")
-    except Exception as e:
-        logger.warning("JWT verification failed: %s", e)
+    provider = get_auth_provider()
+    result = await provider.verify_token(token)
+
+    if not result.valid:
+        logger.warning("Token verification failed via %s: %s", provider.provider_type, result.error)
         if require_valid:
             raise AuthenticationError("Invalid or expired security token")
         return {
@@ -256,34 +254,19 @@ async def verify_jwt_token(token: str | None, require_valid: bool = True) -> dic
             "method": "none",
             "role": Role.ANONYMOUS.value,
             "permissions": get_permissions_for_role(Role.ANONYMOUS),
-            "error": "token_invalid",
+            "error": result.error or "token_invalid",
         }
 
-    # Check for token revocation
-    from .token_revocation import get_token_validator
-
-    # Convert to dict for validator
-    payload_dict = payload.model_dump() if hasattr(payload, "model_dump") else {}
-    is_valid, error = await get_token_validator().validate_token(payload_dict)
-    if not is_valid:
-        logger.warning("JWT revocation check failed: %s", error)
-        if require_valid:
-            raise AuthenticationError(f"Token invalid: {error}")
-        return {
-            "authenticated": False,
-            "method": "none",
-            "role": Role.ANONYMOUS.value,
-            "permissions": get_permissions_for_role(Role.ANONYMOUS),
-            "error": "token_revoked",
-        }
-
-    # Map scope 'role' or similar to RBAC Role
-    if hasattr(payload, "role"):
-        role_name = payload.role
-    elif payload.metadata and "role" in payload.metadata:
-        role_name = payload.metadata["role"]
-    else:
-        role_name = Role.READER.value
+    # Map provider user to RBAC role
+    user = result.user
+    role_name = Role.READER.value
+    if user:
+        if user.roles:
+            role_name = user.roles[0]
+        elif user.metadata and "role" in user.metadata:
+            role_name = user.metadata["role"]
+        elif result.raw_payload.get("metadata", {}).get("role"):
+            role_name = result.raw_payload["metadata"]["role"]
 
     try:
         role = Role(role_name.lower())
@@ -293,10 +276,12 @@ async def verify_jwt_token(token: str | None, require_valid: bool = True) -> dic
     return {
         "authenticated": True,
         "method": "bearer",
-        "user_id": payload.user_id if hasattr(payload, "user_id") else payload.sub,
+        "user_id": user.user_id if user else "unknown",
+        "email": user.email if user else None,
         "role": role.value,
         "permissions": get_permissions_for_role(role),
-        "token_payload": payload.model_dump() if hasattr(payload, "model_dump") else {},
+        "token_payload": result.raw_payload,
+        "provider": provider.provider_type.value,
     }
 
 

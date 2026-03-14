@@ -14,6 +14,7 @@ from pydantic import BaseModel, EmailStr, Field
 
 from application.mothership.dependencies import Auth, RateLimited, RequestContext, Settings
 from application.mothership.schemas import ApiResponse, ResponseMeta
+from application.mothership.security.auth_provider import get_auth_provider
 from application.mothership.security.credential_validation import validate_production_credentials
 from application.mothership.security.jwt import get_jwt_manager
 from application.mothership.security.token_revocation import get_token_validator
@@ -153,13 +154,15 @@ async def login(
     """
     Authenticate user and generate JWT tokens.
 
+    Routes through the active auth provider (internal JWT or external OAuth2).
+    Provider is selected via MOTHERSHIP_AUTH_PROVIDER env var.
+
     **Development Mode:**
     - Any username/password combination is accepted
     - Tokens are generated for testing purposes
 
     **Production Mode:**
-    - Credentials are validated against user store
-    - Secure password hashing verification
+    - Credentials are validated via the configured auth provider
     - Failed attempts are logged and rate-limited
 
     Args:
@@ -175,37 +178,6 @@ async def login(
         HTTPException: If authentication fails
     """
     request_id = request_context.get("request_id", "unknown")
-    auth_result = None
-
-    # Production credential validation
-    if not settings.is_development:
-        auth_result = await validate_production_credentials(request.username, request.password)
-
-        if not auth_result.success:
-            logger.warning(
-                "Authentication failed for user: %s, reason: %s (request_id=%s)",
-                request.username,
-                auth_result.error_code,
-                request_id,
-            )
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail=auth_result.error_message or "Authentication failed",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-
-    # Generate JWT token pair
-    # Convert empty string to None to allow env var fallback
-    secret_key_param = (
-        settings.security.secret_key if settings.security.secret_key and settings.security.secret_key.strip() else None
-    )
-    jwt_manager = get_jwt_manager(
-        secret_key=secret_key_param,
-        environment=settings.environment.value,
-        algorithm=settings.security.algorithm,
-        access_token_expire_minutes=settings.security.access_token_expire_minutes,
-        refresh_token_expire_days=settings.security.refresh_token_expire_days,
-    )
 
     # Normalize scopes - ensure valid permissions only
     valid_scopes = {"read", "write", "admin"}
@@ -213,35 +185,28 @@ async def login(
     if not granted_scopes:
         granted_scopes = ["read"]  # Default to read-only
 
-    # Get user details from auth result in production, or use defaults in dev
-    if not settings.is_development and auth_result and auth_result.user:
-        user_id = auth_result.user.user_id
-        email = auth_result.user.email or f"{request.username}@example.com"
-    else:
-        user_id = f"user_{request.username}"
-        email = f"{request.username}@example.com" if "@" not in request.username else request.username
-
     try:
-        token_pair = jwt_manager.create_token_pair(
-            subject=request.username,
+        provider = get_auth_provider()
+        auth_token = await provider.authenticate(
+            username=request.username,
+            password=request.password,
             scopes=granted_scopes,
-            user_id=user_id,
-            email=email,
-            metadata={
-                "login_method": "password",
-                "request_id": request_id,
-            },
         )
 
         response_data = TokenResponse(
-            access_token=token_pair.access_token,
-            refresh_token=token_pair.refresh_token,
-            token_type=token_pair.token_type,
-            expires_in=token_pair.expires_in,
-            scopes=granted_scopes,
+            access_token=auth_token.access_token,
+            refresh_token=auth_token.refresh_token or "",
+            token_type=auth_token.token_type,
+            expires_in=auth_token.expires_in,
+            scopes=auth_token.scopes or granted_scopes,
         )
 
-        logger.info("User authenticated successfully: %s (request_id=%s)", request.username, request_id)
+        logger.info(
+            "User authenticated successfully via %s: %s (request_id=%s)",
+            provider.provider_type,
+            request.username,
+            request_id,
+        )
 
         return ApiResponse(
             success=True,
@@ -249,11 +214,19 @@ async def login(
             meta=ResponseMeta(request_id=request_id),
         )
 
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.exception("Token generation failed for user: %s", request.username)
+        logger.warning(
+            "Authentication failed for user: %s, error: %s (request_id=%s)",
+            request.username,
+            str(e),
+            request_id,
+        )
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Authentication failed - unable to generate tokens",
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=str(e) if str(e) else "Authentication failed",
+            headers={"WWW-Authenticate": "Bearer"},
         ) from e
 
 
@@ -281,25 +254,17 @@ async def refresh_token(
     """
     request_id = request_context.get("request_id", "unknown")
 
-    jwt_manager = get_jwt_manager(
-        secret_key=settings.security.secret_key,
-        environment=settings.environment.value,
-        algorithm=settings.security.algorithm,
-        access_token_expire_minutes=settings.security.access_token_expire_minutes,
-        refresh_token_expire_days=settings.security.refresh_token_expire_days,
-    )
-
     try:
-        # Generate new access token from refresh token
-        new_access_token = jwt_manager.refresh_access_token(request.refresh_token)
+        provider = get_auth_provider()
+        auth_token = await provider.refresh_token(request.refresh_token)
 
         response_data = RefreshResponse(
-            access_token=new_access_token,
-            token_type="bearer",
-            expires_in=settings.security.access_token_expire_minutes * 60,
+            access_token=auth_token.access_token,
+            token_type=auth_token.token_type,
+            expires_in=auth_token.expires_in,
         )
 
-        logger.info("Token refreshed successfully (request_id=%s)", request_id)
+        logger.info("Token refreshed successfully via %s (request_id=%s)", provider.provider_type, request_id)
 
         return ApiResponse(
             success=True,
