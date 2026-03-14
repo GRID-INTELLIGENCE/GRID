@@ -59,6 +59,7 @@ class SecurePathManager:
     # Dangerous path patterns that should never be added to sys.path.
     # SCOPE: Path-level concerns only. Shell metachar detection (&&, |, ;)
     # is handled by input_sanitizer.py and threat_profile.py.
+    # These are checked as exact parent-directory matches, not substrings.
     DANGEROUS_PATTERNS: list[str] = [
         "/tmp",  # noqa: S108 temp file path is intentional
         "/var/tmp",  # noqa: S108 temp file path is intentional
@@ -124,18 +125,30 @@ class SecurePathManager:
                 # Resolve relative paths against base_dir
                 path_obj = (self.base_dir / path_obj).resolve()
 
-            # Check for dangerous path patterns (temp dirs)
-            path_str = str(path_obj).lower()
-            for pattern in self.DANGEROUS_PATTERNS:
-                if pattern in path_str:
-                    return PathValidationResult(
-                        path=path_obj,
-                        is_valid=False,
-                        exists=False,
-                        is_directory=False,
-                        is_writable=False,
-                        reason=f"Path contains dangerous pattern: {pattern}",
-                    )
+            # Check for dangerous path patterns (temp dirs).
+            # Skip this check when path is under the trusted base_dir
+            # (e.g. pytest tmp_path on Linux lives under /tmp/).
+            resolved = path_obj.resolve() if path_obj.is_absolute() else path_obj
+            base_resolved = self.base_dir.resolve()
+            is_under_base = False
+            try:
+                resolved.relative_to(base_resolved)
+                is_under_base = True
+            except ValueError:
+                pass
+
+            if not is_under_base:
+                path_str = str(resolved).lower()
+                for pattern in self.DANGEROUS_PATTERNS:
+                    if pattern in path_str:
+                        return PathValidationResult(
+                            path=path_obj,
+                            is_valid=False,
+                            exists=False,
+                            is_directory=False,
+                            is_writable=False,
+                            reason=f"Path contains dangerous pattern: {pattern}",
+                        )
 
             # Check if path exists
             if not path_obj.exists():
