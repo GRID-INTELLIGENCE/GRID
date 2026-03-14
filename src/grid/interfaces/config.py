@@ -6,19 +6,12 @@ import os
 from dataclasses import dataclass, field
 from datetime import timedelta
 
+from infrastructure.config.parsing import parse_bool
+
 
 def _parse_bool(value: str | None) -> bool:
-    """Parse boolean value from environment variable.
-
-    Args:
-        value: String value to parse
-
-    Returns:
-        Boolean value (default: False)
-    """
-    if not value:
-        return False
-    return value.lower() in ("true", "1", "yes", "on")
+    """Backward-compatible wrapper around infrastructure.config.parsing.parse_bool."""
+    return parse_bool(value, False)
 
 
 @dataclass

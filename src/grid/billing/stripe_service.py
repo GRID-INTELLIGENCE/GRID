@@ -8,6 +8,7 @@ from typing import Any, Literal
 import stripe
 
 from grid.config.runtime_settings import RuntimeSettings
+from infrastructure.config.parsing import parse_bool
 
 logger = logging.getLogger(__name__)
 
@@ -54,9 +55,8 @@ class UsageReportResult:
 
 
 def _parse_bool(value: str | None, default: bool = False) -> bool:
-    if value is None:
-        return default
-    return value.strip().lower() in {"true", "1", "yes", "y", "on"}
+    """Backward-compatible wrapper around infrastructure.config.parsing.parse_bool."""
+    return parse_bool(value, default)
 
 
 def _is_production_environment() -> bool:

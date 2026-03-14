@@ -22,13 +22,14 @@ from enum import StrEnum
 from typing import Any
 from uuid import uuid4
 
+from infrastructure.config.parsing import parse_bool
+
 logger = logging.getLogger(__name__)
 
 
 def _parse_bool(value: str | None, default: bool = False) -> bool:
-    if value is None:
-        return default
-    return value.strip().lower() in {"true", "1", "yes", "y", "on"}
+    """Backward-compatible wrapper around infrastructure.config.parsing.parse_bool."""
+    return parse_bool(value, default)
 
 
 def _is_production_environment() -> bool:

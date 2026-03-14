@@ -14,11 +14,16 @@ from sqlalchemy.engine import Engine
 logger = logging.getLogger(__name__)
 
 
+# --- Shared redaction utility (extracted to infrastructure.config.security.redaction) ---
+from infrastructure.config.security.redaction import redact_token
+
+
 def _redact_token(token: str) -> str:
-    """Redact token for logging."""
-    if not token or len(token) < 8:
-        return "***"
-    return f"{token[:4]}***{token[-4:]}"
+    """Redact token for logging.
+
+    Backward-compatible wrapper around infrastructure.config.security.redaction.redact_token.
+    """
+    return redact_token(token)
 
 
 class EnhancedDatabricksConnector:

@@ -16,10 +16,12 @@ class ProcessingResult:
     metadata: dict[str, Any] | None = None
 
 
+from infrastructure.config.parsing import parse_bool
+
+
 def _parse_bool(value: str | None, default: bool = False) -> bool:
-    if value is None:
-        return default
-    return value.strip().lower() in {"true", "1", "yes", "y", "on"}
+    """Backward-compatible wrapper around infrastructure.config.parsing.parse_bool."""
+    return parse_bool(value, default)
 
 
 def _is_production_environment() -> bool:

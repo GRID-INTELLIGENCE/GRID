@@ -156,6 +156,7 @@ packages = [
     "src/cognitive",
     "src/tools",
     "src/mycelium",
+    "src/infrastructure",  # Shared config library (infrastructure.config)
 ]
 exclude = [
     "src/api/**",

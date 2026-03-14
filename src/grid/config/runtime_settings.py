@@ -3,11 +3,12 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass, field
 
+from infrastructure.config.parsing import parse_bool
+
 
 def _parse_bool(value: str | None, default: bool = False) -> bool:
-    if value is None:
-        return default
-    return value.strip().lower() in {"true", "1", "yes", "y", "on"}
+    """Backward-compatible wrapper around infrastructure.config.parsing.parse_bool."""
+    return parse_bool(value, default)
 
 
 @dataclass

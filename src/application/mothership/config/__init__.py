@@ -62,18 +62,24 @@ class LogLevel(StrEnum):
     CRITICAL = "CRITICAL"
 
 
+# --- Shared parsing utilities (extracted to infrastructure.config.parsing) ---
+from infrastructure.config.parsing import parse_bool, parse_list
+
+
 def _parse_bool(value: str | None, default: bool = False) -> bool:
-    """Parse boolean from environment variable string."""
-    if value is None:
-        return default
-    return value.strip().lower() in {"true", "1", "yes", "y", "on"}
+    """Parse boolean from environment variable string.
+
+    Backward-compatible wrapper around infrastructure.config.parsing.parse_bool.
+    """
+    return parse_bool(value, default)
 
 
 def _parse_list(value: str | None, separator: str = ",") -> list[str]:
-    """Parse comma-separated list from environment variable."""
-    if not value:
-        return []
-    return [item.strip() for item in value.split(separator) if item.strip()]
+    """Parse comma-separated list from environment variable.
+
+    Backward-compatible wrapper around infrastructure.config.parsing.parse_list.
+    """
+    return parse_list(value, separator)
 
 
 @dataclass

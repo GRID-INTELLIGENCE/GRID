@@ -7,6 +7,8 @@ from typing import Any
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.pool import NullPool
 
+from infrastructure.config.database.url_normalizer import normalize_async_url
+
 from ..config import get_settings
 
 try:
@@ -38,18 +40,11 @@ def get_database_url() -> str:
 
 
 def _normalize_async_db_url(url: str) -> str:
-    url = (url or "").strip()
-    if url.startswith("sqlite:///") and "+aiosqlite" not in url:
-        return url.replace("sqlite:///", "sqlite+aiosqlite:///", 1)
-    if url.startswith("postgresql://") and "+asyncpg" not in url:
-        return url.replace("postgresql://", "postgresql+asyncpg://", 1)
-    if url.startswith("postgres://") and "+asyncpg" not in url:
-        return url.replace("postgres://", "postgresql+asyncpg://", 1)
-    # Databricks uses synchronous connector (no async support in databricks-sql-connector)
-    # We'll handle this separately
-    if url.startswith("databricks://"):
-        return url
-    return url
+    """Normalize DB URL for async driver.
+
+    Backward-compatible wrapper around infrastructure.config.database.url_normalizer.normalize_async_url.
+    """
+    return normalize_async_url(url)
 
 
 def _should_auto_init_sqlite(url: str) -> bool:
