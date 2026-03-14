@@ -8,6 +8,7 @@ Fail-closed: if the DB is unreachable, callers must refuse requests.
 from __future__ import annotations
 
 import os
+from pathlib import Path
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
@@ -36,6 +37,10 @@ def _get_database_url() -> str:
     # Ensure async driver
     if url.startswith("postgresql://"):
         url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+    if url.startswith("sqlite://") or url.startswith("sqlite+aiosqlite://"):
+        sqlite_path = url.split(":///", 1)[1] if ":///" in url else ""
+        if sqlite_path and sqlite_path != ":memory:":
+            Path(sqlite_path).expanduser().resolve().parent.mkdir(parents=True, exist_ok=True)
     return url
 
 
