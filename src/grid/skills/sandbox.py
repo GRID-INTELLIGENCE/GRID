@@ -417,17 +417,68 @@ else:
             )
 
         def _run_in_process() -> Any:
-            previous_cwd = Path.cwd()
-            namespace: dict[str, Any] = {}
-            try:
-                os.chdir(work_dir)
-                exec(skill_code, namespace)  # noqa: S102 - intentional sandbox fallback execution
-                main = namespace.get("main")
-                if not callable(main):
-                    raise RuntimeError("No main function found in skill")
-                return main(skill_args)
-            finally:
-                os.chdir(previous_cwd)
+            # Build restricted builtins — deny dangerous primitives.
+            import builtins as _builtins
+
+            _DENIED_BUILTINS = frozenset(
+                {
+                    "eval",
+                    "exec",
+                    "compile",
+                    "open",
+                    "globals",
+                    "locals",
+                    "vars",
+                    "getattr",
+                    "setattr",
+                    "delattr",
+                    "breakpoint",
+                    "exit",
+                    "quit",
+                }
+            )
+
+            # Filtered __import__ — blocks dangerous modules at runtime.
+            _BLOCKED_MODULES = frozenset(
+                {
+                    "os",
+                    "subprocess",
+                    "socket",
+                    "shutil",
+                    "ctypes",
+                    "pickle",
+                    "shelve",
+                    "marshal",
+                    "importlib",
+                    "signal",
+                    "multiprocessing",
+                    "_thread",
+                    "threading",
+                }
+            )
+
+            _real_import = _builtins.__import__
+
+            def _safe_import(name, *args, **kwargs):
+                root = name.split(".")[0]
+                if root in _BLOCKED_MODULES:
+                    raise ImportError(f"Module '{name}' is blocked in sandbox")
+                return _real_import(name, *args, **kwargs)
+
+            safe_builtins = {
+                k: getattr(_builtins, k) for k in dir(_builtins) if not k.startswith("_") and k not in _DENIED_BUILTINS
+            }
+            # Preserve __name__ and __build_class__ so class defs work
+            safe_builtins["__name__"] = "__sandbox__"
+            safe_builtins["__build_class__"] = _builtins.__build_class__
+            safe_builtins["__import__"] = _safe_import
+
+            namespace: dict[str, Any] = {"__builtins__": safe_builtins}
+            exec(skill_code, namespace)  # noqa: S102 - intentional sandbox fallback execution
+            main = namespace.get("main")
+            if not callable(main):
+                raise RuntimeError("No main function found in skill")
+            return main(skill_args)
 
         try:
             async with asyncio.timeout(self.config.timeout):
@@ -545,7 +596,12 @@ else:
         }
 
     def _check_security_violations(self, execution_id: str, work_dir: Path, skill_code: str | None = None) -> list[str]:
-        """Check for security violations. If skill_code is provided, check for suspicious patterns in executed code."""
+        """Check for security violations using both substring and AST-based analysis.
+
+        If skill_code is provided, check for suspicious patterns before execution.
+        """
+        import ast as _ast
+
         violations: list[str] = []
 
         try:
@@ -555,8 +611,8 @@ else:
                     f"Unauthorized file access: {file_path}" for file_path in work_dir.rglob("*") if file_path.is_file()
                 )
 
-            # Check for suspicious patterns in executed code (CRIT-4/HIGH-17: check skill_code, not violations)
             if skill_code is not None:
+                # Layer 1: Fast substring pre-screen
                 suspicious_patterns = [
                     "import os",
                     "import subprocess",
@@ -571,8 +627,53 @@ else:
                     if pattern in skill_code
                 )
 
+                # Layer 2: AST-based deep analysis (catches obfuscation)
+                try:
+                    tree = _ast.parse(skill_code)
+                    _blocked_imports = frozenset(
+                        {
+                            "os",
+                            "subprocess",
+                            "socket",
+                            "shutil",
+                            "ctypes",
+                            "pickle",
+                            "shelve",
+                            "marshal",
+                        }
+                    )
+                    _dangerous_calls = frozenset(
+                        {
+                            "eval",
+                            "exec",
+                            "compile",
+                            "__import__",
+                        }
+                    )
+                    _dangerous_attrs = frozenset({"system", "popen", "Popen"})
+
+                    for node in _ast.walk(tree):
+                        if isinstance(node, _ast.Import):
+                            for alias in node.names:
+                                root = alias.name.split(".")[0]
+                                if root in _blocked_imports:
+                                    violations.append(f"AST: blocked import '{alias.name}' at line {node.lineno}")
+                        elif isinstance(node, _ast.ImportFrom):
+                            if node.module:
+                                root = node.module.split(".")[0]
+                                if root in _blocked_imports:
+                                    violations.append(f"AST: blocked import from '{node.module}' at line {node.lineno}")
+                        elif isinstance(node, _ast.Call):
+                            func = node.func
+                            if isinstance(func, _ast.Name) and func.id in _dangerous_calls:
+                                violations.append(f"AST: dangerous call '{func.id}()' at line {node.lineno}")
+                            elif isinstance(func, _ast.Attribute) and func.attr in _dangerous_attrs:
+                                violations.append(f"AST: dangerous method '.{func.attr}()' at line {node.lineno}")
+                except SyntaxError as parse_err:
+                    violations.append(f"Skill code has syntax error: {parse_err}")
+
         except Exception as e:
-            logger.error(f"Security violation check failed: {e}")
+            logger.error("Security violation check failed: %s", e)
 
         return violations
 

@@ -998,20 +998,21 @@ class PreventionFramework:
     @staticmethod
     def _check_writable_system_paths() -> bool:
         """Check that system paths are not writable."""
-        system_paths = [
-            "/usr",
-            "/bin",
-            "/sbin",
-            "/lib",
-        ]
+        # Unix system paths (configurable via GRID_SYSTEM_PATHS)
+        unix_paths = os.getenv("GRID_SYSTEM_PATHS", "/usr:/bin:/sbin:/lib").split(":")
+
+        # Windows system paths (configurable via GRID_WINDOWS_PATHS)
         if sys.platform == "win32":
-            system_paths.extend(
-                [
-                    os.environ.get("SystemRoot", "C:\\Windows"),
-                    os.environ.get("ProgramFiles", "C:\\Program Files"),
-                    os.environ.get("ProgramFiles(x86)", "C:\\Program Files (x86)"),
-                ]
-            )
+            windows_paths = os.getenv(
+                "GRID_WINDOWS_PATHS",
+                f"{os.environ.get('SystemRoot', 'C:\\Windows')}:"
+                f"{os.environ.get('ProgramFiles', 'C:\\Program Files')}:"
+                f"{os.environ.get('ProgramFiles(x86)', 'C:\\Program Files (x86)')}",
+            ).split(":")
+            system_paths = unix_paths + windows_paths
+        else:
+            system_paths = unix_paths
+
         for path in system_paths:
             if os.path.exists(path) and os.access(path, os.W_OK):
                 return False

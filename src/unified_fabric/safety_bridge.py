@@ -12,7 +12,6 @@ Goals:
 import importlib.util
 import logging
 import os
-import sys
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
@@ -27,16 +26,27 @@ def get_wellness_studio_default_path() -> str:
     if env_path:
         return env_path
 
-    possible_paths = [
-        Path.home() / "CascadeProjects" / "windsurf-project-2" / "wellness_studio",
-        Path.home() / "wellness_studio",
-        Path("/mnt/c/Users/irfan/CascadeProjects/windsurf-project-2/wellness_studio"),
-    ]
+    # Configurable search paths (colon-separated on Unix, semicolon on Windows)
+    search_paths_str = os.getenv(
+        "WELLNESS_STUDIO_SEARCH_PATHS",
+        # Default search paths with platform separators
+        os.pathsep.join(
+            [
+                str(Path.home() / "CascadeProjects" / "windsurf-project-2" / "wellness_studio"),
+                str(Path.home() / "wellness_studio"),
+                "/mnt/c/Users/irfan/CascadeProjects/windsurf-project-2/wellness_studio",
+            ]
+        ),
+    )
+
+    separator = ":" if os.name != "nt" else ";"
+    possible_paths = [Path(p.strip()) for p in search_paths_str.split(separator)]
 
     for path in possible_paths:
         if path.exists():
             return str(path)
 
+    # Return first path as default even if it doesn't exist
     return str(possible_paths[0])
 
 
@@ -265,24 +275,72 @@ class AISafetyBridge:
             logger.warning(f"Wellness safety failed, using fallback: {e}")
             return await self._safety_router.validate(content, context.domain, context.user_id)
 
-    async def _load_wellness_safety(self):
-        """Load wellness_studio safety modules"""
+    def _validate_and_load_wellness_module(self) -> Any | None:
+        """Validate and load wellness_studio module (sync, called via to_thread).
+
+        Returns loaded module or None on failure.
+        """
+        import hashlib
+
+        base_path = Path(self.config.wellness_studio_path).resolve()
+        module_file = base_path / "src" / "wellness_studio" / "security" / "ai_safety.py"
+
+        # --- Security gate 1: Path validation ---
+        if not base_path.exists():
+            logger.warning("Wellness studio path does not exist: %s", base_path)
+            return None
+
+        if not module_file.is_file():
+            logger.warning("AI safety module not found at expected path: %s", module_file)
+            return None
+
+        # Ensure resolved module path is still under the configured base
+        # (prevents traversal via symlinks or ..).
         try:
-            safety_path = Path(self.config.wellness_studio_path) / "src/wellness_studio/security"
+            module_file.resolve().relative_to(base_path)
+        except ValueError:
+            logger.error(
+                "Security: ai_safety module path escapes base directory. base=%s resolved_module=%s",
+                base_path,
+                module_file.resolve(),
+            )
+            return None
 
-            # Add to path if not present
-            if str(safety_path.parent) not in sys.path:
-                sys.path.insert(0, str(safety_path.parent))
+        # --- Security gate 2: File integrity logging (provenance) ---
+        module_hash = hashlib.sha256(module_file.read_bytes()).hexdigest()
+        logger.info(
+            "Loading wellness_studio AI safety module: %s (sha256=%s)",
+            module_file,
+            module_hash[:16],
+        )
 
-            # Try to import ai_safety module
-            spec = importlib.util.spec_from_file_location("ai_safety", safety_path / "ai_safety.py")
-            if spec and spec.loader:
-                module = importlib.util.module_from_spec(spec)
-                spec.loader.exec_module(module)
-                self._wellness_safety = module
-                logger.info("Loaded wellness_studio AI safety module")
+        # --- Security gate 3: Load without polluting sys.path ---
+        spec = importlib.util.spec_from_file_location("ai_safety", module_file)
+        if spec and spec.loader:
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+
+            # --- Security gate 4: Interface validation ---
+            if not hasattr(module, "validate_content") or not callable(getattr(module, "validate_content", None)):
+                logger.error("Security: ai_safety module missing required 'validate_content' callable")
+                return None
+
+            logger.info("Loaded wellness_studio AI safety module successfully")
+            return module
+
+        logger.warning("Could not create module spec for %s", module_file)
+        return None
+
+    async def _load_wellness_safety(self):
+        """Load wellness_studio safety modules with integrity checks."""
+        import asyncio
+
+        try:
+            loaded = await asyncio.to_thread(self._validate_and_load_wellness_module)
+            if loaded is not None:
+                self._wellness_safety = loaded
         except Exception as e:
-            logger.warning(f"Could not load wellness_studio safety: {e}")
+            logger.warning("Could not load wellness_studio safety: %s", e)
 
     def _convert_wellness_result(self, result: Any) -> SafetyReport:
         """Convert wellness_studio result to SafetyReport"""

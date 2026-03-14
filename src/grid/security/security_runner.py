@@ -694,19 +694,17 @@ class SecurityValidator:
         """Check for writable system paths."""
         writable_system = []
 
-        system_paths = [
-            Path("/usr"),
-            Path("/bin"),
-            Path("/sbin"),
-            Path("/lib"),
-        ]
+        # Unix system paths (configurable via GRID_SYSTEM_PATHS)
+        unix_paths = os.getenv("GRID_SYSTEM_PATHS", "/usr:/bin:/sbin:/lib").split(":")
+        system_paths = [Path(p) for p in unix_paths]
+
+        # Windows system paths (configurable via GRID_WINDOWS_PATHS)
         if sys.platform == "win32":
-            system_paths.extend(
-                [
-                    Path(os.environ.get("SystemRoot", "C:/Windows")),
-                    Path(os.environ.get("ProgramFiles", "C:/Program Files")),
-                ]
-            )
+            windows_paths = os.getenv(
+                "GRID_WINDOWS_PATHS",
+                f"{os.environ.get('SystemRoot', 'C:/Windows')}:{os.environ.get('ProgramFiles', 'C:/Program Files')}",
+            ).split(":")
+            system_paths.extend(Path(p) for p in windows_paths)
 
         writable_system.extend(str(path) for path in system_paths if path.exists() and os.access(path, os.W_OK))
 

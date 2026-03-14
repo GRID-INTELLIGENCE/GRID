@@ -69,6 +69,49 @@ class SkillExtractionEngine:
     def __init__(self):
         self._ast_cache: dict[str, tuple[ast.AST, str, float]] = {}
 
+    # Modules that must not appear in skill imports (security boundary).
+    _BLOCKED_IMPORTS: frozenset[str] = frozenset(
+        {
+            "os",
+            "subprocess",
+            "socket",
+            "shutil",
+            "ctypes",
+            "pickle",
+            "shelve",
+            "marshal",
+        }
+    )
+
+    def _validate_skill_ast(self, tree: ast.AST, skill_file: Path) -> list[str]:
+        """Validate skill AST for dangerous patterns before execution.
+
+        Returns list of violation descriptions (empty = safe).
+        """
+        violations: list[str] = []
+
+        for node in ast.walk(tree):
+            # Check imports against blocklist
+            if isinstance(node, ast.Import):
+                for alias in node.names:
+                    root = alias.name.split(".")[0]
+                    if root in self._BLOCKED_IMPORTS:
+                        violations.append(f"Blocked import '{alias.name}' at line {node.lineno}")
+            elif isinstance(node, ast.ImportFrom):
+                if node.module:
+                    root = node.module.split(".")[0]
+                    if root in self._BLOCKED_IMPORTS:
+                        violations.append(f"Blocked import from '{node.module}' at line {node.lineno}")
+            # Check for eval/exec/__import__ calls
+            elif isinstance(node, ast.Call):
+                func = node.func
+                if isinstance(func, ast.Name) and func.id in ("eval", "exec", "__import__", "compile"):
+                    violations.append(f"Dangerous builtin call '{func.id}()' at line {node.lineno}")
+                elif isinstance(func, ast.Attribute) and func.attr in ("system", "popen"):
+                    violations.append(f"Dangerous method call '.{func.attr}()' at line {node.lineno}")
+
+        return violations
+
     def extract_skill_metadata(self, skill_file: Path) -> ExtendedSkillMetadata:
         """Extract comprehensive metadata from a skill file.
 
@@ -80,12 +123,30 @@ class SkillExtractionEngine:
 
         Raises:
             ValueError: If no skill class found in file
+            SecurityError: If skill contains dangerous patterns
         """
         import importlib.util
+
+        # --- Security gate 1: File validation ---
+        if not skill_file.is_file():
+            raise ValueError(f"Skill file does not exist: {skill_file}")
+        if skill_file.suffix != ".py":
+            raise ValueError(f"Skill file must be a .py file: {skill_file}")
 
         # Read and cache source
         source, source_hash = self._read_source(skill_file)
         tree = self._get_ast(skill_file, source)
+
+        # --- Security gate 2: AST-based validation before exec ---
+        violations = self._validate_skill_ast(tree, skill_file)
+        if violations:
+            logger.warning(
+                "Skill %s blocked: %d security violations: %s",
+                skill_file.name,
+                len(violations),
+                violations,
+            )
+            raise ValueError(f"Skill '{skill_file.name}' contains dangerous patterns: {'; '.join(violations)}")
 
         # Load module to get skill instance
         spec = importlib.util.spec_from_file_location(f"skill_{skill_file.stem}", skill_file)

@@ -361,6 +361,7 @@ extend-ignore = [
 "__init__.py" = ["F401"]  # Public API re-exports are intentional
 "__main__.py" = ["F401"]  # Optional imports checked at runtime
 "**/demo*.py" = ["F401", "F841"]  # Demo files often have unused imports
+"demos/**/*.py" = ["S311", "B905"]  # Demo files use random for illustration
 "**/routers/*.py" = ["B904", "F401"]  # HTTP exception re-raising + optional imports
 "**/security/*.py" = ["B904"]  # Security exception re-raising pattern
 "**/db/*.py" = ["F401"]  # Optional database imports

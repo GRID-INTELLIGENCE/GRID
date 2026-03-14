@@ -8,6 +8,9 @@
 /debug_*.py
 /test_*_fix.py
 
+# Scratch artifacts
+src/tools/insite.txt
+
 # ==========================
 # ENVIRONMENT & SECRETS
 # ==========================

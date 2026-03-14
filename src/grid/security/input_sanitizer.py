@@ -151,9 +151,21 @@ class InputSanitizer:
         (r"\b(exec\s*\(|execute\s*\()\b", ThreatType.SQL_INJECTION, ThreatSeverity.HIGH),
         (r"\b(xp_cmdshell|sp_executesql)\b", ThreatType.SQL_INJECTION, ThreatSeverity.CRITICAL),
         # Command injection patterns
-        (r";\s*(rm|del|format|fdisk|mkfs)\s", ThreatType.COMMAND_INJECTION, ThreatSeverity.CRITICAL),
-        (r"\|\s*(nc|netcat|telnet|ssh|bash|sh|cmd)\s", ThreatType.COMMAND_INJECTION, ThreatSeverity.CRITICAL),
-        (r"&&\s*(wget|curl|fetch|powershell)\s", ThreatType.COMMAND_INJECTION, ThreatSeverity.HIGH),
+        (
+            r";\s*(rm|del|format|fdisk|mkfs|chmod|chown|cat|dd|mv|cp)\s",
+            ThreatType.COMMAND_INJECTION,
+            ThreatSeverity.CRITICAL,
+        ),
+        (
+            r"\|\s*(nc|netcat|telnet|ssh|bash|sh|cmd|python|perl|ruby|php|node)\s",
+            ThreatType.COMMAND_INJECTION,
+            ThreatSeverity.CRITICAL,
+        ),
+        (
+            r"&&\s*(wget|curl|fetch|powershell|rm|del|chmod|chown|bash|sh|cmd|python|perl|ruby|nc|mkfs|dd|cat)\s",
+            ThreatType.COMMAND_INJECTION,
+            ThreatSeverity.HIGH,
+        ),
         (r"\$\([^)]+\)", ThreatType.COMMAND_INJECTION, ThreatSeverity.MEDIUM),
         (r"`[^`]+`", ThreatType.COMMAND_INJECTION, ThreatSeverity.MEDIUM),
         (r">\s*/dev/null", ThreatType.COMMAND_INJECTION, ThreatSeverity.LOW),
