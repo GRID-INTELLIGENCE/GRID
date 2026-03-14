@@ -39,7 +39,9 @@ class TestValidatePathTraversal:
         manager = SecurePathManager(base_dir=tmp_path)
         result = manager.validate_path("/home/user/../../../etc/passwd")
         assert not result.is_valid
-        assert "traversal" in (result.reason or "").lower()
+        # ".." patterns can be caught by either DANGEROUS_PATTERNS or traversal component check
+        reason = (result.reason or "").lower()
+        assert "dangerous pattern" in reason or "traversal" in reason
 
     def test_blocks_relative_dotdot(self, tmp_path: Path) -> None:
         manager = SecurePathManager(base_dir=tmp_path)
