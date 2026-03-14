@@ -76,7 +76,8 @@ class SettingsBase:
             Configured settings instance
         """
         env = os.environ
-        env_str = env.get(f"{prefix}ENVIRONMENT", "development").lower()
+        env_override = overrides.pop("environment", None)
+        env_str = (env_override or env.get(f"{prefix}ENVIRONMENT", "development")).lower()
 
         return cls(
             environment=env_str,
@@ -182,6 +183,16 @@ class EnvironmentInfo:
     is_testing: bool = False
     is_staging: bool = False
 
+    @property
+    def environment(self) -> str:
+        """Backward-compatible alias for environment name."""
+        return self.name
+
+    @property
+    def is_test(self) -> bool:
+        """Backward-compatible alias for test environment flag."""
+        return self.is_testing
+
     @classmethod
     def from_string(cls, env_str: str) -> EnvironmentInfo:
         """Create from environment string."""
@@ -198,4 +209,9 @@ class EnvironmentInfo:
     def from_env(cls, var_name: str = "ENVIRONMENT") -> EnvironmentInfo:
         """Create from environment variable."""
         env_str = os.getenv(var_name, "development")
+        return cls.from_string(env_str)
+
+    @classmethod
+    def from_environment(cls, env_str: str) -> EnvironmentInfo:
+        """Backward-compatible constructor from explicit environment string."""
         return cls.from_string(env_str)

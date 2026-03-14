@@ -40,7 +40,7 @@ from .contracts import (
 )
 from .definitions import ParasiteAction, ParasiteContext, ParasiteRisk, SourceMap
 from .detector import ParasiteDetector
-from .integration import add_parasite_guard
+from .integration import add_parasite_guard, wait_for_sanitization
 from .middleware import ParasiteGuardMiddleware
 from .models import DetectionResult, ParasiteSeverity, SanitizationResult
 from .state_machine import (
@@ -68,6 +68,7 @@ __all__ = [
     # Middleware
     "ParasiteGuardMiddleware",
     "add_parasite_guard",
+    "wait_for_sanitization",
     # Models
     "DetectionResult",
     "SanitizationResult",

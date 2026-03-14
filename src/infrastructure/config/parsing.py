@@ -279,9 +279,14 @@ def parse_path(value: str | None, default: str = "", must_exist: bool = False) -
 
     path_str = value.strip()
 
-    if must_exist and not Path(path_str).exists():
-        logger.warning(f"Path '{path_str}' does not exist, using default")
-        return default
+    if must_exist:
+        try:
+            if not Path(path_str).expanduser().exists():
+                logger.warning(f"Path '{path_str}' does not exist, using default")
+                return default
+        except (OSError, ValueError):
+            logger.warning(f"Path '{path_str}' is invalid, using default")
+            return default
 
     return path_str
 

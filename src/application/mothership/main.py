@@ -570,7 +570,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
                 logger.warning(f"Error waiting for parasite sanitization: {e}")
 
         # Shutdown DRT middleware
-        if hasattr(app.state, "drt_middleware"):
+        if hasattr(app.state, "drt_middleware") and app.state.drt_middleware:
             try:
                 await app.state.drt_middleware.shutdown()  # type: ignore[reportAttributeAccessIssue]
                 logger.info("DRT middleware shut down")

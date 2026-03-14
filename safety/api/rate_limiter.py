@@ -595,3 +595,12 @@ async def get_security_status() -> dict[str, Any]:
     except Exception as e:
         logger.error(f"Failed to get security status: {e}")
         return {"error": str(e)}
+
+
+async def close_pool() -> None:
+    """Close the rate limiter connection pool."""
+    global _redis_client
+    if _redis_client:
+        await _redis_client.close()
+        _redis_client = None
+    logger.info("Rate limiter pool closed")
