@@ -9,22 +9,25 @@ Provides REST endpoints for knowledge base operations:
 - Analytics and monitoring
 """
 
+from __future__ import annotations
+
 import logging
 import os
 import time
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
-from ..core.config import KnowledgeBaseConfig
-from ..core.database import KnowledgeBaseDB
-from ..embeddings.engine import EmbeddingEngine
-from ..embeddings.llm_generator import LLMGenerator
-from ..ingestion.pipeline import DataIngestionPipeline
-from ..search.retriever import VectorRetriever
+if TYPE_CHECKING:
+    from ..core.config import KnowledgeBaseConfig
+    from ..core.database import KnowledgeBaseDB
+    from ..embeddings.engine import EmbeddingEngine
+    from ..embeddings.llm_generator import LLMGenerator
+    from ..ingestion.pipeline import DataIngestionPipeline
+    from ..search.retriever import VectorRetriever
 
 logger = logging.getLogger(__name__)
 
@@ -222,6 +225,8 @@ def create_api_app(
     async def generate_answer(request: GenerateRequest):
         """Generate answer using retrieved context."""
         try:
+            from ..embeddings.llm_generator import LLMGenerator
+
             # Search for relevant context
             context_results = retriever.search(query_text=request.query, limit=request.context_limit or 5)
 

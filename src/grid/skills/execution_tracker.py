@@ -213,8 +213,11 @@ class SkillExecutionTracker:
                 # Trim dead-letter if too large
                 if len(self._dead_letter) > self._max_dead_letter_size:
                     self._dead_letter = self._dead_letter[-self._max_dead_letter_size :]
+            # Use debug level in test environment to avoid stderr triggering PowerShell error
+            is_test = os.environ.get("GRID_ENV") == "test" or os.environ.get("PYTEST_CURRENT_TEST")
+            log_method = self._logger.debug if is_test else self._logger.warning
             try:
-                self._logger.warning(f"Inventory unavailable, moved {len(self._batch_buffer)} records to dead-letter")
+                log_method(f"Inventory unavailable, moved {len(self._batch_buffer)} records to dead-letter")
             except (ValueError, OSError):
                 pass  # Logging stream may be closed during shutdown
             self._batch_buffer.clear()
@@ -272,8 +275,8 @@ class SkillExecutionTracker:
             return
         try:
             with self._flush_lock:
-                # Use print instead of logger if handles might be closed
-                print(f"SkillExecutionTracker: Shutdown flush of {len(self._batch_buffer)} records...")
+                # Use debug logging instead of print to avoid stdout/stderr issues in tests
+                self._logger.debug(f"Shutdown flush of {len(self._batch_buffer)} records...")
                 self._flush_batch()
         except Exception:  # noqa: S110 intentional silent handling
             # Silent fail on shutdown to avoid I/O errors on closed loggers

@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import os
 import sys
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
@@ -148,8 +149,11 @@ def validate_db_path(db_path: str) -> str:
     """Validate database path is within allowed bounds."""
     path = Path(db_path).resolve()
 
-    # Restrict to known safe directories
-    allowed_dirs = [Path.cwd(), Path.home() / ".grid", Path("/tmp/grid"), Path("E:/grid")]  # noqa: S108 temp file path is intentional
+    # Restrict to known safe directories (configurable via GRID_DASHBOARD_ALLOWED_DIRS)
+    default_dirs = [str(Path.cwd()), str(Path.home() / ".grid"), "/tmp/grid", "E:/grid"]  # noqa: S108 temp directory is intentional
+    allowed_dirs_str = os.getenv("GRID_DASHBOARD_ALLOWED_DIRS", os.pathsep.join(default_dirs))
+    separator = ":" if os.name != "nt" else ";"
+    allowed_dirs = [Path(p.strip()) for p in allowed_dirs_str.split(separator)]  # noqa: S108 temp file path is intentional
 
     if not any(path.is_relative_to(allowed_dir.resolve()) for allowed_dir in allowed_dirs):
         raise ValueError(f"Database path not allowed: {db_path}")

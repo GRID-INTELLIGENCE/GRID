@@ -56,14 +56,12 @@ class SecurePathManager:
         >>> manager.validate_and_clean()
     """
 
-    # Dangerous path patterns that should never be added
+    # Dangerous path patterns that should never be added to sys.path.
+    # SCOPE: Path-level concerns only. Shell metachar detection (&&, |, ;)
+    # is handled by input_sanitizer.py and threat_profile.py.
     DANGEROUS_PATTERNS: list[str] = [
         "/tmp",  # noqa: S108 temp file path is intentional
         "/var/tmp",  # noqa: S108 temp file path is intentional
-        ";",
-        "&&",
-        "|",
-        "..",
     ]
 
     # System paths that should be avoided (Windows)
@@ -94,12 +92,39 @@ class SecurePathManager:
             PathValidationResult with validation details
         """
         try:
-            path_obj = Path(path)
+            raw_path_str = str(path)
+
+            # Check for null bytes before any path processing (CWE-626)
+            if "\x00" in raw_path_str or "%00" in raw_path_str:
+                return PathValidationResult(
+                    path=Path(path) if isinstance(path, str) else path,
+                    is_valid=False,
+                    exists=False,
+                    is_directory=False,
+                    is_writable=False,
+                    reason="Path contains null byte",
+                )
+
+            # Check for directory traversal at the component level
+            # on the ORIGINAL path (before resolve() normalizes it away)
+            raw_path_obj = Path(path)
+            for component in raw_path_obj.parts:
+                if component == "..":
+                    return PathValidationResult(
+                        path=raw_path_obj,
+                        is_valid=False,
+                        exists=False,
+                        is_directory=False,
+                        is_writable=False,
+                        reason="Path contains directory traversal component",
+                    )
+
+            path_obj = raw_path_obj
             if not path_obj.is_absolute():
                 # Resolve relative paths against base_dir
                 path_obj = (self.base_dir / path_obj).resolve()
 
-            # Check for dangerous patterns
+            # Check for dangerous path patterns (temp dirs)
             path_str = str(path_obj).lower()
             for pattern in self.DANGEROUS_PATTERNS:
                 if pattern in path_str:

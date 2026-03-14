@@ -2,6 +2,7 @@
 
 import json
 import logging
+import os
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -62,12 +63,16 @@ class ContextStorage:
         resolved_root = self.context_root.resolve()
 
         # Restrict to known safe directories
-        allowed_roots = [
-            Path.home() / ".grid" / "context",
-            Path("E:/user_context"),
-            Path("/var/grid/context"),
-            Path("/tmp/grid/context"),  # noqa: S108 temp file path is intentional
+        # Configurable context storage roots (GRID_CONTEXT_ALLOWED_ROOTS)
+        default_roots = [
+            str(Path.home() / ".grid" / "context"),
+            "E:/user_context",
+            "/var/grid/context",
+            "/tmp/grid/context",  # noqa: S108 temp file path is intentional
         ]
+        allowed_roots_str = os.getenv("GRID_CONTEXT_ALLOWED_ROOTS", os.pathsep.join(default_roots))
+        separator = ":" if os.name != "nt" else ";"
+        allowed_roots = [Path(p.strip()) for p in allowed_roots_str.split(separator)]
 
         if not any(resolved_root.is_relative_to(allowed_root.resolve()) for allowed_root in allowed_roots):
             logger.warning(f"Context root {resolved_root} may be unsafe")
