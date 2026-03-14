@@ -2,13 +2,14 @@
 	"folders": [
 		{
 			"path": ".",
-			"name": "GRID-CORE"
+			"name": "GRID"
 		}
 	],
 	"settings": {
+		// ── Python ──────────────────────────────────────────────
 		"python.defaultInterpreterPath": ".venv/Scripts/python.exe",
-		"python.languageServer": "Jedi",
-		"python.analysis.typeCheckingMode": "basic",
+		"python.languageServer": "Pylance",
+		"python.analysis.typeCheckingMode": "strict",
 		"python.analysis.extraPaths": [
 			"${workspaceFolder}/src",
 			"${workspaceFolder}/safety",
@@ -19,8 +20,9 @@
 		"python.testing.pytestArgs": [
 			"tests"
 		],
+		// ── Editor ──────────────────────────────────────────────
 		"[python]": {
-			"editor.defaultFormatter": "codeium.windsurf",
+			"editor.defaultFormatter": "charliermarsh.ruff",
 			"editor.formatOnSave": true,
 			"editor.rulers": [
 				120
@@ -35,7 +37,10 @@
 			"source.fixAll.ruff": "explicit",
 			"source.organizeImports.ruff": "explicit"
 		},
+		// ── Ruff ────────────────────────────────────────────────
+		"ruff.nativeServer": "on",
 		"ruff.importStrategy": "fromEnvironment",
+		// ── Files ───────────────────────────────────────────────
 		"files.eol": "\n",
 		"files.trimTrailingWhitespace": true,
 		"files.insertFinalNewline": true,
@@ -44,16 +49,20 @@
 			"**/.venv": true,
 			"**/__pycache__": true,
 			"**/.pytest_cache": true,
+			"**/.pytest_tmp_root": true,
 			"**/.mypy_cache": true,
 			"**/.ruff_cache": true,
+			"**/.uv-cache": true,
+			"**/.test_tmp": true,
+			"**/.rag_db": true,
+			"**/.rag_logs": true,
+			"**/.test_rag_db": true,
+			"**/.test_eval_rag_db": true,
 			"**/node_modules": true,
 			"**/dist": true,
 			"**/build": true,
 			"**/archive": true,
-			"**/.rag_db": true,
-			"**/.rag_logs": true,
-			"**/.test_rag_db": true,
-			"**/.test_eval_rag_db": true
+			"**/logs": true
 		},
 		"search.exclude": {
 			"**/.venv": true,
@@ -61,11 +70,13 @@
 			"**/.pytest_cache": true,
 			"**/.mypy_cache": true,
 			"**/.ruff_cache": true,
+			"**/.uv-cache": true,
 			"**/node_modules": true,
 			"**/dist": true,
 			"**/build": true,
 			"**/archive": true,
-			"**/uv.lock": true
+			"**/uv.lock": true,
+			"**/logs": true
 		},
 		"files.watcherExclude": {
 			"**/.venv/**": true,
@@ -73,19 +84,19 @@
 			"**/.pytest_cache/**": true,
 			"**/.mypy_cache/**": true,
 			"**/.ruff_cache/**": true,
+			"**/.uv-cache/**": true,
 			"**/node_modules/**": true,
 			"**/dist/**": true,
 			"**/build/**": true,
-			"**/archive/**": true
+			"**/archive/**": true,
+			"**/logs/**": true
 		},
-		"terminal.integrated.shellIntegration.enabled": false,
-		"terminal.integrated.shellIntegration.decorationsEnabled": "never",
+		// ── Terminal ────────────────────────────────────────────
 		"terminal.integrated.env.windows": {
 			"PROJECT_ROOT": "${workspaceFolder}",
-			"PYTHONPATH": "${workspaceFolder}/src:${workspaceFolder}/safety:${workspaceFolder}/security:${workspaceFolder}/boundaries",
+			"PYTHONPATH": "${workspaceFolder}/src;${workspaceFolder}/safety;${workspaceFolder}/security;${workspaceFolder}/boundaries",
 			"GRID_HOME": "${workspaceFolder}/src/grid",
 			"COGNITIVE_HOME": "${workspaceFolder}/src/cognitive",
-			"RESONANCE_HOME": "${workspaceFolder}/src/application/resonance",
 			"ENV": "development",
 			"PYTHON_VERSION": "3.13"
 		},
@@ -105,38 +116,7 @@
 			}
 		},
 		"terminal.integrated.defaultProfile.windows": "PowerShell",
-		"workbench.editor.alwaysShowEditorActions": true,
-		"workbench.editor.autoLockGroups": {
-			"default": true,
-			"workbench.editorinputs.searchEditorInput": true,
-			"workbench.input.interactive": true,
-			"jsProfileVisualizer.heapsnapshot.table": true,
-			"jsProfileVisualizer.heapprofile.table": true,
-			"jsProfileVisualizer.cpuprofile.table": true,
-			"vscode.videoPreview": true,
-			"vscode.audioPreview": true,
-			"imagePreview.previewEditor": true,
-			"workbench.editors.gettingStartedInput": true,
-			"repl": true,
-			"jupyter-notebook": true,
-			"notebookOutputEditor": true
-		},
-		"workbench.editor.closeOnFileDelete": true,
-		"workbench.editor.centeredLayoutFixedWidth": true,
-		"chat.agent.maxRequests": 55,
-		"chat.customAgentInSubagent.enabled": true,
-		"chat.editor.wordWrap": "on",
-		"chat.edits2.enabled": true,
-		"chat.mcp.discovery.enabled": {
-			"cursor-workspace": true,
-			"cursor-global": true,
-			"windsurf": true,
-			"claude-desktop": true
-		},
-		"chat.renderRelatedFiles": true,
-		"chat.tools.terminal.autoReplyToPrompts": true,
-		"chat.useNestedAgentsMdFiles": true,
-		"inlineChat.enableV2": true,
-		"inlineChat.notebookAgent": true
+		// ── Workbench ───────────────────────────────────────────
+		"workbench.editor.closeOnFileDelete": true
 	}
 }

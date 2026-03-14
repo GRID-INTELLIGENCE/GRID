@@ -475,11 +475,11 @@ dev/logs/
 dev/cache/
 dev/*.json
 
-# Reports
-reports/
-reports/integration/*.txt
-reports/temp/
-reports/cache/
+# Reports (root-level only; docs/reports/ is tracked)
+/reports/
+/reports/integration/*.txt
+/reports/temp/
+/reports/cache/
 
 # Extended documentation
 docs-ext/temp/
@@ -738,3 +738,5 @@ Screenshot*.jpg
 .apiguard_backup/
 scripts/baseline.txt
 scripts/git-workflow/
+resonance_telemetry_events.jsonl
+*.telemetry.jsonl
