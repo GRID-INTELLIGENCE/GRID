@@ -132,7 +132,7 @@ class TestValidatePathAcceptance:
         manager = SecurePathManager(base_dir=tmp_path)
         result = manager.validate_path("subdir")
         assert result.is_valid
-        assert result.path == target
+        assert result.path.resolve() == target.resolve()
 
     def test_nonexistent_path_rejected(self, tmp_path: Path) -> None:
         manager = SecurePathManager(base_dir=tmp_path)
