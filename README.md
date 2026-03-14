@@ -120,7 +120,7 @@ $ grid analyze src/
 
 | 🎯 Metric | 📈 Value | 🎯 Metric | 📈 Value |
 |-----------|----------|-----------|----------|
-| **Python Version** | 3.13+ | **Tests Passing** | 1130+ ✅ |
+| **Python Version** | 3.13+ | **Tests Passing** | 2953+ ✅ |
 | **Code Coverage** | ≥75% | **Architecture** | DDD + Event-Driven |
 | **Lint Errors** | 0 (ruff clean) | **RAG Precision** | +33-40% |
 | **Security** | Production-Ready | **Package Manager** | UV |
@@ -131,9 +131,9 @@ $ grid analyze src/
 
 ### 🚀 Quick Stats
 
-![Lines of Code](https://img.shields.io/badge/Lines%20of%20Code-190k%2B-blue?style=flat-square)
-![Files](https://img.shields.io/badge/Files-800%2B-green?style=flat-square)
-![Tests](https://img.shields.io/badge/Tests-1130%2B-success?style=flat-square)
+![Lines of Code](https://img.shields.io/badge/Lines%20of%20Code-310k%2B-blue?style=flat-square)
+![Files](https://img.shields.io/badge/Files-828%2B-green?style=flat-square)
+![Tests](https://img.shields.io/badge/Tests-2953%2B-success?style=flat-square)
 ![Lint](https://img.shields.io/badge/Lint-0%20errors-brightgreen?style=flat-square)
 
 </div>
@@ -163,6 +163,7 @@ GRID (Geometric Resonance Intelligence Driver) is a comprehensive framework for 
 - ✅ **Pathways Adapter** — User-ID anti-spoofing and tracing for Unified Fabric
 - ✅ **Test Isolation Hardening** — Eliminated `importlib.reload()` in tests; reset global singletons to prevent cross-test contamination
 - ✅ **Cross-Platform Security** — Windows backslash normalization and absolute path detection on Linux for path traversal protection
+- ✅ **CI/CD Hygiene** — Fixed git hygiene blockers, removed hardcoded paths, cleaned ephemeral files, resolved all lint issues
 
 ### v2.6.x — Mycelium Frontend & Packaging (February 2026)
 
@@ -267,7 +268,7 @@ Nov 2025 → First commit. Blank templates. Beginning.
 Dec 2025 → Architecture cleanup. Security foundation. Domain-driven design.
 Jan 2026 → Cognitive layer. RAG optimization (+33-40% precision). Production hardening.
 Feb 2026 → 540+ files. Environmental Intelligence. Mycelium Frontend. Version 2.6+. Production-ready.
-Mar 2026 → 800+ source files. 1130+ tests passing. Search guardrails. Transition gate. CI audit gates. Version 2.7.0. ✨
+Mar 2026 → 828 source files. 2953 tests passing. Search guardrails. Transition gate. CI audit gates. CI/CD hygiene fixes. Version 2.7.0. ✨
 ```
 
 <div align="center">
@@ -819,7 +820,7 @@ Optimized pre-push hook ensures:
 
 ### Test Coverage
 
-- **1130+ tests passing** in CI (unit + security + API), 3200+ total collected across all test directories
+- **2953+ tests passing** in CI (unit + security + API), 2959 total collected across all test directories
 - **100% pass rate** for core modules, Unified Fabric, and search guardrails
 - **Comprehensive coverage** for core intelligence, agentic system, DDD patterns, and transition gate
 - **CI/CD pipeline** with automated validation, git hygiene checks, and `assert_no_debug` production gate
