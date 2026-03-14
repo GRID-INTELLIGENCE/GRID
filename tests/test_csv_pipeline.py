@@ -183,7 +183,7 @@ def test_run_pipeline_file_not_found_error(tmp_path: Path, caplog):
     with pytest.raises(SystemExit):
         run_pipeline(str(non_existent))
 
-    assert "Pipeline error: CSV file not found" in caplog.text
+    assert "Pipeline failed: CSV file not found" in caplog.text
 
 
 def test_print_results(capsys):

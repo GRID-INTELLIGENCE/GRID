@@ -568,6 +568,17 @@ _public_rate_limit_registry: Any = None
 # Lightweight fallback for when apiguard is not installed
 _fallback_counters: dict[str, int] = {}
 
+# Alias exposed for test isolation (clear between tests)
+_rate_limit_store = _fallback_counters
+
+
+def reset_rate_limit_state() -> None:
+    """Reset all rate-limit state. Use in test fixtures for isolation."""
+    global _authenticated_rate_limit_registry, _public_rate_limit_registry
+    _fallback_counters.clear()
+    _authenticated_rate_limit_registry = None
+    _public_rate_limit_registry = None
+
 
 def _get_rate_limit_registry(settings: MothershipSettings, *, public: bool) -> Any:
     global _authenticated_rate_limit_registry, _public_rate_limit_registry
@@ -716,4 +727,6 @@ __all__ = [
     "check_public_rate_limit",
     "RateLimited",
     "PublicRateLimited",
+    "_rate_limit_store",
+    "reset_rate_limit_state",
 ]

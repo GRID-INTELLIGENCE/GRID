@@ -34,6 +34,10 @@ def _prime_test_environment() -> None:
     os.environ.setdefault("GRID_SANDBOX_TMPDIR", os.path.join(_PROJECT_ROOT, ".test_tmp", "sandbox"))
     os.makedirs(os.environ["GRID_SANDBOX_TMPDIR"], exist_ok=True)
     os.environ["RAG_VECTOR_STORE_PROVIDER"] = os.environ.get("RAG_VECTOR_STORE_PROVIDER", "in_memory")
+    os.environ["RAG_EMBEDDING_PROVIDER"] = os.environ.get("RAG_EMBEDDING_PROVIDER", "simple")
+    os.environ["RAG_USE_RERANKER"] = "false"
+    os.environ["RAG_USE_HYBRID"] = "false"
+    os.environ["RAG_USE_INTELLIGENT_RAG"] = "false"
     os.environ["SAFETY_BYPASS_REDIS"] = "true"
     # CRIT-1: Allow dev-test-token in tests only (never in production)
     os.environ.setdefault("ENABLE_DEV_TOKEN", "1")
@@ -447,3 +451,100 @@ def api_server_available():
 def resonance_server_available():
     """Session-scoped check for Resonance service on port 8080."""
     return _check_api_server_available(8080)
+
+
+# ---------------------------------------------------------------------------
+# Mock Service Fixtures for External Dependencies
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture(scope="session")
+def mock_ollama_client():
+    """Mock Ollama client for testing."""
+    from unittest.mock import MagicMock, Mock
+
+    mock_client = Mock()
+
+    # Mock embeddings response
+    def mock_embeddings(model, prompt):
+        return {"embedding": [0.1] * 768}  # Return 768-dim vector
+
+    # Mock list models response
+    def mock_list():
+        return {"models": [{"name": "nomic-embed-text:latest"}]}
+
+    # Mock generate response
+    def mock_generate(model, prompt, **kwargs):
+        return {"response": f"Mock response for: {prompt[:50]}..."}
+
+    mock_client.embeddings = mock_embeddings
+    mock_client.list = mock_list
+    mock_client.generate = mock_generate
+
+    return mock_client
+
+
+@pytest.fixture(scope="session")
+def mock_chromadb_client():
+    """Mock ChromaDB client for testing."""
+    from unittest.mock import MagicMock, Mock
+
+    # Mock collection
+    mock_collection = Mock()
+    mock_collection.count.return_value = 0
+    mock_collection.add.return_value = None
+    mock_collection.get.return_value = {"ids": [], "documents": [], "metadatas": []}
+    mock_collection.delete.return_value = None
+    mock_collection.update.return_value = None
+
+    def mock_query(query_embeddings, n_results=10, **kwargs):
+        # Return mock query results with correct list-of-lists shape
+        return {
+            "ids": [["doc1", "doc2"][:n_results]],
+            "documents": [["Document 1", "Document 2"][:n_results]],
+            "metadatas": [[{"source": "test1"}, {"source": "test2"}][:n_results]],
+            "distances": [[0.1, 0.2][:n_results]],
+        }
+
+    mock_collection.query = mock_query
+
+    # Mock client
+    mock_client = Mock()
+    mock_client.get_or_create_collection.return_value = mock_collection
+    mock_client.delete_collection.return_value = None
+    mock_client.list_collections.return_value = []
+
+    return mock_client, mock_collection
+
+
+@pytest.fixture(scope="session")
+def mock_redis_client():
+    """Mock Redis client for testing."""
+    from unittest.mock import MagicMock, Mock
+
+    mock_client = Mock()
+
+    # Mock basic operations
+    mock_client.get.return_value = None
+    mock_client.set.return_value = True
+    mock_client.delete.return_value = 1
+    mock_client.exists.return_value = 0
+    mock_client.expire.return_value = True
+
+    # Mock pub/sub
+    mock_pubsub = Mock()
+    mock_pubsub.subscribe.return_value = None
+    mock_pubsub.unsubscribe.return_value = None
+    mock_pubsub.listen.return_value = []  # Empty iterator
+    mock_client.pubsub.return_value = mock_pubsub
+
+    # Mock pipeline
+    mock_pipeline = Mock()
+    mock_pipeline.execute.return_value = []
+    mock_client.pipeline.return_value = mock_pipeline
+
+    # Mock connection
+    mock_client.ping.return_value = True
+    mock_client.close.return_value = None
+
+    return mock_client

@@ -89,7 +89,7 @@ class TestContentSanitization:
         report = guard.validate_input("Hello\x00World")
         assert report.is_safe
         assert "\x00" not in (report.sanitized_text or "")
-        assert "Control characters removed" in report.reasons[0]
+        assert "Control characters detected" in report.reasons[0]
 
     def test_control_characters_removed(self) -> None:
         guard = SafetyGuard()

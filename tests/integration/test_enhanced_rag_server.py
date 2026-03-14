@@ -173,13 +173,13 @@ class TestEnhancedRAGMCPServerWithDeps:
 
     @pytest.fixture
     def server(self):
-        """Create real Enhanced RAG MCP Server."""
+        """Create real Enhanced RAG MCP Server, skip if dependencies unavailable."""
         if not HAS_ENHANCED_RAG_SERVER:
             pytest.skip("Enhanced RAG Server not available")
         try:
             return EnhancedRAGMCPServer()
         except (RuntimeError, Exception) as e:
-            pytest.skip(f"Enhanced RAG Server unavailable (Ollama might be down): {e}")
+            pytest.skip(f"Enhanced RAG Server unavailable: {e}")
 
     @requires_mcp_server
     def test_server_instantiation(self, server):

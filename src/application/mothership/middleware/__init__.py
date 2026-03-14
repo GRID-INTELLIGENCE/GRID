@@ -579,20 +579,15 @@ def setup_middleware(app: FastAPI, settings: Any) -> None:
 
     # Rate limiting (if enabled)
     if getattr(settings, "security", None) and settings.security.rate_limit_enabled:
-        # Use Redis-backed rate limiting if Redis is enabled, otherwise use in-memory
-        if getattr(settings, "database", None) and settings.database.redis_enabled:
-            from .rate_limit_redis import RedisRateLimitMiddleware
+        from .apiguard_adapter import APIGuardRateLimitMiddleware
 
-            app.add_middleware(
-                RedisRateLimitMiddleware,
-                requests_per_minute=settings.security.rate_limit_requests,
-                redis_url=settings.database.redis_url,
-            )
-        else:
-            app.add_middleware(
-                RateLimitMiddleware,
-                requests_per_minute=settings.security.rate_limit_requests,
-            )
+        app.add_middleware(
+            APIGuardRateLimitMiddleware,
+            default_capacity=settings.security.rate_limit_requests,
+            default_refill_rate=max(settings.security.rate_limit_requests / 60.0, 1.0 / 60.0),
+            redis_backed=getattr(settings, "database", None) is not None and settings.database.redis_enabled,
+            per_user=True,
+        )
 
 
 # Lazy imports for optional middleware

@@ -120,32 +120,41 @@ class TokenManager:
         return encoded_jwt
 
     async def verify_token(self, token: str) -> dict[str, Any]:
-        """Verify token signature and check denylist."""
-        # Check Denylist first
-        is_revoked = await self.cache.get(f"denylist:{token}")
-        if is_revoked:
-            raise ValueError("Token has been revoked")
-
+        """Verify token signature and check denylist (keyed by JTI, not raw token — CRIT-3)."""
         try:
             payload = _decode_jwt(token, self.secret_key, self.algorithm)
-            return payload
         except JWTError as e:
             raise ValueError(f"Could not validate credentials: {e}")
 
+        # CRIT-3: denylist lookup by JTI, never raw token
+        jti = payload.get("jti")
+        if jti:
+            is_revoked = await self.cache.get(f"denylist:{jti}")
+            if is_revoked:
+                raise ValueError("Token has been revoked")
+
+        return payload
+
     async def revoke_token(self, token: str) -> None:
-        """Revoke a token by adding it to the denylist until its expiry."""
+        """Revoke a token by adding its JTI to the denylist until expiry (CRIT-3)."""
         try:
-            # Decode without verifying signature first to get expiry,
-            # or just verify logic. Verification is safer.
             payload = _decode_jwt(token, self.secret_key, self.algorithm, verify_exp=False)
+            jti = payload.get("jti")
+            if not jti:
+                logger.warning("Cannot revoke token without JTI claim")
+                return
             exp = payload.get("exp")
             if exp:
                 now = datetime.now(UTC).timestamp()
                 ttl = int(exp - now)
                 if ttl > 0:
-                    await self.cache.set(f"denylist:{token}", "revoked", ttl=ttl)
-                    logger.info(f"Token revoked. Denylisted for {ttl}s")
+                    await self.cache.set(f"denylist:{jti}", "revoked", ttl=ttl)
+                    logger.info("Token revoked (jti=%s). Denylisted for %ds", jti, ttl)
                 else:
                     logger.info("Token already expired, no need to denylist.")
+            else:
+                # No expiry — denylist with a long TTL as a safeguard
+                await self.cache.set(f"denylist:{jti}", "revoked", ttl=86400)
+                logger.info("Token revoked (jti=%s). No exp claim; denylisted for 24h.", jti)
         except JWTError:
             logger.warning("Attempted to revoke invalid token")

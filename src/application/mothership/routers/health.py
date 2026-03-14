@@ -19,6 +19,7 @@ from fastapi import APIRouter, Depends, Response, status
 from pydantic import BaseModel, Field
 
 from application.mothership.dependencies import Cockpit, Settings
+
 from ..schemas import (
     ApiResponse,
     HealthCheckResponse,

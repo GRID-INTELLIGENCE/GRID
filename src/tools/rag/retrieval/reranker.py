@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 
 import httpx
 
-from tools.rag.resilience import create_async_resilient_client, get_circuit_breaker
+from tools.rag.resilience import get_circuit_breaker
 
 logger = logging.getLogger(__name__)
 

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-GRID (Geometric Resonance Intelligence Driver) is a local-first AI framework built on Python 3.13, FastAPI, SQLAlchemy, and ChromaDB+Ollama for RAG. It uses domain-driven design with event-driven agentic workflows, a 9-pattern cognitive intelligence engine, and layered security/safety enforcement.
+GRID (Geometric Resonance Intelligence Driver) is a local-first AI framework built on Python 3.13, FastAPI, SQLAlchemy, and ChromaDB+Ollama for RAG. It uses domain-driven design with event-driven agentic workflows, a 9-pattern cognitive intelligence engine, and layered security/safety enforcement. Version 2.7.0, MIT license, repo at `github.com/GRID-INTELLIGENCE/GRID`.
 
 ## Commands
 
@@ -25,6 +25,12 @@ uv run pytest tests/unit/test_example.py::test_function_name -v
 uv run pytest -m unit -q --tb=short
 uv run pytest -m safety -q --tb=short
 uv run pytest -m security -q --tb=short
+
+# Safety module tests (separate test root)
+uv run pytest safety/tests -q --tb=short
+
+# Boundary module tests
+uv run pytest boundaries/tests -q --tb=short
 
 # Lint
 uv run ruff check .
@@ -77,36 +83,68 @@ CLI (grid/__main__)  →  API Gateway (port 8000)  →  Mothership API (port 808
 
 | Package | Role |
 |---------|------|
-| `grid/` | Core intelligence: state machine (essence), 9 cognition patterns, awareness, evolution, quantum architecture, multi-tenant organization |
+| `grid/` | Core intelligence: state machine (essence), 9 cognition patterns, awareness, evolution, quantum architecture, multi-tenant organization, auth, skills |
 | `application/` | Mothership Cockpit FastAPI app: versioned routers (v1, v2), session management, alerts, component registry |
-| `cognitive/` | Cognitive processing: interaction tracking, temporal reasoning, flow management, resonance bridging |
+| `cognitive/` | Cognitive processing: interaction tracking, temporal reasoning, flow management, resonance bridging, 9 patterns (Flow, Spatial, Rhythm, Color, Repetition, Deviation, Cause, Time, Combination) |
 | `search/` | RAG-augmented search: query parsing, retrieval, ranking, indexing, chunking, embedding, safety guardrails |
 | `mycelium/` | Knowledge federation: persona system, lens discovery, multi-perspective synthesis |
-| `unified_fabric/` | Cross-project routing: domain router, Coinbase/Pathways adapters, AI safety bridge, audit |
+| `unified_fabric/` | Cross-project routing: domain router (SAFETY, GRID, COINBASE, PATHWAYS), async pub/sub with Redis, AI safety bridge |
 | `tools/` | CLI utilities: RAG tools, crypto, forensics, dashboards, skill store |
-| `infrastructure/` | API gateway, event bus, service mesh, parasite guard, logging/metrics |
+| `infrastructure/` | API gateway (circuit breaker, dynamic routing), event bus (Redis pub/sub + in-memory fallback), service mesh, parasite guard, logging/metrics |
 | `vection/` | Distributed worker protocols and concurrency coordination |
 
 ### Peer Security Modules (outside `src/`)
 
 | Module | Purpose |
 |--------|---------|
-| `safety/` | AI safety: content detectors, escalation, guardian engine, audit logging, observability |
-| `security/` | Network monitoring, forensic analysis, incident response, hardening |
-| `boundaries/` | Boundary contracts (ownership transfer), overwatch, refusal logic, transition gate |
+| `safety/` | AI safety: GUARDIAN rule engine (Aho-Corasick + regex), content detectors (pre/post-check), escalation, PII privacy engine, audit logging, observability, canary tokens |
+| `security/` | Network interceptor (deny-by-default, monkey-patches network libs), forensic analysis, incident response |
+| `boundaries/` | Boundary contracts (consent, refusal rights), overwatch, transition gate (9-step sealed-envelope handshake with HMAC-SHA256, nonce replay prevention) |
 
 These three modules enforce security invariants independently. Never weaken validation, add bypass paths, or remove existing checks. See `.claude/rules/safety.md` and `.claude/rules/behavioral-shield.md`.
 
+### Additional Top-Level Modules
+
+| Module | Purpose |
+|--------|---------|
+| `knowledge_base/` | Databricks SQL-backed RAG system (separate from `src/search/` local RAG). Has its own embeddings, ingestion pipeline, search retriever, and API routes |
+| `frontend/` | React 19 + TypeScript + Electron desktop app. Dev: `npm run dev`, Lint: `npm run lint`, Test: `npm test` |
+
 ### Key Entry Points
 
-- **CLI**: `src/grid/__main__.py` — commands: `serve`, `analyze`, `chat`, `skills`, `process`
+- **CLI**: `src/grid/__main__.py` — commands: `serve`, `analyze`, `chat`, `skills`, `process`, `run`
 - **Mothership API**: `src/application/mothership/main.py` — port 8080
-- **API Gateway**: `src/infrastructure/api_gateway/` → `src/main.py` — port 8000
+- **API Gateway**: `src/infrastructure/api_gateway/gateway.py` → `src/main.py` — port 8000
 - **RAG Chat**: `grid chat` or `grid run rag` — uses Ollama (default model: ministral-3:3b)
+- **Boundary Toolkit CLI**: `boundaries/toolkit/__main__.py` — commands: `seal`, `verify`, `test`, `demo`, `report`
+
+### Mothership Middleware Chain (order matters)
+
+```
+Request → RequestID → RequestLogging → Timing → ErrorHandling → SecurityHeaders
+       → UsageTracking → RateLimit → SafetyMiddleware → DRTMiddleware
+       → AccountabilityContract → ParasiteGuard → Router
+```
+
+SafetyMiddleware is mandatory in production. ParasiteGuard detects malicious code injection. DRTMiddleware monitors behavioral anomalies.
+
+### Dependency Injection (Mothership)
+
+Core dependencies in `src/application/mothership/dependencies.py`:
+- `get_settings()` → `MothershipSettings` (env-based config: dev/staging/prod/test)
+- `get_store()` → `StateStore` (persistence)
+- `get_uow()` → `DbUnitOfWork` (database transactions)
+- `get_cockpit_service()` → `CockpitService` (facade over SessionService, OperationService, ComponentService, AlertService)
+
+### Dual Event Bus Architecture
+
+Two event systems exist for different scopes:
+1. **Infrastructure EventBus** (`src/infrastructure/event_bus/event_system.py`): Priority-based events with correlation/causation tracking. Redis pub/sub with in-memory fallback.
+2. **Unified Fabric DynamicEventBus** (`src/unified_fabric/__init__.py`): Domain-aware async routing across SAFETY, GRID, COINBASE, PATHWAYS domains.
 
 ### Test Structure
 
-Tests live in `tests/` with subdirectories per concern: `unit/`, `integration/`, `e2e/`, `api/`, `security/`, `safety/`, `agentic/`, `auth/`, `billing/`, `cognitive/`, `mycelium/`, `resilience/`, `chaos/`, `load/`, `performance/`, `unified_fabric/`. Safety module has its own tests at `safety/tests/`. Boundary tests at `boundaries/tests/`.
+Tests live in `tests/` with 37 subdirectories per concern: `unit/`, `integration/`, `e2e/`, `api/`, `security/`, `safety/`, `agentic/`, `auth/`, `billing/`, `cognitive/`, `mycelium/`, `resilience/`, `chaos/`, `load/`, `performance/`, `unified_fabric/`, and more. Safety module has its own tests at `safety/tests/`. Boundary tests at `boundaries/tests/`.
 
 ### Pytest Configuration
 
@@ -115,6 +153,18 @@ Tests live in `tests/` with subdirectories per concern: `unit/`, `integration/`,
 - Markers: `unit`, `integration`, `safety`, `security`, `api`, `critical`, `slow`, `flaky`, `redteam`, `smoke`
 - `--maxfail=5` and `-m "not scratch and not flaky and not slow"` by default
 - `pythonpath = ["src"]` — imports resolve from `src/`
+- Coverage minimum: 75% (`--cov-fail-under=75`)
+- Performance budget: full suite < 30 seconds; profile with `--durations=10`
+
+### Test Environment
+
+`tests/conftest.py` sets critical env vars for isolation:
+- `MOTHERSHIP_ENVIRONMENT=test`, `MOTHERSHIP_DATABASE_URL=sqlite:///:memory:`
+- `RAG_VECTOR_STORE_PROVIDER=in_memory`, `RAG_EMBEDDING_PROVIDER=simple`
+- `SAFETY_BYPASS_REDIS=true`, `MOTHERSHIP_REDIS_ENABLED=false`
+- `ENABLE_DEV_TOKEN=1` (enables dev-test-token auth in test API client)
+- Auto-marker system maps test directory names to pytest markers automatically
+- `reset_services()` autouse fixture ensures per-test singleton isolation (see `tests/utils/reset_helpers.py`)
 
 ## Conventions
 
@@ -130,6 +180,15 @@ Tests live in `tests/` with subdirectories per concern: `unit/`, `integration/`,
 - **Local-first AI**: Ollama + ChromaDB by default — never suggest external APIs unless explicitly requested
 - **Prohibited**: `eval()`, `exec()`, `pickle` — use AST-based evaluation only
 - **Imports**: `conftest.py` ensures `src/` is first on `sys.path` so `grid.*` resolves to `src/grid/`
+- **Layer boundaries**: Core has no dependencies on upper layers. Services depend on core but not application. API layer orchestrates services, never accesses DB directly.
+- **Line endings**: LF (`\n`), not CRLF. See `.editorconfig`.
+
+## CI Pipeline
+
+GitHub Actions at `.github/workflows/ci.yml` runs on push/PR to main:
+- **secrets-scan** → **lint** (ruff) → **type-check** (mypy) → **test-unit** → **test-integration** → **test-security** → **test-api** → **build-wheel**
+- Environment: ubuntu-latest, Python 3.13, `uv` for package management
+- Concurrency: cancel-in-progress grouped by workflow ref
 
 ## Decision Logging
 

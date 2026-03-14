@@ -605,6 +605,17 @@ class TestDRTAPIIntegration:
 
         app.include_router(router)
 
+        # Override AdminAuth so protected endpoints don't return 401 in tests
+        from application.mothership.dependencies import require_admin
+
+        app.dependency_overrides[require_admin] = lambda: {
+            "authenticated": True,
+            "method": "test",
+            "user_id": "test_admin",
+            "role": "admin",
+            "permissions": {"admin", "read", "write"},
+        }
+
         # Set the middleware instance for the test
         from application.mothership.routers.drt_monitoring import set_drt_middleware
 

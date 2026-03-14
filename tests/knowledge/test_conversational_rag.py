@@ -37,6 +37,9 @@ def conversational_engine():
     config.conversation_enabled = True
     config.multi_hop_enabled = False
     config.vector_store_provider = "in_memory"
+    config.use_hybrid = False
+    config.use_reranker = False
+    config.use_intelligent_rag = False
     return ConversationalRAGEngine(config)
 
 
@@ -115,9 +118,11 @@ class TestConversationalRAGEngine:
     @pytest.mark.asyncio
     async def test_query_with_session(self, conversational_engine):
         """Test query with conversation session."""
-        # Mock the parent query method
-        conversational_engine._rag_engine = Mock()
-        conversational_engine._rag_engine.query = AsyncMock(return_value={"answer": "Mock answer", "sources": []})
+        # Mock embedding + LLM providers so we don't hit real Ollama
+        conversational_engine.embedding_provider = Mock()
+        conversational_engine.embedding_provider.async_embed = AsyncMock(return_value=[0.0] * 768)
+        conversational_engine.llm_provider = Mock()
+        conversational_engine.llm_provider.async_generate = AsyncMock(return_value="Mock answer")
 
         result = await conversational_engine.query("test query", session_id="test-session", enable_multi_hop=False)
 
@@ -146,9 +151,11 @@ class TestConversationalRAGEngine:
         # Create session and add turns
         conversational_engine.create_session("session1")
 
-        # Mock query to simulate conversation
-        conversational_engine._rag_engine = Mock()
-        conversational_engine._rag_engine.query = AsyncMock(return_value={"answer": "Answer 1", "sources": []})
+        # Mock embedding + LLM providers so we don't hit real Ollama
+        conversational_engine.embedding_provider = Mock()
+        conversational_engine.embedding_provider.async_embed = AsyncMock(return_value=[0.0] * 768)
+        conversational_engine.llm_provider = Mock()
+        conversational_engine.llm_provider.async_generate = AsyncMock(return_value="Answer 1")
 
         await conversational_engine.query("Query 1", session_id="session1")
         await conversational_engine.query("Query 2", session_id="session1")

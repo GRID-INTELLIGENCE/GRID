@@ -68,7 +68,7 @@ class EventBus:
             self._init_redis(redis_host, redis_port, redis_db)
 
     def _init_redis(self, host: str, port: int, db: int) -> None:
-        """Initialize Redis connection."""
+        """Initialize Redis connection with connectivity verification."""
         if not REDIS_AVAILABLE:
             logger.warning("Redis not available. Falling back to in-memory queue.")
             self.use_redis = False

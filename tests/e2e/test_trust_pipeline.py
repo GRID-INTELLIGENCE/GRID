@@ -39,7 +39,11 @@ async def auth_token(client: AsyncClient) -> str:
     )
     if response.status_code == 200:
         data = response.json()
-        return data.get("access_token", data.get("token", ""))
+        # Token is nested: {"data": {"access_token": "..."}}
+        nested = data.get("data", data)
+        token = nested.get("access_token") or nested.get("token") or data.get("access_token", "")
+        if token:
+            return token
     # Fallback: dev mode may accept any creds
     return "dev-test-token"
 

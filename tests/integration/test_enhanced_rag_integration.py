@@ -128,13 +128,13 @@ class TestEnhancedRAGCapabilitiesWithDeps:
 
     @pytest.fixture
     def engine(self):
-        """Create conversational RAG engine."""
+        """Create conversational RAG engine, skip if dependencies unavailable."""
         if not HAS_CONVERSATIONAL_RAG:
             pytest.skip("Conversational RAG dependencies not available")
         try:
             return create_conversational_rag_engine()
         except (RuntimeError, Exception) as e:
-            pytest.skip(f"RAG engine unavailable (Ollama might be down): {e}")
+            pytest.skip(f"RAG engine unavailable: {e}")
 
     @requires_rag_deps
     @pytest.mark.asyncio

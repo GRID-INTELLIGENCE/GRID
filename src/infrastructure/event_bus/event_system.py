@@ -19,9 +19,18 @@ from enum import IntEnum, StrEnum
 from pathlib import Path
 from typing import Any, TypeVar
 
-import aio_pika  # type: ignore[import-not-found]
+try:
+    import aio_pika  # type: ignore[import-not-found]
+    from aio_pika import DeliveryMode, ExchangeType, Message
+
+    _HAS_AIOPIKA = True
+except ImportError:
+    aio_pika = None  # type: ignore[assignment]
+    DeliveryMode = None  # type: ignore[assignment,misc]
+    ExchangeType = None  # type: ignore[assignment,misc]
+    Message = None  # type: ignore[assignment,misc]
+    _HAS_AIOPIKA = False
 import redis.asyncio as redis
-from aio_pika import DeliveryMode, ExchangeType, Message
 
 try:
     from prometheus_client import REGISTRY, Counter, Gauge

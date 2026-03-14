@@ -22,9 +22,18 @@ from pathlib import Path
 from typing import Any
 from weakref import WeakMethod, ref
 
-import aio_pika  # type: ignore[import-not-found]
+try:
+    import aio_pika  # type: ignore[import-not-found]
+    from aio_pika import DeliveryMode, ExchangeType, Message
+
+    _HAS_AIOPIKA = True
+except ImportError:
+    aio_pika = None  # type: ignore[assignment]
+    DeliveryMode = None  # type: ignore[assignment,misc]
+    ExchangeType = None  # type: ignore[assignment,misc]
+    Message = None  # type: ignore[assignment,misc]
+    _HAS_AIOPIKA = False
 import redis.asyncio as redis
-from aio_pika import DeliveryMode, ExchangeType, Message
 
 
 class EventPriority(IntEnum):

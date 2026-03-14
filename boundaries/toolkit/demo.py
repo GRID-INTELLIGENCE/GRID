@@ -1,7 +1,3 @@
-Seeds\GRID-main\boundaries\toolkit\demo.py
-```
-
-```python
 """
 Interactive demonstrations for the Transition Gate Toolkit.
 
@@ -23,9 +19,7 @@ from boundaries.transition_gate.envelope import (
     PERM_DEPLOY,
     PERM_READ_ONLY,
     PERM_RUN_TESTS,
-    PERM_START_SERVER,
     ScopeDeclaration,
-    TransitionEnvelope,
     seal_envelope,
 )
 from boundaries.transition_gate.fingerprint import (
@@ -37,11 +31,8 @@ from boundaries.transition_gate.fingerprint import (
 from boundaries.transition_gate.gate_keeper import (
     GateKeeper,
     RejectionReason,
-    VerificationResult,
-    VerificationStatus,
 )
 from boundaries.transition_gate.nonce import NonceRegistry
-
 
 # ═══════════════════════════════════════════════════════════════════════════
 # Demo Configuration
@@ -66,6 +57,7 @@ DEMO_MACHINE_OVERRIDES = {
 # ═══════════════════════════════════════════════════════════════════════════
 # Visual Formatting Helpers
 # ═══════════════════════════════════════════════════════════════════════════
+
 
 def print_header(text: str) -> None:
     """Print a styled header."""
@@ -222,6 +214,7 @@ def demo_sealing() -> None:
 
     # Setup
     import tempfile
+
     with tempfile.TemporaryDirectory() as td:
         tmp_path = Path(td)
         nonce_registry = NonceRegistry(tmp_path / "nonces.json", max_age_seconds=600.0)
@@ -295,6 +288,7 @@ def demo_verification_pipeline() -> None:
     print("Each step has a specific security purpose.\n")
 
     import tempfile
+
     with tempfile.TemporaryDirectory() as td:
         tmp_path = Path(td)
         nonce_registry = NonceRegistry(tmp_path / "nonces.json", max_age_seconds=600.0)
@@ -380,6 +374,7 @@ def demo_replay_attack() -> None:
     print("A replay attacker intercepts a valid envelope and tries to reuse it.\n")
 
     import tempfile
+
     with tempfile.TemporaryDirectory() as td:
         tmp_path = Path(td)
         nonce_registry = NonceRegistry(tmp_path / "nonces.json", max_age_seconds=600.0)
@@ -458,6 +453,7 @@ def demo_privilege_escalation() -> None:
     print("Users can only perform actions explicitly permitted in the envelope.\n")
 
     import tempfile
+
     with tempfile.TemporaryDirectory() as td:
         tmp_path = Path(td)
         nonce_registry = NonceRegistry(tmp_path / "nonces.json", max_age_seconds=600.0)
@@ -605,7 +601,7 @@ def demo_timing_attack_prevention() -> None:
     # Vulnerable comparison
     start = time.perf_counter()
     for _ in range(iterations):
-        _ = (secret_fp == wrong_fp)  # Standard comparison
+        _ = secret_fp == wrong_fp  # Standard comparison
     vuln_time = (time.perf_counter() - start) * 1000
 
     # Safe comparison
@@ -692,12 +688,36 @@ def list_demos() -> list[dict[str, str]]:
         List of demo metadata dictionaries
     """
     return [
-        {"name": "fingerprints", "title": "Cryptographic Fingerprinting", "description": "How SHA-256 and HMAC-SHA256 create cryptographic bindings"},
-        {"name": "sealing", "title": "Envelope Sealing", "description": "How payloads are transformed into sealed envelopes"},
-        {"name": "verification", "title": "Verification Pipeline", "description": "Walk through all 9 verification steps"},
-        {"name": "replay", "title": "Replay Attack Prevention", "description": "How nonce burning prevents replay attacks"},
-        {"name": "privilege", "title": "Privilege Escalation Prevention", "description": "How scope declarations enforce least privilege"},
-        {"name": "timing", "title": "Timing Attack Prevention", "description": "How constant-time comparison prevents side-channels"},
+        {
+            "name": "fingerprints",
+            "title": "Cryptographic Fingerprinting",
+            "description": "How SHA-256 and HMAC-SHA256 create cryptographic bindings",
+        },
+        {
+            "name": "sealing",
+            "title": "Envelope Sealing",
+            "description": "How payloads are transformed into sealed envelopes",
+        },
+        {
+            "name": "verification",
+            "title": "Verification Pipeline",
+            "description": "Walk through all 9 verification steps",
+        },
+        {
+            "name": "replay",
+            "title": "Replay Attack Prevention",
+            "description": "How nonce burning prevents replay attacks",
+        },
+        {
+            "name": "privilege",
+            "title": "Privilege Escalation Prevention",
+            "description": "How scope declarations enforce least privilege",
+        },
+        {
+            "name": "timing",
+            "title": "Timing Attack Prevention",
+            "description": "How constant-time comparison prevents side-channels",
+        },
     ]
 
 

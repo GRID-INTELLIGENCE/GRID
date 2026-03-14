@@ -213,8 +213,7 @@ torchaudio = { index = "pytorch-cpu" }
 # Local path override kept for development convenience.
 grid-safety = { path = "safety" }
 
-# APIGuard local development path
-grid-apiguard = { path = "C:/Users/USER/CascadeProjects/apiguard" }
+# grid-apiguard: resolved from PyPI via [project.dependencies] (no local override)
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]

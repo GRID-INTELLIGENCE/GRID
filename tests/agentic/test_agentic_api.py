@@ -162,6 +162,7 @@ def client(mock_processing_unit_fixture, mock_agentic_system_fixture):
 
     # Override auth to be permissive
     app.dependency_overrides[verify_authentication] = lambda: {
+        "authenticated": True,
         "sub": "test_user",
         "user_id": "user_123",
         "scopes": ["read", "write"],

@@ -16,7 +16,6 @@ OllamaReranker *and* OllamaLocalLLM see the open circuit immediately).
 
 from __future__ import annotations
 
-import contextlib
 import logging
 from typing import Any
 

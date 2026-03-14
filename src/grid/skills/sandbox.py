@@ -395,6 +395,27 @@ else:
     ) -> SandboxResult:
         """Fallback execution path when subprocess creation is blocked."""
 
+        # CRIT-4: Check security violations BEFORE execution, not after.
+        violations = self._check_security_violations(execution_id, work_dir, skill_code=skill_code)
+        if violations:
+            logger.warning(
+                "Sandbox fallback BLOCKED for %s: security violations detected before exec: %s",
+                execution_id,
+                violations,
+            )
+            return SandboxResult(
+                execution_id=execution_id,
+                status=SandboxStatus.FAILED,
+                start_time=start_time,
+                end_time=datetime.now(),
+                exit_code=1,
+                stdout="",
+                stderr="Execution blocked: security violations detected before execution",
+                resource_usage=await self._get_resource_usage(execution_id),
+                error_message="Security violations detected — execution refused",
+                security_violations=violations,
+            )
+
         def _run_in_process() -> Any:
             previous_cwd = Path.cwd()
             namespace: dict[str, Any] = {}
@@ -439,7 +460,7 @@ else:
             stderr=stderr_text,
             resource_usage=await self._get_resource_usage(execution_id),
             error_message=error_message,
-            security_violations=self._check_security_violations(execution_id, work_dir, skill_code=skill_code),
+            security_violations=violations,
         )
 
     def _get_execution_environment(self) -> dict[str, str]:

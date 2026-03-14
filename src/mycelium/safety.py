@@ -112,6 +112,11 @@ class SafetyGuard:
     def validate_input(self, text: str) -> SafetyReport:
         """Validate text input before synthesis.
 
+        Follows Prevention → Detection → Remediation order:
+        1. Prevention: Type and bounds checking (fail-fast)
+        2. Detection: Identify potential issues (PII, control chars)
+        3. Remediation: Apply sanitization based on detection
+
         Checks:
             1. Type is string
             2. Length within bounds (1..500,000 chars)
@@ -125,10 +130,8 @@ class SafetyGuard:
             SafetyReport with verdict and any warnings.
         """
         start = time.monotonic()
-        reasons: list[str] = []
-        pii_found = False
 
-        # Type check
+        # PHASE 1: PREVENTION — Fail-fast checks (bounds, type)
         if not isinstance(text, str):
             return SafetyReport(
                 verdict=SafetyVerdict.REJECT,
@@ -139,7 +142,7 @@ class SafetyGuard:
 
         original_length = len(text)
 
-        # Length bounds
+        # Length bounds (prevention)
         if original_length > MAX_INPUT_LENGTH:
             return SafetyReport(
                 verdict=SafetyVerdict.REJECT,
@@ -156,27 +159,35 @@ class SafetyGuard:
                 processing_time_ms=_elapsed_ms(start),
             )
 
-        # Sanitize dangerous characters
-        sanitized = _DANGEROUS_CHARS.sub("", text)
-        if len(sanitized) != original_length:
-            reasons.append("Control characters removed from input")
+        # PHASE 2: DETECTION — Identify potential issues
+        reasons: list[str] = []
+        pii_found = False
 
-        # PII detection (warn, don't block — Rule 4.2: non-punitive)
-        pii_types = self.detect_pii(sanitized)
+        # Detect dangerous control characters
+        dangerous_chars_present = _DANGEROUS_CHARS.search(text) is not None
+        if dangerous_chars_present:
+            reasons.append("Control characters detected in input")
+
+        # Detect PII (warn, don't block — Rule 4.2: non-punitive)
+        pii_types = self.detect_pii(text)
         if pii_types:
             pii_found = True
             reasons.append(
                 f"Possible PII detected: {', '.join(pii_types)}. Processing locally only — no data transmitted."
             )
 
+        # PHASE 3: REMEDIATION — Apply fixes based on detection
+        sanitized = text
+        if dangerous_chars_present:
+            sanitized = _DANGEROUS_CHARS.sub("", text)
+
         self._check_count += 1
         self._last_check_time = time.monotonic()
 
-        verdict = SafetyVerdict.WARN if (reasons and not pii_found) or pii_found else SafetyVerdict.PASS
-        if reasons and not pii_found:
-            verdict = SafetyVerdict.WARN
-        elif pii_found:
-            verdict = SafetyVerdict.WARN
+        # Determine verdict based on detection results
+        verdict = SafetyVerdict.PASS
+        if reasons:
+            verdict = SafetyVerdict.WARN  # Non-punitive: warn rather than block
 
         return SafetyReport(
             verdict=verdict,

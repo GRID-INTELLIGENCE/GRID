@@ -716,3 +716,25 @@ bandit-report.json
 config.secrets.baseline
 tmp_scan_*.py
 Virtual Environments.MD
+
+# ==========================
+# EPHEMERAL TEST & GIT OUTPUTS (prevent root clutter)
+# ==========================
+git*.txt
+gitlog*.txt
+full_suite*.txt
+full_suite_*.txt
+order_check.txt
+mastermind_test.txt
+parasite_test.txt
+suite_output.txt
+baseline.txt
+compass_artifact_*.md
+detect-secrets-report.json
+.tmp_*
+.pytest_tmp_root/
+Screenshot*.png
+Screenshot*.jpg
+.apiguard_backup/
+scripts/baseline.txt
+scripts/git-workflow/

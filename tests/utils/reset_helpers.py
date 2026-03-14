@@ -95,6 +95,45 @@ def reset_rate_limiter_state() -> None:
         pass
 
 
+def reset_mastermind_session() -> None:
+    """Reset the global MastermindSession singleton to defaults.
+
+    The module-level ``session`` in ``grid.mcp.mastermind_server`` carries
+    mutable state (project_root, indexed_files, query_count, last_analysis)
+    that can leak across tests.
+    """
+    try:
+        import importlib
+
+        _module = importlib.import_module("grid.mcp.mastermind_server")
+        _session = getattr(_module, "session", None)
+        if _session is not None:
+            _session.last_analysis = None
+            _session.indexed_files = []
+            _session.query_count = 0
+            # project_root is reset to module default (grid_root) on next reload;
+            # clearing the mutable fields is sufficient for isolation.
+    except ImportError:
+        pass
+
+
+def reset_parasite_profiler() -> None:
+    """Reset the lazy-initialised ParasiteProfiler singleton.
+
+    ``grid.security.parasite_guard._profiler`` is created on first call to
+    ``get_profiler()`` and never cleared, causing stale state to leak
+    between tests that exercise the pruner metrics path.
+    """
+    try:
+        import importlib
+
+        _module = importlib.import_module("grid.security.parasite_guard")
+        if hasattr(_module, "_profiler"):
+            _module._profiler = None  # type: ignore[attr-defined]
+    except ImportError:
+        pass
+
+
 def reset_all_singletons() -> None:
     """Reset all known global singletons.
 
@@ -107,6 +146,8 @@ def reset_all_singletons() -> None:
     reset_metrics_collector()
     reset_accountability_calculator()
     reset_rate_limiter_state()
+    reset_mastermind_session()
+    reset_parasite_profiler()
 
 
 __all__ = [
@@ -114,5 +155,7 @@ __all__ = [
     "reset_metrics_collector",
     "reset_accountability_calculator",
     "reset_rate_limiter_state",
+    "reset_mastermind_session",
+    "reset_parasite_profiler",
     "reset_all_singletons",
 ]

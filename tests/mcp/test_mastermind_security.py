@@ -6,7 +6,6 @@ Tests for path traversal vulnerabilities and access controls.
 
 import sys
 from pathlib import Path
-from unittest.mock import patch
 
 import pytest
 
@@ -14,7 +13,7 @@ import pytest
 grid_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(grid_root / "src"))
 
-from grid.mcp.mastermind_server import MastermindSession, analyze_file
+from grid.mcp.mastermind_server import analyze_file
 
 
 class TestMastermindSecurity:
@@ -22,12 +21,35 @@ class TestMastermindSecurity:
 
     @pytest.fixture
     def session(self, tmp_path: Path):
-        """Create a test session."""
-        session = MastermindSession()
-        session.project_root = tmp_path
-        # Patch the global session
-        with patch("grid.mcp.mastermind_server.session", session):
-            yield session
+        """Create a test session with isolated global state.
+
+        Accesses the ``session`` object via the same module reference that
+        ``analyze_file`` lives in so that mutations are visible to calls
+        even when ``--import-mode=importlib`` creates separate module
+        namespaces for different import paths.
+        """
+        # Get the exact session object used by analyze_file at runtime
+        _global = analyze_file.__globals__["session"]
+
+        # Save originals
+        _orig_root = _global.project_root
+        _orig_analysis = _global.last_analysis
+        _orig_files = _global.indexed_files[:]
+        _orig_count = _global.query_count
+
+        # Override for test
+        _global.project_root = tmp_path
+        _global.last_analysis = None
+        _global.indexed_files = []
+        _global.query_count = 0
+
+        yield _global
+
+        # Restore
+        _global.project_root = _orig_root
+        _global.last_analysis = _orig_analysis
+        _global.indexed_files = _orig_files
+        _global.query_count = _orig_count
 
     @pytest.mark.asyncio
     async def test_analyze_file_path_traversal_prevention(self, session):

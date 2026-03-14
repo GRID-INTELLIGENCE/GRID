@@ -13,21 +13,17 @@ Key Features:
 
 from __future__ import annotations
 
-import asyncio
 import logging
-import time
-from typing import Any, Optional
+from typing import Any
 
+# APIGuard imports
+from apiguard import BucketRegistry, CircuitBreaker, RetryHandler, TokenBucket
+from apiguard.adapters.httpx import AsyncRateLimitedClient
+from apiguard.exceptions import CircuitOpenError, RetryExhaustedError
 from fastapi import Request, Response, status
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.types import ASGIApp
-
-# APIGuard imports
-from apiguard import TokenBucket, CircuitBreaker, RetryHandler, BucketRegistry
-from apiguard.circuit import CircuitState
-from apiguard.adapters.httpx import AsyncRateLimitedClient
-from apiguard.exceptions import CircuitOpenError, RetryExhaustedError
 
 # GRID imports (with graceful fallback)
 try:
@@ -39,11 +35,13 @@ try:
     from config.cognitive_settings import get_cognitive_load_thresholds  # type: ignore[import-not-found]
     from config.quality_gates import get_rate_limit  # type: ignore[import-not-found]
 except ImportError:
+
     def get_rate_limit(limit_type: str = "default") -> int:
         return 60
 
     def get_cognitive_load_thresholds() -> dict:
         return {"low": 0.3, "medium": 0.6, "high": 0.8}
+
 
 logger = logging.getLogger(__name__)
 
@@ -196,7 +194,7 @@ class APIGuardCircuitBreakerMiddleware(BaseHTTPMiddleware):
 
                 return response
 
-            except Exception as e:
+            except Exception:
                 if attempt < self.retry.max_retries:
                     await self.retry.apply_backoff(attempt)
                     continue
@@ -314,6 +312,7 @@ class APIGuardRateLimitMiddleware(BaseHTTPMiddleware):
             # In a real implementation, decode JWT and extract user ID
             # For now, use a hash of the token
             import hashlib
+
             return hashlib.sha256(auth_header.encode()).hexdigest()[:16]
 
         # Fallback to IP address
@@ -331,7 +330,7 @@ class APIGuardHTTPClient:
 
     def __init__(
         self,
-        base_url: Optional[str] = None,
+        base_url: str | None = None,
         rate_limit_capacity: int = 100,
         rate_limit_refill_rate: float = 10.0,
         circuit_failure_threshold: int = 5,
