@@ -1,0 +1,123 @@
+# GRID Framework — Monitoring Alert Rules
+# Uses Prometheus metrics defined in src/application/monitoring.py
+# TDC-20260314-0006
+
+groups:
+  - name: grid_http_alerts
+    rules:
+      - alert: HighErrorRate
+        expr: rate(grid_http_requests_total{status_code=~"5.."}[5m]) / rate(grid_http_requests_total[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "HTTP error rate above 5%"
+          description: "{{ $labels.endpoint }} has {{ $value | humanizePercentage }} error rate over 5 minutes."
+
+      - alert: HighLatency
+        expr: histogram_quantile(0.95, rate(grid_http_request_duration_seconds_bucket[5m])) > 2.0
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "P95 latency above 2 seconds"
+          description: "{{ $labels.endpoint }} P95 latency is {{ $value }}s."
+
+      - alert: HighRequestRate
+        expr: rate(grid_http_requests_total[1m]) > 500
+        for: 5m
+        labels:
+          severity: info
+        annotations:
+          summary: "Request rate above 500/min sustained"
+
+  - name: grid_session_alerts
+    rules:
+      - alert: SessionCountHigh
+        expr: count(grid_sessions_active) > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Active sessions approaching limit (80/100)"
+
+      - alert: ExpiredSessionsAccumulating
+        expr: rate(grid_sessions_expired_total[10m]) > 5
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Sessions expiring faster than expected"
+          description: "May indicate session timeout misconfiguration or client issues."
+
+  - name: grid_inference_alerts
+    rules:
+      - alert: InferenceLatencyHigh
+        expr: histogram_quantile(0.95, rate(grid_http_request_duration_seconds_bucket{endpoint=~"/inference.*"}[5m])) > 10.0
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Inference P95 latency above 10 seconds"
+
+      - alert: InferenceErrorRate
+        expr: rate(grid_http_requests_total{endpoint=~"/inference.*", status_code=~"5.."}[5m]) / rate(grid_http_requests_total{endpoint=~"/inference.*"}[5m]) > 0.10
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Inference error rate above 10%"
+
+  - name: grid_rag_alerts
+    rules:
+      - alert: RAGQuerySlow
+        expr: histogram_quantile(0.95, rate(grid_rag_query_duration_seconds_bucket[5m])) > 3.0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "RAG query P95 above 3 seconds"
+
+      - alert: RAGCacheHitRateLow
+        expr: rate(grid_rag_cache_hits_total[10m]) / (rate(grid_rag_cache_hits_total[10m]) + rate(grid_rag_cache_misses_total[10m])) < 0.5
+        for: 10m
+        labels:
+          severity: info
+        annotations:
+          summary: "RAG cache hit rate below 50%"
+
+  - name: grid_database_alerts
+    rules:
+      - alert: DatabaseQuerySlow
+        expr: histogram_quantile(0.95, rate(grid_db_query_duration_seconds_bucket[5m])) > 1.0
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Database P95 query time above 1 second"
+
+      - alert: DatabaseConnectionPoolExhausted
+        expr: grid_db_connection_pool_size < 2
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Database connection pool nearly exhausted"
+
+  - name: grid_event_bus_alerts
+    rules:
+      - alert: EventQueueBacklog
+        expr: grid_event_bus_queue_size > 500
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Event bus queue exceeds 500 messages"
+
+      - alert: EventProcessingSlow
+        expr: histogram_quantile(0.95, rate(grid_event_bus_event_processing_duration_seconds_bucket[5m])) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Event processing P95 above 500ms"
