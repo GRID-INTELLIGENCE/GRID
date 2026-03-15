@@ -296,9 +296,9 @@ class EventBus:
         storage_path: str = "events",
     ):
         self.redis_client: redis.Redis | None = None
-        self.rabbitmq_connection: aio_pika.Connection | None = None
-        self.channel: aio_pika.Channel | None = None
-        self.exchange: aio_pika.Exchange | None = None
+        self.rabbitmq_connection: Any = None
+        self.channel: Any = None
+        self.exchange: Any = None
 
         self.event_store = EventStore(storage_path)
         self.event_router = EventRouter()
@@ -322,7 +322,7 @@ class EventBus:
         """Start the event bus."""
         # Initialize Redis
         try:
-            self.redis_client = redis.from_url(self.redis_url)
+            self.redis_client = await redis.from_url(self.redis_url)
             await self.redis_client.ping()
             logging.info("Redis connected to event bus")
         except Exception as e:
@@ -647,6 +647,55 @@ async def example_event_bus_setup():
     print(f"Event bus metrics: {metrics}")
 
     return event_bus
+
+
+# ============================================================================
+# Module-level API (matches event_system.py interface for __init__.py)
+# ============================================================================
+
+_eventbus_instance: EventBus | None = None
+_eventbus_lock = asyncio.Lock()
+
+
+async def get_eventbus(*args: Any, **kwargs: Any) -> EventBus:
+    """Get or create the singleton EventBus instance."""
+    global _eventbus_instance
+    async with _eventbus_lock:
+        if _eventbus_instance is None:
+            _eventbus_instance = EventBus(*args, **kwargs)
+        return _eventbus_instance
+
+
+async def subscribe(event_type: str, handler: Callable) -> Subscription:
+    """Subscribe to events using the singleton EventBus."""
+    bus = await get_eventbus()
+    return bus.subscribe(event_type, handler)
+
+
+async def unsubscribe(subscription: Subscription) -> None:
+    """Unsubscribe using the singleton EventBus."""
+    subscription.unsubscribe()
+
+
+async def publish(
+    event_type: str,
+    data: dict[str, Any],
+    source: str = "unknown",
+    priority: EventPriority = EventPriority.NORMAL,
+    correlation_id: str | None = None,
+    routing_key: str | None = None,
+) -> str:
+    """Publish an event using the singleton EventBus."""
+    bus = await get_eventbus()
+    return await bus.publish(event_type, data, source, priority, correlation_id, routing_key)
+
+
+async def clear_all() -> None:
+    """Clear all subscriptions using the singleton EventBus."""
+    bus = await get_eventbus()
+    async with bus._lock:
+        bus._subscribers.clear()
+        bus._subscriber_counter = 0
 
 
 if __name__ == "__main__":

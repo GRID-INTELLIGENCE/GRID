@@ -55,6 +55,8 @@ class XAIExplainer:
         Returns:
             Structured explanation dictionary
         """
+        defaults_used: list[str] = []
+
         explanation = {
             "decision_id": decision_id,
             "resonance_alignment": context.get("resonance", 0.0),
@@ -66,11 +68,16 @@ class XAIExplainer:
 
         # Add cognitive context if available
         if cognitive_state:
+            mental_model_alignment = cognitive_state.get("mental_model_alignment")
+            if mental_model_alignment is None:
+                mental_model_alignment = 0.5
+                defaults_used.append("mental_model_alignment")
+
             explanation["cognitive_context"] = {
                 "load": cognitive_state.get("estimated_load", 0.0),
                 "load_type": cognitive_state.get("load_type", "unknown"),
                 "processing_mode": cognitive_state.get("processing_mode", "unknown"),
-                "mental_model_alignment": cognitive_state.get("mental_model_alignment", 0.5),
+                "mental_model_alignment": mental_model_alignment,
                 "working_memory_usage": cognitive_state.get("working_memory_usage", 0.0),
             }
             # Add cognitive-aware narrative
@@ -89,6 +96,8 @@ class XAIExplainer:
             context.get("resonance", 0.0),
             detected_pattern_names,
         )
+
+        explanation["defaults_used"] = defaults_used
 
         # Save trace for audit
         trace_path = self.trace_dir / f"trace_{decision_id}.json"

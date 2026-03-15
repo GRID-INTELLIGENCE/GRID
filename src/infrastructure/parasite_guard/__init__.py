@@ -38,11 +38,12 @@ from .contracts import (
     validate_detector_contract,
     validate_sanitizer_contract,
 )
-from .definitions import ParasiteAction, ParasiteContext, ParasiteRisk, SourceMap
-from .detector import ParasiteDetector
+# Note: ParasiteContext, DetectionResult, SanitizationResult, SourceMap are in .models
+# ParasiteSeverity replaces the stale ParasiteRisk from definitions.py
+# ParasiteDetector protocol removed - use Detector from .detectors instead
 from .integration import add_parasite_guard
 from .middleware import ParasiteGuardMiddleware
-from .models import DetectionResult, ParasiteSeverity, SanitizationResult
+from .models import DetectionResult, ParasiteContext, ParasiteSeverity, SanitizationResult, SourceMap
 from .state_machine import (
     GuardState,
     InvalidTransitionError,
@@ -57,14 +58,11 @@ from .state_machine import (
 # - from .metrics import *
 
 __all__ = [
-    # Core definitions
+    # Core definitions (from models.py)
     "ParasiteContext",
-    "ParasiteRisk",
-    "ParasiteAction",
     "ParasiteSeverity",
     "SourceMap",
-    # Detector
-    "ParasiteDetector",
+    # Detector (use Detector from .detectors for implementations)
     # Middleware
     "ParasiteGuardMiddleware",
     "add_parasite_guard",

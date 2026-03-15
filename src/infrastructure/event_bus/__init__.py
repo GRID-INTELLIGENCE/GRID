@@ -4,7 +4,7 @@
 # Lazy imports to avoid dependency issues
 def __getattr__(name: str):
     if name in ("EventBus", "get_eventbus", "subscribe", "unsubscribe", "publish", "clear_all"):
-        from .event_system import (
+        from .event_system_fixed import (
             EventBus,
             clear_all,
             get_eventbus,

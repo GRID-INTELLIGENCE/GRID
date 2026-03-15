@@ -49,7 +49,7 @@ class LearningUpdate:
     """Update to a pattern model from new observation."""
 
     pattern_id: str
-    was_correct: bool
+    was_correct: bool | None  # None = outcome unknown
     user_feedback: str | None = None  # "correct", "incorrect", "neutral"
     confidence_adjustment: float = 0.0  # -0.1 to 0.1
     context: dict[str, Any] = field(default_factory=dict)
@@ -230,7 +230,7 @@ class AdvancedPatternManager:
 
         update = LearningUpdate(
             pattern_id=pattern_id,
-            was_correct=True,  # resonance is always a positive signal
+            was_correct=None,  # outcome unknown until validated
             user_feedback="resonance",
             confidence_adjustment=confidence_delta,
             context=features,
@@ -377,7 +377,45 @@ class AdvancedPatternManager:
                 pid
                 for pid, _model in sorted(self._patterns.items(), key=lambda item: item[1].confidence, reverse=True)[:5]
             ],
+            "calibration_score": self.calibration_score(),
         }
+
+    def record_outcome(self, pattern_id: str, prediction_confidence: float, actual_correct: bool) -> None:
+        """Record a validated outcome for calibration scoring.
+
+        Args:
+            pattern_id: Pattern that made the prediction
+            prediction_confidence: The confidence at time of prediction (0.0-1.0)
+            actual_correct: Whether the prediction turned out correct
+        """
+        if pattern_id not in self._patterns:
+            return
+        update = LearningUpdate(
+            pattern_id=pattern_id,
+            was_correct=actual_correct,
+            confidence_adjustment=0.0,
+            context={"prediction_confidence": prediction_confidence},
+        )
+        self._feedback_history.append(update)
+
+    def calibration_score(self) -> float | None:
+        """Compute Brier score from outcomes with known correctness.
+
+        Returns None if fewer than 5 validated outcomes exist.
+        Lower is better (0 = perfect, 0.25 = random).
+        """
+        validated = [
+            u for u in self._feedback_history
+            if u.was_correct is not None and "prediction_confidence" in u.context
+        ]
+        if len(validated) < 5:
+            return None
+        total = 0.0
+        for u in validated:
+            predicted = u.context["prediction_confidence"]
+            actual = 1.0 if u.was_correct else 0.0
+            total += (predicted - actual) ** 2
+        return total / len(validated)
 
     def export_patterns(self) -> dict[str, dict[str, Any]]:
         """Export all learned patterns for inspection."""

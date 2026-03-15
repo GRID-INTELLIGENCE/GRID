@@ -18,7 +18,7 @@ class EssentialState:
     context_depth: float
     coherence_factor: float
 
-    def _quantum_transform(self, context: Context) -> EssentialState:
+    def _quantum_transform(self, context: Context, coherence_delta: float = 0.1) -> EssentialState:
         """Produce a transformed state influenced by context.
 
         Test expectations:
@@ -27,7 +27,7 @@ class EssentialState:
         - context_depth should match context.temporal_depth
         """
         new_signature = f"{self.pattern_signature}_ctx_{context.quantum_signature}"
-        new_coherence = self.coherence_factor + 0.1
+        new_coherence = min(1.0, max(0.0, self.coherence_factor + coherence_delta))
         return replace(
             self,
             pattern_signature=new_signature,

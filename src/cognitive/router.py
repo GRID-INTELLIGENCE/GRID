@@ -95,7 +95,7 @@ class CognitiveRouter:
         request: dict[str, Any],
         cognitive_state: CognitiveState,
         profile: UserCognitiveProfile,
-        detected_patterns: list[str] | None = None,
+        detected_patterns: list[str | dict[str, Any]] | None = None,
     ) -> Route:
         """Route request to appropriate handler based on cognitive context.
 
@@ -103,7 +103,7 @@ class CognitiveRouter:
             request: Request data
             cognitive_state: Current cognitive state
             profile: User cognitive profile
-            detected_patterns: Optional list of detected patterns
+            detected_patterns: Optional list of detected patterns (str or dict with pattern_name/confidence)
 
         Returns:
             Route with routing decision and adaptations
@@ -128,7 +128,7 @@ class CognitiveRouter:
         self,
         cognitive_state: CognitiveState,
         profile: UserCognitiveProfile,
-        detected_patterns: list[str] | None = None,
+        detected_patterns: list[str | dict[str, Any]] | None = None,
     ) -> tuple[RouteType, float]:
         """Determine the primary route type."""
         detected_patterns = detected_patterns or []
@@ -155,13 +155,22 @@ class CognitiveRouter:
         elif expertise_score < 0.3:
             scores[RouteType.NOVICE] = 1.0 - expertise_score
 
-        # 4. Pattern-based scores
-        if "flow" in detected_patterns:
-            scores[RouteType.FLOW] = 0.9
-        if "deviation" in detected_patterns:
-            scores[RouteType.INVESTIGATE] = 0.8
-        if "repetition" in detected_patterns:
-            scores[RouteType.AUTOMATE] = 0.7
+        # 4. Pattern-based scores — accept string or dict with confidence
+        pattern_defaults = {
+            "flow": (RouteType.FLOW, 0.9),
+            "deviation": (RouteType.INVESTIGATE, 0.8),
+            "repetition": (RouteType.AUTOMATE, 0.7),
+        }
+        for pattern in detected_patterns:
+            if isinstance(pattern, dict):
+                name = pattern.get("pattern_name", "")
+                confidence = pattern.get("confidence", 0.5)
+                if name in pattern_defaults:
+                    route_type, _ = pattern_defaults[name]
+                    scores[route_type] = confidence
+            elif isinstance(pattern, str) and pattern in pattern_defaults:
+                route_type, default_score = pattern_defaults[pattern]
+                scores[route_type] = default_score
 
         # Determine highest scoring route
         if not scores:
@@ -370,7 +379,7 @@ class CognitiveRequestHandler:
         request: dict[str, Any],
         cognitive_state: CognitiveState,
         profile: UserCognitiveProfile,
-        detected_patterns: list[str] | None = None,
+        detected_patterns: list[str | dict[str, Any]] | None = None,
     ) -> dict[str, Any]:
         """Handle a request with cognitive awareness.
 

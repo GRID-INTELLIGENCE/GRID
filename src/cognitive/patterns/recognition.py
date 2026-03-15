@@ -263,7 +263,7 @@ class FlowPattern(PatternRecognizer):
         """Analyze flow features from data."""
         return PatternFeatures(
             intensity=data.get("engagement", 0.5),
-            stability=data.get("stability", 0.7),
+            stability=data.get("stability", 0.7),  # known default — tracked via confidence_source
             frequency=data.get("flow_frequency", 0.5),
             duration=data.get("session_duration", 0.0),
             metadata={

@@ -793,6 +793,10 @@ The API supports multiple authentication methods:
         middleware = add_parasite_guard(app, mode=mode)
         # Store for wiring in lifespan
         app.state.parasite_guard = middleware  # type: ignore[reportAttributeAccessIssue]
+        # Inject dispose_engine callable to fix DDD inversion (infrastructure -> application)
+        if hasattr(middleware, 'set_dispose_engine'):
+            middleware.set_dispose_engine(dispose_async_engine)
+            logger.info("Parasite Guard dispose_engine injected")
         logger.info("Parasite Guard integrated (mode=%s)", mode)
 
     # ==========================================================================

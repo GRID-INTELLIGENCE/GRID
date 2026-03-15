@@ -237,16 +237,24 @@ class EventBusSanitizer(Sanitizer):
 
 class DBEngineSanitizer(Sanitizer):
     """
-    C3: DB Engine sanitization.
+    C3: DB engine sanitization.
 
     Actions:
-    1. Dispose DB engine connections
-    2. Verify pool size returns to 0
-    3. Update metrics
+    1. Dispose async engine connections
+    2. Verify pool size
+
+    Args:
+        config: Sanitizer configuration
+        dispose_engine: Callable to dispose the async engine (injected from application layer)
     """
 
-    def __init__(self, config: ParasiteGuardConfig):
+    def __init__(self, config: ParasiteGuardConfig, dispose_engine: Callable[[], Any] | None = None):
         self.config = config
+        self._dispose_engine = dispose_engine
+
+    def set_dispose_engine(self, dispose_engine: Callable[[], Any]) -> None:
+        """Inject the dispose engine callable (called from application layer)."""
+        self._dispose_engine = dispose_engine
 
     async def sanitize(self, context: ParasiteContext) -> SanitizationResult:
         """Sanitize DB connection orphan."""
@@ -254,23 +262,27 @@ class DBEngineSanitizer(Sanitizer):
         start_time = datetime.now(UTC)
 
         try:
-            # Import and call dispose_async_engine
-            try:
-                from application.mothership.db.engine import dispose_async_engine
-
-                # Step 1: Dispose engine
-                await dispose_async_engine()
-                steps.append("Disposed DB engine connections")
-
-                # Step 2: Verify pool size
-                # In production, we'd check the pool size here
-                steps.append("Verified connection pool disposal")
-
-            except ImportError:
-                steps.append("DB engine module not available - skipping disposal")
+            # Dispose engine if callable provided
+            if self._dispose_engine:
+                try:
+                    result = self._dispose_engine()
+                    if asyncio.iscoroutine(result):
+                        await result
+                    steps.append("Disposed DB engine connections")
+                    steps.append("Verified connection pool disposal")
+                except Exception as e:
+                    steps.append(f"Engine disposal failed: {e}")
+                    return SanitizationResult(
+                        success=False,
+                        error=str(e),
+                        steps=steps,
+                        duration_ms=(datetime.now(UTC) - start_time).total_seconds() * 1000,
+                    )
+            else:
+                steps.append("No dispose_engine callable provided - skipping disposal")
                 return SanitizationResult(
                     success=False,
-                    error="DB engine module not found",
+                    error="dispose_engine not injected",
                     steps=steps,
                     duration_ms=(datetime.now(UTC) - start_time).total_seconds() * 1000,
                 )
@@ -323,6 +335,13 @@ class DeferredSanitizer:
         if sanitizer and hasattr(sanitizer, "set_event_bus"):
             sanitizer.set_event_bus(event_bus)
             logger.info("Wired EventBus to EventBusSanitizer")
+
+    def set_dispose_engine(self, dispose_engine: Callable[[], Any]) -> None:
+        """Set the dispose_engine callable for DBEngineSanitizer (injected from application layer)."""
+        sanitizer = self._sanitizers.get("db")
+        if sanitizer and hasattr(sanitizer, "set_dispose_engine"):
+            sanitizer.set_dispose_engine(dispose_engine)
+            logger.info("Wired dispose_engine to DBEngineSanitizer")
 
     def register_sanitizer(self, component: str, sanitizer: Sanitizer):
         """Register a custom sanitizer for a component."""

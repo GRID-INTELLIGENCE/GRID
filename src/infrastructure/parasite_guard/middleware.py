@@ -103,6 +103,22 @@ class ParasiteGuardMiddleware:
             self.deferred_sanitizer.set_event_bus(event_bus)
             logger.info("Wired EventBus to DeferredSanitizer")
 
+    def wire_dispose_engine(self, dispose_engine: Callable[[], Any]) -> None:
+        """
+        Wire dispose_engine callable to the DeferredSanitizer for DB cleanup.
+
+        This fixes DDD inversion by allowing application layer to inject the
+        dispose_async_engine callable instead of infrastructure importing it.
+
+        Args:
+            dispose_engine: Callable that disposes the async engine (may be async)
+        """
+        if hasattr(self.deferred_sanitizer, "set_dispose_engine"):
+            self.deferred_sanitizer.set_dispose_engine(dispose_engine)
+            logger.info("Wired dispose_engine to DeferredSanitizer")
+        else:
+            logger.warning("DeferredSanitizer does not support set_dispose_engine")
+
     async def __call__(self, scope: dict, receive: Callable, send: Callable) -> None:
         """
         ASGI middleware entry point.
