@@ -77,7 +77,9 @@ class EnhancedRAGMCPServer:
                 raise ImportError("GRID RAG tools not found. Please ensure GRID is properly installed.") from e
 
         self.server = Server("grid-rag-enhanced")
-        self.rag_engine = rag_engine_factory()
+        self._rag_engine_factory = rag_engine_factory
+        self._ollama_checker = ollama_checker
+        self.rag_engine = None
         self.sessions: dict[str, RAGSession] = {}
         self._register_handlers()
 
@@ -92,9 +94,13 @@ class EnhancedRAGMCPServer:
 
         self.server._handle_list_tools = _handle_list_tools
 
-        # Check Ollama connection
-        if not ollama_checker():
-            logger.warning("Ollama connection not available. Some features may be limited.")
+    def _ensure_rag_engine(self) -> Any:
+        """Create the heavy RAG engine lazily so MCP initialize stays fast."""
+        if self.rag_engine is None:
+            self.rag_engine = self._rag_engine_factory()
+            if not self._ollama_checker():
+                logger.warning("Ollama connection not available. Some features may be limited.")
+        return self.rag_engine
 
     def _register_handlers(self):
         """Register MCP handlers."""
@@ -286,8 +292,9 @@ class EnhancedRAGMCPServer:
             return CallToolResult(content=[TextContent(text="Error: query is required", type="text")], isError=True)
 
         try:
+            engine = self._ensure_rag_engine()
             # Execute query with conversation support
-            result = await self.rag_engine.query(
+            result = await engine.query(
                 query_text=query, session_id=session_id, enable_multi_hop=enable_multi_hop, temperature=temperature
             )
 
@@ -318,8 +325,9 @@ class EnhancedRAGMCPServer:
             )
 
         try:
+            engine = self._ensure_rag_engine()
             # Create session in RAG engine
-            self.rag_engine.create_session(session_id, metadata)
+            engine.create_session(session_id, metadata)
 
             # Store session info
             self.sessions[session_id] = RAGSession(session_id=session_id, metadata=metadata)
@@ -344,8 +352,9 @@ class EnhancedRAGMCPServer:
             )
 
         try:
+            engine = self._ensure_rag_engine()
             # Get session info from RAG engine
-            session_info = self.rag_engine.get_session_info(session_id)
+            session_info = engine.get_session_info(session_id)
 
             if not session_info:
                 return CallToolResult(
@@ -370,8 +379,9 @@ class EnhancedRAGMCPServer:
             )
 
         try:
+            engine = self._ensure_rag_engine()
             # Delete session from RAG engine
-            success = self.rag_engine.delete_session(session_id)
+            success = engine.delete_session(session_id)
 
             if success:
                 # Remove from local sessions
@@ -395,8 +405,9 @@ class EnhancedRAGMCPServer:
     async def _handle_get_stats(self, arguments: dict[str, Any]) -> CallToolResult:
         """Get RAG system statistics."""
         try:
+            engine = self._ensure_rag_engine()
             # Get stats from RAG engine
-            stats = self.rag_engine.get_conversation_stats()
+            stats = engine.get_conversation_stats()
 
             # Add server-specific stats
             stats["server_stats"] = {
@@ -421,10 +432,11 @@ class EnhancedRAGMCPServer:
             return CallToolResult(content=[TextContent(text="Error: path is required", type="text")], isError=True)
 
         try:
+            engine = self._ensure_rag_engine()
             # Index documents using RAG engine
-            await self.rag_engine.index(path, rebuild=rebuild)
+            await engine.index(path, rebuild=rebuild)
 
-            stats = self.rag_engine.get_stats()
+            stats = engine.get_stats()
 
             return CallToolResult(
                 content=[
