@@ -9,26 +9,36 @@ Returns only sanitized portfolio insights with full audit trails.
 import asyncio
 import json
 import logging
-
-# Coinbase imports
 import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 
 from mcp.server import Server
+from mcp.server.stdio import stdio_server
 from mcp.types import CallToolResult, ListToolsResult, TextContent, Tool
 
-# Add Coinbase to path
-coinbase_path = Path(__file__).parent.parent.parent.parent / "Coinbase"
-if str(coinbase_path) not in sys.path:
+# Add Coinbase to path when the archive exists in this workspace.
+coinbase_path = Path.home() / "seed" / "archive" / "Coinbase_from_zip"
+if coinbase_path.exists() and str(coinbase_path) not in sys.path:
     sys.path.insert(0, str(coinbase_path))
 
-from coinbase.database.ai_safe_analyzer import get_ai_safe_analyzer
-from coinbase.security.ai_safety import get_ai_safety
-from coinbase.security.audit_logger import AuditEventType, get_audit_logger
-from coinbase.security.portfolio_data_policy import get_portfolio_data_policy
-from coinbase.security.portfolio_security import get_portfolio_security
+COINBASE_IMPORT_ERROR: str | None = None
+get_ai_safe_analyzer = None
+get_ai_safety = None
+AuditEventType = None
+get_audit_logger = None
+get_portfolio_data_policy = None
+get_portfolio_security = None
+
+try:
+    from coinbase.database.ai_safe_analyzer import get_ai_safe_analyzer
+    from coinbase.security.ai_safety import get_ai_safety
+    from coinbase.security.audit_logger import AuditEventType, get_audit_logger
+    from coinbase.security.portfolio_data_policy import get_portfolio_data_policy
+    from coinbase.security.portfolio_security import get_portfolio_security
+except Exception as exc:  # pragma: no cover - startup fallback
+    COINBASE_IMPORT_ERROR = f"{type(exc).__name__}: {exc}"
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -39,12 +49,44 @@ class PortfolioSafetyLensServer:
 
     def __init__(self):
         self.server = Server("portfolio-safety-lens")
-        self.security = get_portfolio_security()
-        self.policy = get_portfolio_data_policy()
-        self.ai_safety = get_ai_safety()
-        self.audit_logger = get_audit_logger()
-        self.analyzer = get_ai_safe_analyzer()
+        self.startup_error: str | None = COINBASE_IMPORT_ERROR
+        self.security = None
+        self.policy = None
+        self.ai_safety = None
+        self.audit_logger = None
+        self.analyzer = None
+        if self.startup_error is None:
+            try:
+                self.security = get_portfolio_security()
+                self.policy = get_portfolio_data_policy()
+                self.ai_safety = get_ai_safety()
+                self.audit_logger = get_audit_logger()
+                self.analyzer = get_ai_safe_analyzer()
+            except Exception as exc:  # pragma: no cover - startup fallback
+                self.startup_error = f"{type(exc).__name__}: {exc}"
+                logger.exception("Portfolio safety backend failed to initialize")
+        if self.startup_error:
+            logger.warning("Portfolio safety backend unavailable: %s", self.startup_error)
         self._register_handlers()
+
+    def _backend_unavailable(self) -> CallToolResult:
+        """Return a structured error when optional portfolio dependencies are unavailable."""
+        return CallToolResult(
+            content=[
+                TextContent(
+                    text=json.dumps(
+                        {
+                            "available": False,
+                            "error": self.startup_error,
+                            "hint": "Install and configure the Coinbase/Databricks runtime before using this server.",
+                        },
+                        indent=2,
+                    ),
+                    type="text",
+                )
+            ],
+            isError=True,
+        )
 
     def _register_handlers(self):
         """Register MCP handlers."""
@@ -95,6 +137,8 @@ class PortfolioSafetyLensServer:
         @self.server.call_tool()
         async def call_tool(name: str, arguments: dict[str, Any]) -> CallToolResult:
             """Handle tool calls."""
+            if self.startup_error:
+                return self._backend_unavailable()
             try:
                 if name == "portfolio_summary_safe":
                     return await self._portfolio_summary_safe(arguments)
@@ -254,11 +298,8 @@ class PortfolioSafetyLensServer:
 async def main():
     """Run the Portfolio Safety Lens MCP server."""
     server = PortfolioSafetyLensServer()
-
-    # Use stdio transport
-    from mcp.server.stdio import stdio_server
-
-    await stdio_server(server.server)
+    async with stdio_server() as (read_stream, write_stream):
+        await server.server.run(read_stream, write_stream, server.server.create_initialization_options())
 
 
 if __name__ == "__main__":

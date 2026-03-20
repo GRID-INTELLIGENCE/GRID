@@ -10,10 +10,14 @@ import sys
 from pathlib import Path
 from typing import Any
 
+PROTOCOL_VERSION = "2025-06-18"
+SERVER_NAME = "test-runner"
+SERVER_VERSION = "1.0.0"
+
 
 def run_pytest(args: list[str], cwd: str = None) -> dict[str, Any]:
     """Run pytest with given arguments"""
-    cmd = ["pytest"] + args
+    cmd = [sys.executable, "-m", "pytest"] + args
     try:
         result = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, timeout=60)
         return {
@@ -88,22 +92,39 @@ def get_test_summary(test_path: str = None) -> dict[str, Any]:
     return {"test_count": test_count, "output": result["stdout"]}
 
 
+def build_initialize_result() -> dict[str, Any]:
+    """Return a spec-compliant MCP initialize payload."""
+    return {
+        "protocolVersion": PROTOCOL_VERSION,
+        "capabilities": {"tools": {"listChanged": False}},
+        "serverInfo": {"name": SERVER_NAME, "version": SERVER_VERSION},
+    }
+
+
 def main():
     """Main MCP server loop"""
     while True:
         try:
-            line = input()
+            line = sys.stdin.readline()
+            if line == "":
+                break
+
+            line = line.strip()
             if not line:
                 continue
 
             request = json.loads(line)
             method = request.get("method")
-            params = request.get("params", {})
+            params = request.get("params") or {}
+            request_id = request.get("id")
+            is_notification = request_id is None
+            response = None
 
-            response = {"jsonrpc": "2.0", "id": request.get("id")}
+            if method == "notifications/initialized":
+                continue
 
             if method == "tools/list":
-                response["result"] = {
+                response = {"jsonrpc": "2.0", "id": request_id, "result": {
                     "tools": [
                         {
                             "name": "run_tests",
@@ -135,11 +156,12 @@ def main():
                             "inputSchema": {"type": "object", "properties": {"test_path": {"type": "string"}}},
                         },
                     ]
-                }
+                }}
 
             elif method == "tools/call":
                 tool_name = params.get("name")
                 arguments = params.get("arguments", {})
+                response = {"jsonrpc": "2.0", "id": request_id}
 
                 if tool_name == "run_tests":
                     result = run_tests(test_path=arguments.get("test_path"), verbose=arguments.get("verbose", False))
@@ -163,16 +185,27 @@ def main():
                     response["error"] = {"code": -32601, "message": "Method not found"}
 
             elif method == "initialize":
-                response["result"] = {"capabilities": {"tools": {}}}
+                response = {"jsonrpc": "2.0", "id": request_id, "result": build_initialize_result()}
+
+            elif method == "ping":
+                response = {"jsonrpc": "2.0", "id": request_id, "result": {}}
 
             elif method == "shutdown":
+                response = {"jsonrpc": "2.0", "id": request_id, "result": {}}
+                print(json.dumps(response))
+                sys.stdout.flush()
                 break
 
-            else:
-                response["error"] = {"code": -32601, "message": "Method not found"}
+            elif not is_notification:
+                response = {
+                    "jsonrpc": "2.0",
+                    "id": request_id,
+                    "error": {"code": -32601, "message": "Method not found"},
+                }
 
-            print(json.dumps(response))
-            sys.stdout.flush()
+            if response is not None:
+                print(json.dumps(response))
+                sys.stdout.flush()
 
         except json.JSONDecodeError:
             continue

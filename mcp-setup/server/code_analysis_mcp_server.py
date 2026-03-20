@@ -10,6 +10,10 @@ import sys
 from pathlib import Path
 from typing import Any
 
+PROTOCOL_VERSION = "2025-06-18"
+SERVER_NAME = "code-analysis"
+SERVER_VERSION = "1.0.0"
+
 
 def run_command(cmd: list[str], cwd: str = None) -> dict[str, Any]:
     """Run a command and return the result"""
@@ -36,15 +40,15 @@ def analyze_code(file_path: str) -> dict[str, Any]:
     results = {"file": str(path), "ruff": None, "mypy": None, "black_check": None}
 
     # Ruff linting
-    ruff_result = run_command(["ruff", "check", str(path)])
+    ruff_result = run_command([sys.executable, "-m", "ruff", "check", str(path)])
     results["ruff"] = ruff_result
 
     # MyPy type checking
-    mypy_result = run_command(["mypy", str(path), "--ignore-missing-imports"])
+    mypy_result = run_command([sys.executable, "-m", "mypy", str(path), "--ignore-missing-imports"])
     results["mypy"] = mypy_result
 
     # Black format check
-    black_result = run_command(["black", "--check", str(path)])
+    black_result = run_command([sys.executable, "-m", "black", "--check", str(path)])
     results["black_check"] = black_result
 
     return results
@@ -94,22 +98,39 @@ def get_complexity(file_path: str) -> dict[str, Any]:
     }
 
 
+def build_initialize_result() -> dict[str, Any]:
+    """Return a spec-compliant MCP initialize payload."""
+    return {
+        "protocolVersion": PROTOCOL_VERSION,
+        "capabilities": {"tools": {"listChanged": False}},
+        "serverInfo": {"name": SERVER_NAME, "version": SERVER_VERSION},
+    }
+
+
 def main():
     """Main MCP server loop"""
     while True:
         try:
-            line = input()
+            line = sys.stdin.readline()
+            if line == "":
+                break
+
+            line = line.strip()
             if not line:
                 continue
 
             request = json.loads(line)
             method = request.get("method")
-            params = request.get("params", {})
+            params = request.get("params") or {}
+            request_id = request.get("id")
+            is_notification = request_id is None
+            response = None
 
-            response = {"jsonrpc": "2.0", "id": request.get("id")}
+            if method == "notifications/initialized":
+                continue
 
             if method == "tools/list":
-                response["result"] = {
+                response = {"jsonrpc": "2.0", "id": request_id, "result": {
                     "tools": [
                         {
                             "name": "analyze_code",
@@ -139,11 +160,12 @@ def main():
                             },
                         },
                     ]
-                }
+                }}
 
             elif method == "tools/call":
                 tool_name = params.get("name")
                 arguments = params.get("arguments", {})
+                response = {"jsonrpc": "2.0", "id": request_id}
 
                 if tool_name == "analyze_code":
                     result = analyze_code(arguments.get("file_path"))
@@ -161,16 +183,27 @@ def main():
                     response["error"] = {"code": -32601, "message": "Method not found"}
 
             elif method == "initialize":
-                response["result"] = {"capabilities": {"tools": {}}}
+                response = {"jsonrpc": "2.0", "id": request_id, "result": build_initialize_result()}
+
+            elif method == "ping":
+                response = {"jsonrpc": "2.0", "id": request_id, "result": {}}
 
             elif method == "shutdown":
+                response = {"jsonrpc": "2.0", "id": request_id, "result": {}}
+                print(json.dumps(response))
+                sys.stdout.flush()
                 break
 
-            else:
-                response["error"] = {"code": -32601, "message": "Method not found"}
+            elif not is_notification:
+                response = {
+                    "jsonrpc": "2.0",
+                    "id": request_id,
+                    "error": {"code": -32601, "message": "Method not found"},
+                }
 
-            print(json.dumps(response))
-            sys.stdout.flush()
+            if response is not None:
+                print(json.dumps(response))
+                sys.stdout.flush()
 
         except json.JSONDecodeError:
             continue
