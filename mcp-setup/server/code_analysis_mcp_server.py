@@ -14,6 +14,34 @@ PROTOCOL_VERSION = "2025-06-18"
 SERVER_NAME = "code-analysis"
 SERVER_VERSION = "1.0.0"
 
+# Path containment: all file operations restricted to GRID workspace root
+GRID_ROOT = Path(__file__).resolve().parent.parent.parent
+
+
+def _validate_path(file_path: str) -> Path:
+    """Validate that a path resolves within the GRID workspace root.
+
+    Raises ValueError if the path escapes the boundary.
+    """
+    if not file_path:
+        raise ValueError("file_path is required")
+    resolved = Path(file_path).resolve()
+    try:
+        resolved.relative_to(GRID_ROOT)
+    except ValueError:
+        raise ValueError(
+            f"Path '{file_path}' resolves outside GRID workspace root ({GRID_ROOT}). Access denied."
+        )
+    if resolved.is_symlink():
+        target = resolved.readlink().resolve()
+        try:
+            target.relative_to(GRID_ROOT)
+        except ValueError:
+            raise ValueError(
+                f"Symlink '{file_path}' targets outside GRID workspace root. Access denied."
+            )
+    return resolved
+
 
 def run_command(cmd: list[str], cwd: str = None) -> dict[str, Any]:
     """Run a command and return the result"""
@@ -33,7 +61,10 @@ def run_command(cmd: list[str], cwd: str = None) -> dict[str, Any]:
 
 def analyze_code(file_path: str) -> dict[str, Any]:
     """Analyze a Python file for code quality issues"""
-    path = Path(file_path)
+    try:
+        path = _validate_path(file_path)
+    except ValueError as e:
+        return {"error": str(e)}
     if not path.exists():
         return {"error": "File not found"}
 
@@ -56,7 +87,10 @@ def analyze_code(file_path: str) -> dict[str, Any]:
 
 def check_security(file_path: str) -> dict[str, Any]:
     """Check for security issues in a file"""
-    path = Path(file_path)
+    try:
+        path = _validate_path(file_path)
+    except ValueError as e:
+        return {"error": str(e)}
     if not path.exists():
         return {"error": "File not found"}
 
@@ -82,7 +116,10 @@ def check_security(file_path: str) -> dict[str, Any]:
 
 def get_complexity(file_path: str) -> dict[str, Any]:
     """Get code complexity metrics"""
-    path = Path(file_path)
+    try:
+        path = _validate_path(file_path)
+    except ValueError as e:
+        return {"error": str(e)}
     if not path.exists():
         return {"error": "File not found"}
 

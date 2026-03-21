@@ -52,28 +52,6 @@ def format_tool_output(tool_name: str, result: dict[str, Any], execution_time: f
 """
 
 
-# region agent log
-def _debug_log(message: str, data: dict[str, Any] | None = None, hypothesis_id: str = "H1") -> None:
-    try:
-        import os as _os
-
-        _path = _os.path.join(_os.path.dirname(_os.path.dirname(_os.path.dirname(__file__))), "debug-14d2f0.log")
-        _payload = {
-            "sessionId": "14d2f0",
-            "runId": data.get("runId", "run1") if data else "run1",
-            "hypothesisId": hypothesis_id,
-            "location": "enhanced_tools_mcp_server.py:run_command",
-            "message": message,
-            "data": data or {},
-            "timestamp": __import__("time", fromlist=["time"]).time() * 1000,
-        }
-        with open(_path, "a", encoding="utf-8") as _f:
-            _f.write(__import__("json", fromlist=["json"]).json.dumps(_payload) + "\n")
-    except Exception:
-        pass
-
-
-# endregion
 
 
 async def _run_process_and_communicate(
@@ -86,10 +64,6 @@ async def _run_process_and_communicate(
         stderr=asyncio.subprocess.PIPE,
         cwd=cwd or session.workspace_root,
     )
-    # region agent log
-    _debug_log("run_command process_created", {"pid": process.pid}, "H1")
-    _debug_log("run_command before_communicate", {}, "H1")
-    # endregion
     try:
         async with asyncio.timeout(timeout):
             stdout, stderr = await process.communicate()
@@ -97,17 +71,11 @@ async def _run_process_and_communicate(
         process.kill()
         await process.wait()
         raise
-    # region agent log
-    _debug_log("run_command after_communicate", {"returncode": process.returncode}, "H1")
-    # endregion
     return process, stdout or b"", stderr or b""
 
 
 async def run_command(cmd: list[str], cwd: Path | None = None, timeout: int = 30) -> dict[str, Any]:
     """Run command with timeout and error handling. Timeout covers both process start and communicate (avoids stuck thread)."""
-    # region agent log
-    _debug_log("run_command entry", {"cmd": cmd, "timeout": timeout}, "H1")
-    # endregion
     try:
         process, stdout, stderr = await asyncio.wait_for(
             _run_process_and_communicate(cmd, cwd, timeout),
@@ -120,9 +88,6 @@ async def run_command(cmd: list[str], cwd: Path | None = None, timeout: int = 30
             "stderr": stderr.decode("utf-8", errors="ignore"),
         }
     except TimeoutError:
-        # region agent log
-        _debug_log("run_command timeout (full)", {"timeout": timeout}, "H3")
-        # endregion
         return {"success": False, "error": f"Command timed out after {timeout}s", "returncode": -1}
     except Exception as e:
         return {"success": False, "error": str(e), "returncode": -1}

@@ -14,6 +14,34 @@ PROTOCOL_VERSION = "2025-06-18"
 SERVER_NAME = "test-runner"
 SERVER_VERSION = "1.0.0"
 
+# Path containment: all operations restricted to GRID workspace root
+GRID_ROOT = Path(__file__).resolve().parent.parent.parent
+
+
+def _validate_path(target_path: str) -> Path:
+    """Validate that a path resolves within the GRID workspace root.
+
+    Raises ValueError if the path escapes the boundary.
+    """
+    if not target_path:
+        raise ValueError("path is required")
+    resolved = Path(target_path).resolve()
+    try:
+        resolved.relative_to(GRID_ROOT)
+    except ValueError:
+        raise ValueError(
+            f"Path '{target_path}' resolves outside GRID workspace root ({GRID_ROOT}). Access denied."
+        )
+    if resolved.is_symlink():
+        target = resolved.readlink().resolve()
+        try:
+            target.relative_to(GRID_ROOT)
+        except ValueError:
+            raise ValueError(
+                f"Symlink '{target_path}' targets outside GRID workspace root. Access denied."
+            )
+    return resolved
+
 
 def run_pytest(args: list[str], cwd: str = None) -> dict[str, Any]:
     """Run pytest with given arguments"""
@@ -34,6 +62,11 @@ def run_pytest(args: list[str], cwd: str = None) -> dict[str, Any]:
 
 def run_tests(test_path: str = None, verbose: bool = False) -> dict[str, Any]:
     """Run tests"""
+    if test_path:
+        try:
+            _validate_path(test_path)
+        except ValueError as e:
+            return {"success": False, "error": str(e)}
     args = []
     if test_path:
         args.append(test_path)
@@ -46,6 +79,11 @@ def run_tests(test_path: str = None, verbose: bool = False) -> dict[str, Any]:
 
 def run_coverage(test_path: str = None, output_format: str = "term") -> dict[str, Any]:
     """Run tests with coverage"""
+    if test_path:
+        try:
+            _validate_path(test_path)
+        except ValueError as e:
+            return {"success": False, "error": str(e)}
     args = ["--cov=src", f"--cov-report={output_format}"]
     if test_path:
         args.append(test_path)
@@ -56,6 +94,10 @@ def run_coverage(test_path: str = None, output_format: str = "term") -> dict[str
 
 def discover_tests(test_dir: str = "tests/") -> dict[str, Any]:
     """Discover available tests"""
+    try:
+        _validate_path(test_dir)
+    except ValueError as e:
+        return {"error": str(e)}
     test_path = Path(test_dir)
     if not test_path.exists():
         return {"error": "Test directory not found"}
@@ -72,6 +114,11 @@ def discover_tests(test_dir: str = "tests/") -> dict[str, Any]:
 
 def get_test_summary(test_path: str = None) -> dict[str, Any]:
     """Get test summary without running"""
+    if test_path:
+        try:
+            _validate_path(test_path)
+        except ValueError as e:
+            return {"test_count": 0, "output": "", "error": str(e)}
     args = ["--collect-only"]
     if test_path:
         args.append(test_path)
