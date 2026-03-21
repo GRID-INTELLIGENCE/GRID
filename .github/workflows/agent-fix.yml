@@ -1,0 +1,102 @@
+name: agent-fix
+
+on:
+  pull_request_target:
+    types: [labeled]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  fix:
+    name: agent-fix
+    if: github.event.label.name == 'agent:fix'
+    runs-on: [self-hosted, linux, agent-fix]
+    concurrency:
+      group: agent-fix-${{ github.event.pull_request.number }}
+      cancel-in-progress: false
+    steps:
+      - name: Guard same-repo PRs only
+        id: guard
+        run: |
+          if [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
+            echo "eligible=false" >> "$GITHUB_OUTPUT"
+            echo "reason=fork-prs-are-not-eligible" >> "$GITHUB_OUTPUT"
+          else
+            echo "eligible=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.guard.outputs.eligible == 'true'
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Capture PR context
+        if: steps.guard.outputs.eligible == 'true'
+        run: |
+          printf '%s\n' "${{ github.event.pull_request.title }}" > .git/pr-title.txt
+          printf '%s\n' "${{ github.event.pull_request.body }}" > .git/pr-body.txt
+          git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}" > .git/changed-files.txt
+
+      - name: Ensure Codex CLI is available
+        if: steps.guard.outputs.eligible == 'true'
+        run: command -v codex >/dev/null
+
+      - name: Run Codex fix pass
+        if: steps.guard.outputs.eligible == 'true'
+        run: |
+          cat .github/agent-fix-prompt.md > .git/agent-fix-prompt.txt
+          {
+            echo
+            echo "PR title:"
+            cat .git/pr-title.txt
+            echo
+            echo "PR body:"
+            cat .git/pr-body.txt
+            echo
+            echo "Changed files:"
+            cat .git/changed-files.txt
+          } >> .git/agent-fix-prompt.txt
+          codex exec --dangerously-bypass-approvals-and-sandbox -C . - < .git/agent-fix-prompt.txt
+
+      - name: Install uv
+        if: steps.guard.outputs.eligible == 'true'
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.13"
+
+      - name: Run verification
+        if: steps.guard.outputs.eligible == 'true'
+        run: |
+          uv sync --frozen
+          uv run ruff check .
+          uv run pytest tests/unit/ -q --tb=short
+
+      - name: Commit and push changes
+        if: steps.guard.outputs.eligible == 'true'
+        run: |
+          if git diff --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git config user.name "portfolio-agent"
+          git config user.email "portfolio-agent@users.noreply.github.com"
+          git add -A
+          git commit -m "chore(agent): apply automated PR fixes"
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
+
+      - name: Comment when skipped
+        if: steps.guard.outputs.eligible != 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `Agent fix skipped: ${process.env.REASON || 'not eligible'}.`
+            });
+        env:
+          REASON: ${{ steps.guard.outputs.reason }}
