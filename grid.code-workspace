@@ -7,7 +7,7 @@
 	],
 	"settings": {
 		// ── Python ──────────────────────────────────────────────
-		"python.defaultInterpreterPath": ".venv/Scripts/python.exe",
+		"python.defaultInterpreterPath": ".venv/bin/python",
 		"python.languageServer": "Pylance",
 		"python.analysis.typeCheckingMode": "strict",
 		"python.analysis.extraPaths": [
@@ -92,30 +92,14 @@
 			"**/logs/**": true
 		},
 		// ── Terminal ────────────────────────────────────────────
-		"terminal.integrated.env.windows": {
+		"terminal.integrated.env.linux": {
 			"PROJECT_ROOT": "${workspaceFolder}",
-			"PYTHONPATH": "${workspaceFolder}/src;${workspaceFolder}/safety;${workspaceFolder}/security;${workspaceFolder}/boundaries",
+			"PYTHONPATH": "${workspaceFolder}/src:${workspaceFolder}/safety:${workspaceFolder}/security:${workspaceFolder}/boundaries",
 			"GRID_HOME": "${workspaceFolder}/src/grid",
 			"COGNITIVE_HOME": "${workspaceFolder}/src/cognitive",
 			"ENV": "development",
 			"PYTHON_VERSION": "3.13"
 		},
-		"terminal.integrated.profiles.windows": {
-			"PowerShell": {
-				"source": "PowerShell",
-				"icon": "terminal-powershell"
-			},
-			"WSL": {
-				"path": "wsl.exe",
-				"args": [
-					"-d",
-					"Ubuntu"
-				],
-				"icon": "terminal-linux",
-				"color": "terminal.ansiBlue"
-			}
-		},
-		"terminal.integrated.defaultProfile.windows": "PowerShell",
 		// ── Workbench ───────────────────────────────────────────
 		"workbench.editor.closeOnFileDelete": true
 	}
