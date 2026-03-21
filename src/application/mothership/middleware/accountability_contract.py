@@ -13,6 +13,10 @@ from typing import Any, Callable
 from fastapi import Request, Response, status
 from starlette.middleware.base import BaseHTTPMiddleware
 
+from grid.resilience.accountability.characters import (
+    ContractContext,
+    activate,
+)
 from grid.resilience.accountability.contracts import EnforcementResult
 
 # Import enhanced enforcer
@@ -58,6 +62,9 @@ class AccountabilityContractMiddleware(BaseHTTPMiddleware):
         self.enforcer.enforcement_mode = enforcement_mode
         if contract_path:
             self.enforcer.contract_path = contract_path
+
+        # Activate TUV-001 governance contract
+        self.governance = activate(enforcement_mode=enforcement_mode)
 
         logger.info(
             f"Accountability contract middleware initialized: mode={enforcement_mode}, "
@@ -112,8 +119,29 @@ class AccountabilityContractMiddleware(BaseHTTPMiddleware):
                 response_time_ms=response_time_ms,
             )
 
+            # Run TUV-001 governance check
+            gov_ctx = ContractContext(
+                objective=f"{request.method} {request.url.path}",
+                action=request.method,
+            )
+            gov_verdict = self.governance.enforce(gov_ctx)
+
             # Add enforcement headers
             self._add_enforcement_headers(response, request_result, response_result)
+
+            # Add governance headers
+            response.headers["X-Governance-Status"] = "pass" if gov_verdict.passed else "fail"
+            response.headers["X-Governance-Circuit"] = gov_verdict.circuit.value
+            response.headers["X-Governance-Confidence"] = f"{gov_verdict.confidence:.2f}"
+
+            if not gov_verdict.passed:
+                logger.warning(
+                    "Governance violation: %s %s — circuit=%s confidence=%.0f%%",
+                    request.method,
+                    request.url.path,
+                    gov_verdict.circuit.value,
+                    gov_verdict.confidence * 100,
+                )
 
             # Log violations
             self._log_violations(request, request_result, response_result)

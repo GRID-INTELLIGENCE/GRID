@@ -13,6 +13,17 @@ from .calculator import (
     get_accountability_calculator,
 )
 
+# Development governance contract (TUV-001)
+from .characters import (
+    CircuitState,
+    ContractContext,
+    ContractVerdict,
+    DevContract,
+    LayerVerdict,
+    activate,
+    get_contract,
+)
+
 # Import from contract loader
 from .contract_loader import (
     ContractLoader,
@@ -75,4 +86,12 @@ __all__ = [
     # Contract Loader
     "load_accountability_contract",
     "ContractLoader",
+    # Development governance contract (TUV-001)
+    "DevContract",
+    "ContractContext",
+    "ContractVerdict",
+    "LayerVerdict",
+    "CircuitState",
+    "activate",
+    "get_contract",
 ]

@@ -11,7 +11,12 @@ from .accountability import (
     AccountabilityCalculator,
     DeliveryClassification,
     DeliveryScore,
+    DevContract,
     get_accountability_calculator,
+    get_contract,
+)
+from .accountability import (
+    activate as activate_contract,
 )
 from .metrics import (
     MetricsCollector,
@@ -41,6 +46,10 @@ __all__ = [
     "DeliveryScore",
     "AccountabilityCalculator",
     "get_accountability_calculator",
+    # Governance contract (TUV-001)
+    "DevContract",
+    "activate_contract",
+    "get_contract",
     # Penalties
     "PenaltySeverity",
     "SEVERITY_RANGES",
