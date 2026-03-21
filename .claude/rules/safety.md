@@ -22,3 +22,5 @@ Before modifying any file here, consider:
 2. Are existing tests still passing?
 3. Is the audit trail preserved?
 4. Could this introduce a bypass path?
+
+# bp-discovery-hogsmade-20260321102103-new
