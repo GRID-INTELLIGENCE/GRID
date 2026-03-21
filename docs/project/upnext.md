@@ -63,7 +63,7 @@
 - [ ] **Concurrent registration test**: Async test for race condition on duplicate username
 - [ ] **Load test `/auth/login`**: k6 or locust script, target < 200ms p99 at 100 RPS
 - [ ] **Failed login monitoring**: Alert on > 50 failed logins/min (Prometheus + alertmanager)
-- [ ] **Pre-commit hooks at repo root**: Add root `.pre-commit-config.yaml` with ruff, mypy
+- [x] **Pre-commit hooks at repo root**: Add root `.pre-commit-config.yaml` with ruff, mypy
 
 ### P3 — Low (Backlog)
 

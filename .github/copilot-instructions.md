@@ -1,5 +1,13 @@
 # Copilot Instructions for GRID
 
+## Copilot Code Review Guardrails (TL;DR)
+
+- Type hints required for ALL functions/methods/attributes; avoid weakening typing.
+- Never use or suggest `eval()`, `exec()`, or `pickle` for runtime behavior.
+- Safety/security/boundary changes require tests plus an explicit rollback plan.
+- Logging: prefer `structlog`; do not introduce `print()` in runtime paths.
+- Style: keep within the project's 120-char line length.
+
 This document guides AI agents through the GRID (Geometric Resonance Intelligence Driver) codebase for productive development.
 
 ## Project Identity
@@ -391,3 +399,11 @@ For user-facing features, consider:
 - Verify UV environment: `uv sync --group dev --group test`
 - Check test isolation: `pytest tests/unit/ -v` (should not require external services)
 - Verify unified_fabric event bus: `pytest tests/unified_fabric/ -v`
+
+## Copilot Code Review Guardrails
+
+- Type hints required for ALL functions, methods, and class attributes; avoid weakening typing.
+- Never use or suggest `eval()`, `exec()`, or `pickle` for runtime behavior. If you believe there is no safe alternative, block the change and request a safer design.
+- Safety/security/boundary changes require tests plus an explicit rollback plan; do not weaken boundaries without coverage.
+- Logging: prefer `structlog` and existing logging utilities; do not introduce `print()` on runtime paths.
+- Style: keep within the project's 120-char line length.

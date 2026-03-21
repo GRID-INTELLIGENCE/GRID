@@ -1,0 +1,11 @@
+# CODEOWNERS — GRID
+* @caraxesthebloodwyrm02
+
+# Safety-critical paths — mandatory review
+/src/**/safety/ @caraxesthebloodwyrm02
+/src/**/security/ @caraxesthebloodwyrm02
+/src/**/boundaries/ @caraxesthebloodwyrm02
+/safety/ @caraxesthebloodwyrm02
+
+# CI/CD and governance
+/.github/ @caraxesthebloodwyrm02
