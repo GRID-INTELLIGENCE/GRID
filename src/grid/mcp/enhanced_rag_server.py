@@ -14,6 +14,7 @@ import asyncio
 import json
 import logging
 import sys
+import threading
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
@@ -79,6 +80,7 @@ class EnhancedRAGMCPServer:
         self.server = Server("grid-rag-enhanced")
         self._rag_engine_factory = rag_engine_factory
         self._ollama_checker = ollama_checker
+        self._init_lock = threading.Lock()
         self.rag_engine = None
         self.sessions: dict[str, RAGSession] = {}
         self._register_handlers()
@@ -95,11 +97,13 @@ class EnhancedRAGMCPServer:
         self.server._handle_list_tools = _handle_list_tools
 
     def _ensure_rag_engine(self) -> Any:
-        """Create the heavy RAG engine lazily so MCP initialize stays fast."""
+        """Lazy-init the RAG engine on first tool call to keep MCP startup fast."""
         if self.rag_engine is None:
-            self.rag_engine = self._rag_engine_factory()
-            if not self._ollama_checker():
-                logger.warning("Ollama connection not available. Some features may be limited.")
+            with self._init_lock:
+                if self.rag_engine is None:
+                    self.rag_engine = self._rag_engine_factory()
+                    self._rag_engine_factory = None  # type: ignore[assignment]
+                    self._ollama_checker = None  # type: ignore[assignment]
         return self.rag_engine
 
     def _register_handlers(self):
@@ -293,7 +297,6 @@ class EnhancedRAGMCPServer:
 
         try:
             engine = self._ensure_rag_engine()
-            # Execute query with conversation support
             result = await engine.query(
                 query_text=query, session_id=session_id, enable_multi_hop=enable_multi_hop, temperature=temperature
             )
@@ -326,7 +329,6 @@ class EnhancedRAGMCPServer:
 
         try:
             engine = self._ensure_rag_engine()
-            # Create session in RAG engine
             engine.create_session(session_id, metadata)
 
             # Store session info
@@ -353,7 +355,6 @@ class EnhancedRAGMCPServer:
 
         try:
             engine = self._ensure_rag_engine()
-            # Get session info from RAG engine
             session_info = engine.get_session_info(session_id)
 
             if not session_info:
@@ -380,7 +381,6 @@ class EnhancedRAGMCPServer:
 
         try:
             engine = self._ensure_rag_engine()
-            # Delete session from RAG engine
             success = engine.delete_session(session_id)
 
             if success:
@@ -406,7 +406,6 @@ class EnhancedRAGMCPServer:
         """Get RAG system statistics."""
         try:
             engine = self._ensure_rag_engine()
-            # Get stats from RAG engine
             stats = engine.get_conversation_stats()
 
             # Add server-specific stats
@@ -433,7 +432,6 @@ class EnhancedRAGMCPServer:
 
         try:
             engine = self._ensure_rag_engine()
-            # Index documents using RAG engine
             await engine.index(path, rebuild=rebuild)
 
             stats = engine.get_stats()
