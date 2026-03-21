@@ -130,37 +130,41 @@ def main():
                 continue
 
             if method == "tools/list":
-                response = {"jsonrpc": "2.0", "id": request_id, "result": {
-                    "tools": [
-                        {
-                            "name": "analyze_code",
-                            "description": "Analyze Python code for quality issues",
-                            "inputSchema": {
-                                "type": "object",
-                                "properties": {"file_path": {"type": "string"}},
-                                "required": ["file_path"],
+                response = {
+                    "jsonrpc": "2.0",
+                    "id": request_id,
+                    "result": {
+                        "tools": [
+                            {
+                                "name": "analyze_code",
+                                "description": "Analyze Python code for quality issues",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {"file_path": {"type": "string"}},
+                                    "required": ["file_path"],
+                                },
                             },
-                        },
-                        {
-                            "name": "check_security",
-                            "description": "Check for security issues",
-                            "inputSchema": {
-                                "type": "object",
-                                "properties": {"file_path": {"type": "string"}},
-                                "required": ["file_path"],
+                            {
+                                "name": "check_security",
+                                "description": "Check for security issues",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {"file_path": {"type": "string"}},
+                                    "required": ["file_path"],
+                                },
                             },
-                        },
-                        {
-                            "name": "get_complexity",
-                            "description": "Get code complexity metrics",
-                            "inputSchema": {
-                                "type": "object",
-                                "properties": {"file_path": {"type": "string"}},
-                                "required": ["file_path"],
+                            {
+                                "name": "get_complexity",
+                                "description": "Get code complexity metrics",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {"file_path": {"type": "string"}},
+                                    "required": ["file_path"],
+                                },
                             },
-                        },
-                    ]
-                }}
+                        ]
+                    },
+                }
 
             elif method == "tools/call":
                 tool_name = params.get("name")

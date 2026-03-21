@@ -124,39 +124,43 @@ def main():
                 continue
 
             if method == "tools/list":
-                response = {"jsonrpc": "2.0", "id": request_id, "result": {
-                    "tools": [
-                        {
-                            "name": "run_tests",
-                            "description": "Run pytest tests",
-                            "inputSchema": {
-                                "type": "object",
-                                "properties": {"test_path": {"type": "string"}, "verbose": {"type": "boolean"}},
-                            },
-                        },
-                        {
-                            "name": "run_coverage",
-                            "description": "Run tests with coverage report",
-                            "inputSchema": {
-                                "type": "object",
-                                "properties": {
-                                    "test_path": {"type": "string"},
-                                    "output_format": {"type": "string", "enum": ["term", "json", "html"]},
+                response = {
+                    "jsonrpc": "2.0",
+                    "id": request_id,
+                    "result": {
+                        "tools": [
+                            {
+                                "name": "run_tests",
+                                "description": "Run pytest tests",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {"test_path": {"type": "string"}, "verbose": {"type": "boolean"}},
                                 },
                             },
-                        },
-                        {
-                            "name": "discover_tests",
-                            "description": "Discover available test files",
-                            "inputSchema": {"type": "object", "properties": {"test_dir": {"type": "string"}}},
-                        },
-                        {
-                            "name": "get_test_summary",
-                            "description": "Get test summary without running",
-                            "inputSchema": {"type": "object", "properties": {"test_path": {"type": "string"}}},
-                        },
-                    ]
-                }}
+                            {
+                                "name": "run_coverage",
+                                "description": "Run tests with coverage report",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "test_path": {"type": "string"},
+                                        "output_format": {"type": "string", "enum": ["term", "json", "html"]},
+                                    },
+                                },
+                            },
+                            {
+                                "name": "discover_tests",
+                                "description": "Discover available test files",
+                                "inputSchema": {"type": "object", "properties": {"test_dir": {"type": "string"}}},
+                            },
+                            {
+                                "name": "get_test_summary",
+                                "description": "Get test summary without running",
+                                "inputSchema": {"type": "object", "properties": {"test_path": {"type": "string"}}},
+                            },
+                        ]
+                    },
+                }
 
             elif method == "tools/call":
                 tool_name = params.get("name")

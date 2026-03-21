@@ -174,7 +174,7 @@ def create_app() -> FastAPI:
     # Add Parasite Guard first (total Rickall defense)
     middleware = add_parasite_guard(app, settings)
     # Inject dispose_engine callable to fix DDD inversion (infrastructure -> application)
-    if hasattr(middleware, 'wire_dispose_engine'):
+    if hasattr(middleware, "wire_dispose_engine"):
         middleware.wire_dispose_engine(dispose_async_engine)
         logger.info("Parasite Guard dispose_engine injected (main_unified)")
 

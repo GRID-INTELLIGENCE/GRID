@@ -405,8 +405,7 @@ class AdvancedPatternManager:
         Lower is better (0 = perfect, 0.25 = random).
         """
         validated = [
-            u for u in self._feedback_history
-            if u.was_correct is not None and "prediction_confidence" in u.context
+            u for u in self._feedback_history if u.was_correct is not None and "prediction_confidence" in u.context
         ]
         if len(validated) < 5:
             return None
