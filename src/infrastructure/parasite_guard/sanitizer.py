@@ -11,6 +11,7 @@ import asyncio
 import logging
 import sys
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from datetime import UTC, datetime
 from typing import Any
 

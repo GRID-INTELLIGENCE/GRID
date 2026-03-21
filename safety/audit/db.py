@@ -8,8 +8,8 @@ Fail-closed: if the DB is unreachable, callers must refuse requests.
 from __future__ import annotations
 
 import os
-from pathlib import Path
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import AsyncGenerator
 
 from sqlalchemy import text

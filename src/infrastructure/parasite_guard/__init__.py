@@ -38,6 +38,7 @@ from .contracts import (
     validate_detector_contract,
     validate_sanitizer_contract,
 )
+
 # Note: ParasiteContext, DetectionResult, SanitizationResult, SourceMap are in .models
 # ParasiteSeverity replaces the stale ParasiteRisk from definitions.py
 # ParasiteDetector protocol removed - use Detector from .detectors instead

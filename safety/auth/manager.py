@@ -67,7 +67,7 @@ class AuthManager:
             "Hard-coded user stubs are not permitted in safety/auth/manager.py."
         )
 
-        def check_rate_limit(self, user_id: str, action: str = "request") -> bool:
+    def check_rate_limit(self, user_id: str, action: str = "request") -> bool:
         """Check if user is within rate limits"""
         key = f"ratelimit:{user_id}:{action}"
         current_time = datetime.now(UTC).timestamp()
@@ -86,7 +86,6 @@ class AuthManager:
         self.redis_client.expire(key, settings.RATE_LIMIT_WINDOW)
 
         return True
-
 
     def get_trust_tier_limits(self, trust_tier: str) -> dict[str, int]:
         """Get rate limits for trust tier"""

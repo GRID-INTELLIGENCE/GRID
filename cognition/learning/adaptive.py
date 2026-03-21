@@ -14,7 +14,7 @@ import logging
 from collections import defaultdict
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
 from typing import Any
 
@@ -52,7 +52,7 @@ class LearningOutcome:
     actual_output: Any | None = None
     confidence: float = 0.5
     confidence_source: str = "default"
-    timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    timestamp: datetime = field(default_factory=lambda: datetime.now(UTC))
     metadata: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
