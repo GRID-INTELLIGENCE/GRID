@@ -52,7 +52,10 @@ def get_embedding_provider(provider_type: str | None = None, config: RAGConfig |
                 "may be missing or broken). Use provider_type='ollama' or 'simple', or fix the "
                 "environment. Original error: " + str(e)
             ) from e
-        return HuggingFaceEmbeddingProvider(model_name=config.embedding_model)
+        return HuggingFaceEmbeddingProvider(
+            model_name=config.embedding_model,
+            allow_download=getattr(config, "reranker_allow_download", False),
+        )
     elif provider_type == EmbeddingProviderType.OPENAI.value:
         from .openai import OpenAIEmbeddingProvider
 

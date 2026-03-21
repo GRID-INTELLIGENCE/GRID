@@ -13,23 +13,55 @@ class HuggingFaceEmbeddingProvider(BaseEmbeddingProvider):
     This provider runs locally using the sentence-transformers package.
     """
 
-    def __init__(self, model_name: str = "BAAI/bge-small-en-v1.5", device: str = "cpu"):
+    def __init__(
+        self,
+        model_name: str = "BAAI/bge-small-en-v1.5",
+        device: str = "cpu",
+        allow_download: bool = False,
+    ):
         """Initialize Hugging Face provider.
 
         Args:
             model_name: Hugging Face model identifier
             device: Device to run on ('cpu', 'cuda', etc.)
+            allow_download: If False, block outbound HuggingFace Hub model downloads (local-first policy)
         """
+        import logging
+        import os
+
+        logger = logging.getLogger(__name__)
+
         try:
             from sentence_transformers import SentenceTransformer
         except ImportError:
             raise ImportError(
-                "sentence-transformers not installed. Please install with: pip install sentence-transformers"
+                "sentence-transformers not installed. Please install with: uv add sentence-transformers"
             ) from None
 
         self.model_name = model_name
         self.device = device
-        self._model = SentenceTransformer(model_name, device=device)
+
+        # Enforce local-first egress policy: block HuggingFace Hub downloads unless explicitly allowed
+        prev_offline = os.environ.get("HF_HUB_OFFLINE")
+        if not allow_download:
+            os.environ["HF_HUB_OFFLINE"] = "1"
+            logger.info("HuggingFace egress blocked (HF_HUB_OFFLINE=1) — using cached models only")
+
+        try:
+            self._model = SentenceTransformer(model_name, device=device)
+        except OSError as e:
+            raise RuntimeError(
+                f"HuggingFace embedding model '{model_name}' not found in local cache and downloads "
+                f"are disabled (RAG_RERANKER_ALLOW_DOWNLOAD=false). Either pre-download the model or "
+                f"set RAG_RERANKER_ALLOW_DOWNLOAD=true to allow HuggingFace Hub egress. "
+                f"Original error: {e}"
+            ) from e
+        finally:
+            if prev_offline is None:
+                os.environ.pop("HF_HUB_OFFLINE", None)
+            else:
+                os.environ["HF_HUB_OFFLINE"] = prev_offline
+
         self._dimension = self._model.get_sentence_embedding_dimension()
 
     def embed(self, text: str) -> list[float] | np.ndarray:

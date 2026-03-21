@@ -297,7 +297,31 @@ class PortfolioSafetyLensServer:
 
 async def main():
     """Run the Portfolio Safety Lens MCP server."""
+    # Startup dependency validation — diagnose missing components individually
+    from importlib.util import find_spec
+
+    dep_issues: list[str] = []
+    if not coinbase_path.exists():
+        dep_issues.append(f"Coinbase archive not found at {coinbase_path}")
+    if find_spec("databricks") is None and find_spec("databricks.sql") is None:
+        dep_issues.append(
+            "databricks-sql-connector not installed. "
+            "Install with: uv pip install databricks-sql-connector"
+        )
+    if dep_issues:
+        logger.warning(
+            "portfolio-safety-lens starting in DEGRADED mode — missing dependencies:\n  - %s",
+            "\n  - ".join(dep_issues),
+        )
+
     server = PortfolioSafetyLensServer()
+    if server.startup_error:
+        logger.error(
+            "portfolio-safety-lens backend unavailable: %s. "
+            "All tool calls will return structured errors until dependencies are resolved.",
+            server.startup_error,
+        )
+
     async with stdio_server() as (read_stream, write_stream):
         await server.server.run(read_stream, write_stream, server.server.create_initialization_options())
 

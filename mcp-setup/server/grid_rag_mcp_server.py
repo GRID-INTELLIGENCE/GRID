@@ -745,6 +745,45 @@ async def main():
         logger.warning(f"Could not load RAG config: {e}")
         session.config = RAGConfig()  # Use defaults
 
+    # Validate model availability at startup (fail-early on config/runtime drift)
+    try:
+        from tools.rag.utils import check_rag_system_health
+
+        config = session.config
+        health = await asyncio.wait_for(
+            asyncio.get_event_loop().run_in_executor(
+                None,
+                lambda: check_rag_system_health(
+                    embedding_model=config.embedding_model,
+                    llm_model=config.llm_model_local,
+                    base_url=config.ollama_base_url,
+                ),
+            ),
+            timeout=15.0,
+        )
+        status = health.get("overall_status", "unknown")
+        if status == "unhealthy":
+            logger.error(
+                "RAG startup validation FAILED: no required models available. "
+                "Embedding='%s', LLM='%s'. Server will start but tools will fail. "
+                "Run: ollama pull %s && ollama pull %s",
+                config.embedding_model,
+                config.llm_model_local,
+                config.embedding_model,
+                config.llm_model_local,
+            )
+        elif status == "degraded":
+            logger.warning(
+                "RAG startup validation: DEGRADED — some models missing. Health: %s",
+                health,
+            )
+        else:
+            logger.info("RAG startup validation: all models available")
+    except TimeoutError:
+        logger.warning("RAG startup model validation timed out — skipping (Ollama may be slow)")
+    except Exception as e:
+        logger.warning(f"RAG startup model validation failed: {e}")
+
     # Run server
     async with stdio_server() as (read_stream, write_stream):
         await server.run(read_stream, write_stream, server.create_initialization_options())

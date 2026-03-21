@@ -63,30 +63,55 @@ class RAGEngine:
         elif config.llm_mode == ModelMode.EXTERNAL:
             print("Using external API provider (OpenAI/Anthropic/etc.) - no Ollama required")
 
-        # Try to find available models for Ollama provider
+        # Validate and resolve embedding model for Ollama provider
         if config.embedding_provider == "ollama":
             try:
                 available_embedding_model = find_embedding_model(
                     preferred=config.embedding_model, base_url=config.ollama_base_url
                 )
-                if available_embedding_model and available_embedding_model != config.embedding_model:
-                    print(
-                        f"Info: Using available Ollama model '{available_embedding_model}' instead of '{config.embedding_model}'"
+                if available_embedding_model is None:
+                    raise RuntimeError(
+                        f"No compatible embedding model found in Ollama. "
+                        f"Configured: '{config.embedding_model}'. "
+                        f"Pull a model with: ollama pull {config.embedding_model}"
+                    )
+                if available_embedding_model != config.embedding_model:
+                    logger.warning(
+                        "Using available Ollama embedding model '%s' instead of configured '%s'",
+                        available_embedding_model,
+                        config.embedding_model,
                     )
                     config.embedding_model = available_embedding_model
-            except Exception:  # noqa: S110 intentional silent handling
-                pass
+            except RuntimeError:
+                raise
+            except Exception as e:
+                raise RuntimeError(
+                    f"Failed to validate embedding model availability: {e}"
+                ) from e
 
+        # Validate and resolve LLM model for local mode
         if config.llm_mode == ModelMode.LOCAL:
             try:
                 available_llm_model = find_llm_model(preferred=config.llm_model_local, base_url=config.ollama_base_url)
-                if available_llm_model and available_llm_model != config.llm_model_local:
-                    print(
-                        f"Info: Using available Ollama LLM '{available_llm_model}' instead of '{config.llm_model_local}'"
+                if available_llm_model is None:
+                    raise RuntimeError(
+                        f"No compatible LLM model found in Ollama. "
+                        f"Configured: '{config.llm_model_local}'. "
+                        f"Pull a model with: ollama pull {config.llm_model_local}"
+                    )
+                if available_llm_model != config.llm_model_local:
+                    logger.warning(
+                        "Using available Ollama LLM '%s' instead of configured '%s'",
+                        available_llm_model,
+                        config.llm_model_local,
                     )
                     config.llm_model_local = available_llm_model
-            except Exception:  # noqa: S110 intentional silent handling
-                pass
+            except RuntimeError:
+                raise
+            except Exception as e:
+                raise RuntimeError(
+                    f"Failed to validate LLM model availability: {e}"
+                ) from e
 
         self.config = config
 
