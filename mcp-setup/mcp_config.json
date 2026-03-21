@@ -1,4 +1,5 @@
 {
+  "_NOT_EDITOR_CANONICAL": "Editor/tool MCP is CascadeProjects/mcp_config.json (workspace TUV-001 / .dev-rules.md). This file is GRID-submodule legacy (servers array, optional ports, historical paths). Do not merge blindly into Cursor, Windsurf, Claude Code, or Zed configs.",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "version": "1.0.0",
   "description": "GRID MCP Server Configuration",
