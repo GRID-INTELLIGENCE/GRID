@@ -2,11 +2,11 @@
   "general_configuration": {
     "id": "unified-workspace-config-2026",
     "version": "1.0.0",
-    "description": "Unified server configuration and technical debt profile for irfan's development workspace spanning E:\\grid, E:\\coinbase, E:\\wellness_studio, and C:\\Users\\irfan projects",
+    "description": "Unified server configuration and technical debt profile for irfan's development workspace",
     "logging": {
       "format": "JSON",
       "level": "INFO",
-      "file": "E:\\config\\logs\\unified-health-check.log"
+      "file": "logs/unified-health-check.log"
     },
     "defaults": {
       "retry_attempts": 3,
@@ -28,8 +28,11 @@
         "note": "Production-stable v2.2.2, core component of GRID framework"
       },
       "command": "python",
-      "arguments": ["-m", "grid_rag_mcp_server"],
-      "working_directory": "E:\\grid\\mcp-setup\\server",
+      "arguments": [
+        "-m",
+        "grid_rag_mcp_server"
+      ],
+      "working_directory": "mcp-setup/server",
       "environment_variables": {
         "OLLAMA_HOST": "http://localhost:11434",
         "CHROMA_HOST": "localhost",
@@ -58,8 +61,11 @@
         "note": "Active development, part of MCP ecosystem"
       },
       "command": "python",
-      "arguments": ["-m", "enhanced_tools_mcp_server"],
-      "working_directory": "E:\\grid\\mcp-setup\\server",
+      "arguments": [
+        "-m",
+        "enhanced_tools_mcp_server"
+      ],
+      "working_directory": "mcp-setup/server",
       "environment_variables": {},
       "port": 8001,
       "context": "Provides extended tooling capabilities for GRID agents including file operations, web search, and utility functions.",
@@ -84,8 +90,11 @@
         "note": "Core component with 9 cognition patterns implemented"
       },
       "command": "python",
-      "arguments": ["-m", "grid.agentic"],
-      "working_directory": "E:\\grid",
+      "arguments": [
+        "-m",
+        "grid.agentic"
+      ],
+      "working_directory": ".",
       "environment_variables": {
         "GRID_LOG_LEVEL": "INFO",
         "GRID_TRACE_ENABLED": "true"
@@ -114,7 +123,7 @@
       },
       "command": "grid-api",
       "arguments": [],
-      "working_directory": "E:\\grid",
+      "working_directory": ".",
       "environment_variables": {
         "DATABRICKS_HOST": "${DATABRICKS_HOST}",
         "REDIS_URL": "${REDIS_URL}"
@@ -142,8 +151,11 @@
         "note": "Active development, 40% overall progress on planned improvements"
       },
       "command": "python",
-      "arguments": ["-m", "coinbase.cli"],
-      "working_directory": "E:\\coinbase",
+      "arguments": [
+        "-m",
+        "coinbase.cli"
+      ],
+      "working_directory": "../seed/archive/Coinbase_from_zip",
       "environment_variables": {
         "DATABRICKS_HOST": "${DATABRICKS_HOST}",
         "DATABRICKS_TOKEN": "${DATABRICKS_TOKEN}",
@@ -173,7 +185,7 @@
       },
       "command": "wellness-studio",
       "arguments": [],
-      "working_directory": "E:\\wellness_studio",
+      "working_directory": "../seed/archive/wellness_studio",
       "environment_variables": {
         "TORCH_HOME": "${TORCH_HOME}",
         "HF_HOME": "${HF_HOME}"
@@ -201,8 +213,11 @@
         "note": "Cannot run until dependencies resolved"
       },
       "command": "python",
-      "arguments": ["-m", "ai_safety.monitoring.spawn_monitor"],
-      "working_directory": "E:\\wellness_studio",
+      "arguments": [
+        "-m",
+        "ai_safety.monitoring.spawn_monitor"
+      ],
+      "working_directory": "../seed/archive/wellness_studio",
       "environment_variables": {},
       "port": null,
       "context": "Monitors MCP configuration files for changes and spawns/manages server processes accordingly. Provides crash recovery and state persistence.",
@@ -227,8 +242,11 @@
         "note": "Core safety component blocked by missing dependencies"
       },
       "command": "python",
-      "arguments": ["-c", "from ai_safety.denylist_engine.wellness_safety_manager import WellnessSafetyManager"],
-      "working_directory": "E:\\wellness_studio",
+      "arguments": [
+        "-c",
+        "from ai_safety.denylist_engine.wellness_safety_manager import WellnessSafetyManager"
+      ],
+      "working_directory": "../seed/archive/wellness_studio",
       "environment_variables": {},
       "port": null,
       "context": "Enforces healthcare safety policies including PII protection, HIPAA compliance, and AI safety guardrails. Part of multi-provider AI safety framework.",
@@ -243,7 +261,7 @@
     {
       "id": "django-myproject",
       "name": "Django MyProject",
-      "description": "Django web application at C:\\Users\\irfan\\myproject",
+      "description": "Django web application (archived, was at C:\\Users\\irfan\\myproject)",
       "status": {
         "enabled": false,
         "denylist": {
@@ -253,8 +271,11 @@
         "note": "SECURITY RISK - Do not deploy until fixed"
       },
       "command": "python",
-      "arguments": ["manage.py", "runserver"],
-      "working_directory": "C:\\Users\\irfan\\myproject",
+      "arguments": [
+        "manage.py",
+        "runserver"
+      ],
+      "working_directory": "ARCHIVED",
       "environment_variables": {},
       "port": 8000,
       "context": "Django web project with SQLite backend. Located at user root directory, appears to be a learning/test project.",
@@ -279,8 +300,11 @@
         "note": "LSP errors indicate code quality issues"
       },
       "command": "python",
-      "arguments": ["-m", "server_denylist_manager"],
-      "working_directory": "E:\\scripts",
+      "arguments": [
+        "-m",
+        "server_denylist_manager"
+      ],
+      "working_directory": "scripts",
       "environment_variables": {},
       "port": null,
       "context": "Manages server denylist rules for AI safety enforcement. Part of the unified workspace safety infrastructure.",

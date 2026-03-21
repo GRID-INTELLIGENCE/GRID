@@ -6,27 +6,59 @@
   "created": "2026-02-16",
   "codebase": {
     "name": "grid-intelligence",
-    "root": "E:\\GRID-main",
-    "languages": ["python", "typescript", "javascript"],
+    "root": ".",
+    "languages": [
+      "python",
+      "typescript",
+      "javascript"
+    ],
     "python_version": ">=3.13,<3.14",
     "node_version": ">=18",
     "package_manager_python": "uv",
     "package_manager_js": "npm",
-    "source_paths": ["src/", "safety/", "boundaries/", "cognition/", "arena_api/"],
+    "source_paths": [
+      "src/",
+      "safety/",
+      "boundaries/",
+      "cognition/",
+      "arena_api/"
+    ],
     "frontend_path": "frontend/",
-    "test_paths": ["tests/", "safety/tests/", "boundaries/tests/"],
+    "test_paths": [
+      "tests/",
+      "safety/tests/",
+      "boundaries/tests/"
+    ],
     "total_python_files": 715,
     "total_packages": 9
   },
   "environment": {
     "required_tools": [
-      { "name": "uv", "min_version": "0.4.0", "verify": "uv --version" },
-      { "name": "python", "min_version": "3.13", "verify": "python --version" },
-      { "name": "node", "min_version": "18.0", "verify": "node --version" },
-      { "name": "npm", "min_version": "9.0", "verify": "npm --version" }
+      {
+        "name": "uv",
+        "min_version": "0.4.0",
+        "verify": "uv --version"
+      },
+      {
+        "name": "python",
+        "min_version": "3.13",
+        "verify": "python --version"
+      },
+      {
+        "name": "node",
+        "min_version": "18.0",
+        "verify": "node --version"
+      },
+      {
+        "name": "npm",
+        "min_version": "9.0",
+        "verify": "npm --version"
+      }
     ],
     "env_vars": {
-      "required": ["MOTHERSHIP_ENVIRONMENT"],
+      "required": [
+        "MOTHERSHIP_ENVIRONMENT"
+      ],
       "recommended_test_values": {
         "MOTHERSHIP_ENVIRONMENT": "test",
         "MOTHERSHIP_DATABASE_URL": "sqlite:///:memory:",
@@ -51,7 +83,10 @@
           "timeout_seconds": 120,
           "pass_criteria": {
             "exit_code": 0,
-            "stderr_must_not_contain": ["error", "conflict"],
+            "stderr_must_not_contain": [
+              "error",
+              "conflict"
+            ],
             "stdout_must_contain": []
           },
           "fix": {
@@ -63,7 +98,11 @@
             "escalation": "If uv sync fails after lock regeneration, inspect pyproject.toml dependency constraints"
           },
           "depends_on": [],
-          "tags": ["python", "dependencies", "ci-blocking"]
+          "tags": [
+            "python",
+            "dependencies",
+            "ci-blocking"
+          ]
         },
         {
           "id": "bi-002",
@@ -75,7 +114,10 @@
           "timeout_seconds": 120,
           "pass_criteria": {
             "exit_code": 0,
-            "stderr_must_not_contain": ["ERR!", "ERESOLVE"],
+            "stderr_must_not_contain": [
+              "ERR!",
+              "ERESOLVE"
+            ],
             "stdout_must_contain": []
           },
           "fix": {
@@ -87,7 +129,11 @@
             "escalation": "Check for peer dependency conflicts in frontend/package.json"
           },
           "depends_on": [],
-          "tags": ["node", "dependencies", "ci-blocking"]
+          "tags": [
+            "node",
+            "dependencies",
+            "ci-blocking"
+          ]
         },
         {
           "id": "bi-003",
@@ -99,7 +145,10 @@
           "timeout_seconds": 120,
           "pass_criteria": {
             "exit_code": 0,
-            "stderr_must_not_contain": ["error", "failed"],
+            "stderr_must_not_contain": [
+              "error",
+              "failed"
+            ],
             "stdout_must_contain": []
           },
           "fix": {
@@ -110,8 +159,14 @@
             ],
             "escalation": "Inspect build backend (hatchling) configuration for missing or excluded paths"
           },
-          "depends_on": ["bi-001"],
-          "tags": ["python", "build", "packaging"]
+          "depends_on": [
+            "bi-001"
+          ],
+          "tags": [
+            "python",
+            "build",
+            "packaging"
+          ]
         },
         {
           "id": "bi-004",
@@ -123,8 +178,12 @@
           "timeout_seconds": 30,
           "pass_criteria": {
             "exit_code": 0,
-            "stderr_must_not_contain": ["error"],
-            "stdout_must_contain": ["PASSED"]
+            "stderr_must_not_contain": [
+              "error"
+            ],
+            "stdout_must_contain": [
+              "PASSED"
+            ]
           },
           "fix": {
             "auto_command": null,
@@ -134,8 +193,14 @@
             ],
             "escalation": "Check long_description format and content-type in pyproject.toml"
           },
-          "depends_on": ["bi-003"],
-          "tags": ["python", "packaging", "metadata"]
+          "depends_on": [
+            "bi-003"
+          ],
+          "tags": [
+            "python",
+            "packaging",
+            "metadata"
+          ]
         },
         {
           "id": "bi-005",
@@ -147,7 +212,10 @@
           "timeout_seconds": 180,
           "pass_criteria": {
             "exit_code": 0,
-            "stderr_must_not_contain": ["error TS", "ERROR"],
+            "stderr_must_not_contain": [
+              "error TS",
+              "ERROR"
+            ],
             "stdout_must_contain": []
           },
           "fix": {
@@ -158,8 +226,14 @@
             ],
             "escalation": "Review tsconfig.json and tsconfig.electron.json for path alias issues"
           },
-          "depends_on": ["bi-002"],
-          "tags": ["node", "build", "frontend"]
+          "depends_on": [
+            "bi-002"
+          ],
+          "tags": [
+            "node",
+            "build",
+            "frontend"
+          ]
         },
         {
           "id": "bi-006",
@@ -171,8 +245,14 @@
           "timeout_seconds": 60,
           "pass_criteria": {
             "exit_code": 0,
-            "stderr_must_not_contain": ["ModuleNotFoundError", "ImportError", "SyntaxError"],
-            "stdout_must_contain": ["test"]
+            "stderr_must_not_contain": [
+              "ModuleNotFoundError",
+              "ImportError",
+              "SyntaxError"
+            ],
+            "stdout_must_contain": [
+              "test"
+            ]
           },
           "fix": {
             "auto_command": null,
@@ -183,8 +263,14 @@
             ],
             "escalation": "Cross-reference PREEXISTING_ISSUES.md for known import failures"
           },
-          "depends_on": ["bi-001"],
-          "tags": ["python", "imports", "ci-blocking"]
+          "depends_on": [
+            "bi-001"
+          ],
+          "tags": [
+            "python",
+            "imports",
+            "ci-blocking"
+          ]
         }
       ]
     },
@@ -215,8 +301,14 @@
             ],
             "escalation": "Review mypy_path and explicit_package_bases in pyproject.toml [tool.mypy]"
           },
-          "depends_on": ["bi-001"],
-          "tags": ["python", "types", "static-analysis"]
+          "depends_on": [
+            "bi-001"
+          ],
+          "tags": [
+            "python",
+            "types",
+            "static-analysis"
+          ]
         },
         {
           "id": "ts-002",
@@ -228,7 +320,9 @@
           "timeout_seconds": 120,
           "pass_criteria": {
             "exit_code": 0,
-            "stderr_must_not_contain": ["error TS"],
+            "stderr_must_not_contain": [
+              "error TS"
+            ],
             "stdout_must_contain": []
           },
           "fix": {
@@ -239,8 +333,14 @@
             ],
             "escalation": "Review path aliases in tsconfig.json and vite.config.ts"
           },
-          "depends_on": ["bi-002"],
-          "tags": ["typescript", "types", "frontend"]
+          "depends_on": [
+            "bi-002"
+          ],
+          "tags": [
+            "typescript",
+            "types",
+            "frontend"
+          ]
         },
         {
           "id": "ts-003",
@@ -252,7 +352,9 @@
           "timeout_seconds": 60,
           "pass_criteria": {
             "exit_code": 0,
-            "stderr_must_not_contain": ["error TS"],
+            "stderr_must_not_contain": [
+              "error TS"
+            ],
             "stdout_must_contain": []
           },
           "fix": {
@@ -263,8 +365,14 @@
             ],
             "escalation": "Check electron main/preload entry points match tsconfig"
           },
-          "depends_on": ["bi-002"],
-          "tags": ["typescript", "types", "electron"]
+          "depends_on": [
+            "bi-002"
+          ],
+          "tags": [
+            "typescript",
+            "types",
+            "electron"
+          ]
         },
         {
           "id": "ts-004",
@@ -276,8 +384,12 @@
           "timeout_seconds": 10,
           "pass_criteria": {
             "exit_code": 0,
-            "stderr_must_not_contain": ["AssertionError"],
-            "stdout_must_contain": ["py.typed"]
+            "stderr_must_not_contain": [
+              "AssertionError"
+            ],
+            "stdout_must_contain": [
+              "py.typed"
+            ]
           },
           "fix": {
             "auto_command": null,
@@ -288,7 +400,11 @@
             "escalation": "Ensure all packages listed in [tool.hatch.build.targets.wheel].packages have py.typed"
           },
           "depends_on": [],
-          "tags": ["python", "types", "pep561"]
+          "tags": [
+            "python",
+            "types",
+            "pep561"
+          ]
         }
       ]
     },
@@ -307,8 +423,13 @@
           "timeout_seconds": 180,
           "pass_criteria": {
             "exit_code": 0,
-            "stderr_must_not_contain": ["ERRORS", "FAILED"],
-            "stdout_must_contain": ["passed"]
+            "stderr_must_not_contain": [
+              "ERRORS",
+              "FAILED"
+            ],
+            "stdout_must_contain": [
+              "passed"
+            ]
           },
           "fix": {
             "auto_command": null,
@@ -318,8 +439,16 @@
             ],
             "escalation": "Cross-reference PREEXISTING_ISSUES.md for known test failures"
           },
-          "depends_on": ["bi-001", "bi-006"],
-          "tags": ["python", "tests", "unit", "ci-blocking"]
+          "depends_on": [
+            "bi-001",
+            "bi-006"
+          ],
+          "tags": [
+            "python",
+            "tests",
+            "unit",
+            "ci-blocking"
+          ]
         },
         {
           "id": "tc-002",
@@ -331,7 +460,9 @@
           "timeout_seconds": 300,
           "pass_criteria": {
             "exit_code": 0,
-            "stderr_must_not_contain": ["ERRORS"],
+            "stderr_must_not_contain": [
+              "ERRORS"
+            ],
             "stdout_must_contain": []
           },
           "fix": {
@@ -343,8 +474,15 @@
             ],
             "escalation": "Some integration tests require Ollama running locally (ollama serve)"
           },
-          "depends_on": ["bi-001", "bi-006"],
-          "tags": ["python", "tests", "integration"]
+          "depends_on": [
+            "bi-001",
+            "bi-006"
+          ],
+          "tags": [
+            "python",
+            "tests",
+            "integration"
+          ]
         },
         {
           "id": "tc-003",
@@ -368,8 +506,14 @@
             ],
             "escalation": "Coverage threshold is 75% per pyproject.toml — adjust if needed during early development"
           },
-          "depends_on": ["tc-001"],
-          "tags": ["python", "tests", "coverage"]
+          "depends_on": [
+            "tc-001"
+          ],
+          "tags": [
+            "python",
+            "tests",
+            "coverage"
+          ]
         },
         {
           "id": "tc-004",
@@ -381,7 +525,9 @@
           "timeout_seconds": 120,
           "pass_criteria": {
             "exit_code": 0,
-            "stderr_must_not_contain": ["FAIL"],
+            "stderr_must_not_contain": [
+              "FAIL"
+            ],
             "stdout_must_contain": []
           },
           "fix": {
@@ -392,8 +538,14 @@
             ],
             "escalation": "Ensure test environment matches expected DOM/Node setup"
           },
-          "depends_on": ["bi-002"],
-          "tags": ["node", "tests", "frontend"]
+          "depends_on": [
+            "bi-002"
+          ],
+          "tags": [
+            "node",
+            "tests",
+            "frontend"
+          ]
         },
         {
           "id": "tc-005",
@@ -405,7 +557,9 @@
           "timeout_seconds": 180,
           "pass_criteria": {
             "exit_code": 0,
-            "stderr_must_not_contain": ["FAIL"],
+            "stderr_must_not_contain": [
+              "FAIL"
+            ],
             "stdout_must_contain": []
           },
           "fix": {
@@ -416,8 +570,15 @@
             ],
             "escalation": "Review coverage report in frontend/coverage/ for gaps"
           },
-          "depends_on": ["tc-004"],
-          "tags": ["node", "tests", "coverage", "frontend"]
+          "depends_on": [
+            "tc-004"
+          ],
+          "tags": [
+            "node",
+            "tests",
+            "coverage",
+            "frontend"
+          ]
         },
         {
           "id": "tc-006",
@@ -429,7 +590,9 @@
           "timeout_seconds": 180,
           "pass_criteria": {
             "exit_code": 0,
-            "stderr_must_not_contain": ["ERRORS"],
+            "stderr_must_not_contain": [
+              "ERRORS"
+            ],
             "stdout_must_contain": []
           },
           "fix": {
@@ -440,8 +603,14 @@
             ],
             "escalation": "Safety tests may require Redis — use SAFETY_DEGRADED_MODE=true to mock it"
           },
-          "depends_on": ["bi-001"],
-          "tags": ["python", "tests", "safety"]
+          "depends_on": [
+            "bi-001"
+          ],
+          "tags": [
+            "python",
+            "tests",
+            "safety"
+          ]
         },
         {
           "id": "tc-007",
@@ -453,7 +622,9 @@
           "timeout_seconds": 180,
           "pass_criteria": {
             "exit_code": 0,
-            "stderr_must_not_contain": ["ERRORS"],
+            "stderr_must_not_contain": [
+              "ERRORS"
+            ],
             "stdout_must_contain": []
           },
           "fix": {
@@ -464,8 +635,14 @@
             ],
             "escalation": "Verify asyncio_default_fixture_loop_scope=function in [tool.pytest.ini_options]"
           },
-          "depends_on": ["bi-001"],
-          "tags": ["python", "tests", "async"]
+          "depends_on": [
+            "bi-001"
+          ],
+          "tags": [
+            "python",
+            "tests",
+            "async"
+          ]
         }
       ]
     },
@@ -497,7 +674,11 @@
             "escalation": "Review extend-ignore list in pyproject.toml — some rules may be intentionally suppressed"
           },
           "depends_on": [],
-          "tags": ["python", "lint", "ruff"]
+          "tags": [
+            "python",
+            "lint",
+            "ruff"
+          ]
         },
         {
           "id": "lc-002",
@@ -520,7 +701,11 @@
             "escalation": "Check [tool.ruff] line-length and exclude settings in pyproject.toml"
           },
           "depends_on": [],
-          "tags": ["python", "format", "ruff"]
+          "tags": [
+            "python",
+            "format",
+            "ruff"
+          ]
         },
         {
           "id": "lc-003",
@@ -532,7 +717,9 @@
           "timeout_seconds": 60,
           "pass_criteria": {
             "exit_code": 0,
-            "stderr_must_not_contain": ["error"],
+            "stderr_must_not_contain": [
+              "error"
+            ],
             "stdout_must_contain": []
           },
           "fix": {
@@ -543,8 +730,14 @@
             ],
             "escalation": "Review ESLint plugin compatibility with TypeScript parser"
           },
-          "depends_on": ["bi-002"],
-          "tags": ["node", "lint", "frontend"]
+          "depends_on": [
+            "bi-002"
+          ],
+          "tags": [
+            "node",
+            "lint",
+            "frontend"
+          ]
         },
         {
           "id": "lc-004",
@@ -566,8 +759,14 @@
             ],
             "escalation": "Check .prettierrc or prettier config in package.json"
           },
-          "depends_on": ["bi-002"],
-          "tags": ["node", "format", "frontend"]
+          "depends_on": [
+            "bi-002"
+          ],
+          "tags": [
+            "node",
+            "format",
+            "frontend"
+          ]
         }
       ]
     },
@@ -586,7 +785,10 @@
           "timeout_seconds": 120,
           "pass_criteria": {
             "exit_code": 0,
-            "stderr_must_not_contain": ["FAILED", "ERROR"],
+            "stderr_must_not_contain": [
+              "FAILED",
+              "ERROR"
+            ],
             "stdout_must_contain": []
           },
           "fix": {
@@ -597,8 +799,16 @@
             ],
             "escalation": "Critical failures block all deployments — escalate immediately"
           },
-          "depends_on": ["bi-001", "bi-006"],
-          "tags": ["python", "tests", "critical", "ci-blocking"]
+          "depends_on": [
+            "bi-001",
+            "bi-006"
+          ],
+          "tags": [
+            "python",
+            "tests",
+            "critical",
+            "ci-blocking"
+          ]
         },
         {
           "id": "rc-002",
@@ -610,7 +820,9 @@
           "timeout_seconds": 180,
           "pass_criteria": {
             "exit_code": 0,
-            "stderr_must_not_contain": ["ERRORS"],
+            "stderr_must_not_contain": [
+              "ERRORS"
+            ],
             "stdout_must_contain": []
           },
           "fix": {
@@ -622,8 +834,15 @@
             ],
             "escalation": "API test failures may indicate middleware registration issues — check main.py create_app()"
           },
-          "depends_on": ["bi-001", "bi-006"],
-          "tags": ["python", "tests", "api"]
+          "depends_on": [
+            "bi-001",
+            "bi-006"
+          ],
+          "tags": [
+            "python",
+            "tests",
+            "api"
+          ]
         },
         {
           "id": "rc-003",
@@ -635,7 +854,9 @@
           "timeout_seconds": 120,
           "pass_criteria": {
             "exit_code": 0,
-            "stderr_must_not_contain": ["ERRORS"],
+            "stderr_must_not_contain": [
+              "ERRORS"
+            ],
             "stdout_must_contain": []
           },
           "fix": {
@@ -646,8 +867,14 @@
             ],
             "escalation": "Security test failures are high priority — check PREEXISTING_ISSUES.md Section 4"
           },
-          "depends_on": ["bi-001"],
-          "tags": ["python", "tests", "security"]
+          "depends_on": [
+            "bi-001"
+          ],
+          "tags": [
+            "python",
+            "tests",
+            "security"
+          ]
         },
         {
           "id": "rc-004",
@@ -659,7 +886,10 @@
           "timeout_seconds": 30,
           "pass_criteria": {
             "exit_code": 0,
-            "stderr_must_not_contain": ["ERROR", "FAIL"],
+            "stderr_must_not_contain": [
+              "ERROR",
+              "FAIL"
+            ],
             "stdout_must_contain": []
           },
           "fix": {
@@ -670,8 +900,14 @@
             ],
             "escalation": "If venv validation fails after recreating, check Python version matches pyproject.toml"
           },
-          "depends_on": ["bi-001"],
-          "tags": ["python", "environment", "venv"]
+          "depends_on": [
+            "bi-001"
+          ],
+          "tags": [
+            "python",
+            "environment",
+            "venv"
+          ]
         },
         {
           "id": "rc-005",
@@ -683,7 +919,9 @@
           "timeout_seconds": 120,
           "pass_criteria": {
             "exit_code": 0,
-            "stderr_must_not_contain": ["ERRORS"],
+            "stderr_must_not_contain": [
+              "ERRORS"
+            ],
             "stdout_must_contain": []
           },
           "fix": {
@@ -694,8 +932,14 @@
             ],
             "escalation": "Cognitive tests may require specific model files or config"
           },
-          "depends_on": ["bi-001"],
-          "tags": ["python", "tests", "cognitive"]
+          "depends_on": [
+            "bi-001"
+          ],
+          "tags": [
+            "python",
+            "tests",
+            "cognitive"
+          ]
         }
       ]
     },
@@ -726,8 +970,14 @@
             ],
             "escalation": "High severity bandit findings block production deployment"
           },
-          "depends_on": ["bi-001"],
-          "tags": ["python", "security", "sast"]
+          "depends_on": [
+            "bi-001"
+          ],
+          "tags": [
+            "python",
+            "security",
+            "sast"
+          ]
         },
         {
           "id": "sd-002",
@@ -739,7 +989,9 @@
           "timeout_seconds": 120,
           "pass_criteria": {
             "exit_code": 0,
-            "stderr_must_not_contain": ["found vulnerability"],
+            "stderr_must_not_contain": [
+              "found vulnerability"
+            ],
             "stdout_must_contain": []
           },
           "fix": {
@@ -751,8 +1003,14 @@
             ],
             "escalation": "Critical CVEs must be patched or mitigated before deployment"
           },
-          "depends_on": ["bi-001"],
-          "tags": ["python", "security", "vulnerabilities"]
+          "depends_on": [
+            "bi-001"
+          ],
+          "tags": [
+            "python",
+            "security",
+            "vulnerabilities"
+          ]
         },
         {
           "id": "sd-003",
@@ -764,7 +1022,9 @@
           "timeout_seconds": 30,
           "pass_criteria": {
             "exit_code": 0,
-            "stderr_must_not_contain": ["GATE FAILED"],
+            "stderr_must_not_contain": [
+              "GATE FAILED"
+            ],
             "stdout_must_contain": []
           },
           "fix": {
@@ -776,8 +1036,15 @@
             ],
             "escalation": "Security gate failure blocks deployment — fix all high findings, reduce medium to <= 5"
           },
-          "depends_on": ["sd-001"],
-          "tags": ["python", "security", "gate", "ci-blocking"]
+          "depends_on": [
+            "sd-001"
+          ],
+          "tags": [
+            "python",
+            "security",
+            "gate",
+            "ci-blocking"
+          ]
         },
         {
           "id": "sd-004",
@@ -789,7 +1056,9 @@
           "timeout_seconds": 60,
           "pass_criteria": {
             "exit_code": 0,
-            "stderr_must_not_contain": ["ERROR"],
+            "stderr_must_not_contain": [
+              "ERROR"
+            ],
             "stdout_must_contain": []
           },
           "fix": {
@@ -803,7 +1072,11 @@
             "escalation": "Any confirmed secret in source MUST be rotated immediately regardless of deployment status"
           },
           "depends_on": [],
-          "tags": ["security", "secrets", "ci-blocking"]
+          "tags": [
+            "security",
+            "secrets",
+            "ci-blocking"
+          ]
         }
       ]
     }
@@ -813,7 +1086,10 @@
       {
         "phase": 1,
         "name": "prerequisites",
-        "checks": ["bi-001", "bi-002"],
+        "checks": [
+          "bi-001",
+          "bi-002"
+        ],
         "parallel": true,
         "depends_on_phase": null,
         "description": "Install all dependencies first — Python (uv sync) and Node (npm ci)."
@@ -821,7 +1097,17 @@
       {
         "phase": 2,
         "name": "static_analysis",
-        "checks": ["ts-001", "ts-002", "ts-003", "ts-004", "lc-001", "lc-002", "lc-003", "lc-004", "bi-006"],
+        "checks": [
+          "ts-001",
+          "ts-002",
+          "ts-003",
+          "ts-004",
+          "lc-001",
+          "lc-002",
+          "lc-003",
+          "lc-004",
+          "bi-006"
+        ],
         "parallel": true,
         "depends_on_phase": 1,
         "description": "Type checking + linting — no runtime needed, fast feedback."
@@ -829,7 +1115,11 @@
       {
         "phase": 3,
         "name": "build_verification",
-        "checks": ["bi-003", "bi-004", "bi-005"],
+        "checks": [
+          "bi-003",
+          "bi-004",
+          "bi-005"
+        ],
         "parallel": true,
         "depends_on_phase": 1,
         "description": "Full build pipeline — Python wheel + frontend production build."
@@ -837,7 +1127,13 @@
       {
         "phase": 4,
         "name": "test_execution",
-        "checks": ["tc-001", "tc-002", "tc-004", "tc-006", "tc-007"],
+        "checks": [
+          "tc-001",
+          "tc-002",
+          "tc-004",
+          "tc-006",
+          "tc-007"
+        ],
         "parallel": true,
         "depends_on_phase": 2,
         "description": "Run all test suites — unit, integration, frontend, safety, async."
@@ -845,7 +1141,15 @@
       {
         "phase": 5,
         "name": "coverage_and_runtime",
-        "checks": ["tc-003", "tc-005", "rc-001", "rc-002", "rc-003", "rc-004", "rc-005"],
+        "checks": [
+          "tc-003",
+          "tc-005",
+          "rc-001",
+          "rc-002",
+          "rc-003",
+          "rc-004",
+          "rc-005"
+        ],
         "parallel": true,
         "depends_on_phase": 4,
         "description": "Coverage thresholds + runtime correctness validation."
@@ -853,7 +1157,12 @@
       {
         "phase": 6,
         "name": "security_audit",
-        "checks": ["sd-001", "sd-002", "sd-003", "sd-004"],
+        "checks": [
+          "sd-001",
+          "sd-002",
+          "sd-003",
+          "sd-004"
+        ],
         "parallel": true,
         "depends_on_phase": 1,
         "description": "Security scanning — can run early, only needs dependencies installed."

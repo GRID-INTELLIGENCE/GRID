@@ -2,11 +2,10 @@
   "version": "1.0.0",
   "protected_projects": {
     "grid": {
-      "canonical_path": "E:\\_projects\\grid",
+      "canonical_path": "/home/caraxes/roots/GRID",
       "alternate_paths": [
-        "E:/_projects/grid",
-        "e:\\_projects\\grid",
-        "e:/_projects/grid"
+        "roots/GRID",
+        "CascadeProjects/GRID-main"
       ],
       "protection_level": "EXPLICIT",
       "modification_allowed": false,
@@ -19,20 +18,16 @@
       ],
       "description": "Primary GRID intelligence framework with RAG and observability",
       "key_paths": {
-        "root": "E:\\_projects\\grid",
-        "src": "E:\\_projects\\grid\\src",
-        "config": "E:\\_projects\\grid\\config",
-        "docs": "E:\\_projects\\grid\\docs"
+        "root": "/home/caraxes/roots/GRID",
+        "src": "/home/caraxes/roots/GRID/src",
+        "config": "/home/caraxes/roots/GRID/config",
+        "docs": "/home/caraxes/roots/GRID/docs"
       }
     },
     "coinbase": {
-      "canonical_path": "E:\\_projects\\Coinbase\\coinbase",
-      "alternate_paths": [
-        "E:/_projects/Coinbase/coinbase",
-        "e:\\_projects\\Coinbase\\coinbase",
-        "e:/_projects/Coinbase/coinbase"
-      ],
-      "protection_level": "EXPLICIT",
+      "canonical_path": "/home/caraxes/seed/archive/Coinbase_from_zip",
+      "alternate_paths": [],
+      "protection_level": "ARCHIVED",
       "modification_allowed": false,
       "tags": [
         "#file:coinbase",
@@ -40,21 +35,15 @@
         "Crypto Application",
         "GRID Integration"
       ],
-      "description": "Crypto-focused application with GRID integration",
+      "description": "Crypto-focused application with GRID integration (archived)",
       "key_paths": {
-        "root": "E:\\_projects\\Coinbase\\coinbase",
-        "src": "E:\\_projects\\Coinbase\\coinbase\\src",
-        "config": "E:\\_projects\\Coinbase\\coinbase\\config"
+        "root": "/home/caraxes/seed/archive/Coinbase_from_zip"
       }
     },
     "wellness_studio": {
-      "canonical_path": "E:\\_projects\\wellness_studio",
-      "alternate_paths": [
-        "E:/_projects/wellness_studio",
-        "e:\\_projects\\wellness_studio",
-        "e:/_projects/wellness_studio"
-      ],
-      "protection_level": "EXPLICIT",
+      "canonical_path": "/home/caraxes/seed/archive/wellness_studio",
+      "alternate_paths": [],
+      "protection_level": "ARCHIVED",
       "modification_allowed": false,
       "tags": [
         "#file:wellness_studio",
@@ -62,11 +51,9 @@
         "AI Safety",
         "Wellness Framework"
       ],
-      "description": "Wellness and AI Safety framework",
+      "description": "Wellness and AI Safety framework (archived)",
       "key_paths": {
-        "root": "E:\\_projects\\wellness_studio",
-        "ai_safety": "E:\\_projects\\wellness_studio\\ai_safety",
-        "config": "E:\\_projects\\wellness_studio\\config"
+        "root": "/home/caraxes/seed/archive/wellness_studio"
       }
     }
   },
@@ -129,9 +116,10 @@
     "read_only_references": "Treat protected projects as read-only for path operations"
   },
   "current_safe_working_directory": {
-    "path": "E:\\.worktrees\\copilot-worktree-2026-02-01T20-18-14",
-    "description": "Temporary worktree - safe for modifications",
+    "path": "/home/caraxes",
+    "description": "Home directory — mangrove workspace root containing roots/, canopy/, seed/, grove/, CascadeProjects/. Broad scope is intentional: enforcement_rules above restrict path-level operations regardless of working directory. Content operations (read, create, modify within existing structure) are allowed.",
     "relationship_to_protected": "May reference protected projects but must not modify their locations",
-    "allowed_operations": "All operations allowed within this directory"
+    "allowed_operations": "Content operations within existing directory structure. Path-level operations (move, rename, relocate) governed by enforcement_rules above.",
+    "scope_rationale": "Narrowing to a single project would break cross-project workflows (MCP servers, submodules, shared-types builds). Protection is enforced by enforcement_rules, not by working directory scope."
   }
 }

@@ -97,20 +97,20 @@
   "transitionGate": {
     "enabled": true,
     "sourcePartition": {
-      "label": "E:\\",
-      "rootPath": "E:\\Seeds",
-      "stagingPath": "E:\\Fruits\\releases"
+      "label": "roots",
+      "rootPath": "/home/caraxes/roots",
+      "stagingPath": "/home/caraxes/roots/releases"
     },
     "targetPartition": {
-      "label": "C:\\",
-      "rootPath": "C:\\Users\\USER\\cascadeprojects",
-      "incomingPath": "C:\\Users\\USER\\cascadeprojects\\gate\\incoming",
-      "resultsPath": "C:\\Users\\USER\\cascadeprojects\\gate\\results"
+      "label": "CascadeProjects",
+      "rootPath": "/home/caraxes/CascadeProjects",
+      "incomingPath": "/home/caraxes/CascadeProjects/gate/incoming",
+      "resultsPath": "/home/caraxes/CascadeProjects/gate/results"
     },
     "securityPrimitives": {
       "userFingerprint": {
         "algorithm": "HMAC-SHA256",
-        "keySource": "windows_credential_manager",
+        "keySource": "environment_variable",
         "keyName": "TransitionGate"
       },
       "machineFingerprint": {
@@ -161,25 +161,39 @@
         "testCommand": "uv run pytest tests/unit tests/integration -q --tb=short",
         "lintCommand": "uv run ruff check .",
         "port": 8080,
-        "defaultScopePermissions": ["deploy", "run_tests", "start_server"]
+        "defaultScopePermissions": [
+          "deploy",
+          "run_tests",
+          "start_server"
+        ]
       },
       "afloat": {
         "testCommand": "npm run test",
         "lintCommand": "npm run lint",
         "port": 3000,
-        "defaultScopePermissions": ["deploy", "start_server"]
+        "defaultScopePermissions": [
+          "deploy",
+          "start_server"
+        ]
       },
       "echoes": {
         "testCommand": "uv run pytest tests/ -q --tb=short",
         "lintCommand": "uv run ruff check .",
         "port": 8000,
-        "defaultScopePermissions": ["deploy", "run_tests", "start_server"]
+        "defaultScopePermissions": [
+          "deploy",
+          "run_tests",
+          "start_server"
+        ]
       },
       "light_of_the_seven": {
         "testCommand": "uv run pytest tests/ -q --tb=short",
         "lintCommand": "uv run ruff check .",
         "port": 8001,
-        "defaultScopePermissions": ["deploy", "run_tests"]
+        "defaultScopePermissions": [
+          "deploy",
+          "run_tests"
+        ]
       }
     }
   }

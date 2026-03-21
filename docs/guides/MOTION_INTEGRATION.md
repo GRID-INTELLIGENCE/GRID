@@ -22,7 +22,7 @@ All modules are based on Motion Planning Diffusion (MPD) research and reference 
 
 ### Module Location
 ```
-e:\grid\src\grid\motion\
+src/grid/motion/
 ├── __init__.py                    # Package exports
 ├── trajectory_diffusion.py        # Core implementation
 ├── config.yaml                    # Configuration
@@ -141,7 +141,7 @@ import numpy as np
 
 # Initialize pipeline (loads config from file or defaults)
 pipeline = TrajectoryDiffusionPipeline(
-    config_path="e:\\grid\\src\\grid\\motion\\config.yaml"
+    config_path="src/grid/motion/config.yaml"
 )
 
 # Sample trajectories
@@ -236,8 +236,8 @@ layouts, costs = sampler.sample(
 ### Testing
 
 Run unit tests:
-```powershell
-pytest e:\grid\tests\unit\test_trajectory_diffusion.py -v
+```bash
+uv run pytest tests/unit/test_trajectory_diffusion.py -v
 ```
 
 Tests cover:
@@ -253,7 +253,7 @@ Tests cover:
 
 ### Module Location
 ```
-e:\EUFLE\eufle\motion\
+eufle/motion/
 ├── __init__.py                # Package exports
 ├── flow_diffusion.py          # Core implementation
 ├── config.yaml                # Configuration
@@ -392,7 +392,7 @@ import numpy as np
 
 # Initialize pipeline
 pipeline = FlowDiffusionPipeline(
-    config_path="e:\\EUFLE\\eufle\\motion\\config.yaml"
+    config_path="eufle/motion/config.yaml"
 )
 
 # Register TUI states
@@ -463,7 +463,7 @@ def display_interaction_suggestions(current_state):
         preferred_states=user_preferences.get("preferred_states"),
         target_state=current_task.get("target_state"),
     )
-    
+
     # Display top 3 suggestions to user
     for i, flow in enumerate(flows[:3]):
         print(f"Suggestion {i+1}: {' → '.join(flow[:5])}")
@@ -526,8 +526,8 @@ preferred_flows = cost_fn.find_low_cost_paths(start="budget_overview", end="expo
 ### Testing
 
 Run unit tests:
-```powershell
-pytest e:\EUFLE\tests\test_flow_diffusion.py -v
+```bash
+uv run pytest tests/test_flow_diffusion.py -v
 ```
 
 Tests cover:
@@ -553,29 +553,28 @@ The `opencode` model will be integrated to provide:
 #### 1. **OpenCodePrior** (Planned Implementation)
 A concrete `TrajectoryPrior` that loads pre-trained opencode models for motion planning.
 
-**Planned Location:** `e:\grid\src\grid\motion\opencode_prior.py`
+**Planned Location:** `src/grid/motion/opencode_prior.py`
 
 ```python
 from grid.motion.trajectory_diffusion import TrajectoryPrior
-import pickle
+import torch
 
 class OpenCodePrior(TrajectoryPrior):
-    """TrajectoryPrior using OpenCode big pickle model."""
-    
+    """TrajectoryPrior using OpenCode model."""
+
     def __init__(self, model_path: str):
         self.model_path = model_path
         self.model = None
-        
+
     def load(self, model_path: str) -> None:
-        """Load pre-trained opencode model from pickle."""
-        with open(model_path, 'rb') as f:
-            self.model = pickle.load(f)
-    
+        """Load pre-trained opencode model (torch checkpoint)."""
+        self.model = torch.load(model_path, map_location=torch.device('cpu'), weights_only=True)
+
     def encode(self, trajectories: np.ndarray) -> torch.Tensor:
         """Encode trajectories using opencode model."""
         # Implementation with opencode model
         pass
-    
+
     def decode(self, latents: torch.Tensor) -> np.ndarray:
         """Decode latents using opencode model."""
         # Implementation with opencode model
@@ -585,18 +584,18 @@ class OpenCodePrior(TrajectoryPrior):
 #### 2. **OpenCodeFlowPrior** (Planned Implementation)
 A concrete `FlowPrior` for code-aware interaction sequences.
 
-**Planned Location:** `e:\EUFLE\eufle\motion\opencode_flow_prior.py`
+**Planned Location:** `eufle/motion/opencode_flow_prior.py`
 
 ```python
 from eufle.motion.flow_diffusion import FlowPrior
 
 class OpenCodeFlowPrior(FlowPrior):
     """FlowPrior using OpenCode model for code-aware interaction sequences."""
-    
+
     def load(self, model_path: str) -> None:
         """Load opencode model."""
         pass
-    
+
     def sample(self, num_samples: int, condition: Optional[str] = None) -> np.ndarray:
         """Sample code-aware interaction sequences."""
         pass
@@ -653,13 +652,13 @@ flow_diffusion:
 
 ### GRID Trajectory Diffusion
 
-```powershell
+```bash
 # Basic usage
 python -c "
 from grid.motion import TrajectoryDiffusionPipeline
 import numpy as np
 
-pipeline = TrajectoryDiffusionPipeline('e:\grid\src\grid\motion\config.yaml')
+pipeline = TrajectoryDiffusionPipeline('src/grid/motion/config.yaml')
 trajectories, costs = pipeline.sample_trajectories(
     num_samples=32,
     trajectory_length=50,
@@ -673,13 +672,13 @@ print(f'Best cost: {costs[0]:.4f}')
 
 ### EUFLE Flow Diffusion
 
-```powershell
+```bash
 # Basic usage
 python -c "
 from eufle.motion import FlowDiffusionPipeline
 import numpy as np
 
-pipeline = FlowDiffusionPipeline('e:\EUFLE\eufle\motion\config.yaml')
+pipeline = FlowDiffusionPipeline('eufle/motion/config.yaml')
 
 # Register states
 for i in range(5):
@@ -695,15 +694,15 @@ print(f'Generated {len(flows)} flow suggestions')
 
 ### Run Tests
 
-```powershell
+```bash
 # GRID tests
-pytest e:\grid\tests\unit\test_trajectory_diffusion.py -v
+uv run pytest tests/unit/test_trajectory_diffusion.py -v
 
 # EUFLE tests
-pytest e:\EUFLE\tests\test_flow_diffusion.py -v
+uv run pytest tests/test_flow_diffusion.py -v
 
 # Combined
-pytest e:\grid\tests\unit\test_trajectory_diffusion.py e:\EUFLE\tests\test_flow_diffusion.py -v
+uv run pytest tests/unit/test_trajectory_diffusion.py tests/test_flow_diffusion.py -v
 ```
 
 ---
@@ -722,8 +721,8 @@ pytest>=6.2.0
 ```
 
 Install with:
-```powershell
-pip install numpy torch pyyaml einops scipy pytest
+```bash
+uv sync --group dev
 ```
 
 ---

@@ -1,5 +1,7 @@
 # GRID Discovery Checklist
 
+> **Archival note (2026-03):** This document was created on the original Windows workstation. All `E:\`, `F:\`, and `C:\Users\irfan` paths refer to that environment and are retained for historical reference. The canonical workspace is now `/home/caraxes/roots/GRID` on Linux.
+
 **Context:** Microsoft account synced. Recovery drive can be created per Microsoft steps (Create a recovery drive, back up system files, Safety Remove Hardware to eject). This document records where GRID was searched and what was found.
 
 ---

@@ -1,9 +1,6 @@
 """In-memory vector store for document retrieval.
 
-Security Note:
-    This module uses pickle for serialization. Pickle files should ONLY be loaded
-    from trusted sources as pickle deserialization can execute arbitrary code.
-    For untrusted data, use the JSON format instead.
+Serialization uses JSON (NDJSON) exclusively.
 """
 
 import json
@@ -14,20 +11,6 @@ from typing import Any
 from .types import LLMProvider, VectorStoreConfig
 
 logger = logging.getLogger(__name__)
-
-
-class SecurityError(Exception):
-    """Raised when a security validation fails."""
-
-    pass
-
-
-# Security: Define allowed directories for pickle loading
-_ALLOWED_PICKLE_DIRS: set[str] = {
-    ".rag_db",
-    ".cache",
-    "src/.rag_db",
-}
 
 
 class VectorStore:
