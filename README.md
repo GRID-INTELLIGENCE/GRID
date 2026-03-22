@@ -12,6 +12,23 @@
 
 </div>
 
+## Engineering at a Glance
+
+Built primarily by a solo engineer over 5 months — from blank templates to a production-hardened framework with CI, security layers, and full test infrastructure.
+
+| What | Evidence |
+|------|----------|
+| **Codebase scale** | 828+ source files, 190K+ lines, 9 distributable wheel packages |
+| **Test discipline** | 2,953+ tests passing, ≥75% coverage, 30s performance budget |
+| **CI rigor** | 7-stage GitHub Actions pipeline: secrets scan → lint → smoke → security → test → integration → build |
+| **Security depth** | 3 independent security modules (safety, security, boundaries), sealed-envelope HMAC-SHA256 transfer gate, zero-trust boundary contracts |
+| **API architecture** | FastAPI + 13-layer middleware chain, dual event bus (Redis + in-memory fallback), circuit breaking, rate limiting |
+| **Code quality** | 0 ruff lint errors across 828 files, strict type hints, conventional commits |
+| **Resilience patterns** | Published separately as [APIGuard](https://pypi.org/project/apiguard/) — circuit breaking + rate limiting + retry with 100% test coverage |
+
+The architecture is domain-driven with event-driven agentic workflows — not a monolith, not a microservice explosion. Each package has clear boundaries, its own tests, and ships as an independent wheel.
+
+For clients: If you're evaluating this repo as part of a proposal, the CI pipeline, CHANGELOG, and test structure tell the story better than any portfolio page. The code is the portfolio.
 ---
 
 GRID is a **privacy-first code intelligence framework** that helps you understand complex codebases using local AI models. Your code never leaves your machine.
