@@ -32,14 +32,14 @@ pydantic-settings==2.13.1
 # Testing
 pytest==9.0.2
 pytest-asyncio==0.24.0
-pytest-cov==7.0.0
+pytest-cov==7.1.0
 # httpx already listed above for testing
 
 # Code Quality
 flake8==7.1.1
 mypy==1.19.1
 black==24.10.0
-isort==8.0.0
+isort==8.0.1
 
 # Security Scanning
 bandit==1.9.3
