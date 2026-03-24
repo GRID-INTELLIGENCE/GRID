@@ -1,6 +1,6 @@
 {
   "pythonVersion": "3.13",
-  "pythonPlatform": "Windows",
+  "pythonPlatform": "Linux",
   "venvPath": ".",
   "venv": ".venv",
   "extraPaths": [".", "src", "safety", "security"],

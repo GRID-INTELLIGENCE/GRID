@@ -4,18 +4,47 @@ GRID Test Runner MCP Server
 Provides test execution, coverage analysis, and test discovery
 """
 
+import asyncio
 import json
+import logging
 import subprocess
 import sys
 from pathlib import Path
 from typing import Any
 
-PROTOCOL_VERSION = "2025-06-18"
-SERVER_NAME = "test-runner"
-SERVER_VERSION = "1.0.0"
+# Add GRID to path using SecurePathManager
+grid_root = Path(__file__).resolve().parent.parent.parent
+try:
+    from grid.security.path_manager import SecurePathManager
+
+    manager = SecurePathManager(base_dir=grid_root)
+    manager.add_path(grid_root / "src", validate=True)
+except ImportError:
+    # Fallback to direct sys.path manipulation if SecurePathManager unavailable
+    sys.path.insert(0, str(grid_root / "src"))
+
+# Also add the global Python site-packages to path
+import site
+
+site.main()
+
+try:
+    from mcp.server import Server
+    from mcp.server.stdio import stdio_server
+    from mcp.types import CallToolResult, TextContent, Tool
+except ImportError:
+    print("MCP library not found. Please install: pip install mcp")
+    sys.exit(1)
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Path containment: all operations restricted to GRID workspace root
-GRID_ROOT = Path(__file__).resolve().parent.parent.parent
+GRID_ROOT = grid_root
+
+# Initialize MCP server
+server = Server("test-runner")
 
 
 def _validate_path(target_path: str) -> Path:
@@ -25,21 +54,23 @@ def _validate_path(target_path: str) -> Path:
     """
     if not target_path:
         raise ValueError("path is required")
-    resolved = Path(target_path).resolve()
-    try:
-        resolved.relative_to(GRID_ROOT)
-    except ValueError:
-        raise ValueError(
-            f"Path '{target_path}' resolves outside GRID workspace root ({GRID_ROOT}). Access denied."
-        )
-    if resolved.is_symlink():
-        target = resolved.readlink().resolve()
+    original = Path(target_path)
+    # Check symlink target before resolving
+    if original.is_symlink():
+        target = original.resolve()
         try:
             target.relative_to(GRID_ROOT)
         except ValueError:
             raise ValueError(
                 f"Symlink '{target_path}' targets outside GRID workspace root. Access denied."
             )
+    resolved = original.resolve()
+    try:
+        resolved.relative_to(GRID_ROOT)
+    except ValueError:
+        raise ValueError(
+            f"Path '{target_path}' resolves outside GRID workspace root ({GRID_ROOT}). Access denied."
+        )
     return resolved
 
 
@@ -95,10 +126,9 @@ def run_coverage(test_path: str = None, output_format: str = "term") -> dict[str
 def discover_tests(test_dir: str = "tests/") -> dict[str, Any]:
     """Discover available tests"""
     try:
-        _validate_path(test_dir)
+        test_path = _validate_path(test_dir)
     except ValueError as e:
         return {"error": str(e)}
-    test_path = Path(test_dir)
     if not test_path.exists():
         return {"error": "Test directory not found"}
 
@@ -139,130 +169,87 @@ def get_test_summary(test_path: str = None) -> dict[str, Any]:
     return {"test_count": test_count, "output": result["stdout"]}
 
 
-def build_initialize_result() -> dict[str, Any]:
-    """Return a spec-compliant MCP initialize payload."""
-    return {
-        "protocolVersion": PROTOCOL_VERSION,
-        "capabilities": {"tools": {"listChanged": False}},
-        "serverInfo": {"name": SERVER_NAME, "version": SERVER_VERSION},
-    }
+@server.list_tools()
+async def handle_list_tools() -> list[Tool]:
+    """List available tools."""
+    return [
+        Tool(
+            name="run_tests",
+            description="Run pytest tests",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "test_path": {"type": "string", "description": "Path to test file or directory"},
+                    "verbose": {"type": "boolean", "description": "Enable verbose output"},
+                },
+            },
+        ),
+        Tool(
+            name="run_coverage",
+            description="Run tests with coverage report",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "test_path": {"type": "string", "description": "Path to test file or directory"},
+                    "output_format": {"type": "string", "enum": ["term", "json", "html"], "description": "Coverage report format"},
+                },
+            },
+        ),
+        Tool(
+            name="discover_tests",
+            description="Discover available test files",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "test_dir": {"type": "string", "description": "Test directory to scan (default: tests/)"},
+                },
+            },
+        ),
+        Tool(
+            name="get_test_summary",
+            description="Get test summary without running",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "test_path": {"type": "string", "description": "Path to test file or directory"},
+                },
+            },
+        ),
+    ]
 
 
-def main():
-    """Main MCP server loop"""
-    while True:
-        try:
-            line = sys.stdin.readline()
-            if line == "":
-                break
+@server.call_tool()
+async def handle_call_tool(name: str, arguments: dict[str, Any]) -> CallToolResult:
+    """Handle tool calls."""
+    try:
+        if name == "run_tests":
+            result = run_tests(test_path=arguments.get("test_path"), verbose=arguments.get("verbose", False))
+        elif name == "run_coverage":
+            result = run_coverage(
+                test_path=arguments.get("test_path"), output_format=arguments.get("output_format", "term")
+            )
+        elif name == "discover_tests":
+            result = discover_tests(test_dir=arguments.get("test_dir", "tests/"))
+        elif name == "get_test_summary":
+            result = get_test_summary(test_path=arguments.get("test_path"))
+        else:
+            raise ValueError(f"Unknown tool: {name}")
 
-            line = line.strip()
-            if not line:
-                continue
+        return CallToolResult(content=[TextContent(type="text", text=json.dumps(result, indent=2))])
 
-            request = json.loads(line)
-            method = request.get("method")
-            params = request.get("params") or {}
-            request_id = request.get("id")
-            is_notification = request_id is None
-            response = None
+    except Exception as e:
+        logger.error(f"Error in tool {name}: {e}")
+        return CallToolResult(content=[TextContent(type="text", text=f"Error: {e}")], isError=True)
 
-            if method == "notifications/initialized":
-                continue
 
-            if method == "tools/list":
-                response = {
-                    "jsonrpc": "2.0",
-                    "id": request_id,
-                    "result": {
-                        "tools": [
-                            {
-                                "name": "run_tests",
-                                "description": "Run pytest tests",
-                                "inputSchema": {
-                                    "type": "object",
-                                    "properties": {"test_path": {"type": "string"}, "verbose": {"type": "boolean"}},
-                                },
-                            },
-                            {
-                                "name": "run_coverage",
-                                "description": "Run tests with coverage report",
-                                "inputSchema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "test_path": {"type": "string"},
-                                        "output_format": {"type": "string", "enum": ["term", "json", "html"]},
-                                    },
-                                },
-                            },
-                            {
-                                "name": "discover_tests",
-                                "description": "Discover available test files",
-                                "inputSchema": {"type": "object", "properties": {"test_dir": {"type": "string"}}},
-                            },
-                            {
-                                "name": "get_test_summary",
-                                "description": "Get test summary without running",
-                                "inputSchema": {"type": "object", "properties": {"test_path": {"type": "string"}}},
-                            },
-                        ]
-                    },
-                }
+async def main():
+    """Main server entry point."""
+    logger.info("Starting GRID Test Runner MCP Server...")
 
-            elif method == "tools/call":
-                tool_name = params.get("name")
-                arguments = params.get("arguments", {})
-                response = {"jsonrpc": "2.0", "id": request_id}
-
-                if tool_name == "run_tests":
-                    result = run_tests(test_path=arguments.get("test_path"), verbose=arguments.get("verbose", False))
-                    response["result"] = {"content": [{"type": "text", "text": json.dumps(result, indent=2)}]}
-
-                elif tool_name == "run_coverage":
-                    result = run_coverage(
-                        test_path=arguments.get("test_path"), output_format=arguments.get("output_format", "term")
-                    )
-                    response["result"] = {"content": [{"type": "text", "text": json.dumps(result, indent=2)}]}
-
-                elif tool_name == "discover_tests":
-                    result = discover_tests(test_dir=arguments.get("test_dir", "tests/"))
-                    response["result"] = {"content": [{"type": "text", "text": json.dumps(result, indent=2)}]}
-
-                elif tool_name == "get_test_summary":
-                    result = get_test_summary(test_path=arguments.get("test_path"))
-                    response["result"] = {"content": [{"type": "text", "text": json.dumps(result, indent=2)}]}
-
-                else:
-                    response["error"] = {"code": -32601, "message": "Method not found"}
-
-            elif method == "initialize":
-                response = {"jsonrpc": "2.0", "id": request_id, "result": build_initialize_result()}
-
-            elif method == "ping":
-                response = {"jsonrpc": "2.0", "id": request_id, "result": {}}
-
-            elif method == "shutdown":
-                response = {"jsonrpc": "2.0", "id": request_id, "result": {}}
-                print(json.dumps(response))
-                sys.stdout.flush()
-                break
-
-            elif not is_notification:
-                response = {
-                    "jsonrpc": "2.0",
-                    "id": request_id,
-                    "error": {"code": -32601, "message": "Method not found"},
-                }
-
-            if response is not None:
-                print(json.dumps(response))
-                sys.stdout.flush()
-
-        except json.JSONDecodeError:
-            continue
-        except KeyboardInterrupt:
-            break
+    # Run server
+    async with stdio_server() as (read_stream, write_stream):
+        await server.run(read_stream, write_stream, server.create_initialization_options())
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

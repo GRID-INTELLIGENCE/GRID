@@ -4,18 +4,47 @@ GRID Code Analysis MCP Server
 Provides static analysis, code quality checks, and security scanning
 """
 
+import asyncio
 import json
+import logging
 import subprocess
 import sys
 from pathlib import Path
 from typing import Any
 
-PROTOCOL_VERSION = "2025-06-18"
-SERVER_NAME = "code-analysis"
-SERVER_VERSION = "1.0.0"
+# Add GRID to path using SecurePathManager
+grid_root = Path(__file__).resolve().parent.parent.parent
+try:
+    from grid.security.path_manager import SecurePathManager
+
+    manager = SecurePathManager(base_dir=grid_root)
+    manager.add_path(grid_root / "src", validate=True)
+except ImportError:
+    # Fallback to direct sys.path manipulation if SecurePathManager unavailable
+    sys.path.insert(0, str(grid_root / "src"))
+
+# Also add the global Python site-packages to path
+import site
+
+site.main()
+
+try:
+    from mcp.server import Server
+    from mcp.server.stdio import stdio_server
+    from mcp.types import CallToolResult, TextContent, Tool
+except ImportError:
+    print("MCP library not found. Please install: pip install mcp")
+    sys.exit(1)
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Path containment: all file operations restricted to GRID workspace root
-GRID_ROOT = Path(__file__).resolve().parent.parent.parent
+GRID_ROOT = grid_root
+
+# Initialize MCP server
+server = Server("code-analysis")
 
 
 def _validate_path(file_path: str) -> Path:
@@ -25,21 +54,23 @@ def _validate_path(file_path: str) -> Path:
     """
     if not file_path:
         raise ValueError("file_path is required")
-    resolved = Path(file_path).resolve()
-    try:
-        resolved.relative_to(GRID_ROOT)
-    except ValueError:
-        raise ValueError(
-            f"Path '{file_path}' resolves outside GRID workspace root ({GRID_ROOT}). Access denied."
-        )
-    if resolved.is_symlink():
-        target = resolved.readlink().resolve()
+    original = Path(file_path)
+    # Check symlink target before resolving
+    if original.is_symlink():
+        target = original.resolve()
         try:
             target.relative_to(GRID_ROOT)
         except ValueError:
             raise ValueError(
                 f"Symlink '{file_path}' targets outside GRID workspace root. Access denied."
             )
+    resolved = original.resolve()
+    try:
+        resolved.relative_to(GRID_ROOT)
+    except ValueError:
+        raise ValueError(
+            f"Path '{file_path}' resolves outside GRID workspace root ({GRID_ROOT}). Access denied."
+        )
     return resolved
 
 
@@ -135,122 +166,68 @@ def get_complexity(file_path: str) -> dict[str, Any]:
     }
 
 
-def build_initialize_result() -> dict[str, Any]:
-    """Return a spec-compliant MCP initialize payload."""
-    return {
-        "protocolVersion": PROTOCOL_VERSION,
-        "capabilities": {"tools": {"listChanged": False}},
-        "serverInfo": {"name": SERVER_NAME, "version": SERVER_VERSION},
-    }
+@server.list_tools()
+async def handle_list_tools() -> list[Tool]:
+    """List available tools."""
+    return [
+        Tool(
+            name="analyze_code",
+            description="Analyze Python code for quality issues",
+            inputSchema={
+                "type": "object",
+                "properties": {"file_path": {"type": "string", "description": "Path to the Python file to analyze"}},
+                "required": ["file_path"],
+            },
+        ),
+        Tool(
+            name="check_security",
+            description="Check for security issues",
+            inputSchema={
+                "type": "object",
+                "properties": {"file_path": {"type": "string", "description": "Path to the file to scan"}},
+                "required": ["file_path"],
+            },
+        ),
+        Tool(
+            name="get_complexity",
+            description="Get code complexity metrics",
+            inputSchema={
+                "type": "object",
+                "properties": {"file_path": {"type": "string", "description": "Path to the file to measure"}},
+                "required": ["file_path"],
+            },
+        ),
+    ]
 
 
-def main():
-    """Main MCP server loop"""
-    while True:
-        try:
-            line = sys.stdin.readline()
-            if line == "":
-                break
+@server.call_tool()
+async def handle_call_tool(name: str, arguments: dict[str, Any]) -> CallToolResult:
+    """Handle tool calls."""
+    try:
+        if name == "analyze_code":
+            result = analyze_code(arguments.get("file_path"))
+        elif name == "check_security":
+            result = check_security(arguments.get("file_path"))
+        elif name == "get_complexity":
+            result = get_complexity(arguments.get("file_path"))
+        else:
+            raise ValueError(f"Unknown tool: {name}")
 
-            line = line.strip()
-            if not line:
-                continue
+        return CallToolResult(content=[TextContent(type="text", text=json.dumps(result, indent=2))])
 
-            request = json.loads(line)
-            method = request.get("method")
-            params = request.get("params") or {}
-            request_id = request.get("id")
-            is_notification = request_id is None
-            response = None
+    except Exception as e:
+        logger.error(f"Error in tool {name}: {e}")
+        return CallToolResult(content=[TextContent(type="text", text=f"Error: {e}")], isError=True)
 
-            if method == "notifications/initialized":
-                continue
 
-            if method == "tools/list":
-                response = {
-                    "jsonrpc": "2.0",
-                    "id": request_id,
-                    "result": {
-                        "tools": [
-                            {
-                                "name": "analyze_code",
-                                "description": "Analyze Python code for quality issues",
-                                "inputSchema": {
-                                    "type": "object",
-                                    "properties": {"file_path": {"type": "string"}},
-                                    "required": ["file_path"],
-                                },
-                            },
-                            {
-                                "name": "check_security",
-                                "description": "Check for security issues",
-                                "inputSchema": {
-                                    "type": "object",
-                                    "properties": {"file_path": {"type": "string"}},
-                                    "required": ["file_path"],
-                                },
-                            },
-                            {
-                                "name": "get_complexity",
-                                "description": "Get code complexity metrics",
-                                "inputSchema": {
-                                    "type": "object",
-                                    "properties": {"file_path": {"type": "string"}},
-                                    "required": ["file_path"],
-                                },
-                            },
-                        ]
-                    },
-                }
+async def main():
+    """Main server entry point."""
+    logger.info("Starting GRID Code Analysis MCP Server...")
 
-            elif method == "tools/call":
-                tool_name = params.get("name")
-                arguments = params.get("arguments", {})
-                response = {"jsonrpc": "2.0", "id": request_id}
-
-                if tool_name == "analyze_code":
-                    result = analyze_code(arguments.get("file_path"))
-                    response["result"] = {"content": [{"type": "text", "text": json.dumps(result, indent=2)}]}
-
-                elif tool_name == "check_security":
-                    result = check_security(arguments.get("file_path"))
-                    response["result"] = {"content": [{"type": "text", "text": json.dumps(result, indent=2)}]}
-
-                elif tool_name == "get_complexity":
-                    result = get_complexity(arguments.get("file_path"))
-                    response["result"] = {"content": [{"type": "text", "text": json.dumps(result, indent=2)}]}
-
-                else:
-                    response["error"] = {"code": -32601, "message": "Method not found"}
-
-            elif method == "initialize":
-                response = {"jsonrpc": "2.0", "id": request_id, "result": build_initialize_result()}
-
-            elif method == "ping":
-                response = {"jsonrpc": "2.0", "id": request_id, "result": {}}
-
-            elif method == "shutdown":
-                response = {"jsonrpc": "2.0", "id": request_id, "result": {}}
-                print(json.dumps(response))
-                sys.stdout.flush()
-                break
-
-            elif not is_notification:
-                response = {
-                    "jsonrpc": "2.0",
-                    "id": request_id,
-                    "error": {"code": -32601, "message": "Method not found"},
-                }
-
-            if response is not None:
-                print(json.dumps(response))
-                sys.stdout.flush()
-
-        except json.JSONDecodeError:
-            continue
-        except KeyboardInterrupt:
-            break
+    # Run server
+    async with stdio_server() as (read_stream, write_stream):
+        await server.run(read_stream, write_stream, server.create_initialization_options())
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
