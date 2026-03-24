@@ -7,6 +7,7 @@ Provides test execution, coverage analysis, and test discovery
 import asyncio
 import json
 import logging
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -41,7 +42,12 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Path containment: all operations restricted to GRID workspace root
+# plus any extra roots declared via EXTRA_ALLOWED_ROOTS (colon-separated).
 GRID_ROOT = grid_root
+_extra = os.environ.get("EXTRA_ALLOWED_ROOTS", "")
+ALLOWED_ROOTS: list[Path] = [GRID_ROOT] + [
+    Path(p).resolve() for p in _extra.split(":") if p.strip()
+]
 
 # Initialize MCP server
 server = Server("test-runner")
@@ -58,20 +64,25 @@ def _validate_path(target_path: str) -> Path:
     # Check symlink target before resolving
     if original.is_symlink():
         target = original.resolve()
-        try:
-            target.relative_to(GRID_ROOT)
-        except ValueError:
+        if not any(_is_under(target, root) for root in ALLOWED_ROOTS):
             raise ValueError(
-                f"Symlink '{target_path}' targets outside GRID workspace root. Access denied."
+                f"Symlink '{target_path}' targets outside allowed workspace roots. Access denied."
             )
     resolved = original.resolve()
-    try:
-        resolved.relative_to(GRID_ROOT)
-    except ValueError:
+    if not any(_is_under(resolved, root) for root in ALLOWED_ROOTS):
         raise ValueError(
-            f"Path '{target_path}' resolves outside GRID workspace root ({GRID_ROOT}). Access denied."
+            f"Path '{target_path}' resolves outside allowed workspace roots ({ALLOWED_ROOTS}). Access denied."
         )
     return resolved
+
+
+def _is_under(path: Path, root: Path) -> bool:
+    """Return True if *path* is equal to or a child of *root*."""
+    try:
+        path.relative_to(root)
+        return True
+    except ValueError:
+        return False
 
 
 def run_pytest(args: list[str], cwd: str = None) -> dict[str, Any]:
