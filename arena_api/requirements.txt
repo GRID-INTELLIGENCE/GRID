@@ -36,10 +36,8 @@ pytest-cov==7.1.0
 # httpx already listed above for testing
 
 # Code Quality
-flake8==7.1.1
+ruff>=0.8.0
 mypy==1.19.1
-black==24.10.0
-isort==8.0.1
 
 # Security Scanning
 bandit==1.9.3

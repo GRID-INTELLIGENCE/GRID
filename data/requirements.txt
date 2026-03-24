@@ -4,6 +4,5 @@ python-dotenv>=1.0.0
 
 # Development/testing requirements
 pytest>=7.0.0
-black>=23.0.0
+ruff>=0.8.0
 mypy>=1.0.0
-flake8>=6.0.0

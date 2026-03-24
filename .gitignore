@@ -459,13 +459,9 @@ docker-compose.local.yml
 */.ipynb_checkpoints/*
 
 # ==========================
-# DEV DRIVE SETUP ARTIFACTS
+# EPHEMERAL ANALYSIS OUTPUTS
 # ==========================
 
-Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle
-complete-dev-drive-setup.md
-dev-drive-manual-setup.md
-setup-dev-drive.ps1
 current_mypy_errors.txt
 
 # ==========================
@@ -528,25 +524,11 @@ grid/events/
 grid/io/
 grid/safety/
 grid/security/
-grid/version_3_5.py
-grid/version_4_5.py
-
-# Game files
-Hogwarts/
 
 # Build and dependency directories
 k8s/
 circuits/
 codemaps/
-
-# Tools and utilities
-tools/ambient_sound/
-tools/pulse_monitor/
-tools/zoology_mapper/
-
-# Configuration files
-grid.code-workspace
-light_of_the_seven/grid.code-workspace
 
 # Config directory sensitive files
 config/secrets/
