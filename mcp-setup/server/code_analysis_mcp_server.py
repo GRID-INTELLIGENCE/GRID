@@ -167,7 +167,7 @@ def get_complexity(file_path: str) -> dict[str, Any]:
 
 
 @server.list_tools()
-async def handle_list_tools() -> list[Tool]:
+async def list_tools() -> list[Tool]:
     """List available tools."""
     return [
         Tool(
@@ -201,7 +201,7 @@ async def handle_list_tools() -> list[Tool]:
 
 
 @server.call_tool()
-async def handle_call_tool(name: str, arguments: dict[str, Any]) -> CallToolResult:
+async def call_tool(name: str, arguments: dict[str, Any]) -> CallToolResult:
     """Handle tool calls."""
     try:
         if name == "analyze_code":
