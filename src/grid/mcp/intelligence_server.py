@@ -428,9 +428,7 @@ class GridIntelligenceMCPServer:
                         from grid.tracing import TraceManager
                         from grid.tracing.trace_store import TraceStore
 
-                        storage_path = os.environ.get(
-                            "GRID_TRACE_STORAGE_PATH", str(Path.home() / ".grid" / "traces")
-                        )
+                        storage_path = os.environ.get("GRID_TRACE_STORAGE_PATH", str(Path.home() / ".grid" / "traces"))
                         store = TraceStore(storage_path=Path(storage_path))
                         self._trace_manager = TraceManager(store=store)
         return self._trace_manager
@@ -523,9 +521,7 @@ class GridIntelligenceMCPServer:
         detector = self._ensure_agentic()
         result = await detector.detect_embedded_agentic(state)
 
-        return CallToolResult(
-            content=[TextContent(text=json.dumps(result, indent=2, default=str), type="text")]
-        )
+        return CallToolResult(content=[TextContent(text=json.dumps(result, indent=2, default=str), type="text")])
 
     async def _handle_list_pattern_detectors(self, args: dict[str, Any]) -> CallToolResult:
         detectors = [
@@ -560,9 +556,7 @@ class GridIntelligenceMCPServer:
                 "description": "Extended pattern recognition with embedded agentic detection and coherence analysis",
             },
         ]
-        return CallToolResult(
-            content=[TextContent(text=json.dumps({"detectors": detectors}, indent=2), type="text")]
-        )
+        return CallToolResult(content=[TextContent(text=json.dumps({"detectors": detectors}, indent=2), type="text")])
 
     # -- Knowledge Graph handlers --
 
@@ -608,9 +602,7 @@ class GridIntelligenceMCPServer:
         store = self._ensure_knowledge()
         subgraph = _get_subgraph_from_store(store, entity_id, depth)
 
-        return CallToolResult(
-            content=[TextContent(text=json.dumps(subgraph, indent=2, default=str), type="text")]
-        )
+        return CallToolResult(content=[TextContent(text=json.dumps(subgraph, indent=2, default=str), type="text")])
 
     async def _handle_store_entity(self, args: dict[str, Any]) -> CallToolResult:
         from grid.knowledge.graph_schema import EntityType
@@ -832,9 +824,7 @@ class GridIntelligenceMCPServer:
         analysis["context_depth"] = state.context_depth
         analysis["pattern_signature"] = state.pattern_signature
 
-        return CallToolResult(
-            content=[TextContent(text=json.dumps(analysis, indent=2, default=str), type="text")]
-        )
+        return CallToolResult(content=[TextContent(text=json.dumps(analysis, indent=2, default=str), type="text")])
 
     # -- Server lifecycle --
 

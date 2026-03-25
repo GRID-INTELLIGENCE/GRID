@@ -305,8 +305,7 @@ async def main():
         dep_issues.append(f"Coinbase archive not found at {coinbase_path}")
     if find_spec("databricks") is None and find_spec("databricks.sql") is None:
         dep_issues.append(
-            "databricks-sql-connector not installed. "
-            "Install with: uv pip install databricks-sql-connector"
+            "databricks-sql-connector not installed. Install with: uv pip install databricks-sql-connector"
         )
     if dep_issues:
         logger.warning(

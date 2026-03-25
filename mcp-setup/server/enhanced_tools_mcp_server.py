@@ -52,8 +52,6 @@ def format_tool_output(tool_name: str, result: dict[str, Any], execution_time: f
 """
 
 
-
-
 async def _run_process_and_communicate(
     cmd: list[str], cwd: Path | None, timeout: int
 ) -> tuple[asyncio.subprocess.Process, bytes, bytes]:

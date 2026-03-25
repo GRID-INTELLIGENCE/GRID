@@ -85,9 +85,7 @@ class RAGEngine:
             except RuntimeError:
                 raise
             except Exception as e:
-                raise RuntimeError(
-                    f"Failed to validate embedding model availability: {e}"
-                ) from e
+                raise RuntimeError(f"Failed to validate embedding model availability: {e}") from e
 
         # Validate and resolve LLM model for local mode
         if config.llm_mode == ModelMode.LOCAL:
@@ -109,9 +107,7 @@ class RAGEngine:
             except RuntimeError:
                 raise
             except Exception as e:
-                raise RuntimeError(
-                    f"Failed to validate LLM model availability: {e}"
-                ) from e
+                raise RuntimeError(f"Failed to validate LLM model availability: {e}") from e
 
         self.config = config
 

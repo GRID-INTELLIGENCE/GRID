@@ -20,7 +20,6 @@ Usage:
 from __future__ import annotations
 
 import asyncio
-import logging
 import os
 import sys
 import time
@@ -89,15 +88,15 @@ except ImportError:
         return None
 
 
-# Security Infrastructure
-from .security.api_sentinels import API_DEFAULTS, apply_defaults
-from .services.payment import reconciliation_loop
-
 # =============================================================================
 # Logging Configuration
 # =============================================================================
+from application.mothership.logging_structured import ensure_configured
+from application.mothership.logging_structured import get_logger as _get_structured_logger
 
-from application.mothership.logging_structured import ensure_configured, get_logger as _get_structured_logger
+# Security Infrastructure
+from .security.api_sentinels import API_DEFAULTS, apply_defaults
+from .services.payment import reconciliation_loop
 
 # Check for quiet mode (used by RAG chat and other CLI tools)
 _quiet_mode = os.environ.get("GRID_QUIET", "").lower() in ("1", "true", "yes")

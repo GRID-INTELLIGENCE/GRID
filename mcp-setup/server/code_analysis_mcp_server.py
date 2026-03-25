@@ -45,9 +45,7 @@ logger = logging.getLogger(__name__)
 # plus any extra roots declared via EXTRA_ALLOWED_ROOTS (colon-separated).
 GRID_ROOT = grid_root
 _extra = os.environ.get("EXTRA_ALLOWED_ROOTS", "")
-ALLOWED_ROOTS: list[Path] = [GRID_ROOT] + [
-    Path(p).resolve() for p in _extra.split(":") if p.strip()
-]
+ALLOWED_ROOTS: list[Path] = [GRID_ROOT] + [Path(p).resolve() for p in _extra.split(":") if p.strip()]
 
 # Initialize MCP server
 server = Server("code-analysis")
@@ -74,9 +72,7 @@ def _validate_path(file_path: str) -> Path:
     if original.is_symlink():
         target = original.resolve()
         if not any(_is_under(target, root) for root in ALLOWED_ROOTS):
-            raise ValueError(
-                f"Symlink '{file_path}' targets outside allowed workspace roots. Access denied."
-            )
+            raise ValueError(f"Symlink '{file_path}' targets outside allowed workspace roots. Access denied.")
     resolved = original.resolve()
     if not any(_is_under(resolved, root) for root in ALLOWED_ROOTS):
         raise ValueError(

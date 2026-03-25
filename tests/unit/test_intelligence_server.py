@@ -289,9 +289,7 @@ class TestValidateEssentialState:
 
     def test_invalid_context_depth_type(self):
         with pytest.raises(ValueError, match="context_depth"):
-            _validate_essential_state(
-                {"pattern_signature": "sig", "quantum_state": {"a": 1}, "context_depth": "bad"}
-            )
+            _validate_essential_state({"pattern_signature": "sig", "quantum_state": {"a": 1}, "context_depth": "bad"})
 
 
 # ---------------------------------------------------------------------------
@@ -551,9 +549,7 @@ class TestLazyInit:
 
     @pytest.mark.asyncio()
     async def test_pattern_detector_initialized_on_first_call(self, server: GridIntelligenceMCPServer):
-        await server._dispatch_tool(
-            "detect_patterns", {"pattern_signature": "init_test", "quantum_state": {"x": 1}}
-        )
+        await server._dispatch_tool("detect_patterns", {"pattern_signature": "init_test", "quantum_state": {"x": 1}})
         assert server._pattern_detector is not None
 
     @pytest.mark.asyncio()
