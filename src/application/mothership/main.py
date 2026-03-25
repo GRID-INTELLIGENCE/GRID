@@ -97,17 +97,15 @@ from .services.payment import reconciliation_loop
 # Logging Configuration
 # =============================================================================
 
+from application.mothership.logging_structured import ensure_configured, get_logger as _get_structured_logger
+
 # Check for quiet mode (used by RAG chat and other CLI tools)
 _quiet_mode = os.environ.get("GRID_QUIET", "").lower() in ("1", "true", "yes")
-_log_level = logging.CRITICAL if _quiet_mode else logging.INFO
+if _quiet_mode:
+    os.environ.setdefault("MOTHERSHIP_LOG_LEVEL", "CRITICAL")
 
-logging.basicConfig(
-    level=_log_level,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[logging.StreamHandler(sys.stdout)],
-)
-
-logger = logging.getLogger(__name__)
+ensure_configured()
+logger = _get_structured_logger(__name__)
 
 
 # =============================================================================
