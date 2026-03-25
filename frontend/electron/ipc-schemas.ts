@@ -71,7 +71,7 @@ export type OllamaStreamInput = z.infer<typeof ollamaStreamSchema>;
 
 export const executeToolSchema = z.object({
   toolId: z.string().min(1),
-  arguments: z.record(z.unknown()),
+  arguments: z.record(z.string(), z.unknown()),
   dryRun: z.boolean().default(false),
 });
 

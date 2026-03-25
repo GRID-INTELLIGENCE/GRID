@@ -58,7 +58,7 @@ export type ToolMetadata = z.infer<typeof ToolMetadataSchema>;
 
 export const ToolCallSchema = z.object({
   toolId: z.string(),
-  arguments: z.record(z.unknown()),
+  arguments: z.record(z.string(), z.unknown()),
   description: z.string(),
 });
 export type ToolCall = z.infer<typeof ToolCallSchema>;
@@ -86,7 +86,7 @@ export const StepResultSchema = z.discriminatedUnion("status", [
   z.object({
     status: z.literal("success"),
     stepOrder: z.number(),
-    data: z.record(z.unknown()),
+    data: z.record(z.string(), z.unknown()),
     durationMs: z.number(),
   }),
   z.object({
@@ -115,7 +115,7 @@ export type PlanExecutionResult = z.infer<typeof PlanExecutionResultSchema>;
 
 export const ExecuteToolPayloadSchema = z.object({
   toolId: z.string(),
-  arguments: z.record(z.unknown()),
+  arguments: z.record(z.string(), z.unknown()),
   dryRun: z.boolean().default(false),
 });
 export type ExecuteToolPayload = z.infer<typeof ExecuteToolPayloadSchema>;

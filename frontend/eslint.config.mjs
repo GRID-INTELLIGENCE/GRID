@@ -14,6 +14,7 @@ export default tseslint.config(// Global ignores
     "node_modules/",
     "storybook-static/",
     "scripts/",
+    "src/api/schema.d.ts",
     "*.config.*",
   ],
 }, // Base JS recommended rules
