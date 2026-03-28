@@ -946,9 +946,17 @@ def _build_app_with_router(**gate_kwargs: Any) -> FastAPI:
     }
     gate_defaults.update(gate_kwargs)
 
-    gate = AdmissionGateMiddleware(app, **gate_defaults)
+    # Shared attribution engine — same pattern as main.py
+    from application.mothership.middleware.admission_gate import EntityAttributionEngine, load_billboard
+
+    attribution = EntityAttributionEngine(
+        banner_threshold=gate_defaults["banner_threshold"],
+    )
+    gate_defaults["attribution"] = attribution
     app.add_middleware(AdmissionGateMiddleware, **gate_defaults)
-    app.state.admission_gate = gate
+    app.state.admission_attribution = attribution
+    app.state.admission_context_ceiling = 25_000
+    app.state.admission_billboard = load_billboard()
 
     app.include_router(admission_router)
     return app
@@ -1003,8 +1011,8 @@ class TestEnforcementRouterEntityReport:
     def test_known_entity_returns_full_report(self) -> None:
         app = _build_app_with_router()
         # Inject a violation directly into the gate
-        gate = app.state.admission_gate
-        gate.attribution.record_violation("test-entity-1", ViolationType.BUDGET_EXCEEDED)
+        attr = app.state.admission_attribution
+        attr.record_violation("test-entity-1", ViolationType.BUDGET_EXCEEDED)
 
         client = TestClient(app, raise_server_exceptions=False)
         resp = client.get("/admission/entity/test-entity-1")
@@ -1030,12 +1038,12 @@ class TestEnforcementRouterBannered:
 
     def test_bannered_entity_appears_in_list(self) -> None:
         app = _build_app_with_router(banner_threshold=10)
-        gate = app.state.admission_gate
+        attr = app.state.admission_attribution
         # Push entity over threshold
-        gate.attribution.record_violation(
+        attr.record_violation(
             "bad-actor", ViolationType.ORIGIN_DENIED
         )  # 10 points = threshold
-        assert gate.attribution.get_record("bad-actor").bannered is True
+        assert attr.get_record("bad-actor").bannered is True
 
         client = TestClient(app, raise_server_exceptions=False)
         resp = client.get("/admission/entities/bannered")
@@ -1153,9 +1161,9 @@ class TestEnforcementRouterPenaltyRevoke:
 
     def test_revoke_banner(self) -> None:
         app = _build_app_with_router(banner_threshold=10)
-        gate = app.state.admission_gate
-        gate.attribution.record_violation("bannered-entity", ViolationType.ORIGIN_DENIED)
-        assert gate.attribution.get_record("bannered-entity").bannered is True
+        attr = app.state.admission_attribution
+        attr.record_violation("bannered-entity", ViolationType.ORIGIN_DENIED)
+        assert attr.get_record("bannered-entity").bannered is True
 
         client = TestClient(app, raise_server_exceptions=False)
         resp = client.post(
@@ -1174,9 +1182,9 @@ class TestEnforcementRouterPenaltyRevoke:
 
     def test_reduce_penalty(self) -> None:
         app = _build_app_with_router()
-        gate = app.state.admission_gate
-        gate.attribution.record_violation("penalized", ViolationType.BUDGET_EXCEEDED)
-        initial = gate.attribution.get_record("penalized").total_penalty_points
+        attr = app.state.admission_attribution
+        attr.record_violation("penalized", ViolationType.BUDGET_EXCEEDED)
+        initial = attr.get_record("penalized").total_penalty_points
 
         client = TestClient(app, raise_server_exceptions=False)
         resp = client.post(
@@ -1193,8 +1201,8 @@ class TestEnforcementRouterPenaltyRevoke:
 
     def test_full_reset(self) -> None:
         app = _build_app_with_router(banner_threshold=10)
-        gate = app.state.admission_gate
-        gate.attribution.record_violation("reset-me", ViolationType.ORIGIN_DENIED)
+        attr = app.state.admission_attribution
+        attr.record_violation("reset-me", ViolationType.ORIGIN_DENIED)
 
         client = TestClient(app, raise_server_exceptions=False)
         resp = client.post(
