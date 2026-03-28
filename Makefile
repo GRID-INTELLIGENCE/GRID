@@ -2,7 +2,7 @@
 # Streamlines local development with uv
 # Note: Dotfiles (.agentignore, .cursorrules, .python-version, .secrets.baseline) in config/
 
-.PHONY: help install run test lint format export-requirements check-venv clean guard-no-debug
+.PHONY: help install run test lint format export-requirements check-venv clean guard-no-debug docker-build docker-build-prod docker-up docker-down docker-logs docker-shell
 
 # Default target
 .DEFAULT_GOAL := help
@@ -59,3 +59,21 @@ clean: ## Clean build artifacts and caches
 	find . -type d -name ".pytest_cache" -exec rm -rf {} +
 	find . -type d -name ".ruff_cache" -exec rm -rf {} +
 	find . -type d -name ".mypy_cache" -exec rm -rf {} +
+
+docker-build: ## Build GRID Docker image (dev)
+	docker build -t grid:dev --target dev .
+
+docker-build-prod: ## Build GRID Docker image (prod)
+	docker build -t grid:prod --target prod .
+
+docker-up: ## Start GRID with Redis + Ollama
+	docker compose up -d
+
+docker-down: ## Stop GRID containers
+	docker compose down
+
+docker-logs: ## Tail GRID container logs
+	docker compose logs -f --tail=50
+
+docker-shell: ## Shell into GRID container
+	docker compose exec grid-mothership bash
