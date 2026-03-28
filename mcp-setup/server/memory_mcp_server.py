@@ -7,6 +7,7 @@ Provides local memory storage and retrieval for agents
 import asyncio
 import json
 import logging
+import re
 from pathlib import Path
 from typing import Any
 
@@ -51,8 +52,16 @@ async def list_tools() -> list[Tool]:
     ]
 
 
+_SAFE_KEY_RE = re.compile(r"^[a-zA-Z0-9_-]{1,128}$")
+
+
 def get_memory_path(key: str) -> Path:
-    return MEMORY_DIR / f"{key}.json"
+    if not _SAFE_KEY_RE.match(key):
+        raise ValueError(f"Invalid memory key: must match [a-zA-Z0-9_-]{{1,128}}")
+    result = (MEMORY_DIR / f"{key}.json").resolve()
+    if not str(result).startswith(str(MEMORY_DIR.resolve())):
+        raise ValueError("Path traversal detected")
+    return result
 
 
 @server.call_tool()
@@ -67,7 +76,7 @@ async def call_tool(name: str, args: dict[str, Any]) -> list[TextContent]:
         memory_path = get_memory_path(key)
         memory_path.write_text(json.dumps(memory_data, indent=2))
 
-        logger.info(f"Stored memory: {key}")
+        logger.info("Stored memory: %s", key)
         return [TextContent(f"Stored memory: {key}")]
 
     elif name == "retrieve_memory":

@@ -34,7 +34,7 @@ try:
     from mcp.server.stdio import stdio_server
     from mcp.types import CallToolResult, TextContent, Tool
 except ImportError:
-    print("MCP library not found. Please install: pip install mcp")
+    sys.stderr.write("MCP library not found. Please install: pip install mcp\n")
     sys.exit(1)
 
 # Configure logging

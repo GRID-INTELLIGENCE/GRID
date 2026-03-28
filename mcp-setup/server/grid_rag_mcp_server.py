@@ -1,6 +1,7 @@
 import asyncio
 import json
 import logging
+import re
 import sys
 from dataclasses import dataclass
 from datetime import datetime
@@ -37,15 +38,50 @@ try:
         Tool,
     )
 except ImportError:
-    print("MCP library not found. Please install: pip install mcp")
+    sys.stderr.write("MCP library not found. Please install: pip install mcp\n")
     sys.exit(1)
 
 try:
     from tools.rag import RAGConfig, RAGEngine
     from tools.rag.on_demand_engine import OnDemandRAGEngine
 except ImportError:
-    print("GRID RAG tools not found. Please ensure GRID is properly installed.")
+    sys.stderr.write("GRID RAG tools not found. Please ensure GRID is properly installed.\n")
     sys.exit(1)
+
+# Import InputSanitizer for query validation
+try:
+    from grid.security.input_sanitizer import InputSanitizer, SanitizationConfig
+
+    _query_sanitizer = InputSanitizer(SanitizationConfig(
+        encode_html=False,
+        max_text_length=10000,
+    ))
+except ImportError:
+    _query_sanitizer = None
+
+# Prompt injection patterns for RAG source content filtering
+_INJECTION_PATTERNS = [
+    re.compile(r"ignore\s+(previous|all|above)\s+instructions", re.I),
+    re.compile(r"you\s+are\s+now\s+", re.I),
+    re.compile(r"<\|(?:im_start|system|endofprompt)\|>", re.I),
+    re.compile(r"###\s*(?:system|instruction|override)", re.I),
+    re.compile(r"(?:IMPORTANT|CRITICAL|URGENT):\s*(?:ignore|forget|disregard)", re.I),
+]
+
+
+def _filter_sources(sources: list[dict]) -> list[dict]:
+    """Filter retrieved RAG sources for prompt injection patterns."""
+    filtered = []
+    for s in sources:
+        content = s.get("content", "") or s.get("document", "")
+        if any(p.search(content) for p in _INJECTION_PATTERNS):
+            logging.getLogger(__name__).warning(
+                "Filtered suspicious RAG source: %s", s.get("metadata", {}).get("path", "?")
+            )
+            continue
+        filtered.append(s)
+    return filtered
+
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -367,13 +403,27 @@ async def handle_index(args: dict[str, Any]) -> CallToolResult:
     curated = args.get("curated", False)
     quiet = args.get("quiet", False)
 
+    # Path containment for index path
+    path_resolved = Path(path).resolve()
+    allowed_roots = [
+        grid_root.resolve(),
+        Path.home().resolve() / "CascadeProjects",
+        Path.home().resolve() / "canopy",
+        Path.home().resolve() / "roots",
+    ]
+    if not any(str(path_resolved).startswith(str(r)) for r in allowed_roots):
+        return CallToolResult(content=[TextContent(type="text", text="Denied: path outside workspace")])
+    sensitive = [".ssh", ".gnupg", ".env", "credentials", "secrets"]
+    if any(s in str(path_resolved).lower() for s in sensitive):
+        return CallToolResult(content=[TextContent(type="text", text="Denied: sensitive directory")])
+
     try:
         engine = await ensure_rag_engine()
         if engine is None:
             return CallToolResult(content=[TextContent(type="text", text="Error: RAG engine not initialized")])
 
         if not quiet:
-            print(f"🔍 **Indexing:** {path}")
+            logger.info("Indexing: %s", path)
 
         # Determine files to index
         files = None
@@ -384,10 +434,10 @@ async def handle_index(args: dict[str, Any]) -> CallToolResult:
 
                 files = _build_curated_files(path)
                 if not quiet:
-                    print(f"📋 **Curated mode:** {len(files)} files")
+                    logger.info("Curated mode: %d files", len(files))
             except ImportError:
                 if not quiet:
-                    print("⚠️ Curated mode not available, using full directory scan")
+                    logger.info("Curated mode not available, using full directory scan")
 
         # Perform indexing
         engine.index(repo_path=path, rebuild=rebuild, files=files, quiet=quiet)
@@ -414,6 +464,14 @@ async def handle_query(args: dict[str, Any]) -> CallToolResult:
     temperature = args.get("temperature", 0.3)
     include_sources = args.get("include_sources", True)
 
+    # Sanitize query input
+    if _query_sanitizer is not None:
+        scan = _query_sanitizer.sanitize_text_full(query)
+        if scan.severity.value in ("critical", "high"):
+            logger.warning("RAG query blocked: severity=%s threats=%s", scan.severity, scan.threats_detected)
+            return CallToolResult(content=[TextContent(type="text", text="Query rejected: suspicious content detected")])
+        query = str(scan.sanitized_content)
+
     try:
         engine = await ensure_rag_engine()
         if engine is None:
@@ -426,9 +484,9 @@ async def handle_query(args: dict[str, Any]) -> CallToolResult:
         # Generate response
         result = await engine.query(query_text=query, top_k=top_k, temperature=temperature, include_sources=True)
 
-        # Format response
+        # Filter sources for prompt injection
         answer = result.get("answer", "No answer generated")
-        sources = result.get("sources", [])
+        sources = _filter_sources(result.get("sources", []))
 
         response = f"🤖 **Answer:**\n{answer}"
 
@@ -481,6 +539,28 @@ async def handle_on_demand(args: dict[str, Any]) -> CallToolResult:
     include_codebase = args.get("include_codebase", False)
     max_files = args.get("max_files", 100)
 
+    # Sanitize query input
+    if _query_sanitizer is not None:
+        scan = _query_sanitizer.sanitize_text_full(query)
+        if scan.severity.value in ("critical", "high"):
+            logger.warning("RAG on-demand blocked: severity=%s threats=%s", scan.severity, scan.threats_detected)
+            return CallToolResult(content=[TextContent(type="text", text="Query rejected: suspicious content detected")])
+        query = str(scan.sanitized_content)
+
+    # Path containment for docs_path
+    docs_resolved = Path(docs_path).resolve()
+    allowed_roots = [
+        grid_root.resolve(),
+        Path.home().resolve() / "CascadeProjects",
+        Path.home().resolve() / "canopy",
+        Path.home().resolve() / "roots",
+    ]
+    if not any(str(docs_resolved).startswith(str(r)) for r in allowed_roots):
+        return CallToolResult(content=[TextContent(type="text", text="Denied: path outside workspace")])
+    sensitive = [".ssh", ".gnupg", ".env", "credentials", "secrets"]
+    if any(s in str(docs_resolved).lower() for s in sensitive):
+        return CallToolResult(content=[TextContent(type="text", text="Denied: sensitive directory")])
+
     try:
         # Initialize on-demand engine
         config = RAGConfig.from_env()
@@ -519,6 +599,14 @@ async def handle_search(args: dict[str, Any]) -> CallToolResult:
     query = args["query"]
     top_k = args.get("top_k", 10)
     threshold = args.get("threshold", 0.0)
+
+    # Sanitize query input
+    if _query_sanitizer is not None:
+        scan = _query_sanitizer.sanitize_text_full(query)
+        if scan.severity.value in ("critical", "high"):
+            logger.warning("RAG search blocked: severity=%s threats=%s", scan.severity, scan.threats_detected)
+            return CallToolResult(content=[TextContent(type="text", text="Query rejected: suspicious content detected")])
+        query = str(scan.sanitized_content)
 
     try:
         engine = await ensure_rag_engine()

@@ -15,7 +15,7 @@ try:
     from mcp.server.stdio import stdio_server
     from mcp.types import CallToolResult, TextContent, Tool
 except ImportError:
-    print("MCP library not found. Please install: pip install mcp")
+    sys.stderr.write("MCP library not found. Please install: pip install mcp\n")
     sys.exit(1)
 
 # Configure logging
@@ -388,13 +388,24 @@ async def handle_test_coverage_analyzer(args: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+_BLOCKED_MODULES = frozenset({
+    "os", "sys", "subprocess", "shutil", "importlib", "pickle",
+    "ctypes", "builtins", "code", "codeop",
+})
+
+
 def _is_safe_module_name(name: str) -> bool:
     """Allow only valid Python module names (no code injection). Max length 64."""
     if not name or len(name) > 64:
         return False
     import re
 
-    return bool(re.match(r"^[a-zA-Z_][a-zA-Z0-9_.]*$", name))
+    if not re.match(r"^[a-zA-Z_][a-zA-Z0-9_.]*$", name):
+        return False
+    for part in name.split("."):
+        if part in _BLOCKED_MODULES:
+            return False
+    return True
 
 
 def _sanitize_target_for_command(target: str, max_length: int = 512) -> str:
