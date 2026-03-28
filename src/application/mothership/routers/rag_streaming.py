@@ -23,6 +23,8 @@ router = APIRouter(prefix="/rag", tags=["rag"])
 # Global RAG engine instance
 _rag_engine: ConversationalRAGEngine | None = None
 
+_CLIENT_ERROR_MESSAGE = "Request processing failed"
+
 
 def get_rag_engine() -> ConversationalRAGEngine:
     """Get or create the global RAG engine."""
@@ -30,6 +32,10 @@ def get_rag_engine() -> ConversationalRAGEngine:
     if _rag_engine is None:
         _rag_engine = create_conversational_rag_engine()
     return _rag_engine
+
+
+def _client_error_payload(query: str) -> dict[str, Any]:
+    return {"error": _CLIENT_ERROR_MESSAGE, "query": query}
 
 
 # Pydantic models for streaming API
@@ -116,17 +122,6 @@ async def query_rag_stream(request: RAGQueryRequest) -> StreamingResponse:
         # Stage 2: Retrieval process
         yield StreamChunk(type="retrieval_started", data={"query": safe_query}).to_json() + "\n"
 
-        # Stage 3: Simulate retrieval progress
-        for progress in range(0, 101, 20):
-            yield (
-                StreamChunk(
-                    type="retrieval_progress",
-                    data={"progress": progress, "status": f"Retrieving documents... {progress}%"},
-                ).to_json()
-                + "\n"
-            )
-            await asyncio.sleep(0.1)  # Simulate work
-
         # Stage 4: Execute query
         try:
             result = await engine.query(
@@ -205,8 +200,9 @@ async def query_rag_stream(request: RAGQueryRequest) -> StreamingResponse:
                 + "\n"
             )
 
-        except Exception as e:
-            yield StreamChunk(type="error", data={"error": str(e), "query": safe_query}).to_json() + "\n"
+        except Exception:
+            logger.exception("RAG streaming query failed", extra={"query": safe_query})
+            yield StreamChunk(type="error", data=_client_error_payload(safe_query)).to_json() + "\n"
 
     return StreamingResponse(
         generate_stream(),
@@ -219,7 +215,7 @@ async def query_rag_stream(request: RAGQueryRequest) -> StreamingResponse:
 
 
 @router.post("/query/batch")
-async def query_rag_batch(requests: list[RAGQueryRequest]) -> dict[str, Any]:
+async def query_rag_batch(requests: list[RAGQueryRequest]) -> StreamingResponse:
     """Execute multiple RAG queries in batch with progress streaming."""
     engine = get_rag_engine()
     # Sanitize each query before processing (SECURITY_REVIEW)
@@ -267,8 +263,9 @@ async def query_rag_batch(requests: list[RAGQueryRequest]) -> dict[str, Any]:
 
                 results.append({"query": safe_query, **result})
 
-            except Exception as e:
-                results.append({"query": safe_query, "error": str(e)})
+            except Exception:
+                logger.exception("RAG batch query failed", extra={"query": safe_query, "index": i})
+                results.append({"query": safe_query, "error": _CLIENT_ERROR_MESSAGE})
 
             yield (
                 StreamChunk(

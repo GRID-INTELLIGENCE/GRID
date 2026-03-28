@@ -12,15 +12,6 @@ from grid.application import IntelligenceApplication
 
 router = APIRouter(tags=["intelligence"])
 
-_APP: IntelligenceApplication | None = None
-
-
-def _get_app() -> IntelligenceApplication:
-    global _APP
-    if _APP is None:
-        _APP = IntelligenceApplication()
-    return _APP
-
 
 class IntelligenceProcessRequest(BaseModel):
     data: dict[str, Any] = Field(default_factory=dict)
@@ -36,7 +27,7 @@ async def process_intelligence(
     auth: Auth,
     request_context: RequestContext,
 ) -> ApiResponse[dict[str, Any]]:
-    app = _get_app()
+    app = IntelligenceApplication()
 
     if payload.reset_session:
         app.reset()

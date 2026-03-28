@@ -64,7 +64,10 @@ def rag_client():
         mock_create.return_value = mock_engine
 
         # Now import and create the app
+        from application.mothership.routers import rag_streaming as rag_streaming_module
         from application.mothership.routers.rag_streaming import router as rag_router
+
+        rag_streaming_module._rag_engine = None
 
         app = FastAPI()
         app.include_router(rag_router, prefix="/api/v1")
@@ -192,19 +195,62 @@ def test_rag_stream_multi_hop_reasoning(rag_client):
     assert type_sequence[0] == "analysis_started"
     assert "retrieval_started" in type_sequence
     assert "documents_retrieved" in type_sequence
+    assert "retrieval_progress" not in type_sequence
     assert type_sequence[-1] == "complete"
 
 
 def test_rag_stream_error_handling(rag_client):
-    """Test error handling in streaming responses."""
-    response = rag_client.post(
-        "/api/v1/rag/query/stream",
-        json={"query": "test error", "top_k": 5},
-    )
+    """Test error handling in streaming responses — internal details must not leak."""
+    with patch("application.mothership.routers.rag_streaming.create_conversational_rag_engine") as mock_create:
+        mock_engine = MagicMock()
+        mock_engine.query = AsyncMock(side_effect=RuntimeError("internal details should not leak"))
+        mock_create.return_value = mock_engine
 
-    # Should handle gracefully - either complete or error event
+        from application.mothership.routers import rag_streaming as rag_streaming_module
+        from application.mothership.routers.rag_streaming import router as rag_router
+
+        rag_streaming_module._rag_engine = None
+
+        app = FastAPI()
+        app.include_router(rag_router, prefix="/api/v1")
+
+        with TestClient(app) as client:
+            response = client.post(
+                "/api/v1/rag/query/stream",
+                json={"query": "test error", "top_k": 5},
+            )
+
     assert response.status_code == 200
     events = parse_ndjson_events(response)
-    if events:
-        # Last event should indicate status
-        assert "type" in events[-1]
+    assert events[-1]["type"] == "error"
+    assert events[-1]["data"]["error"] == "Request processing failed"
+    assert "internal details should not leak" not in json.dumps(events[-1])
+
+
+def test_rag_batch_error_handling_sanitizes_errors():
+    """Test batch query errors are sanitized in streamed batch results."""
+    with patch("application.mothership.routers.rag_streaming.create_conversational_rag_engine") as mock_create:
+        mock_engine = MagicMock()
+        mock_engine.query = AsyncMock(side_effect=RuntimeError("sensitive batch failure"))
+        mock_create.return_value = mock_engine
+
+        from application.mothership.routers import rag_streaming as rag_streaming_module
+        from application.mothership.routers.rag_streaming import router as rag_router
+
+        rag_streaming_module._rag_engine = None
+
+        app = FastAPI()
+        app.include_router(rag_router, prefix="/api/v1")
+
+        with TestClient(app) as client:
+            response = client.post(
+                "/api/v1/rag/query/batch",
+                json=[{"query": "test error", "top_k": 5, "temperature": 0.7}],
+            )
+
+    assert response.status_code == 200
+    events = parse_ndjson_events(response)
+    assert events[-1]["type"] == "batch_completed"
+    result = events[-1]["data"]["results"][0]
+    assert result["error"] == "Request processing failed"
+    assert "sensitive batch failure" not in json.dumps(events[-1])
