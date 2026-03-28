@@ -194,6 +194,28 @@ export interface AdmissionBanneredEntities {
   timestamp: string;
 }
 
+export interface ComplianceCheckRequest {
+  payload: Record<string, unknown>;
+  headers?: Record<string, string>;
+  entity_id?: string;
+  target_path?: string;
+}
+
+export interface PenaltyApplyRequest {
+  entity_id: string;
+  violation_type: string;
+  profit_masked?: boolean;
+  metadata?: Record<string, unknown>;
+  reason?: string;
+}
+
+export interface PenaltyRevokeRequest {
+  entity_id: string;
+  action: "revoke_banner" | "reduce_penalty" | "full_reset";
+  reduction_points?: number;
+  reason?: string;
+}
+
 // ── Intelligence ────────────────────────────────────────────────────
 
 export interface IntelligenceResult {

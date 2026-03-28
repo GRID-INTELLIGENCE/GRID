@@ -1370,6 +1370,40 @@ pie title Security Test Coverage (9/9 Passing)
 
 ---
 
+### Admission Gate (v2.8.0)
+
+Top-of-stack admission filter that sits above all other middleware. Rejects requests that should never reach the pipeline.
+
+**Components:**
+- **PolicyBillboard** — immutable ethical participation contract displayed to every entity
+- **EntityAttributionEngine** — identifies, tracks, and penalizes entities behind requests
+- **BudgetTracker** — sliding-window per-entity call cap with penalty-adjusted budgets
+- **AdmissionGateMiddleware** — orchestrates the gate chain
+
+**Gate Chain (execution order):**
+1. **Gate 0 — Banner check**: hard-block bannered entities (403)
+2. **Gate 1 — Budget**: sliding-window call cap, adjusted by penalty points (429)
+3. **Gate 2 — Origin whitelist**: only known origins pass (403)
+4. **Gate 3a — Context ceiling**: estimated token cost check (422)
+5. **Gate 3b — JSON validity**: body must be valid JSON (422)
+6. **Gate 3c — Structure**: intelligence paths require `data` key (422)
+7. **Gate 3d — Profit-mask detection**: scans for profit-maximization signals (403, 3x penalty)
+
+**Penalty Tiers:**
+| Tier | Multiplier | Trigger |
+|------|-----------|---------|
+| Runtime mistake | 1x | Single correctable violation |
+| Environment pollution | 1x compounding | Repeated violations, budget reduction |
+| Intentional scheming | 3x accelerated | Profit-masking signals, safety bypasses |
+
+**Middleware Position:** Added last in `create_app()` so it runs first in the request chain.
+
+**Persistence:** Entity records persist to SQLite via `AdmissionEntityRepository`. Hydrated at startup, fire-and-forget writes on violations.
+
+**REST API:** `/admission/*` endpoints expose stats, entity reports, compliance checks, and penalty management. See `routers/admission_enforcement.py`.
+
+---
+
 ## Technology Stack
 
 Comprehensive technology overview with versions and purposes.

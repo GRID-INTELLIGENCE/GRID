@@ -34,6 +34,7 @@ interface GridQueryOptions {
   endpoint: string;
   staleTime?: number;
   refetchInterval?: number;
+  refetchIntervalInBackground?: boolean;
   enabled?: boolean;
 }
 
@@ -53,6 +54,7 @@ function useGridQuery<T>(options: GridQueryOptions) {
     },
     staleTime: options.staleTime,
     refetchInterval: options.refetchInterval,
+    refetchIntervalInBackground: options.refetchIntervalInBackground,
     enabled: options.enabled,
   });
 }
@@ -198,6 +200,7 @@ export function useAdmissionStats(opts?: { refetchInterval?: number }) {
     endpoint: "/admission/stats",
     staleTime: 10_000,
     refetchInterval: opts?.refetchInterval ?? 15_000,
+    refetchIntervalInBackground: false,
   });
 }
 
