@@ -3,6 +3,14 @@
 		{
 			"path": ".",
 			"name": "GRID"
+		},
+		{
+			"path": "frontend",
+			"name": "Frontend"
+		},
+		{
+			"path": "mcp-setup",
+			"name": "MCP Servers"
 		}
 	],
 	"settings": {
@@ -11,10 +19,10 @@
 		"python.languageServer": "Pylance",
 		"python.analysis.typeCheckingMode": "strict",
 		"python.analysis.extraPaths": [
-			"${workspaceFolder}/src",
-			"${workspaceFolder}/safety",
-			"${workspaceFolder}/security",
-			"${workspaceFolder}/boundaries"
+			"${workspaceFolder:GRID}/src",
+			"${workspaceFolder:GRID}/safety",
+			"${workspaceFolder:GRID}/security",
+			"${workspaceFolder:GRID}/boundaries"
 		],
 		"python.testing.pytestEnabled": true,
 		"python.testing.pytestArgs": [
@@ -31,6 +39,15 @@
 				"source.organizeImports": "explicit",
 				"source.fixAll": "explicit"
 			}
+		},
+		"[typescript]": {
+			"editor.formatOnSave": true
+		},
+		"[typescriptreact]": {
+			"editor.formatOnSave": true
+		},
+		"[javascript]": {
+			"editor.formatOnSave": true
 		},
 		"editor.formatOnSave": true,
 		"editor.codeActionsOnSave": {
@@ -62,45 +79,176 @@
 			"**/dist": true,
 			"**/build": true,
 			"**/archive": true,
-			"**/logs": true
+			"**/logs": true,
+			"**/coverage": true,
+			"**/htmlcov": true
 		},
 		"search.exclude": {
 			"**/.venv": true,
 			"**/__pycache__": true,
 			"**/.pytest_cache": true,
+			"**/.pytest_tmp_root": true,
 			"**/.mypy_cache": true,
 			"**/.ruff_cache": true,
 			"**/.uv-cache": true,
+			"**/.test_tmp": true,
+			"**/.rag_db": true,
+			"**/.rag_logs": true,
+			"**/.test_rag_db": true,
+			"**/.test_eval_rag_db": true,
 			"**/node_modules": true,
 			"**/dist": true,
 			"**/build": true,
 			"**/archive": true,
 			"**/uv.lock": true,
-			"**/logs": true
+			"**/logs": true,
+			"**/coverage": true,
+			"**/htmlcov": true
 		},
 		"files.watcherExclude": {
 			"**/.venv/**": true,
 			"**/__pycache__/**": true,
 			"**/.pytest_cache/**": true,
+			"**/.pytest_tmp_root/**": true,
 			"**/.mypy_cache/**": true,
 			"**/.ruff_cache/**": true,
 			"**/.uv-cache/**": true,
+			"**/.test_tmp/**": true,
+			"**/.rag_db/**": true,
+			"**/.rag_logs/**": true,
+			"**/.test_rag_db/**": true,
+			"**/.test_eval_rag_db/**": true,
 			"**/node_modules/**": true,
 			"**/dist/**": true,
 			"**/build/**": true,
 			"**/archive/**": true,
-			"**/logs/**": true
+			"**/logs/**": true,
+			"**/coverage/**": true,
+			"**/htmlcov/**": true
 		},
 		// ── Terminal ────────────────────────────────────────────
 		"terminal.integrated.env.linux": {
-			"PROJECT_ROOT": "${workspaceFolder}",
-			"PYTHONPATH": "${workspaceFolder}/src:${workspaceFolder}/safety:${workspaceFolder}/security:${workspaceFolder}/boundaries",
-			"GRID_HOME": "${workspaceFolder}/src/grid",
-			"COGNITIVE_HOME": "${workspaceFolder}/src/cognitive",
+			"PROJECT_ROOT": "${workspaceFolder:GRID}",
+			"PYTHONPATH": "${workspaceFolder:GRID}/src:${workspaceFolder:GRID}/safety:${workspaceFolder:GRID}/security:${workspaceFolder:GRID}/boundaries",
+			"GRID_HOME": "${workspaceFolder:GRID}/src/grid",
+			"COGNITIVE_HOME": "${workspaceFolder:GRID}/src/cognitive",
 			"ENV": "development",
 			"PYTHON_VERSION": "3.13"
 		},
 		// ── Workbench ───────────────────────────────────────────
 		"workbench.editor.closeOnFileDelete": true
+	},
+	"tasks": {
+		"version": "2.0.0",
+		"tasks": [
+			{
+				"label": "GRID: Test",
+				"type": "shell",
+				"command": "make test",
+				"options": {
+					"cwd": "${workspaceFolder:GRID}"
+				},
+				"problemMatcher": [],
+				"group": {
+					"kind": "test",
+					"isDefault": true
+				}
+			},
+			{
+				"label": "GRID: Lint",
+				"type": "shell",
+				"command": "make lint",
+				"options": {
+					"cwd": "${workspaceFolder:GRID}"
+				},
+				"problemMatcher": []
+			},
+			{
+				"label": "GRID: Format",
+				"type": "shell",
+				"command": "make format",
+				"options": {
+					"cwd": "${workspaceFolder:GRID}"
+				},
+				"problemMatcher": []
+			},
+			{
+				"label": "GRID: Mothership (port 8080)",
+				"type": "shell",
+				"command": "make run",
+				"options": {
+					"cwd": "${workspaceFolder:GRID}"
+				},
+				"isBackground": true,
+				"problemMatcher": [],
+				"presentation": {
+					"reveal": "always",
+					"panel": "dedicated"
+				}
+			},
+			{
+				"label": "GRID: Verify the Wall",
+				"type": "shell",
+				"command": "uv run pytest -q --tb=short && uv run ruff check src/ safety/ security/ boundaries/",
+				"options": {
+					"cwd": "${workspaceFolder:GRID}"
+				},
+				"problemMatcher": [],
+				"group": {
+					"kind": "build",
+					"isDefault": true
+				}
+			},
+			{
+				"label": "Frontend: Dev Server",
+				"type": "shell",
+				"command": "npm run dev",
+				"options": {
+					"cwd": "${workspaceFolder:Frontend}"
+				},
+				"isBackground": true,
+				"problemMatcher": [],
+				"presentation": {
+					"reveal": "silent",
+					"panel": "dedicated"
+				}
+			},
+			{
+				"label": "Frontend: Storybook",
+				"type": "shell",
+				"command": "npm run storybook",
+				"options": {
+					"cwd": "${workspaceFolder:Frontend}"
+				},
+				"isBackground": true,
+				"problemMatcher": [],
+				"presentation": {
+					"reveal": "silent",
+					"panel": "dedicated"
+				}
+			},
+			{
+				"label": "Frontend: Generate API Types",
+				"type": "shell",
+				"command": "npm run api:generate",
+				"options": {
+					"cwd": "${workspaceFolder:Frontend}"
+				},
+				"problemMatcher": []
+			}
+		]
+	},
+	"extensions": {
+		"recommendations": [
+			"charliermarsh.ruff",
+			"dbaeumer.vscode-eslint",
+			"esbenp.prettier-vscode",
+			"github.copilot",
+			"github.copilot-chat",
+			"github.vscode-github-actions",
+			"ms-python.python",
+			"ms-python.vscode-pylance",
+			"redhat.vscode-yaml"
+		]
 	}
 }
