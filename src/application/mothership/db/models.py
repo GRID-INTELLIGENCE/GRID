@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from .models_admission import AdmissionEntityRow, AdmissionViolationRow
 from .models_audit import AuditLogRow
 from .models_base import Base
 from .models_billing import (
@@ -31,6 +32,8 @@ from .models_drt import (
 
 __all__ = [
     "Base",
+    "AdmissionEntityRow",
+    "AdmissionViolationRow",
     "APIKeyRow",
     "UsageRecordRow",
     "PaymentTransactionRow",

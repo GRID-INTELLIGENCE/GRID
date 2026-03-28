@@ -472,6 +472,25 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
             except Exception as e:
                 logger.warning(f"Could not wire ParasiteGuard to EventBus: {e}")
 
+        # Hydrate admission gate entities from SQLite (if gate is active)
+        if hasattr(app.state, "admission_gate"):
+            try:
+                from .db.engine import get_async_sessionmaker
+                from .repositories.admission import AdmissionEntityRepository
+
+                sessionmaker = get_async_sessionmaker()
+                repo = AdmissionEntityRepository(sessionmaker)
+                await repo.ensure_tables()
+                persisted = await repo.load_all()
+                app.state.admission_gate.attribution.load_entities(persisted)
+
+                # Wire the persist hook now that we have a session factory
+                app.state.admission_gate.attribution._persist_hook = repo.persist_entity
+                app.state.admission_entity_repo = repo  # type: ignore[reportAttributeAccessIssue]
+                logger.info("Admission gate entities hydrated from SQLite (%d entities)", len(persisted))
+            except Exception as e:
+                logger.warning("Admission gate persistence unavailable: %s (entities will be in-memory only)", e)
+
         logger.info("Mothership Cockpit started successfully")
 
     except Exception as e:
@@ -798,25 +817,26 @@ The API supports multiple authentication methods:
 
     # 9. Admission Gate (top-of-stack pre-filter — added LAST so it runs FIRST)
     # Entity attribution, penalty enforcement, policy billboard, profit-mask detection.
-    try:
-        from .middleware.admission_gate import AdmissionGateMiddleware
+    if settings.security.admission_gate_enabled:
+        try:
+            from .middleware.admission_gate import AdmissionGateMiddleware
 
-        admission_gate = AdmissionGateMiddleware(
-            app,  # ASGIApp — required positional arg for BaseHTTPMiddleware
-            call_budget=getattr(settings.security, "admission_call_budget", 60),
-            banner_threshold=getattr(settings.security, "admission_banner_threshold", 50),
-        )
-        # Starlette wraps middleware; store the raw instance on app.state
-        # so the enforcement router can query it.
-        app.add_middleware(
-            AdmissionGateMiddleware,
-            call_budget=getattr(settings.security, "admission_call_budget", 60),
-            banner_threshold=getattr(settings.security, "admission_banner_threshold", 50),
-        )
-        app.state.admission_gate = admission_gate  # type: ignore[reportAttributeAccessIssue]
-        logger.info("Admission gate middleware enabled (top-of-stack)")
-    except Exception as e:
-        logger.warning("Admission gate middleware not available: %s", e)
+            admission_gate = AdmissionGateMiddleware(
+                app,  # ASGIApp — required positional arg for BaseHTTPMiddleware
+                call_budget=settings.security.admission_call_budget,
+                banner_threshold=settings.security.admission_banner_threshold,
+            )
+            # Starlette wraps middleware; store the raw instance on app.state
+            # so the enforcement router can query it.
+            app.add_middleware(
+                AdmissionGateMiddleware,
+                call_budget=settings.security.admission_call_budget,
+                banner_threshold=settings.security.admission_banner_threshold,
+            )
+            app.state.admission_gate = admission_gate  # type: ignore[reportAttributeAccessIssue]
+            logger.info("Admission gate middleware enabled (top-of-stack)")
+        except Exception as e:
+            logger.warning("Admission gate middleware not available: %s", e)
 
     # ==========================================================================
     # Prometheus Metrics (Phase 1 Gap Fix)

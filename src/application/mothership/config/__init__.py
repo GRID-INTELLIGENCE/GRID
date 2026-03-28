@@ -271,6 +271,11 @@ class SecuritySettings:
     accountability_contract_path: str = "config/accountability/contracts.yaml"  # Path to contract file
     accountability_audit_logging: bool = True  # Enable audit logging for violations
 
+    # Admission Gate (top-of-stack pipeline pre-filter)
+    admission_gate_enabled: bool = True  # Enable/disable the admission gate middleware
+    admission_call_budget: int = 60  # Sliding-window call budget per entity per window
+    admission_banner_threshold: int = 50  # Cumulative penalty score to trigger entity banner
+
     @classmethod
     def from_env(cls) -> SecuritySettings:
         """Load security settings from environment variables."""
@@ -314,6 +319,10 @@ class SecuritySettings:
                 "MOTHERSHIP_ACCOUNTABILITY_CONTRACT_PATH", "config/accountability/contracts.yaml"
             ),
             accountability_audit_logging=_parse_bool(env.get("MOTHERSHIP_ACCOUNTABILITY_AUDIT_LOGGING"), True),
+            # Admission Gate
+            admission_gate_enabled=_parse_bool(env.get("MOTHERSHIP_ADMISSION_GATE_ENABLED"), True),
+            admission_call_budget=int(env.get("MOTHERSHIP_ADMISSION_CALL_BUDGET", "60")),
+            admission_banner_threshold=int(env.get("MOTHERSHIP_ADMISSION_BANNER_THRESHOLD", "50")),
         )
 
     def validate(self, environment: str | None = None, fail_fast: bool = False) -> list[str]:

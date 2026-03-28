@@ -24,6 +24,7 @@ from typing import Any
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field
 
+from ..dependencies import AdminAuth
 from ..middleware.admission_gate import (
     BILLBOARD_VERSION,
     PROFIT_MASK_SIGNALS,
@@ -413,7 +414,7 @@ async def check_compliance(request: Request, body: ComplianceCheckRequest) -> Co
         "is applied when profit_masked=true."
     ),
 )
-async def apply_penalty(request: Request, body: PenaltyApplyRequest) -> PenaltyApplyResponse:
+async def apply_penalty(request: Request, body: PenaltyApplyRequest, auth: AdminAuth) -> PenaltyApplyResponse:
     gate = _get_gate(request)
 
     # Validate violation type
@@ -470,7 +471,7 @@ async def apply_penalty(request: Request, body: PenaltyApplyRequest) -> PenaltyA
         "course. Actions: revoke_banner, reduce_penalty, full_reset."
     ),
 )
-async def revoke_penalty(request: Request, body: PenaltyRevokeRequest) -> PenaltyRevokeResponse:
+async def revoke_penalty(request: Request, body: PenaltyRevokeRequest, auth: AdminAuth) -> PenaltyRevokeResponse:
     gate = _get_gate(request)
 
     valid_actions = {"revoke_banner", "reduce_penalty", "full_reset"}
@@ -505,6 +506,9 @@ async def revoke_penalty(request: Request, body: PenaltyRevokeRequest) -> Penalt
             message = "Entity record fully reset."
         case _:
             raise HTTPException(status_code=400, detail=f"Unknown action: {body.action}")
+
+    # Persist updated state to SQLite
+    gate.attribution._fire_persist(record)
 
     logger.info(
         "admission_enforcement.penalty_revoked entity=%s action=%s prev=%d curr=%d reason=%s",

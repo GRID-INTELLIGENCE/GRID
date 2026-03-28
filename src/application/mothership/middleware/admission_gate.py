@@ -19,10 +19,12 @@ and never touch the router, IntelligenceApplication, or any downstream middlewar
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import time
 from collections import defaultdict
+from collections.abc import Callable, Coroutine
 from dataclasses import dataclass, field
 from enum import StrEnum
 from typing import Any, Protocol
@@ -338,18 +340,33 @@ class EntityAttributionEngine:
         ViolationType.PROFIT_MASKING: 15,  # base is already high, then 3x
     }
 
+    # Type alias for the optional async persistence callback.
+    PersistHook = Callable[[EntityRecord], Coroutine[Any, Any, None]]
+
     def __init__(
         self,
         banner_threshold: int = 50,
         profit_mask_multiplier: int = PROFIT_MASK_PENALTY_MULTIPLIER,
         knowledge_store: KnowledgeStoreProtocol | None = None,
         pattern_detector: PatternDetectorProtocol | None = None,
+        persist_hook: PersistHook | None = None,
     ) -> None:
         self._entities: dict[str, EntityRecord] = {}
         self._banner_threshold = banner_threshold
         self._profit_mask_multiplier = profit_mask_multiplier
         self._knowledge_store = knowledge_store
         self._pattern_detector = pattern_detector
+        self._persist_hook = persist_hook
+
+    def _fire_persist(self, record: EntityRecord) -> None:
+        """Schedule async persistence without blocking the sync middleware path."""
+        if not self._persist_hook:
+            return
+        try:
+            loop = asyncio.get_running_loop()
+            loop.create_task(self._persist_hook(record))
+        except RuntimeError:
+            pass  # No event loop — skip persistence (e.g. in tests)
 
     # -- entity resolution --
 
@@ -443,6 +460,9 @@ class EntityAttributionEngine:
 
         # Emit violation to knowledge store
         self._emit_violation_to_knowledge_store(violation, record)
+
+        # Persist updated entity to SQLite (fire-and-forget)
+        self._fire_persist(record)
 
         return violation
 
@@ -591,6 +611,11 @@ class EntityAttributionEngine:
                 for v in record.violations
             ],
         }
+
+    def load_entities(self, entities: dict[str, EntityRecord]) -> None:
+        """Hydrate in-memory entity store from persisted records (called at startup)."""
+        self._entities.update(entities)
+        logger.info("admission_gate.entities_hydrated count=%d", len(entities))
 
     def reset(self) -> None:
         self._entities.clear()
