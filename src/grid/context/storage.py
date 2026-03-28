@@ -66,16 +66,21 @@ class ContextStorage:
         # Configurable context storage roots (GRID_CONTEXT_ALLOWED_ROOTS)
         default_roots = [
             str(Path.home() / ".grid" / "context"),
-            "E:/user_context",
             "/var/grid/context",
             "/tmp/grid/context",  # noqa: S108 temp file path is intentional
         ]
+        if os.name == "nt":
+            default_roots.append("E:/user_context")
+        # Always use os.pathsep for both join and split to avoid
+        # mangling Windows paths (E:/...) when splitting on ':' on Linux.
         allowed_roots_str = os.getenv("GRID_CONTEXT_ALLOWED_ROOTS", os.pathsep.join(default_roots))
-        separator = ":" if os.name != "nt" else ";"
-        allowed_roots = [Path(p.strip()) for p in allowed_roots_str.split(separator)]
+        allowed_roots = [Path(p.strip()) for p in allowed_roots_str.split(os.pathsep)]
 
         if not any(resolved_root.is_relative_to(allowed_root.resolve()) for allowed_root in allowed_roots):
-            logger.warning(f"Context root {resolved_root} may be unsafe")
+            raise SecurityError(
+                f"Context root {resolved_root} is outside allowed storage boundaries. "
+                f"Allowed roots: {[str(r) for r in allowed_roots]}"
+            )
 
         # Ensure directories exist
         self.profiles_dir.mkdir(parents=True, exist_ok=True)

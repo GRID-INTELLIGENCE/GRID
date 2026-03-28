@@ -21,10 +21,11 @@ class EssentialState:
     def _quantum_transform(self, context: Context, coherence_delta: float = 0.1) -> EssentialState:
         """Produce a transformed state influenced by context.
 
-        Test expectations:
-        - pattern_signature should change
-        - coherence_factor should increase
-        - context_depth should match context.temporal_depth
+        Args:
+            context: The context influencing the transformation.
+            coherence_delta: Adjustment to coherence_factor. Positive values increase
+                coherence (reinforcement), negative values decay it (degradation).
+                Clamped to [0.0, 1.0].
         """
         new_signature = f"{self.pattern_signature}_ctx_{context.quantum_signature}"
         new_coherence = min(1.0, max(0.0, self.coherence_factor + coherence_delta))
@@ -33,6 +34,17 @@ class EssentialState:
             pattern_signature=new_signature,
             coherence_factor=new_coherence,
             context_depth=context.temporal_depth,
+        )
+
+    def decay(self, rate: float = 0.05) -> EssentialState:
+        """Apply coherence decay — models natural degradation over time or inactivity.
+
+        Args:
+            rate: Decay amount subtracted from coherence_factor. Must be >= 0.
+        """
+        return replace(
+            self,
+            coherence_factor=max(0.0, self.coherence_factor - abs(rate)),
         )
 
 

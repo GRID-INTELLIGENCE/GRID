@@ -57,11 +57,11 @@ class RAGEngine:
                         f"Please start Ollama for embeddings and LLM: ollama serve"
                     )
                 else:
-                    print(f"Warning: Ollama not accessible at {config.ollama_base_url}. Local LLM will fail.")
+                    logger.warning("Ollama not accessible at %s — local LLM will fail", config.ollama_base_url)
         elif config.llm_mode == ModelMode.COPILOT:
-            print("Using GitHub Copilot SDK - no Ollama required")
+            logger.info("Using GitHub Copilot SDK — no Ollama required")
         elif config.llm_mode == ModelMode.EXTERNAL:
-            print("Using external API provider (OpenAI/Anthropic/etc.) - no Ollama required")
+            logger.info("Using external API provider (OpenAI/Anthropic/etc.) — no Ollama required")
 
         # Validate and resolve embedding model for Ollama provider
         if config.embedding_provider == "ollama":
@@ -230,7 +230,7 @@ class RAGEngine:
             if expected_dim > 0:
                 actual_dim = len(self.embedding_provider.embed("test"))
                 if expected_dim != actual_dim:
-                    print(f"⚠️  Dimension mismatch: Index={expected_dim}D, Model={actual_dim}D. Rebuilding...")
+                    logger.warning("Dimension mismatch: Index=%dD, Model=%dD — rebuilding", expected_dim, actual_dim)
                     rebuild = True
 
         """Index a repository.
