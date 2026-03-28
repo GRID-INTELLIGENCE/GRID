@@ -1,5 +1,8 @@
 // Barrel export for all custom hooks
 export {
+  useAdmissionBannered,
+  useAdmissionPolicy,
+  useAdmissionStats,
   useChaosResilience,
   useCockpitState,
   useCorruptionStats,

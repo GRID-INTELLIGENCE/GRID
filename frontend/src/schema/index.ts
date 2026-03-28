@@ -60,6 +60,7 @@ function lazyRoute<T extends Record<string, ComponentType>>(
 }
 
 export const routeComponents: Record<RouteKey, ComponentType> = {
+  admission: lazyRoute(() => import("@/pages/Admission"), "Admission"),
   dashboard: lazyRoute(() => import("@/pages/Dashboard"), "Dashboard"),
   chat: lazyRoute(() => import("@/pages/ChatPage"), "ChatPage"),
   rag: lazyRoute(() => import("@/pages/RagQuery"), "RagQuery"),

@@ -146,6 +146,54 @@ export interface RagSession {
   metadata?: Record<string, unknown>;
 }
 
+// ── Admission Gate ──────────────────────────────────────────────────
+
+export interface AdmissionPolicyBillboard {
+  billboard_version: string;
+  principles: Record<string, boolean>;
+  ethical_dos: string[];
+  ethical_donts: string[];
+  penalty_tiers: Record<string, string>;
+  caution: string;
+  evolution_notice: string;
+  timestamp: string;
+}
+
+export interface AdmissionGateStats {
+  total_admitted: number;
+  total_rejected: number;
+  rejection_reasons: Record<string, number>;
+  tracked_entities: number;
+  bannered_entities: number;
+  timestamp: string;
+}
+
+export interface AdmissionViolation {
+  type: string;
+  penalty_points: number;
+  metadata: Record<string, unknown>;
+}
+
+export interface AdmissionEntityReport {
+  entity_id: string;
+  found: boolean;
+  violation_count: number;
+  total_penalty_points: number;
+  bannered: boolean;
+  banner_reason: string;
+  profit_mask_violations: number;
+  penalty_tier: string;
+  tier_description: string;
+  violations: AdmissionViolation[];
+  timestamp: string;
+}
+
+export interface AdmissionBanneredEntities {
+  count: number;
+  entities: AdmissionEntityReport[];
+  timestamp: string;
+}
+
 // ── Intelligence ────────────────────────────────────────────────────
 
 export interface IntelligenceResult {

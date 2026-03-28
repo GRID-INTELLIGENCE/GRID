@@ -9,6 +9,9 @@
 import { gridClient } from "@/lib/grid-client";
 import { queryKeys } from "@/lib/query-keys";
 import type {
+  AdmissionBanneredEntities,
+  AdmissionGateStats,
+  AdmissionPolicyBillboard,
   ChaosResilience,
   CockpitState,
   CorruptionStats,
@@ -178,6 +181,36 @@ export function useRagStats() {
     staleTime: 30_000,
   });
 }
+
+// ── Admission Gate hooks ────────────────────────────────────────────
+
+export function useAdmissionPolicy() {
+  return useGridQuery<AdmissionPolicyBillboard>({
+    queryKey: queryKeys.admission.policy(),
+    endpoint: "/admission/policy",
+    staleTime: 60_000,
+  });
+}
+
+export function useAdmissionStats(opts?: { refetchInterval?: number }) {
+  return useGridQuery<AdmissionGateStats>({
+    queryKey: queryKeys.admission.stats(),
+    endpoint: "/admission/stats",
+    staleTime: 10_000,
+    refetchInterval: opts?.refetchInterval ?? 15_000,
+  });
+}
+
+export function useAdmissionBannered() {
+  return useGridQuery<AdmissionBanneredEntities>({
+    queryKey: queryKeys.admission.bannered(),
+    endpoint: "/admission/entities/bannered",
+    staleTime: 15_000,
+    refetchInterval: 30_000,
+  });
+}
+
+// ── Misc hooks ──────────────────────────────────────────────────────
 
 export function useSignalQuality() {
   return useGridQuery<Record<string, unknown>>({

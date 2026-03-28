@@ -44,4 +44,9 @@ export const queryKeys = {
   rag: {
     stats: () => ["rag", "stats"] as const,
   },
+  admission: {
+    policy: () => ["admission", "policy"] as const,
+    stats: () => ["admission", "stats"] as const,
+    bannered: () => ["admission", "bannered"] as const,
+  },
 } as const;

@@ -75,6 +75,14 @@
       "icon": "shield"
     },
     {
+      "id": "admission",
+      "path": "/admission",
+      "title": "Admission Gate",
+      "description": "Ethical participation enforcement — policy billboard, entity penalties, gate statistics",
+      "navLabel": "Admission",
+      "icon": "shield"
+    },
+    {
       "id": "observability",
       "path": "/observability",
       "title": "Observability",
@@ -147,6 +155,7 @@
       "intelligence",
       "cognitive",
       "security",
+      "admission",
       "observability",
       "knowledge",
       "terminal",

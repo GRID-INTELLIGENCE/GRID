@@ -30,6 +30,7 @@ export type RouteKey =
   | "register"
   | "login"
   | "roundtable"
+  | "admission"
   | "mycelium"
   | "mycelium-demo";
 
