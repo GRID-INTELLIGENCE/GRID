@@ -66,6 +66,8 @@ def rate_limited_client() -> TestClient:
 
     os.environ["MOTHERSHIP_SECRET_KEY"] = "test-jwt-key-32-chars-minimum-required-for-security-validation"
     os.environ["MOTHERSHIP_RATE_LIMIT_ENABLED"] = "true"
+    # Disable admission gate so its budget/banner logic doesn't interfere with rate-limit tests
+    os.environ["MOTHERSHIP_ADMISSION_GATE_ENABLED"] = "false"
 
     reload_settings()
     reset_jwt_manager()

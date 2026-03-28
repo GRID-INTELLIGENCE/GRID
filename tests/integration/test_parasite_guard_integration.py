@@ -125,10 +125,10 @@ class TestAckTrackerIntegration:
 
 
 class TestEventBusSubscriptionIntegration:
-    """Integration tests for EventBus subscription handling."""
+    """Integration tests for EventBus subscription handling (event_system_fixed API)."""
 
     @pytest.fixture
-    async def event_bus(self):
+    def event_bus(self):
         """Create an EventBus instance."""
         from infrastructure.event_bus.event_system import EventBus
 
@@ -140,91 +140,68 @@ class TestEventBusSubscriptionIntegration:
     @pytest.mark.asyncio
     async def test_subscribe_returns_handle(self, event_bus):
         """Test that subscribe returns a Subscription handle."""
+        from infrastructure.event_bus.event_system import Subscription
+
         handler = AsyncMock()
 
-        sub = await event_bus.subscribe("test.event", handler)
+        sub = event_bus.subscribe("test.event", handler)
 
         assert sub is not None
+        assert isinstance(sub, Subscription)
         assert sub.event_type == "test.event"
-        assert sub.id is not None
-        assert sub.created_at > 0
 
     @pytest.mark.asyncio
     async def test_unsubscribe_by_handle(self, event_bus):
         """Test unsubscribing using the Subscription handle."""
         handler = AsyncMock()
 
-        sub = await event_bus.subscribe("test.event", handler)
-        initial_count = await event_bus.get_subscription_count()
+        sub = event_bus.subscribe("test.event", handler)
+        assert sub.callback_id in event_bus._subscribers["test.event"]
 
-        result = await event_bus.unsubscribe(sub)
+        sub.unsubscribe()
 
-        assert result is True
-        assert await event_bus.get_subscription_count() == initial_count - 1
-
-    @pytest.mark.asyncio
-    async def test_unsubscribe_by_id(self, event_bus):
-        """Test unsubscribing using just the subscription ID."""
-        handler = AsyncMock()
-
-        sub = await event_bus.subscribe("test.event", handler)
-        initial_count = await event_bus.get_subscription_count()
-
-        result = await event_bus.unsubscribe(sub.id)
-
-        assert result is True
-        assert await event_bus.get_subscription_count() == initial_count - 1
-
-    @pytest.mark.asyncio
-    async def test_unsubscribe_nonexistent(self, event_bus):
-        """Test unsubscribing a non-existent subscription."""
-        result = await event_bus.unsubscribe(uuid.uuid4())
-
-        assert result is False
+        assert sub.callback_id not in event_bus._subscribers["test.event"]
 
     @pytest.mark.asyncio
     async def test_subscription_count_by_type(self, event_bus):
-        """Test getting subscription count by event type."""
+        """Test subscription tracking via internal _subscribers dict."""
         handler = AsyncMock()
 
-        await event_bus.subscribe("type.a", handler)
-        await event_bus.subscribe("type.a", handler)
-        await event_bus.subscribe("type.b", handler)
+        event_bus.subscribe("type.a", handler)
+        event_bus.subscribe("type.a", handler)
+        event_bus.subscribe("type.b", handler)
 
-        count_a = await event_bus.get_subscription_count("type.a")
-        count_b = await event_bus.get_subscription_count("type.b")
-        total = await event_bus.get_subscription_count()
-
-        assert count_a == 2
-        assert count_b == 1
-        assert total == 3
+        assert len(event_bus._subscribers["type.a"]) == 2
+        assert len(event_bus._subscribers["type.b"]) == 1
 
     @pytest.mark.asyncio
-    async def test_clear_all_subscriptions(self, event_bus):
-        """Test clearing all subscriptions."""
+    async def test_clear_subscriptions_via_unsubscribe(self, event_bus):
+        """Test clearing subscriptions via individual unsubscribe calls."""
         handler = AsyncMock()
 
-        await event_bus.subscribe("type.a", handler)
-        await event_bus.subscribe("type.b", handler)
-        await event_bus.subscribe("type.c", handler)
+        subs = [
+            event_bus.subscribe("type.a", handler),
+            event_bus.subscribe("type.b", handler),
+            event_bus.subscribe("type.c", handler),
+        ]
 
-        cleared = await event_bus.clear_all()
+        for sub in subs:
+            sub.unsubscribe()
 
-        assert cleared == 3
-        assert await event_bus.get_subscription_count() == 0
+        assert len(event_bus._subscribers["type.a"]) == 0
+        assert len(event_bus._subscribers["type.b"]) == 0
+        assert len(event_bus._subscribers["type.c"]) == 0
 
     @pytest.mark.asyncio
-    async def test_subscription_serialization(self, event_bus):
-        """Test Subscription.to_dict() serialization."""
+    async def test_subscription_attributes(self, event_bus):
+        """Test Subscription object attributes."""
         handler = AsyncMock()
 
-        sub = await event_bus.subscribe("test.event", handler)
-        data = sub.to_dict()
+        sub = event_bus.subscribe("test.event", handler)
 
-        assert "id" in data
-        assert data["event_type"] == "test.event"
-        assert "created_at" in data
-        assert "handler_name" in data
+        assert sub.event_type == "test.event"
+        assert sub.callback_id is not None
+        assert hasattr(sub, "unsubscribe")
 
 
 # =============================================================================

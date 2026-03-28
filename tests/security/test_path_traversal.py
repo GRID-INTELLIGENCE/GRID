@@ -88,8 +88,9 @@ class TestPathTraversalSecurity:
             # PermissionError is also valid: OS blocks access to sensitive paths
             pass
 
-    def test_context_storage_allows_valid_operations(self, temp_context_root):
+    def test_context_storage_allows_valid_operations(self, temp_context_root, monkeypatch):
         """Test that ContextStorage allows valid operations within context root."""
+        monkeypatch.setenv("GRID_CONTEXT_ALLOWED_ROOTS", str(temp_context_root))
         storage = ContextStorage(context_root=temp_context_root, user_id="test")
 
         # Test saving and loading user profile

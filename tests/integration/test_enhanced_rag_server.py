@@ -168,6 +168,7 @@ class MockEnhancedRAGMCPServer:
 # =============================================================================
 
 
+@pytest.mark.slow
 class TestEnhancedRAGMCPServerWithDeps:
     """Tests that require the real MCP server."""
 

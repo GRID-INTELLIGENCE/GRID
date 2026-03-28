@@ -918,9 +918,16 @@ class TestPenaltyTierClassification:
 
 def _build_app_with_router(**gate_kwargs: Any) -> FastAPI:
     """Build a FastAPI app with both the admission gate middleware and the enforcement router."""
+    from application.mothership.dependencies import require_admin
     from application.mothership.routers.admission_enforcement import router as admission_router
 
     app = FastAPI()
+
+    # Override AdminAuth dependency so tests don't need real auth tokens
+    async def _fake_admin() -> dict[str, Any]:
+        return {"sub": "test-admin", "permissions": ["admin"]}
+
+    app.dependency_overrides[require_admin] = _fake_admin
 
     @app.post("/api/v1/intelligence/process")
     async def intelligence_process(request: Request) -> JSONResponse:
