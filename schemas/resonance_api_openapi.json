@@ -3,84 +3,18 @@
   "info": {
     "title": "Mothership Cockpit",
     "description": "\n# Mothership Cockpit API\n\nLocal integration backend for the Mothership Cockpit system.\n\n## Features\n\n- **Session Management**: Create and manage user sessions\n- **Operation Tracking**: Track long-running operations with progress\n- **Component Health**: Monitor system component health\n- **Alert System**: Create, acknowledge, and resolve alerts\n- **Real-time Updates**: WebSocket support for live updates\n- **Cloud Integration**: Seamless Gemini Studio integration\n\n## Authentication\n\nThe API supports multiple authentication methods:\n- API Key (X-API-Key header)\n- JWT Bearer Token (Authorization header)\n\nDevelopment mode allows unauthenticated access.\n        ",
-    "version": "1.0.0",
-    "x-resonance-api-version": "1.0.0"
+    "version": "2.7.0",
+    "x-resonance-api-version": "2.7.0"
   },
   "paths": {
-    "/health": {
+    "/": {
       "get": {
         "tags": [
-          "health"
+          "root"
         ],
-        "summary": "Health Check",
-        "description": "Comprehensive health check endpoint for monitoring",
-        "operationId": "health_check_health_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponse_HealthCheckResponse_"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/health/live": {
-      "get": {
-        "tags": [
-          "health"
-        ],
-        "summary": "Liveness Probe",
-        "description": "Kubernetes liveness probe endpoint",
-        "operationId": "liveness_health_live_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LivenessResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/health/ready": {
-      "get": {
-        "tags": [
-          "health"
-        ],
-        "summary": "Readiness Probe",
-        "description": "Kubernetes readiness probe endpoint",
-        "operationId": "readiness_health_ready_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ReadinessResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/health/startup": {
-      "get": {
-        "tags": [
-          "health"
-        ],
-        "summary": "Startup Probe",
-        "description": "Kubernetes startup probe endpoint",
-        "operationId": "startup_health_startup_get",
+        "summary": "Root",
+        "description": "Root endpoint with API information.",
+        "operationId": "root__get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -89,7 +23,7 @@
                 "schema": {
                   "additionalProperties": true,
                   "type": "object",
-                  "title": "Response Startup Health Startup Get"
+                  "title": "Response Root  Get"
                 }
               }
             }
@@ -97,79 +31,31 @@
         }
       }
     },
-    "/version": {
-      "get": {
-        "tags": [
-          "health"
-        ],
-        "summary": "Version Information",
-        "description": "Get service version and build information",
-        "operationId": "version_version_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "additionalProperties": true,
-                  "type": "object",
-                  "title": "Response Version Version Get"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/metrics": {
-      "get": {
-        "tags": [
-          "health"
-        ],
-        "summary": "Basic Metrics",
-        "description": "Get basic system metrics",
-        "operationId": "metrics_metrics_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "additionalProperties": true,
-                  "type": "object",
-                  "title": "Response Metrics Metrics Get"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/payment/create": {
+    "/admission/compliance/check": {
       "post": {
         "tags": [
-          "payment"
+          "Admission Gate Enforcement"
         ],
-        "summary": "Create Payment",
-        "description": "Create a payment transaction.\n\nCreates a payment intent with the configured payment gateway.",
-        "operationId": "create_payment_api_v1_payment_create_post",
+        "summary": "Dry-run policy compliance check",
+        "description": "Checks a payload against the admission policy without actually sending a request through the pipeline. Reports violations, profit-mask signals, context token estimate, and structural conformance. Use this to pre-validate before submission.",
+        "operationId": "check_compliance_admission_compliance_check_post",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Body_create_payment_api_v1_payment_create_post"
+                "$ref": "#/components/schemas/ComplianceCheckRequest"
               }
             }
           },
           "required": true
         },
         "responses": {
-          "201": {
+          "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CreatePaymentResponse"
+                  "$ref": "#/components/schemas/ComplianceCheckResponse"
                 }
               }
             }
@@ -187,63 +73,54 @@
         }
       }
     },
-    "/api/v1/payment/webhook": {
-      "post": {
+    "/admission/entities/bannered": {
+      "get": {
         "tags": [
-          "payment"
+          "Admission Gate Enforcement"
         ],
-        "summary": "Payment Webhook",
-        "description": "Handle payment webhook events from payment gateway.\n\nVerifies webhook signature and processes payment status updates.",
-        "operationId": "payment_webhook_api_v1_payment_webhook_post",
+        "summary": "List bannered entities",
+        "description": "Returns all entities currently bannered (hard-blocked) by the admission gate.",
+        "operationId": "list_bannered_entities_admission_entities_bannered_get",
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/BanneredEntitiesResponse"
+                }
               }
             }
           }
         }
       }
     },
-    "/api/v1/payment/transaction/{transaction_id}": {
+    "/admission/entity/{entity_id}": {
       "get": {
         "tags": [
-          "payment"
+          "Admission Gate Enforcement"
         ],
-        "summary": "Get Transaction",
-        "description": "Get payment transaction details.",
-        "operationId": "get_transaction_api_v1_payment_transaction__transaction_id__get",
+        "summary": "Get entity report",
+        "description": "Returns the full violation history, accumulated penalty points, banner status, and classified penalty tier for an entity.",
+        "operationId": "get_entity_report_admission_entity__entity_id__get",
         "parameters": [
           {
-            "name": "transaction_id",
+            "name": "entity_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "title": "Transaction Id"
+              "title": "Entity Id"
             }
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "additionalProperties": true,
-                "title": "Auth"
-              }
-            }
-          }
-        },
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PaymentTransactionResponse"
+                  "$ref": "#/components/schemas/EntityReportResponse"
                 }
               }
             }
@@ -261,103 +138,19 @@
         }
       }
     },
-    "/api/v1/payment/refund": {
+    "/admission/penalty/apply": {
       "post": {
         "tags": [
-          "payment"
+          "Admission Gate Enforcement"
         ],
-        "summary": "Refund Payment",
-        "description": "Refund a payment (full or partial).",
-        "operationId": "refund_payment_api_v1_payment_refund_post",
+        "summary": "Apply penalty to entity",
+        "description": "Manually apply a penalty to an entity. Used for out-of-band enforcement \u2014 when violations are detected by external systems (MCP servers, CLI, monitoring) outside the HTTP request flow. The 3x profit-mask multiplier is applied when profit_masked=true.",
+        "operationId": "apply_penalty_admission_penalty_apply_post",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Body_refund_payment_api_v1_payment_refund_post"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RefundResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/payment/subscription/create": {
-      "post": {
-        "tags": [
-          "payment"
-        ],
-        "summary": "Create Subscription",
-        "description": "Create a subscription.",
-        "operationId": "create_subscription_api_v1_payment_subscription_create_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Body_create_subscription_api_v1_payment_subscription_create_post"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SubscriptionResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/payment/subscription/cancel": {
-      "post": {
-        "tags": [
-          "payment"
-        ],
-        "summary": "Cancel Subscription",
-        "description": "Cancel a subscription.",
-        "operationId": "cancel_subscription_api_v1_payment_subscription_cancel_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Body_cancel_subscription_api_v1_payment_subscription_cancel_post"
+                "$ref": "#/components/schemas/PenaltyApplyRequest"
               }
             }
           },
@@ -369,7 +162,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/SubscriptionResponse"
+                  "$ref": "#/components/schemas/PenaltyApplyResponse"
                 }
               }
             }
@@ -387,53 +180,63 @@
         }
       }
     },
-    "/api/v1/payment/subscription/{subscription_id}": {
+    "/admission/penalty/revoke": {
+      "post": {
+        "tags": [
+          "Admission Gate Enforcement"
+        ],
+        "summary": "Revoke banner or reduce penalty",
+        "description": "Revoke a banner, reduce accumulated penalty points, or fully reset an entity's record. Used for remediation after an entity has corrected course. Actions: revoke_banner, reduce_penalty, full_reset.",
+        "operationId": "revoke_penalty_admission_penalty_revoke_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PenaltyRevokeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PenaltyRevokeResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admission/policy": {
       "get": {
         "tags": [
-          "payment"
+          "Admission Gate Enforcement"
         ],
-        "summary": "Get Subscription",
-        "description": "Get subscription details.",
-        "operationId": "get_subscription_api_v1_payment_subscription__subscription_id__get",
-        "parameters": [
-          {
-            "name": "subscription_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Subscription Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "additionalProperties": true,
-                "title": "Auth"
-              }
-            }
-          }
-        },
+        "summary": "Get current policy billboard",
+        "description": "Returns the full ethical participation contract displayed at the top of every execution chain. Includes principles, dos/don'ts, penalty tiers, caution, and evolution notice.",
+        "operationId": "get_policy_billboard_admission_policy_get",
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/SubscriptionResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/PolicyBillboardResponse"
                 }
               }
             }
@@ -441,46 +244,21 @@
         }
       }
     },
-    "/api/v1/payment/subscriptions": {
+    "/admission/stats": {
       "get": {
         "tags": [
-          "payment"
+          "Admission Gate Enforcement"
         ],
-        "summary": "List Subscriptions",
-        "description": "List all subscriptions for the current user.",
-        "operationId": "list_subscriptions_api_v1_payment_subscriptions_get",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "additionalProperties": true,
-                "type": "object",
-                "title": "Auth"
-              }
-            }
-          }
-        },
+        "summary": "Get gate statistics",
+        "description": "Returns admission/rejection counters and breakdown by rejection reason.",
+        "operationId": "get_gate_stats_admission_stats_get",
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/SubscriptionResponse"
-                  },
-                  "type": "array",
-                  "title": "Response List Subscriptions Api V1 Payment Subscriptions Get"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/GateStatsResponse"
                 }
               }
             }
@@ -725,63 +503,6 @@
         }
       }
     },
-    "/api/v1/billing/usage": {
-      "get": {
-        "tags": [
-          "billing"
-        ],
-        "summary": "Get Usage Summary",
-        "description": "Get usage summary for the current user.\n\nReturns usage statistics, tier limits, and current consumption.",
-        "operationId": "get_usage_summary_api_v1_billing_usage_get",
-        "parameters": [
-          {
-            "name": "period_days",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "maximum": 365,
-              "minimum": 1,
-              "description": "Period in days",
-              "default": 30,
-              "title": "Period Days"
-            },
-            "description": "Period in days"
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "additionalProperties": true,
-                "title": "Auth"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v1/billing/invoices": {
       "get": {
         "tags": [
@@ -883,113 +604,47 @@
         }
       }
     },
-    "/api/v1/resonance/performance/sales": {
+    "/api/v1/billing/usage": {
       "get": {
         "tags": [
-          "resonance",
-          "performance"
+          "billing"
         ],
-        "summary": "Get Sales Data",
-        "operationId": "get_sales_data_api_v1_resonance_performance_sales_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
+        "summary": "Get Usage Summary",
+        "description": "Get usage summary for the current user.\n\nReturns usage statistics, tier limits, and current consumption.",
+        "operationId": "get_usage_summary_api_v1_billing_usage_get",
+        "parameters": [
+          {
+            "name": "period_days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 365,
+              "minimum": 1,
+              "description": "Period in days",
+              "default": 30,
+              "title": "Period Days"
+            },
+            "description": "Period in days"
           }
-        }
-      }
-    },
-    "/api/v1/resonance/performance/user-behavior": {
-      "get": {
-        "tags": [
-          "resonance",
-          "performance"
         ],
-        "summary": "Get User Behavior",
-        "operationId": "get_user_behavior_api_v1_resonance_performance_user_behavior_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/resonance/performance/product-data": {
-      "get": {
-        "tags": [
-          "resonance",
-          "performance"
-        ],
-        "summary": "Get Product Data",
-        "operationId": "get_product_data_api_v1_resonance_performance_product_data_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/resonance/performance/development-data": {
-      "get": {
-        "tags": [
-          "resonance",
-          "performance"
-        ],
-        "summary": "Get Development Data",
-        "operationId": "get_development_data_api_v1_resonance_performance_development_data_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/resonance/process": {
-      "post": {
-        "tags": [
-          "resonance",
-          "resonance"
-        ],
-        "summary": "Process Activity",
-        "description": "Process an activity with left-to-right communication. Returns context snapshot, path triage, and envelope metrics.",
-        "operationId": "process_activity_api_v1_resonance_process_post",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ActivityProcessRequest"
+                "type": "object",
+                "additionalProperties": true,
+                "title": "Auth"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ResonanceResponse"
-                }
+                "schema": {}
               }
             }
           },
@@ -1006,369 +661,14 @@
         }
       }
     },
-    "/api/v1/resonance/context": {
-      "get": {
-        "tags": [
-          "resonance",
-          "resonance"
-        ],
-        "summary": "Get Fast Context",
-        "description": "Get fast, concise context for a query (left side - application/).",
-        "operationId": "get_context_api_v1_resonance_context_get",
-        "parameters": [
-          {
-            "name": "query",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 1000,
-              "description": "The query to get context for",
-              "title": "Query"
-            },
-            "description": "The query to get context for"
-          },
-          {
-            "name": "context_type",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "description": "Type of context (general, code, config)",
-              "default": "general",
-              "title": "Context Type"
-            },
-            "description": "Type of context (general, code, config)"
-          },
-          {
-            "name": "max_length",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "maximum": 2000,
-              "minimum": 50,
-              "description": "Maximum context length",
-              "default": 200,
-              "title": "Max Length"
-            },
-            "description": "Maximum context length"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ContextResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/resonance/paths": {
-      "get": {
-        "tags": [
-          "resonance",
-          "resonance"
-        ],
-        "summary": "Get Path Triage",
-        "description": "Get path triage for a goal (right side - light_of_the_seven/).",
-        "operationId": "get_paths_api_v1_resonance_paths_get",
-        "parameters": [
-          {
-            "name": "goal",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 1000,
-              "description": "The goal or task",
-              "title": "Goal"
-            },
-            "description": "The goal or task"
-          },
-          {
-            "name": "max_options",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "maximum": 10,
-              "minimum": 1,
-              "description": "Maximum number of path options",
-              "default": 4,
-              "title": "Max Options"
-            },
-            "description": "Maximum number of path options"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PathTriageResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/resonance/envelope/{activity_id}": {
-      "get": {
-        "tags": [
-          "resonance",
-          "resonance"
-        ],
-        "summary": "Get Envelope Metrics",
-        "description": "Get current ADSR envelope metrics for an activity.",
-        "operationId": "get_envelope_api_v1_resonance_envelope__activity_id__get",
-        "parameters": [
-          {
-            "name": "activity_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "Activity ID",
-              "title": "Activity Id"
-            },
-            "description": "Activity ID"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EnvelopeMetricsResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/resonance/complete/{activity_id}": {
+    "/api/v1/cockpit/diagnostics": {
       "post": {
         "tags": [
-          "resonance",
-          "resonance"
+          "cockpit"
         ],
-        "summary": "Complete Activity",
-        "description": "Complete an activity (trigger release phase).",
-        "operationId": "complete_activity_api_v1_resonance_complete__activity_id__post",
-        "parameters": [
-          {
-            "name": "activity_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "Activity ID",
-              "title": "Activity Id"
-            },
-            "description": "Activity ID"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ActivityCompleteResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/resonance/events/{activity_id}": {
-      "get": {
-        "tags": [
-          "resonance",
-          "resonance"
-        ],
-        "summary": "Get Activity Events",
-        "description": "Get activity events history.",
-        "operationId": "get_events_api_v1_resonance_events__activity_id__get",
-        "parameters": [
-          {
-            "name": "activity_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "Activity ID",
-              "title": "Activity Id"
-            },
-            "description": "Activity ID"
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "maximum": 1000,
-              "minimum": 1,
-              "description": "Maximum number of events to return",
-              "default": 100,
-              "title": "Limit"
-            },
-            "description": "Maximum number of events to return"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ActivityEventsResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/resonance/definitive": {
-      "post": {
-        "tags": [
-          "resonance",
-          "resonance"
-        ],
-        "summary": "Definitive (Canvas Flip) Step",
-        "description": "A mid-process checkpoint (~65%) that flips a chaotic/free-form view into a coherent, audience-aligned explanation. Combines Resonance context + path triage with Skills (schema transform, compression, optional cross-reference) and optional local-first RAG.",
-        "operationId": "definitive_step_api_v1_resonance_definitive_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DefinitiveStepRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DefinitiveStepResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/resonance/debug/config": {
-      "get": {
-        "tags": [
-          "resonance",
-          "debug"
-        ],
-        "summary": "Get Debug Config",
-        "description": "Get current debug configuration.",
-        "operationId": "get_debug_config_api_v1_resonance_debug_config_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "additionalProperties": true,
-                  "type": "object",
-                  "title": "Response Get Debug Config Api V1 Resonance Debug Config Get"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/intelligence/process": {
-      "post": {
-        "tags": [
-          "intelligence"
-        ],
-        "summary": "Process Intelligence",
-        "operationId": "process_intelligence_api_v1_intelligence_process_post",
+        "summary": "Run Diagnostics",
+        "description": "Run system diagnostics.",
+        "operationId": "run_diagnostics_api_v1_cockpit_diagnostics_post",
         "security": [
           {
             "APIKeyHeader": []
@@ -1379,55 +679,25 @@
         ],
         "parameters": [
           {
-            "name": "session_id",
+            "name": "include_details",
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Session Id"
-            }
-          },
-          {
-            "name": "X-Session-ID",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Session-Id"
-            }
+              "type": "boolean",
+              "description": "Include detailed results",
+              "default": true,
+              "title": "Include Details"
+            },
+            "description": "Include detailed results"
           }
         ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/IntelligenceProcessRequest"
-              }
-            }
-          }
-        },
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApiResponse_Dict_str__Any__"
+                  "$ref": "#/components/schemas/ApiResponse_DiagnosticsResponse_"
                 }
               }
             }
@@ -1468,22 +738,21 @@
         }
       }
     },
-    "/api/v1/cockpit/ready": {
+    "/api/v1/cockpit/info": {
       "get": {
         "tags": [
-          "cockpit",
-          "health"
+          "cockpit"
         ],
-        "summary": "Readiness Probe",
-        "description": "Check if the system is ready to accept requests.",
-        "operationId": "readiness_check_api_v1_cockpit_ready_get",
+        "summary": "Get System Information",
+        "description": "Get system and application information.",
+        "operationId": "get_system_info_api_v1_cockpit_info_get",
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ReadinessResponse"
+                  "$ref": "#/components/schemas/ApiResponse_SystemInfoResponse_"
                 }
               }
             }
@@ -1507,88 +776,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/LivenessResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/cockpit/state": {
-      "get": {
-        "tags": [
-          "cockpit"
-        ],
-        "summary": "Get Cockpit State",
-        "description": "Get the current state of the cockpit system.",
-        "operationId": "get_state_api_v1_cockpit_state_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponse_CockpitStateResponse_"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "APIKeyHeader": []
-          },
-          {
-            "HTTPBearer": []
-          }
-        ]
-      }
-    },
-    "/api/v1/cockpit/state/full": {
-      "get": {
-        "tags": [
-          "cockpit"
-        ],
-        "summary": "Get Full Cockpit State",
-        "description": "Get complete state including all entities.",
-        "operationId": "get_full_state_api_v1_cockpit_state_full_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponse_Dict_str__Any__"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "APIKeyHeader": []
-          },
-          {
-            "HTTPBearer": []
-          }
-        ]
-      }
-    },
-    "/api/v1/cockpit/info": {
-      "get": {
-        "tags": [
-          "cockpit"
-        ],
-        "summary": "Get System Information",
-        "description": "Get system and application information.",
-        "operationId": "get_system_info_api_v1_cockpit_info_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponse_SystemInfoResponse_"
                 }
               }
             }
@@ -1700,14 +887,37 @@
         }
       }
     },
-    "/api/v1/cockpit/diagnostics": {
+    "/api/v1/cockpit/ready": {
+      "get": {
+        "tags": [
+          "cockpit",
+          "health"
+        ],
+        "summary": "Readiness Probe",
+        "description": "Check if the system is ready to accept requests.",
+        "operationId": "readiness_check_api_v1_cockpit_ready_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadinessResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cockpit/restart": {
       "post": {
         "tags": [
           "cockpit"
         ],
-        "summary": "Run Diagnostics",
-        "description": "Run system diagnostics.",
-        "operationId": "run_diagnostics_api_v1_cockpit_diagnostics_post",
+        "summary": "Restart System",
+        "description": "Restart the cockpit system.",
+        "operationId": "restart_system_api_v1_cockpit_restart_post",
         "security": [
           {
             "APIKeyHeader": []
@@ -1718,25 +928,45 @@
         ],
         "parameters": [
           {
-            "name": "include_details",
+            "name": "session_id",
             "in": "query",
             "required": false,
             "schema": {
-              "type": "boolean",
-              "description": "Include detailed results",
-              "default": true,
-              "title": "Include Details"
-            },
-            "description": "Include detailed results"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Session Id"
+            }
+          },
+          {
+            "name": "X-Session-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Session-Id"
+            }
           }
         ],
         "responses": {
-          "200": {
+          "202": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApiResponse_DiagnosticsResponse_"
+                  "$ref": "#/components/schemas/ApiResponse_Dict_str__Any__"
                 }
               }
             }
@@ -1840,14 +1070,103 @@
         }
       }
     },
-    "/api/v1/cockpit/restart": {
-      "post": {
+    "/api/v1/cockpit/state": {
+      "get": {
         "tags": [
           "cockpit"
         ],
-        "summary": "Restart System",
-        "description": "Restart the cockpit system.",
-        "operationId": "restart_system_api_v1_cockpit_restart_post",
+        "summary": "Get Cockpit State",
+        "description": "Get the current state of the cockpit system.",
+        "operationId": "get_state_api_v1_cockpit_state_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_CockpitStateResponse_"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/cockpit/state/full": {
+      "get": {
+        "tags": [
+          "cockpit"
+        ],
+        "summary": "Get Full Cockpit State",
+        "description": "Get complete state including all entities.",
+        "operationId": "get_full_state_api_v1_cockpit_state_full_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_Dict_str__Any__"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/cockpit/stats": {
+      "get": {
+        "tags": [
+          "cockpit"
+        ],
+        "summary": "Get Statistics",
+        "description": "Get cockpit statistics and metrics.",
+        "operationId": "get_statistics_api_v1_cockpit_stats_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_Dict_str__Any__"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/intelligence/process": {
+      "post": {
+        "tags": [
+          "intelligence"
+        ],
+        "summary": "Process Intelligence",
+        "operationId": "process_intelligence_api_v1_intelligence_process_post",
         "security": [
           {
             "APIKeyHeader": []
@@ -1890,8 +1209,18 @@
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IntelligenceProcessRequest"
+              }
+            }
+          }
+        },
         "responses": {
-          "202": {
+          "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
@@ -1914,44 +1243,478 @@
         }
       }
     },
-    "/api/v1/cockpit/stats": {
-      "get": {
+    "/api/v1/payment/create": {
+      "post": {
         "tags": [
-          "cockpit"
+          "payment"
         ],
-        "summary": "Get Statistics",
-        "description": "Get cockpit statistics and metrics.",
-        "operationId": "get_statistics_api_v1_cockpit_stats_get",
+        "summary": "Create Payment",
+        "description": "Create a payment transaction.\n\nCreates a payment intent with the configured payment gateway.",
+        "operationId": "create_payment_api_v1_payment_create_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_create_payment_api_v1_payment_create_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatePaymentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/payment/refund": {
+      "post": {
+        "tags": [
+          "payment"
+        ],
+        "summary": "Refund Payment",
+        "description": "Refund a payment (full or partial).",
+        "operationId": "refund_payment_api_v1_payment_refund_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_refund_payment_api_v1_payment_refund_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefundResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/payment/subscription/cancel": {
+      "post": {
+        "tags": [
+          "payment"
+        ],
+        "summary": "Cancel Subscription",
+        "description": "Cancel a subscription.",
+        "operationId": "cancel_subscription_api_v1_payment_subscription_cancel_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_cancel_subscription_api_v1_payment_subscription_cancel_post"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApiResponse_Dict_str__Any__"
+                  "$ref": "#/components/schemas/SubscriptionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
           }
-        },
-        "security": [
-          {
-            "APIKeyHeader": []
-          },
-          {
-            "HTTPBearer": []
-          }
-        ]
+        }
       }
     },
-    "/": {
+    "/api/v1/payment/subscription/create": {
+      "post": {
+        "tags": [
+          "payment"
+        ],
+        "summary": "Create Subscription",
+        "description": "Create a subscription.",
+        "operationId": "create_subscription_api_v1_payment_subscription_create_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_create_subscription_api_v1_payment_subscription_create_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscriptionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/payment/subscription/{subscription_id}": {
       "get": {
         "tags": [
-          "root"
+          "payment"
         ],
-        "summary": "Root",
-        "description": "Root endpoint with API information.",
-        "operationId": "root__get",
+        "summary": "Get Subscription",
+        "description": "Get subscription details.",
+        "operationId": "get_subscription_api_v1_payment_subscription__subscription_id__get",
+        "parameters": [
+          {
+            "name": "subscription_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Subscription Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "title": "Auth"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscriptionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/payment/subscriptions": {
+      "get": {
+        "tags": [
+          "payment"
+        ],
+        "summary": "List Subscriptions",
+        "description": "List all subscriptions for the current user.",
+        "operationId": "list_subscriptions_api_v1_payment_subscriptions_get",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "type": "object",
+                "title": "Auth"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SubscriptionResponse"
+                  },
+                  "type": "array",
+                  "title": "Response List Subscriptions Api V1 Payment Subscriptions Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/payment/transaction/{transaction_id}": {
+      "get": {
+        "tags": [
+          "payment"
+        ],
+        "summary": "Get Transaction",
+        "description": "Get payment transaction details.",
+        "operationId": "get_transaction_api_v1_payment_transaction__transaction_id__get",
+        "parameters": [
+          {
+            "name": "transaction_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Transaction Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "title": "Auth"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentTransactionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/payment/webhook": {
+      "post": {
+        "tags": [
+          "payment"
+        ],
+        "summary": "Payment Webhook",
+        "description": "Handle payment webhook events from payment gateway.\n\nVerifies webhook signature and processes payment status updates.",
+        "operationId": "payment_webhook_api_v1_payment_webhook_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/resonance/complete/{activity_id}": {
+      "post": {
+        "tags": [
+          "resonance",
+          "resonance"
+        ],
+        "summary": "Complete Activity",
+        "description": "Complete an activity (trigger release phase).",
+        "operationId": "complete_activity_api_v1_resonance_complete__activity_id__post",
+        "parameters": [
+          {
+            "name": "activity_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Activity ID",
+              "title": "Activity Id"
+            },
+            "description": "Activity ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActivityCompleteResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/resonance/context": {
+      "get": {
+        "tags": [
+          "resonance",
+          "resonance"
+        ],
+        "summary": "Get Fast Context",
+        "description": "Get fast, concise context for a query (left side - application/).",
+        "operationId": "get_context_api_v1_resonance_context_get",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1000,
+              "description": "The query to get context for",
+              "title": "Query"
+            },
+            "description": "The query to get context for"
+          },
+          {
+            "name": "context_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Type of context (general, code, config)",
+              "default": "general",
+              "title": "Context Type"
+            },
+            "description": "Type of context (general, code, config)"
+          },
+          {
+            "name": "max_length",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 2000,
+              "minimum": 50,
+              "description": "Maximum context length",
+              "default": 200,
+              "title": "Max Length"
+            },
+            "description": "Maximum context length"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContextResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/resonance/debug/config": {
+      "get": {
+        "tags": [
+          "resonance",
+          "debug"
+        ],
+        "summary": "Get Debug Config",
+        "description": "Get current debug configuration.",
+        "operationId": "get_debug_config_api_v1_resonance_debug_config_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -1960,7 +1723,455 @@
                 "schema": {
                   "additionalProperties": true,
                   "type": "object",
-                  "title": "Response Root  Get"
+                  "title": "Response Get Debug Config Api V1 Resonance Debug Config Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/resonance/definitive": {
+      "post": {
+        "tags": [
+          "resonance",
+          "resonance"
+        ],
+        "summary": "Definitive (Canvas Flip) Step",
+        "description": "A mid-process checkpoint (~65%) that flips a chaotic/free-form view into a coherent, audience-aligned explanation. Combines Resonance context + path triage with Skills (schema transform, compression, optional cross-reference) and optional local-first RAG.",
+        "operationId": "definitive_step_api_v1_resonance_definitive_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DefinitiveStepRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefinitiveStepResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/resonance/envelope/{activity_id}": {
+      "get": {
+        "tags": [
+          "resonance",
+          "resonance"
+        ],
+        "summary": "Get Envelope Metrics",
+        "description": "Get current ADSR envelope metrics for an activity.",
+        "operationId": "get_envelope_api_v1_resonance_envelope__activity_id__get",
+        "parameters": [
+          {
+            "name": "activity_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Activity ID",
+              "title": "Activity Id"
+            },
+            "description": "Activity ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeMetricsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/resonance/events/{activity_id}": {
+      "get": {
+        "tags": [
+          "resonance",
+          "resonance"
+        ],
+        "summary": "Get Activity Events",
+        "description": "Get activity events history.",
+        "operationId": "get_events_api_v1_resonance_events__activity_id__get",
+        "parameters": [
+          {
+            "name": "activity_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Activity ID",
+              "title": "Activity Id"
+            },
+            "description": "Activity ID"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 1000,
+              "minimum": 1,
+              "description": "Maximum number of events to return",
+              "default": 100,
+              "title": "Limit"
+            },
+            "description": "Maximum number of events to return"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActivityEventsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/resonance/paths": {
+      "get": {
+        "tags": [
+          "resonance",
+          "resonance"
+        ],
+        "summary": "Get Path Triage",
+        "description": "Get path triage for a goal (right side - light_of_the_seven/).",
+        "operationId": "get_paths_api_v1_resonance_paths_get",
+        "parameters": [
+          {
+            "name": "goal",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1000,
+              "description": "The goal or task",
+              "title": "Goal"
+            },
+            "description": "The goal or task"
+          },
+          {
+            "name": "max_options",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 10,
+              "minimum": 1,
+              "description": "Maximum number of path options",
+              "default": 4,
+              "title": "Max Options"
+            },
+            "description": "Maximum number of path options"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PathTriageResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/resonance/performance/development-data": {
+      "get": {
+        "tags": [
+          "resonance",
+          "performance"
+        ],
+        "summary": "Get Development Data",
+        "operationId": "get_development_data_api_v1_resonance_performance_development_data_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/resonance/performance/product-data": {
+      "get": {
+        "tags": [
+          "resonance",
+          "performance"
+        ],
+        "summary": "Get Product Data",
+        "operationId": "get_product_data_api_v1_resonance_performance_product_data_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/resonance/performance/sales": {
+      "get": {
+        "tags": [
+          "resonance",
+          "performance"
+        ],
+        "summary": "Get Sales Data",
+        "operationId": "get_sales_data_api_v1_resonance_performance_sales_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/resonance/performance/user-behavior": {
+      "get": {
+        "tags": [
+          "resonance",
+          "performance"
+        ],
+        "summary": "Get User Behavior",
+        "operationId": "get_user_behavior_api_v1_resonance_performance_user_behavior_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/resonance/process": {
+      "post": {
+        "tags": [
+          "resonance",
+          "resonance"
+        ],
+        "summary": "Process Activity",
+        "description": "Process an activity with left-to-right communication. Returns context snapshot, path triage, and envelope metrics.",
+        "operationId": "process_activity_api_v1_resonance_process_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActivityProcessRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResonanceResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Health Check",
+        "description": "Comprehensive health check endpoint for monitoring",
+        "operationId": "health_check_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_HealthCheckResponse_"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health/live": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Liveness Probe",
+        "description": "Kubernetes liveness probe endpoint",
+        "operationId": "liveness_health_live_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LivenessResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health/ready": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Readiness Probe",
+        "description": "Kubernetes readiness probe endpoint",
+        "operationId": "readiness_health_ready_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadinessResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health/startup": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Startup Probe",
+        "description": "Kubernetes startup probe endpoint",
+        "operationId": "startup_health_startup_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Startup Health Startup Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/metrics": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Basic Metrics",
+        "description": "Get basic system metrics",
+        "operationId": "metrics_metrics_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Metrics Metrics Get"
                 }
               }
             }
@@ -1987,6 +2198,30 @@
                   },
                   "type": "object",
                   "title": "Response Ping Ping Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/version": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Version Information",
+        "description": "Get service version and build information",
+        "operationId": "version_version_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Version Version Get"
                 }
               }
             }
@@ -4330,6 +4565,514 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "ComplianceCheckResponse": {
+        "properties": {
+          "compliant": {
+            "type": "boolean",
+            "title": "Compliant"
+          },
+          "violations": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Violations"
+          },
+          "profit_mask_signals": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Profit Mask Signals"
+          },
+          "estimated_tokens": {
+            "type": "integer",
+            "title": "Estimated Tokens"
+          },
+          "context_ceiling_exceeded": {
+            "type": "boolean",
+            "title": "Context Ceiling Exceeded"
+          },
+          "has_required_structure": {
+            "type": "boolean",
+            "title": "Has Required Structure"
+          },
+          "entity_penalty_points": {
+            "type": "integer",
+            "title": "Entity Penalty Points",
+            "default": 0
+          },
+          "entity_bannered": {
+            "type": "boolean",
+            "title": "Entity Bannered",
+            "default": false
+          },
+          "policy": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Policy"
+          },
+          "timestamp": {
+            "type": "string",
+            "title": "Timestamp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "compliant",
+          "violations",
+          "profit_mask_signals",
+          "estimated_tokens",
+          "context_ceiling_exceeded",
+          "has_required_structure",
+          "policy",
+          "timestamp"
+        ],
+        "title": "ComplianceCheckResponse",
+        "description": "Result of a dry-run compliance check."
+      },
+      "PenaltyApplyRequest": {
+        "properties": {
+          "entity_id": {
+            "type": "string",
+            "title": "Entity Id",
+            "description": "Entity to penalize"
+          },
+          "violation_type": {
+            "type": "string",
+            "title": "Violation Type",
+            "description": "One of: budget_exceeded, origin_denied, context_overflow, invalid_body, missing_structure, profit_masking"
+          },
+          "profit_masked": {
+            "type": "boolean",
+            "title": "Profit Masked",
+            "description": "Apply 3x multiplier for profit-masking",
+            "default": false
+          },
+          "metadata": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Metadata",
+            "description": "Additional context"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason",
+            "description": "Human-readable reason",
+            "default": "manual_enforcement"
+          }
+        },
+        "type": "object",
+        "required": [
+          "entity_id",
+          "violation_type"
+        ],
+        "title": "PenaltyApplyRequest",
+        "description": "Manually apply a penalty to an entity."
+      },
+      "PenaltyApplyResponse": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success"
+          },
+          "entity_id": {
+            "type": "string",
+            "title": "Entity Id"
+          },
+          "violation_type": {
+            "type": "string",
+            "title": "Violation Type"
+          },
+          "penalty_points_applied": {
+            "type": "integer",
+            "title": "Penalty Points Applied"
+          },
+          "total_penalty_points": {
+            "type": "integer",
+            "title": "Total Penalty Points"
+          },
+          "bannered": {
+            "type": "boolean",
+            "title": "Bannered"
+          },
+          "penalty_tier": {
+            "type": "string",
+            "title": "Penalty Tier"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "timestamp": {
+            "type": "string",
+            "title": "Timestamp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "success",
+          "entity_id",
+          "violation_type",
+          "penalty_points_applied",
+          "total_penalty_points",
+          "bannered",
+          "penalty_tier",
+          "message",
+          "timestamp"
+        ],
+        "title": "PenaltyApplyResponse",
+        "description": "Result of penalty application."
+      },
+      "EntityReportResponse": {
+        "properties": {
+          "entity_id": {
+            "type": "string",
+            "title": "Entity Id"
+          },
+          "found": {
+            "type": "boolean",
+            "title": "Found"
+          },
+          "violation_count": {
+            "type": "integer",
+            "title": "Violation Count",
+            "default": 0
+          },
+          "total_penalty_points": {
+            "type": "integer",
+            "title": "Total Penalty Points",
+            "default": 0
+          },
+          "bannered": {
+            "type": "boolean",
+            "title": "Bannered",
+            "default": false
+          },
+          "banner_reason": {
+            "type": "string",
+            "title": "Banner Reason",
+            "default": ""
+          },
+          "profit_mask_violations": {
+            "type": "integer",
+            "title": "Profit Mask Violations",
+            "default": 0
+          },
+          "penalty_tier": {
+            "type": "string",
+            "title": "Penalty Tier",
+            "default": "none"
+          },
+          "tier_description": {
+            "type": "string",
+            "title": "Tier Description",
+            "default": ""
+          },
+          "violations": {
+            "items": {
+              "$ref": "#/components/schemas/ViolationDetail"
+            },
+            "type": "array",
+            "title": "Violations"
+          },
+          "timestamp": {
+            "type": "string",
+            "title": "Timestamp",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "entity_id",
+          "found"
+        ],
+        "title": "EntityReportResponse",
+        "description": "Full entity report \u2014 violations, penalty, tier classification."
+      },
+      "ViolationDetail": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "title": "Type"
+          },
+          "penalty_points": {
+            "type": "integer",
+            "title": "Penalty Points"
+          },
+          "metadata": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Metadata"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "penalty_points"
+        ],
+        "title": "ViolationDetail",
+        "description": "Single violation record."
+      },
+      "GateStatsResponse": {
+        "properties": {
+          "total_admitted": {
+            "type": "integer",
+            "title": "Total Admitted"
+          },
+          "total_rejected": {
+            "type": "integer",
+            "title": "Total Rejected"
+          },
+          "rejection_reasons": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Rejection Reasons"
+          },
+          "tracked_entities": {
+            "type": "integer",
+            "title": "Tracked Entities"
+          },
+          "bannered_entities": {
+            "type": "integer",
+            "title": "Bannered Entities"
+          },
+          "timestamp": {
+            "type": "string",
+            "title": "Timestamp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total_admitted",
+          "total_rejected",
+          "rejection_reasons",
+          "tracked_entities",
+          "bannered_entities",
+          "timestamp"
+        ],
+        "title": "GateStatsResponse",
+        "description": "Admission gate operational statistics."
+      },
+      "ComplianceCheckRequest": {
+        "properties": {
+          "payload": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Payload",
+            "description": "Payload body to check"
+          },
+          "headers": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Headers",
+            "description": "Headers to scan for profit-mask signals"
+          },
+          "entity_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity Id",
+            "description": "Entity ID for context (optional)"
+          },
+          "target_path": {
+            "type": "string",
+            "title": "Target Path",
+            "description": "Simulated request path",
+            "default": "/api/v1/intelligence/process"
+          }
+        },
+        "type": "object",
+        "required": [
+          "payload"
+        ],
+        "title": "ComplianceCheckRequest",
+        "description": "Dry-run compliance check against the admission policy."
+      },
+      "BanneredEntitiesResponse": {
+        "properties": {
+          "count": {
+            "type": "integer",
+            "title": "Count"
+          },
+          "entities": {
+            "items": {
+              "$ref": "#/components/schemas/EntityReportResponse"
+            },
+            "type": "array",
+            "title": "Entities"
+          },
+          "timestamp": {
+            "type": "string",
+            "title": "Timestamp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "count",
+          "entities",
+          "timestamp"
+        ],
+        "title": "BanneredEntitiesResponse",
+        "description": "List of all bannered entities."
+      },
+      "PolicyBillboardResponse": {
+        "properties": {
+          "billboard_version": {
+            "type": "string",
+            "title": "Billboard Version"
+          },
+          "principles": {
+            "additionalProperties": {
+              "type": "boolean"
+            },
+            "type": "object",
+            "title": "Principles"
+          },
+          "ethical_dos": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Ethical Dos"
+          },
+          "ethical_donts": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Ethical Donts"
+          },
+          "penalty_tiers": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Penalty Tiers"
+          },
+          "caution": {
+            "type": "string",
+            "title": "Caution"
+          },
+          "evolution_notice": {
+            "type": "string",
+            "title": "Evolution Notice"
+          },
+          "timestamp": {
+            "type": "string",
+            "title": "Timestamp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "billboard_version",
+          "principles",
+          "ethical_dos",
+          "ethical_donts",
+          "penalty_tiers",
+          "caution",
+          "evolution_notice",
+          "timestamp"
+        ],
+        "title": "PolicyBillboardResponse",
+        "description": "Full policy billboard snapshot with version and timestamp."
+      },
+      "PenaltyRevokeRequest": {
+        "properties": {
+          "entity_id": {
+            "type": "string",
+            "title": "Entity Id",
+            "description": "Entity to modify"
+          },
+          "action": {
+            "type": "string",
+            "title": "Action",
+            "description": "One of: revoke_banner, reduce_penalty, full_reset"
+          },
+          "reduction_points": {
+            "type": "integer",
+            "title": "Reduction Points",
+            "description": "Points to subtract (for reduce_penalty)",
+            "default": 0
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason",
+            "description": "Reason for revocation",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "entity_id",
+          "action"
+        ],
+        "title": "PenaltyRevokeRequest",
+        "description": "Revoke a banner or reduce penalty for an entity."
+      },
+      "PenaltyRevokeResponse": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success"
+          },
+          "entity_id": {
+            "type": "string",
+            "title": "Entity Id"
+          },
+          "action": {
+            "type": "string",
+            "title": "Action"
+          },
+          "previous_points": {
+            "type": "integer",
+            "title": "Previous Points"
+          },
+          "current_points": {
+            "type": "integer",
+            "title": "Current Points"
+          },
+          "was_bannered": {
+            "type": "boolean",
+            "title": "Was Bannered"
+          },
+          "is_bannered": {
+            "type": "boolean",
+            "title": "Is Bannered"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "timestamp": {
+            "type": "string",
+            "title": "Timestamp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "success",
+          "entity_id",
+          "action",
+          "previous_points",
+          "current_points",
+          "was_bannered",
+          "is_bannered",
+          "message",
+          "timestamp"
+        ],
+        "title": "PenaltyRevokeResponse",
+        "description": "Result of penalty revocation."
       }
     },
     "securitySchemes": {

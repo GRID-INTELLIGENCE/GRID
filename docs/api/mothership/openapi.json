@@ -2,17 +2,17 @@
   "openapi": "3.1.0",
   "info": {
     "title": "GRID Mothership API",
-    "description": "Main GRID application API with authentication, billing, RAG, and agentic system",
+    "description": "Enterprise AI framework with local-first RAG, event-driven agentic system, and cognitive decision support",
     "contact": {
       "name": "GRID Support",
-      "url": "https://github.com/yourusername/grid",
+      "url": "https://github.com/GRID-INTELLIGENCE/GRID",
       "email": "irfankabir02@gmail.com"
     },
     "license": {
       "name": "MIT License",
       "url": "https://opensource.org/licenses/MIT"
     },
-    "version": "2.2.0"
+    "version": "2.7.0"
   },
   "servers": [
     {
@@ -32,7 +32,7 @@
         ],
         "summary": "Basic Metrics",
         "description": "Get basic system metrics",
-        "operationId": "metrics_metrics_get",
+        "operationId": "cockpit_metrics_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -41,7 +41,7 @@
                 "schema": {
                   "additionalProperties": true,
                   "type": "object",
-                  "title": "Response Metrics Metrics Get"
+                  "title": "Response Cockpit Metrics Get"
                 }
               }
             }
@@ -231,13 +231,1141 @@
         }
       }
     },
+    "/health/chaos-resilience": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Chaos Resilience Health Check",
+        "description": "Monitor chaos engineering resilience components",
+        "operationId": "chaos_resilience_health_health_chaos_resilience_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Chaos Resilience Health Health Chaos Resilience Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/corruption/report": {
+      "post": {
+        "tags": [
+          "Data Corruption Monitoring"
+        ],
+        "summary": "Report a data corruption event",
+        "description": "Manually report a data corruption event for tracking and penalty calculation",
+        "operationId": "report_corruption_event_corruption_report_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CorruptionEventRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CorruptionEventResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/corruption/health/{endpoint}": {
+      "get": {
+        "tags": [
+          "Data Corruption Monitoring"
+        ],
+        "summary": "Get health status for a specific endpoint",
+        "description": "Retrieve the current corruption penalty score and health status for an endpoint",
+        "operationId": "get_endpoint_health_corruption_health__endpoint__get",
+        "parameters": [
+          {
+            "name": "endpoint",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Endpoint"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EndpointHealthResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/corruption/critical": {
+      "get": {
+        "tags": [
+          "Data Corruption Monitoring"
+        ],
+        "summary": "List critical endpoints",
+        "description": "Get a list of all endpoints that have exceeded the critical penalty threshold",
+        "operationId": "get_critical_endpoints_corruption_critical_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CriticalEndpointsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/corruption/stats": {
+      "get": {
+        "tags": [
+          "Data Corruption Monitoring"
+        ],
+        "summary": "Get corruption statistics",
+        "description": "Get overall corruption statistics and system health metrics",
+        "operationId": "get_corruption_stats_corruption_stats_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CorruptionStatsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/corruption/reset/{endpoint}": {
+      "post": {
+        "tags": [
+          "Data Corruption Monitoring"
+        ],
+        "summary": "Reset endpoint penalties",
+        "description": "Reset all corruption penalties for a specific endpoint (admin only)",
+        "operationId": "reset_endpoint_penalties_corruption_reset__endpoint__post",
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "endpoint",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Endpoint"
+            }
+          },
+          {
+            "name": "reason",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Reason for resetting penalties",
+              "title": "Reason"
+            },
+            "description": "Reason for resetting penalties"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Reset Endpoint Penalties Corruption Reset  Endpoint  Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/corruption/penalties": {
+      "get": {
+        "tags": [
+          "Data Corruption Monitoring"
+        ],
+        "summary": "Get all endpoint penalties",
+        "description": "Get a mapping of all endpoints to their current penalty scores",
+        "operationId": "get_all_penalties_corruption_penalties_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "number"
+                  },
+                  "type": "object",
+                  "title": "Response Get All Penalties Corruption Penalties Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admission/policy": {
+      "get": {
+        "tags": [
+          "Admission Gate Enforcement"
+        ],
+        "summary": "Get current policy billboard",
+        "description": "Returns the full ethical participation contract displayed at the top of every execution chain. Includes principles, dos/don'ts, penalty tiers, caution, and evolution notice.",
+        "operationId": "get_policy_billboard_admission_policy_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PolicyBillboardResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admission/stats": {
+      "get": {
+        "tags": [
+          "Admission Gate Enforcement"
+        ],
+        "summary": "Get gate statistics",
+        "description": "Returns admission/rejection counters and breakdown by rejection reason.",
+        "operationId": "get_gate_stats_admission_stats_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GateStatsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admission/entity/{entity_id}": {
+      "get": {
+        "tags": [
+          "Admission Gate Enforcement"
+        ],
+        "summary": "Get entity report",
+        "description": "Returns the full violation history, accumulated penalty points, banner status, and classified penalty tier for an entity.",
+        "operationId": "get_entity_report_admission_entity__entity_id__get",
+        "parameters": [
+          {
+            "name": "entity_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Entity Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntityReportResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admission/entities/bannered": {
+      "get": {
+        "tags": [
+          "Admission Gate Enforcement"
+        ],
+        "summary": "List bannered entities",
+        "description": "Returns all entities currently bannered (hard-blocked) by the admission gate.",
+        "operationId": "list_bannered_entities_admission_entities_bannered_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BanneredEntitiesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admission/compliance/check": {
+      "post": {
+        "tags": [
+          "Admission Gate Enforcement"
+        ],
+        "summary": "Dry-run policy compliance check",
+        "description": "Checks a payload against the admission policy without actually sending a request through the pipeline. Reports violations, profit-mask signals, context token estimate, and structural conformance. Use this to pre-validate before submission.",
+        "operationId": "check_compliance_admission_compliance_check_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ComplianceCheckRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceCheckResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admission/penalty/apply": {
+      "post": {
+        "tags": [
+          "Admission Gate Enforcement"
+        ],
+        "summary": "Apply penalty to entity",
+        "description": "Manually apply a penalty to an entity. Used for out-of-band enforcement \u2014 when violations are detected by external systems (MCP servers, CLI, monitoring) outside the HTTP request flow. The 3x profit-mask multiplier is applied when profit_masked=true.",
+        "operationId": "apply_penalty_admission_penalty_apply_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PenaltyApplyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PenaltyApplyResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admission/penalty/revoke": {
+      "post": {
+        "tags": [
+          "Admission Gate Enforcement"
+        ],
+        "summary": "Revoke banner or reduce penalty",
+        "description": "Revoke a banner, reduce accumulated penalty points, or fully reset an entity's record. Used for remediation after an entity has corrected course. Actions: revoke_banner, reduce_penalty, full_reset.",
+        "operationId": "revoke_penalty_admission_penalty_revoke_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PenaltyRevokeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PenaltyRevokeResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/drt/status": {
+      "get": {
+        "tags": [
+          "DRT Monitoring"
+        ],
+        "summary": "Get Drt Status",
+        "description": "Get unified DRT system status from core engine.",
+        "operationId": "get_drt_status_drt_status_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/drt/attack-vectors": {
+      "post": {
+        "tags": [
+          "DRT Monitoring"
+        ],
+        "summary": "Add Attack Vector",
+        "description": "Add attack vector to core DRT monitor.",
+        "operationId": "add_attack_vector_drt_attack_vectors_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttackVectorAddRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object",
+                  "title": "Response Add Attack Vector Drt Attack Vectors Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/drt/escalated-endpoints": {
+      "get": {
+        "tags": [
+          "DRT Monitoring"
+        ],
+        "summary": "Get Escalated Endpoints",
+        "description": "Get list of currently escalated endpoints.",
+        "operationId": "get_escalated_endpoints_drt_escalated_endpoints_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Get Escalated Endpoints Drt Escalated Endpoints Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/drt/escalate/{path}": {
+      "post": {
+        "tags": [
+          "DRT Monitoring"
+        ],
+        "summary": "Escalate Endpoint",
+        "description": "Manually escalate an endpoint.",
+        "operationId": "escalate_endpoint_drt_escalate__path__post",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Escalate Endpoint Drt Escalate  Path  Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/drt/de-escalate/{path}": {
+      "post": {
+        "tags": [
+          "DRT Monitoring"
+        ],
+        "summary": "De Escalate Endpoint",
+        "description": "De-escalate an endpoint.",
+        "operationId": "de_escalate_endpoint_drt_de_escalate__path__post",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response De Escalate Endpoint Drt De Escalate  Path  Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/drt/behavioral-history": {
+      "get": {
+        "tags": [
+          "DRT Monitoring"
+        ],
+        "summary": "Get Behavioral History",
+        "description": "Get behavioral history from core DRT monitor.",
+        "operationId": "get_behavioral_history_drt_behavioral_history_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Get Behavioral History Drt Behavioral History Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/drt/endpoint/{path}/summary": {
+      "get": {
+        "tags": [
+          "DRT Monitoring"
+        ],
+        "summary": "Get Endpoint Summary",
+        "description": "Get detailed summary for a specific endpoint.",
+        "operationId": "get_endpoint_summary_drt_endpoint__path__summary_get",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EndpointSummaryResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/drt/system-overview": {
+      "get": {
+        "tags": [
+          "DRT Monitoring"
+        ],
+        "summary": "Get System Overview",
+        "description": "Get comprehensive system overview.",
+        "operationId": "get_system_overview_drt_system_overview_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Get System Overview Drt System Overview Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/safety/observe/health": {
+      "get": {
+        "tags": [
+          "safety",
+          "observation"
+        ],
+        "summary": "Get Health",
+        "description": "Get component health status.",
+        "operationId": "get_health_safety_observe_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Get Health Safety Observe Health Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/safety/observe/metrics": {
+      "get": {
+        "tags": [
+          "safety",
+          "observation"
+        ],
+        "summary": "Get Metrics",
+        "description": "Get observation metrics.",
+        "operationId": "get_metrics_safety_observe_metrics_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Get Metrics Safety Observe Metrics Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/safety/observe/rules": {
+      "get": {
+        "tags": [
+          "safety",
+          "observation"
+        ],
+        "summary": "Get Rules",
+        "description": "Get active safety rules (Project GUARDIAN).",
+        "operationId": "get_rules_safety_observe_rules_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/safety/observe/rules/dynamic": {
+      "post": {
+        "tags": [
+          "safety",
+          "observation"
+        ],
+        "summary": "Inject Rule",
+        "description": "Inject dynamic rule into Project GUARDIAN.\nSaves to Redis to sync across all instances.",
+        "operationId": "inject_rule_safety_observe_rules_dynamic_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "type": "object",
+                "title": "Rule"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/safety/privacy/detect": {
+      "post": {
+        "tags": [
+          "safety",
+          "privacy"
+        ],
+        "summary": "Detect Pii",
+        "description": "Detect PII in text without modifying it.\nUseful for checking if content contains sensitive information.",
+        "operationId": "detect_pii_safety_privacy_detect_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/safety__api__privacy_endpoints__DetectionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrivacyResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/safety/privacy/mask": {
+      "post": {
+        "tags": [
+          "safety",
+          "privacy"
+        ],
+        "summary": "Mask Pii",
+        "description": "Process text through the privacy shield, applying masking/blocking rules.\nIf 'requires_user_input' returns True, the client should prompt the user\nand retry with 'user_choice'.",
+        "operationId": "mask_pii_safety_privacy_mask_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MaskingRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrivacyResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/safety/privacy/batch": {
+      "post": {
+        "tags": [
+          "safety",
+          "privacy"
+        ],
+        "summary": "Batch Process",
+        "description": "Process multiple text snippets in parallel.\nEfficient for scanning documents or chat history.",
+        "operationId": "batch_process_safety_privacy_batch_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PrivacyResponse"
+                  },
+                  "type": "array",
+                  "title": "Response Batch Process Safety Privacy Batch Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/safety/privacy/context/invalidate": {
+      "post": {
+        "tags": [
+          "safety",
+          "privacy"
+        ],
+        "summary": "Invalidate Privacy Context",
+        "description": "Invalidate the privacy cache for a specific context (workspace/team).\nUseful when privacy rules or permissions change for a group.",
+        "operationId": "invalidate_privacy_context_safety_privacy_context_invalidate_post",
+        "parameters": [
+          {
+            "name": "context_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Context Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/register": {
+      "post": {
+        "tags": [
+          "authentication"
+        ],
+        "summary": "Register User",
+        "description": "Register a new user account.\n\nCreates a new user with BASIC trust tier. In development mode,\nthis creates the user without external dependencies. In production,\nthis would integrate with the user store.\n\nArgs:\n    request: Registration details\n    _: Rate limiting enforcement\n    request_context: Request context\n\nReturns:\n    API response with created user details\n\nRaises:\n    HTTPException: If registration fails (e.g., user already exists)",
+        "operationId": "register_user_api_v1_auth_register_post",
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Session Id"
+            }
+          },
+          {
+            "name": "X-Session-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Session-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_UserResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/auth/login": {
       "post": {
         "tags": [
           "authentication"
         ],
         "summary": "Login",
-        "description": "Authenticate user and generate JWT tokens.\n\n**Development Mode:**\n- Any username/password combination is accepted\n- Tokens are generated for testing purposes\n\n**Production Mode:**\n- Credentials are validated against user store\n- Secure password hashing verification\n- Failed attempts are logged and rate-limited\n\nArgs:\n    request: Login credentials\n    _: Rate limiting enforcement\n    settings: Application settings\n    request_context: Request context\n\nReturns:\n    API response with token pair\n\nRaises:\n    HTTPException: If authentication fails",
+        "description": "Authenticate user and generate JWT tokens.\n\n**Development / Testing Mode:**\n- Any username/password combination is accepted\n- Tokens are generated for testing purposes\n\n**Production Mode:**\n- Credentials are validated against user store\n- Secure password hashing verification\n- Failed attempts are logged and rate-limited\n\nArgs:\n    request: Login credentials\n    _: Rate limiting enforcement\n    settings: Application settings\n    request_context: Request context\n\nReturns:\n    API response with token pair\n\nRaises:\n    HTTPException: If authentication fails",
         "operationId": "login_api_v1_auth_login_post",
         "security": [
           {
@@ -405,7 +1533,7 @@
           "authentication"
         ],
         "summary": "Validate Token",
-        "description": "Validate the current authentication token.\n\nThis endpoint can be used to check if a token is still valid\nand retrieve information about the authenticated user.\n\nArgs:\n    auth: Authentication context (automatically validated)\n    request_context: Request context\n\nReturns:\n    API response with token validation result",
+        "description": "Validate the current authentication token.\n\nCallable without a token; returns 200 with valid=False when unauthenticated.\nUse to check whether the current request is authenticated.",
         "operationId": "validate_token_api_v1_auth_validate_get",
         "security": [
           {
@@ -456,6 +1584,80 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResponse_ValidateResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/me": {
+      "get": {
+        "tags": [
+          "authentication"
+        ],
+        "summary": "Get Current User",
+        "description": "Get current authenticated user information.\n\nReturns details about the currently authenticated user based on the JWT token.\n\nArgs:\n    auth: Authentication context (automatically validated)\n    request_context: Request context\n\nReturns:\n    API response with current user details",
+        "operationId": "get_current_user_api_v1_auth_me_get",
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Session Id"
+            }
+          },
+          {
+            "name": "X-Session-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Session-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_UserResponse_"
                 }
               }
             }
@@ -952,6 +2154,144 @@
         ]
       }
     },
+    "/api/v1/payment/reconciliation/run": {
+      "post": {
+        "tags": [
+          "payment"
+        ],
+        "summary": "Run Reconciliation",
+        "description": "Trigger an immediate payment reconciliation run.",
+        "operationId": "run_reconciliation_api_v1_payment_reconciliation_run_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/payment/reconciliation/runs": {
+      "get": {
+        "tags": [
+          "payment"
+        ],
+        "summary": "List Reconciliation Runs",
+        "description": "List recent reconciliation runs for accounting visibility.",
+        "operationId": "list_reconciliation_runs_api_v1_payment_reconciliation_runs_get",
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/payment/reconciliation/stuck-pending": {
+      "get": {
+        "tags": [
+          "payment"
+        ],
+        "summary": "List Stuck Pending Payments",
+        "description": "Report pending/processing transactions older than threshold.",
+        "operationId": "list_stuck_pending_payments_api_v1_payment_reconciliation_stuck_pending_get",
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "older_than_minutes",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 30,
+              "title": "Older Than Minutes"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 200,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/payment/subscription/create": {
       "post": {
         "tags": [
@@ -1135,6 +2475,545 @@
             "HTTPBearer": []
           }
         ]
+      }
+    },
+    "/api/v1/connect-demo/dashboard": {
+      "get": {
+        "tags": [
+          "stripe-connect-demo"
+        ],
+        "summary": "Connect Dashboard",
+        "description": "Dashboard for merchants to create/onboard a connected account and manage catalog/subscriptions.",
+        "operationId": "connect_dashboard_api_v1_connect_demo_dashboard_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/connect-demo/accounts/create": {
+      "post": {
+        "tags": [
+          "stripe-connect-demo"
+        ],
+        "summary": "Create Connected Account",
+        "description": "Create a Stripe Connected Account using V2 API with the required property set.\n\nIdempotency behavior for this sample:\n- If the current user already has a mapped connected account and Stripe can retrieve it,\n  we reuse it rather than creating a duplicate account.\n- If mapping exists but account retrieval fails, we create a fresh account and remap.",
+        "operationId": "create_connected_account_api_v1_connect_demo_accounts_create_post",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_create_connected_account_api_v1_connect_demo_accounts_create_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/connect-demo/accounts/onboarding-link": {
+      "post": {
+        "tags": [
+          "stripe-connect-demo"
+        ],
+        "summary": "Create Onboarding Link",
+        "description": "Create V2 Account Link for onboarding and redirect merchant to Stripe-hosted flow.",
+        "operationId": "create_onboarding_link_api_v1_connect_demo_accounts_onboarding_link_post",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_create_onboarding_link_api_v1_connect_demo_accounts_onboarding_link_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/connect-demo/products/create": {
+      "post": {
+        "tags": [
+          "stripe-connect-demo"
+        ],
+        "summary": "Create Product",
+        "description": "Create product + default price on connected account via Stripe-Account header.",
+        "operationId": "create_product_api_v1_connect_demo_products_create_post",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_create_product_api_v1_connect_demo_products_create_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/connect-demo/storefront/{account_id}": {
+      "get": {
+        "tags": [
+          "stripe-connect-demo"
+        ],
+        "summary": "Storefront Page",
+        "description": "Public storefront page for a single connected account.\n\nNOTE: This demo uses account_id in URL directly for simplicity.\nIn production, replace with merchant slug/opaque ID and resolve internally.",
+        "operationId": "storefront_page_api_v1_connect_demo_storefront__account_id__get",
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Account Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/connect-demo/storefront/{account_id}/checkout": {
+      "post": {
+        "tags": [
+          "stripe-connect-demo"
+        ],
+        "summary": "Checkout Direct Charge",
+        "description": "Create direct-charge Checkout Session on connected account with application fee.",
+        "operationId": "checkout_direct_charge_api_v1_connect_demo_storefront__account_id__checkout_post",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Account Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_checkout_direct_charge_api_v1_connect_demo_storefront__account_id__checkout_post"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/connect-demo/success": {
+      "get": {
+        "tags": [
+          "stripe-connect-demo"
+        ],
+        "summary": "Checkout Success",
+        "description": "Basic success landing page for hosted checkout.",
+        "operationId": "checkout_success_api_v1_connect_demo_success_get",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Session Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/connect-demo/subscriptions/checkout": {
+      "post": {
+        "tags": [
+          "stripe-connect-demo"
+        ],
+        "summary": "Connected Account Subscription Checkout",
+        "description": "Create platform-level hosted subscription checkout using connected account ID as customer_account.",
+        "operationId": "connected_account_subscription_checkout_api_v1_connect_demo_subscriptions_checkout_post",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_connected_account_subscription_checkout_api_v1_connect_demo_subscriptions_checkout_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/connect-demo/subscriptions/portal": {
+      "post": {
+        "tags": [
+          "stripe-connect-demo"
+        ],
+        "summary": "Connected Account Billing Portal",
+        "description": "Create billing portal session for connected account billing management.",
+        "operationId": "connected_account_billing_portal_api_v1_connect_demo_subscriptions_portal_post",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_connected_account_billing_portal_api_v1_connect_demo_subscriptions_portal_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/connect-demo/webhooks/thin": {
+      "post": {
+        "tags": [
+          "stripe-connect-demo"
+        ],
+        "summary": "Webhook Thin V2",
+        "description": "Handle thin V2 account update events.\n\nThis uses Stripe Client thin parsing + event retrieval flow:\n  thin_event = stripe_client.parse_thin_event(...)\n  event = stripe_client.v2.core.events.retrieve(thin_event.id)",
+        "operationId": "webhook_thin_v2_api_v1_connect_demo_webhooks_thin_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/connect-demo/webhooks/billing": {
+      "post": {
+        "tags": [
+          "stripe-connect-demo"
+        ],
+        "summary": "Webhook Billing Snapshot",
+        "description": "Handle classic (non-thin) subscription/billing webhook events for connected-account subscriptions.",
+        "operationId": "webhook_billing_snapshot_api_v1_connect_demo_webhooks_billing_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/connect-demo/events": {
+      "get": {
+        "tags": [
+          "stripe-connect-demo"
+        ],
+        "summary": "List Recent Connect Events",
+        "description": "Return recent Connect-related webhook events from mapping metadata for the authenticated user.",
+        "operationId": "list_recent_connect_events_api_v1_connect_demo_events_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/connect-demo/account/{account_id}": {
+      "get": {
+        "tags": [
+          "stripe-connect-demo"
+        ],
+        "summary": "Get Connect Account Status",
+        "description": "JSON helper to fetch current account status directly from Stripe API.",
+        "operationId": "get_connect_account_status_api_v1_connect_demo_account__account_id__get",
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Account Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/v1/api-keys/": {
@@ -1512,6 +3391,387 @@
             }
           }
         }
+      }
+    },
+    "/api/v1/inference/": {
+      "post": {
+        "tags": [
+          "inference"
+        ],
+        "summary": "Create Inference",
+        "description": "Create a new inference request.",
+        "operationId": "create_inference_api_v1_inference__post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InferenceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InferenceResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/inference/async": {
+      "post": {
+        "tags": [
+          "inference"
+        ],
+        "summary": "Create Async Inference",
+        "description": "Create an asynchronous inference request.",
+        "operationId": "create_async_inference_api_v1_inference_async_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InferenceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/inference/status/{task_id}": {
+      "get": {
+        "tags": [
+          "inference"
+        ],
+        "summary": "Get Inference Status",
+        "description": "Get the status of an asynchronous inference request.",
+        "operationId": "get_inference_status_api_v1_inference_status__task_id__get",
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Task Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/inference/models": {
+      "get": {
+        "tags": [
+          "inference"
+        ],
+        "summary": "List Available Models",
+        "description": "List available inference models.",
+        "operationId": "list_available_models_api_v1_inference_models_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/privacy/detect": {
+      "post": {
+        "tags": [
+          "privacy"
+        ],
+        "summary": "Detect Pii",
+        "description": "Detect PII entities in text.",
+        "operationId": "detect_pii_api_v1_privacy_detect_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/application__mothership__routers__privacy__DetectionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DetectionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/privacy/mask": {
+      "post": {
+        "tags": [
+          "privacy"
+        ],
+        "summary": "Mask Pii",
+        "description": "Mask PII entities in text.",
+        "operationId": "mask_pii_api_v1_privacy_mask_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PrivacyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrivacyMaskResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/privacy/batch": {
+      "post": {
+        "tags": [
+          "privacy"
+        ],
+        "summary": "Batch Privacy Processing",
+        "description": "Process multiple texts for PII detection and masking.",
+        "operationId": "batch_privacy_processing_api_v1_privacy_batch_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PrivacyBatchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchPrivacyResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/privacy/levels": {
+      "get": {
+        "tags": [
+          "privacy"
+        ],
+        "summary": "Get Privacy Levels",
+        "description": "Get available privacy processing levels.",
+        "operationId": "get_privacy_levels_api_v1_privacy_levels_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/privacy/stats": {
+      "get": {
+        "tags": [
+          "privacy"
+        ],
+        "summary": "Get Privacy Stats",
+        "description": "Get privacy processing statistics.",
+        "operationId": "get_privacy_stats_api_v1_privacy_stats_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ]
       }
     },
     "/api/v1/resonance/performance/sales": {
@@ -2157,7 +4417,7 @@
           "debug"
         ],
         "summary": "Get Debug Config",
-        "description": "Get current debug configuration.",
+        "description": "Get current debug configuration. Returns 404 when DEBUG env is not set.",
         "operationId": "get_debug_config_api_v1_resonance_debug_config_get",
         "responses": {
           "200": {
@@ -2268,6 +4528,371 @@
                   "type": "object",
                   "additionalProperties": true,
                   "title": "Response Get Wheel Visualization Api V1 Api V1 Canvas Wheel Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/stabilize": {
+      "post": {
+        "tags": [
+          "reasoning"
+        ],
+        "summary": "Stabilize Reasoning",
+        "description": "Generate stabilized reasoning trace and quality record.",
+        "operationId": "stabilize_reasoning_api_v1_stabilize_post",
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Session Id"
+            }
+          },
+          {
+            "name": "X-Session-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Session-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StabilizeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_StabilizeResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/drift-check": {
+      "post": {
+        "tags": [
+          "reasoning"
+        ],
+        "summary": "Drift Check",
+        "description": "Detect contradiction and intent drift before response release.",
+        "operationId": "drift_check_api_v1_drift_check_post",
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Session Id"
+            }
+          },
+          {
+            "name": "X-Session-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Session-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DriftCheckRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_DriftCheckResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/roundtable/reconcile": {
+      "post": {
+        "tags": [
+          "reasoning"
+        ],
+        "summary": "Roundtable Reconcile",
+        "description": "Reconcile system trace with human notes using equal-weight roundtable logic.",
+        "operationId": "roundtable_reconcile_api_v1_roundtable_reconcile_post",
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Session Id"
+            }
+          },
+          {
+            "name": "X-Session-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Session-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoundtableReconcileRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_RoundtableReconcileResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/inference-gaps/{case_id}": {
+      "get": {
+        "tags": [
+          "reasoning"
+        ],
+        "summary": "List Inference Gaps",
+        "description": "List persisted inference gaps for a case.",
+        "operationId": "list_inference_gaps_api_v1_inference_gaps__case_id__get",
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "case_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Case Id"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/GapStatus"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Gap status filter",
+              "title": "Status"
+            },
+            "description": "Gap status filter"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 500,
+              "minimum": 1,
+              "default": 100,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "session_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Session Id"
+            }
+          },
+          {
+            "name": "X-Session-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Session-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_InferenceGapListResponse_"
                 }
               }
             }
@@ -2925,6 +5550,14 @@
         "summary": "Get Case",
         "description": "Get case status and details.",
         "operationId": "get_case_api_v1_agentic_cases__case_id__get",
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "case_id",
@@ -2968,6 +5601,14 @@
         "summary": "Enrich Case",
         "description": "Enrich an existing case with additional user input.",
         "operationId": "enrich_case_api_v1_agentic_cases__case_id__enrich_post",
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "case_id",
@@ -3021,6 +5662,14 @@
         "summary": "Execute Case",
         "description": "Execute a case (lawyer processes case).",
         "operationId": "execute_case_api_v1_agentic_cases__case_id__execute_post",
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "case_id",
@@ -3074,6 +5723,14 @@
         "summary": "Execute iterative lawyer phase",
         "description": "Execute the lawyer phase iteratively for a case.",
         "operationId": "execute_case_iterative_api_v1_agentic_cases__case_id__execute_iterative_post",
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "case_id",
@@ -3090,6 +5747,8 @@
             "required": false,
             "schema": {
               "type": "integer",
+              "maximum": 50,
+              "minimum": 1,
               "default": 3,
               "title": "Max Iterations"
             }
@@ -3125,6 +5784,14 @@
         "summary": "Get case reference file contents",
         "description": "Get reference file for a case.",
         "operationId": "get_reference_file_api_v1_agentic_cases__case_id__reference_get",
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "case_id",
@@ -3179,7 +5846,15 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ]
       }
     },
     "/api/v1/skills/health": {
@@ -3851,6 +6526,41 @@
         "type": "object",
         "title": "ApiResponse[DiagnosticsResponse]"
       },
+      "ApiResponse_DriftCheckResponse_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DriftCheckResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/ResponseMeta"
+          }
+        },
+        "type": "object",
+        "title": "ApiResponse[DriftCheckResponse]"
+      },
       "ApiResponse_HealthCheckResponse_": {
         "properties": {
           "success": {
@@ -3885,6 +6595,41 @@
         },
         "type": "object",
         "title": "ApiResponse[HealthCheckResponse]"
+      },
+      "ApiResponse_InferenceGapListResponse_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/InferenceGapListResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/ResponseMeta"
+          }
+        },
+        "type": "object",
+        "title": "ApiResponse[InferenceGapListResponse]"
       },
       "ApiResponse_ModeChangeResponse_": {
         "properties": {
@@ -3991,6 +6736,41 @@
         "type": "object",
         "title": "ApiResponse[RefreshResponse]"
       },
+      "ApiResponse_RoundtableReconcileResponse_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RoundtableReconcileResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/ResponseMeta"
+          }
+        },
+        "type": "object",
+        "title": "ApiResponse[RoundtableReconcileResponse]"
+      },
       "ApiResponse_SecurityHealthResponse_": {
         "properties": {
           "success": {
@@ -4025,6 +6805,41 @@
         },
         "type": "object",
         "title": "ApiResponse[SecurityHealthResponse]"
+      },
+      "ApiResponse_StabilizeResponse_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StabilizeResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/ResponseMeta"
+          }
+        },
+        "type": "object",
+        "title": "ApiResponse[StabilizeResponse]"
       },
       "ApiResponse_SystemInfoResponse_": {
         "properties": {
@@ -4095,6 +6910,41 @@
         },
         "type": "object",
         "title": "ApiResponse[TokenResponse]"
+      },
+      "ApiResponse_UserResponse_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UserResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/ResponseMeta"
+          }
+        },
+        "type": "object",
+        "title": "ApiResponse[UserResponse]"
       },
       "ApiResponse_ValidateResponse_": {
         "properties": {
@@ -4207,6 +7057,229 @@
         "type": "object",
         "title": "ApiResponse[dict[str, str]]"
       },
+      "AttackVectorAddRequest": {
+        "properties": {
+          "endpoint": {
+            "type": "string",
+            "title": "Endpoint"
+          },
+          "method": {
+            "type": "string",
+            "title": "Method"
+          },
+          "client_ip": {
+            "type": "string",
+            "title": "Client Ip"
+          },
+          "user_agent": {
+            "type": "string",
+            "title": "User Agent"
+          },
+          "attack_type": {
+            "type": "string",
+            "title": "Attack Type"
+          },
+          "severity": {
+            "type": "string",
+            "title": "Severity"
+          }
+        },
+        "type": "object",
+        "required": [
+          "endpoint",
+          "method",
+          "client_ip",
+          "user_agent",
+          "attack_type",
+          "severity"
+        ],
+        "title": "AttackVectorAddRequest"
+      },
+      "BanneredEntitiesResponse": {
+        "properties": {
+          "count": {
+            "type": "integer",
+            "title": "Count"
+          },
+          "entities": {
+            "items": {
+              "$ref": "#/components/schemas/EntityReportResponse"
+            },
+            "type": "array",
+            "title": "Entities"
+          },
+          "timestamp": {
+            "type": "string",
+            "title": "Timestamp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "count",
+          "entities",
+          "timestamp"
+        ],
+        "title": "BanneredEntitiesResponse",
+        "description": "List of all bannered entities."
+      },
+      "BatchPrivacyResponse": {
+        "properties": {
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/BatchResult"
+            },
+            "type": "array",
+            "title": "Results",
+            "description": "Results for each text"
+          },
+          "total_processed": {
+            "type": "integer",
+            "title": "Total Processed",
+            "description": "Total number of texts processed"
+          },
+          "level": {
+            "type": "string",
+            "title": "Level",
+            "description": "Privacy level used"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total_processed",
+          "level"
+        ],
+        "title": "BatchPrivacyResponse",
+        "description": "Batch privacy processing response."
+      },
+      "BatchRequest": {
+        "properties": {
+          "texts": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "title": "Texts",
+            "description": "List of texts to analyze"
+          },
+          "context_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Context Id"
+          },
+          "preset": {
+            "$ref": "#/components/schemas/PrivacyPreset",
+            "default": "balanced"
+          }
+        },
+        "type": "object",
+        "required": [
+          "texts"
+        ],
+        "title": "BatchRequest"
+      },
+      "BatchResult": {
+        "properties": {
+          "original_text": {
+            "type": "string",
+            "title": "Original Text",
+            "description": "Original input text"
+          },
+          "masked_text": {
+            "type": "string",
+            "title": "Masked Text",
+            "description": "Text with PII masked"
+          },
+          "detected_entities": {
+            "items": {
+              "$ref": "#/components/schemas/DetectedEntity"
+            },
+            "type": "array",
+            "title": "Detected Entities",
+            "description": "Entities that were masked"
+          }
+        },
+        "type": "object",
+        "required": [
+          "original_text",
+          "masked_text"
+        ],
+        "title": "BatchResult",
+        "description": "Single item result in batch processing."
+      },
+      "Body_checkout_direct_charge_api_v1_connect_demo_storefront__account_id__checkout_post": {
+        "properties": {
+          "product_id": {
+            "type": "string",
+            "title": "Product Id"
+          },
+          "csrf_token": {
+            "type": "string",
+            "title": "Csrf Token"
+          }
+        },
+        "type": "object",
+        "required": [
+          "product_id",
+          "csrf_token"
+        ],
+        "title": "Body_checkout_direct_charge_api_v1_connect_demo_storefront__account_id__checkout_post"
+      },
+      "Body_connected_account_billing_portal_api_v1_connect_demo_subscriptions_portal_post": {
+        "properties": {
+          "csrf_token": {
+            "type": "string",
+            "title": "Csrf Token"
+          }
+        },
+        "type": "object",
+        "required": [
+          "csrf_token"
+        ],
+        "title": "Body_connected_account_billing_portal_api_v1_connect_demo_subscriptions_portal_post"
+      },
+      "Body_connected_account_subscription_checkout_api_v1_connect_demo_subscriptions_checkout_post": {
+        "properties": {
+          "csrf_token": {
+            "type": "string",
+            "title": "Csrf Token"
+          }
+        },
+        "type": "object",
+        "required": [
+          "csrf_token"
+        ],
+        "title": "Body_connected_account_subscription_checkout_api_v1_connect_demo_subscriptions_checkout_post"
+      },
+      "Body_create_connected_account_api_v1_connect_demo_accounts_create_post": {
+        "properties": {
+          "display_name": {
+            "type": "string",
+            "title": "Display Name"
+          },
+          "contact_email": {
+            "type": "string",
+            "title": "Contact Email"
+          },
+          "csrf_token": {
+            "type": "string",
+            "title": "Csrf Token"
+          }
+        },
+        "type": "object",
+        "required": [
+          "display_name",
+          "contact_email",
+          "csrf_token"
+        ],
+        "title": "Body_create_connected_account_api_v1_connect_demo_accounts_create_post"
+      },
       "Body_create_navigation_decision_api_v1_navigation_decision_post": {
         "properties": {
           "payload": {
@@ -4242,6 +7315,52 @@
           "payload"
         ],
         "title": "Body_create_navigation_decision_api_v1_navigation_decision_post"
+      },
+      "Body_create_onboarding_link_api_v1_connect_demo_accounts_onboarding_link_post": {
+        "properties": {
+          "csrf_token": {
+            "type": "string",
+            "title": "Csrf Token"
+          }
+        },
+        "type": "object",
+        "required": [
+          "csrf_token"
+        ],
+        "title": "Body_create_onboarding_link_api_v1_connect_demo_accounts_onboarding_link_post"
+      },
+      "Body_create_product_api_v1_connect_demo_products_create_post": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": ""
+          },
+          "price_in_cents": {
+            "type": "integer",
+            "title": "Price In Cents"
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency",
+            "default": "usd"
+          },
+          "csrf_token": {
+            "type": "string",
+            "title": "Csrf Token"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "price_in_cents",
+          "csrf_token"
+        ],
+        "title": "Body_create_product_api_v1_connect_demo_products_create_post"
       },
       "Body_streaming_navigation_plan_api_v1_navigation_plan_stream_get": {
         "properties": {
@@ -4769,6 +7888,114 @@
         "title": "CockpitSummarySchema",
         "description": "Summary statistics for cockpit state."
       },
+      "ComplianceCheckRequest": {
+        "properties": {
+          "payload": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Payload",
+            "description": "Payload body to check"
+          },
+          "headers": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Headers",
+            "description": "Headers to scan for profit-mask signals"
+          },
+          "entity_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity Id",
+            "description": "Entity ID for context (optional)"
+          },
+          "target_path": {
+            "type": "string",
+            "title": "Target Path",
+            "description": "Simulated request path",
+            "default": "/api/v1/intelligence/process"
+          }
+        },
+        "type": "object",
+        "required": [
+          "payload"
+        ],
+        "title": "ComplianceCheckRequest",
+        "description": "Dry-run compliance check against the admission policy."
+      },
+      "ComplianceCheckResponse": {
+        "properties": {
+          "compliant": {
+            "type": "boolean",
+            "title": "Compliant"
+          },
+          "violations": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Violations"
+          },
+          "profit_mask_signals": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Profit Mask Signals"
+          },
+          "estimated_tokens": {
+            "type": "integer",
+            "title": "Estimated Tokens"
+          },
+          "context_ceiling_exceeded": {
+            "type": "boolean",
+            "title": "Context Ceiling Exceeded"
+          },
+          "has_required_structure": {
+            "type": "boolean",
+            "title": "Has Required Structure"
+          },
+          "entity_penalty_points": {
+            "type": "integer",
+            "title": "Entity Penalty Points",
+            "default": 0
+          },
+          "entity_bannered": {
+            "type": "boolean",
+            "title": "Entity Bannered",
+            "default": false
+          },
+          "policy": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Policy"
+          },
+          "timestamp": {
+            "type": "string",
+            "title": "Timestamp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "compliant",
+          "violations",
+          "profit_mask_signals",
+          "estimated_tokens",
+          "context_ceiling_exceeded",
+          "has_required_structure",
+          "policy",
+          "timestamp"
+        ],
+        "title": "ComplianceCheckResponse",
+        "description": "Result of a dry-run compliance check."
+      },
       "ContextMetricsResponse": {
         "properties": {
           "sparsity": {
@@ -4859,6 +8086,145 @@
         ],
         "title": "ContextResponse",
         "description": "Response with context snapshot."
+      },
+      "CorruptionEventRequest": {
+        "properties": {
+          "endpoint": {
+            "type": "string",
+            "title": "Endpoint",
+            "description": "The endpoint where corruption was detected"
+          },
+          "severity": {
+            "type": "string",
+            "title": "Severity",
+            "description": "Severity level (LOW, MEDIUM, HIGH, CRITICAL)"
+          },
+          "corruption_type": {
+            "type": "string",
+            "title": "Corruption Type",
+            "description": "Type of corruption"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "description": "Description of the corruption event"
+          },
+          "affected_resources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Affected Resources",
+            "description": "Resources affected"
+          },
+          "metadata": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Metadata",
+            "description": "Additional metadata"
+          },
+          "correlation_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Correlation Id",
+            "description": "Optional correlation ID"
+          }
+        },
+        "type": "object",
+        "required": [
+          "endpoint",
+          "severity",
+          "corruption_type",
+          "description"
+        ],
+        "title": "CorruptionEventRequest",
+        "description": "Request model for manually reporting a corruption event."
+      },
+      "CorruptionEventResponse": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success"
+          },
+          "penalty_applied": {
+            "type": "number",
+            "title": "Penalty Applied"
+          },
+          "endpoint": {
+            "type": "string",
+            "title": "Endpoint"
+          },
+          "correlation_id": {
+            "type": "string",
+            "title": "Correlation Id"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "success",
+          "penalty_applied",
+          "endpoint",
+          "correlation_id",
+          "message"
+        ],
+        "title": "CorruptionEventResponse",
+        "description": "Response model for corruption event reporting."
+      },
+      "CorruptionStatsResponse": {
+        "properties": {
+          "total_endpoints_monitored": {
+            "type": "integer",
+            "title": "Total Endpoints Monitored"
+          },
+          "critical_endpoints": {
+            "type": "integer",
+            "title": "Critical Endpoints"
+          },
+          "total_penalty_score": {
+            "type": "number",
+            "title": "Total Penalty Score"
+          },
+          "average_penalty": {
+            "type": "number",
+            "title": "Average Penalty"
+          },
+          "highest_penalty_endpoint": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Highest Penalty Endpoint"
+          },
+          "system_status": {
+            "type": "string",
+            "title": "System Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total_endpoints_monitored",
+          "critical_endpoints",
+          "total_penalty_score",
+          "average_penalty",
+          "highest_penalty_endpoint",
+          "system_status"
+        ],
+        "title": "CorruptionStatsResponse",
+        "description": "Response model for corruption statistics."
       },
       "CreateAPIKeyRequest": {
         "properties": {
@@ -5028,6 +8394,82 @@
         ],
         "title": "CreateSubscriptionRequest",
         "description": "Request to create a subscription."
+      },
+      "CriticalEndpointsResponse": {
+        "properties": {
+          "critical_count": {
+            "type": "integer",
+            "title": "Critical Count"
+          },
+          "endpoints": {
+            "items": {
+              "$ref": "#/components/schemas/EndpointHealthResponse"
+            },
+            "type": "array",
+            "title": "Endpoints"
+          },
+          "system_health": {
+            "type": "string",
+            "title": "System Health"
+          }
+        },
+        "type": "object",
+        "required": [
+          "critical_count",
+          "endpoints",
+          "system_health"
+        ],
+        "title": "CriticalEndpointsResponse",
+        "description": "Response model for critical endpoints list."
+      },
+      "DecisionQualityRecord": {
+        "properties": {
+          "quality_score": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Quality Score"
+          },
+          "coherence": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Coherence"
+          },
+          "evidence_coverage": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Evidence Coverage"
+          },
+          "uncertainty_penalty": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Uncertainty Penalty"
+          },
+          "recommendations": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Recommendations"
+          },
+          "measured_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Measured At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "quality_score",
+          "coherence",
+          "evidence_coverage",
+          "uncertainty_penalty"
+        ],
+        "title": "DecisionQualityRecord",
+        "description": "Quality metrics for stabilized reasoning output."
       },
       "DecisionRequest": {
         "properties": {
@@ -5330,6 +8772,62 @@
         "title": "DependencyHealth",
         "description": "Health status for a single dependency."
       },
+      "DetectedEntity": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "title": "Type",
+            "description": "Entity type (e.g., email, phone, ssn)"
+          },
+          "value": {
+            "type": "string",
+            "title": "Value",
+            "description": "Detected value"
+          },
+          "start": {
+            "type": "integer",
+            "title": "Start",
+            "description": "Start position in text"
+          },
+          "end": {
+            "type": "integer",
+            "title": "End",
+            "description": "End position in text"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "value",
+          "start",
+          "end"
+        ],
+        "title": "DetectedEntity",
+        "description": "Detected PII entity."
+      },
+      "DetectionResponse": {
+        "properties": {
+          "detected_entities": {
+            "items": {
+              "$ref": "#/components/schemas/DetectedEntity"
+            },
+            "type": "array",
+            "title": "Detected Entities",
+            "description": "List of detected entities"
+          },
+          "entity_count": {
+            "type": "integer",
+            "title": "Entity Count",
+            "description": "Total number of entities detected"
+          }
+        },
+        "type": "object",
+        "required": [
+          "entity_count"
+        ],
+        "title": "DetectionResponse",
+        "description": "PII detection response."
+      },
       "DiagnosticResult": {
         "properties": {
           "name": {
@@ -5396,6 +8894,313 @@
         ],
         "title": "DiagnosticsResponse",
         "description": "Full diagnostics response."
+      },
+      "DriftCheckRequest": {
+        "properties": {
+          "trace_so_far": {
+            "anyOf": [
+              {
+                "items": {
+                  "anyOf": [
+                    {
+                      "additionalProperties": true,
+                      "type": "object"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                },
+                "type": "array"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Trace So Far"
+          },
+          "candidate_response": {
+            "type": "string",
+            "maxLength": 50000,
+            "minLength": 1,
+            "title": "Candidate Response"
+          },
+          "case_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 120
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Case Id"
+          },
+          "include_gap_log": {
+            "type": "boolean",
+            "title": "Include Gap Log",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "candidate_response"
+        ],
+        "title": "DriftCheckRequest",
+        "description": "Request payload for response drift checks."
+      },
+      "DriftCheckResponse": {
+        "properties": {
+          "drift_flags": {
+            "items": {
+              "$ref": "#/components/schemas/DriftSignal"
+            },
+            "type": "array",
+            "title": "Drift Flags"
+          },
+          "contradictions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Contradictions"
+          },
+          "repair_suggestions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Repair Suggestions"
+          },
+          "logged_gaps": {
+            "items": {
+              "$ref": "#/components/schemas/InferenceGapRecord"
+            },
+            "type": "array",
+            "title": "Logged Gaps"
+          }
+        },
+        "type": "object",
+        "required": [
+          "drift_flags",
+          "contradictions",
+          "repair_suggestions"
+        ],
+        "title": "DriftCheckResponse",
+        "description": "Response payload for drift checks."
+      },
+      "DriftSignal": {
+        "properties": {
+          "signal_type": {
+            "type": "string",
+            "enum": [
+              "intent_shift",
+              "contradiction",
+              "unsupported_claim",
+              "coherence_drop"
+            ],
+            "title": "Signal Type"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ],
+            "title": "Severity"
+          },
+          "message": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Message"
+          },
+          "evidence": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Evidence"
+          }
+        },
+        "type": "object",
+        "required": [
+          "signal_type",
+          "severity",
+          "message"
+        ],
+        "title": "DriftSignal",
+        "description": "Signal indicating response drift or coherence risk."
+      },
+      "EndpointHealthResponse": {
+        "properties": {
+          "endpoint": {
+            "type": "string",
+            "title": "Endpoint"
+          },
+          "penalty_score": {
+            "type": "number",
+            "title": "Penalty Score"
+          },
+          "is_critical": {
+            "type": "boolean",
+            "title": "Is Critical"
+          },
+          "severity": {
+            "type": "string",
+            "title": "Severity"
+          },
+          "recommendation": {
+            "type": "string",
+            "title": "Recommendation"
+          },
+          "last_updated": {
+            "type": "string",
+            "title": "Last Updated"
+          }
+        },
+        "type": "object",
+        "required": [
+          "endpoint",
+          "penalty_score",
+          "is_critical",
+          "severity",
+          "recommendation",
+          "last_updated"
+        ],
+        "title": "EndpointHealthResponse",
+        "description": "Response model for endpoint health status."
+      },
+      "EndpointSummaryResponse": {
+        "properties": {
+          "endpoint": {
+            "type": "string",
+            "title": "Endpoint"
+          },
+          "behavior_count": {
+            "type": "integer",
+            "title": "Behavior Count"
+          },
+          "time_range": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Time Range"
+          },
+          "method_distribution": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Method Distribution"
+          },
+          "user_agent_distribution": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "User Agent Distribution"
+          },
+          "hourly_distribution": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Hourly Distribution"
+          },
+          "escalated": {
+            "type": "boolean",
+            "title": "Escalated"
+          },
+          "websocket_overheads": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Websocket Overheads"
+          }
+        },
+        "type": "object",
+        "required": [
+          "endpoint",
+          "behavior_count",
+          "time_range",
+          "method_distribution",
+          "user_agent_distribution",
+          "hourly_distribution",
+          "escalated",
+          "websocket_overheads"
+        ],
+        "title": "EndpointSummaryResponse"
+      },
+      "EntityReportResponse": {
+        "properties": {
+          "entity_id": {
+            "type": "string",
+            "title": "Entity Id"
+          },
+          "found": {
+            "type": "boolean",
+            "title": "Found"
+          },
+          "violation_count": {
+            "type": "integer",
+            "title": "Violation Count",
+            "default": 0
+          },
+          "total_penalty_points": {
+            "type": "integer",
+            "title": "Total Penalty Points",
+            "default": 0
+          },
+          "bannered": {
+            "type": "boolean",
+            "title": "Bannered",
+            "default": false
+          },
+          "banner_reason": {
+            "type": "string",
+            "title": "Banner Reason",
+            "default": ""
+          },
+          "profit_mask_violations": {
+            "type": "integer",
+            "title": "Profit Mask Violations",
+            "default": 0
+          },
+          "penalty_tier": {
+            "type": "string",
+            "title": "Penalty Tier",
+            "default": "none"
+          },
+          "tier_description": {
+            "type": "string",
+            "title": "Tier Description",
+            "default": ""
+          },
+          "violations": {
+            "items": {
+              "$ref": "#/components/schemas/ViolationDetail"
+            },
+            "type": "array",
+            "title": "Violations"
+          },
+          "timestamp": {
+            "type": "string",
+            "title": "Timestamp",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "entity_id",
+          "found"
+        ],
+        "title": "EntityReportResponse",
+        "description": "Full entity report \u2014 violations, penalty, tier classification."
       },
       "EnvelopeMetricsResponse": {
         "properties": {
@@ -5471,6 +9276,67 @@
         "title": "FAQItemResponse",
         "description": "FAQ item for audience-facing explanations."
       },
+      "GapSource": {
+        "type": "string",
+        "enum": [
+          "stabilize",
+          "drift_check",
+          "roundtable_reconcile"
+        ],
+        "title": "GapSource",
+        "description": "Source that generated an inference gap."
+      },
+      "GapStatus": {
+        "type": "string",
+        "enum": [
+          "open",
+          "resolved"
+        ],
+        "title": "GapStatus",
+        "description": "Lifecycle state for an inference gap."
+      },
+      "GateStatsResponse": {
+        "properties": {
+          "total_admitted": {
+            "type": "integer",
+            "title": "Total Admitted"
+          },
+          "total_rejected": {
+            "type": "integer",
+            "title": "Total Rejected"
+          },
+          "rejection_reasons": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Rejection Reasons"
+          },
+          "tracked_entities": {
+            "type": "integer",
+            "title": "Tracked Entities"
+          },
+          "bannered_entities": {
+            "type": "integer",
+            "title": "Bannered Entities"
+          },
+          "timestamp": {
+            "type": "string",
+            "title": "Timestamp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total_admitted",
+          "total_rejected",
+          "rejection_reasons",
+          "tracked_entities",
+          "bannered_entities",
+          "timestamp"
+        ],
+        "title": "GateStatsResponse",
+        "description": "Admission gate operational statistics."
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -5519,6 +9385,202 @@
         ],
         "title": "HealthCheckResponse",
         "description": "Health check response schema."
+      },
+      "InferenceGapListResponse": {
+        "properties": {
+          "case_id": {
+            "type": "string",
+            "title": "Case Id"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "records": {
+            "items": {
+              "$ref": "#/components/schemas/InferenceGapRecord"
+            },
+            "type": "array",
+            "title": "Records"
+          }
+        },
+        "type": "object",
+        "required": [
+          "case_id",
+          "total",
+          "records"
+        ],
+        "title": "InferenceGapListResponse",
+        "description": "Response payload for listing inference gaps by case."
+      },
+      "InferenceGapRecord": {
+        "properties": {
+          "gap_id": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Gap Id"
+          },
+          "case_id": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Case Id"
+          },
+          "source": {
+            "$ref": "#/components/schemas/GapSource"
+          },
+          "summary": {
+            "type": "string",
+            "maxLength": 1200,
+            "minLength": 1,
+            "title": "Summary"
+          },
+          "status": {
+            "$ref": "#/components/schemas/GapStatus",
+            "default": "open"
+          },
+          "confidence": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Confidence"
+          },
+          "metadata": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Metadata"
+          },
+          "detected_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Detected At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "gap_id",
+          "case_id",
+          "source",
+          "summary",
+          "confidence"
+        ],
+        "title": "InferenceGapRecord",
+        "description": "Persistent record of unresolved reasoning gap."
+      },
+      "InferenceRequest": {
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Prompt",
+            "description": "Prompt text for inference"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model",
+            "description": "Model to use for inference"
+          },
+          "max_tokens": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Tokens",
+            "description": "Maximum tokens to generate"
+          },
+          "temperature": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 2.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Temperature",
+            "description": "Sampling temperature",
+            "default": 0.7
+          },
+          "context": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Context",
+            "description": "Additional context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "prompt"
+        ],
+        "title": "InferenceRequest",
+        "description": "Inference request payload."
+      },
+      "InferenceResponse": {
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result",
+            "description": "Generated result"
+          },
+          "model": {
+            "type": "string",
+            "title": "Model",
+            "description": "Model used for inference"
+          },
+          "tokens_used": {
+            "type": "integer",
+            "title": "Tokens Used",
+            "description": "Number of tokens used",
+            "default": 0
+          },
+          "processing_time": {
+            "type": "number",
+            "title": "Processing Time",
+            "description": "Processing time in seconds"
+          },
+          "metadata": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metadata",
+            "description": "Additional metadata"
+          }
+        },
+        "type": "object",
+        "required": [
+          "result",
+          "model",
+          "processing_time"
+        ],
+        "title": "InferenceResponse",
+        "description": "Inference response."
       },
       "IntegrationStateResponse": {
         "properties": {
@@ -5703,6 +9765,50 @@
         ],
         "title": "LoginRequest",
         "description": "Login request payload."
+      },
+      "MaskingRequest": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Text",
+            "description": "Text to analyze for PII"
+          },
+          "context_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Context Id",
+            "description": "Workspace/Team ID for collaborative mode"
+          },
+          "preset": {
+            "$ref": "#/components/schemas/PrivacyPreset",
+            "description": "Privacy strictness",
+            "default": "balanced"
+          },
+          "user_choice": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Choice",
+            "description": "User decision for interactive mode"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "title": "MaskingRequest"
       },
       "ModeChangeResponse": {
         "properties": {
@@ -6105,6 +10211,442 @@
         "title": "PaymentTransactionResponse",
         "description": "Payment transaction response."
       },
+      "PenaltyApplyRequest": {
+        "properties": {
+          "entity_id": {
+            "type": "string",
+            "title": "Entity Id",
+            "description": "Entity to penalize"
+          },
+          "violation_type": {
+            "type": "string",
+            "title": "Violation Type",
+            "description": "One of: budget_exceeded, origin_denied, context_overflow, invalid_body, missing_structure, profit_masking"
+          },
+          "profit_masked": {
+            "type": "boolean",
+            "title": "Profit Masked",
+            "description": "Apply 3x multiplier for profit-masking",
+            "default": false
+          },
+          "metadata": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Metadata",
+            "description": "Additional context"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason",
+            "description": "Human-readable reason",
+            "default": "manual_enforcement"
+          }
+        },
+        "type": "object",
+        "required": [
+          "entity_id",
+          "violation_type"
+        ],
+        "title": "PenaltyApplyRequest",
+        "description": "Manually apply a penalty to an entity."
+      },
+      "PenaltyApplyResponse": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success"
+          },
+          "entity_id": {
+            "type": "string",
+            "title": "Entity Id"
+          },
+          "violation_type": {
+            "type": "string",
+            "title": "Violation Type"
+          },
+          "penalty_points_applied": {
+            "type": "integer",
+            "title": "Penalty Points Applied"
+          },
+          "total_penalty_points": {
+            "type": "integer",
+            "title": "Total Penalty Points"
+          },
+          "bannered": {
+            "type": "boolean",
+            "title": "Bannered"
+          },
+          "penalty_tier": {
+            "type": "string",
+            "title": "Penalty Tier"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "timestamp": {
+            "type": "string",
+            "title": "Timestamp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "success",
+          "entity_id",
+          "violation_type",
+          "penalty_points_applied",
+          "total_penalty_points",
+          "bannered",
+          "penalty_tier",
+          "message",
+          "timestamp"
+        ],
+        "title": "PenaltyApplyResponse",
+        "description": "Result of penalty application."
+      },
+      "PenaltyRevokeRequest": {
+        "properties": {
+          "entity_id": {
+            "type": "string",
+            "title": "Entity Id",
+            "description": "Entity to modify"
+          },
+          "action": {
+            "type": "string",
+            "title": "Action",
+            "description": "One of: revoke_banner, reduce_penalty, full_reset"
+          },
+          "reduction_points": {
+            "type": "integer",
+            "title": "Reduction Points",
+            "description": "Points to subtract (for reduce_penalty)",
+            "default": 0
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason",
+            "description": "Reason for revocation",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "entity_id",
+          "action"
+        ],
+        "title": "PenaltyRevokeRequest",
+        "description": "Revoke a banner or reduce penalty for an entity."
+      },
+      "PenaltyRevokeResponse": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success"
+          },
+          "entity_id": {
+            "type": "string",
+            "title": "Entity Id"
+          },
+          "action": {
+            "type": "string",
+            "title": "Action"
+          },
+          "previous_points": {
+            "type": "integer",
+            "title": "Previous Points"
+          },
+          "current_points": {
+            "type": "integer",
+            "title": "Current Points"
+          },
+          "was_bannered": {
+            "type": "boolean",
+            "title": "Was Bannered"
+          },
+          "is_bannered": {
+            "type": "boolean",
+            "title": "Is Bannered"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "timestamp": {
+            "type": "string",
+            "title": "Timestamp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "success",
+          "entity_id",
+          "action",
+          "previous_points",
+          "current_points",
+          "was_bannered",
+          "is_bannered",
+          "message",
+          "timestamp"
+        ],
+        "title": "PenaltyRevokeResponse",
+        "description": "Result of penalty revocation."
+      },
+      "PolicyBillboardResponse": {
+        "properties": {
+          "billboard_version": {
+            "type": "string",
+            "title": "Billboard Version"
+          },
+          "principles": {
+            "additionalProperties": {
+              "type": "boolean"
+            },
+            "type": "object",
+            "title": "Principles"
+          },
+          "ethical_dos": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Ethical Dos"
+          },
+          "ethical_donts": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Ethical Donts"
+          },
+          "penalty_tiers": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Penalty Tiers"
+          },
+          "caution": {
+            "type": "string",
+            "title": "Caution"
+          },
+          "evolution_notice": {
+            "type": "string",
+            "title": "Evolution Notice"
+          },
+          "timestamp": {
+            "type": "string",
+            "title": "Timestamp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "billboard_version",
+          "principles",
+          "ethical_dos",
+          "ethical_donts",
+          "penalty_tiers",
+          "caution",
+          "evolution_notice",
+          "timestamp"
+        ],
+        "title": "PolicyBillboardResponse",
+        "description": "Full policy billboard snapshot with version and timestamp."
+      },
+      "PrivacyBatchRequest": {
+        "properties": {
+          "texts": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Texts",
+            "description": "List of texts to process"
+          },
+          "level": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Level",
+            "description": "Privacy level: strict, balanced, minimal"
+          },
+          "context": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Context",
+            "description": "Optional context for processing"
+          }
+        },
+        "type": "object",
+        "required": [
+          "texts"
+        ],
+        "title": "PrivacyBatchRequest",
+        "description": "Batch privacy processing request."
+      },
+      "PrivacyMaskResponse": {
+        "properties": {
+          "original_text": {
+            "type": "string",
+            "title": "Original Text",
+            "description": "Original input text"
+          },
+          "masked_text": {
+            "type": "string",
+            "title": "Masked Text",
+            "description": "Text with PII masked"
+          },
+          "detected_entities": {
+            "items": {
+              "$ref": "#/components/schemas/DetectedEntity"
+            },
+            "type": "array",
+            "title": "Detected Entities",
+            "description": "Entities that were masked"
+          },
+          "applied_rules": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Applied Rules",
+            "description": "Rules that were applied"
+          }
+        },
+        "type": "object",
+        "required": [
+          "original_text",
+          "masked_text"
+        ],
+        "title": "PrivacyMaskResponse",
+        "description": "Privacy masking response."
+      },
+      "PrivacyPreset": {
+        "type": "string",
+        "enum": [
+          "balanced",
+          "strict",
+          "minimal",
+          "gdpr",
+          "hipaa",
+          "pci",
+          "collaborative"
+        ],
+        "title": "PrivacyPreset",
+        "description": "Pre-configured privacy settings."
+      },
+      "PrivacyRequest": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Text",
+            "description": "Text to process for PII"
+          },
+          "level": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Level",
+            "description": "Privacy level: strict, balanced, minimal"
+          },
+          "context": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Context",
+            "description": "Optional context for processing"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "title": "PrivacyRequest",
+        "description": "Privacy processing request."
+      },
+      "PrivacyResponse": {
+        "properties": {
+          "original_text": {
+            "type": "string",
+            "title": "Original Text"
+          },
+          "processed_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Processed Text"
+          },
+          "detections": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Detections"
+          },
+          "action_taken": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Action Taken"
+          },
+          "masked": {
+            "type": "boolean",
+            "title": "Masked"
+          },
+          "blocked": {
+            "type": "boolean",
+            "title": "Blocked"
+          },
+          "requires_user_input": {
+            "type": "boolean",
+            "title": "Requires User Input"
+          }
+        },
+        "type": "object",
+        "required": [
+          "original_text",
+          "processed_text",
+          "detections",
+          "action_taken",
+          "masked",
+          "blocked",
+          "requires_user_input"
+        ],
+        "title": "PrivacyResponse"
+      },
       "ReadinessResponse": {
         "properties": {
           "ready": {
@@ -6135,6 +10677,54 @@
         "type": "object",
         "title": "ReadinessResponse",
         "description": "Readiness probe response schema."
+      },
+      "ReasoningTrace": {
+        "properties": {
+          "step_number": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Step Number"
+          },
+          "stage": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Stage"
+          },
+          "statement": {
+            "type": "string",
+            "maxLength": 4000,
+            "minLength": 1,
+            "title": "Statement"
+          },
+          "confidence": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Confidence"
+          },
+          "evidence_refs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Evidence Refs"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Timestamp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "step_number",
+          "stage",
+          "statement",
+          "confidence"
+        ],
+        "title": "ReasoningTrace",
+        "description": "Single structured reasoning step."
       },
       "ReferenceFileResponse": {
         "properties": {
@@ -6305,6 +10895,51 @@
         "title": "RefundResponse",
         "description": "Response after creating a refund."
       },
+      "RegisterRequest": {
+        "properties": {
+          "username": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 3,
+            "title": "Username",
+            "description": "Username"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email",
+            "description": "Email address"
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 8,
+            "title": "Password",
+            "description": "Password"
+          },
+          "full_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Full Name",
+            "description": "Full name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "username",
+          "email",
+          "password"
+        ],
+        "title": "RegisterRequest",
+        "description": "User registration request."
+      },
       "ResonanceResponse": {
         "properties": {
           "activity_id": {
@@ -6407,6 +11042,120 @@
         "type": "object",
         "title": "ResponseMeta",
         "description": "Metadata for API responses."
+      },
+      "RiskLevel": {
+        "type": "string",
+        "enum": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "title": "RiskLevel",
+        "description": "Risk level for reasoning operations."
+      },
+      "RoundtableReconcileRequest": {
+        "properties": {
+          "case_id": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Case Id"
+          },
+          "human_notes": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Human Notes"
+          },
+          "system_trace": {
+            "anyOf": [
+              {
+                "items": {
+                  "anyOf": [
+                    {
+                      "additionalProperties": true,
+                      "type": "object"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                },
+                "type": "array"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "System Trace"
+          },
+          "topic": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 250
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Topic"
+          }
+        },
+        "type": "object",
+        "required": [
+          "case_id",
+          "human_notes",
+          "system_trace"
+        ],
+        "title": "RoundtableReconcileRequest",
+        "description": "Request payload for human/system reconciliation."
+      },
+      "RoundtableReconcileResponse": {
+        "properties": {
+          "resolved_facts": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Resolved Facts"
+          },
+          "open_gaps": {
+            "items": {
+              "$ref": "#/components/schemas/InferenceGapRecord"
+            },
+            "type": "array",
+            "title": "Open Gaps"
+          },
+          "updated_policy_hints": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Updated Policy Hints"
+          },
+          "synthesis": {
+            "type": "string",
+            "title": "Synthesis"
+          }
+        },
+        "type": "object",
+        "required": [
+          "resolved_facts",
+          "open_gaps",
+          "updated_policy_hints",
+          "synthesis"
+        ],
+        "title": "RoundtableReconcileResponse",
+        "description": "Response payload for reconciliation output."
       },
       "RoutingRequest": {
         "properties": {
@@ -6721,6 +11470,182 @@
         "title": "SkillHealthResponse",
         "description": "Complete health response for a skill."
       },
+      "StabilizeRequest": {
+        "properties": {
+          "input": {
+            "type": "string",
+            "maxLength": 50000,
+            "minLength": 1,
+            "title": "Input"
+          },
+          "context": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Context"
+          },
+          "task_type": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Task Type",
+            "default": "general"
+          },
+          "risk_level": {
+            "$ref": "#/components/schemas/RiskLevel",
+            "default": "medium"
+          },
+          "case_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 120
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Case Id"
+          },
+          "include_gap_log": {
+            "type": "boolean",
+            "title": "Include Gap Log",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "input"
+        ],
+        "title": "StabilizeRequest",
+        "description": "Request payload for reasoning stabilization."
+      },
+      "StabilizeResponse": {
+        "properties": {
+          "stabilized_trace": {
+            "items": {
+              "$ref": "#/components/schemas/ReasoningTrace"
+            },
+            "type": "array",
+            "title": "Stabilized Trace"
+          },
+          "uncertainty_map": {
+            "items": {
+              "$ref": "#/components/schemas/UncertaintySpan"
+            },
+            "type": "array",
+            "title": "Uncertainty Map"
+          },
+          "next_actions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Next Actions"
+          },
+          "quality_record": {
+            "$ref": "#/components/schemas/DecisionQualityRecord"
+          },
+          "logged_gaps": {
+            "items": {
+              "$ref": "#/components/schemas/InferenceGapRecord"
+            },
+            "type": "array",
+            "title": "Logged Gaps"
+          }
+        },
+        "type": "object",
+        "required": [
+          "stabilized_trace",
+          "uncertainty_map",
+          "next_actions",
+          "quality_record"
+        ],
+        "title": "StabilizeResponse",
+        "description": "Response payload for reasoning stabilization."
+      },
+      "StatusResponse": {
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled"
+          },
+          "enforcement_mode": {
+            "type": "string",
+            "title": "Enforcement Mode"
+          },
+          "similarity_threshold": {
+            "type": "number",
+            "title": "Similarity Threshold"
+          },
+          "retention_hours": {
+            "type": "integer",
+            "title": "Retention Hours"
+          },
+          "auto_escalate": {
+            "type": "boolean",
+            "title": "Auto Escalate"
+          },
+          "escalated_endpoints": {
+            "type": "integer",
+            "title": "Escalated Endpoints"
+          },
+          "behavioral_history_count": {
+            "type": "integer",
+            "title": "Behavioral History Count"
+          },
+          "attack_vectors_count": {
+            "type": "integer",
+            "title": "Attack Vectors Count"
+          },
+          "sampling_rate": {
+            "type": "number",
+            "title": "Sampling Rate"
+          },
+          "rate_limit_multiplier": {
+            "type": "number",
+            "title": "Rate Limit Multiplier"
+          },
+          "core_total_monitored_endpoints": {
+            "type": "integer",
+            "title": "Core Total Monitored Endpoints"
+          },
+          "core_escalated_endpoints": {
+            "type": "integer",
+            "title": "Core Escalated Endpoints"
+          },
+          "core_escalation_rate": {
+            "type": "number",
+            "title": "Core Escalation Rate"
+          },
+          "core_known_attack_vectors": {
+            "type": "integer",
+            "title": "Core Known Attack Vectors"
+          },
+          "timestamp": {
+            "type": "string",
+            "title": "Timestamp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "enabled",
+          "enforcement_mode",
+          "similarity_threshold",
+          "retention_hours",
+          "auto_escalate",
+          "escalated_endpoints",
+          "behavioral_history_count",
+          "attack_vectors_count",
+          "sampling_rate",
+          "rate_limit_multiplier",
+          "core_total_monitored_endpoints",
+          "core_escalated_endpoints",
+          "core_escalation_rate",
+          "core_known_attack_vectors",
+          "timestamp"
+        ],
+        "title": "StatusResponse"
+      },
       "SubscriptionResponse": {
         "properties": {
           "id": {
@@ -6933,6 +11858,63 @@
         "title": "TokenResponse",
         "description": "Token response."
       },
+      "UncertaintySpan": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "maxLength": 400,
+            "minLength": 1,
+            "title": "Text"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 400,
+            "minLength": 1,
+            "title": "Reason"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ],
+            "title": "Severity",
+            "default": "medium"
+          },
+          "start_index": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Index"
+          },
+          "end_index": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Index"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text",
+          "reason"
+        ],
+        "title": "UncertaintySpan",
+        "description": "Region in text where uncertainty or assumptions were detected."
+      },
       "UpdateAPIKeyRequest": {
         "properties": {
           "name": {
@@ -6999,6 +11981,65 @@
         ],
         "title": "UseCaseResponse",
         "description": "A short use-case scenario."
+      },
+      "UserResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "User ID"
+          },
+          "username": {
+            "type": "string",
+            "title": "Username",
+            "description": "Username"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email",
+            "description": "Email address"
+          },
+          "full_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Full Name",
+            "description": "Full name"
+          },
+          "trust_tier": {
+            "type": "string",
+            "title": "Trust Tier",
+            "description": "Trust tier",
+            "default": "standard"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "description": "Whether user is active",
+            "default": true
+          },
+          "scopes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Scopes",
+            "description": "User scopes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "username",
+          "email"
+        ],
+        "title": "UserResponse",
+        "description": "Current user response."
       },
       "ValidateResponse": {
         "properties": {
@@ -7082,6 +12123,13 @@
           "type": {
             "type": "string",
             "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
           }
         },
         "type": "object",
@@ -7091,6 +12139,78 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "ViolationDetail": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "title": "Type"
+          },
+          "penalty_points": {
+            "type": "integer",
+            "title": "Penalty Points"
+          },
+          "metadata": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Metadata"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "penalty_points"
+        ],
+        "title": "ViolationDetail",
+        "description": "Single violation record."
+      },
+      "application__mothership__routers__privacy__DetectionRequest": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Text",
+            "description": "Text to analyze for PII"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "title": "DetectionRequest",
+        "description": "PII detection request."
+      },
+      "safety__api__privacy_endpoints__DetectionRequest": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Text",
+            "description": "Text to analyze for PII"
+          },
+          "context_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Context Id",
+            "description": "Workspace/Team ID for collaborative mode"
+          },
+          "preset": {
+            "$ref": "#/components/schemas/PrivacyPreset",
+            "description": "Privacy strictness",
+            "default": "balanced"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "title": "DetectionRequest"
       }
     },
     "securitySchemes": {

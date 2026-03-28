@@ -796,6 +796,28 @@ The API supports multiple authentication methods:
             logger.info("Parasite Guard dispose_engine injected")
         logger.info("Parasite Guard integrated (mode=%s)", mode)
 
+    # 9. Admission Gate (top-of-stack pre-filter — added LAST so it runs FIRST)
+    # Entity attribution, penalty enforcement, policy billboard, profit-mask detection.
+    try:
+        from .middleware.admission_gate import AdmissionGateMiddleware
+
+        admission_gate = AdmissionGateMiddleware(
+            app,  # ASGIApp — required positional arg for BaseHTTPMiddleware
+            call_budget=getattr(settings.security, "admission_call_budget", 60),
+            banner_threshold=getattr(settings.security, "admission_banner_threshold", 50),
+        )
+        # Starlette wraps middleware; store the raw instance on app.state
+        # so the enforcement router can query it.
+        app.add_middleware(
+            AdmissionGateMiddleware,
+            call_budget=getattr(settings.security, "admission_call_budget", 60),
+            banner_threshold=getattr(settings.security, "admission_banner_threshold", 50),
+        )
+        app.state.admission_gate = admission_gate  # type: ignore[reportAttributeAccessIssue]
+        logger.info("Admission gate middleware enabled (top-of-stack)")
+    except Exception as e:
+        logger.warning("Admission gate middleware not available: %s", e)
+
     # ==========================================================================
     # Prometheus Metrics (Phase 1 Gap Fix)
     # ==========================================================================
@@ -855,6 +877,15 @@ The API supports multiple authentication methods:
 
     app.include_router(corruption_router)
     logger.info("Corruption monitoring API endpoints registered")
+
+    # Admission gate enforcement endpoints (penalty, compliance, billboard)
+    try:
+        from .routers.admission_enforcement import router as admission_router
+
+        app.include_router(admission_router)
+        logger.info("Admission gate enforcement API endpoints registered")
+    except Exception as e:
+        logger.warning("Admission enforcement router not available: %s", e)
 
     if drt_router is not None:
         app.include_router(drt_router)
