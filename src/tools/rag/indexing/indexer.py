@@ -6,7 +6,7 @@ import logging
 import os
 from collections import deque
 from dataclasses import dataclass, field
-from datetime import UTC, datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 class IndexingMetrics:
     """Track indexing performance and quality metrics."""
 
-    start_time: datetime = field(default_factory=datetime.now)
+    start_time: datetime = field(default_factory=lambda: datetime.now(UTC))
     end_time: datetime | None = None
     files_processed: int = 0
     files_skipped: int = 0

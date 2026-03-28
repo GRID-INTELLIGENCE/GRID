@@ -41,7 +41,7 @@ def list_ollama_models(base_url: str = "http://localhost:11434") -> list[str]:
         with httpx.Client(timeout=10) as client:
             response = client.get(f"{base_url.rstrip('/')}/api/tags")
             response.raise_for_status()
-            data = response.model_dump_json()
+            data = response.json()
             models = [model["name"] for model in data.get("models", [])]
             return models
     except Exception as e:
