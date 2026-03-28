@@ -1,0 +1,157 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://grid-intelligence.dev/schemas/ollama-models.schema.json",
+  "title": "GRID Ollama Model Configuration",
+  "description": "Defines LLM and embedding model providers with ordered fallback chains. The system tries providers in array order; the first healthy provider wins.",
+  "type": "object",
+  "required": ["llm", "embedding"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "JSON Schema reference (ignored at runtime)"
+    },
+    "llm": {
+      "$ref": "#/$defs/providerChain",
+      "description": "Language model provider chain for RAG generation"
+    },
+    "embedding": {
+      "$ref": "#/$defs/providerChain",
+      "description": "Embedding model provider chain for vector search"
+    },
+    "health": {
+      "$ref": "#/$defs/healthConfig",
+      "description": "Global health-check settings (overridable per provider)"
+    }
+  },
+  "$defs": {
+    "providerChain": {
+      "type": "object",
+      "required": ["providers"],
+      "additionalProperties": false,
+      "properties": {
+        "strategy": {
+          "type": "string",
+          "enum": ["fallback", "fixed"],
+          "default": "fallback",
+          "description": "fallback = try providers in order until one responds; fixed = use only the first provider, fail if unavailable"
+        },
+        "providers": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/provider"
+          },
+          "description": "Ordered list of providers. First healthy provider is used."
+        }
+      }
+    },
+    "provider": {
+      "type": "object",
+      "required": ["type", "model"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "ollama-cloud",
+            "ollama-local",
+            "openai",
+            "anthropic",
+            "openai-compatible",
+            "simple"
+          ],
+          "description": "Provider backend type"
+        },
+        "model": {
+          "type": "string",
+          "description": "Model identifier (e.g. 'ministral:latest', 'nomic-embed-text-v2-moe:latest')",
+          "minLength": 1
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Base URL for the provider. Required for ollama-cloud and ollama-local."
+        },
+        "api_key_env": {
+          "type": "string",
+          "description": "Environment variable name holding the API key (e.g. 'OPENAI_API_KEY'). Never put raw keys here."
+        },
+        "timeout_ms": {
+          "type": "integer",
+          "minimum": 500,
+          "maximum": 300000,
+          "default": 30000,
+          "description": "Request timeout in milliseconds"
+        },
+        "health_check": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to probe this provider before selecting it. When false, the provider is assumed healthy."
+        },
+        "health_timeout_ms": {
+          "type": "integer",
+          "minimum": 200,
+          "maximum": 10000,
+          "default": 2000,
+          "description": "Timeout for the health probe (GET /api/tags for Ollama providers)"
+        },
+        "label": {
+          "type": "string",
+          "description": "Human-readable label for logs and diagnostics"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "type": { "const": "ollama-cloud" } }
+          },
+          "then": {
+            "required": ["url"]
+          }
+        },
+        {
+          "if": {
+            "properties": { "type": { "const": "openai" } }
+          },
+          "then": {
+            "required": ["api_key_env"]
+          }
+        },
+        {
+          "if": {
+            "properties": { "type": { "const": "anthropic" } }
+          },
+          "then": {
+            "required": ["api_key_env"]
+          }
+        }
+      ]
+    },
+    "healthConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Master switch for health probes. When false, always uses the first provider."
+        },
+        "cache_ttl_s": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3600,
+          "default": 60,
+          "description": "Seconds to cache a successful health probe before re-checking"
+        },
+        "retry_backoff_s": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 300,
+          "default": 30,
+          "description": "Seconds to wait before retrying a failed provider"
+        }
+      }
+    }
+  }
+}

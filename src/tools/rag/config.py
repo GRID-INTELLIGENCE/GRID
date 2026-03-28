@@ -20,6 +20,7 @@ if not _quiet_mode:
 class ModelMode(StrEnum):
     """Model execution mode."""
 
+    AUTO = "auto"  # Use fallback chain from config/ollama-models.json (cloud-first, local fallback)
     LOCAL = "local"  # Use local Ollama models
     CLOUD = "cloud"  # Use cloud Ollama models
     COPILOT = "copilot"  # Use GitHub Copilot SDK

@@ -1,11 +1,23 @@
-"""Factory for creating LLM providers."""
+"""Factory for creating LLM providers.
 
+Supports two resolution paths:
+1. **Fallback chain** (default): Load config/ollama-models.json, probe providers
+   in order, return the first healthy one. Activated when RAG_LLM_MODE=auto or
+   when ollama-models.json exists and no explicit mode is set.
+2. **Legacy explicit mode**: RAG_LLM_MODE=local|cloud|external|copilot picks a
+   single provider directly from env vars (original behavior, still supported).
+"""
+
+import logging
+import os
 from enum import StrEnum
 
 from ..config import ModelMode, RAGConfig
 from .base import BaseLLMProvider
 from .ollama_cloud import OllamaCloudLLM
 from .ollama_local import OllamaLocalLLM
+
+logger = logging.getLogger(__name__)
 
 
 class LLMProviderType(StrEnum):
@@ -21,10 +33,68 @@ class LLMProviderType(StrEnum):
     SIMPLE = "simple"  # Simple fallback
 
 
+def _use_fallback_chain() -> bool:
+    """Check whether to use the ollama-models.json fallback chain."""
+    mode = os.environ.get("RAG_LLM_MODE", "").lower()
+    if mode == "auto":
+        return True
+    # If no explicit mode, check if the config file exists
+    if not mode:
+        try:
+            from ..model_resolver import _find_config_path
+
+            _find_config_path()
+            return True
+        except FileNotFoundError:
+            return False
+    return False
+
+
+def _provider_from_resolved(resolved: "ResolvedProvider") -> BaseLLMProvider:  # noqa: F821
+    """Instantiate a BaseLLMProvider from a ResolvedProvider."""
+    from ..model_resolver import ResolvedProvider  # noqa: F811 — runtime import for type
+
+    assert isinstance(resolved, ResolvedProvider)
+
+    if resolved.type in ("ollama-local",):
+        return OllamaLocalLLM(
+            model=resolved.model,
+            base_url=resolved.url or "http://localhost:11434",
+            timeout=resolved.timeout_ms // 1000,
+        )
+    if resolved.type in ("ollama-cloud",):
+        return OllamaCloudLLM(
+            model=resolved.model,
+            cloud_url=resolved.url or "",
+            timeout=resolved.timeout_ms // 1000,
+        )
+    if resolved.type == "openai":
+        from .openai_llm import OpenAILLM
+
+        api_key = os.environ.get(resolved.api_key_env or "OPENAI_API_KEY", "")
+        return OpenAILLM(model=resolved.model, api_key=api_key, base_url=resolved.url)
+    if resolved.type == "anthropic":
+        from .anthropic_llm import AnthropicLLM
+
+        api_key = os.environ.get(resolved.api_key_env or "ANTHROPIC_API_KEY", "")
+        return AnthropicLLM(model=resolved.model, api_key=api_key)
+    if resolved.type == "simple":
+        from .simple import SimpleLLM
+
+        return SimpleLLM()
+
+    msg = f"Unsupported resolved provider type: {resolved.type}"
+    raise ValueError(msg)
+
+
 def get_llm_provider(
     provider_type: str | None = None, config: RAGConfig | None = None, model: str | None = None
 ) -> BaseLLMProvider:
-    """Get an LLM provider with local/cloud/external selection.
+    """Get an LLM provider with fallback-chain or legacy explicit selection.
+
+    When RAG_LLM_MODE=auto (or unset with ollama-models.json present), uses the
+    fallback chain from config/ollama-models.json — probing cloud first, falling
+    back to local. Otherwise, falls through to the legacy single-provider path.
 
     Args:
         provider_type: Type of provider (default: based on config)
@@ -34,6 +104,15 @@ def get_llm_provider(
     Returns:
         LLM provider instance
     """
+    # --- Fallback chain path ---
+    if provider_type is None and model is None and _use_fallback_chain():
+        from ..model_resolver import resolve_llm
+
+        resolved = resolve_llm()
+        logger.info("llm_factory.fallback_chain", provider=resolved.label, model=resolved.model)
+        return _provider_from_resolved(resolved)
+
+    # --- Legacy explicit-mode path ---
     if config is None:
         config = RAGConfig.from_env()
 

@@ -1,0 +1,54 @@
+{
+  "$schema": "./schemas/ollama-models.schema.json",
+  "llm": {
+    "strategy": "fallback",
+    "providers": [
+      {
+        "type": "ollama-cloud",
+        "model": "mistral:latest",
+        "url": "https://api.ollama.com",
+        "label": "Ollama Cloud — Mistral",
+        "timeout_ms": 60000,
+        "health_check": true,
+        "health_timeout_ms": 3000
+      },
+      {
+        "type": "ollama-local",
+        "model": "ministral:latest",
+        "url": "http://localhost:11434",
+        "label": "Local Ollama — Ministral",
+        "timeout_ms": 120000,
+        "health_check": true,
+        "health_timeout_ms": 2000
+      }
+    ]
+  },
+  "embedding": {
+    "strategy": "fallback",
+    "providers": [
+      {
+        "type": "ollama-cloud",
+        "model": "nomic-embed-text-v2-moe:latest",
+        "url": "https://api.ollama.com",
+        "label": "Ollama Cloud — Nomic v2 MoE",
+        "timeout_ms": 30000,
+        "health_check": true,
+        "health_timeout_ms": 3000
+      },
+      {
+        "type": "ollama-local",
+        "model": "nomic-embed-text-v2-moe:latest",
+        "url": "http://localhost:11434",
+        "label": "Local Ollama — Nomic v2 MoE",
+        "timeout_ms": 30000,
+        "health_check": true,
+        "health_timeout_ms": 2000
+      }
+    ]
+  },
+  "health": {
+    "enabled": true,
+    "cache_ttl_s": 60,
+    "retry_backoff_s": 30
+  }
+}
