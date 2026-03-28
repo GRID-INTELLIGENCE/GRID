@@ -5,7 +5,7 @@
     "description": "Enterprise AI framework with local-first RAG, event-driven agentic system, and cognitive decision support",
     "contact": {
       "name": "GRID Support",
-      "url": "https://github.com/GRID-INTELLIGENCE/GRID",
+      "url": "https://github.com/yourusername/grid",
       "email": "irfankabir02@gmail.com"
     },
     "license": {
@@ -664,7 +664,15 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ]
       }
     },
     "/admission/penalty/revoke": {
@@ -706,7 +714,15 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ]
       }
     },
     "/drt/status": {

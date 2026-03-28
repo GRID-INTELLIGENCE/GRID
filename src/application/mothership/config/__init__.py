@@ -769,7 +769,7 @@ class MothershipSettings:
     """
 
     app_name: str = "Mothership Cockpit"
-    app_version: str = "1.0.0"
+    app_version: str = "2.8.0"
     environment: Environment = Environment.DEVELOPMENT
     base_path: Path = field(default_factory=lambda: Path.cwd())
 
@@ -805,7 +805,7 @@ class MothershipSettings:
 
         settings = cls(
             app_name=env.get("MOTHERSHIP_APP_NAME", "Mothership Cockpit"),
-            app_version=env.get("MOTHERSHIP_APP_VERSION", "1.0.0"),
+            app_version=env.get("MOTHERSHIP_APP_VERSION", "2.8.0"),
             environment=environment,
             base_path=base_path,
         )
