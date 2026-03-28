@@ -3,8 +3,8 @@
   "info": {
     "title": "Mothership Cockpit",
     "description": "\n# Mothership Cockpit API\n\nLocal integration backend for the Mothership Cockpit system.\n\n## Features\n\n- **Session Management**: Create and manage user sessions\n- **Operation Tracking**: Track long-running operations with progress\n- **Component Health**: Monitor system component health\n- **Alert System**: Create, acknowledge, and resolve alerts\n- **Real-time Updates**: WebSocket support for live updates\n- **Cloud Integration**: Seamless Gemini Studio integration\n\n## Authentication\n\nThe API supports multiple authentication methods:\n- API Key (X-API-Key header)\n- JWT Bearer Token (Authorization header)\n\nDevelopment mode allows unauthenticated access.\n        ",
-    "version": "2.7.0",
-    "x-resonance-api-version": "2.7.0"
+    "version": "2.8.0",
+    "x-resonance-api-version": "2.8.0"
   },
   "paths": {
     "/": {

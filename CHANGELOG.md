@@ -5,6 +5,43 @@ All notable changes to the GRID project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.8.0] - 2026-03-28
+
+### Highlights
+
+**Admission Gate & Entity Persistence** — Top-of-stack ethical participation enforcement with 6 sequential gates, entity attribution with 3-tier penalty escalation, SQLite persistence, REST API (7 endpoints), and a full frontend dashboard.
+
+### Added
+
+- **Admission Gate Middleware** (`src/application/mothership/middleware/admission_gate.py`) — Pre-filter with 6 gates: Billboard → Banner → Budget → Origin → Structure/Context → Profit-mask. Configurable via `MOTHERSHIP_ADMISSION_GATE_ENABLED`, `MOTHERSHIP_ADMISSION_CALL_BUDGET`, `MOTHERSHIP_ADMISSION_BANNER_THRESHOLD`
+- **Entity Attribution Engine** — Resolves requests to entities (X-Entity-Id → X-API-Key → IP), accumulates violations, auto-banners at threshold. Three penalty tiers: runtime_mistake (1x) → environment_pollution (1x compounding) → intentional_scheming (3x accelerated)
+- **Policy Billboard** — Frozen ethical participation contract displayed at top of every execution chain, versioned and queryable
+- **Admission REST API** (`src/application/mothership/routers/admission_enforcement.py`) — 7 endpoints under `/admission/*`: policy, stats, entity report, bannered list, compliance check, penalty apply (admin), penalty revoke (admin)
+- **Entity Persistence** (`src/application/mothership/repositories/admission.py`) — SQLAlchemy async CRUD with aiosqlite, fire-and-forget persist hook, startup hydration from SQLite
+- **Frontend Admission Dashboard** (`frontend/src/pages/Admission.tsx`) — Stats row (5 cards), rejection breakdown, policy billboard, bannered entities table with tier badges. TanStack Query hooks for live polling
+- **Event Bus Compatibility Alias** (`src/infrastructure/event_bus/event_system.py`) — Re-exports from event_system_fixed with prometheus metric stubs
+- **EssentialState.decay()** (`src/grid/essence/core_state.py`) — Bidirectional coherence degradation method
+- **OpenAPI $schema Injection Script** (`scripts/inject_openapi_schema.py`) — Post-generation hook with `--check` dry-run mode
+
+### Changed
+
+- **Version bump** from 2.7.0 to 2.8.0
+- **Middleware chain** expanded to 14 layers (admission gate is top-of-stack)
+- **ContextStorage path validation** — Platform-conditional default roots, consistent `os.pathsep` splitting (fixes `E:/user_context` parsing on Linux)
+- **RAG engine logging** — 4 bare `print()` calls replaced with `structlog` logger
+
+### Fixed
+
+- **Event bus test failures** — Rewrote 8 tests to match sync `event_system_fixed` API (was using nonexistent async methods)
+- **Nomic embedding norm assertion** — Widened bound to 20.0 (nomic-embed-text-v2-moe norms reach ~14)
+- **Path traversal security test** — Test fixture sets `GRID_CONTEXT_ALLOWED_ROOTS` via monkeypatch
+- **Rate limit test regression** — Admission gate bannered entities after 60+ requests; gate now disabled in JWT rate-limit fixture
+
+### Security
+
+- **AdminAuth on penalty endpoints** — `POST /admission/penalty/apply` and `/revoke` require admin JWT
+- **ContextStorage SecurityError** — Now raises instead of logging warning when context root is outside allowed bounds
+
 ## [2.7.0] - 2026-03-11
 
 ### Highlights

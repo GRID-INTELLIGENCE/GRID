@@ -18,12 +18,12 @@ Built primarily by a solo engineer over 5 months — from blank templates to a p
 
 | What | Evidence |
 |------|----------|
-| **Codebase scale** | 828+ source files, 190K+ lines, 9 distributable wheel packages |
-| **Test discipline** | 2,953+ tests passing, ≥75% coverage, 30s performance budget |
+| **Codebase scale** | 1,270+ source files, 190K+ lines, 9 distributable wheel packages |
+| **Test discipline** | 3,710+ tests passing, ≥75% coverage, 30s performance budget |
 | **CI rigor** | 7-stage GitHub Actions pipeline: secrets scan → lint → smoke → security → test → integration → build |
-| **Security depth** | 3 independent security modules (safety, security, boundaries), sealed-envelope HMAC-SHA256 transfer gate, zero-trust boundary contracts |
-| **API architecture** | FastAPI + 13-layer middleware chain, dual event bus (Redis + in-memory fallback), circuit breaking, rate limiting |
-| **Code quality** | 0 ruff lint errors across 828 files, strict type hints, conventional commits |
+| **Security depth** | 3 independent security modules (safety, security, boundaries), sealed-envelope HMAC-SHA256 transfer gate, admission gate with ethical enforcement, zero-trust boundary contracts |
+| **API architecture** | FastAPI + 14-layer middleware chain, dual event bus (Redis + in-memory fallback), circuit breaking, rate limiting |
+| **Code quality** | 0 ruff lint errors across 1,270+ files, strict type hints, conventional commits |
 | **Resilience patterns** | Published separately as [APIGuard](https://pypi.org/project/apiguard/) — circuit breaking + rate limiting + retry with 100% test coverage |
 
 The architecture is domain-driven with event-driven agentic workflows — not a monolith, not a microservice explosion. Each package has clear boundaries, its own tests, and ships as an independent wheel.
@@ -59,8 +59,8 @@ grid --help
 | Metric | Value |
 |--------|-------|
 | **Python** | 3.13+ |
-| **Source files** | 828+ |
-| **Tests passing** | 2953+ |
+| **Source files** | 1,270+ |
+| **Tests passing** | 3,710+ |
 | **Lint errors** | 0 (ruff clean) |
 | **Coverage** | ≥ 75 % |
 | **RAG precision lift** | +33–40 % |
@@ -146,18 +146,17 @@ GRID/
 
 ## What's New
 
-### v2.7.0 — Security Hardening & CI Hygiene (March 2026)
+### v2.8.0 — Admission Gate & Entity Persistence (March 2026)
 
-- **Search Engine with Guardrails** — Auth, rate limiting, input sanitization, admin-gated routes
-- **Transition Gate** — HMAC-SHA256 sealed-envelope handshake with single-use nonces
-- **API Attack Surface Guardrails (Phases 1–4)** — Comprehensive endpoint protection
-- **CI Audit Gates** — `assert_no_debug`, git hygiene, production gate
-- **CI/CD Hygiene** — Removed hardcoded paths, cleaned ephemeral files, all lint resolved
-- **Cross-Platform Security** — Windows backslash normalization for path traversal protection
-- **Test Isolation** — Eliminated `importlib.reload()`; global singleton reset between tests
+- **Admission Gate** — Top-of-stack ethical participation enforcement with 6 sequential gates, 3-tier penalty escalation, and entity attribution
+- **Entity Persistence** — SQLite-backed entity state with async CRUD and startup hydration
+- **Frontend Dashboard** — Admission page with live stats, policy billboard, bannered entities table
+- **REST API** — 7 endpoints under `/admission/*` with admin-protected penalty management
 
 <details>
 <summary><b>Earlier releases</b></summary>
+
+**v2.7.0** — Security Hardening & CI Hygiene: search guardrails, transition gate, API attack surface guardrails, CI audit gates, cross-platform path traversal protection
 
 **v2.6.x** — Mycelium Frontend, wheel packaging, version/changelog CI gate
 
@@ -234,7 +233,7 @@ Nov 2025 → First commit. Blank templates.
 Dec 2025 → Architecture cleanup. Security foundation. DDD.
 Jan 2026 → Cognitive layer. RAG optimization. Production hardening.
 Feb 2026 → 540+ files. Environmental Intelligence. Mycelium. v2.6+.
-Mar 2026 → 828 files. 2953 tests. Search guardrails. CI gates. v2.7.0.
+Mar 2026 → 1270+ files. 3710+ tests. Admission gate. Entity persistence. v2.8.0.
 ```
 
 **GRID is built by someone who cares about doing things right — principled, not perfect.**
