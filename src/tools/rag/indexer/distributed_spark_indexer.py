@@ -23,7 +23,7 @@ class DistributedSparkIndexerConfig:
         cluster_id: str | None = None,
         num_partitions: int = 8,
         batch_size: int = 100,
-        embedding_model: str = "nomic-embed-text:latest",
+        embedding_model: str = "nomic-embed-text-v2-moe:latest",
         checkpoint_enabled: bool = True,
         checkpoint_path: str = ".databricks_indexing_checkpoint",
     ):
@@ -230,7 +230,7 @@ class DistributedSparkIndexer:
     def create_spark_job_notebook(
         documents_path: str,
         output_table: str,
-        embedding_model: str = "nomic-embed-text:latest",
+        embedding_model: str = "nomic-embed-text-v2-moe:latest",
     ) -> str:
         """Generate Databricks notebook code for distributed indexing.
 

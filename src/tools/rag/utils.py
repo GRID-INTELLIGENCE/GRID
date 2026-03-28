@@ -100,7 +100,7 @@ def find_embedding_model(
         return None
 
 
-def find_llm_model(preferred: str = "ministral-3:3b", base_url: str = "http://localhost:11434") -> str | None:
+def find_llm_model(preferred: str = "ministral-3:latest", base_url: str = "http://localhost:11434") -> str | None:
     """Find available LLM model, trying alternatives.
 
     Args:
@@ -129,6 +129,7 @@ def find_llm_model(preferred: str = "ministral-3:3b", base_url: str = "http://lo
 
         # Try alternatives
         alternatives = [
+            "ministral-3:latest",
             "ministral-3:3b",
             "ministral",
             "gpt-oss-safeguard",
@@ -358,8 +359,8 @@ def check_models_health(
 
 
 def check_rag_system_health(
-    embedding_model: str = "nomic-embed-text:latest",
-    llm_model: str = "ministral-3:3b",
+    embedding_model: str = "nomic-embed-text-v2-moe:latest",
+    llm_model: str = "ministral-3:latest",
     base_url: str = "http://localhost:11434",
 ) -> dict[str, any]:
     """

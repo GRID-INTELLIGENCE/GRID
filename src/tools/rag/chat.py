@@ -7,7 +7,7 @@ answer questions with full codebase context from the indexed RAG knowledge base.
 
 Usage:
     python -m tools.rag.chat                    # Default model
-    python -m tools.rag.chat --model ministral-3:3b
+    python -m tools.rag.chat --model ministral-3:latest
     python -m tools.rag.chat --model qwen2.5-coder:latest
 
 Or via grid CLI:
@@ -178,7 +178,7 @@ def _suppress_noisy_imports() -> None:
 class ChatConfig:
     """Configuration for the chat session."""
 
-    model: str = "ministral-3:3b"
+    model: str = "ministral-3:latest"
     ollama_base_url: str = "http://localhost:11434"
     top_k: int = 8
     temperature: float = 0.7
@@ -623,8 +623,8 @@ Examples:
     parser.add_argument(
         "--model",
         "-m",
-        default=os.getenv("RAG_CHAT_MODEL", "ministral-3:3b"),
-        help="Ollama model to use (default: ministral-3:3b)",
+        default=os.getenv("RAG_CHAT_MODEL", "ministral-3:latest"),
+        help="Ollama model to use (default: ministral-3:latest)",
     )
     parser.add_argument(
         "--top-k",

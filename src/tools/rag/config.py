@@ -32,12 +32,12 @@ class RAGConfig:
     """Configuration for RAG system."""
 
     # Embedding configuration
-    embedding_model: str = "nomic-embed-text:latest"
+    embedding_model: str = "nomic-embed-text-v2-moe:latest"
     embedding_mode: ModelMode = ModelMode.LOCAL
     embedding_provider: str = "ollama"  # Use Ollama for nomic-embed-text
 
     # LLM configuration
-    llm_model_local: str = "ministral-3:3b"  # Default local model
+    llm_model_local: str = "ministral-3:latest"  # Default local model
     llm_model_cloud: str | None = None  # Cloud model if using cloud mode
     llm_model_copilot: str = "gpt-4o"  # Default Copilot model
     llm_mode: ModelMode = ModelMode.LOCAL
@@ -108,10 +108,10 @@ class RAGConfig:
     def from_env(cls) -> "RAGConfig":
         """Create configuration from environment variables."""
         return cls(
-            embedding_model=os.getenv("RAG_EMBEDDING_MODEL", "nomic-embed-text:latest"),
+            embedding_model=os.getenv("RAG_EMBEDDING_MODEL", "nomic-embed-text-v2-moe:latest"),
             embedding_mode=ModelMode(os.getenv("RAG_EMBEDDING_MODE", "local")),
             embedding_provider=os.getenv("RAG_EMBEDDING_PROVIDER", "ollama"),
-            llm_model_local=os.getenv("RAG_LLM_MODEL_LOCAL", "ministral-3:3b"),
+            llm_model_local=os.getenv("RAG_LLM_MODEL_LOCAL", "ministral-3:latest"),
             llm_model_cloud=os.getenv("RAG_LLM_MODEL_CLOUD", None),
             llm_model_copilot=os.getenv("RAG_LLM_MODEL_COPILOT", "gpt-4o"),
             llm_mode=ModelMode(os.getenv("RAG_LLM_MODE", "local")),

@@ -12,7 +12,7 @@ Usage:
 
 Or after installing the package:
     rag-chat
-    rag-chat --model ministral-3:3b
+    rag-chat --model ministral-3:latest
 """
 
 # =============================================================================

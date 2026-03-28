@@ -426,7 +426,9 @@ def build_parser() -> argparse.ArgumentParser:
         help="Interactive RAG chat - talk to your codebase",
         description="Start an interactive chat session with your codebase using RAG-augmented LLM",
     )
-    chat.add_argument("--model", "-m", default="ministral-3:3b", help="Ollama model to use (default: ministral-3:3b)")
+    chat.add_argument(
+        "--model", "-m", default="ministral-3:latest", help="Ollama model to use (default: ministral-3:latest)"
+    )
     chat.add_argument("--top-k", "-k", type=int, default=8, help="Number of context chunks to retrieve")
     chat.add_argument("--temperature", "-t", type=float, default=0.7, help="LLM temperature")
     chat.add_argument("--no-sources", action="store_true", help="Don't show retrieved sources")
@@ -438,7 +440,7 @@ def build_parser() -> argparse.ArgumentParser:
     # Run command - unified way to launch components with model selection
     run = subparsers.add_parser(
         "run",
-        help="Run GRID components (e.g., grid run rag --model ministral-3:3b)",
+        help="Run GRID components (e.g., grid run rag --model ministral-3:latest)",
         description="Launch GRID components with optional model configuration",
     )
     run_sub = run.add_subparsers(dest="component", help="Component to run")
@@ -452,8 +454,8 @@ def build_parser() -> argparse.ArgumentParser:
     run_rag.add_argument(
         "--model",
         "-m",
-        default="ministral-3:3b",
-        help="Ollama model (e.g., ministral-3:3b, qwen2.5-coder:latest)",
+        default="ministral-3:latest",
+        help="Ollama model (e.g., ministral-3:latest, qwen2.5-coder:latest)",
     )
     run_rag.add_argument("--top-k", "-k", type=int, default=8, help="Context chunks to retrieve")
     run_rag.add_argument("--temperature", "-t", type=float, default=0.7, help="LLM temperature")
