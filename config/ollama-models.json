@@ -14,7 +14,7 @@
       },
       {
         "type": "ollama-local",
-        "model": "ministral:latest",
+        "model": "ministral-3:latest",
         "url": "http://localhost:11434",
         "label": "Local Ollama — Ministral",
         "timeout_ms": 120000,
