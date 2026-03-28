@@ -218,6 +218,7 @@ class ViolationType(StrEnum):
     INVALID_BODY = "invalid_body"
     MISSING_STRUCTURE = "missing_structure"
     PROFIT_MASKING = "profit_masking"
+    ENTITY_BANNERED = "entity_bannered"
 
 
 @dataclass
@@ -338,6 +339,7 @@ class EntityAttributionEngine:
         ViolationType.INVALID_BODY: 3,
         ViolationType.MISSING_STRUCTURE: 3,
         ViolationType.PROFIT_MASKING: 15,  # base is already high, then 3x
+        ViolationType.ENTITY_BANNERED: 0,  # bannered entities are already blocked
     }
 
     # Type alias for the optional async persistence callback.
@@ -350,6 +352,7 @@ class EntityAttributionEngine:
         knowledge_store: KnowledgeStoreProtocol | None = None,
         pattern_detector: PatternDetectorProtocol | None = None,
         persist_hook: PersistHook | None = None,
+        entity_signing_secret: str = "",
     ) -> None:
         self._entities: dict[str, EntityRecord] = {}
         self._banner_threshold = banner_threshold
@@ -357,6 +360,12 @@ class EntityAttributionEngine:
         self._knowledge_store = knowledge_store
         self._pattern_detector = pattern_detector
         self._persist_hook = persist_hook
+        self._entity_signing_secret = entity_signing_secret
+
+        # Request-level counters (shared between middleware and router)
+        self.total_admitted: int = 0
+        self.total_rejected: int = 0
+        self.rejection_reasons: dict[str, int] = defaultdict(int)
 
     def _fire_persist(self, record: EntityRecord) -> None:
         """Schedule async persistence without blocking the sync middleware path."""
@@ -373,11 +382,22 @@ class EntityAttributionEngine:
     def resolve_entity(self, request: Request) -> str:
         """Resolve request to an entity identifier.
 
-        Priority: X-Entity-Id header > X-API-Key > client IP.
+        Priority: X-Entity-Id header (HMAC-verified if secret set) > X-API-Key > client IP.
+        If HMAC verification fails, the claimed entity ID is discarded and
+        resolution falls through to API key or IP — silent fallthrough, not rejection.
         """
         entity_id = request.headers.get("X-Entity-Id", "").strip()
         if entity_id:
-            return entity_id
+            if self._entity_signing_secret:
+                from .entity_signing import verify_entity_signature
+
+                sig = request.headers.get("X-Entity-Signature", "")
+                ts = request.headers.get("X-Entity-Timestamp", "")
+                if not verify_entity_signature(entity_id, sig, ts, self._entity_signing_secret):
+                    # Unsigned/invalid claim — fall through to API key / IP
+                    entity_id = ""
+            if entity_id:
+                return entity_id
         api_key = request.headers.get("X-API-Key", "").strip()
         if api_key:
             return f"api:{api_key[:16]}"
@@ -617,8 +637,30 @@ class EntityAttributionEngine:
         self._entities.update(entities)
         logger.info("admission_gate.entities_hydrated count=%d", len(entities))
 
+    @property
+    def banner_threshold(self) -> int:
+        return self._banner_threshold
+
+    def peek_record(self, entity_id: str) -> EntityRecord | None:
+        """Return record if it exists, without auto-creating."""
+        return self._entities.get(entity_id)
+
+    def persist_record(self, record: EntityRecord) -> None:
+        """Public wrapper for fire-and-forget persistence."""
+        self._fire_persist(record)
+
+    def set_persist_hook(self, hook: PersistHook) -> None:
+        """Wire the async persistence callback."""
+        self._persist_hook = hook
+
     def reset(self) -> None:
         self._entities.clear()
+
+    def reset_counters(self) -> None:
+        """Reset request-level counters (for testing)."""
+        self.total_admitted = 0
+        self.total_rejected = 0
+        self.rejection_reasons.clear()
 
 
 # ---------------------------------------------------------------------------
@@ -632,8 +674,10 @@ class AdmissionGateMiddleware(BaseHTTPMiddleware):
     Added **last** in the middleware chain so it runs **first**.
 
     Execution chain:
-    Billboard (policy display) → Gate 0 (banner) → Gate 1 (budget) →
-    Gate 2 (origin) → Gate 3 (structure + profit-mask) → Admitted
+    Billboard (policy display) → Gate 0 (banner check) → Gate 1 (budget) →
+    Gate 2 (origin whitelist) → Gate 3a (context ceiling) →
+    Gate 3b (JSON validity) → Gate 3c (structure) →
+    Gate 3d (profit-mask detection) → Admitted
     """
 
     def __init__(
@@ -652,6 +696,7 @@ class AdmissionGateMiddleware(BaseHTTPMiddleware):
         knowledge_store: KnowledgeStoreProtocol | None = None,
         pattern_detector: PatternDetectorProtocol | None = None,
         billboard: PolicyBillboard | None = None,
+        attribution: EntityAttributionEngine | None = None,
     ) -> None:
         super().__init__(app)
         self._tracker = _BudgetTracker(call_budget, window_seconds)
@@ -662,7 +707,7 @@ class AdmissionGateMiddleware(BaseHTTPMiddleware):
         self._enforce_origin = enforce_origin
         self._enforce_structure = enforce_structure
 
-        self.attribution = EntityAttributionEngine(
+        self.attribution = attribution if attribution is not None else EntityAttributionEngine(
             banner_threshold=banner_threshold,
             profit_mask_multiplier=profit_mask_multiplier,
             knowledge_store=knowledge_store,
@@ -672,21 +717,12 @@ class AdmissionGateMiddleware(BaseHTTPMiddleware):
         # Policy billboard — loaded once at boot, immutable
         self.billboard = billboard if billboard is not None else load_billboard()
 
-        # Counters for observability
-        self.total_admitted: int = 0
-        self.total_rejected: int = 0
-        self._rejection_reasons: dict[str, int] = defaultdict(int)
-
     # -- public helpers for testing --
 
-    @property
-    def rejection_reasons(self) -> dict[str, int]:
-        return dict(self._rejection_reasons)
-
     def reset_counters(self) -> None:
-        self.total_admitted = 0
-        self.total_rejected = 0
-        self._rejection_reasons.clear()
+        self.attribution.total_admitted = 0
+        self.attribution.total_rejected = 0
+        self.attribution.rejection_reasons.clear()
         self._tracker.reset()
         self.attribution.reset()
 
@@ -704,8 +740,8 @@ class AdmissionGateMiddleware(BaseHTTPMiddleware):
         headers: dict[str, str] | None = None,
         metadata: dict[str, Any] | None = None,
     ) -> JSONResponse:
-        self.total_rejected += 1
-        self._rejection_reasons[code] += 1
+        self.attribution.total_rejected += 1
+        self.attribution.rejection_reasons[code] += 1
 
         # Record violation with entity attribution
         self.attribution.record_violation(
@@ -775,7 +811,7 @@ class AdmissionGateMiddleware(BaseHTTPMiddleware):
                 "ADMISSION_ENTITY_BANNERED",
                 f"Entity '{entity_id}' is bannered: {record.banner_reason}",
                 status.HTTP_403_FORBIDDEN,
-                ViolationType.BUDGET_EXCEEDED,
+                ViolationType.ENTITY_BANNERED,
             )
 
         # --- Gate 1: Budget (adjusted by penalty) ---
@@ -867,7 +903,7 @@ class AdmissionGateMiddleware(BaseHTTPMiddleware):
                 )
 
         # --- Admitted ---
-        self.total_admitted += 1
+        self.attribution.total_admitted += 1
         remaining = self._tracker.remaining(entity_id, effective_budget=effective_budget)
         response = await call_next(request)
         response.headers["X-Admission-Remaining"] = str(remaining)

@@ -28,6 +28,7 @@ from ..dependencies import AdminAuth
 from ..middleware.admission_gate import (
     BILLBOARD_VERSION,
     PROFIT_MASK_SIGNALS,
+    EntityAttributionEngine,
     PolicyBillboard,
     ViolationType,
 )
@@ -181,15 +182,15 @@ class PenaltyRevokeResponse(BaseModel):
 # ---------------------------------------------------------------------------
 
 
-def _get_gate(request: Request):
-    """Retrieve the admission gate middleware instance from app state."""
-    gate = getattr(request.app.state, "admission_gate", None)
-    if gate is None:
+def _get_attribution(request: Request) -> EntityAttributionEngine:
+    """Retrieve the shared EntityAttributionEngine from app state."""
+    attr = getattr(request.app.state, "admission_attribution", None)
+    if attr is None:
         raise HTTPException(
             status_code=503,
             detail="Admission gate is not active. Enable it in Mothership settings.",
         )
-    return gate
+    return attr
 
 
 def _classify_tier(record) -> tuple[str, str]:
@@ -227,8 +228,11 @@ def _now_iso() -> str:
     ),
 )
 async def get_policy_billboard(request: Request) -> PolicyBillboardResponse:
-    gate = _get_gate(request)
-    snap = gate.billboard.snapshot()
+    _get_attribution(request)  # ensure gate is active
+    billboard = getattr(request.app.state, "admission_billboard", None)
+    if billboard is None:
+        raise HTTPException(status_code=503, detail="Admission billboard not loaded.")
+    snap = billboard.snapshot()
     return PolicyBillboardResponse(**snap, timestamp=_now_iso())
 
 
@@ -239,13 +243,13 @@ async def get_policy_billboard(request: Request) -> PolicyBillboardResponse:
     description="Returns admission/rejection counters and breakdown by rejection reason.",
 )
 async def get_gate_stats(request: Request) -> GateStatsResponse:
-    gate = _get_gate(request)
+    attr = _get_attribution(request)
     return GateStatsResponse(
-        total_admitted=gate.total_admitted,
-        total_rejected=gate.total_rejected,
-        rejection_reasons=gate.rejection_reasons,
-        tracked_entities=len(gate.attribution.entities),
-        bannered_entities=len(gate.attribution.bannered_entities()),
+        total_admitted=attr.total_admitted,
+        total_rejected=attr.total_rejected,
+        rejection_reasons=dict(attr.rejection_reasons),
+        tracked_entities=len(attr.entities),
+        bannered_entities=len(attr.bannered_entities()),
         timestamp=_now_iso(),
     )
 
@@ -260,10 +264,10 @@ async def get_gate_stats(request: Request) -> GateStatsResponse:
     ),
 )
 async def get_entity_report(request: Request, entity_id: str) -> EntityReportResponse:
-    gate = _get_gate(request)
-    report = gate.attribution.entity_report(entity_id)
+    attr = _get_attribution(request)
+    record = attr.peek_record(entity_id)
 
-    if not report.get("found"):
+    if record is None:
         return EntityReportResponse(
             entity_id=entity_id,
             found=False,
@@ -272,11 +276,11 @@ async def get_entity_report(request: Request, entity_id: str) -> EntityReportRes
             timestamp=_now_iso(),
         )
 
-    record = gate.attribution.get_record(entity_id)
+    report = attr.entity_report(entity_id)
     tier, tier_desc = _classify_tier(record)
 
     return EntityReportResponse(
-        entity_id=report["entity_id"],
+        entity_id=record.entity_id,
         found=True,
         violation_count=report["violation_count"],
         total_penalty_points=report["total_penalty_points"],
@@ -304,8 +308,8 @@ async def get_entity_report(request: Request, entity_id: str) -> EntityReportRes
     description="Returns all entities currently bannered (hard-blocked) by the admission gate.",
 )
 async def list_bannered_entities(request: Request) -> BanneredEntitiesResponse:
-    gate = _get_gate(request)
-    bannered = gate.attribution.bannered_entities()
+    attr = _get_attribution(request)
+    bannered = attr.bannered_entities()
 
     entities = []
     for record in bannered:
@@ -352,23 +356,25 @@ async def list_bannered_entities(request: Request) -> BanneredEntitiesResponse:
     ),
 )
 async def check_compliance(request: Request, body: ComplianceCheckRequest) -> ComplianceCheckResponse:
-    gate = _get_gate(request)
+    attr = _get_attribution(request)
+    context_ceiling = getattr(request.app.state, "admission_context_ceiling", 25_000)
+    billboard = getattr(request.app.state, "admission_billboard", None)
 
     violations: list[str] = []
     import json
 
     # Profit-mask scan
-    signals = gate.attribution.detect_profit_masking(body.payload, body.headers or None)
+    signals = attr.detect_profit_masking(body.payload, body.headers or None)
     if signals:
         violations.append(f"profit_masking: {', '.join(signals)}")
 
     # Context token estimate
     payload_bytes = len(json.dumps(body.payload, default=str).encode())
     estimated_tokens = payload_bytes // 4
-    ceiling_exceeded = estimated_tokens > gate._context_ceiling
+    ceiling_exceeded = estimated_tokens > context_ceiling
     if ceiling_exceeded:
         violations.append(
-            f"context_overflow: {estimated_tokens} tokens > ceiling {gate._context_ceiling}"
+            f"context_overflow: {estimated_tokens} tokens > ceiling {context_ceiling}"
         )
 
     # Structure check
@@ -382,13 +388,14 @@ async def check_compliance(request: Request, body: ComplianceCheckRequest) -> Co
     entity_points = 0
     entity_bannered = False
     if body.entity_id:
-        record = gate.attribution._entities.get(body.entity_id)
+        record = attr.peek_record(body.entity_id)
         if record:
             entity_points = record.total_penalty_points
             entity_bannered = record.bannered
             if entity_bannered:
                 violations.append(f"entity_bannered: {record.banner_reason}")
 
+    policy_snap = billboard.snapshot() if billboard else {}
     return ComplianceCheckResponse(
         compliant=len(violations) == 0,
         violations=violations,
@@ -398,7 +405,7 @@ async def check_compliance(request: Request, body: ComplianceCheckRequest) -> Co
         has_required_structure=has_structure,
         entity_penalty_points=entity_points,
         entity_bannered=entity_bannered,
-        policy=gate.billboard.snapshot(),
+        policy=policy_snap,
         timestamp=_now_iso(),
     )
 
@@ -415,7 +422,7 @@ async def check_compliance(request: Request, body: ComplianceCheckRequest) -> Co
     ),
 )
 async def apply_penalty(request: Request, body: PenaltyApplyRequest, auth: AdminAuth) -> PenaltyApplyResponse:
-    gate = _get_gate(request)
+    attr = _get_attribution(request)
 
     # Validate violation type
     try:
@@ -429,14 +436,14 @@ async def apply_penalty(request: Request, body: PenaltyApplyRequest, auth: Admin
 
     meta = {**body.metadata, "reason": body.reason, "source": "manual_enforcement"}
 
-    violation = gate.attribution.record_violation(
+    violation = attr.record_violation(
         body.entity_id,
         vtype,
         profit_masked=body.profit_masked,
         metadata=meta,
     )
 
-    record = gate.attribution.get_record(body.entity_id)
+    record = attr.get_record(body.entity_id)
     tier, _ = _classify_tier(record)
 
     logger.info(
@@ -472,7 +479,7 @@ async def apply_penalty(request: Request, body: PenaltyApplyRequest, auth: Admin
     ),
 )
 async def revoke_penalty(request: Request, body: PenaltyRevokeRequest, auth: AdminAuth) -> PenaltyRevokeResponse:
-    gate = _get_gate(request)
+    attr = _get_attribution(request)
 
     valid_actions = {"revoke_banner", "reduce_penalty", "full_reset"}
     if body.action not in valid_actions:
@@ -481,7 +488,7 @@ async def revoke_penalty(request: Request, body: PenaltyRevokeRequest, auth: Adm
             detail=f"Invalid action '{body.action}'. Valid: {sorted(valid_actions)}",
         )
 
-    record = gate.attribution.get_record(body.entity_id)
+    record = attr.get_record(body.entity_id)
     previous_points = record.total_penalty_points
     was_bannered = record.bannered
 
@@ -494,7 +501,7 @@ async def revoke_penalty(request: Request, body: PenaltyRevokeRequest, auth: Adm
             reduction = min(body.reduction_points, record.total_penalty_points)
             record.total_penalty_points -= reduction
             # Un-banner if dropped below threshold
-            if record.bannered and record.total_penalty_points < gate.attribution._banner_threshold:
+            if record.bannered and record.total_penalty_points < attr.banner_threshold:
                 record.bannered = False
                 record.banner_reason = ""
             message = f"Penalty reduced by {reduction} points."
@@ -508,7 +515,7 @@ async def revoke_penalty(request: Request, body: PenaltyRevokeRequest, auth: Adm
             raise HTTPException(status_code=400, detail=f"Unknown action: {body.action}")
 
     # Persist updated state to SQLite
-    gate.attribution._fire_persist(record)
+    attr.persist_record(record)
 
     logger.info(
         "admission_enforcement.penalty_revoked entity=%s action=%s prev=%d curr=%d reason=%s",

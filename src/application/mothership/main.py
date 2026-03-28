@@ -473,7 +473,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
                 logger.warning(f"Could not wire ParasiteGuard to EventBus: {e}")
 
         # Hydrate admission gate entities from SQLite (if gate is active)
-        if hasattr(app.state, "admission_gate"):
+        if hasattr(app.state, "admission_attribution"):
             try:
                 from .db.engine import get_async_sessionmaker
                 from .repositories.admission import AdmissionEntityRepository
@@ -482,10 +482,10 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
                 repo = AdmissionEntityRepository(sessionmaker)
                 await repo.ensure_tables()
                 persisted = await repo.load_all()
-                app.state.admission_gate.attribution.load_entities(persisted)
+                app.state.admission_attribution.load_entities(persisted)
 
                 # Wire the persist hook now that we have a session factory
-                app.state.admission_gate.attribution._persist_hook = repo.persist_entity
+                app.state.admission_attribution.set_persist_hook(repo.persist_entity)
                 app.state.admission_entity_repo = repo  # type: ignore[reportAttributeAccessIssue]
                 logger.info("Admission gate entities hydrated from SQLite (%d entities)", len(persisted))
             except Exception as e:
@@ -819,21 +819,27 @@ The API supports multiple authentication methods:
     # Entity attribution, penalty enforcement, policy billboard, profit-mask detection.
     if settings.security.admission_gate_enabled:
         try:
-            from .middleware.admission_gate import AdmissionGateMiddleware
-
-            admission_gate = AdmissionGateMiddleware(
-                app,  # ASGIApp — required positional arg for BaseHTTPMiddleware
-                call_budget=settings.security.admission_call_budget,
-                banner_threshold=settings.security.admission_banner_threshold,
+            from .middleware.admission_gate import (
+                DEFAULT_CONTEXT_TOKEN_CEILING,
+                AdmissionGateMiddleware,
+                EntityAttributionEngine,
+                load_billboard,
             )
-            # Starlette wraps middleware; store the raw instance on app.state
-            # so the enforcement router can query it.
+
+            admission_attribution = EntityAttributionEngine(
+                banner_threshold=settings.security.admission_banner_threshold,
+                entity_signing_secret=settings.security.admission_entity_signing_secret,
+            )
             app.add_middleware(
                 AdmissionGateMiddleware,
                 call_budget=settings.security.admission_call_budget,
                 banner_threshold=settings.security.admission_banner_threshold,
+                attribution=admission_attribution,
             )
-            app.state.admission_gate = admission_gate  # type: ignore[reportAttributeAccessIssue]
+            # Shared state for enforcement router and lifespan hydration
+            app.state.admission_attribution = admission_attribution  # type: ignore[reportAttributeAccessIssue]
+            app.state.admission_context_ceiling = DEFAULT_CONTEXT_TOKEN_CEILING  # type: ignore[reportAttributeAccessIssue]
+            app.state.admission_billboard = load_billboard()  # type: ignore[reportAttributeAccessIssue]
             logger.info("Admission gate middleware enabled (top-of-stack)")
         except Exception as e:
             logger.warning("Admission gate middleware not available: %s", e)

@@ -66,17 +66,31 @@ class AdmissionEntityRepository:
                     existing.total_penalty_points = record.total_penalty_points
                     existing.bannered = record.bannered
                     existing.banner_reason = record.banner_reason
-                    # Sync violations: add any new ones (compare by count)
+                    # Sync violations: detect reset vs append-only
                     persisted_count = len(existing.violations)
-                    for v in record.violations[persisted_count:]:
-                        existing.violations.append(
-                            AdmissionViolationRow(
-                                entity_id=record.entity_id,
-                                violation_type=v.violation_type.value,
-                                penalty_points=v.penalty_points,
-                                violation_metadata=v.metadata,
+                    if len(record.violations) < persisted_count:
+                        # Reset occurred — clear DB violations and re-insert from memory
+                        existing.violations.clear()
+                        for v in record.violations:
+                            existing.violations.append(
+                                AdmissionViolationRow(
+                                    entity_id=record.entity_id,
+                                    violation_type=v.violation_type.value,
+                                    penalty_points=v.penalty_points,
+                                    violation_metadata=v.metadata,
+                                )
                             )
-                        )
+                    else:
+                        # Append-only: add new violations beyond persisted count
+                        for v in record.violations[persisted_count:]:
+                            existing.violations.append(
+                                AdmissionViolationRow(
+                                    entity_id=record.entity_id,
+                                    violation_type=v.violation_type.value,
+                                    penalty_points=v.penalty_points,
+                                    violation_metadata=v.metadata,
+                                )
+                            )
                 else:
                     entity_row = AdmissionEntityRow(
                         entity_id=record.entity_id,

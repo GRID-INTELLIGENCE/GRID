@@ -275,6 +275,7 @@ class SecuritySettings:
     admission_gate_enabled: bool = True  # Enable/disable the admission gate middleware
     admission_call_budget: int = 60  # Sliding-window call budget per entity per window
     admission_banner_threshold: int = 50  # Cumulative penalty score to trigger entity banner
+    admission_entity_signing_secret: str = ""  # HMAC secret for X-Entity-Id verification (empty = dev mode, no signing)
 
     @classmethod
     def from_env(cls) -> SecuritySettings:
@@ -323,6 +324,7 @@ class SecuritySettings:
             admission_gate_enabled=_parse_bool(env.get("MOTHERSHIP_ADMISSION_GATE_ENABLED"), True),
             admission_call_budget=int(env.get("MOTHERSHIP_ADMISSION_CALL_BUDGET", "60")),
             admission_banner_threshold=int(env.get("MOTHERSHIP_ADMISSION_BANNER_THRESHOLD", "50")),
+            admission_entity_signing_secret=env.get("MOTHERSHIP_ADMISSION_ENTITY_SIGNING_SECRET", ""),
         )
 
     def validate(self, environment: str | None = None, fail_fast: bool = False) -> list[str]:
