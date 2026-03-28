@@ -1,0 +1,283 @@
+{
+  "$schema": "https://grid-intelligence.dev/schemas/deferred-contract.schema.json",
+  "contract": {
+    "id": "GRID-DEFER-2026-03-28",
+    "title": "GRID Handoff Deferred Work — Infrastructure Hardening & Model Resolver",
+    "version": "1.0.0",
+    "created": "2026-03-28",
+    "origin_commits": [
+      "63d1949 — fix(rag): datetime timezone and response handling fixes",
+      "9b0bb89 — feat(rag): add model resolver with provider fallback chain",
+      "5b63c91 — feat(infra): add Dockerfile and Docker make targets",
+      "38a095c — fix(mothership): sanitize streamed errors and scope IntelligenceApplication per-request"
+    ],
+    "status": "open",
+    "priority": "medium",
+    "tags": ["security", "rag", "streaming", "privacy", "mcp"]
+  },
+  "items": [
+    {
+      "id": "DEFER-01",
+      "title": "Real RAG stage markers",
+      "priority": "high",
+      "category": "feature",
+      "status": "not_started",
+      "description": "Replace removed fake retrieval progress (asyncio.sleep loops) with real stage markers emitting actual retrieval metrics — document count, chunk scores, retrieval latency.",
+      "rationale": "Commit 38a095c removed fake progress events (retrieval_progress type) from rag_streaming.py. The stream now jumps from retrieval_started directly to documents_retrieved. Clients consuming the NDJSON stream lose progress visibility during the retrieval window.",
+      "affected_files": [
+        "src/application/mothership/routers/rag_streaming.py",
+        "src/tools/rag/conversational_rag.py",
+        "tests/api/test_rag_streaming_api.py"
+      ],
+      "acceptance_criteria": [
+        "Stream emits at least one retrieval_progress event between retrieval_started and documents_retrieved",
+        "Progress events contain real metrics (documents_scanned, chunks_scored), not synthetic percentages",
+        "No asyncio.sleep calls in the stream pipeline",
+        "Existing test_rag_stream_multi_hop_reasoning still passes",
+        "New test validates progress events contain numeric metrics"
+      ],
+      "execution": {
+        "steps": [
+          {
+            "step": 1,
+            "action": "Add a callback hook to ConversationalRAGEngine.query that yields progress",
+            "file": "src/tools/rag/conversational_rag.py",
+            "code": "# In ConversationalRAGEngine.query, after retrieval completes:\n# Yield intermediate results via a callback\nasync def query(\n    self,\n    query_text: str,\n    *,\n    top_k: int | None = None,\n    temperature: float = 0.7,\n    session_id: str | None = None,\n    use_conversation: bool = True,\n    enable_multi_hop: bool | None = None,\n    on_progress: Callable[[dict[str, Any]], None] | None = None,\n) -> dict[str, Any]:\n    # ... existing retrieval logic ...\n    retrieved_docs = await self._retrieve(query_text, top_k=top_k)\n    if on_progress:\n        on_progress({\n            \"documents_scanned\": len(retrieved_docs),\n            \"top_score\": max((d.get(\"confidence\", 0) for d in retrieved_docs), default=0),\n            \"retrieval_ms\": (time.perf_counter() - t_start) * 1000,\n        })\n    # ... continue with ranking, generation ..."
+          },
+          {
+            "step": 2,
+            "action": "Wire the callback into the streaming endpoint",
+            "file": "src/application/mothership/routers/rag_streaming.py",
+            "code": "# Inside generate_stream(), between retrieval_started and the query call:\nprogress_events: list[dict[str, Any]] = []\n\ndef capture_progress(metrics: dict[str, Any]) -> None:\n    progress_events.append(metrics)\n\nresult = await engine.query(\n    query_text=safe_query,\n    top_k=request.top_k,\n    temperature=request.temperature,\n    session_id=request.session_id,\n    use_conversation=request.enable_conversation,\n    enable_multi_hop=request.enable_multi_hop,\n    on_progress=capture_progress,\n)\n\n# Emit real progress events\nfor metrics in progress_events:\n    yield (\n        StreamChunk(\n            type=\"retrieval_progress\",\n            data=metrics,\n        ).to_json()\n        + \"\\n\"\n    )"
+          },
+          {
+            "step": 3,
+            "action": "Add test for real progress metrics",
+            "file": "tests/api/test_rag_streaming_api.py",
+            "code": "def test_rag_stream_emits_real_progress_metrics(rag_client):\n    \"\"\"Progress events must contain real metrics, not synthetic percentages.\"\"\"\n    response = rag_client.post(\n        \"/api/v1/rag/query/stream\",\n        json={\"query\": \"test progress\", \"top_k\": 5},\n    )\n    assert response.status_code == 200\n    events = parse_ndjson_events(response)\n    progress = [e for e in events if e[\"type\"] == \"retrieval_progress\"]\n    assert len(progress) >= 1\n    for p in progress:\n        assert \"documents_scanned\" in p[\"data\"]\n        assert isinstance(p[\"data\"][\"documents_scanned\"], int)"
+          },
+          {
+            "step": 4,
+            "action": "Run verification",
+            "command": "cd /home/caraxes/roots/GRID && uv run pytest tests/api/test_rag_streaming_api.py -q --tb=short"
+          }
+        ]
+      }
+    },
+    {
+      "id": "DEFER-02",
+      "title": "Resonance feedback callback",
+      "priority": "medium",
+      "category": "feature",
+      "status": "not_started",
+      "description": "Add a post-processing feedback callback to the intelligence router that feeds resonance quality signals back to the IntelligenceApplication after each request completes.",
+      "rationale": "IntelligenceApplication.process_input returns a result dict but the router discards quality signals (pattern confidence, bridge coherence). A feedback loop would let the application adapt its pattern recognition across a session without requiring a global singleton.",
+      "affected_files": [
+        "src/application/mothership/routers/intelligence.py",
+        "src/grid/application.py",
+        "tests/api/test_intelligence_router_api.py"
+      ],
+      "acceptance_criteria": [
+        "IntelligenceApplication gains a record_feedback(result, latency_ms) method",
+        "The intelligence router calls record_feedback after process_input succeeds",
+        "Feedback is fire-and-forget — failures do not affect the API response",
+        "Test verifies feedback method is called with correct arguments",
+        "No global mutable state introduced (per-request app remains the pattern)"
+      ],
+      "execution": {
+        "steps": [
+          {
+            "step": 1,
+            "action": "Add record_feedback method to IntelligenceApplication",
+            "file": "src/grid/application.py",
+            "code": "def record_feedback(\n    self,\n    result: dict[str, Any],\n    latency_ms: float,\n) -> None:\n    \"\"\"Record resonance quality signals for adaptive tuning.\n\n    Fire-and-forget: exceptions are logged, never propagated.\n    \"\"\"\n    try:\n        patterns = result.get(\"patterns\", [])\n        coherence = result.get(\"bridge_result\", {}).get(\"coherence\", 0.0)\n        self.interaction_log.append({\n            \"type\": \"feedback\",\n            \"latency_ms\": latency_ms,\n            \"pattern_count\": len(patterns),\n            \"coherence\": coherence,\n        })\n    except Exception:\n        logger.debug(\"record_feedback failed silently\", exc_info=True)"
+          },
+          {
+            "step": 2,
+            "action": "Wire feedback call into the intelligence router",
+            "file": "src/application/mothership/routers/intelligence.py",
+            "code": "# After the timing block, before building ApiResponse:\nresult = await app.process_input(payload.data, ctx, include_evidence=payload.include_evidence)\nt1 = time.perf_counter()\n\n# Fire-and-forget resonance feedback\napp.record_feedback(result, latency_ms=(t1 - t0) * 1000.0)\n\nif payload.include_evidence:\n    result.setdefault(\"timings_ms\", {})\n    result[\"timings_ms\"].setdefault(\"api_total_ms\", (t1 - t0) * 1000.0)\n    result[\"interaction_count\"] = len(app.interaction_log)"
+          },
+          {
+            "step": 3,
+            "action": "Add test verifying feedback is recorded",
+            "file": "tests/api/test_intelligence_router_api.py",
+            "code": "def test_process_intelligence_records_feedback() -> None:\n    _FakeIntelligenceApplication.instances.clear()\n\n    # Add record_feedback to fake\n    class _FakeWithFeedback(_FakeIntelligenceApplication):\n        feedback_calls: list[dict] = []\n\n        def record_feedback(self, result: dict, latency_ms: float) -> None:\n            self.feedback_calls.append({\"result\": result, \"latency_ms\": latency_ms})\n\n    with patch(\"application.mothership.routers.intelligence.IntelligenceApplication\", _FakeWithFeedback):\n        app = _build_test_app()\n        with TestClient(app) as client:\n            resp = client.post(\n                \"/api/v1/intelligence/process\",\n                json={\"data\": {\"v\": 1}, \"context\": {}, \"include_evidence\": True},\n            )\n\n    assert resp.status_code == 200\n    assert len(_FakeWithFeedback.feedback_calls) == 1\n    assert _FakeWithFeedback.feedback_calls[0][\"latency_ms\"] > 0"
+          },
+          {
+            "step": 4,
+            "action": "Run verification",
+            "command": "cd /home/caraxes/roots/GRID && uv run pytest tests/api/test_intelligence_router_api.py -q --tb=short"
+          }
+        ]
+      }
+    },
+    {
+      "id": "DEFER-03",
+      "title": "Privacy regex validator tightening",
+      "priority": "high",
+      "category": "security",
+      "status": "not_started",
+      "description": "Tighten the PII detection regexes in safety/privacy/detector.py: add Luhn checksum validation for credit card patterns and restrict IPv4 octets to valid ranges (0-255).",
+      "rationale": "Current CREDIT_CARD regex (\\b(?:\\d{4}[-.\\s]?){3}\\d{4}\\b) matches any 16-digit sequence — timestamps, UUIDs, hex strings all trigger false positives. Current IP_ADDRESS regex (\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b) matches 999.999.999.999 which is not a valid IPv4 address. Both degrade masking precision and audit noise.",
+      "affected_files": [
+        "safety/privacy/detector.py",
+        "safety/tests/unit/test_masking.py"
+      ],
+      "acceptance_criteria": [
+        "CREDIT_CARD regex candidate passes Luhn checksum validation before flagging",
+        "IP_ADDRESS regex restricts each octet to 0-255",
+        "False positive rate for CREDIT_CARD drops (16-digit non-card numbers no longer flagged)",
+        "Existing masking tests still pass",
+        "New test cases cover: valid Visa, invalid Luhn, valid IP, out-of-range IP"
+      ],
+      "execution": {
+        "steps": [
+          {
+            "step": 1,
+            "action": "Add Luhn checksum validator function",
+            "file": "safety/privacy/detector.py",
+            "code": "def _passes_luhn(digits: str) -> bool:\n    \"\"\"Validate a digit string against the Luhn algorithm (ISO/IEC 7812-1).\"\"\"\n    cleaned = digits.replace(\"-\", \"\").replace(\" \", \"\").replace(\".\", \"\")\n    if not cleaned.isdigit() or len(cleaned) < 13:\n        return False\n    total = 0\n    for i, ch in enumerate(reversed(cleaned)):\n        n = int(ch)\n        if i % 2 == 1:\n            n *= 2\n            if n > 9:\n                n -= 9\n        total += n\n    return total % 10 == 0"
+          },
+          {
+            "step": 2,
+            "action": "Tighten the CREDIT_CARD pattern to use Luhn post-validation",
+            "file": "safety/privacy/detector.py",
+            "code": "# Replace the simple regex match with a two-phase approach:\n# Phase 1: regex captures candidates\n# Phase 2: _passes_luhn filters false positives\n#\n# In the detect() method, after regex match for CREDIT_CARD:\nif pattern_name == \"CREDIT_CARD\":\n    raw_digits = match.group().replace(\"-\", \"\").replace(\" \", \"\").replace(\".\", \"\")\n    if not _passes_luhn(raw_digits):\n        continue  # Skip non-card 16-digit sequences"
+          },
+          {
+            "step": 3,
+            "action": "Tighten IPv4 regex to valid octet range",
+            "file": "safety/privacy/detector.py",
+            "code": "# Replace:\n#   (\"IP_ADDRESS\", r\"\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b\", \"IP_ADDRESS\", 0.75),\n# With:\n(\"IP_ADDRESS\",\n r\"\\b(?:(?:25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\.){3}(?:25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\b\",\n \"IP_ADDRESS\", 0.75),"
+          },
+          {
+            "step": 4,
+            "action": "Add test cases for tightened validators",
+            "file": "safety/tests/unit/test_masking.py",
+            "code": "class TestPrivacyRegexTightening:\n    def test_valid_visa_detected(self):\n        \"\"\"4111111111111111 is a known Visa test number (passes Luhn).\"\"\"\n        from safety.privacy.detector import _passes_luhn\n        assert _passes_luhn(\"4111111111111111\") is True\n\n    def test_invalid_luhn_rejected(self):\n        \"\"\"1234567890123456 fails Luhn — should not flag as credit card.\"\"\"\n        from safety.privacy.detector import _passes_luhn\n        assert _passes_luhn(\"1234567890123456\") is False\n\n    def test_valid_ipv4_detected(self):\n        import re\n        ipv4_re = r\"\\b(?:(?:25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\.){3}(?:25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\b\"\n        assert re.search(ipv4_re, \"192.168.1.1\")\n        assert re.search(ipv4_re, \"255.255.255.255\")\n        assert re.search(ipv4_re, \"0.0.0.0\")\n\n    def test_invalid_ipv4_octet_rejected(self):\n        import re\n        ipv4_re = r\"\\b(?:(?:25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\.){3}(?:25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\b\"\n        assert re.search(ipv4_re, \"999.999.999.999\") is None\n        assert re.search(ipv4_re, \"256.1.1.1\") is None\n\n    def test_luhn_with_separators(self):\n        from safety.privacy.detector import _passes_luhn\n        assert _passes_luhn(\"4111-1111-1111-1111\") is True\n        assert _passes_luhn(\"4111 1111 1111 1111\") is True"
+          },
+          {
+            "step": 5,
+            "action": "Run verification",
+            "command": "cd /home/caraxes/roots/GRID && uv run pytest safety/tests -q --tb=short"
+          }
+        ]
+      }
+    },
+    {
+      "id": "DEFER-04",
+      "title": "Evaluate MCP tool server regression tests",
+      "priority": "low",
+      "category": "test",
+      "status": "not_started",
+      "description": "Evaluate tests/mcp/test_mcp_tool_servers.py from GRID-main (133 lines) for porting to roots/GRID. Tests cover path containment and endpoint helpers for code_analysis_mcp_server.py and test_runner_mcp_server.py in mcp-setup/server/.",
+      "rationale": "The file was created in the Windsurf session in GRID-main. It tests standalone MCP server scripts that live in mcp-setup/server/. Need to verify these scripts exist in roots/GRID and that the tests add value beyond what CI already covers.",
+      "affected_files": [
+        "tests/mcp/test_mcp_tool_servers.py",
+        "mcp-setup/server/code_analysis_mcp_server.py",
+        "mcp-setup/server/test_runner_mcp_server.py"
+      ],
+      "acceptance_criteria": [
+        "Confirm mcp-setup/server/ scripts exist in roots/GRID",
+        "If scripts exist: copy test file, run, verify passes",
+        "If scripts don't exist: close as not-applicable",
+        "Tests must not require network access or running MCP transport"
+      ],
+      "execution": {
+        "steps": [
+          {
+            "step": 1,
+            "action": "Check if MCP server scripts exist in roots/GRID",
+            "command": "ls -la /home/caraxes/roots/GRID/mcp-setup/server/code_analysis_mcp_server.py /home/caraxes/roots/GRID/mcp-setup/server/test_runner_mcp_server.py 2>&1"
+          },
+          {
+            "step": 2,
+            "action": "If scripts exist, create test directory and copy",
+            "command": "mkdir -p /home/caraxes/roots/GRID/tests/mcp && cp /home/caraxes/CascadeProjects/GRID-main/tests/mcp/test_mcp_tool_servers.py /home/caraxes/roots/GRID/tests/mcp/"
+          },
+          {
+            "step": 3,
+            "action": "Run the ported tests",
+            "command": "cd /home/caraxes/roots/GRID && uv run pytest tests/mcp/test_mcp_tool_servers.py -q --tb=short"
+          },
+          {
+            "step": 4,
+            "action": "If tests pass, commit; if not, assess and close",
+            "command": "cd /home/caraxes/roots/GRID && git add tests/mcp/ && git commit -m 'test(mcp): port MCP tool server regression tests from GRID-main'"
+          }
+        ]
+      }
+    },
+    {
+      "id": "DEFER-05",
+      "title": "Clean up GRID-main submodule",
+      "priority": "medium",
+      "category": "maintenance",
+      "status": "blocked",
+      "blocked_by": "Requires Prince confirmation before discarding uncommitted changes",
+      "description": "Discard all uncommitted changes in CascadeProjects/GRID-main submodule that were created by the interrupted Windsurf session. GRID-main is a read-only submodule reference — all development happens in roots/GRID.",
+      "rationale": "The Windsurf session incorrectly modified GRID-main instead of roots/GRID. The divergent class-based model_resolver (381 lines), modified routers, and test files in GRID-main are now superseded by the roots/GRID commits. Leaving dirty submodule state causes noise in git status and risks accidental submodule pointer updates.",
+      "affected_files": [
+        "CascadeProjects/GRID-main (entire submodule working tree)"
+      ],
+      "acceptance_criteria": [
+        "git status in CascadeProjects/GRID-main shows clean working tree",
+        "No untracked files remain from the Windsurf session",
+        "Submodule pointer in CascadeProjects is unchanged (no git add of GRID-main)"
+      ],
+      "execution": {
+        "steps": [
+          {
+            "step": 1,
+            "action": "Review what will be discarded",
+            "command": "cd /home/caraxes/CascadeProjects/GRID-main && git status --short"
+          },
+          {
+            "step": 2,
+            "action": "Discard all modified tracked files",
+            "command": "cd /home/caraxes/CascadeProjects/GRID-main && git checkout -- ."
+          },
+          {
+            "step": 3,
+            "action": "Remove untracked files from Windsurf session",
+            "command": "cd /home/caraxes/CascadeProjects/GRID-main && git clean -fd"
+          },
+          {
+            "step": 4,
+            "action": "Verify clean state",
+            "command": "cd /home/caraxes/CascadeProjects/GRID-main && git status"
+          }
+        ]
+      }
+    }
+  ],
+  "cross_references": {
+    "completed_commits": {
+      "fix_rag_minor": "63d1949",
+      "feat_model_resolver": "9b0bb89",
+      "feat_docker": "5b63c91",
+      "fix_hardening": "38a095c"
+    },
+    "test_coverage": {
+      "model_resolver_tests": 86,
+      "streaming_api_tests": 9,
+      "intelligence_api_tests": 2,
+      "total_new_tests": 97
+    },
+    "key_files": {
+      "model_resolver": "src/tools/rag/model_resolver.py",
+      "rag_streaming": "src/application/mothership/routers/rag_streaming.py",
+      "intelligence_router": "src/application/mothership/routers/intelligence.py",
+      "privacy_detector": "safety/privacy/detector.py",
+      "ollama_config": "config/ollama-models.json",
+      "ollama_schema": "config/schemas/ollama-models.schema.json"
+    },
+    "pre_existing_failures": [
+      "test_embedding_dimension_consistency[nomic] — embedding norm issue, unrelated",
+      "test_enhanced_rag_server (2 tests) — Ollama model ministral-3:3b not pulled",
+      "test_navigation_after_token_refresh — auth token integration issue",
+      "test_parasite_guard_integration — missing event_bus module"
+    ]
+  }
+}
