@@ -437,6 +437,43 @@ class AccountabilityContract(BaseModel):
                     }
                 )
 
-            # TODO: Add support for custom validators
+            # Custom validator: format is "module.path:function_name"
+            # Contract: return True/None → pass; False → generic fail;
+            # str → fail with that message; raise → fail with exception text.
+            if rule.custom_validator:
+                import importlib
+
+                try:
+                    module_path, func_name = rule.custom_validator.rsplit(":", 1)
+                    mod = importlib.import_module(module_path)
+                    validator_fn = getattr(mod, func_name)
+                    result = validator_fn(value)
+                    if result is not True and result is not None:
+                        message = (
+                            result if isinstance(result, str) else f"Custom validation failed for field '{field_name}'"
+                        )
+                        errors.append(
+                            {
+                                "field": field_name,
+                                "error": "custom_validation_failed",
+                                "message": message,
+                            }
+                        )
+                except (ImportError, AttributeError) as exc:
+                    errors.append(
+                        {
+                            "field": field_name,
+                            "error": "custom_validator_unavailable",
+                            "message": (f"Custom validator '{rule.custom_validator}' could not be loaded: {exc}"),
+                        }
+                    )
+                except Exception as exc:  # noqa: BLE001
+                    errors.append(
+                        {
+                            "field": field_name,
+                            "error": "custom_validation_error",
+                            "message": f"Custom validator raised an error for field '{field_name}': {exc}",
+                        }
+                    )
 
         return errors
