@@ -198,6 +198,21 @@ class ComplianceRequirement(BaseModel):
     )
 
 
+def _default_performance_sla() -> PerformanceSLA:
+    """Build validated performance defaults for nested Pydantic models."""
+    return PerformanceSLA()
+
+
+def _default_security_requirement() -> SecurityRequirement:
+    """Build validated security defaults for nested Pydantic models."""
+    return SecurityRequirement()
+
+
+def _default_compliance_requirement() -> ComplianceRequirement:
+    """Build validated compliance defaults for nested Pydantic models."""
+    return ComplianceRequirement()
+
+
 class EndpointContract(BaseModel):
     """Contract defining requirements for a specific API endpoint."""
 
@@ -211,13 +226,13 @@ class EndpointContract(BaseModel):
         default_factory=dict, description="Response validation rules"
     )
     performance: PerformanceSLA = Field(
-        default_factory=lambda: PerformanceSLA.model_construct(), description="Performance requirements"
+        default_factory=_default_performance_sla, description="Performance requirements"
     )
     security: SecurityRequirement = Field(
-        default_factory=lambda: SecurityRequirement.model_construct(), description="Security requirements"
+        default_factory=_default_security_requirement, description="Security requirements"
     )
     compliance: ComplianceRequirement = Field(
-        default_factory=lambda: ComplianceRequirement.model_construct(), description="Compliance requirements"
+        default_factory=_default_compliance_requirement, description="Compliance requirements"
     )
     enabled: bool = Field(True, description="Whether this contract is actively enforced")
     severity: ContractSeverity = Field(ContractSeverity.MEDIUM, description="Default severity for violations")
@@ -283,11 +298,11 @@ class AccountabilityContract(BaseModel):
     endpoints: list[EndpointContract] = Field(default_factory=list, description="List of endpoint contracts")
     slos: list[ServiceLevelObjective] = Field(default_factory=list, description="Service Level Objectives")
     default_security: SecurityRequirement = Field(
-        default_factory=lambda: SecurityRequirement.model_construct(),
+        default_factory=_default_security_requirement,
         description="Default security requirements",
     )
     default_compliance: ComplianceRequirement = Field(
-        default_factory=lambda: ComplianceRequirement.model_construct(),
+        default_factory=_default_compliance_requirement,
         description="Default compliance requirements",
     )
     created_at: datetime = Field(

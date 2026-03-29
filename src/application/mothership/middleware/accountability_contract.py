@@ -318,6 +318,10 @@ class AccountabilityContractMiddleware(BaseHTTPMiddleware):
         response_result: EnforcementResult | None,
     ) -> None:
         """Add accountability enforcement headers to the response."""
+        # Preserve the original header contract for older tests and clients.
+        # Historically this header meant "the accountability middleware ran",
+        # not "enforce mode was active".
+        response.headers["X-Accountability-Enforced"] = "true"
         response.headers["X-Accountability-Status"] = "enforced" if self.enforcement_mode == "enforce" else "monitored"
 
         total_violations = len(request_result.violations)

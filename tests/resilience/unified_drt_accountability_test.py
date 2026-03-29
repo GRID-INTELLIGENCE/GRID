@@ -182,6 +182,9 @@ class TestAccountabilityContractMiddleware:
         # Should have enforcement headers
         assert "X-Accountability-Enforced" in response.headers
         assert response.headers["X-Accountability-Enforced"] == "true"
+        assert response.headers["X-Accountability-Status"] == "monitored"
+        assert response.headers["X-Accountability-Violation-Count"] == "1"
+        assert response.headers["X-Accountability-Violation"] == "true"
 
     @pytest.mark.asyncio
     async def test_role_based_authorization(self, accountability_middleware, mock_request):
@@ -217,6 +220,9 @@ class TestAccountabilityContractMiddleware:
         # In monitor mode, should add enforcement headers
         # The middleware adds violations count header when violations are found
         assert "X-Accountability-Enforced" in response.headers
+        assert response.headers["X-Accountability-Status"] == "monitored"
+        assert response.headers["X-Accountability-Violation-Count"] == "3"
+        assert response.headers["X-Accountability-Violation"] == "true"
 
     def test_skip_paths(self, accountability_middleware):
         """Test that certain paths are skipped from enforcement."""
