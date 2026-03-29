@@ -8,6 +8,7 @@ Defines the contract schema for accountability enforcement, including:
 - Compliance requirements
 """
 
+import dataclasses
 import re
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
@@ -53,7 +54,7 @@ class ContractViolation:
     actual_value: Any = None
     expected_value: Any = None
     penalty_points: int = 10
-    timestamp: datetime = field(default_factory=lambda: datetime.now(UTC))
+    timestamp: datetime = dataclasses.field(default_factory=lambda: datetime.now(UTC))
 
     # Alias for backward compatibility
     @property
@@ -209,10 +210,14 @@ class EndpointContract(BaseModel):
     response_validation: dict[str, DataValidationRule] = Field(
         default_factory=dict, description="Response validation rules"
     )
-    performance: PerformanceSLA = Field(default_factory=PerformanceSLA, description="Performance requirements")
-    security: SecurityRequirement = Field(default_factory=SecurityRequirement, description="Security requirements")
+    performance: PerformanceSLA = Field(
+        default_factory=lambda: PerformanceSLA.model_construct(), description="Performance requirements"
+    )
+    security: SecurityRequirement = Field(
+        default_factory=lambda: SecurityRequirement.model_construct(), description="Security requirements"
+    )
     compliance: ComplianceRequirement = Field(
-        default_factory=ComplianceRequirement, description="Compliance requirements"
+        default_factory=lambda: ComplianceRequirement.model_construct(), description="Compliance requirements"
     )
     enabled: bool = Field(True, description="Whether this contract is actively enforced")
     severity: ContractSeverity = Field(ContractSeverity.MEDIUM, description="Default severity for violations")
@@ -278,10 +283,12 @@ class AccountabilityContract(BaseModel):
     endpoints: list[EndpointContract] = Field(default_factory=list, description="List of endpoint contracts")
     slos: list[ServiceLevelObjective] = Field(default_factory=list, description="Service Level Objectives")
     default_security: SecurityRequirement = Field(
-        default_factory=SecurityRequirement, description="Default security requirements"
+        default_factory=lambda: SecurityRequirement.model_construct(),
+        description="Default security requirements",
     )
     default_compliance: ComplianceRequirement = Field(
-        default_factory=ComplianceRequirement, description="Default compliance requirements"
+        default_factory=lambda: ComplianceRequirement.model_construct(),
+        description="Default compliance requirements",
     )
     created_at: datetime = Field(
         default_factory=lambda: datetime.now(UTC), description="When this contract was created"

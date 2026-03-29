@@ -327,7 +327,7 @@ class SearchEngine:
         backend = self.config.vector_store_backend
         if backend == "chromadb":
             try:
-                from tools.rag.vector_store.chromadb_store import ChromaDBStore
+                from tools.rag.vector_store.chromadb_store import ChromaDBStore  # type: ignore[import-untyped]
 
                 return ChromaDBStore(collection_name=f"search_{index_name}")
             except ImportError:
