@@ -17,7 +17,7 @@ aiohttp==3.13.3
 httpx==0.28.1
 
 # Monitoring & Observability
-prometheus-client==0.21.1
+prometheus-client==0.24.1
 structlog==25.5.0
 sentry-sdk[fastapi]==2.19.2
 
