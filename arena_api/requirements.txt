@@ -64,7 +64,7 @@ kubernetes==35.0.0
 
 # AI/ML Safety (SECURITY UPDATE)
 transformers==5.3.0
-torch==2.10.0
+torch==2.11.0
 scikit-learn==1.8.0
 pandas==3.0.1
 numpy==2.4.2
