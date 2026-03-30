@@ -298,11 +298,12 @@ class TestRAGQuerySanitization:
 class TestRAGPathContainment:
     """Verify docs_path and index path containment logic."""
 
+    HOME = Path.home().resolve()
     ALLOWED_ROOTS = [
-        Path("/home/caraxes/roots/GRID").resolve(),
-        Path.home().resolve() / "CascadeProjects",
-        Path.home().resolve() / "canopy",
-        Path.home().resolve() / "roots",
+        HOME / "roots" / "GRID",
+        HOME / "CascadeProjects",
+        HOME / "canopy",
+        HOME / "roots",
     ]
     SENSITIVE = [".ssh", ".gnupg", ".env", "credentials", "secrets"]
 
@@ -318,19 +319,19 @@ class TestRAGPathContainment:
         assert not self._is_allowed("/etc/")
 
     def test_rejects_ssh(self):
-        assert not self._is_allowed("/home/caraxes/.ssh/")
+        assert not self._is_allowed(str(self.HOME / ".ssh"))
 
     def test_rejects_gnupg(self):
-        assert not self._is_allowed("/home/caraxes/.gnupg/")
+        assert not self._is_allowed(str(self.HOME / ".gnupg"))
 
     def test_rejects_tmp(self):
         assert not self._is_allowed("/tmp/malicious")
 
     def test_accepts_grid_root(self):
-        assert self._is_allowed("/home/caraxes/roots/GRID/docs")
+        assert self._is_allowed(str(self.HOME / "roots" / "GRID" / "docs"))
 
     def test_accepts_cascade_projects(self):
-        assert self._is_allowed("/home/caraxes/CascadeProjects/shared-types")
+        assert self._is_allowed(str(self.HOME / "CascadeProjects" / "shared-types"))
 
     def test_accepts_canopy(self):
-        assert self._is_allowed("/home/caraxes/canopy/echoes")
+        assert self._is_allowed(str(self.HOME / "canopy" / "echoes"))
