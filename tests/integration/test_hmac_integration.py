@@ -14,7 +14,11 @@ from fastapi import FastAPI, Request
 from fastapi.testclient import TestClient
 
 from application.mothership.middleware.admission_gate import AdmissionGateMiddleware, EntityAttributionEngine
-from application.mothership.middleware.entity_signing import sign_entity_id, verify_entity_signature, ENTITY_SIGNATURE_MAX_AGE
+from application.mothership.middleware.entity_signing import (
+    ENTITY_SIGNATURE_MAX_AGE,
+    sign_entity_id,
+    verify_entity_signature,
+)
 
 
 class TestHMACIntegration:

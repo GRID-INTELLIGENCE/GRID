@@ -57,7 +57,7 @@ _SAFE_KEY_RE = re.compile(r"^[a-zA-Z0-9_-]{1,128}$")
 
 def get_memory_path(key: str) -> Path:
     if not _SAFE_KEY_RE.match(key):
-        raise ValueError(f"Invalid memory key: must match [a-zA-Z0-9_-]{{1,128}}")
+        raise ValueError("Invalid memory key: must match [a-zA-Z0-9_-]{1,128}")
     result = (MEMORY_DIR / f"{key}.json").resolve()
     if not str(result).startswith(str(MEMORY_DIR.resolve())):
         raise ValueError("Path traversal detected")

@@ -37,14 +37,14 @@ class TestMemoryPathTraversal:
         spec = importlib.util.spec_from_file_location(
             "memory_mcp_server", MCP_SERVER_DIR / "memory_mcp_server.py"
         )
-        mod = importlib.util.module_from_spec(spec)
+        _ = importlib.util.module_from_spec(spec)
         # Don't execute the module (it starts a server), just parse the function
         # Instead, test the regex + path logic directly
         _SAFE_KEY_RE = re.compile(r"^[a-zA-Z0-9_-]{1,128}$")
         MEMORY_DIR = Path.home() / ".grid" / "memory"
 
         if not _SAFE_KEY_RE.match(key):
-            raise ValueError(f"Invalid memory key: must match [a-zA-Z0-9_-]{{1,128}}")
+            raise ValueError("Invalid memory key: must match [a-zA-Z0-9_-]{1,128}")
         result = (MEMORY_DIR / f"{key}.json").resolve()
         if not str(result).startswith(str(MEMORY_DIR.resolve())):
             raise ValueError("Path traversal detected")
