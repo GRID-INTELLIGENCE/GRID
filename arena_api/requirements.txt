@@ -71,7 +71,7 @@ numpy==2.4.4
 
 # Compliance & Audit (CRITICAL SECURITY UPDATE: Crypto vulnerabilities patched)
 cryptography==46.0.6
-bcrypt==4.2.1
+bcrypt==5.0.0
 
 # CHANGES FROM PREVIOUS VERSION:
 # - fastapi: 0.104.1 -> 0.115.6 (CORS bypass fix)
