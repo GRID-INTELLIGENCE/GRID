@@ -47,7 +47,7 @@ safety==3.7.0
 locust==2.43.3
 
 # Environment Management
-python-dotenv==1.2.1
+python-dotenv==1.2.2
 
 # Logging
 rich==14.3.3
