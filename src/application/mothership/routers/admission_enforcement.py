@@ -196,13 +196,9 @@ def _get_attribution(request: Request) -> EntityAttributionEngine:
 def _classify_tier(record) -> tuple[str, str]:
     """Classify an entity's current penalty tier."""
     if record.profit_mask_violations > 0:
-        return "intentional_scheming", (
-            "3x accelerated penalty. Profit-masking or safety bypass detected."
-        )
+        return "intentional_scheming", ("3x accelerated penalty. Profit-masking or safety bypass detected.")
     if record.violation_count > 1 and record.total_penalty_points > 0:
-        return "environment_pollution", (
-            "1x compounding penalty. Repeated violations reducing effective budget."
-        )
+        return "environment_pollution", ("1x compounding penalty. Repeated violations reducing effective budget.")
     if record.violation_count > 0:
         return "runtime_mistake", "1x base penalty. Correctable incident."
     return "none", "No violations recorded."
@@ -373,9 +369,7 @@ async def check_compliance(request: Request, body: ComplianceCheckRequest) -> Co
     estimated_tokens = payload_bytes // 4
     ceiling_exceeded = estimated_tokens > context_ceiling
     if ceiling_exceeded:
-        violations.append(
-            f"context_overflow: {estimated_tokens} tokens > ceiling {context_ceiling}"
-        )
+        violations.append(f"context_overflow: {estimated_tokens} tokens > ceiling {context_ceiling}")
 
     # Structure check
     has_structure = True
@@ -430,8 +424,7 @@ async def apply_penalty(request: Request, body: PenaltyApplyRequest, auth: Admin
     except ValueError:
         raise HTTPException(
             status_code=400,
-            detail=f"Invalid violation_type '{body.violation_type}'. "
-            f"Valid: {[v.value for v in ViolationType]}",
+            detail=f"Invalid violation_type '{body.violation_type}'. Valid: {[v.value for v in ViolationType]}",
         )
 
     meta = {**body.metadata, "reason": body.reason, "source": "manual_enforcement"}

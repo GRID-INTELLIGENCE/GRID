@@ -65,13 +65,14 @@ class TestHMACIntegration:
         entity_id = "test-entity-123"
         signature, timestamp = sign_entity_id(entity_id, secret)
 
-        response = client.post("/api/v1/intelligence/process",
+        response = client.post(
+            "/api/v1/intelligence/process",
             json={"data": {"test": "valid"}},
             headers={
                 "X-Entity-Id": entity_id,
                 "X-Entity-Signature": signature,
                 "X-Entity-Timestamp": str(timestamp),
-            }
+            },
         )
 
         # Should be admitted
@@ -87,12 +88,13 @@ class TestHMACIntegration:
         """Test that missing signature falls through to IP resolution but still admitted."""
         client, secret, engine = app_with_secret
 
-        response = client.post("/api/v1/intelligence/process",
+        response = client.post(
+            "/api/v1/intelligence/process",
             json={"data": {"test": "valid"}},
             headers={
                 "X-Entity-Id": "test-entity",
                 # Missing signature and timestamp
-            }
+            },
         )
 
         # Should be admitted (structure is valid)
@@ -107,13 +109,14 @@ class TestHMACIntegration:
         """Test that invalid signature falls through to IP resolution but still admitted."""
         client, secret, engine = app_with_secret
 
-        response = client.post("/api/v1/intelligence/process",
+        response = client.post(
+            "/api/v1/intelligence/process",
             json={"data": {"test": "valid"}},
             headers={
                 "X-Entity-Id": "test-entity",
                 "X-Entity-Signature": "invalid-signature",
                 "X-Entity-Timestamp": str(int(time.time())),
-            }
+            },
         )
 
         # Should be admitted (structure is valid)
@@ -132,13 +135,14 @@ class TestHMACIntegration:
         old_timestamp = int(time.time()) - ENTITY_SIGNATURE_MAX_AGE - 60
         signature, _ = sign_entity_id("test-entity", secret, old_timestamp)
 
-        response = client.post("/api/v1/intelligence/process",
+        response = client.post(
+            "/api/v1/intelligence/process",
             json={"data": {"test": "valid"}},
             headers={
                 "X-Entity-Id": "test-entity",
                 "X-Entity-Signature": signature,
                 "X-Entity-Timestamp": str(old_timestamp),
-            }
+            },
         )
 
         # Should be admitted (structure is valid)
@@ -157,13 +161,14 @@ class TestHMACIntegration:
         wrong_secret = "wrong-secret"
         signature, timestamp = sign_entity_id("test-entity", wrong_secret)
 
-        response = client.post("/api/v1/intelligence/process",
+        response = client.post(
+            "/api/v1/intelligence/process",
             json={"data": {"test": "valid"}},
             headers={
                 "X-Entity-Id": "test-entity",
                 "X-Entity-Signature": signature,
                 "X-Entity-Timestamp": str(timestamp),
-            }
+            },
         )
 
         # Should be admitted (structure is valid)
@@ -178,13 +183,14 @@ class TestHMACIntegration:
         """Test that when no secret is configured, signature headers are ignored."""
         client, engine = app_without_secret
 
-        response = client.post("/api/v1/intelligence/process",
+        response = client.post(
+            "/api/v1/intelligence/process",
             json={"data": {"test": "valid"}},
             headers={
                 "X-Entity-Id": "test-entity",
                 "X-Entity-Signature": "some-signature",
                 "X-Entity-Timestamp": str(int(time.time())),
-            }
+            },
         )
 
         # Should be admitted and attributed to claimed entity
@@ -198,14 +204,15 @@ class TestHMACIntegration:
         """Test API key fallback when signature is invalid."""
         client, secret, engine = app_with_secret
 
-        response = client.post("/api/v1/intelligence/process",
+        response = client.post(
+            "/api/v1/intelligence/process",
             json={"data": {"test": "valid"}},
             headers={
                 "X-Entity-Id": "test-entity",
                 "X-Entity-Signature": "invalid",
                 "X-Entity-Timestamp": str(int(time.time())),
                 "X-API-Key": "test-api-key-12345678",
-            }
+            },
         )
 
         # Should be admitted
@@ -219,13 +226,14 @@ class TestHMACIntegration:
         """Test edge case of empty entity ID header."""
         client, secret, engine = app_with_secret
 
-        response = client.post("/api/v1/intelligence/process",
+        response = client.post(
+            "/api/v1/intelligence/process",
             json={"data": {"test": "valid"}},
             headers={
                 "X-Entity-Id": "",
                 "X-Entity-Signature": "signature",
                 "X-Entity-Timestamp": str(int(time.time())),
-            }
+            },
         )
 
         # Should be admitted with IP-based entity
@@ -239,13 +247,14 @@ class TestHMACIntegration:
         """Test edge case of whitespace-only entity ID header."""
         client, secret, engine = app_with_secret
 
-        response = client.post("/api/v1/intelligence/process",
+        response = client.post(
+            "/api/v1/intelligence/process",
             json={"data": {"test": "valid"}},
             headers={
                 "X-Entity-Id": "   ",
                 "X-Entity-Signature": "signature",
                 "X-Entity-Timestamp": str(int(time.time())),
-            }
+            },
         )
 
         # Should be admitted with IP-based entity

@@ -69,9 +69,7 @@ def test_code_analysis_analyze_code_missing_file_returns_error(code_analysis_mod
 def test_code_analysis_check_security_detects_issues(code_analysis_module: ModuleType) -> None:
     sample = _create_workspace_temp_file(
         code_analysis_module.GRID_ROOT,
-        "api_key = 'abc123'\n"
-        "def bad():\n"
-        "    eval('1+1')\n",
+        "api_key = 'abc123'\ndef bad():\n    eval('1+1')\n",
     )
     result = code_analysis_module.check_security(str(sample))
 
@@ -95,7 +93,9 @@ def test_test_runner_run_tests_blocks_escape(test_runner_module: ModuleType) -> 
         outside.unlink(missing_ok=True)
 
 
-def test_test_runner_run_coverage_passes_expected_args(monkeypatch: pytest.MonkeyPatch, test_runner_module: ModuleType) -> None:
+def test_test_runner_run_coverage_passes_expected_args(
+    monkeypatch: pytest.MonkeyPatch, test_runner_module: ModuleType
+) -> None:
     captured: dict[str, object] = {}
 
     def fake_run_pytest(args: list[str], cwd: str = None) -> dict[str, object]:

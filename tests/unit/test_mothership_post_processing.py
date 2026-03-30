@@ -267,9 +267,7 @@ class TestProfitMaskDetection:
 
     def test_detects_signals_in_nested_payload(self) -> None:
         engine = EntityAttributionEngine()
-        signals = engine.detect_profit_masking(
-            {"config": {"optimization": {"type": "cost_optimization"}}}
-        )
+        signals = engine.detect_profit_masking({"config": {"optimization": {"type": "cost_optimization"}}})
         assert "cost_optimization" in signals
 
     def test_detects_signals_in_headers(self) -> None:
@@ -282,9 +280,7 @@ class TestProfitMaskDetection:
 
     def test_multiple_signals_all_returned(self) -> None:
         engine = EntityAttributionEngine()
-        signals = engine.detect_profit_masking(
-            {"a": "skip_validation", "b": "fast_track", "c": "bulk_override"}
-        )
+        signals = engine.detect_profit_masking({"a": "skip_validation", "b": "fast_track", "c": "bulk_override"})
         assert len(signals) >= 3
 
 
@@ -904,8 +900,7 @@ class TestPenaltyTierClassification:
 
         # 15x difference in penalty for one violation each
         ratio = (
-            engine.get_record("schemer").total_penalty_points
-            / engine.get_record("honest-entity").total_penalty_points
+            engine.get_record("schemer").total_penalty_points / engine.get_record("honest-entity").total_penalty_points
         )
         assert ratio == 15.0  # 45/3 = 15x total impact difference
 
@@ -1040,9 +1035,7 @@ class TestEnforcementRouterBannered:
         app = _build_app_with_router(banner_threshold=10)
         attr = app.state.admission_attribution
         # Push entity over threshold
-        attr.record_violation(
-            "bad-actor", ViolationType.ORIGIN_DENIED
-        )  # 10 points = threshold
+        attr.record_violation("bad-actor", ViolationType.ORIGIN_DENIED)  # 10 points = threshold
         assert attr.get_record("bad-actor").bannered is True
 
         client = TestClient(app, raise_server_exceptions=False)

@@ -52,10 +52,12 @@ except ImportError:
 try:
     from grid.security.input_sanitizer import InputSanitizer, SanitizationConfig
 
-    _query_sanitizer = InputSanitizer(SanitizationConfig(
-        encode_html=False,
-        max_text_length=10000,
-    ))
+    _query_sanitizer = InputSanitizer(
+        SanitizationConfig(
+            encode_html=False,
+            max_text_length=10000,
+        )
+    )
 except ImportError:
     _query_sanitizer = None
 
@@ -469,7 +471,9 @@ async def handle_query(args: dict[str, Any]) -> CallToolResult:
         scan = _query_sanitizer.sanitize_text_full(query)
         if scan.severity.value in ("critical", "high"):
             logger.warning("RAG query blocked: severity=%s threats=%s", scan.severity, scan.threats_detected)
-            return CallToolResult(content=[TextContent(type="text", text="Query rejected: suspicious content detected")])
+            return CallToolResult(
+                content=[TextContent(type="text", text="Query rejected: suspicious content detected")]
+            )
         query = str(scan.sanitized_content)
 
     try:
@@ -544,7 +548,9 @@ async def handle_on_demand(args: dict[str, Any]) -> CallToolResult:
         scan = _query_sanitizer.sanitize_text_full(query)
         if scan.severity.value in ("critical", "high"):
             logger.warning("RAG on-demand blocked: severity=%s threats=%s", scan.severity, scan.threats_detected)
-            return CallToolResult(content=[TextContent(type="text", text="Query rejected: suspicious content detected")])
+            return CallToolResult(
+                content=[TextContent(type="text", text="Query rejected: suspicious content detected")]
+            )
         query = str(scan.sanitized_content)
 
     # Path containment for docs_path
@@ -605,7 +611,9 @@ async def handle_search(args: dict[str, Any]) -> CallToolResult:
         scan = _query_sanitizer.sanitize_text_full(query)
         if scan.severity.value in ("critical", "high"):
             logger.warning("RAG search blocked: severity=%s threats=%s", scan.severity, scan.threats_detected)
-            return CallToolResult(content=[TextContent(type="text", text="Query rejected: suspicious content detected")])
+            return CallToolResult(
+                content=[TextContent(type="text", text="Query rejected: suspicious content detected")]
+            )
         query = str(scan.sanitized_content)
 
     try:

@@ -26,7 +26,9 @@ class AdmissionEntityRow(Base):
     last_seen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
 
     violations: Mapped[list[AdmissionViolationRow]] = relationship(
-        back_populates="entity", cascade="all, delete-orphan", lazy="selectin",
+        back_populates="entity",
+        cascade="all, delete-orphan",
+        lazy="selectin",
     )
 
 
@@ -37,7 +39,9 @@ class AdmissionViolationRow(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     entity_id: Mapped[str] = mapped_column(
-        String(256), ForeignKey("admission_entities.entity_id", ondelete="CASCADE"), index=True,
+        String(256),
+        ForeignKey("admission_entities.entity_id", ondelete="CASCADE"),
+        index=True,
     )
     violation_type: Mapped[str] = mapped_column(String(64), index=True)
     penalty_points: Mapped[int] = mapped_column(Integer)

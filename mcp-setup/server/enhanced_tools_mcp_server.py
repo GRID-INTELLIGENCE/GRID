@@ -388,10 +388,20 @@ async def handle_test_coverage_analyzer(args: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-_BLOCKED_MODULES = frozenset({
-    "os", "sys", "subprocess", "shutil", "importlib", "pickle",
-    "ctypes", "builtins", "code", "codeop",
-})
+_BLOCKED_MODULES = frozenset(
+    {
+        "os",
+        "sys",
+        "subprocess",
+        "shutil",
+        "importlib",
+        "pickle",
+        "ctypes",
+        "builtins",
+        "code",
+        "codeop",
+    }
+)
 
 
 def _is_safe_module_name(name: str) -> bool:

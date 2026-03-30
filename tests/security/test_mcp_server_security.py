@@ -34,9 +34,7 @@ class TestMemoryPathTraversal:
         # Re-import each time to avoid module caching issues
         import importlib
 
-        spec = importlib.util.spec_from_file_location(
-            "memory_mcp_server", MCP_SERVER_DIR / "memory_mcp_server.py"
-        )
+        spec = importlib.util.spec_from_file_location("memory_mcp_server", MCP_SERVER_DIR / "memory_mcp_server.py")
         _ = importlib.util.module_from_spec(spec)
         # Don't execute the module (it starts a server), just parse the function
         # Instead, test the regex + path logic directly
@@ -95,10 +93,20 @@ class TestMemoryPathTraversal:
 class TestModuleNameBlocklist:
     """Verify _is_safe_module_name blocks dangerous modules."""
 
-    _BLOCKED_MODULES = frozenset({
-        "os", "sys", "subprocess", "shutil", "importlib", "pickle",
-        "ctypes", "builtins", "code", "codeop",
-    })
+    _BLOCKED_MODULES = frozenset(
+        {
+            "os",
+            "sys",
+            "subprocess",
+            "shutil",
+            "importlib",
+            "pickle",
+            "ctypes",
+            "builtins",
+            "code",
+            "codeop",
+        }
+    )
 
     def _is_safe_module_name(self, name: str) -> bool:
         """Reproduce the validation logic from enhanced_tools_mcp_server."""

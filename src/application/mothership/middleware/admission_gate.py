@@ -53,9 +53,7 @@ BYPASS_PATHS: frozenset[str] = frozenset(
 )
 
 # Origins that are allowed through (header: X-Admission-Origin)
-ALLOWED_ORIGINS: frozenset[str] = frozenset(
-    {"internal", "mothership", "grid-core", "cli", "mcp", "frontend"}
-)
+ALLOWED_ORIGINS: frozenset[str] = frozenset({"internal", "mothership", "grid-core", "cli", "mcp", "frontend"})
 
 # Signals that suggest profit-maximization disguised as cost-cutting.
 # Matched against payload metadata, headers, or entity behavioral history.
@@ -197,6 +195,7 @@ def load_billboard() -> PolicyBillboard:
 
     try:
         from tools.runtime_policy import get_principles
+
         principles.update(get_principles())
     except Exception:
         logger.debug("admission_gate.billboard: runtime_policy unavailable, using defaults")
@@ -488,9 +487,7 @@ class EntityAttributionEngine:
 
     # -- knowledge store integration --
 
-    def _emit_violation_to_knowledge_store(
-        self, violation: EntityViolation, record: EntityRecord
-    ) -> None:
+    def _emit_violation_to_knowledge_store(self, violation: EntityViolation, record: EntityRecord) -> None:
         """Push violation as an Event entity + EXECUTED_BY relationship to the knowledge store."""
         if not self._knowledge_store:
             return
@@ -707,11 +704,15 @@ class AdmissionGateMiddleware(BaseHTTPMiddleware):
         self._enforce_origin = enforce_origin
         self._enforce_structure = enforce_structure
 
-        self.attribution = attribution if attribution is not None else EntityAttributionEngine(
-            banner_threshold=banner_threshold,
-            profit_mask_multiplier=profit_mask_multiplier,
-            knowledge_store=knowledge_store,
-            pattern_detector=pattern_detector,
+        self.attribution = (
+            attribution
+            if attribution is not None
+            else EntityAttributionEngine(
+                banner_threshold=banner_threshold,
+                profit_mask_multiplier=profit_mask_multiplier,
+                knowledge_store=knowledge_store,
+                pattern_detector=pattern_detector,
+            )
         )
 
         # Policy billboard — loaded once at boot, immutable
@@ -815,9 +816,7 @@ class AdmissionGateMiddleware(BaseHTTPMiddleware):
             )
 
         # --- Gate 1: Budget (adjusted by penalty) ---
-        effective_budget = self.attribution.effective_budget(
-            entity_id, self._tracker.default_budget
-        )
+        effective_budget = self.attribution.effective_budget(entity_id, self._tracker.default_budget)
         if not self._tracker.allow(entity_id, effective_budget=effective_budget):
             return self._reject(
                 entity_id,

@@ -50,7 +50,7 @@ def indexer_config(temp_checkpoint_dir):
         cluster_id="test_cluster",
         num_partitions=4,
         batch_size=50,
-        embedding_model="nomic-embed-text:latest",
+        embedding_model="nomic-embed-text-v2-moe:latest",
         checkpoint_enabled=True,
         checkpoint_path=temp_checkpoint_dir,
     )
@@ -73,7 +73,7 @@ def test_indexer_config_defaults():
 
     assert config.num_partitions == 8
     assert config.batch_size == 100
-    assert config.embedding_model == "nomic-embed-text:latest"
+    assert config.embedding_model == "nomic-embed-text-v2-moe:latest"
     assert config.checkpoint_enabled is True
 
 

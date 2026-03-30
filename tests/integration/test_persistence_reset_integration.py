@@ -49,9 +49,7 @@ class TestPersistenceResetIntegration:
     async def repository(self, temp_db_engine):
         """Create repository with temp database."""
         engine, db_path = temp_db_engine
-        session_factory = async_sessionmaker(
-            engine, class_=AsyncSession, expire_on_commit=False
-        )
+        session_factory = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
         return AdmissionEntityRepository(session_factory), db_path
 
     async def test_full_reset_persistence_cycle(self, repository):
@@ -223,11 +221,7 @@ class TestPersistenceResetIntegration:
 
         # Add violation with metadata
         metadata = {"request_path": "/api/v1/test", "user_agent": "test-agent"}
-        engine.record_violation(
-            entity_id,
-            ViolationType.CONTEXT_OVERFLOW,
-            metadata=metadata
-        )
+        engine.record_violation(entity_id, ViolationType.CONTEXT_OVERFLOW, metadata=metadata)
 
         # Persist
         record = engine.get_record(entity_id)
