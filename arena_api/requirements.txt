@@ -67,7 +67,7 @@ transformers==5.3.0
 torch==2.10.0
 scikit-learn==1.8.0
 pandas==3.0.1
-numpy==2.4.2
+numpy==2.4.4
 
 # Compliance & Audit (CRITICAL SECURITY UPDATE: Crypto vulnerabilities patched)
 cryptography==46.0.5
