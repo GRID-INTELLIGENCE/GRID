@@ -201,12 +201,6 @@ class MeritScoringEngine:
             standing.badge = self._calculate_badge(standing)
             standing._update_eligible_scopes()
             self._standings[entity_id] = standing
-            logger.info(
-                "merit_standing.created entity_fp=%s badge=%s score=%d",
-                _entity_fingerprint(entity_id),
-                standing.badge,
-                standing.score,
-            )
         return self._standings[entity_id]
 
     def get_standing(self, entity_id: str) -> MeritStanding | None:
