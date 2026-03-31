@@ -205,9 +205,12 @@ async def get_bearer_token(
     return credentials.credentials
 
 
-from application.mothership.security.rbac import has_permission
-
 from .security.auth import verify_api_key, verify_jwt_token
+from .security.merit_standing import (
+    ActionClass,
+    get_merit_engine,
+)
+from .security.rbac import has_permission
 
 # CRIT-1: Literal dev-test-token must never grant access in production; gate behind ENABLE_DEV_TOKEN.
 DEV_TEST_TOKEN_LITERAL = "dev-test-token"
@@ -337,18 +340,59 @@ RequiredAuth = Annotated[dict[str, Any], Depends(require_authentication)]
 async def require_permission(
     permission: str,
     auth: Auth,
+    request: Request | None = None,
 ) -> dict[str, Any]:
     """
-    Require a specific permission using the RBAC system.
-    """
-    permissions = auth.get("permissions", set())
-    if has_permission(permissions, permission):
-        return auth
+    Require a specific permission using RBAC + Merit Standing system.
 
-    raise HTTPException(
-        status_code=status.HTTP_403_FORBIDDEN,
-        detail=f"Operation requires '{permission}' permission",
-    )
+    Enforces access by role + scope + merit badge (threshold badges), not role alone.
+    """
+    # First check RBAC permission
+    permissions = auth.get("permissions", set())
+    if not has_permission(permissions, permission):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Operation requires '{permission}' permission",
+        )
+
+    # Then check merit standing
+    entity_id = auth.get("user_id") or auth.get("email", "anonymous")
+    engine = get_merit_engine()
+
+    # Map permission to action class
+    action_class = _map_permission_to_action_class(permission)
+
+    allowed, details = engine.check_permission(entity_id, action_class)
+    if not allowed:
+        logger.warning(
+            "merit_permission_denied entity=%s permission=%s required_badge=%s actual_badge=%s",
+            entity_id,
+            permission,
+            details.get("required_badge"),
+            details.get("actual_badge"),
+        )
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Insufficient merit standing for '{permission}'. "
+            f"Required: {details.get('required_badge')}, "
+            f"Current: {details.get('actual_badge')}",
+        )
+
+    return auth
+
+
+def _map_permission_to_action_class(permission: str) -> ActionClass:
+    """Map RBAC permission to Merit action class."""
+    permission_lower = permission.lower()
+
+    if "admin" in permission_lower or "control" in permission_lower:
+        return ActionClass.CONTROL_ADMIN
+    if "write" in permission_lower or "create" in permission_lower or "delete" in permission_lower:
+        return ActionClass.ACTION_WRITE
+    if "read" in permission_lower or "view" in permission_lower or "analysis" in permission_lower:
+        return ActionClass.ANALYSIS_READ
+
+    return ActionClass.PUBLIC_BASIC
 
 
 async def require_admin(auth: dict[str, Any] = Depends(require_authentication)) -> dict[str, Any]:

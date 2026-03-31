@@ -35,6 +35,13 @@ from starlette import status
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.types import ASGIApp
 
+from application.mothership.security.merit_standing import (
+    ActionClass,
+    MeritStanding,
+    Scope,
+    get_merit_engine,
+)
+
 logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
@@ -48,9 +55,13 @@ DEFAULT_MAX_BODY_BYTES = 512 * 1024  # 512 KB estimated context limit
 PROFIT_MASK_PENALTY_MULTIPLIER = 3  # 3x penalty for profit-masking abuse
 
 # Paths that bypass the gate entirely (health, docs, metrics, enforcement admin)
+# Paths that bypass the gate entirely (minimal infra bypass only)
 BYPASS_PATHS: frozenset[str] = frozenset(
-    {"/health", "/ping", "/metrics", "/docs", "/redoc", "/openapi.json", "/", "/admission"}
+    {"/health", "/ping", "/metrics", "/docs", "/redoc", "/openapi.json", "/"}
 )
+
+# Admission paths that require full merit evaluation (not bypassed)
+ADMISSION_PATHS_PREFIX = "/admission"
 
 # Origins that are allowed through (header: X-Admission-Origin)
 ALLOWED_ORIGINS: frozenset[str] = frozenset({"internal", "mothership", "grid-core", "cli", "mcp", "frontend"})
@@ -242,6 +253,14 @@ class EntityRecord:
     banner_reason: str = ""
     first_seen: float = field(default_factory=time.monotonic)
     last_seen: float = field(default_factory=time.monotonic)
+    # Merit standing for roll-number model
+    merit_standing: MeritStanding | None = None
+
+    def __post_init__(self) -> None:
+        """Ensure merit_standing is initialized."""
+        if self.merit_standing is None:
+            engine = get_merit_engine()
+            self.merit_standing = engine.get_or_create_standing(self.entity_id)
 
     @property
     def violation_count(self) -> int:
@@ -597,6 +616,61 @@ class EntityAttributionEngine:
         reduction_pct = min(record.total_penalty_points, 90) / 100.0
         return max(int(base_budget * (1.0 - reduction_pct)), max(1, base_budget // 10))
 
+    # -- merit standing integration --
+
+    def check_merit_permission(
+        self,
+        entity_id: str,
+        action_class: str,
+        required_scope: str | None = None,
+    ) -> tuple[bool, dict[str, Any]]:
+        """
+        Check entity permission using merit standing model.
+
+        Args:
+            entity_id: Entity to check
+            action_class: ActionClass value (public_basic, analysis_read, action_write, control_admin)
+            required_scope: Optional Scope value (read, write, admin, analysis, control)
+
+        Returns:
+            Tuple of (allowed, details dict)
+        """
+        engine = get_merit_engine()
+
+        try:
+            action = ActionClass(action_class)
+        except ValueError:
+            return False, {"error": f"invalid_action_class: {action_class}"}
+
+        scope: Scope | None = None
+        if required_scope:
+            try:
+                scope = Scope(required_scope)
+            except ValueError:
+                return False, {"error": f"invalid_scope: {required_scope}"}
+
+        return engine.check_permission(entity_id, action, scope)
+
+    def record_successful_action(self, entity_id: str) -> MeritStanding:
+        """Record successful gated action for clean streak tracking."""
+        engine = get_merit_engine()
+        return engine.record_successful_action(entity_id)
+
+    def get_merit_standing(self, entity_id: str) -> MeritStanding | None:
+        """Get merit standing for an entity."""
+        engine = get_merit_engine()
+        return engine.get_standing(entity_id)
+
+    def get_merit_leaderboard(self, limit: int = 100) -> list[dict[str, Any]]:
+        """Get merit leaderboard."""
+        engine = get_merit_engine()
+        return engine.get_leaderboard(limit)
+
+    def apply_review_adjustment(self, entity_id: str, adjustment: int) -> MeritStanding:
+        """Apply manual review adjustment to entity standing."""
+        engine = get_merit_engine()
+        return engine.apply_review_adjustment(entity_id, adjustment)
+
     # -- query interface --
 
     @property
@@ -611,6 +685,11 @@ class EntityAttributionEngine:
         record = self._entities.get(entity_id)
         if not record:
             return {"entity_id": entity_id, "found": False}
+
+        merit_data = {}
+        if record.merit_standing:
+            merit_data = record.merit_standing.to_dict()
+
         return {
             "entity_id": record.entity_id,
             "found": True,
@@ -627,6 +706,7 @@ class EntityAttributionEngine:
                 }
                 for v in record.violations
             ],
+            "merit_standing": merit_data,
         }
 
     def load_entities(self, entities: dict[str, EntityRecord]) -> None:
@@ -798,10 +878,11 @@ class AdmissionGateMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
         path = request.url.path
 
-        # Bypass non-API paths
+        # Bypass non-API paths (tightened: minimal infra bypass only)
         if any(path == bp or path.startswith(bp + "/") for bp in self._bypass_paths):
             return await call_next(request)
 
+        # NOTE: /admission/* paths are no longer bypassed - they go through full merit evaluation
         entity_id = self.attribution.resolve_entity(request)
 
         # --- Gate 0: Banner check (hard block) ---
@@ -901,12 +982,75 @@ class AdmissionGateMiddleware(BaseHTTPMiddleware):
                     metadata={"signals": signals},
                 )
 
+        # --- Gate 4: Merit Standing Check (for protected paths) ---
+        # Determine action class from route metadata (if available) or path
+        action_class = self._resolve_action_class(request, path)
+        required_scope = self._resolve_required_scope(request, path)
+
+        # Check merit permission
+        allowed, permission_details = self.attribution.check_merit_permission(
+            entity_id, action_class, required_scope
+        )
+        if not allowed:
+            return self._reject(
+                entity_id,
+                "ADMISSION_INSUFFICIENT_MERIT",
+                f"Entity '{entity_id}' lacks required merit standing for {action_class}. "
+                f"Current: {permission_details.get('actual_badge', 'unknown')}, "
+                f"Required: {permission_details.get('required_badge', 'unknown')}",
+                status.HTTP_403_FORBIDDEN,
+                ViolationType.ENTITY_BANNERED,  # Using bannered as proxy for insufficient merit
+                metadata=permission_details,
+            )
+
         # --- Admitted ---
         self.attribution.total_admitted += 1
+        # Record successful action for clean streak
+        self.attribution.record_successful_action(entity_id)
+
         remaining = self._tracker.remaining(entity_id, effective_budget=effective_budget)
         response = await call_next(request)
         response.headers["X-Admission-Remaining"] = str(remaining)
         response.headers["X-Entity-Penalty"] = str(record.total_penalty_points)
         response.headers["X-Policy-Billboard"] = self.billboard.summary()
         response.headers["X-Policy-Version"] = BILLBOARD_VERSION
+
+        # Add merit standing headers
+        if record.merit_standing:
+            response.headers["X-Merit-Badge"] = record.merit_standing.badge.value
+            response.headers["X-Merit-Score"] = str(record.merit_standing.score)
+            response.headers["X-Merit-Roll"] = str(record.merit_standing.roll_number)
+
         return response
+
+    def _resolve_action_class(self, request: Request, path: str) -> str:
+        """Resolve action class from route metadata or path patterns."""
+        # Check for explicit action class in request state (set by api_sentinels)
+        action_class = getattr(request.state, "action_class", None)
+        if action_class:
+            return action_class
+
+        # Path-based heuristic
+        if "/admin/" in path or "/control/" in path:
+            return ActionClass.CONTROL_ADMIN.value
+        if "/write/" in path or "/action/" in path or request.method in {"POST", "PUT", "DELETE", "PATCH"}:
+            return ActionClass.ACTION_WRITE.value
+        if "/analysis/" in path or "/read/" in path or request.method == "GET":
+            return ActionClass.ANALYSIS_READ.value
+
+        return ActionClass.PUBLIC_BASIC.value
+
+    def _resolve_required_scope(self, request: Request, path: str) -> str | None:
+        """Resolve required scope from route metadata or path patterns."""
+        # Check for explicit scope in request state (set by api_sentinels)
+        scope = getattr(request.state, "required_scope", None)
+        if scope:
+            return scope
+
+        # Path-based heuristic
+        if "/admin/" in path:
+            return Scope.ADMIN.value
+        if "/write/" in path or "/action/" in path:
+            return Scope.WRITE.value
+
+        return None

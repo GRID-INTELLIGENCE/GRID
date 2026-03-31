@@ -704,6 +704,25 @@ tmp_scan_*.py
 Virtual Environments.MD
 
 # ==========================
+# PLAYWRIGHT / E2E TEST OUTPUTS
+# ==========================
+playwright-report/
+test-results/
+playwright/.cache/
+**/*-snapshots/*/diff.png
+**/*-snapshots/*/actual.png
+**/playwright/.auth/
+
+# ==========================
+# FRONTEND SPECIFIC
+# ==========================
+frontend/.env*.local
+frontend/coverage/
+frontend/.next/
+frontend/out/
+frontend/build/
+
+# ==========================
 # EPHEMERAL TEST & GIT OUTPUTS (prevent root clutter)
 # ==========================
 git*.txt
@@ -726,3 +745,12 @@ scripts/baseline.txt
 scripts/git-workflow/
 resonance_telemetry_events.jsonl
 *.telemetry.jsonl
+
+# ==========================
+# DEPLOYMENT & RELEASE
+# ==========================
+.vercel/
+.terraform.lock.hcl
+*.tfplan
+release-notes-draft.md
+publish-summary.txt

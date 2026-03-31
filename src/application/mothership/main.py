@@ -472,6 +472,19 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
             except Exception as e:
                 logger.warning(f"Could not wire ParasiteGuard to EventBus: {e}")
 
+        # Initialize Merit Standing Engine (must be before admission gate hydration)
+        try:
+            from .security.merit_standing import get_merit_engine
+
+            merit_engine = get_merit_engine()
+            logger.info("Merit standing engine initialized")
+            # Store in app state for access by middleware
+            app.state.merit_engine = merit_engine  # type: ignore[reportAttributeAccessIssue]
+        except Exception as e:
+            logger.error(f"Merit standing engine initialization failed: {e}")
+            if settings.is_production:
+                raise RuntimeError("Merit standing engine must initialize in production") from e
+
         # Hydrate admission gate entities from SQLite (if gate is active)
         if hasattr(app.state, "admission_attribution"):
             try:

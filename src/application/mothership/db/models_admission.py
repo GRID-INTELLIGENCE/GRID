@@ -25,6 +25,16 @@ class AdmissionEntityRow(Base):
     first_seen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     last_seen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
 
+    # Merit standing fields
+    merit_badge: Mapped[str] = mapped_column(String(32), default="B0_RESTRICTED")
+    merit_score: Mapped[int] = mapped_column(Integer, default=45)
+    merit_roll_number: Mapped[int] = mapped_column(Integer, default=0)
+    merit_clean_streak: Mapped[int] = mapped_column(Integer, default=0)
+    merit_clean_streak_bonus: Mapped[int] = mapped_column(Integer, default=0)
+    merit_review_adjustment: Mapped[int] = mapped_column(Integer, default=0)
+    merit_last_reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    merit_last_critical_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
     violations: Mapped[list[AdmissionViolationRow]] = relationship(
         back_populates="entity",
         cascade="all, delete-orphan",

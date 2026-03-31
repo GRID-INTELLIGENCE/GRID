@@ -163,6 +163,56 @@ class PenaltyRevokeRequest(BaseModel):
     reason: str = Field("", description="Reason for revocation")
 
 
+# Merit Standing request/response models
+class MeritStandingResponse(BaseModel):
+    """Merit standing for an entity."""
+
+    entity_id: str
+    badge: str
+    score: int
+    roll_number: int
+    total_penalty_points: int
+    recent_critical_penalty: int
+    clean_streak: int
+    clean_streak_bonus: int
+    review_adjustment: int
+    last_reviewed_at: str | None
+    eligible_scopes: list[str]
+    first_seen_at: str | None
+    last_seen_at: str | None
+    violation_count: int
+    timestamp: str
+
+
+class MeritLeaderboardResponse(BaseModel):
+    """Merit standing leaderboard."""
+
+    entities: list[MeritStandingResponse]
+    count: int
+    timestamp: str
+
+
+class ReviewAdjustRequest(BaseModel):
+    """Request to adjust entity review standing."""
+
+    entity_id: str = Field(..., description="Entity to adjust")
+    adjustment: int = Field(..., ge=-10, le=10, description="Adjustment value -10 to +10")
+    reason: str = Field("", description="Reason for adjustment")
+
+
+class ReviewAdjustResponse(BaseModel):
+    """Response from review adjustment."""
+
+    success: bool
+    entity_id: str
+    adjustment: int
+    new_score: int
+    new_badge: str
+    new_roll_number: int
+    message: str
+    timestamp: str
+
+
 class PenaltyRevokeResponse(BaseModel):
     """Result of penalty revocation."""
 
@@ -175,6 +225,7 @@ class PenaltyRevokeResponse(BaseModel):
     is_bannered: bool
     message: str
     timestamp: str
+
 
 
 # ---------------------------------------------------------------------------
@@ -528,5 +579,129 @@ async def revoke_penalty(request: Request, body: PenaltyRevokeRequest, auth: Adm
         was_bannered=was_bannered,
         is_bannered=record.bannered,
         message=message,
+        timestamp=_now_iso(),
+    )
+
+
+# ---------------------------------------------------------------------------
+# Merit Standing Endpoints
+# ---------------------------------------------------------------------------
+
+
+@router.get(
+    "/standing/{entity_id:path}",
+    response_model=MeritStandingResponse,
+    summary="Get merit standing for an entity",
+    description=(
+        "Returns the full merit standing for an entity including badge, score, "
+        "roll number, eligible scopes, clean streak, and review adjustment."
+    ),
+)
+async def get_merit_standing(request: Request, entity_id: str) -> MeritStandingResponse:
+    attr = _get_attribution(request)
+    standing = attr.get_merit_standing(entity_id)
+
+    if standing is None:
+        raise HTTPException(status_code=404, detail=f"Entity {entity_id} not found")
+
+    return MeritStandingResponse(
+        entity_id=standing.entity_id,
+        badge=standing.badge.value,
+        score=standing.score,
+        roll_number=standing.roll_number,
+        total_penalty_points=standing.total_penalty_points,
+        recent_critical_penalty=standing.recent_critical_penalty,
+        clean_streak=standing.clean_streak,
+        clean_streak_bonus=standing.clean_streak_bonus,
+        review_adjustment=standing.review_adjustment,
+        last_reviewed_at=standing.last_reviewed_at.isoformat() if standing.last_reviewed_at else None,
+        eligible_scopes=[s.value for s in standing.eligible_scopes],
+        first_seen_at=standing.first_seen_at.isoformat() if standing.first_seen_at else None,
+        last_seen_at=standing.last_seen_at.isoformat() if standing.last_seen_at else None,
+        violation_count=standing.violation_count,
+        timestamp=_now_iso(),
+    )
+
+
+@router.get(
+    "/leaderboard",
+    response_model=MeritLeaderboardResponse,
+    summary="Get merit leaderboard",
+    description=(
+        "Returns the ranked merit leaderboard. Entities are ordered by roll number "
+        "(descending score, then lower penalties, then longer clean streak, then earlier first-seen)."
+    ),
+)
+async def get_merit_leaderboard(request: Request, limit: int = 100) -> MeritLeaderboardResponse:
+    attr = _get_attribution(request)
+    standings = attr.get_merit_leaderboard(limit)
+
+    entities = [
+        MeritStandingResponse(
+            entity_id=s["entity_id"],
+            badge=s["badge"],
+            score=s["score"],
+            roll_number=s["roll_number"],
+            total_penalty_points=s["total_penalty_points"],
+            recent_critical_penalty=s["recent_critical_penalty"],
+            clean_streak=s["clean_streak"],
+            clean_streak_bonus=s["clean_streak_bonus"],
+            review_adjustment=s["review_adjustment"],
+            last_reviewed_at=s["last_reviewed_at"],
+            eligible_scopes=s["eligible_scopes"],
+            first_seen_at=s["first_seen_at"],
+            last_seen_at=s["last_seen_at"],
+            violation_count=s["violation_count"],
+            timestamp=_now_iso(),
+        )
+        for s in standings
+    ]
+
+    return MeritLeaderboardResponse(
+        entities=entities,
+        count=len(entities),
+        timestamp=_now_iso(),
+    )
+
+
+@router.post(
+    "/review/adjust",
+    response_model=ReviewAdjustResponse,
+    summary="Apply manual review adjustment",
+    description=(
+        "Apply a manual review adjustment (-10 to +10) to an entity's merit standing. "
+        "Used for twice-weekly review cadence to reward good behavior or penalize issues "
+        "detected outside the automatic gate. Requires admin privileges."
+    ),
+)
+async def apply_review_adjustment(
+    request: Request,
+    body: ReviewAdjustRequest,
+    auth: AdminAuth,
+) -> ReviewAdjustResponse:
+    attr = _get_attribution(request)
+
+    try:
+        standing = attr.apply_review_adjustment(body.entity_id, body.adjustment)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
+    logger.info(
+        "admission_enforcement.review_adjusted entity=%s adjustment=%d new_score=%d badge=%s reason=%s",
+        body.entity_id,
+        body.adjustment,
+        standing.score,
+        standing.badge.value,
+        body.reason,
+    )
+
+    return ReviewAdjustResponse(
+        success=True,
+        entity_id=body.entity_id,
+        adjustment=body.adjustment,
+        new_score=standing.score,
+        new_badge=standing.badge.value,
+        new_roll_number=standing.roll_number,
+        message=f"Review adjustment applied: {body.adjustment:+d} points. New score: {standing.score}",
         timestamp=_now_iso(),
     )

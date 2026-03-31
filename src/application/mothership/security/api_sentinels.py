@@ -818,6 +818,76 @@ def verify_api_against_defaults(
 
 
 # =============================================================================
+# Route Metadata Attachment (for Merit-Driven Auth)
+# =============================================================================
+
+from .merit_standing import ActionClass, Badge, Scope
+
+
+def attach_route_metadata(
+    func: Any,
+    *,
+    action_class: ActionClass = ActionClass.PUBLIC_BASIC,
+    required_badge: Badge | None = None,
+    required_scope: Scope | None = None,
+) -> Any:
+    """
+    Attach merit-driven auth metadata to a route handler.
+
+    This attaches action_class, required_badge, and required_scope to the
+    function's __route_metadata__ attribute, which is consumed by the
+    admission gate middleware for permission checking.
+
+    Args:
+        func: The route handler function to decorate
+        action_class: The action class for this endpoint
+        required_badge: Optional specific badge requirement (defaults from action_class)
+        required_scope: Optional specific scope requirement
+
+    Returns:
+        The decorated function with attached metadata
+    """
+    if not hasattr(func, "__route_metadata__"):
+        func.__route_metadata__ = {}
+
+    func.__route_metadata__["action_class"] = action_class.value
+    func.__route_metadata__["required_badge"] = required_badge.value if required_badge else None
+    func.__route_metadata__["required_scope"] = required_scope.value if required_scope else None
+
+    return func
+
+
+def get_route_metadata(func: Any) -> dict[str, Any]:
+    """
+    Get merit-driven auth metadata from a route handler.
+
+    Returns empty dict if no metadata is attached.
+    """
+    return getattr(func, "__route_metadata__", {})
+
+
+# Merit-driven decorators for convenience
+def public_basic(func: Any) -> Any:
+    """Decorator for public_basic action class."""
+    return attach_route_metadata(func, action_class=ActionClass.PUBLIC_BASIC)
+
+
+def analysis_read(func: Any) -> Any:
+    """Decorator for analysis_read action class."""
+    return attach_route_metadata(func, action_class=ActionClass.ANALYSIS_READ)
+
+
+def action_write(func: Any) -> Any:
+    """Decorator for action_write action class."""
+    return attach_route_metadata(func, action_class=ActionClass.ACTION_WRITE)
+
+
+def control_admin(func: Any) -> Any:
+    """Decorator for control_admin action class."""
+    return attach_route_metadata(func, action_class=ActionClass.CONTROL_ADMIN)
+
+
+# =============================================================================
 # Exports
 # =============================================================================
 
@@ -844,4 +914,11 @@ __all__ = [
     "SecurityAuditResult",
     "audit_endpoint_security",
     "verify_api_against_defaults",
+    # Merit-driven auth
+    "attach_route_metadata",
+    "get_route_metadata",
+    "public_basic",
+    "analysis_read",
+    "action_write",
+    "control_admin",
 ]
