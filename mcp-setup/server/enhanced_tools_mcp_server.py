@@ -1,6 +1,7 @@
 import asyncio
 import json
 import logging
+import os
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -9,6 +10,35 @@ from typing import Any
 # Add GRID to path
 grid_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(grid_root / "src"))
+
+# Path containment: all file operations restricted to GRID workspace root
+# plus any extra roots declared via EXTRA_ALLOWED_ROOTS (colon-separated).
+GRID_ROOT = grid_root
+_extra = os.environ.get("EXTRA_ALLOWED_ROOTS", "")
+ALLOWED_ROOTS: list[Path] = [GRID_ROOT] + [Path(p).resolve() for p in _extra.split(":") if p.strip()]
+
+
+def _is_under(path: Path, root: Path) -> bool:
+    """Check if path is under root (handles symlink resolution)."""
+    try:
+        path.resolve().relative_to(root.resolve())
+        return True
+    except ValueError:
+        return False
+
+
+def _validate_path(target_path: str) -> Path:
+    """Validate that a path is within allowed roots."""
+    original = Path(target_path)
+    resolved = original.resolve()
+    if not original.is_absolute():
+        resolved = (Path.cwd() / original).resolve()
+    if not any(_is_under(resolved, root) for root in ALLOWED_ROOTS):
+        raise PermissionError(
+            f"Path '{target_path}' resolves outside allowed workspace roots ({ALLOWED_ROOTS}). Access denied."
+        )
+    return resolved
+
 
 try:
     from mcp.server import Server
@@ -287,8 +317,8 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> CallToolResult:
 async def handle_performance_profiler(args: dict[str, Any]) -> dict[str, Any]:
     """Handle performance profiling."""
     try:
-        target = _sanitize_target_for_command(args["target"])
-    except ValueError as e:
+        target = _validate_path(_sanitize_target_for_command(args["target"]))
+    except (ValueError, PermissionError) as e:
         return {"success": False, "error": str(e), "target": args.get("target", "")}
     profiler_type = args.get("profiler_type", "cpu")
     args.get("output_format", "json")
@@ -317,8 +347,8 @@ async def handle_performance_profiler(args: dict[str, Any]) -> dict[str, Any]:
 async def handle_security_auditor(args: dict[str, Any]) -> dict[str, Any]:
     """Handle security auditing."""
     try:
-        target = _sanitize_target_for_command(args["target"])
-    except ValueError as e:
+        target = _validate_path(_sanitize_target_for_command(args["target"]))
+    except (ValueError, PermissionError) as e:
         return {"success": False, "error": str(e), "target": args.get("target", "")}
     audit_type = args.get("audit_type", "all")
     severity_level = args.get("severity_level", "medium")
@@ -356,8 +386,8 @@ async def handle_security_auditor(args: dict[str, Any]) -> dict[str, Any]:
 async def handle_test_coverage_analyzer(args: dict[str, Any]) -> dict[str, Any]:
     """Handle test coverage analysis."""
     try:
-        target = _sanitize_target_for_command(args["target"])
-    except ValueError as e:
+        target = _validate_path(_sanitize_target_for_command(args["target"]))
+    except (ValueError, PermissionError) as e:
         return {"success": False, "error": str(e), "target": args.get("target", "")}
     coverage_type = args.get("coverage_type", "line")
     threshold = args.get("threshold", 80.0)
@@ -438,8 +468,8 @@ def _sanitize_target_for_command(target: str, max_length: int = 512) -> str:
 async def handle_documentation_generator(args: dict[str, Any]) -> dict[str, Any]:
     """Handle documentation generation."""
     try:
-        target = _sanitize_target_for_command(args["target"])
-    except ValueError as e:
+        target = _validate_path(_sanitize_target_for_command(args["target"]))
+    except (ValueError, PermissionError) as e:
         return {
             "success": False,
             "target": args.get("target", ""),
@@ -487,8 +517,8 @@ async def handle_documentation_generator(args: dict[str, Any]) -> dict[str, Any]
 async def handle_dependency_health_monitor(args: dict[str, Any]) -> dict[str, Any]:
     """Handle dependency health monitoring."""
     try:
-        target = _sanitize_target_for_command(args["target"])
-    except ValueError as e:
+        target = _validate_path(_sanitize_target_for_command(args["target"]))
+    except (ValueError, PermissionError) as e:
         return {"success": False, "error": str(e), "target": args.get("target", "")}
     check_type = args.get("check_type", "health")
     include_dev = args.get("include_dev", True)
@@ -523,8 +553,8 @@ async def handle_dependency_health_monitor(args: dict[str, Any]) -> dict[str, An
 async def handle_code_quality_gate(args: dict[str, Any]) -> dict[str, Any]:
     """Handle code quality gating."""
     try:
-        target = _sanitize_target_for_command(args["target"])
-    except ValueError as e:
+        target = _validate_path(_sanitize_target_for_command(args["target"]))
+    except (ValueError, PermissionError) as e:
         return {"success": False, "error": str(e), "target": args.get("target", "")}
     quality_metrics = args.get("quality_metrics", ["lint", "complexity", "style", "type_check"])
     fail_threshold = args.get("fail_threshold", 8.0)

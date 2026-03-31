@@ -199,7 +199,7 @@ jobs:
 
       - name: "Run pip-audit Python dependency check"
         run: |
-          uv run pip-audit --desc -f json > pip-audit-report.json || true
+          (uv run pip-audit --desc -f json > pip-audit-report.json) || (echo '[]' > pip-audit-report.json)
           # Fail on critical/high vulnerabilities
           if grep -q '"severity": "critical"\|"severity": "high"' pip-audit-report.json; then
             echo "::error::Critical or high severity Python vulnerabilities found"
@@ -233,7 +233,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Python Dependencies (pip-audit)" >> $GITHUB_STEP_SUMMARY
           if [ -f pip-audit-report.json ]; then
-            python3 -c "import json; data=json.load(open('pip-audit-report.json')); print(f'  - {len(data)} vulnerabilities detected')" >> $GITHUB_STEP_SUMMARY
+            python3 -c "import json; p='pip-audit-report.json'; raw=open(p, encoding='utf-8').read().strip() or '[]'; data=json.loads(raw); print(f'  - {len(data)} vulnerabilities detected')" >> $GITHUB_STEP_SUMMARY
           else
             echo "  - No vulnerabilities detected" >> $GITHUB_STEP_SUMMARY
           fi

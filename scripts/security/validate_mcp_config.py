@@ -6,6 +6,7 @@ Validates that all paths in mcp_config.json are valid and secure.
 """
 
 import json
+import shutil
 import sys
 from pathlib import Path
 from typing import Any
@@ -21,6 +22,29 @@ try:
 except ImportError:
     PATH_MANAGER_AVAILABLE = False
     print("Warning: SecurePathManager not available, using basic validation")
+
+
+def _extract_servers(config: dict[str, Any]) -> list[dict[str, Any]]:
+    """Normalize MCP config into a list of server dictionaries."""
+    if "servers" in config:
+        servers = config.get("servers", [])
+        if isinstance(servers, list):
+            return servers
+        raise ValueError("MCP config 'servers' key must be a list")
+
+    if "mcpServers" in config:
+        mcp_servers = config.get("mcpServers", {})
+        if not isinstance(mcp_servers, dict):
+            raise ValueError("MCP config 'mcpServers' key must be an object")
+
+        normalized_servers: list[dict[str, Any]] = []
+        for server_name, server_config in mcp_servers.items():
+            if not isinstance(server_config, dict):
+                raise ValueError(f"MCP server '{server_name}' config must be an object")
+            normalized_servers.append({"name": server_name, **server_config})
+        return normalized_servers
+
+    raise ValueError("MCP config missing 'servers' or 'mcpServers' key")
 
 
 def validate_mcp_config(config_path: Path | None = None) -> dict[str, Any]:
@@ -55,15 +79,11 @@ def validate_mcp_config(config_path: Path | None = None) -> dict[str, Any]:
         with open(config_path) as f:
             config = json.load(f)
 
-        if "servers" not in config:
-            return {
-                "success": False,
-                "error": "MCP config missing 'servers' key",
-            }
+        servers = _extract_servers(config)
 
         manager = SecurePathManager(base_dir=project_root) if PATH_MANAGER_AVAILABLE else None
 
-        for server in config.get("servers", []):
+        for server in servers:
             server_name = server.get("name", "unknown")
             results["servers_validated"] += 1
             server_issues: list[str] = []
@@ -117,10 +137,13 @@ def validate_mcp_config(config_path: Path | None = None) -> dict[str, Any]:
             if command:
                 try:
                     cmd_path = Path(command)
-                    if not cmd_path.exists():
-                        server_issues.append(f"Command executable does not exist: {command}")
-                    elif not cmd_path.is_file():
-                        server_issues.append(f"Command is not a file: {command}")
+                    if cmd_path.is_absolute() or "/" in command:
+                        if not cmd_path.exists():
+                            server_issues.append(f"Command executable does not exist: {command}")
+                        elif not cmd_path.is_file():
+                            server_issues.append(f"Command is not a file: {command}")
+                    elif shutil.which(command) is None:
+                        server_issues.append(f"Command executable not found in PATH: {command}")
                 except Exception as e:
                     server_issues.append(f"Invalid command path '{command}': {e}")
 

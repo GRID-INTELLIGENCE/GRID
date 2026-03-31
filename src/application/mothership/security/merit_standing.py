@@ -8,6 +8,7 @@ scopes (demotion), with twice-weekly manual bonus/penalty review adjustments.
 
 from __future__ import annotations
 
+import hashlib
 import logging
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
@@ -15,6 +16,13 @@ from enum import StrEnum
 from typing import Any
 
 logger = logging.getLogger(__name__)
+
+
+def _entity_fingerprint(entity_id: str) -> str:
+    """Non-reversible, log-safe identifier for entity ids."""
+    digest = hashlib.sha256(entity_id.encode("utf-8", errors="replace")).hexdigest()
+    return digest[:12]
+
 
 # ---------------------------------------------------------------------------
 # Enums and Constants
@@ -100,7 +108,10 @@ class MeritStanding:
     """
 
     entity_id: str
-    badge: Badge = Badge.B0_RESTRICTED  # Baseline: all new entities start restricted
+    # Baseline: new entities start at the B1 threshold with READ/ANALYSIS scopes.
+    # This matches the documented "generous baseline" and avoids a contradictory
+    # state where score==45 but badge remains B0_RESTRICTED.
+    badge: Badge = Badge.B1_TRUSTED
     score: int = 45  # Starting at B1 threshold for new entities (generous baseline)
     roll_number: int = 0  # Descending rank (higher = better standing)
 
@@ -184,10 +195,12 @@ class MeritScoringEngine:
         self._standings: dict[str, MeritStanding] = {}
 
     def get_or_create_standing(self, entity_id: str) -> MeritStanding:
-        """Get existing standing or create new with B0_RESTRICTED baseline."""
+        """Get existing standing or create new with score-derived badge."""
         if entity_id not in self._standings:
-            self._standings[entity_id] = MeritStanding(entity_id=entity_id)
-            logger.info("merit_standing.created entity=%s badge=%s", entity_id, Badge.B0_RESTRICTED)
+            standing = MeritStanding(entity_id=entity_id)
+            standing.badge = self._calculate_badge(standing)
+            standing._update_eligible_scopes()
+            self._standings[entity_id] = standing
         return self._standings[entity_id]
 
     def get_standing(self, entity_id: str) -> MeritStanding | None:
@@ -224,8 +237,8 @@ class MeritScoringEngine:
         self._recalculate_roll_numbers()
 
         logger.info(
-            "merit_standing.violation_recorded entity=%s points=%d critical=%s new_score=%d badge=%s",
-            entity_id,
+            "merit_standing.violation_recorded entity_fp=%s points=%d critical=%s new_score=%d badge=%s",
+            _entity_fingerprint(entity_id),
             penalty_points,
             is_critical,
             standing.score,
@@ -274,8 +287,8 @@ class MeritScoringEngine:
         self._recalculate_roll_numbers()
 
         logger.info(
-            "merit_standing.review_adjusted entity=%s adjustment=%d new_score=%d",
-            entity_id,
+            "merit_standing.review_adjusted entity_fp=%s adjustment=%d new_score=%d",
+            _entity_fingerprint(entity_id),
             adjustment,
             standing.score,
         )
@@ -315,8 +328,8 @@ class MeritScoringEngine:
             standing.badge = new_badge
             standing._update_eligible_scopes()
             logger.info(
-                "merit_standing.badge_changed entity=%s old=%s new=%s score=%d",
-                standing.entity_id,
+                "merit_standing.badge_changed entity_fp=%s old=%s new=%s score=%d",
+                _entity_fingerprint(standing.entity_id),
                 old_badge.value,
                 new_badge.value,
                 standing.score,
@@ -395,7 +408,9 @@ class MeritScoringEngine:
         required_scopes = ACTION_CLASS_SCOPE_REQUIREMENTS[action_class]
 
         # Check badge level
-        badge_values = {b: i for i, b in enumerate([Badge.B0_RESTRICTED, Badge.B1_TRUSTED, Badge.B2_VERIFIED, Badge.B3_PRIVILEGED])}
+        badge_values = {
+            b: i for i, b in enumerate([Badge.B0_RESTRICTED, Badge.B1_TRUSTED, Badge.B2_VERIFIED, Badge.B3_PRIVILEGED])
+        }
         has_badge = badge_values[standing.badge] >= badge_values[required_badge]
 
         # Check scope eligibility

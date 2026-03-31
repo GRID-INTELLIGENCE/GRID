@@ -1,3 +1,20 @@
+"""DEPRECATED: Use rag_mcp_server.py instead.
+
+This server is superseded by the unified RAG MCP server at rag_mcp_server.py,
+which consolidates grid_rag_mcp_server.py and enhanced_rag_server.py into a
+single endpoint with 11 tools, runtime config hotloading (rag_configure),
+session management, and path containment.
+
+Migration:
+  - Replace command path with: mcp-setup/server/rag_mcp_server.py
+  - All tools from this server are available under the same names (rag_ prefix)
+  - enhanced_rag_server tools are available as rag_create_session, rag_get_session,
+    rag_delete_session, rag_conversational_query
+  - New tool: rag_configure for runtime config hotloading
+
+This file will be removed in a future release.
+"""
+
 import asyncio
 import json
 import logging

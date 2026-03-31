@@ -1,3 +1,19 @@
+"""DEPRECATED: Use rag_mcp_server.py instead.
+
+This server is superseded by the unified RAG MCP server at
+mcp-setup/server/rag_mcp_server.py, which consolidates this module and
+grid_rag_mcp_server.py into a single endpoint.
+
+Migration:
+  - Replace `python -m grid.mcp.enhanced_rag_server` with
+    `python mcp-setup/server/rag_mcp_server.py`
+  - Session tools: rag_create_session, rag_get_session, rag_delete_session
+  - Conversational query: rag_conversational_query (with session_id param)
+  - Runtime config: rag_configure (new)
+
+This module will be removed in a future release.
+"""
+
 VEISON = "v2.2.0"
 #!/usr/bin/env python3
 """
