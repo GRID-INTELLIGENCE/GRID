@@ -23,6 +23,7 @@ def _entity_fingerprint(entity_id: str) -> str:
     digest = hashlib.sha256(entity_id.encode("utf-8", errors="replace")).hexdigest()
     return digest[:12]
 
+
 # ---------------------------------------------------------------------------
 # Enums and Constants
 # ---------------------------------------------------------------------------
