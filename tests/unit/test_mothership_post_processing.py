@@ -396,28 +396,30 @@ class TestBudgetGate:
 class TestOriginGate:
     def test_no_origin_header_passes(self) -> None:
         app = _build_app()
-        with TestClient(app) as client:
+        with TestClient(app, headers=_admitted_headers()) as client:
             r = client.post(_intelligence_url(), json=_valid_payload())
             assert r.status_code == 200
 
     def test_allowed_origins_pass(self) -> None:
         app = _build_app()
+        base_headers = _admitted_headers()
         with TestClient(app) as client:
             for origin in ALLOWED_ORIGINS:
                 r = client.post(
                     _intelligence_url(),
                     json=_valid_payload(),
-                    headers={"X-Admission-Origin": origin},
+                    headers={**base_headers, "X-Admission-Origin": origin},
                 )
                 assert r.status_code == 200, f"origin {origin!r} should pass"
 
     def test_unknown_origin_blocked_with_entity_attribution(self) -> None:
         app = _build_app()
+        base_headers = _admitted_headers()
         with TestClient(app) as client:
             r = client.post(
                 _intelligence_url(),
                 json=_valid_payload(),
-                headers={"X-Admission-Origin": "sketchy-api.example.com"},
+                headers={**base_headers, "X-Admission-Origin": "sketchy-api.example.com"},
             )
             assert r.status_code == 403
             body = r.json()
@@ -434,13 +436,13 @@ class TestOriginGate:
 class TestContextOverflowGate:
     def test_small_payload_passes(self) -> None:
         app = _build_app(context_token_ceiling=25_000)
-        with TestClient(app) as client:
+        with TestClient(app, headers=_admitted_headers()) as client:
             r = client.post(_intelligence_url(), json=_valid_payload())
             assert r.status_code == 200
 
     def test_oversized_payload_rejected(self) -> None:
         app = _build_app(context_token_ceiling=100)
-        with TestClient(app) as client:
+        with TestClient(app, headers=_admitted_headers()) as client:
             big_payload = {"data": {"filler": "x" * 2000}, "context": {}}
             r = client.post(_intelligence_url(), json=big_payload)
             assert r.status_code == 422
@@ -455,41 +457,43 @@ class TestContextOverflowGate:
 class TestStructureGate:
     def test_valid_intelligence_payload_passes(self) -> None:
         app = _build_app()
-        with TestClient(app) as client:
+        with TestClient(app, headers=_admitted_headers()) as client:
             r = client.post(_intelligence_url(), json=_valid_payload())
             assert r.status_code == 200
 
     def test_intelligence_payload_missing_data_key_rejected(self) -> None:
         app = _build_app()
-        with TestClient(app) as client:
+        with TestClient(app, headers=_admitted_headers()) as client:
             r = client.post(_intelligence_url(), json={"context": {}, "random": True})
             assert r.status_code == 422
             assert r.json()["error"]["code"] == "ADMISSION_MISSING_STRUCTURE"
 
     def test_non_intelligence_path_skips_data_key_check(self) -> None:
         app = _build_app()
-        with TestClient(app) as client:
+        with TestClient(app, headers=_admitted_headers()) as client:
             r = client.post("/api/v1/other/endpoint", json={"anything": "goes"})
             assert r.status_code == 200
 
     def test_invalid_json_body_rejected(self) -> None:
         app = _build_app()
+        base_headers = _admitted_headers()
         with TestClient(app) as client:
             r = client.post(
                 _intelligence_url(),
                 content=b"not json {{{",
-                headers={"Content-Type": "application/json"},
+                headers={**base_headers, "Content-Type": "application/json"},
             )
             assert r.status_code == 422
             assert r.json()["error"]["code"] == "ADMISSION_INVALID_BODY"
 
     def test_structure_enforcement_can_be_disabled(self) -> None:
         app = _build_app(enforce_structure=False)
+        base_headers = _admitted_headers()
         with TestClient(app, raise_server_exceptions=False) as client:
             r = client.post(
                 _intelligence_url(),
                 content=b"not json {{{",
-                headers={"Content-Type": "application/json"},
+                headers={**base_headers, "Content-Type": "application/json"},
             )
             if r.status_code >= 400:
                 body = r.json() if r.headers.get("content-type", "").startswith("application/json") else {}
@@ -504,7 +508,7 @@ class TestStructureGate:
 class TestProfitMaskGateHTTP:
     def test_profit_mask_signal_in_payload_blocked(self) -> None:
         app = _build_app()
-        with TestClient(app) as client:
+        with TestClient(app, headers=_admitted_headers()) as client:
             payload = {"data": {"strategy": "cost_cutting"}, "context": {}}
             r = client.post(_intelligence_url(), json=payload)
             assert r.status_code == 403
@@ -514,7 +518,7 @@ class TestProfitMaskGateHTTP:
 
     def test_bypass_safety_signal_blocked(self) -> None:
         app = _build_app()
-        with TestClient(app) as client:
+        with TestClient(app, headers=_admitted_headers()) as client:
             payload = {"data": {"mode": "bypass_safety"}, "context": {}}
             r = client.post(_intelligence_url(), json=payload)
             assert r.status_code == 403
@@ -522,7 +526,7 @@ class TestProfitMaskGateHTTP:
 
     def test_clean_payload_passes(self) -> None:
         app = _build_app()
-        with TestClient(app) as client:
+        with TestClient(app, headers=_admitted_headers()) as client:
             payload = {"data": {"query": "legitimate analysis"}, "context": {}}
             r = client.post(_intelligence_url(), json=payload)
             assert r.status_code == 200
@@ -530,7 +534,7 @@ class TestProfitMaskGateHTTP:
     def test_profit_mask_accumulates_and_banners(self) -> None:
         """Two profit-mask violations (45 pts each) should exceed 50-point banner threshold."""
         app = _build_app(banner_threshold=50)
-        with TestClient(app) as client:
+        with TestClient(app, headers=_admitted_headers()) as client:
             payload = {"data": {"mode": "skip_validation"}, "context": {}}
 
             r1 = client.post(_intelligence_url(), json=payload)
@@ -544,7 +548,7 @@ class TestProfitMaskGateHTTP:
     def test_bannered_entity_hard_blocked_on_clean_request(self) -> None:
         """Once bannered, even clean requests are blocked."""
         app = _build_app(banner_threshold=50)
-        with TestClient(app) as client:
+        with TestClient(app, headers=_admitted_headers()) as client:
             # Trigger banner with profit-mask abuse
             payload = {"data": {"mode": "unlimited_quota"}, "context": {}}
             client.post(_intelligence_url(), json=payload)  # 45 pts
@@ -564,7 +568,7 @@ class TestProfitMaskGateHTTP:
 class TestLobbyingCorruptionScenario:
     def test_lobbyist_exhausts_budget_starving_legitimate_parties(self) -> None:
         app = _build_app(call_budget=5)
-        with TestClient(app) as client:
+        with TestClient(app, headers=_admitted_headers()) as client:
             for i in range(5):
                 r = client.post(_intelligence_url(), json=_valid_payload(blended=0.1 * i))
                 assert r.status_code == 200
@@ -573,18 +577,19 @@ class TestLobbyingCorruptionScenario:
 
     def test_rogue_origin_never_reaches_pipeline(self) -> None:
         app = _build_app(call_budget=100)
+        base_headers = _admitted_headers()
         with TestClient(app) as client:
             for origin in ["unknown-api.io", "sketchy-llm.example.com", "rogue-service"]:
                 r = client.post(
                     _intelligence_url(),
                     json=_valid_payload(),
-                    headers={"X-Admission-Origin": origin},
+                    headers={**base_headers, "X-Admission-Origin": origin},
                 )
                 assert r.status_code == 403
 
     def test_context_bomb_rejected(self) -> None:
         app = _build_app(context_token_ceiling=500)
-        with TestClient(app) as client:
+        with TestClient(app, headers=_admitted_headers()) as client:
             bomb = {"data": {"filler": "A" * 10_000}, "context": {}}
             r = client.post(_intelligence_url(), json=bomb)
             assert r.status_code == 422
@@ -592,7 +597,7 @@ class TestLobbyingCorruptionScenario:
 
     def test_bogus_payload_flood_rejected(self) -> None:
         app = _build_app(call_budget=100)
-        with TestClient(app) as client:
+        with TestClient(app, headers=_admitted_headers()) as client:
             for payload in [
                 {"random": "noise"},
                 {"tool_name": "fake"},
@@ -611,19 +616,20 @@ class TestLobbyingCorruptionScenario:
         intentional: persistent violators lose budget faster.
         """
         app = _build_app(call_budget=10, banner_threshold=999)
+        base_headers = _admitted_headers()
         with TestClient(app) as client:
             # Trigger 3 origin violations → 30 penalty points
             for _ in range(3):
                 client.post(
                     _intelligence_url(),
                     json=_valid_payload(),
-                    headers={"X-Admission-Origin": "bad-origin"},
+                    headers={**base_headers, "X-Admission-Origin": "bad-origin"},
                 )
 
             # With penalty, fewer than 10 calls should be admitted
             admitted = 0
             for _ in range(10):
-                r = client.post(_intelligence_url(), json=_valid_payload())
+                r = client.post(_intelligence_url(), json=_valid_payload(), headers=base_headers)
                 if r.status_code == 200:
                     admitted += 1
 
@@ -638,7 +644,7 @@ class TestLobbyingCorruptionScenario:
         """Entity disguises profit-maximization as 'cost_optimization'."""
         store = _make_mock_knowledge_store()
         app = _build_app(banner_threshold=50, knowledge_store=store)
-        with TestClient(app) as client:
+        with TestClient(app, headers=_admitted_headers()) as client:
             payload = {
                 "data": {"optimization": "cost_optimization"},
                 "context": {"priority": "efficiency_override"},
@@ -662,11 +668,12 @@ class TestKnowledgeStoreEmissionHTTP:
     def test_violation_emits_to_store_via_middleware(self) -> None:
         store = _make_mock_knowledge_store()
         app = _build_app(knowledge_store=store)
+        base_headers = _admitted_headers()
         with TestClient(app) as client:
             client.post(
                 _intelligence_url(),
                 json=_valid_payload(),
-                headers={"X-Admission-Origin": "rogue"},
+                headers={**base_headers, "X-Admission-Origin": "rogue"},
             )
         # Actor entity + Event entity = 2 store_entity calls
         assert store.store_entity.call_count == 2
@@ -676,12 +683,13 @@ class TestKnowledgeStoreEmissionHTTP:
     def test_banner_emits_decision_to_store_via_middleware(self) -> None:
         store = _make_mock_knowledge_store()
         app = _build_app(banner_threshold=10, knowledge_store=store)
+        base_headers = _admitted_headers()
         with TestClient(app) as client:
             # Single origin violation = 10 pts = banner
             client.post(
                 _intelligence_url(),
                 json=_valid_payload(),
-                headers={"X-Admission-Origin": "rogue"},
+                headers={**base_headers, "X-Admission-Origin": "rogue"},
             )
         # Violation: actor + event (2) + banner: decision (1) = 3
         assert store.store_entity.call_count == 3
@@ -697,7 +705,7 @@ class TestKnowledgeStoreEmissionHTTP:
 class TestCoherenceUnderLoad:
     def test_all_admitted_responses_have_success_flag(self) -> None:
         app = _build_app(call_budget=20)
-        with TestClient(app) as client:
+        with TestClient(app, headers=_admitted_headers()) as client:
             for i in range(15):
                 r = client.post(_intelligence_url(), json=_valid_payload(blended=0.05 * i))
                 if r.status_code == 200:
@@ -706,7 +714,7 @@ class TestCoherenceUnderLoad:
 
     def test_admitted_requests_echo_payload(self) -> None:
         app = _build_app(call_budget=10)
-        with TestClient(app) as client:
+        with TestClient(app, headers=_admitted_headers()) as client:
             payload = _valid_payload(blended=0.42)
             r = client.post(_intelligence_url(), json=payload)
             assert r.status_code == 200
@@ -714,7 +722,7 @@ class TestCoherenceUnderLoad:
 
     def test_remaining_header_decrements(self) -> None:
         app = _build_app(call_budget=5)
-        with TestClient(app) as client:
+        with TestClient(app, headers=_admitted_headers()) as client:
             remainders = []
             for _ in range(5):
                 r = client.post(_intelligence_url(), json=_valid_payload())
@@ -811,7 +819,7 @@ class TestPolicyBillboard:
 
     def test_admitted_response_has_policy_headers(self) -> None:
         app = _build_app()
-        with TestClient(app) as client:
+        with TestClient(app, headers=_admitted_headers()) as client:
             r = client.post(_intelligence_url(), json=_valid_payload())
             assert r.status_code == 200
             assert "X-Policy-Billboard" in r.headers
@@ -822,11 +830,12 @@ class TestPolicyBillboard:
         """Every rejection carries the full policy snapshot so the entity
         knows why they were rejected and what the rules are."""
         app = _build_app()
+        base_headers = _admitted_headers()
         with TestClient(app) as client:
             r = client.post(
                 _intelligence_url(),
                 json=_valid_payload(),
-                headers={"X-Admission-Origin": "rogue-origin"},
+                headers={**base_headers, "X-Admission-Origin": "rogue-origin"},
             )
             assert r.status_code == 403
             body = r.json()
@@ -841,11 +850,12 @@ class TestPolicyBillboard:
 
     def test_rejected_response_has_policy_header(self) -> None:
         app = _build_app()
+        base_headers = _admitted_headers()
         with TestClient(app) as client:
             r = client.post(
                 _intelligence_url(),
                 json=_valid_payload(),
-                headers={"X-Admission-Origin": "rogue"},
+                headers={**base_headers, "X-Admission-Origin": "rogue"},
             )
             assert r.status_code == 403
             assert "X-Policy-Billboard" in r.headers
@@ -857,7 +867,7 @@ class TestPenaltyTierClassification:
     def test_first_violation_classified_as_runtime_mistake(self) -> None:
         """First-time violation = runtime mistake (1x, correctable)."""
         app = _build_app()
-        with TestClient(app) as client:
+        with TestClient(app, headers=_admitted_headers()) as client:
             r = client.post(_intelligence_url(), json={"context": {}, "no_data": True})
             assert r.status_code == 422
             body = r.json()
@@ -866,7 +876,7 @@ class TestPenaltyTierClassification:
     def test_repeated_violations_classified_as_environment_pollution(self) -> None:
         """Second+ violation = environment pollution (compounding)."""
         app = _build_app(call_budget=100)
-        with TestClient(app) as client:
+        with TestClient(app, headers=_admitted_headers()) as client:
             # First violation
             client.post(_intelligence_url(), json={"context": {}, "no_data": True})
             # Second violation — now has history + points
@@ -878,7 +888,7 @@ class TestPenaltyTierClassification:
     def test_profit_masking_classified_as_intentional_scheming(self) -> None:
         """Profit-mask signal = intentional scheming (3x)."""
         app = _build_app()
-        with TestClient(app) as client:
+        with TestClient(app, headers=_admitted_headers()) as client:
             payload = {"data": {"strategy": "cost_cutting"}, "context": {}}
             r = client.post(_intelligence_url(), json=payload)
             assert r.status_code == 403
@@ -890,7 +900,7 @@ class TestPenaltyTierClassification:
         """The tier_description in the response matches the billboard text."""
         bb = PolicyBillboard()
         app = _build_app()
-        with TestClient(app) as client:
+        with TestClient(app, headers=_admitted_headers()) as client:
             # Runtime mistake
             r = client.post(_intelligence_url(), json={"context": {}, "bad": True})
             assert r.json()["tier_description"] == bb.tier_runtime_mistake

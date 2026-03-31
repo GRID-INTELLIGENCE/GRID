@@ -54,9 +54,12 @@ DEFAULT_CONTEXT_TOKEN_CEILING = 25_000
 DEFAULT_MAX_BODY_BYTES = 512 * 1024  # 512 KB estimated context limit
 PROFIT_MASK_PENALTY_MULTIPLIER = 3  # 3x penalty for profit-masking abuse
 
-# Paths that bypass the gate entirely (health, docs, metrics, enforcement admin)
-# Paths that bypass the gate entirely (minimal infra bypass only)
-BYPASS_PATHS: frozenset[str] = frozenset({"/health", "/ping", "/metrics", "/docs", "/redoc", "/openapi.json", "/"})
+# Paths that bypass the gate entirely (minimal infra + self-observation endpoints).
+# `/admission/*` endpoints exist to observe and operate the gate; they should not
+# consume budget or be blocked by the same gate they are inspecting.
+BYPASS_PATHS: frozenset[str] = frozenset(
+    {"/health", "/ping", "/metrics", "/docs", "/redoc", "/openapi.json", "/admission", "/"}
+)
 
 # Admission paths that require full merit evaluation (not bypassed)
 ADMISSION_PATHS_PREFIX = "/admission"
@@ -880,7 +883,6 @@ class AdmissionGateMiddleware(BaseHTTPMiddleware):
         if any(path == bp or path.startswith(bp + "/") for bp in self._bypass_paths):
             return await call_next(request)
 
-        # NOTE: /admission/* paths are no longer bypassed - they go through full merit evaluation
         entity_id = self.attribution.resolve_entity(request)
 
         # --- Gate 0: Banner check (hard block) ---
