@@ -18,7 +18,6 @@ from application.mothership.security.merit_standing import (
     get_merit_engine,
 )
 
-
 # ---------------------------------------------------------------------------
 # Badge and Threshold Tests
 # ---------------------------------------------------------------------------
@@ -82,12 +81,12 @@ class TestActionClassRequirements:
 
 class TestMeritStanding:
     def test_new_entity_starts_b0(self) -> None:
-        """New entities start with B0_RESTRICTED badge."""
+        """New entities start with B1_TRUSTED badge baseline."""
         standing = MeritStanding(entity_id="test-entity")
-        assert standing.badge == Badge.B0_RESTRICTED
+        assert standing.badge == Badge.B1_TRUSTED
 
     def test_new_entity_default_score(self) -> None:
-        """New entities have default score of 45 (B1 threshold, but B0 due to badge)."""
+        """New entities have default score of 45 (B1 threshold baseline)."""
         standing = MeritStanding(entity_id="test-entity")
         assert standing.score == 45
 
@@ -115,7 +114,7 @@ class TestMeritStanding:
         data = standing.to_dict()
 
         assert data["entity_id"] == "test-entity"
-        assert data["badge"] == "B0_RESTRICTED"
+        assert data["badge"] == "B1_TRUSTED"
         assert "score" in data
         assert "roll_number" in data
         assert "eligible_scopes" in data
@@ -134,7 +133,7 @@ class TestMeritScoringEngine:
 
         assert standing is not None
         assert standing.entity_id == "new-entity"
-        assert standing.badge == Badge.B0_RESTRICTED
+        assert standing.badge == Badge.B1_TRUSTED
 
     def test_get_standing_returns_none_for_unknown(self) -> None:
         """Engine returns None for unknown entities without creating."""
@@ -203,7 +202,6 @@ class TestMeritScoringEngine:
         standing = engine.get_or_create_standing("entity-a")
 
         # Initial score is 100 for new entity (100 - 0 - 0 + 0 + 0)
-        initial_score = standing.score
         standing = engine.apply_review_adjustment("entity-a", adjustment=5)
 
         # Score = 100 + 5 = 105, clamped to 100
@@ -470,9 +468,7 @@ class TestPermissionCheck:
         standing.badge = Badge.B2_VERIFIED
         standing.eligible_scopes = {Scope.READ, Scope.WRITE}
 
-        allowed, details = engine.check_permission(
-            "entity-a", ActionClass.ACTION_WRITE, required_scope=Scope.WRITE
-        )
+        allowed, details = engine.check_permission("entity-a", ActionClass.ACTION_WRITE, required_scope=Scope.WRITE)
         assert allowed is True
         assert details["has_specific_scope"] is True
 

@@ -39,7 +39,6 @@ site.main()
 
 try:
     from mcp.server import Server
-    from mcp.server.models import InitializationOptions
     from mcp.server.stdio import stdio_server
     from mcp.types import (
         CallToolResult,
@@ -57,7 +56,6 @@ except ImportError:
 
 try:
     from tools.rag import RAGConfig, RAGEngine
-    from tools.rag.config import ModelMode
     from tools.rag.conversational_rag import ConversationalRAGEngine, create_conversational_rag_engine
     from tools.rag.on_demand_engine import OnDemandRAGEngine
 except ImportError:
