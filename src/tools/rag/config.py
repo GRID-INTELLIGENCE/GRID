@@ -1,8 +1,10 @@
 """Configuration for RAG system."""
 
+import dataclasses
 import os
 from dataclasses import dataclass
 from enum import StrEnum
+from typing import Any
 
 # Load .env file if present, but respect GRID_QUIET mode which may have set env vars
 # that shouldn't be overridden (e.g., USE_DATABRICKS=false for quiet CLI operation)
@@ -184,3 +186,68 @@ class RAGConfig:
                 f"but embedding_provider={self.embedding_provider}. "
                 "Set RAG_EMBEDDING_PROVIDER=ollama (or huggingface/simple)."
             )
+
+    @classmethod
+    def from_dict(cls, overrides: dict[str, Any] | None = None) -> "RAGConfig":
+        """Create configuration from a dict of runtime overrides.
+
+        Falls back to env vars for any field not specified. This enables
+        per-session hotloading without requiring MCP server restarts.
+
+        Usage:
+            config = RAGConfig.from_dict({
+                "embedding_model": "nomic-embed-text-v2-moe:latest",
+                "llm_model_local": "ministral-3:latest",
+                "vector_store_path": "/custom/path",
+            })
+        """
+        if not overrides:
+            return cls.from_env()
+
+        base = cls.from_env()
+        valid_fields = {f.name for f in dataclasses.fields(cls)}
+        filtered = {k: v for k, v in overrides.items() if k in valid_fields}
+
+        # Convert string enums
+        if "embedding_mode" in filtered and isinstance(filtered["embedding_mode"], str):
+            filtered["embedding_mode"] = ModelMode(filtered["embedding_mode"])
+        if "llm_mode" in filtered and isinstance(filtered["llm_mode"], str):
+            filtered["llm_mode"] = ModelMode(filtered["llm_mode"])
+
+        # Convert string booleans
+        for bool_field in (
+            "cache_enabled",
+            "use_hybrid",
+            "use_reranker",
+            "conversation_enabled",
+            "include_conversation_history",
+            "multi_hop_enabled",
+            "use_intelligent_rag",
+        ):
+            if bool_field in filtered and isinstance(filtered[bool_field], str):
+                filtered[bool_field] = filtered[bool_field].lower() in ("true", "1", "yes")
+
+        # Convert string integers
+        for int_field in (
+            "chunk_size",
+            "chunk_overlap",
+            "top_k",
+            "max_context_length",
+            "cache_size",
+            "cache_ttl",
+            "reranker_top_k",
+            "max_concurrent_embeddings",
+            "embedding_batch_size",
+            "conversation_memory_size",
+            "conversation_context_window",
+            "multi_hop_max_depth",
+        ):
+            if int_field in filtered and isinstance(filtered[int_field], str):
+                filtered[int_field] = int(filtered[int_field])
+
+        # Convert string floats
+        for float_field in ("similarity_threshold",):
+            if float_field in filtered and isinstance(filtered[float_field], str):
+                filtered[float_field] = float(filtered[float_field])
+
+        return dataclasses.replace(base, **filtered)

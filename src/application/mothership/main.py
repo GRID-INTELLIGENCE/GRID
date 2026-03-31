@@ -934,6 +934,15 @@ The API supports multiple authentication methods:
     app.include_router(safety_router)
     logger.info("Safety enforcement API endpoints registered")
 
+    # RAG streaming endpoints (conversational query, sessions, WebSocket, stats)
+    try:
+        from .routers.rag_streaming import router as rag_router
+
+        app.include_router(rag_router, prefix="/rag", tags=["rag"])
+        logger.info("RAG streaming API endpoints registered at /rag/*")
+    except Exception as e:
+        logger.warning("RAG streaming router not available: %s", e)
+
     app.include_router(api_router)
 
     # ==========================================================================

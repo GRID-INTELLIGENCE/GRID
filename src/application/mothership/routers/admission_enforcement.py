@@ -32,6 +32,9 @@ from ..middleware.admission_gate import (
     PolicyBillboard,
     ViolationType,
 )
+from ..security.merit_standing import ActionClass as MeritActionClass
+from ..security.merit_standing import Scope as MeritScope
+from ..security.merit_standing import get_merit_engine
 
 logger = logging.getLogger(__name__)
 
@@ -106,6 +109,35 @@ class ComplianceCheckRequest(BaseModel):
     headers: dict[str, str] = Field(default_factory=dict, description="Headers to scan for profit-mask signals")
     entity_id: str | None = Field(None, description="Entity ID for context (optional)")
     target_path: str = Field("/api/v1/intelligence/process", description="Simulated request path")
+
+
+class PermissionCheckRequest(BaseModel):
+    """Permission check request for merit standing gate."""
+
+    entity_id: str = Field(..., description="Entity identifier (e.g., mcp:server:session)")
+    action_class: str = Field(..., description="Action class: public_basic, analysis_read, action_write, control_admin")
+    required_scope: str | None = Field(
+        None,
+        description="Optional specific scope required: read, write, admin, analysis, control",
+    )
+
+
+class PermissionCheckResponse(BaseModel):
+    """Merit standing permission decision (shape matches @cascade/shared-types PermissionCheckResult)."""
+
+    allowed: bool
+    entity_id: str
+    action_class: str
+    required_badge: str
+    actual_badge: str
+    has_badge: bool
+    required_scopes: list[str]
+    eligible_scopes: list[str]
+    has_scopes: bool
+    required_scope: str | None = None
+    has_specific_scope: bool
+    score: int
+    roll_number: int
 
 
 class ComplianceCheckResponse(BaseModel):
@@ -453,6 +485,34 @@ async def check_compliance(request: Request, body: ComplianceCheckRequest) -> Co
         policy=policy_snap,
         timestamp=_now_iso(),
     )
+
+
+@router.post(
+    "/check-permission",
+    response_model=PermissionCheckResponse,
+    summary="Check merit permission for an entity",
+    description=(
+        "Returns the merit standing permission decision for an entity. "
+        "This endpoint is used by MCP servers to fail-closed on gated tools."
+    ),
+)
+async def check_permission(body: PermissionCheckRequest) -> PermissionCheckResponse:
+    engine = get_merit_engine()
+
+    try:
+        action = MeritActionClass(body.action_class)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=f"invalid_action_class: {body.action_class}") from e
+
+    scope: MeritScope | None = None
+    if body.required_scope:
+        try:
+            scope = MeritScope(body.required_scope)
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=f"invalid_scope: {body.required_scope}") from e
+
+    _allowed, details = engine.check_permission(body.entity_id, action, scope)
+    return PermissionCheckResponse(**details)
 
 
 @router.post(

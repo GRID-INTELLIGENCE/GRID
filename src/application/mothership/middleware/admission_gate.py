@@ -56,9 +56,7 @@ PROFIT_MASK_PENALTY_MULTIPLIER = 3  # 3x penalty for profit-masking abuse
 
 # Paths that bypass the gate entirely (health, docs, metrics, enforcement admin)
 # Paths that bypass the gate entirely (minimal infra bypass only)
-BYPASS_PATHS: frozenset[str] = frozenset(
-    {"/health", "/ping", "/metrics", "/docs", "/redoc", "/openapi.json", "/"}
-)
+BYPASS_PATHS: frozenset[str] = frozenset({"/health", "/ping", "/metrics", "/docs", "/redoc", "/openapi.json", "/"})
 
 # Admission paths that require full merit evaluation (not bypassed)
 ADMISSION_PATHS_PREFIX = "/admission"
@@ -988,9 +986,7 @@ class AdmissionGateMiddleware(BaseHTTPMiddleware):
         required_scope = self._resolve_required_scope(request, path)
 
         # Check merit permission
-        allowed, permission_details = self.attribution.check_merit_permission(
-            entity_id, action_class, required_scope
-        )
+        allowed, permission_details = self.attribution.check_merit_permission(entity_id, action_class, required_scope)
         if not allowed:
             return self._reject(
                 entity_id,
@@ -1025,14 +1021,16 @@ class AdmissionGateMiddleware(BaseHTTPMiddleware):
 
     def _resolve_action_class(self, request: Request, path: str) -> str:
         """Resolve action class from route metadata or path patterns."""
-        # Check for explicit action class in request state (set by api_sentinels)
         action_class = getattr(request.state, "action_class", None)
         if action_class:
             return action_class
 
-        # Path-based heuristic
         if "/admin/" in path or "/control/" in path:
             return ActionClass.CONTROL_ADMIN.value
+
+        if path.startswith("/admission/") and path.endswith("/check-permission"):
+            return ActionClass.PUBLIC_BASIC.value
+
         if "/write/" in path or "/action/" in path or request.method in {"POST", "PUT", "DELETE", "PATCH"}:
             return ActionClass.ACTION_WRITE.value
         if "/analysis/" in path or "/read/" in path or request.method == "GET":
