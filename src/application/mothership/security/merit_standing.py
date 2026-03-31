@@ -8,6 +8,7 @@ scopes (demotion), with twice-weekly manual bonus/penalty review adjustments.
 
 from __future__ import annotations
 
+import hashlib
 import logging
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
@@ -15,6 +16,12 @@ from enum import StrEnum
 from typing import Any
 
 logger = logging.getLogger(__name__)
+
+
+def _entity_fingerprint(entity_id: str) -> str:
+    """Non-reversible, log-safe identifier for entity ids."""
+    digest = hashlib.sha256(entity_id.encode("utf-8", errors="replace")).hexdigest()
+    return digest[:12]
 
 # ---------------------------------------------------------------------------
 # Enums and Constants
@@ -193,7 +200,12 @@ class MeritScoringEngine:
             standing.badge = self._calculate_badge(standing)
             standing._update_eligible_scopes()
             self._standings[entity_id] = standing
-            logger.info("merit_standing.created entity=%s badge=%s score=%d", entity_id, standing.badge, standing.score)
+            logger.info(
+                "merit_standing.created entity_fp=%s badge=%s score=%d",
+                _entity_fingerprint(entity_id),
+                standing.badge,
+                standing.score,
+            )
         return self._standings[entity_id]
 
     def get_standing(self, entity_id: str) -> MeritStanding | None:
@@ -230,8 +242,8 @@ class MeritScoringEngine:
         self._recalculate_roll_numbers()
 
         logger.info(
-            "merit_standing.violation_recorded entity=%s points=%d critical=%s new_score=%d badge=%s",
-            entity_id,
+            "merit_standing.violation_recorded entity_fp=%s points=%d critical=%s new_score=%d badge=%s",
+            _entity_fingerprint(entity_id),
             penalty_points,
             is_critical,
             standing.score,
@@ -280,8 +292,8 @@ class MeritScoringEngine:
         self._recalculate_roll_numbers()
 
         logger.info(
-            "merit_standing.review_adjusted entity=%s adjustment=%d new_score=%d",
-            entity_id,
+            "merit_standing.review_adjusted entity_fp=%s adjustment=%d new_score=%d",
+            _entity_fingerprint(entity_id),
             adjustment,
             standing.score,
         )
@@ -321,8 +333,8 @@ class MeritScoringEngine:
             standing.badge = new_badge
             standing._update_eligible_scopes()
             logger.info(
-                "merit_standing.badge_changed entity=%s old=%s new=%s score=%d",
-                standing.entity_id,
+                "merit_standing.badge_changed entity_fp=%s old=%s new=%s score=%d",
+                _entity_fingerprint(standing.entity_id),
                 old_badge.value,
                 new_badge.value,
                 standing.score,
