@@ -149,10 +149,12 @@ def validate_mcp_config(config_path: Path | None = None) -> dict[str, Any]:
 
             if server_issues:
                 results["servers_with_issues"] += 1
-                results["issues"].append({
-                    "server": server_name,
-                    "issues": server_issues,
-                })
+                results["issues"].append(
+                    {
+                        "server": server_name,
+                        "issues": server_issues,
+                    }
+                )
 
     except json.JSONDecodeError as e:
         return {

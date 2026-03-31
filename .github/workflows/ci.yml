@@ -233,7 +233,17 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Python Dependencies (pip-audit)" >> $GITHUB_STEP_SUMMARY
           if [ -f pip-audit-report.json ]; then
-            python3 -c "import json; p='pip-audit-report.json';\ntry:\n  data=json.load(open(p))\nexcept Exception:\n  data=[]\nprint(f'  - {len(data)} vulnerabilities detected')" >> $GITHUB_STEP_SUMMARY
+            python3 - <<'PY' >> $GITHUB_STEP_SUMMARY
+            import json
+
+            try:
+                with open("pip-audit-report.json", encoding="utf-8") as f:
+                    data = json.load(f)
+            except Exception:
+                data = []
+
+            print(f"  - {len(data)} vulnerabilities detected")
+            PY
           else
             echo "  - No vulnerabilities detected" >> $GITHUB_STEP_SUMMARY
           fi

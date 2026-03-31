@@ -42,6 +42,7 @@ from application.mothership.middleware.admission_gate import (
     _BudgetTracker,
     load_billboard,
 )
+from application.mothership.security.merit_standing import Badge, get_merit_engine
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -108,6 +109,22 @@ def _make_mock_knowledge_store() -> MagicMock:
     store.store_entity = MagicMock()
     store.create_relationship = MagicMock()
     return store
+
+
+def _admitted_headers(entity_id: str = "mcp:testclient:unit") -> dict[str, str]:
+    """
+    Provide a stable attributed entity identity for TestClient calls.
+
+    AdmissionGate treats POST /api/v1/* paths as ACTION_WRITE; tests that are
+    exercising the budget/origin/structure gates should not be blocked by merit
+    standing unless explicitly testing merit itself.
+    """
+    engine = get_merit_engine()
+    standing = engine.get_or_create_standing(entity_id)
+    standing.badge = Badge.B2_VERIFIED
+    standing.score = 65
+    standing._update_eligible_scopes()
+    return {"X-Entity-Id": entity_id}
 
 
 # ===========================================================================
@@ -327,14 +344,14 @@ class TestKnowledgeStoreIntegration:
 class TestBudgetGate:
     def test_calls_within_budget_pass(self) -> None:
         app = _build_app(call_budget=5)
-        with TestClient(app) as client:
+        with TestClient(app, headers=_admitted_headers()) as client:
             for _ in range(5):
                 r = client.post(_intelligence_url(), json=_valid_payload())
                 assert r.status_code == 200
 
     def test_calls_over_budget_get_429(self) -> None:
         app = _build_app(call_budget=3)
-        with TestClient(app) as client:
+        with TestClient(app, headers=_admitted_headers()) as client:
             for _ in range(3):
                 r = client.post(_intelligence_url(), json=_valid_payload())
                 assert r.status_code == 200
@@ -347,7 +364,7 @@ class TestBudgetGate:
 
     def test_bypass_paths_not_counted(self) -> None:
         app = _build_app(call_budget=2)
-        with TestClient(app) as client:
+        with TestClient(app, headers=_admitted_headers()) as client:
             client.get("/health")
             client.get("/ping")
             r1 = client.post(_intelligence_url(), json=_valid_payload())
@@ -357,14 +374,14 @@ class TestBudgetGate:
 
     def test_remaining_header_present(self) -> None:
         app = _build_app(call_budget=5)
-        with TestClient(app) as client:
+        with TestClient(app, headers=_admitted_headers()) as client:
             r = client.post(_intelligence_url(), json=_valid_payload())
             assert r.status_code == 200
             assert "X-Admission-Remaining" in r.headers
 
     def test_penalty_header_present(self) -> None:
         app = _build_app(call_budget=5)
-        with TestClient(app) as client:
+        with TestClient(app, headers=_admitted_headers()) as client:
             r = client.post(_intelligence_url(), json=_valid_payload())
             assert r.status_code == 200
             assert "X-Entity-Penalty" in r.headers
