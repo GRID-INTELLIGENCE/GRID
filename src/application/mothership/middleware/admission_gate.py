@@ -883,6 +883,13 @@ class AdmissionGateMiddleware(BaseHTTPMiddleware):
         if any(path == bp or path.startswith(bp + "/") for bp in self._bypass_paths):
             return await call_next(request)
 
+        # Auth-protected routes should return 401 when unauthenticated.
+        # Admission gating must not mask auth failures with 403s.
+        if (path.startswith("/api/v1/agentic/") or path == "/api/v1/payment/webhook") and not request.headers.get(
+            "Authorization"
+        ):
+            return await call_next(request)
+
         entity_id = self.attribution.resolve_entity(request)
 
         # --- Gate 0: Banner check (hard block) ---
