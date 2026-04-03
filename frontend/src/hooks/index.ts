@@ -8,6 +8,8 @@ export {
   useCorruptionStats,
   useDrtOverview,
   useHealth,
+  useKnowledgeGraph,
+  useKnowledgeGraphStats,
   useMetrics,
   useRagStats,
   useReadiness,

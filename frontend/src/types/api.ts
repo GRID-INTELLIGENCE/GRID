@@ -146,6 +146,42 @@ export interface RagSession {
   metadata?: Record<string, unknown>;
 }
 
+/** Persisted JSON knowledge graph — counts from GET /api/v1/knowledge/stats */
+export interface KnowledgeGraphStats {
+  total_entities?: number;
+  total_relationships?: number;
+  entity_counts?: Record<string, number>;
+  relationship_counts?: Record<string, number>;
+  storage_path?: string;
+  [key: string]: unknown;
+}
+
+/** Payload from GET /api/v1/knowledge/graph */
+export interface KnowledgeGraphNode {
+  id: string;
+  label: string;
+  entity_type: string;
+  subtitle?: string;
+}
+
+export interface KnowledgeGraphEdge {
+  id: string;
+  source: string;
+  target: string;
+  type: string;
+  label: string;
+}
+
+export interface KnowledgeGraphPayload {
+  nodes: KnowledgeGraphNode[];
+  edges: KnowledgeGraphEdge[];
+  storage_path?: string;
+  /** Full entity count in store (may exceed nodes.length when truncated). */
+  total_entities?: number;
+  /** True when max_nodes capped the node set. */
+  truncated?: boolean;
+}
+
 // ── Admission Gate ──────────────────────────────────────────────────
 
 export interface AdmissionPolicyBillboard {

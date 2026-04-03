@@ -7,6 +7,10 @@
  */
 
 import { gridClient } from "@/lib/grid-client";
+import {
+  parseKnowledgeGraphPayload,
+  parseKnowledgeGraphStats,
+} from "@/lib/knowledge-api-guards";
 import { queryKeys } from "@/lib/query-keys";
 import type {
   AdmissionBanneredEntities,
@@ -18,6 +22,8 @@ import type {
   DrtOverview,
   HealthData,
   MetricsResponse,
+  KnowledgeGraphPayload,
+  KnowledgeGraphStats,
   RagStats,
   ReadinessResponse,
   ResonanceContext,
@@ -181,6 +187,42 @@ export function useRagStats() {
     queryKey: queryKeys.rag.stats(),
     endpoint: "/api/v1/rag/stats",
     staleTime: 30_000,
+  });
+}
+
+export function useKnowledgeGraphStats() {
+  const endpoint = "/api/v1/knowledge/stats";
+  return useQuery({
+    queryKey: queryKeys.knowledge.stats(),
+    queryFn: async () => {
+      const response = await gridClient.get<KnowledgeGraphStats>(endpoint);
+      if (!response.ok) {
+        throw new Error(
+          response.error ?? `Knowledge stats request failed (${response.status})`
+        );
+      }
+      return parseKnowledgeGraphStats(response.data);
+    },
+    staleTime: 15_000,
+  });
+}
+
+export function useKnowledgeGraph(opts?: { maxNodes?: number }) {
+  const maxNodes = opts?.maxNodes;
+  const suffix = maxNodes != null ? `?max_nodes=${maxNodes}` : "";
+  const endpoint = `/api/v1/knowledge/graph${suffix}`;
+  return useQuery({
+    queryKey: queryKeys.knowledge.graph(maxNodes),
+    queryFn: async () => {
+      const response = await gridClient.get<KnowledgeGraphPayload>(endpoint);
+      if (!response.ok) {
+        throw new Error(
+          response.error ?? `Knowledge graph request failed (${response.status})`
+        );
+      }
+      return parseKnowledgeGraphPayload(response.data);
+    },
+    staleTime: 15_000,
   });
 }
 

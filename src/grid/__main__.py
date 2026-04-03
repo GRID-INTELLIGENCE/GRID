@@ -374,6 +374,42 @@ From a simple NER tool to a comprehensive "Geometric Resonance Intelligence Driv
     return 0
 
 
+def knowledge_ingest_command(args: argparse.Namespace) -> int:
+    """Handle 'grid knowledge ingest' subcommand."""
+    from grid.knowledge.ingest import IngestConfig, ingest, ingest_many  # noqa: PLC0415
+
+    sources = args.sources
+    config = IngestConfig(
+        use_ollama=not args.heuristic,
+        ollama_model=args.model,
+        index_vectors=args.index_vectors,
+    )
+
+    results = ingest_many([Path(s) for s in sources], config=config)
+
+    for result in results:
+        print(f"\n{'='*60}")
+        print(result.summary())
+
+    total_entities = sum(r.entities_written for r in results)
+    total_relations = sum(r.relations_written for r in results)
+    print(f"\nTotal: {len(results)} doc(s), {total_entities} entities, {total_relations} relations")
+    return 0 if all(r.success for r in results) else 1
+
+
+def knowledge_stats_command(args: argparse.Namespace) -> int:
+    """Handle 'grid knowledge stats' subcommand."""
+    from grid.knowledge.persistent_store import PersistentJSONKnowledgeStore  # noqa: PLC0415
+
+    store = PersistentJSONKnowledgeStore()
+    store.connect()
+    stats = store.get_graph_statistics()
+    store.disconnect()
+    sys.stdout.write(json.dumps(stats, indent=2, ensure_ascii=False))
+    sys.stdout.write("\n")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="grid")
     subparsers = parser.add_subparsers(dest="command")
@@ -419,6 +455,29 @@ def build_parser() -> argparse.ArgumentParser:
     storytime = subparsers.add_parser("storytime", help="Explore the lore and origins of GRID")
     storytime.add_argument("topic", help="The topic to explore (e.g., 'synthwave origins')")
     storytime.set_defaults(func=storytime_command)
+
+    # Knowledge graph commands
+    knowledge = subparsers.add_parser("knowledge", help="Knowledge graph ingestion and inspection")
+    knowledge_sub = knowledge.add_subparsers(dest="knowledge_command")
+
+    kg_ingest = knowledge_sub.add_parser("ingest", help="Ingest documents into the knowledge graph")
+    kg_ingest.add_argument("sources", nargs="+", help="File paths to ingest")
+    kg_ingest.add_argument(
+        "--heuristic", action="store_true", default=False,
+        help="Use heuristic extraction only (no Ollama)"
+    )
+    kg_ingest.add_argument(
+        "--model", default="ministral:latest",
+        help="Ollama model for LLM extraction (default: ministral:latest)"
+    )
+    kg_ingest.add_argument(
+        "--index-vectors", action="store_true", default=False,
+        help="Also index into ChromaDB vector store"
+    )
+    kg_ingest.set_defaults(func=knowledge_ingest_command)
+
+    kg_stats = knowledge_sub.add_parser("stats", help="Show knowledge graph statistics")
+    kg_stats.set_defaults(func=knowledge_stats_command)
 
     # Interactive RAG chat command
     chat = subparsers.add_parser(

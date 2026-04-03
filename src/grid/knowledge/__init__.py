@@ -1,6 +1,7 @@
 """Knowledge graph and structural learning package."""
 
 from .graph_store import EntityId, RelationshipId, SearchContext
+from .ingest import IngestConfig, IngestResult, ingest, ingest_many
 from .persistent_store import PersistentJSONKnowledgeStore
 from .structural_learning import (
     AdaptiveRelationshipModel,
@@ -26,4 +27,8 @@ __all__ = [
     "EntityId",
     "RelationshipId",
     "SearchContext",
+    "IngestConfig",
+    "IngestResult",
+    "ingest",
+    "ingest_many",
 ]

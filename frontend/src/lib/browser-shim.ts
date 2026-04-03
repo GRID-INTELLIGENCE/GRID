@@ -193,6 +193,74 @@ const DEMO_RESPONSES: Record<string, unknown> = {
     },
     sample_size: 1200,
   },
+  "/api/v1/knowledge/stats": {
+    total_entities: 12,
+    total_relationships: 14,
+    entity_counts: { Document: 2, Concept: 10 },
+    relationship_counts: { EXPLAINS: 10, CONNECTS_TO: 4 },
+    storage_path: "dev/knowledge_graph.json",
+  },
+  "/api/v1/knowledge/graph": {
+    nodes: [
+      {
+        id: "doc_demo",
+        label: "Sample paper",
+        entity_type: "Document",
+        subtitle: "Demo document node",
+      },
+      {
+        id: "c1",
+        label: "Attention Mechanism",
+        entity_type: "Concept",
+        subtitle: "Query-key-value attention",
+      },
+      {
+        id: "c2",
+        label: "Transformer",
+        entity_type: "Concept",
+        subtitle: "Encoder-decoder stack",
+      },
+      {
+        id: "c3",
+        label: "RAG",
+        entity_type: "Concept",
+        subtitle: "Retrieval-augmented generation",
+      },
+    ],
+    edges: [
+      {
+        id: "e1",
+        source: "doc_demo",
+        target: "c1",
+        type: "EXPLAINS",
+        label: "EXPLAINS",
+      },
+      {
+        id: "e2",
+        source: "doc_demo",
+        target: "c2",
+        type: "EXPLAINS",
+        label: "EXPLAINS",
+      },
+      {
+        id: "e3",
+        source: "doc_demo",
+        target: "c3",
+        type: "EXPLAINS",
+        label: "EXPLAINS",
+      },
+      {
+        id: "e4",
+        source: "c2",
+        target: "c1",
+        type: "CONNECTS_TO",
+        label: "uses",
+      },
+    ],
+    storage_path: "dev/knowledge_graph.json",
+    total_entities: 4,
+    truncated: false,
+  },
 };
 
 // ── Streaming demo data ──────────────────────────────────────────────
@@ -221,7 +289,8 @@ export function installBrowserShim(): void {
         // Small delay to simulate network
         await new Promise((r) => setTimeout(r, 150 + Math.random() * 200));
 
-        const data = DEMO_RESPONSES[endpoint];
+        const path = endpoint.split("?")[0] ?? endpoint;
+        const data = DEMO_RESPONSES[path];
         if (data) {
           return { ok: true, status: 200, data };
         }

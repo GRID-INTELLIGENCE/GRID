@@ -50,6 +50,9 @@ class EntityType(StrEnum):
     ARTIFACT = "Artifact"
     TASK = "Task"
     DECISION = "Decision"
+    # Knowledge ingestion types
+    CONCEPT = "Concept"
+    DOCUMENT = "Document"
 
 
 class RelationType(StrEnum):
@@ -64,6 +67,9 @@ class RelationType(StrEnum):
     REQUIRES = "REQUIRES"
     PRODUCES = "PRODUCES"
     RELATED_TO = "RELATED_TO"
+    # Knowledge ingestion relationships
+    EXPLAINS = "EXPLAINS"
+    CONNECTS_TO = "CONNECTS_TO"
 
 
 class PropertyType(StrEnum):
@@ -212,6 +218,39 @@ class KnowledgeGraphSchema:
             description="Environmental or state context",
         )
 
+        # Concept entity (knowledge ingestion)
+        self.entity_schemas[EntityType.CONCEPT] = EntitySchema(
+            entity_type=EntityType.CONCEPT,
+            properties=[
+                PropertySchema("id", PropertyType.STRING, required=True),
+                PropertySchema("name", PropertyType.STRING, required=True),
+                PropertySchema("description", PropertyType.STRING, description="What this concept means"),
+                PropertySchema("source_document", PropertyType.STRING, description="Source document ID"),
+                PropertySchema("created_at", PropertyType.DATETIME, required=True),
+                PropertySchema("metadata", PropertyType.DICT),
+            ],
+            unique_keys=["id"],
+            indexes=["name"],
+            description="A named idea, pattern, or domain term extracted from a document",
+        )
+
+        # Document entity (knowledge ingestion)
+        self.entity_schemas[EntityType.DOCUMENT] = EntitySchema(
+            entity_type=EntityType.DOCUMENT,
+            properties=[
+                PropertySchema("id", PropertyType.STRING, required=True),
+                PropertySchema("name", PropertyType.STRING, required=True),
+                PropertySchema("source", PropertyType.STRING, description="File path or URL"),
+                PropertySchema("content_type", PropertyType.STRING, description="markdown, text, code, etc."),
+                PropertySchema("chunk_count", PropertyType.INTEGER, description="Number of vector chunks created"),
+                PropertySchema("created_at", PropertyType.DATETIME, required=True),
+                PropertySchema("metadata", PropertyType.DICT),
+            ],
+            unique_keys=["id"],
+            indexes=["name", "source"],
+            description="A source document that was ingested and indexed",
+        )
+
         # Define relationships
         self._build_relationships()
 
@@ -275,6 +314,36 @@ class KnowledgeGraphSchema:
                 ],
                 cardinality="many-to-one",
                 description="Event contextual location",
+            )
+        )
+
+        # EXPLAINS: Document → Concept
+        self.add_relationship_schema(
+            RelationshipSchema(
+                relation_type=RelationType.EXPLAINS,
+                from_entity=EntityType.DOCUMENT,
+                to_entity=EntityType.CONCEPT,
+                properties=[
+                    PropertySchema("excerpt", PropertyType.STRING, description="Relevant excerpt from document"),
+                    PropertySchema("confidence", PropertyType.FLOAT, description="Extraction confidence 0-1"),
+                ],
+                cardinality="one-to-many",
+                description="Document explains or defines a concept",
+            )
+        )
+
+        # CONNECTS_TO: Concept → Concept
+        self.add_relationship_schema(
+            RelationshipSchema(
+                relation_type=RelationType.CONNECTS_TO,
+                from_entity=EntityType.CONCEPT,
+                to_entity=EntityType.CONCEPT,
+                properties=[
+                    PropertySchema("relation_label", PropertyType.STRING, description="e.g. 'extends', 'contrasts'"),
+                    PropertySchema("confidence", PropertyType.FLOAT, description="Extraction confidence 0-1"),
+                ],
+                cardinality="many-to-many",
+                description="Semantic connection between two concepts",
             )
         )
 
