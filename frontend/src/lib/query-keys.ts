@@ -44,6 +44,11 @@ export const queryKeys = {
   rag: {
     stats: () => ["rag", "stats"] as const,
   },
+  knowledge: {
+    stats: () => ["knowledge", "stats"] as const,
+    graph: (maxNodes?: number) =>
+      ["knowledge", "graph", maxNodes ?? "all"] as const,
+  },
   admission: {
     policy: () => ["admission", "policy"] as const,
     stats: () => ["admission", "stats"] as const,

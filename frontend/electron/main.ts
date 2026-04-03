@@ -118,10 +118,24 @@ ipcMain.handle(
           ? JSON.stringify(validation.data.body)
           : undefined,
       });
+      const text = await res.text();
+      let data: unknown = null;
+      if (text.length > 0) {
+        try {
+          data = JSON.parse(text) as unknown;
+        } catch {
+          return {
+            ok: false,
+            status: res.status,
+            data: null,
+            error: "Response body is not valid JSON",
+          };
+        }
+      }
       return {
         ok: res.ok,
         status: res.status,
-        data: await res.json(),
+        data,
       };
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);

@@ -132,6 +132,10 @@ def create_api_router(prefix: str = "/api/v1") -> APIRouter:
                 "prefix": "/intelligence",
                 "enabled": True,
             },
+            {
+                "module": "application.mothership.routers.knowledge:router",
+                "enabled": True,
+            },
         ]
 
     router = APIRouter(prefix=effective_prefix)

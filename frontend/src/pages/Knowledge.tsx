@@ -1,7 +1,10 @@
+import { KnowledgeGraphCanvas } from "@/components/knowledge/KnowledgeGraphCanvas";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
+  useKnowledgeGraph,
+  useKnowledgeGraphStats,
   useRagStats,
   useSessionDelete,
   useSessionLookup,
@@ -12,6 +15,7 @@ import type { RagSession } from "@/types/api";
 import {
   Database,
   Folder,
+  GitBranch,
   Loader2,
   MessageSquare,
   RefreshCw,
@@ -20,17 +24,25 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
+/** Cap graph payload for SVG layout performance (use API without max_nodes for full export). */
+const KNOWLEDGE_GRAPH_UI_MAX_NODES = 500;
+
 export function Knowledge() {
   const [sessionIdInput, setSessionIdInput] = useState("");
   const [sessionDetail, setSessionDetail] = useState<RagSession | null>(null);
   const [sessionError, setSessionError] = useState<string | null>(null);
 
   const stats = useRagStats();
+  const kgStats = useKnowledgeGraphStats();
+  const kgGraph = useKnowledgeGraph({ maxNodes: KNOWLEDGE_GRAPH_UI_MAX_NODES });
   const signalQuality = useSignalQuality();
   const sessionLookup = useSessionLookup();
   const sessionDelete = useSessionDelete();
 
   const statsData = stats.data;
+  const kgStatsData = kgStats.data;
+  const graphNodes = kgGraph.data?.nodes ?? [];
+  const graphEdges = kgGraph.data?.edges ?? [];
   const signalData = signalQuality.data;
 
   const lookupSession = () => {
@@ -67,8 +79,8 @@ export function Knowledge() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Knowledge Base</h1>
           <p className="text-sm text-[var(--muted-foreground)]">
-            RAG system statistics, conversation sessions, and knowledge quality
-            metrics
+            RAG metrics, persisted knowledge graph layout, conversation
+            sessions, and signal quality
           </p>
         </div>
         <Button
@@ -76,13 +88,16 @@ export function Knowledge() {
           size="sm"
           onClick={() => {
             stats.refetch();
+            kgStats.refetch();
+            kgGraph.refetch();
             signalQuality.refetch();
           }}
         >
           <RefreshCw
             className={cn(
               "mr-1.5 h-3.5 w-3.5",
-              stats.isFetching && "animate-spin"
+              (stats.isFetching || kgStats.isFetching || kgGraph.isFetching) &&
+                "animate-spin"
             )}
           />
           Refresh
@@ -220,6 +235,71 @@ export function Knowledge() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Knowledge graph (JSON store) */}
+      <Card className="glass">
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center gap-2 text-sm">
+            <GitBranch className="h-4 w-4 text-[var(--primary)]" />
+            Knowledge graph
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {kgStats.isError && (
+            <p className="text-xs text-destructive" role="alert">
+              {kgStats.error instanceof Error
+                ? kgStats.error.message
+                : "Could not load knowledge graph stats."}
+            </p>
+          )}
+          {kgStatsData && !kgStats.isError && (
+            <div className="flex flex-wrap gap-3 text-xs">
+              <Badge variant="secondary">
+                {String(kgStatsData.total_entities ?? 0)} entities
+              </Badge>
+              <Badge variant="outline">
+                {String(kgStatsData.total_relationships ?? 0)} relationships
+              </Badge>
+              {kgStatsData.storage_path && (
+                <span className="text-[var(--muted-foreground)] font-mono text-[10px] truncate max-w-full">
+                  {kgStatsData.storage_path}
+                </span>
+              )}
+            </div>
+          )}
+          {kgGraph.isError && (
+            <p className="text-xs text-destructive" role="alert">
+              {kgGraph.error instanceof Error
+                ? kgGraph.error.message
+                : "Could not load knowledge graph visualization."}
+            </p>
+          )}
+          {kgGraph.data?.truncated &&
+            typeof kgGraph.data.total_entities === "number" && (
+              <p className="text-[10px] text-[var(--muted-foreground)]">
+                Showing {graphNodes.length} of {kgGraph.data.total_entities}{" "}
+                entities (UI limit {KNOWLEDGE_GRAPH_UI_MAX_NODES}). Increase{" "}
+                <code className="rounded bg-[var(--muted)] px-1">
+                  KNOWLEDGE_GRAPH_UI_MAX_NODES
+                </code>{" "}
+                or call{" "}
+                <code className="rounded bg-[var(--muted)] px-1">
+                  GET /api/v1/knowledge/graph
+                </code>{" "}
+                without{" "}
+                <code className="rounded bg-[var(--muted)] px-1">
+                  max_nodes
+                </code>
+                .
+              </p>
+            )}
+          {kgGraph.isLoading ? (
+            <Loader2 className="mx-auto h-6 w-6 animate-spin text-[var(--muted-foreground)]" />
+          ) : kgGraph.isError ? null : (
+            <KnowledgeGraphCanvas nodes={graphNodes} edges={graphEdges} />
+          )}
+        </CardContent>
+      </Card>
 
       {/* Signal quality */}
       {signalData && (

@@ -185,6 +185,74 @@ class PersistentJSONKnowledgeStore:
             "storage_path": str(self.storage_path),
         }
 
+    def export_graph_visualization(self, *, max_nodes: int | None = None) -> dict[str, Any]:
+        """
+        Serialize entities and relationships for graph UIs (nodes + edges).
+
+        Args:
+            max_nodes: When set, return at most this many entities (stable order by id)
+                and only edges whose endpoints are both included.
+
+        Returns:
+            Dict with ``nodes``, ``edges``, ``storage_path``, ``total_entities``,
+            and ``truncated`` (JSON-serializable).
+        """
+        if not self._initialized:
+            self.connect()
+
+        total_entities = len(self.entities)
+        sorted_ids = sorted(self.entities.keys())
+        if max_nodes is not None and len(sorted_ids) > max_nodes:
+            allowed_ids = set(sorted_ids[:max_nodes])
+            truncated = True
+        else:
+            allowed_ids = set(sorted_ids)
+            truncated = False
+
+        nodes: list[dict[str, Any]] = []
+        for eid in sorted_ids:
+            if eid not in allowed_ids:
+                continue
+            entity = self.entities[eid]
+            props = entity.properties
+            name = props.get("name", eid)
+            desc = props.get("description", "")
+            subtitle = desc[:160] if isinstance(desc, str) else ""
+            nodes.append(
+                {
+                    "id": eid,
+                    "label": str(name),
+                    "entity_type": entity.entity_type.value,
+                    "subtitle": subtitle,
+                }
+            )
+
+        edges: list[dict[str, Any]] = []
+        for rid, rel in self.relationships.items():
+            if rel.from_entity_id not in allowed_ids or rel.to_entity_id not in allowed_ids:
+                continue
+            rprops = rel.properties if isinstance(rel.properties, dict) else {}
+            label = rprops.get("relation_label")
+            if not label:
+                label = rel.relationship_type.value
+            edges.append(
+                {
+                    "id": rid,
+                    "source": rel.from_entity_id,
+                    "target": rel.to_entity_id,
+                    "type": rel.relationship_type.value,
+                    "label": str(label),
+                }
+            )
+
+        return {
+            "nodes": nodes,
+            "edges": edges,
+            "storage_path": str(self.storage_path),
+            "total_entities": total_entities,
+            "truncated": truncated,
+        }
+
     def __enter__(self):
         self.connect()
         return self
