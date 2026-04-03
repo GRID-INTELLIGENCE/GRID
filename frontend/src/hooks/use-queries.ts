@@ -198,7 +198,8 @@ export function useKnowledgeGraphStats() {
       const response = await gridClient.get<KnowledgeGraphStats>(endpoint);
       if (!response.ok) {
         throw new Error(
-          response.error ?? `Knowledge stats request failed (${response.status})`
+          response.error ??
+            `Knowledge stats request failed (${response.status})`
         );
       }
       return parseKnowledgeGraphStats(response.data);
@@ -217,7 +218,8 @@ export function useKnowledgeGraph(opts?: { maxNodes?: number }) {
       const response = await gridClient.get<KnowledgeGraphPayload>(endpoint);
       if (!response.ok) {
         throw new Error(
-          response.error ?? `Knowledge graph request failed (${response.status})`
+          response.error ??
+            `Knowledge graph request failed (${response.status})`
         );
       }
       return parseKnowledgeGraphPayload(response.data);

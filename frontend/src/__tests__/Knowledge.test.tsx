@@ -270,32 +270,41 @@ describe("Knowledge", () => {
   });
 
   it("shows an error when the graph payload omits nodes or edges", async () => {
-    window.grid.api = vi.fn().mockImplementation((_method: string, endpoint: string) => {
-      if (endpoint === "/api/v1/knowledge/stats") {
-        return Promise.resolve({
-          ok: true,
-          status: 200,
-          data: { ...MOCK_KNOWLEDGE_STATS },
-        });
-      }
-      if (endpoint.startsWith("/api/v1/knowledge/graph")) {
+    window.grid.api = vi
+      .fn()
+      .mockImplementation((_method: string, endpoint: string) => {
+        if (endpoint === "/api/v1/knowledge/stats") {
+          return Promise.resolve({
+            ok: true,
+            status: 200,
+            data: { ...MOCK_KNOWLEDGE_STATS },
+          });
+        }
+        if (endpoint.startsWith("/api/v1/knowledge/graph")) {
+          return Promise.resolve({ ok: true, status: 200, data: {} });
+        }
+        if (endpoint === "/api/v1/rag/stats") {
+          return Promise.resolve({
+            ok: true,
+            status: 200,
+            data: {
+              conversation_stats: {
+                active_sessions: 0,
+                total_conversations: 0,
+              },
+              engine_info: {
+                model: "x",
+                embedding_model: "y",
+                vector_store: "z",
+              },
+            },
+          });
+        }
+        if (endpoint === "/api/v1/skills/signal-quality") {
+          return Promise.resolve({ ok: true, status: 200, data: {} });
+        }
         return Promise.resolve({ ok: true, status: 200, data: {} });
-      }
-      if (endpoint === "/api/v1/rag/stats") {
-        return Promise.resolve({
-          ok: true,
-          status: 200,
-          data: {
-            conversation_stats: { active_sessions: 0, total_conversations: 0 },
-            engine_info: { model: "x", embedding_model: "y", vector_store: "z" },
-          },
-        });
-      }
-      if (endpoint === "/api/v1/skills/signal-quality") {
-        return Promise.resolve({ ok: true, status: 200, data: {} });
-      }
-      return Promise.resolve({ ok: true, status: 200, data: {} });
-    });
+      });
 
     renderWithProviders(<Knowledge />);
     await waitFor(() => {

@@ -388,7 +388,7 @@ def knowledge_ingest_command(args: argparse.Namespace) -> int:
     results = ingest_many([Path(s) for s in sources], config=config)
 
     for result in results:
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print(result.summary())
 
     total_entities = sum(r.entities_written for r in results)
@@ -463,16 +463,13 @@ def build_parser() -> argparse.ArgumentParser:
     kg_ingest = knowledge_sub.add_parser("ingest", help="Ingest documents into the knowledge graph")
     kg_ingest.add_argument("sources", nargs="+", help="File paths to ingest")
     kg_ingest.add_argument(
-        "--heuristic", action="store_true", default=False,
-        help="Use heuristic extraction only (no Ollama)"
+        "--heuristic", action="store_true", default=False, help="Use heuristic extraction only (no Ollama)"
     )
     kg_ingest.add_argument(
-        "--model", default="ministral:latest",
-        help="Ollama model for LLM extraction (default: ministral:latest)"
+        "--model", default="ministral:latest", help="Ollama model for LLM extraction (default: ministral:latest)"
     )
     kg_ingest.add_argument(
-        "--index-vectors", action="store_true", default=False,
-        help="Also index into ChromaDB vector store"
+        "--index-vectors", action="store_true", default=False, help="Also index into ChromaDB vector store"
     )
     kg_ingest.set_defaults(func=knowledge_ingest_command)
 

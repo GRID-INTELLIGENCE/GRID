@@ -39,7 +39,10 @@ export function KnowledgeGraphCanvas({
     return (
       <p className="text-xs text-[var(--muted-foreground)] py-8 text-center">
         No graph nodes yet. Ingest documents via the API or{" "}
-        <code className="rounded bg-[var(--muted)] px-1">grid knowledge ingest</code>.
+        <code className="rounded bg-[var(--muted)] px-1">
+          grid knowledge ingest
+        </code>
+        .
       </p>
     );
   }
@@ -143,9 +146,7 @@ export function KnowledgeGraphCanvas({
             Document
           </span>
           <span className="inline-flex items-center gap-1 mr-3">
-            <span
-              className="inline-block h-2 w-2 rounded-full border border-[var(--primary)] bg-[var(--muted)]"
-            />{" "}
+            <span className="inline-block h-2 w-2 rounded-full border border-[var(--primary)] bg-[var(--muted)]" />{" "}
             Concept
           </span>
           <span className="mr-2">—</span>

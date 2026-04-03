@@ -18,7 +18,6 @@ import hashlib
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
 from uuid import uuid4
 
 import structlog
@@ -31,7 +30,7 @@ from .concept_extractor import (
     extract_with_ollama,
 )
 from .graph_schema import EntityType, RelationType
-from .graph_store import Entity, EntityId, Relationship
+from .graph_store import Entity, Relationship
 from .persistent_store import PersistentJSONKnowledgeStore
 
 logger = structlog.get_logger(__name__)

@@ -16,7 +16,6 @@ pytestmark = pytest.mark.unit
 from grid.knowledge.ingest import IngestConfig, IngestResult, ingest, ingest_many
 from grid.knowledge.persistent_store import PersistentJSONKnowledgeStore
 
-
 SAMPLE_TEXT = """
 # Knowledge Graphs
 
@@ -53,11 +52,15 @@ def heuristic_config() -> IngestConfig:
 
 
 class TestIngestText:
-    def test_returns_ingest_result(self, tmp_store: PersistentJSONKnowledgeStore, heuristic_config: IngestConfig) -> None:
+    def test_returns_ingest_result(
+        self, tmp_store: PersistentJSONKnowledgeStore, heuristic_config: IngestConfig
+    ) -> None:
         result = ingest(SAMPLE_TEXT, config=heuristic_config, store=tmp_store)
         assert isinstance(result, IngestResult)
 
-    def test_success_with_valid_text(self, tmp_store: PersistentJSONKnowledgeStore, heuristic_config: IngestConfig) -> None:
+    def test_success_with_valid_text(
+        self, tmp_store: PersistentJSONKnowledgeStore, heuristic_config: IngestConfig
+    ) -> None:
         result = ingest(SAMPLE_TEXT, config=heuristic_config, store=tmp_store)
         assert result.success
         assert result.errors == []
@@ -71,16 +74,22 @@ class TestIngestText:
         # Should have at least EXPLAINS relations (doc → concepts)
         assert result.relations_written > 0
 
-    def test_document_entity_in_store(self, tmp_store: PersistentJSONKnowledgeStore, heuristic_config: IngestConfig) -> None:
+    def test_document_entity_in_store(
+        self, tmp_store: PersistentJSONKnowledgeStore, heuristic_config: IngestConfig
+    ) -> None:
         result = ingest(SAMPLE_TEXT, config=heuristic_config, store=tmp_store)
         assert result.document_id in tmp_store.entities
 
-    def test_concept_entities_in_store(self, tmp_store: PersistentJSONKnowledgeStore, heuristic_config: IngestConfig) -> None:
+    def test_concept_entities_in_store(
+        self, tmp_store: PersistentJSONKnowledgeStore, heuristic_config: IngestConfig
+    ) -> None:
         ingest(SAMPLE_TEXT, config=heuristic_config, store=tmp_store)
         entity_types = {e.entity_type.value for e in tmp_store.entities.values()}
         assert "Concept" in entity_types
 
-    def test_document_entity_type(self, tmp_store: PersistentJSONKnowledgeStore, heuristic_config: IngestConfig) -> None:
+    def test_document_entity_type(
+        self, tmp_store: PersistentJSONKnowledgeStore, heuristic_config: IngestConfig
+    ) -> None:
         result = ingest(SAMPLE_TEXT, config=heuristic_config, store=tmp_store)
         doc_entity = tmp_store.entities[result.document_id]
         assert doc_entity.entity_type.value == "Document"
@@ -90,7 +99,9 @@ class TestIngestText:
         r2 = ingest(SAMPLE_TEXT, config=heuristic_config, store=tmp_store)
         assert r1.document_id == r2.document_id
 
-    def test_extraction_method_heuristic(self, tmp_store: PersistentJSONKnowledgeStore, heuristic_config: IngestConfig) -> None:
+    def test_extraction_method_heuristic(
+        self, tmp_store: PersistentJSONKnowledgeStore, heuristic_config: IngestConfig
+    ) -> None:
         result = ingest(SAMPLE_TEXT, config=heuristic_config, store=tmp_store)
         assert result.extraction_method == "heuristic"
 

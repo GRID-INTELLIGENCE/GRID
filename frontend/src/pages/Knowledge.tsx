@@ -79,8 +79,8 @@ export function Knowledge() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Knowledge Base</h1>
           <p className="text-sm text-[var(--muted-foreground)]">
-            RAG metrics, persisted knowledge graph layout, conversation sessions,
-            and signal quality
+            RAG metrics, persisted knowledge graph layout, conversation
+            sessions, and signal quality
           </p>
         </div>
         <Button
@@ -96,9 +96,7 @@ export function Knowledge() {
           <RefreshCw
             className={cn(
               "mr-1.5 h-3.5 w-3.5",
-              (stats.isFetching ||
-                kgStats.isFetching ||
-                kgGraph.isFetching) &&
+              (stats.isFetching || kgStats.isFetching || kgGraph.isFetching) &&
                 "animate-spin"
             )}
           />
@@ -289,7 +287,9 @@ export function Knowledge() {
                   GET /api/v1/knowledge/graph
                 </code>{" "}
                 without{" "}
-                <code className="rounded bg-[var(--muted)] px-1">max_nodes</code>
+                <code className="rounded bg-[var(--muted)] px-1">
+                  max_nodes
+                </code>
                 .
               </p>
             )}

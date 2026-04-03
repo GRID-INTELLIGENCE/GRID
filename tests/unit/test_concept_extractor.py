@@ -12,15 +12,14 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
 pytestmark = pytest.mark.unit
 
 from grid.knowledge.concept_extractor import (
-    ExtractionResult,
     ExtractedConcept,
     ExtractedRelation,
+    ExtractionResult,
     build_concept_entities,
     build_relationship_entities,
     extract_heuristic,
 )
 from grid.knowledge.graph_schema import EntityType, RelationType
-
 
 SAMPLE_MARKDOWN = """
 # Attention Mechanism
@@ -61,7 +60,6 @@ class TestHeuristicExtraction:
 
     def test_extracts_relations(self) -> None:
         result = extract_heuristic(SAMPLE_MARKDOWN)
-        relation_labels = {r.relation_label for r in result.relations}
         # "extends" and "uses" patterns should fire
         assert len(result.relations) > 0
 
@@ -143,17 +141,13 @@ class TestBuildRelationshipEntities:
             ExtractedConcept(name="B", description="Second", confidence=1.0),
         ]
         entities = build_concept_entities(concepts, "doc_rel")
-        relations = [
-            ExtractedRelation(from_concept="A", to_concept="B", relation_label="extends", confidence=0.8)
-        ]
+        relations = [ExtractedRelation(from_concept="A", to_concept="B", relation_label="extends", confidence=0.8)]
         rels = build_relationship_entities(relations, entities)
         assert len(rels) == 1
         assert rels[0].relationship_type == RelationType.CONNECTS_TO
 
     def test_skips_unknown_concepts(self) -> None:
-        entities = build_concept_entities(
-            [ExtractedConcept(name="Known", description="", confidence=1.0)], "doc_x"
-        )
+        entities = build_concept_entities([ExtractedConcept(name="Known", description="", confidence=1.0)], "doc_x")
         relations = [
             ExtractedRelation(from_concept="Known", to_concept="Unknown", relation_label="uses", confidence=0.7)
         ]
