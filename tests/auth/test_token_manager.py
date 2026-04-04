@@ -8,7 +8,7 @@ from src.grid.auth.token_manager import TokenManager
 # Use a known secret for testing
 @pytest.fixture
 def mock_settings(monkeypatch):
-    monkeypatch.setenv("MOTHERSHIP_SECRET_KEY", "test-secret-key-123")
+    monkeypatch.setenv("MOTHERSHIP_SECRET_KEY", "test-secret-key-at-least-32-chars-long")
     monkeypatch.setenv("MOTHERSHIP_JWT_ALGORITHM", "HS256")
     # Reset singleton if needed, or TokenManager pulls from env.
 
