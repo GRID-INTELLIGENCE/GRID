@@ -148,7 +148,7 @@ Tests live in `tests/` with 37 subdirectories per concern: `unit/`, `integration
 
 ### Pytest Configuration
 
-- `asyncio_mode = "auto"` — no need for `@pytest.mark.asyncio`
+- `asyncio_mode = "strict"` — all async tests require explicit `@pytest.mark.asyncio`
 - Default timeout: 30s per test
 - Markers: `unit`, `integration`, `safety`, `security`, `api`, `critical`, `slow`, `flaky`, `redteam`, `smoke`
 - `--maxfail=5` and `-m "not scratch and not flaky and not slow"` by default
