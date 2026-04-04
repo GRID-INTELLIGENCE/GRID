@@ -7,6 +7,7 @@ import time
 from unittest.mock import MagicMock
 
 import pytest
+import pytest_asyncio
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.pool import StaticPool
 
@@ -118,7 +119,7 @@ class TestSharedAttribution:
 # ---------------------------------------------------------------------------
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def session_factory():
     engine = create_async_engine(
         "sqlite+aiosqlite:///:memory:",
@@ -137,6 +138,7 @@ def repo(session_factory) -> AdmissionEntityRepository:
     return AdmissionEntityRepository(session_factory)
 
 
+@pytest.mark.asyncio
 class TestPersistenceResetSync:
     async def test_persist_after_full_reset(self, repo: AdmissionEntityRepository) -> None:
         """After full_reset clears violations, persistence should detect the reset
