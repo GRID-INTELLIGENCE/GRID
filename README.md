@@ -14,17 +14,17 @@
 
 ## Engineering at a Glance
 
-Built primarily by a solo engineer over 5 months — from blank templates to a production-hardened framework with CI, security layers, and full test infrastructure.
+Built primarily by a solo engineer over 6 months — from blank templates to a production-hardened framework with CI, security layers, and full test infrastructure.
 
 | What | Evidence |
 |------|----------|
-| **Codebase scale** | 1,270+ source files, 190K+ lines, 9 distributable wheel packages |
-| **Test discipline** | 3,710+ tests passing, ≥75% coverage, 30s performance budget |
+| **Codebase scale** | 1,490+ Python files, 200K+ lines, 9 distributable wheel packages |
+| **Test discipline** | 4,490+ test functions, ≥75% coverage, 30s performance budget |
 | **CI rigor** | 7-stage GitHub Actions pipeline: secrets scan → lint → smoke → security → test → integration → build |
 | **Security depth** | 3 independent security modules (safety, security, boundaries), sealed-envelope HMAC-SHA256 transfer gate, admission gate with ethical enforcement, zero-trust boundary contracts |
 | **API architecture** | FastAPI + 14-layer middleware chain, dual event bus (Redis + in-memory fallback), circuit breaking, rate limiting |
-| **Code quality** | 0 ruff lint errors across 1,270+ files, strict type hints, conventional commits |
-| **Resilience patterns** | Published separately as [APIGuard](https://pypi.org/project/apiguard/) — circuit breaking + rate limiting + retry with 100% test coverage |
+| **Code quality** | 0 ruff lint errors across 1,490+ files, strict type hints, conventional commits |
+| **Resilience patterns** | Published separately as [GRID-APIGUARD](https://pypi.org/project/GRID-APIGUARD/) — circuit breaking + rate limiting + retry with 100% test coverage |
 
 The architecture is domain-driven with event-driven agentic workflows — not a monolith, not a microservice explosion. Each package has clear boundaries, its own tests, and ships as an independent wheel.
 
@@ -36,6 +36,15 @@ GRID is a **privacy-first code intelligence framework** that helps you understan
 ```bash
 pip install grid-intelligence
 grid --help
+```
+
+Or install from source for development:
+
+```bash
+git clone https://github.com/GRID-INTELLIGENCE/GRID.git
+cd GRID
+uv sync --group dev --group test
+uv run grid --help
 ```
 
 > For contributor setup see [docs/INSTALLATION.md](docs/INSTALLATION.md).
@@ -59,8 +68,8 @@ grid --help
 | Metric | Value |
 |--------|-------|
 | **Python** | 3.13+ |
-| **Source files** | 1,270+ |
-| **Tests passing** | 3,710+ |
+| **Source files** | 1,490+ |
+| **Tests** | 4,490+ test functions |
 | **Lint errors** | 0 (ruff clean) |
 | **Coverage** | ≥ 75 % |
 | **RAG precision lift** | +33–40 % |
@@ -84,7 +93,7 @@ grid --help
 
 ## Quick Start (Contributors)
 
-```powershell
+```bash
 uv sync --group dev --group test   # Creates .venv, installs everything
 uv run pytest                      # Run tests
 uv run ruff check .                # Lint
@@ -97,7 +106,7 @@ uv run python -m grid --help       # CLI
 <details>
 <summary>Managing dependencies</summary>
 
-```powershell
+```bash
 uv add <package>                   # Runtime dependency
 uv add --group dev <package>       # Dev-only
 uv lock                            # Regenerate lockfile
@@ -124,7 +133,7 @@ GRID/
 │   ├── infrastructure/        #   Infra adapters
 │   ├── unified_fabric/        #   Async event bus + safety bridge
 │   └── vection/               #   Motion & perception
-├── tests/                     # Test suite (2953+ tests)
+├── tests/                     # Test suite (4490+ test functions)
 ├── safety/                    # GUARDIAN rule engine, PII privacy
 ├── security/                  # Network interceptor, forensics
 ├── boundaries/                # Boundary engine, transition gate
@@ -233,7 +242,8 @@ Nov 2025 → First commit. Blank templates.
 Dec 2025 → Architecture cleanup. Security foundation. DDD.
 Jan 2026 → Cognitive layer. RAG optimization. Production hardening.
 Feb 2026 → 540+ files. Environmental Intelligence. Mycelium. v2.6+.
-Mar 2026 → 1270+ files. 3710+ tests. Admission gate. Entity persistence. v2.8.0.
+Mar 2026 → 1270+ files. Admission gate. Entity persistence. v2.8.0.
+Apr 2026 → 1490+ files. 4490+ tests. TS 6.0, strict asyncio, CI green.
 ```
 
 **GRID is built by someone who cares about doing things right — principled, not perfect.**
