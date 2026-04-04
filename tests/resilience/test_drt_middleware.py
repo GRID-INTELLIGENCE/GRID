@@ -6,6 +6,7 @@ from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
+import pytest_asyncio
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
@@ -384,7 +385,7 @@ class TestDRTMetricsCollector:
 class TestDRTFalsePositiveTracking:
     """Test DRT false positive tracking functionality."""
 
-    @pytest.fixture
+    @pytest_asyncio.fixture
     async def mock_session(self):
         """Create a mock database session for testing."""
         from unittest.mock import MagicMock
@@ -404,14 +405,14 @@ class TestDRTFalsePositiveTracking:
         session.get = AsyncMock(return_value=MagicMock())
         return session
 
-    @pytest.fixture
+    @pytest_asyncio.fixture
     async def fp_repo(self, mock_session):
         """Create a false positive repository for testing."""
         from application.mothership.repositories.drt import DRTFalsePositiveRepository
 
         return DRTFalsePositiveRepository(mock_session)
 
-    @pytest.fixture
+    @pytest_asyncio.fixture
     async def pattern_repo(self, mock_session):
         """Create a false positive pattern repository for testing."""
         from application.mothership.repositories.drt import DRTFalsePositivePatternRepository

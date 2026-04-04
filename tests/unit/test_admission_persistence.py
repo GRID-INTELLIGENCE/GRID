@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import pytest
+import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.pool import StaticPool
 
@@ -15,7 +16,7 @@ from application.mothership.middleware.admission_gate import (
 from application.mothership.repositories.admission import AdmissionEntityRepository
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def session_factory():
     """Create an in-memory SQLite engine + session factory for testing."""
     engine = create_async_engine(
@@ -37,6 +38,7 @@ def repo(session_factory) -> AdmissionEntityRepository:
     return AdmissionEntityRepository(session_factory)
 
 
+@pytest.mark.asyncio
 class TestAdmissionPersistence:
     """Tests for AdmissionEntityRepository CRUD operations."""
 

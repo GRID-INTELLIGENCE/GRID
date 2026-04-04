@@ -5,12 +5,13 @@ import sys
 sys.path.insert(0, "src")
 
 import pytest
+import pytest_asyncio
 
 from src.grid.billing import BillingService, CostTier
 from src.grid.infrastructure.database import DatabaseManager
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def billing_setup(tmp_path):
     db_path = str(tmp_path / "billing_test.db")
     db = DatabaseManager(db_path)

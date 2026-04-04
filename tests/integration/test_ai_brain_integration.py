@@ -6,6 +6,7 @@ Tests Knowledge Graph to Navigation flow
 from unittest.mock import MagicMock
 
 import pytest
+import pytest_asyncio
 
 from grid.intelligence.ai_brain_bridge import (
     AIBrainIntegration,
@@ -16,7 +17,7 @@ from grid.intelligence.ai_brain_bridge import (
 from grid.intelligence.brain import AIBrain
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def ai_brain_integration():
     """Create AI Brain integration instance for testing"""
     integration = AIBrainIntegration()
@@ -76,7 +77,7 @@ class TestAIBrainIntegration:
 class TestKnowledgeGraphBridge:
     """Test Knowledge Graph Bridge functionality"""
 
-    @pytest.fixture
+    @pytest_asyncio.fixture
     async def bridge(self):
         """Create knowledge graph bridge for testing"""
         ai_brain = AIBrain()
@@ -236,7 +237,7 @@ class TestKnowledgeGraphBridge:
 class TestSpatialReasoning:
     """Test spatial reasoning components"""
 
-    @pytest.fixture
+    @pytest_asyncio.fixture
     async def bridge(self):
         """Create bridge with some test data"""
         ai_brain = AIBrain()

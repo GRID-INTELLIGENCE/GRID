@@ -20,6 +20,7 @@ from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
+import pytest_asyncio
 
 # Ensure src is in path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
@@ -366,7 +367,7 @@ class TestAgenticCaseProcessing:
 class TestEventBus:
     """Test event bus publish/subscribe functionality."""
 
-    @pytest.fixture
+    @pytest_asyncio.fixture
     async def event_bus(self):
         """Create event bus for testing."""
         from unified_fabric import DynamicEventBus

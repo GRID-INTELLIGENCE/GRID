@@ -1,6 +1,7 @@
 import asyncio
 
 import pytest
+import pytest_asyncio
 
 from src.grid.auth.service import AuthService
 from src.grid.auth.token_manager import TokenManager
@@ -21,7 +22,7 @@ def auth_env(monkeypatch):
     monkeypatch.setenv("MOTHERSHIP_JWT_ALGORITHM", "HS256")
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def services(db_path):
     # Setup Infrastructure
     db = DatabaseManager(db_path)

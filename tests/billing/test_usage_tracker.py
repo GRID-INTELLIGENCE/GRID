@@ -1,6 +1,7 @@
 import asyncio
 
 import pytest
+import pytest_asyncio
 
 from src.grid.billing.usage_tracker import UsageTracker
 from src.grid.infrastructure.database import DatabaseManager
@@ -11,7 +12,7 @@ def db_path(tmp_path):
     return str(tmp_path / "test_grid.db")
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def db_manager(db_path):
     db = DatabaseManager(db_path)
     await db.initialize_schema()  # Creates usage_logs table
@@ -19,7 +20,7 @@ async def db_manager(db_path):
     await db.close()
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def usage_tracker(db_manager):
     # Small batch size for easy flushing testing
     tracker = UsageTracker(db_manager, batch_size=2, flush_interval=10)

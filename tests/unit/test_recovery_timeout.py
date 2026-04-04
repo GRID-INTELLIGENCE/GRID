@@ -8,6 +8,7 @@ from grid.agentic.recovery_engine import RecoveryEngine
 
 
 @pytest.mark.unit
+@pytest.mark.asyncio
 class TestRecoveryTimeout:
     """Test suite for timeout_seconds parameter."""
 

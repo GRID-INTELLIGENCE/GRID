@@ -7,6 +7,7 @@ Covers: privacy levels, stats, and endpoint availability.
 from __future__ import annotations
 
 import pytest
+import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 
 
@@ -15,7 +16,7 @@ def anyio_backend():
     return "asyncio"
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def client():
     from application.mothership.main import create_app
 
@@ -25,7 +26,7 @@ async def client():
         yield ac
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def auth_headers(client: AsyncClient) -> dict[str, str]:
     resp = await client.post("/api/v1/auth/login", json={"username": "operator", "password": "operator"})
     if resp.status_code == 200:

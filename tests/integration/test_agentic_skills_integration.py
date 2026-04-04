@@ -12,6 +12,7 @@ from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+import pytest_asyncio
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
@@ -407,7 +408,7 @@ class TestRealAgenticSkillsIntegration:
         kb_path.mkdir()
         return kb_path
 
-    @pytest.fixture
+    @pytest_asyncio.fixture
     async def event_bus(self):
         """Create real event bus."""
         from unified_fabric import DynamicEventBus
@@ -422,7 +423,7 @@ class TestRealAgenticSkillsIntegration:
         """Create real skills registry."""
         return SkillsRegistry()
 
-    @pytest.fixture
+    @pytest_asyncio.fixture
     async def agentic_system(self, knowledge_base_path, event_bus, skills_registry):
         """Create real agentic system."""
         return AgenticSystem(

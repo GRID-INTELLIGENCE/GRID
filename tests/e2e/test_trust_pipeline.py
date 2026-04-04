@@ -11,6 +11,7 @@ Steps 11 + 13 of the Phase 0 Execution Schema.
 from __future__ import annotations
 
 import pytest
+import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 
 
@@ -19,7 +20,7 @@ def anyio_backend():
     return "asyncio"
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def client():
     """Create async test client against the Mothership app."""
     from application.mothership.main import create_app
@@ -30,7 +31,7 @@ async def client():
         yield ac
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def auth_token(client: AsyncClient) -> str:
     """Get a valid JWT token for authenticated requests."""
     response = await client.post(

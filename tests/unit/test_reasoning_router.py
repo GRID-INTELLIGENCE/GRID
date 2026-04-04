@@ -8,6 +8,7 @@ query flows.
 from __future__ import annotations
 
 import pytest
+import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 
 
@@ -25,7 +26,7 @@ def reset_reasoning_singleton():
     reset_reasoning_service()
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def client():
     from application.mothership.main import create_app
 
@@ -35,7 +36,7 @@ async def client():
         yield ac
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def auth_headers(client: AsyncClient) -> dict[str, str]:
     resp = await client.post("/api/v1/auth/login", json={"username": "operator", "password": "operator"})
     if resp.status_code == 200:

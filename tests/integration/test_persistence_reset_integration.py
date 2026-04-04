@@ -10,6 +10,7 @@ import time
 from pathlib import Path
 
 import pytest
+import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.pool import StaticPool
 
@@ -22,7 +23,7 @@ from application.mothership.repositories.admission import AdmissionEntityReposit
 class TestPersistenceResetIntegration:
     """Test persistence reset behavior with file-backed SQLite."""
 
-    @pytest.fixture
+    @pytest_asyncio.fixture
     async def temp_db_engine(self):
         """Create temporary file-backed SQLite database."""
         with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as temp_file:
@@ -45,7 +46,7 @@ class TestPersistenceResetIntegration:
         await engine.dispose()
         Path(db_path).unlink(missing_ok=True)
 
-    @pytest.fixture
+    @pytest_asyncio.fixture
     async def repository(self, temp_db_engine):
         """Create repository with temp database."""
         engine, db_path = temp_db_engine

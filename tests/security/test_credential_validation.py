@@ -3,6 +3,7 @@
 from unittest.mock import patch
 
 import pytest
+import pytest_asyncio
 
 from application.mothership.security.credential_validation import (
     CredentialValidationService,
@@ -16,7 +17,7 @@ def validation_service():
     return CredentialValidationService(max_failed_attempts=3, lockout_duration_minutes=5)
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def test_user(validation_service):
     """Create a test user with known credentials."""
     user = await validation_service.create_user(

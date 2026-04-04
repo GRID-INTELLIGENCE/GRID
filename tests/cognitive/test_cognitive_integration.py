@@ -1,6 +1,7 @@
 """Test suite for cognitive integration flows."""
 
 import pytest
+import pytest_asyncio
 
 from cognitive.cognitive_engine import CognitiveEngine, InteractionEvent
 from cognitive.light_of_the_seven.cognitive_layer.schemas.cognitive_state import ProcessingMode
@@ -9,7 +10,7 @@ from cognitive.light_of_the_seven.cognitive_layer.schemas.cognitive_state import
 class TestCognitiveIntegration:
     """Test suite for cognitive integration flows."""
 
-    @pytest.fixture
+    @pytest_asyncio.fixture
     async def cognitive_engine(self):
         """Create cognitive engine instance for testing."""
         return CognitiveEngine()
