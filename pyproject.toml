@@ -220,7 +220,7 @@ pythonpath = ["src"]
 testpaths = ["tests", "safety/tests", "boundaries/tests"]
 python_files = ["test_*.py"]
 python_functions = ["test_*"]
-asyncio_mode = "auto"
+asyncio_mode = "strict"
 asyncio_default_fixture_loop_scope = "function"
 strict_markers = true
 # Optimized discovery exclusions

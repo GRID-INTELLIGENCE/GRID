@@ -16,7 +16,7 @@ Applies to: `work/GRID/src/**`, `safety/**`, `security/**`, `boundaries/**`, `sc
 ## Testing
 
 - Use pytest markers: `@pytest.mark.unit`, `@pytest.mark.integration`, `@pytest.mark.safety`
-- `asyncio_mode = "auto"` â€” no need for explicit `@pytest.mark.asyncio`
+- `asyncio_mode = “strict”` â€” all async tests require explicit `@pytest.mark.asyncio`
 - Run with: `uv run pytest -q --tb=short`
 
 ## Safety-Critical Code
