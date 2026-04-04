@@ -43,6 +43,7 @@ def _prime_test_environment() -> None:
     os.environ.setdefault("ENABLE_DEV_TOKEN", "1")
     # CRIT-2: Allow dev login bypass in tests for auth flow tests
     os.environ.setdefault("ALLOW_DEV_LOGIN_BYPASS", "1")
+    os.environ.setdefault("MOTHERSHIP_ADMISSION_GATE_ENABLED", "false")
 
 
 _prime_test_environment()

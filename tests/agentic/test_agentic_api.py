@@ -120,6 +120,7 @@ def client(mock_processing_unit_fixture, mock_agentic_system_fixture):
         accountability_contract_path = "config/accountability/contracts.yaml"
         parasite_guard_enabled = False
         parasite_guard_pruning_enabled = False
+        admission_gate_enabled = False
 
     class MockTelemetry:
         enabled = False
