@@ -228,6 +228,7 @@ class TestPruneResult:
 # =============================================================================
 
 
+@pytest.mark.asyncio
 class TestHeaderAnomalyDetector:
     """Tests for HeaderAnomalyDetector."""
 
@@ -283,6 +284,7 @@ class TestHeaderAnomalyDetector:
         assert ctx is None
 
 
+@pytest.mark.asyncio
 class TestFrequencyDetector:
     """Tests for FrequencyDetector."""
 
@@ -327,6 +329,7 @@ class TestFrequencyDetector:
             assert ctx is None
 
 
+@pytest.mark.asyncio
 class TestLoopbackDetector:
     """Tests for LoopbackDetector."""
 
@@ -360,6 +363,7 @@ class TestLoopbackDetector:
         assert ctx is None
 
 
+@pytest.mark.asyncio
 class TestMissingBodyDetector:
     """Tests for MissingBodyDetector."""
 
@@ -435,6 +439,7 @@ class TestFractalNullFacade:
 # =============================================================================
 
 
+@pytest.mark.asyncio
 class TestDummyResponseGenerator:
     """Tests for DummyResponseGenerator."""
 
@@ -465,6 +470,7 @@ class TestDummyResponseGenerator:
 # =============================================================================
 
 
+@pytest.mark.asyncio
 class TestParasiteProfiler:
     """Tests for ParasiteProfiler."""
 
@@ -499,6 +505,7 @@ class TestParasiteProfiler:
 # =============================================================================
 
 
+@pytest.mark.asyncio
 class TestSourceTraceResolver:
     """Tests for SourceTraceResolver."""
 
@@ -533,6 +540,7 @@ class TestSourceTraceResolver:
 # =============================================================================
 
 
+@pytest.mark.asyncio
 class TestPrunerOrchestrator:
     """Tests for PrunerOrchestrator."""
 
@@ -643,6 +651,7 @@ class TestMrPoopyButtholeException:
 # =============================================================================
 
 
+@pytest.mark.asyncio
 class TestEdgeCases:
     """Tests for edge cases and error handling."""
 

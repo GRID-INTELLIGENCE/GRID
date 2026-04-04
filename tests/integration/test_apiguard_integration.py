@@ -32,6 +32,7 @@ from application.mothership.middleware.apiguard_adapter import (
 )
 
 
+@pytest.mark.asyncio
 class TestAPIGuardCircuitBreakerMiddleware:
     """Test APIGuard Circuit Breaker Middleware integration."""
 
@@ -93,6 +94,7 @@ class TestAPIGuardCircuitBreakerMiddleware:
         assert rate_limited, "Expected rate limiting to trigger"
 
 
+@pytest.mark.asyncio
 class TestAPIGuardRateLimitMiddleware:
     """Test APIGuard Rate Limit Middleware."""
 
@@ -131,6 +133,7 @@ class TestAPIGuardRateLimitMiddleware:
         assert response.json()["error_code"] == "RATE_LIMIT_EXCEEDED"
 
 
+@pytest.mark.asyncio
 class TestAPIGuardHTTPClient:
     """Test APIGuard HTTP Client."""
 
@@ -195,6 +198,7 @@ class TestAPIGuardHTTPClient:
                     await client.get("https://api.example.com/test")
 
 
+@pytest.mark.asyncio
 class TestFactoryFunctions:
     """Test factory functions for easy integration."""
 
@@ -249,6 +253,7 @@ class TestFactoryFunctions:
         assert client.client._breaker._failure_threshold == 3
 
 
+@pytest.mark.asyncio
 class TestGRIDIntegration:
     """Test integration with GRID's existing patterns."""
 
@@ -300,6 +305,7 @@ class TestGRIDIntegration:
 
 
 # Integration test for RAG system protection
+@pytest.mark.asyncio
 class TestRAGSystemProtection:
     """Test APIGuard integration with GRID's RAG system."""
 
@@ -323,6 +329,7 @@ class TestRAGSystemProtection:
 
 
 # Integration test for external API protection
+@pytest.mark.asyncio
 class TestExternalAPIProtection:
     """Test APIGuard integration with external APIs."""
 

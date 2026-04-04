@@ -153,6 +153,7 @@ class TestDRTMiddleware:
         assert status["attack_vectors_count"] == 0
 
 
+@pytest.mark.asyncio
 class TestDRTIntegration:
     """Integration tests."""
 
@@ -382,6 +383,7 @@ class TestDRTMetricsCollector:
         assert metrics_collector.metrics.false_positives_marked == 0
 
 
+@pytest.mark.asyncio
 class TestDRTFalsePositiveTracking:
     """Test DRT false positive tracking functionality."""
 
@@ -575,6 +577,7 @@ class TestDRTFalsePositiveTracking:
         pattern_repo._db.execute.assert_called_once()
 
 
+@pytest.mark.asyncio
 class TestDRTAPIIntegration:
     """Integration tests for DRT API endpoints."""
 

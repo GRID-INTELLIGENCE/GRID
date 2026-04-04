@@ -1092,6 +1092,7 @@ class TestSecurityIntegrationScenarios:
         assert result.compliant is False
         assert len(result.issues) > 0
 
+    @pytest.mark.asyncio
     async def test_ghost_registry_with_security(self, setup_registry):
         """Test ghost registry integration with security enforcement."""
         from application.mothership.api_core import get_ghost_registry, summon_handler

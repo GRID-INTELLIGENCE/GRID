@@ -379,6 +379,7 @@ class TestStreamingEndpointSecurity:
 # =============================================================================
 
 
+@pytest.mark.asyncio
 class TestStreamingEndpointReliability:
     """Reliability tests for streaming endpoints."""
 
@@ -735,6 +736,7 @@ class TestStreamingEndpointReliability:
 # =============================================================================
 
 
+@pytest.mark.asyncio
 class TestStreamingPerformance:
     """Performance tests for streaming endpoints.
 

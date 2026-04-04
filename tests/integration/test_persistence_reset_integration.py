@@ -20,6 +20,7 @@ from application.mothership.middleware.admission_gate import EntityAttributionEn
 from application.mothership.repositories.admission import AdmissionEntityRepository
 
 
+@pytest.mark.asyncio
 class TestPersistenceResetIntegration:
     """Test persistence reset behavior with file-backed SQLite."""
 

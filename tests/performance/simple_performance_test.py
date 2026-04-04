@@ -8,12 +8,15 @@ import os
 import sys
 import time
 
+import pytest
+
 # Add src to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "src"))
 
 from tools.rag.conversational_rag import create_conversational_rag_engine
 
 
+@pytest.mark.asyncio
 async def test_fallback_performance():
     """Test fallback mechanism performance."""
     print("Testing fallback mechanism performance...")
@@ -38,6 +41,7 @@ async def test_fallback_performance():
             print(f"Answer preview: {result['answer'][:50]}...")
 
 
+@pytest.mark.asyncio
 async def test_conversation_performance():
     """Test conversation performance."""
     print("\nTesting conversation performance...")
@@ -58,6 +62,7 @@ async def test_conversation_performance():
         print(f"Sources: {len(result['sources'])}")
 
 
+@pytest.mark.asyncio
 async def test_metrics():
     """Test metrics collection."""
     print("\nTesting metrics collection...")

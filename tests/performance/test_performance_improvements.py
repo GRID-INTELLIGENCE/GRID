@@ -8,12 +8,15 @@ import os
 import sys
 import time
 
+import pytest
+
 # Add src to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "src"))
 
 from tools.rag.conversational_rag import create_conversational_rag_engine
 
 
+@pytest.mark.asyncio
 async def test_fallback_mechanism():
     """Test the fallback mechanism."""
     print("Testing fallback mechanism...")
@@ -35,6 +38,7 @@ async def test_fallback_mechanism():
     return result
 
 
+@pytest.mark.asyncio
 async def test_conversation_flow():
     """Test conversation flow with session."""
     print("\nTesting conversation flow...")
@@ -56,6 +60,7 @@ async def test_conversation_flow():
         print(f"Sources: {len(result['sources'])}")
 
 
+@pytest.mark.asyncio
 async def test_auto_indexing():
     """Test auto-indexing functionality."""
     print("\nTesting auto-indexing...")

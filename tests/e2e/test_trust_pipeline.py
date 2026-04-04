@@ -59,6 +59,7 @@ def auth_headers(token: str) -> dict[str, str]:
 # =============================================================================
 
 
+@pytest.mark.asyncio
 class TestResonanceProcessEndpoint:
     """Test POST /api/v1/resonance/process — the core trust layer endpoint."""
 
@@ -102,6 +103,7 @@ class TestResonanceProcessEndpoint:
         assert data.get("message") is not None
 
 
+@pytest.mark.asyncio
 class TestDefinitiveEndpoint:
     """Test POST /api/v1/resonance/definitive — the canvas flip checkpoint."""
 
@@ -143,6 +145,7 @@ class TestDefinitiveEndpoint:
 # =============================================================================
 
 
+@pytest.mark.asyncio
 class TestSafetyFramework:
     """Test the AISafetyFramework content evaluation."""
 
@@ -223,6 +226,7 @@ class TestSafetyFramework:
         assert harmful_report.overall_score < clean_report.overall_score
 
 
+@pytest.mark.asyncio
 class TestInferenceRouter:
     """Test /api/v1/inference/* endpoints."""
 
@@ -241,6 +245,7 @@ class TestInferenceRouter:
         assert "default" in data
 
 
+@pytest.mark.asyncio
 class TestPrivacyRouter:
     """Test /api/v1/privacy/* endpoints."""
 
@@ -278,6 +283,7 @@ class TestPrivacyRouter:
 # =============================================================================
 
 
+@pytest.mark.asyncio
 class TestParasiteGuardDetectors:
     """Test the Parasite Guard detector chain — C1, C2, C3."""
 
@@ -479,6 +485,7 @@ class TestSecretValidation:
 # =============================================================================
 
 
+@pytest.mark.asyncio
 class TestHealthEndpoints:
     """Verify basic Mothership connectivity."""
 

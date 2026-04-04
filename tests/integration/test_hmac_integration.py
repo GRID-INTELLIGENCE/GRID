@@ -21,6 +21,7 @@ from application.mothership.middleware.entity_signing import (
 )
 
 
+@pytest.mark.asyncio
 class TestHMACIntegration:
     """Test HMAC integration through actual middleware stack."""
 

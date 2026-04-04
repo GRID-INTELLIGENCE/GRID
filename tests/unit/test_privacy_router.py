@@ -36,6 +36,7 @@ async def auth_headers(client: AsyncClient) -> dict[str, str]:
     return {"Authorization": "Bearer dev-test-token"}
 
 
+@pytest.mark.asyncio
 class TestPrivacyLevels:
     @pytest.mark.anyio
     async def test_levels_returns_all_three(self, client, auth_headers):
@@ -52,6 +53,7 @@ class TestPrivacyLevels:
         assert resp.json()["default"] == "balanced"
 
 
+@pytest.mark.asyncio
 class TestPrivacyStats:
     @pytest.mark.anyio
     async def test_stats_returns_counters(self, client, auth_headers):

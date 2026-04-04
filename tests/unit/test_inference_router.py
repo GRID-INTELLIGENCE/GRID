@@ -36,6 +36,7 @@ async def auth_headers(client: AsyncClient) -> dict[str, str]:
     return {"Authorization": "Bearer dev-test-token"}
 
 
+@pytest.mark.asyncio
 class TestInferenceModels:
     @pytest.mark.anyio
     async def test_list_models_returns_list(self, client, auth_headers):
@@ -53,6 +54,7 @@ class TestInferenceModels:
         assert data["default"] in data["models"]
 
 
+@pytest.mark.asyncio
 class TestInferenceAsync:
     @pytest.mark.anyio
     async def test_async_inference_returns_task_id(self, client, auth_headers):

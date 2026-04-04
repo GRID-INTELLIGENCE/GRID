@@ -14,6 +14,7 @@ import pytest
 from grid.agentic.event_bus import EventBus
 
 
+@pytest.mark.asyncio
 class TestEventBusCore:
     """Test core event bus functionality"""
 
@@ -159,6 +160,7 @@ class TestEventBusCore:
         )
 
 
+@pytest.mark.asyncio
 class TestEventPersistence:
     """Test event persistence and replay functionality"""
 
@@ -188,6 +190,7 @@ class TestEventPersistence:
         assert recent_ids == expected_recent, "Should keep most recent events in order"
 
 
+@pytest.mark.asyncio
 class TestEventHandlers:
     """Test specific event handler implementations"""
 

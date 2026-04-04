@@ -2,10 +2,13 @@
 
 import asyncio
 
+import pytest
+
 from src.unified_fabric import DynamicEventBus, Event
 from src.unified_fabric.safety_router import SafetyFirstRouter
 
 
+@pytest.mark.asyncio
 async def test_safety_router():
     router = SafetyFirstRouter()
 
@@ -24,6 +27,7 @@ async def test_safety_router():
     print("\nAll safety router tests passed!")
 
 
+@pytest.mark.asyncio
 async def test_event_bus():
     bus = DynamicEventBus(bus_id="test")
     received = []

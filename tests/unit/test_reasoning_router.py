@@ -47,6 +47,7 @@ async def auth_headers(client: AsyncClient) -> dict[str, str]:
 
 
 @pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_stabilize_returns_trace_and_quality(client: AsyncClient, auth_headers: dict[str, str]) -> None:
     response = await client.post(
         "/api/v1/stabilize",
@@ -69,6 +70,7 @@ async def test_stabilize_returns_trace_and_quality(client: AsyncClient, auth_hea
 
 
 @pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_drift_check_detects_contradiction(client: AsyncClient, auth_headers: dict[str, str]) -> None:
     response = await client.post(
         "/api/v1/drift-check",
@@ -91,6 +93,7 @@ async def test_drift_check_detects_contradiction(client: AsyncClient, auth_heade
 
 
 @pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_roundtable_reconcile_logs_open_gaps_and_query(client: AsyncClient, auth_headers: dict[str, str]) -> None:
     case_id = "case_reasoning_003"
     reconcile = await client.post(

@@ -10,6 +10,8 @@ import asyncio
 import time
 from typing import Any
 
+import pytest
+
 
 class MockRAGEngine:
     """Mock RAG engine to demonstrate performance improvements."""
@@ -126,6 +128,7 @@ class MockRAGEngine:
         }
 
 
+@pytest.mark.asyncio
 async def test_fallback_performance():
     """Test fallback mechanism performance."""
     print("Testing fallback mechanism performance...")
@@ -155,6 +158,7 @@ async def test_fallback_performance():
         )
 
 
+@pytest.mark.asyncio
 async def test_conversation_performance():
     """Test conversation performance."""
     print("\nTesting conversation performance...")
@@ -178,6 +182,7 @@ async def test_conversation_performance():
         print(f"    Turn count: {result['conversation_metadata']['turn_count']}")
 
 
+@pytest.mark.asyncio
 async def test_multi_hop_performance():
     """Test multi-hop reasoning performance."""
     print("\nTesting multi-hop reasoning performance...")
@@ -205,6 +210,7 @@ async def test_multi_hop_performance():
         print(f"  '{query}' -> Multi-hop: {result['multi_hop_used']}, Latency: {result['latency_ms']:.1f}ms")
 
 
+@pytest.mark.asyncio
 async def test_metrics():
     """Test metrics collection."""
     print("\nTesting metrics collection...")
