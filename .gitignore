@@ -597,6 +597,7 @@ scripts/*.py
 !scripts/migrate_secrets_to_gcp.py
 !scripts/deploy_security_config.py
 !scripts/inject_openapi_schema.py
+!scripts/migrate_knowledge_json_to_sqlite.py
 !scripts/agent_setup.ps1
 
 # ==========================
