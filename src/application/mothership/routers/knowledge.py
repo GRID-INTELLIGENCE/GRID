@@ -160,7 +160,7 @@ def _coerce_graph_payload(payload: Any, *, max_edges: int) -> tuple[list[GraphNo
         _raise_graph_error(
             code="SCHEMA_INVALID",
             message="Knowledge graph payload is not an object",
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
         )
 
     raw_nodes = payload.get("nodes")
@@ -169,7 +169,7 @@ def _coerce_graph_payload(payload: Any, *, max_edges: int) -> tuple[list[GraphNo
         _raise_graph_error(
             code="SCHEMA_INVALID",
             message="Knowledge graph payload must include nodes and edges arrays",
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
         )
 
     try:
@@ -179,7 +179,7 @@ def _coerce_graph_payload(payload: Any, *, max_edges: int) -> tuple[list[GraphNo
         _raise_graph_error(
             code="SCHEMA_INVALID",
             message="Knowledge graph payload does not match schema",
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             details={"validation_errors": _validation_error_messages(exc)},
         )
 
@@ -214,7 +214,7 @@ def _coerce_graph_payload(payload: Any, *, max_edges: int) -> tuple[list[GraphNo
         _raise_graph_error(
             code="SCHEMA_INVALID",
             message="Knowledge graph storage_path must be a string when present",
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
         )
 
     total_entities = payload.get("total_entities")
@@ -222,7 +222,7 @@ def _coerce_graph_payload(payload: Any, *, max_edges: int) -> tuple[list[GraphNo
         _raise_graph_error(
             code="SCHEMA_INVALID",
             message="Knowledge graph total_entities must be an integer",
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
         )
 
     truncated = payload.get("truncated")
@@ -230,7 +230,7 @@ def _coerce_graph_payload(payload: Any, *, max_edges: int) -> tuple[list[GraphNo
         _raise_graph_error(
             code="SCHEMA_INVALID",
             message="Knowledge graph truncated must be a boolean",
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
         )
 
     return nodes, edges, storage_path, total_entities, truncated
@@ -426,11 +426,15 @@ async def knowledge_graph(
 
     started = time.perf_counter()
     try:
-        payload = await asyncio.wait_for(
-            asyncio.to_thread(_export_graph_payload, effective_max_nodes),
-            timeout=timeout_ms / 1000,
-        )
-    except TimeoutError:
+        payload = _export_graph_payload(effective_max_nodes)
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to export knowledge graph: {exc}",
+        ) from exc
+
+    elapsed_ms = int((time.perf_counter() - started) * 1000)
+    if elapsed_ms > timeout_ms:
         _raise_graph_error(
             code="LAYOUT_TIMEOUT",
             message="Knowledge graph export exceeded time budget",
@@ -439,17 +443,15 @@ async def knowledge_graph(
                 "Lower max_nodes and retry",
                 "Retry with a higher timeout_ms value",
             ],
-            details={"timeout_ms": timeout_ms, "max_nodes": effective_max_nodes},
+            details={
+                "timeout_ms": timeout_ms,
+                "export_ms": elapsed_ms,
+                "max_nodes": effective_max_nodes,
+            },
         )
-    except Exception as exc:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to export knowledge graph: {exc}",
-        ) from exc
 
     nodes, edges, storage_path, total_entities, truncated = _coerce_graph_payload(payload, max_edges=max_edges)
     graph_hash = _stable_graph_hash(nodes, edges)
-    elapsed_ms = int((time.perf_counter() - started) * 1000)
 
     return KnowledgeGraphResponse(
         nodes=nodes,
