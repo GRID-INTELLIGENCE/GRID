@@ -19,7 +19,7 @@ httpx==0.28.1
 # Monitoring & Observability
 prometheus-client==0.24.1
 structlog==25.5.0
-sentry-sdk[fastapi]==2.56.0
+sentry-sdk[fastapi]==2.57.0
 
 # Rate Limiting
 redis==7.4.0
