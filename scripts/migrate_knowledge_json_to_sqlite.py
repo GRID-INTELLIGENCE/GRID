@@ -12,6 +12,7 @@ Exits 0 on success, 1 on mismatch or error.
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
@@ -44,8 +45,7 @@ def migrate(json_path: Path, db_path: Path) -> int:
     json_store.connect()
     src_stats = json_store.get_graph_statistics()
     print(
-        f"[INFO]  Source has {src_stats['total_entities']} entities, "
-        f"{src_stats['total_relationships']} relationships"
+        f"[INFO]  Source has {src_stats['total_entities']} entities, {src_stats['total_relationships']} relationships"
     )
 
     db_store = PersistentSQLiteKnowledgeStore(storage_path=db_path)
@@ -63,13 +63,9 @@ def migrate(json_path: Path, db_path: Path) -> int:
 
     rel_ok = 0
     rel_err = 0
+    conn = db_store._ensure_connected()
     for rel in json_store.relationships.values():
         try:
-            from datetime import datetime
-            from grid.knowledge.graph_store import Relationship
-            from grid.knowledge.graph_schema import RelationType
-            import sqlite3
-            conn = db_store._ensure_connected()
             conn.execute(
                 """
                 INSERT OR IGNORE INTO relationships
@@ -82,7 +78,7 @@ def migrate(json_path: Path, db_path: Path) -> int:
                     rel.from_entity_id,
                     rel.to_entity_id,
                     rel.relationship_type.value,
-                    __import__("json").dumps(rel.properties),
+                    json.dumps(rel.properties),
                     rel.created_at.isoformat(),
                     rel.updated_at.isoformat(),
                 ),

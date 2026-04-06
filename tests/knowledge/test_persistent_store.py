@@ -194,7 +194,6 @@ class TestCreateRelationship:
         e2 = _make_entity(entity_id="e_to")
         store.store_entity(e1)
         store.store_entity(e2)
-        rel = _make_relationship("e_from", "e_to")
         result = store.create_relationship(
             from_id=EntityId("e_from"),
             to_id=EntityId("e_to"),
@@ -242,8 +241,14 @@ class TestCreateRelationship:
 
 class TestSemanticSearch:
     def test_finds_entity_by_name_keyword(self, store: PersistentJSONKnowledgeStore) -> None:
-        store.store_entity(_make_entity(entity_id="s_transformer", properties={"name": "Transformer", "description": "Attention model"}))
-        store.store_entity(_make_entity(entity_id="s_other", properties={"name": "Unrelated", "description": "Something else"}))
+        store.store_entity(
+            _make_entity(
+                entity_id="s_transformer", properties={"name": "Transformer", "description": "Attention model"}
+            )
+        )
+        store.store_entity(
+            _make_entity(entity_id="s_other", properties={"name": "Unrelated", "description": "Something else"})
+        )
         ctx = SearchContext(query="Transformer")
         results = store.semantic_search("Transformer", ctx)
         ids = [e.entity_id for e in results]
@@ -256,8 +261,12 @@ class TestSemanticSearch:
         assert any(e.entity_id == "s_case" for e in results)
 
     def test_filters_by_entity_type(self, store: PersistentJSONKnowledgeStore) -> None:
-        store.store_entity(_make_entity(entity_id="s_concept", entity_type=EntityType.CONCEPT, properties={"name": "shared"}))
-        store.store_entity(_make_entity(entity_id="s_agent", entity_type=EntityType.AGENT, properties={"name": "shared"}))
+        store.store_entity(
+            _make_entity(entity_id="s_concept", entity_type=EntityType.CONCEPT, properties={"name": "shared"})
+        )
+        store.store_entity(
+            _make_entity(entity_id="s_agent", entity_type=EntityType.AGENT, properties={"name": "shared"})
+        )
         ctx = SearchContext(query="shared", entity_types=[EntityType.CONCEPT])
         results = store.semantic_search("shared", ctx)
         assert all(e.entity_type == EntityType.CONCEPT for e in results)
@@ -265,7 +274,11 @@ class TestSemanticSearch:
 
     def test_respects_limit(self, store: PersistentJSONKnowledgeStore) -> None:
         for i in range(10):
-            store.store_entity(_make_entity(entity_id=f"s_limit_{i}", properties={"name": f"entity {i}", "description": "common keyword"}))
+            store.store_entity(
+                _make_entity(
+                    entity_id=f"s_limit_{i}", properties={"name": f"entity {i}", "description": "common keyword"}
+                )
+            )
         ctx = SearchContext(query="common", limit=3)
         results = store.semantic_search("common", ctx)
         assert len(results) <= 3

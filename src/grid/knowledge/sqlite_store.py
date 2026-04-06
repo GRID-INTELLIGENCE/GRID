@@ -266,6 +266,7 @@ class PersistentSQLiteKnowledgeStore:
 
         try:
             fts_query = query.replace('"', '""')
+            # type_filter_sql is safe: built from EntityType enum values, not user input
             rows = conn.execute(
                 f"""
                 SELECT e.*
@@ -274,10 +275,11 @@ class PersistentSQLiteKnowledgeStore:
                 WHERE entities_fts MATCH ?
                 {type_filter_sql}
                 LIMIT ?
-                """,
+                """,  # noqa: S608
                 [fts_query, *type_params, limit],
             ).fetchall()
         except sqlite3.OperationalError:
+            # type_filter_sql is safe: built from EntityType enum values, not user input
             rows = conn.execute(
                 f"""
                 SELECT e.*
@@ -288,7 +290,7 @@ class PersistentSQLiteKnowledgeStore:
                 )
                 {type_filter_sql}
                 LIMIT ?
-                """,
+                """,  # noqa: S608
                 [f"%{query.lower()}%", f"%{query.lower()}%", *type_params, limit],
             ).fetchall()
 
@@ -339,9 +341,7 @@ class PersistentSQLiteKnowledgeStore:
         total_entities = conn.execute("SELECT COUNT(*) FROM entities").fetchone()[0]
 
         if max_nodes is not None:
-            entity_rows = conn.execute(
-                "SELECT * FROM entities ORDER BY entity_id LIMIT ?", (max_nodes,)
-            ).fetchall()
+            entity_rows = conn.execute("SELECT * FROM entities ORDER BY entity_id LIMIT ?", (max_nodes,)).fetchall()
             truncated = total_entities > max_nodes
         else:
             entity_rows = conn.execute("SELECT * FROM entities ORDER BY entity_id").fetchall()
