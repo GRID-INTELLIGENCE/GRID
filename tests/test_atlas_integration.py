@@ -239,9 +239,7 @@ class TestGovernanceGates:
             rationale="Standard operation",
         )
 
-    def test_allow_with_good_alignment(
-        self, valid_consent: ConsentSignal, positive_value: ValueAlignment
-    ) -> None:
+    def test_allow_with_good_alignment(self, valid_consent: ConsentSignal, positive_value: ValueAlignment) -> None:
         """Good consent and value alignment should allow action."""
         gate = GovernanceGate()
         result = gate.evaluate("read_file", [valid_consent], [positive_value])
@@ -316,9 +314,7 @@ class TestGovernanceGates:
 
         assert result.verdict == GateVerdict.DENY
 
-    def test_evaluation_history(
-        self, valid_consent: ConsentSignal, positive_value: ValueAlignment
-    ) -> None:
+    def test_evaluation_history(self, valid_consent: ConsentSignal, positive_value: ValueAlignment) -> None:
         """Evaluations should be recorded in history."""
         gate = GovernanceGate()
         gate.evaluate("action1", [valid_consent], [positive_value])
@@ -420,3 +416,172 @@ class TestAtlasPipeline:
         verdict = gate.evaluate("action", [expired], [value])
 
         assert verdict.verdict == GateVerdict.DENY
+
+
+class TestPreflightGraphCompilation:
+    """Tests for the PREFLIGHT entity type and graph_compiler preflight path.
+
+    Validates that glimpse_preflight audit events emitted by canopy/echoes
+    are compiled as EntityType.PREFLIGHT nodes (not generic EVENT nodes) with
+    the correct properties, weight, and TRIGGERED relationship edges.
+    """
+
+    def _make_preflight_event(
+        self,
+        *,
+        event_id: str = "pf-001",
+        aligned: bool = True,
+        status: str = "aligned",
+        essence: str = "on-topic",
+        probability_score: float = 0.91,
+        trajectory_delta: float = 0.03,
+        session_id: str = "sess-abc",
+    ) -> dict:
+        return {
+            "id": event_id,
+            "timestamp": "2026-04-07T12:00:00+00:00",
+            "source": "echoes-canopy",
+            "tool": "glimpse_preflight",
+            "status": "success" if aligned else "failure",
+            "metadata": {
+                "aligned": aligned,
+                "glimpse_status": status,
+                "essence": essence,
+                "probability_score": probability_score,
+                "trajectory_delta": trajectory_delta,
+                "session_id": session_id,
+                "stale": False,
+                "attempt": 1,
+            },
+        }
+
+    def test_preflight_entity_type_is_preflight(self) -> None:
+        """glimpse_preflight events must compile to EntityType.PREFLIGHT, not EVENT."""
+        from grid.core_modules.graph_compiler import EntityType, GraphCompiler
+
+        compiler = GraphCompiler()
+        event = self._make_preflight_event()
+        entity = compiler.compile_preflight_result(event)
+
+        assert entity.entity_type == EntityType.PREFLIGHT
+
+    def test_preflight_entity_id_uses_preflight_prefix(self) -> None:
+        """PREFLIGHT entity IDs must use 'preflight:' prefix, not 'event:'."""
+        from grid.core_modules.graph_compiler import GraphCompiler
+
+        compiler = GraphCompiler()
+        event = self._make_preflight_event(event_id="test-123")
+        entity = compiler.compile_preflight_result(event)
+
+        assert entity.id == "preflight:test-123"
+
+    def test_preflight_entity_source_context(self) -> None:
+        """PREFLIGHT entities must carry source_context='glimpse_preflight'."""
+        from grid.core_modules.graph_compiler import GraphCompiler
+
+        compiler = GraphCompiler()
+        entity = compiler.compile_preflight_result(self._make_preflight_event())
+        assert entity.source_context == "glimpse_preflight"
+
+    def test_aligned_preflight_has_lower_weight_than_misaligned(self) -> None:
+        """Misaligned preflight must have elevated weight vs aligned (safety signal)."""
+        from grid.core_modules.graph_compiler import GraphCompiler
+
+        compiler = GraphCompiler()
+        aligned = compiler.compile_preflight_result(self._make_preflight_event(aligned=True))
+        misaligned = compiler.compile_preflight_result(self._make_preflight_event(aligned=False))
+
+        assert misaligned.weight > aligned.weight, (
+            "Misaligned preflight must have higher weight to draw attention in graph"
+        )
+
+    def test_preflight_entity_properties(self) -> None:
+        """PREFLIGHT entity must surface alignment, essence, probability, and delta."""
+        from grid.core_modules.graph_compiler import GraphCompiler
+
+        compiler = GraphCompiler()
+        event = self._make_preflight_event(
+            aligned=True,
+            essence="clear and on-topic",
+            probability_score=0.87,
+            trajectory_delta=0.05,
+            session_id="sess-xyz",
+        )
+        entity = compiler.compile_preflight_result(event)
+
+        assert entity.properties["aligned"] is True
+        assert entity.properties["reasoning_essence"] == "clear and on-topic"
+        assert entity.properties["probability_score"] == 0.87
+        assert entity.properties["trajectory_delta"] == 0.05
+        assert entity.properties["session_id"] == "sess-xyz"
+
+    def test_compile_echoes_context_routes_preflight_events(self) -> None:
+        """compile_echoes_context must route tool='glimpse_preflight' to PREFLIGHT entity."""
+        from grid.core_modules.graph_compiler import EntityType, GraphCompiler
+
+        compiler = GraphCompiler()
+        context = {
+            "events": [
+                self._make_preflight_event(event_id="pf-1"),
+                {
+                    "id": "ev-2",
+                    "timestamp": "2026-04-07T12:00:01+00:00",
+                    "source": "echoes-server",
+                    "tool": "record_audit",
+                    "status": "success",
+                    "metadata": {},
+                },
+            ]
+        }
+        graph = compiler.compile_echoes_context(context)
+
+        types = {e.entity_type for e in graph.entities}
+        assert EntityType.PREFLIGHT in types, "PREFLIGHT entity must be in compiled graph"
+        assert EntityType.EVENT in types, "Regular EVENT entity must still compile"
+
+        preflight_entities = [e for e in graph.entities if e.entity_type == EntityType.PREFLIGHT]
+        assert len(preflight_entities) == 1
+        assert preflight_entities[0].id == "preflight:pf-1"
+
+    def test_preflight_to_event_edge_uses_triggered_relation(self) -> None:
+        """The edge from a PREFLIGHT node to the following event must use TRIGGERED."""
+        from grid.core_modules.graph_compiler import GraphCompiler, RelationType
+
+        compiler = GraphCompiler()
+        context = {
+            "events": [
+                self._make_preflight_event(event_id="pf-1"),
+                {
+                    "id": "ev-2",
+                    "timestamp": "2026-04-07T12:00:01+00:00",
+                    "source": "echoes-server",
+                    "tool": "record_audit",
+                    "status": "success",
+                    "metadata": {},
+                },
+            ]
+        }
+        graph = compiler.compile_echoes_context(context)
+
+        triggered_edges = [e for e in graph.edges if e.relation_type == RelationType.TRIGGERED]
+        assert len(triggered_edges) == 1, "Expected one TRIGGERED edge from preflight to next event"
+        assert triggered_edges[0].source_id == "preflight:pf-1"
+        assert triggered_edges[0].target_id == "event:ev-2"
+
+    def test_preflight_entity_type_enum_exists(self) -> None:
+        """EntityType.PREFLIGHT must exist in the enum."""
+        from grid.core_modules.graph_compiler import EntityType
+
+        assert hasattr(EntityType, "PREFLIGHT")
+        assert EntityType.PREFLIGHT.value == "preflight"
+
+    def test_preflight_compile_result_to_dict(self) -> None:
+        """PREFLIGHT entity .to_dict() must serialize type as 'preflight'."""
+        from grid.core_modules.graph_compiler import GraphCompiler
+
+        compiler = GraphCompiler()
+        entity = compiler.compile_preflight_result(self._make_preflight_event())
+        d = entity.to_dict()
+
+        assert d["type"] == "preflight"
+        assert d["source"] == "glimpse_preflight"

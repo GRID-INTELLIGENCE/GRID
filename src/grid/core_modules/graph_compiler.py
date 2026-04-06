@@ -21,6 +21,7 @@ class EntityType(Enum):
     CLUSTER = "cluster"
     EVENT = "event"
     ARTIFACT = "artifact"
+    PREFLIGHT = "preflight"  # Glimpse preflight alignment check results
 
 
 class RelationType(Enum):
@@ -155,7 +156,10 @@ class GraphCompiler:
         # Process events
         events = context.get("events", [])
         for event in events:
-            entity = self._compile_event(event)
+            if event.get("tool") == "glimpse_preflight":
+                entity = self._compile_preflight_event(event)
+            else:
+                entity = self._compile_event(event)
             graph.add_entity(entity)
             self._entity_cache[entity.id] = entity
 
@@ -183,6 +187,23 @@ class GraphCompiler:
         """
         return self._compile_event(event)
 
+    def compile_preflight_result(self, preflight_event: dict[str, Any]) -> GlimpseEntity:
+        """Compile a glimpse_preflight audit event into a PREFLIGHT entity.
+
+        Preflight events carry alignment results, trajectory probability, and
+        reasoning essence from EchoesAssistantV2.glimpse_preflight(). They are
+        written to ~/.echoes/audit.ndjson with tool="glimpse_preflight" and
+        compiled here as EntityType.PREFLIGHT nodes so the GlimpseBridge can
+        render them as distinct safety-check nodes in the cognitive graph.
+
+        Args:
+            preflight_event: Echoes audit event dict with tool="glimpse_preflight".
+
+        Returns:
+            GlimpseEntity with entity_type=EntityType.PREFLIGHT.
+        """
+        return self._compile_preflight_event(preflight_event)
+
     def _compile_event(self, event: dict[str, Any]) -> GlimpseEntity:
         """Internal: compile an event to entity."""
         event_id = event.get("id", str(uuid4()))
@@ -206,6 +227,48 @@ class GraphCompiler:
             weight=self._calculate_weight(event),
             timestamp=timestamp,
             source_context="echoes_audit",
+        )
+
+    def _compile_preflight_event(self, event: dict[str, Any]) -> GlimpseEntity:
+        """Internal: compile a glimpse_preflight audit event into a PREFLIGHT entity.
+
+        Extracts alignment result, probability score, trajectory delta, and
+        reasoning essence from the event metadata and surfaces them as
+        first-class PREFLIGHT node properties for graph visualization.
+        """
+        event_id = event.get("id", str(uuid4()))
+        timestamp = None
+        if ts := event.get("timestamp"):
+            if isinstance(ts, str):
+                timestamp = datetime.fromisoformat(ts.replace("Z", "+00:00"))
+            elif isinstance(ts, datetime):
+                timestamp = ts
+
+        meta: dict[str, Any] = event.get("metadata") or {}
+        aligned: bool = meta.get("aligned", event.get("status") == "success")
+        # Weight aligned preflights lower (passing is expected); misaligned gets
+        # elevated weight so it draws attention in the graph.
+        weight = self.default_weight if aligned else self.default_weight * 1.8
+
+        return GlimpseEntity(
+            id=f"preflight:{event_id}",
+            entity_type=EntityType.PREFLIGHT,
+            label=f"Preflight {'✓' if aligned else '✗'} ({meta.get('glimpse_status', 'unknown')})",
+            properties={
+                "aligned": aligned,
+                "glimpse_status": meta.get("glimpse_status"),
+                "probability_score": meta.get("probability_score"),
+                "trajectory_delta": meta.get("trajectory_delta") or meta.get("delta"),
+                "reasoning_essence": meta.get("essence"),
+                "sample": meta.get("sample"),
+                "attempt": meta.get("attempt"),
+                "stale": meta.get("stale"),
+                "session_id": meta.get("session_id"),
+                "source": event.get("source", "echoes-canopy"),
+            },
+            weight=weight,
+            timestamp=timestamp,
+            source_context="glimpse_preflight",
         )
 
     def _compile_session(self, session: dict[str, Any]) -> GlimpseEntity:
@@ -243,18 +306,27 @@ class GraphCompiler:
         edges: list[GlimpseEdge] = []
         events = context.get("events", [])
 
-        # Link sequential events
+        # Link sequential events; preflight→next uses TRIGGERED instead of FOLLOWED_BY
         for i, event in enumerate(events[:-1]):
-            source_id = f"event:{event.get('id', i)}"
-            target_id = f"event:{events[i + 1].get('id', i + 1)}"
+            is_preflight = event.get("tool") == "glimpse_preflight"
+            source_prefix = "preflight" if is_preflight else "event"
+            source_id = f"{source_prefix}:{event.get('id', i)}"
+
+            next_event = events[i + 1]
+            next_is_preflight = next_event.get("tool") == "glimpse_preflight"
+            target_prefix = "preflight" if next_is_preflight else "event"
+            target_id = f"{target_prefix}:{next_event.get('id', i + 1)}"
+
+            # Preflight check triggers the next action — use TRIGGERED relation
+            relation = RelationType.TRIGGERED if is_preflight else RelationType.FOLLOWED_BY
 
             edges.append(
                 GlimpseEdge(
                     id=f"edge:{uuid4()}",
                     source_id=source_id,
                     target_id=target_id,
-                    relation_type=RelationType.FOLLOWED_BY,
-                    weight=0.5,
+                    relation_type=relation,
+                    weight=0.8 if is_preflight else 0.5,
                 )
             )
 
@@ -262,7 +334,9 @@ class GraphCompiler:
         if session := context.get("session"):
             session_id = f"session:{session.get('id', 'default')}"
             for event in events:
-                event_id = f"event:{event.get('id', str(uuid4()))}"
+                is_preflight = event.get("tool") == "glimpse_preflight"
+                prefix = "preflight" if is_preflight else "event"
+                event_id = f"{prefix}:{event.get('id', str(uuid4()))}"
                 edges.append(
                     GlimpseEdge(
                         id=f"edge:{uuid4()}",
