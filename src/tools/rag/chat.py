@@ -248,9 +248,8 @@ class RAGChatSession:
 
             # Now import heavy modules
             from tools.rag.config import RAGConfig
-            from tools.rag.intelligence.query_understanding import QueryUnderstandingLayer
-            from tools.rag.intelligence.retrieval_orchestrator import RetrievalOrchestrator
             from tools.rag.rag_engine import RAGEngine
+            # Intelligence modules archived; using core RAG only
 
             # Initialize RAG engine
             rag_config = RAGConfig.from_env()
@@ -260,10 +259,9 @@ class RAGChatSession:
 
             self._engine = RAGEngine(config=rag_config)
 
-            # Initialize Intelligence Layer if enabled
-            if self.config.use_intelligence:
-                self._intelligence = QueryUnderstandingLayer()
-                self._retrieval_orchestrator = RetrievalOrchestrator(engine=self._engine)
+            # Intelligence modules archived; using core RAG only
+            self._intelligence = None
+            self._retrieval_orchestrator = None
 
         finally:
             # Restore stderr
