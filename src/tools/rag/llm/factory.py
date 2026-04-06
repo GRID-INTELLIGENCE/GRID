@@ -69,12 +69,12 @@ def _provider_from_resolved(resolved: "ResolvedProvider") -> BaseLLMProvider:  #
             timeout=resolved.timeout_ms // 1000,
         )
     if resolved.type == "openai":
-        from .openai_llm import OpenAILLM
+        from .openai import OpenAILLM
 
         api_key = os.environ.get(resolved.api_key_env or "OPENAI_API_KEY", "")
         return OpenAILLM(model=resolved.model, api_key=api_key, base_url=resolved.url)
     if resolved.type == "anthropic":
-        from .anthropic_llm import AnthropicLLM
+        from .anthropic import AnthropicLLM
 
         api_key = os.environ.get(resolved.api_key_env or "ANTHROPIC_API_KEY", "")
         return AnthropicLLM(model=resolved.model, api_key=api_key)
@@ -162,7 +162,7 @@ def get_llm_provider(
 
         return CopilotLLM(model=model)
     elif provider_type == LLMProviderType.OPENAI.value:
-        from .openai_llm import OpenAILLM
+        from .openai import OpenAILLM
 
         if not config.openai_api_key:
             raise ValueError(
@@ -174,7 +174,7 @@ def get_llm_provider(
             base_url=config.openai_base_url,
         )
     elif provider_type == LLMProviderType.ANTHROPIC.value:
-        from .anthropic_llm import AnthropicLLM
+        from .anthropic import AnthropicLLM
 
         if not config.anthropic_api_key:
             raise ValueError(
