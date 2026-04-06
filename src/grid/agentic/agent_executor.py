@@ -230,11 +230,12 @@ class AgentExecutor:
         # For now, return a placeholder result
         return {
             "task": "/inventory",
-            "status": "completed",
+            "status": "partial",
             "result": {
                 "case_id": case_id,
-                "inventory_completed": True,
-                "note": "Inventory execution would be implemented here",
+                "inventory_completed": False,
+                "implementation_state": "placeholder",
+                "note": "Inventory execution stub: implementation pending",
             },
         }
 
@@ -257,11 +258,12 @@ class AgentExecutor:
         logger.info(f"Executing gap analysis for case {case_id}")
         return {
             "task": "/gapanalysis",
-            "status": "completed",
+            "status": "partial",
             "result": {
                 "case_id": case_id,
                 "gaps_identified": [],
-                "note": "Gap analysis execution would be implemented here",
+                "implementation_state": "placeholder",
+                "note": "Gap analysis execution stub: implementation pending",
             },
         }
 
@@ -284,11 +286,12 @@ class AgentExecutor:
         logger.info(f"Executing plan for case {case_id}")
         return {
             "task": "/plan",
-            "status": "completed",
+            "status": "partial",
             "result": {
                 "case_id": case_id,
-                "backlog_created": True,
-                "note": "Planning execution would be implemented here",
+                "backlog_created": False,
+                "implementation_state": "placeholder",
+                "note": "Planning execution stub: implementation pending",
             },
         }
 
@@ -311,11 +314,12 @@ class AgentExecutor:
         logger.info(f"Executing code generation for case {case_id}")
         return {
             "task": "/execute",
-            "status": "completed",
+            "status": "partial",
             "result": {
                 "case_id": case_id,
                 "artifacts_generated": [],
-                "note": "Code generation execution would be implemented here",
+                "implementation_state": "placeholder",
+                "note": "Code generation execution stub: implementation pending",
             },
         }
 
@@ -338,11 +342,12 @@ class AgentExecutor:
         logger.info(f"Executing validation for case {case_id}")
         return {
             "task": "/validate",
-            "status": "completed",
+            "status": "partial",
             "result": {
                 "case_id": case_id,
-                "validation_passed": True,
-                "note": "Validation execution would be implemented here",
+                "validation_passed": False,
+                "implementation_state": "placeholder",
+                "note": "Validation execution stub: implementation pending",
             },
         }
 
@@ -365,11 +370,12 @@ class AgentExecutor:
         logger.info(f"Executing safety review for case {case_id}")
         return {
             "task": "/safety review",
-            "status": "completed",
+            "status": "partial",
             "result": {
                 "case_id": case_id,
-                "safety_review_passed": True,
-                "note": "Safety review execution would be implemented here",
+                "safety_review_passed": False,
+                "implementation_state": "placeholder",
+                "note": "Safety review execution stub: implementation pending",
             },
         }
 
@@ -392,9 +398,10 @@ class AgentExecutor:
         logger.info(f"Executing default task for case {case_id}")
         return {
             "task": "default",
-            "status": "completed",
+            "status": "partial",
             "result": {
                 "case_id": case_id,
-                "note": "Default task execution",
+                "implementation_state": "placeholder",
+                "note": "Default task execution stub: implementation pending",
             },
         }

@@ -27,7 +27,7 @@ from starlette.types import ASGIApp
 
 # GRID imports (with graceful fallback)
 try:
-    from grid.cognitive.engine import CognitiveEngine  # type: ignore[import-not-found]
+    from cognitive.cognitive_engine import CognitiveEngine  # type: ignore[import-not-found]
 except ImportError:
     CognitiveEngine = None  # type: ignore[misc, assignment]
 

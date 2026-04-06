@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from application.agents.agent import SanitizationLevel, SanitizationResult, sanitize_prompt
+from grid.agentic.personality_engine import ConsentLevel, Mood, PersonalityEngine, RulePack, select_rule_pack
 from grid.core_modules.governance_gates import (
     ConsentSignal,
     ConsentType,
@@ -21,7 +22,6 @@ from grid.core_modules.governance_gates import (
     ValueCategory,
 )
 from grid.core_modules.graph_compiler import EntityType, GlimpseEntity, GlimpseGraph, GraphCompiler, RelationType
-from grid.agentic.personality_engine import ConsentLevel, Mood, PersonalityEngine, RulePack, select_rule_pack
 
 
 class TestPromptSanitization:

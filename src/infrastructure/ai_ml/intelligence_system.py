@@ -148,7 +148,7 @@ class AISafetyGuard:
                 response.confidence = 0.0
 
             # Add safety disclaimer
-            if response.safety_level != AISafetyLevel.PROHIBITED:
+            if response.safety_assessment != AISafetyLevel.PROHIBITED:
                 response.explanation = (
                     f"{response.explanation or ''}\n[AI Safety: This response has been filtered and sanitized]"
                 )
@@ -495,18 +495,51 @@ class FrontierIntelligenceSystem:
             )
 
     async def _predict_with_model(self, model: Any, input_data: dict[str, Any]) -> dict[str, Any]:
-        """Make prediction with model."""
-        # This is a placeholder for actual model inference
-        # In a real implementation, this would call the specific model
+        """Make prediction with model adapter resolution."""
+        predictor = getattr(model, "predict", None)
+        if callable(predictor):
+            raw_output = predictor(input_data)
+        elif callable(model):
+            raw_output = model(input_data)
+        else:
+            raise TypeError("Model instance must expose a callable predict(input_data) or __call__(input_data)")
 
-        # Simulate processing time
-        await asyncio.sleep(0.1)
+        if asyncio.iscoroutine(raw_output):
+            raw_output = await raw_output
 
-        # Mock prediction
+        return self._normalize_prediction_output(raw_output)
+
+    def _normalize_prediction_output(self, raw_output: Any) -> dict[str, Any]:
+        """Normalize heterogeneous model outputs to the API response contract."""
+        if isinstance(raw_output, dict):
+            if "predictions" in raw_output:
+                return {
+                    "predictions": raw_output.get("predictions"),
+                    "confidence": float(raw_output.get("confidence", 0.0)),
+                    "explanation": raw_output.get("explanation"),
+                }
+
+            confidence = raw_output.get("confidence", raw_output.get("score", 0.0))
+            explanation = raw_output.get("explanation", raw_output.get("reasoning"))
+            return {
+                "predictions": raw_output,
+                "confidence": float(confidence if isinstance(confidence, (int, float)) else 0.0),
+                "explanation": str(explanation) if explanation is not None else None,
+            }
+
+        if isinstance(raw_output, tuple) and len(raw_output) == 2:
+            predictions, confidence = raw_output
+            numeric_confidence = confidence if isinstance(confidence, (int, float)) else 0.0
+            return {
+                "predictions": predictions if isinstance(predictions, dict) else {"result": predictions},
+                "confidence": float(numeric_confidence),
+                "explanation": None,
+            }
+
         return {
-            "predictions": {"result": "mock_prediction"},
-            "confidence": 0.85,
-            "explanation": "Mock model prediction",
+            "predictions": {"result": raw_output},
+            "confidence": 0.0,
+            "explanation": None,
         }
 
     async def get_metrics(self) -> dict[str, Any]:

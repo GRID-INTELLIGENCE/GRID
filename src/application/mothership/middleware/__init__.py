@@ -477,15 +477,14 @@ def setup_middleware(app: FastAPI, settings: Any) -> None:
         debug=getattr(settings, "debug_enabled", False),
     )
 
-    # Parasite Guard (Total Rickall Defense - detects parasitic calls)
+    # Parasite Guard installation is owned by application entrypoints
+    # (application.mothership.main / main_unified) via infrastructure.parasite_guard.
+    # Keep setup_middleware free of legacy grid.security parasite middleware to prevent dual-stack installation.
     if getattr(settings, "security", None) and getattr(settings.security, "parasite_guard_enabled", False):
-        try:
-            from grid.security.parasite_guard import ParasiteDetectorMiddleware
-
-            app.add_middleware(ParasiteDetectorMiddleware)
-            logger.info("Parasite Guard middleware enabled")
-        except ImportError as e:
-            logger.warning(f"Parasite Guard not available: {e}")
+        if getattr(getattr(app, "state", object()), "parasite_guard", None) is not None:
+            logger.info("Parasite Guard middleware already integrated by application bootstrap")
+        else:
+            logger.info("Parasite Guard enabled in settings; waiting for infrastructure bootstrap integration")
 
     # Security headers
     app.add_middleware(SecurityHeadersMiddleware)
@@ -613,10 +612,10 @@ def get_circuit_manager():
 
 
 def get_parasite_guard_middleware():
-    """Get ParasiteDetectorMiddleware class (lazy import)."""
-    from grid.security.parasite_guard import ParasiteDetectorMiddleware
+    """Get infrastructure ParasiteGuardMiddleware class (lazy import)."""
+    from infrastructure.parasite_guard import ParasiteGuardMiddleware
 
-    return ParasiteDetectorMiddleware
+    return ParasiteGuardMiddleware
 
 
 def get_accountability_middleware():

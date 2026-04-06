@@ -38,6 +38,10 @@ describe("ChatPage", () => {
     expect(
       screen.getByText(/Chat with local LLM models via Ollama/)
     ).toBeInTheDocument();
+    // Flush async useEffect (ollamaClient.isHealthy + setOllamaOnline)
+    await waitFor(() =>
+      expect(screen.getByText("AI Chat")).toBeInTheDocument()
+    );
   });
 
   it("shows Ollama Online badge when healthy", async () => {
@@ -77,16 +81,22 @@ describe("ChatPage", () => {
     });
   });
 
-  it("shows empty state message when no messages", () => {
+  it("shows empty state message when no messages", async () => {
     renderWithProviders(<ChatPage />);
     expect(screen.getByText(/Start a conversation/)).toBeInTheDocument();
     expect(screen.getByText(/Running locally via Ollama/)).toBeInTheDocument();
+    // Flush async useEffect (ollamaClient.isHealthy + setOllamaOnline)
+    await waitFor(() =>
+      expect(screen.getByText(/Start a conversation/)).toBeInTheDocument()
+    );
   });
 
-  it("has a textarea for input", () => {
+  it("has a textarea for input", async () => {
     renderWithProviders(<ChatPage />);
     const textarea = screen.getByPlaceholderText("Type a message…");
     expect(textarea).toBeInTheDocument();
+    // Flush async useEffect (ollamaClient.isHealthy + setOllamaOnline)
+    await waitFor(() => expect(textarea).toBeInTheDocument());
   });
 
   it("send button is disabled when input is empty", async () => {

@@ -38,7 +38,7 @@ describe("IntelligencePage", () => {
     // Click Pattern Recognition to deactivate it
     const patternButton = screen
       .getByText("Pattern Recognition")
-      .closest("button")!;
+      .closest("button") as HTMLButtonElement;
     await user.click(patternButton);
 
     // Should now show 2 / 3 active
@@ -104,7 +104,7 @@ describe("IntelligencePage", () => {
     // Deselect all capabilities
     const buttons = ["Pattern Recognition", "Reasoning", "Security Analysis"];
     for (const name of buttons) {
-      const btn = screen.getByText(name).closest("button")!;
+      const btn = screen.getByText(name).closest("button") as HTMLButtonElement;
       await user.click(btn);
     }
 

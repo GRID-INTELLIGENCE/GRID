@@ -1,9 +1,9 @@
 import React, {
   createContext,
-  useContext,
-  useReducer,
-  useEffect,
   ReactNode,
+  useContext,
+  useEffect,
+  useReducer,
 } from "react";
 import { apiClient } from "../api/client";
 
@@ -75,6 +75,7 @@ interface AuthContextType extends AuthState {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (!context) {

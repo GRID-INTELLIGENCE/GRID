@@ -1,6 +1,6 @@
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
 import { SynthesisProgress } from "@/components/mycelium/SynthesisProgress";
+import { act, render, screen } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
 
 describe("SynthesisProgress", () => {
   it("renders nothing when not active", () => {
@@ -33,19 +33,19 @@ describe("SynthesisProgress", () => {
   it("advances to 'Analyzing...' phase after delay", async () => {
     render(<SynthesisProgress active={true} />);
 
-    // Wait past first phase (1200ms)
-    await new Promise((r) => setTimeout(r, 1400));
+    // Wait past first phase (1200ms), wrapped in act to flush state updates
+    await act(() => new Promise((r) => setTimeout(r, 1400)));
 
     expect(screen.getByText("Analyzing...")).toBeInTheDocument();
   });
 
   it("resets to first phase when deactivated and reactivated", async () => {
     const { rerender } = render(<SynthesisProgress active={true} />);
-    await new Promise((r) => setTimeout(r, 1400));
+    await act(() => new Promise((r) => setTimeout(r, 1400)));
 
     rerender(<SynthesisProgress active={false} />);
     // Wait for async reset
-    await new Promise((r) => setTimeout(r, 50));
+    await act(() => new Promise((r) => setTimeout(r, 50)));
     rerender(<SynthesisProgress active={true} />);
 
     expect(screen.getByText("Reading...")).toBeInTheDocument();

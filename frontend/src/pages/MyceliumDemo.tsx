@@ -5,9 +5,8 @@
  * Same source text → different readers → each gets what they need.
  */
 
-import { cn } from "@/lib/utils";
 import { extractKeywords } from "@/lib/text-utils";
-import { useState, useCallback, useMemo } from "react";
+import { cn } from "@/lib/utils";
 import {
   BookOpen,
   Brain,
@@ -20,6 +19,7 @@ import {
   Users,
   Zap,
 } from "lucide-react";
+import { useCallback, useMemo, useState } from "react";
 
 /* ── Types ─────────────────────────────────────────────────────────── */
 
@@ -357,11 +357,11 @@ export function MyceliumDemo() {
   const [openConcept, setOpenConcept] = useState<string | null>("cache");
 
   const persona = useMemo(
-    () => PERSONAS.find((p) => p.id === personaId)!,
+    () => PERSONAS.find((p) => p.id === personaId) ?? PERSONAS[0],
     [personaId]
   );
   const section = useMemo(
-    () => DEMO_SECTIONS.find((s) => s.id === sectionId)!,
+    () => DEMO_SECTIONS.find((s) => s.id === sectionId) ?? DEMO_SECTIONS[0],
     [sectionId]
   );
   const result = useMemo(

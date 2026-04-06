@@ -9,9 +9,10 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import os
 import time
 import uuid
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal, cast
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field, field_validator
@@ -35,6 +36,16 @@ except ImportError:
 
 
 router = APIRouter(prefix="/navigation", tags=["navigation"])
+NavigationEngine = Literal["simple", "advanced", "hybrid"]
+_VALID_ENGINES: tuple[NavigationEngine, ...] = ("simple", "advanced", "hybrid")
+
+
+def _default_navigation_engine() -> NavigationEngine:
+    raw = os.getenv("NAVIGATION_ENGINE", "simple").strip().lower()
+    if raw in _VALID_ENGINES:
+        return cast(NavigationEngine, raw)
+    logger.warning("Invalid NAVIGATION_ENGINE=%s, falling back to simple", raw)
+    return "simple"
 
 
 class NavigationRequest(BaseModel):
@@ -46,6 +57,10 @@ class NavigationRequest(BaseModel):
     enable_learning: bool = Field(default=True, description="Enable learning features")
     learning_weight: float = Field(default=0.3, ge=0.0, le=1.0, description="Learning weight")
     adaptation_threshold: float = Field(default=0.7, ge=0.0, le=1.0, description="Adaptation threshold")
+    engine: NavigationEngine | None = Field(
+        default=None,
+        description="Navigation engine selector (simple|advanced|hybrid). Defaults to NAVIGATION_ENGINE env var.",
+    )
     source: str | None = Field(default="api", description="Request source")
 
     @field_validator("goal")
@@ -70,6 +85,10 @@ class NavigationPlan(BaseModel):
     confidence: float = Field(..., description="Plan confidence", ge=0.0, le=1.0)
     processing_time_ms: float = Field(..., description="Processing time in milliseconds")
     request_id: str = Field(..., description="Request correlation ID")
+    selected_engine: NavigationEngine = Field(..., description="Engine used for the final plan")
+    attempted_engines: list[NavigationEngine] = Field(default_factory=list, description="Engine execution order")
+    fallback_used: bool = Field(default=False, description="Whether fallback logic was applied")
+    fallback_reason: str | None = Field(default=None, description="Fallback reason, if any")
 
 
 def _safe_request_id(request_context: RequestContext | None) -> str:
@@ -77,6 +96,75 @@ def _safe_request_id(request_context: RequestContext | None) -> str:
     if request_context and hasattr(request_context, "request_id"):
         return str(request_context.request_id)
     return str(uuid.uuid4())
+
+
+def _build_simple_paths(payload: NavigationRequest) -> tuple[dict[str, Any], list[dict[str, Any]], float]:
+    """Create deterministic baseline navigation plan."""
+    primary_path = {
+        "steps": [
+            {"action": "start", "location": "current"},
+            {"action": "move_toward", "target": payload.goal},
+            {"action": "arrive", "location": payload.goal},
+        ],
+        "estimated_time": 30.0,
+        "confidence": 0.8,
+    }
+
+    alternatives = [
+        {
+            "steps": [
+                {"action": "start", "location": "current"},
+                {"action": "alternative_path", "variant": i + 1},
+                {"action": "arrive", "location": payload.goal},
+            ],
+            "estimated_time": 35.0 + i * 5,
+            "confidence": max(0.35, 0.7 - i * 0.1),
+        }
+        for i in range(min(payload.max_alternatives - 1, 2))
+    ]
+    return primary_path, alternatives, 0.8
+
+
+def _build_advanced_paths(payload: NavigationRequest, ctx: dict[str, Any]) -> tuple[dict[str, Any], list[dict[str, Any]], float]:
+    """Create context-aware navigation plan without external module dependency."""
+    complexity = min(len(ctx), 8)
+    confidence = min(0.94, 0.74 + complexity * 0.02)
+    stations = [
+        {"action": "scope_goal", "station": "intake"},
+        {"action": "analyze_constraints", "station": "analysis", "context_keys": sorted(ctx.keys())[:6]},
+        {"action": "sequence_milestones", "station": "planner"},
+        {"action": "execute_route", "station": "delivery", "target": payload.goal},
+        {"action": "verify_outcome", "station": "validation"},
+    ]
+    estimated_time = round(24.0 + (len(payload.goal) / 18.0) + complexity * 1.4, 2)
+
+    primary_path = {
+        "steps": stations,
+        "estimated_time": estimated_time,
+        "confidence": confidence,
+    }
+
+    alternatives: list[dict[str, Any]] = []
+    variants = min(payload.max_alternatives - 1, 3)
+    for idx in range(variants):
+        alternatives.append(
+            {
+                "steps": [
+                    {"action": "scope_goal", "station": "intake"},
+                    {"action": "route_variant", "station": "planner", "variant": idx + 1},
+                    {"action": "execute_route", "station": "delivery", "target": payload.goal},
+                    {"action": "verify_outcome", "station": "validation"},
+                ],
+                "estimated_time": round(estimated_time + (idx + 1) * 3.5, 2),
+                "confidence": max(0.45, round(confidence - (idx + 1) * 0.07, 2)),
+            }
+        )
+
+    return primary_path, alternatives, confidence
+
+
+def _select_engine(payload: NavigationRequest) -> NavigationEngine:
+    return payload.engine or _default_navigation_engine()
 
 
 @router.post("/plan", response_model=ApiResponse[NavigationPlan])
@@ -101,35 +189,43 @@ async def create_navigation_plan(
         ctx.setdefault("user_id", auth.get("user_id"))
         ctx.setdefault("scopes", auth.get("scopes"))
 
-    # Simple mock navigation plan
+    requested_engine = _select_engine(payload)
     plan_id = str(uuid.uuid4())
     processing_time = time.perf_counter()
 
     try:
-        # Mock primary path
-        primary_path = {
-            "steps": [
-                {"action": "start", "location": "current"},
-                {"action": "move_toward", "target": payload.goal},
-                {"action": "arrive", "location": payload.goal},
-            ],
-            "estimated_time": 30.0,
-            "confidence": 0.8,
-        }
+        selected_engine: NavigationEngine = requested_engine
+        attempted_engines: list[NavigationEngine] = []
+        fallback_used = False
+        fallback_reason: str | None = None
 
-        # Mock alternatives
-        alternatives = [
-            {
-                "steps": [
-                    {"action": "start", "location": "current"},
-                    {"action": "alternative_path", "variant": i + 1},
-                    {"action": "arrive", "location": payload.goal},
-                ],
-                "estimated_time": 35.0 + i * 5,
-                "confidence": 0.7 - i * 0.1,
-            }
-            for i in range(min(payload.max_alternatives - 1, 2))
-        ]
+        if requested_engine == "simple":
+            attempted_engines.append("simple")
+            primary_path, alternatives, confidence = _build_simple_paths(payload)
+        elif requested_engine == "advanced":
+            attempted_engines.append("advanced")
+            try:
+                primary_path, alternatives, confidence = _build_advanced_paths(payload, ctx)
+            except Exception as advanced_error:
+                logger.warning("Advanced navigation engine failed, using simple fallback: %s", advanced_error)
+                attempted_engines.append("simple")
+                primary_path, alternatives, confidence = _build_simple_paths(payload)
+                selected_engine = "simple"
+                fallback_used = True
+                fallback_reason = f"advanced_unavailable:{advanced_error}"
+        else:
+            attempted_engines.append("advanced")
+            primary_path, alternatives, confidence = _build_advanced_paths(payload, ctx)
+            if confidence < payload.adaptation_threshold:
+                attempted_engines.append("simple")
+                primary_path, alternatives, confidence = _build_simple_paths(payload)
+                selected_engine = "simple"
+                fallback_used = True
+                fallback_reason = (
+                    f"advanced_confidence_{confidence:.2f}_below_threshold_{payload.adaptation_threshold:.2f}"
+                )
+            else:
+                selected_engine = "advanced"
 
         processing_time_ms = (time.perf_counter() - processing_time) * 1000
 
@@ -138,9 +234,13 @@ async def create_navigation_plan(
             goal=payload.goal,
             primary_path=primary_path,
             alternatives=alternatives,
-            confidence=0.8,
+            confidence=confidence,
             processing_time_ms=processing_time_ms,
             request_id=request_id,
+            selected_engine=selected_engine,
+            attempted_engines=attempted_engines,
+            fallback_used=fallback_used,
+            fallback_reason=fallback_reason,
         )
 
         return ApiResponse(
@@ -217,6 +317,10 @@ def _mock_plan_result(payload: NavigationRequest, request_id: str) -> dict:
         "confidence": 0.8,
         "processing_time_ms": 1500.0,  # Simulated
         "request_id": request_id,
+        "selected_engine": _select_engine(payload),
+        "attempted_engines": [_select_engine(payload)],
+        "fallback_used": False,
+        "fallback_reason": None,
     }
 
 

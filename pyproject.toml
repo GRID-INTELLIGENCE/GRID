@@ -232,6 +232,7 @@ norecursedirs = [
     "frontend",
     "landing",
     "Arena",
+    "arena",
     "EUFLE",
     "research",
     "docs",

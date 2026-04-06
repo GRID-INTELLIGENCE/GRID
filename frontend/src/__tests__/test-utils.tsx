@@ -1,9 +1,10 @@
+/* eslint-disable react-refresh/only-export-components */
+import { AnalyticsProvider } from "@/context/AnalyticsContext";
+import { ThemeProvider } from "@/context/ThemeContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, type RenderOptions } from "@testing-library/react";
 import type { ReactElement, ReactNode } from "react";
 import { MemoryRouter } from "react-router-dom";
-import { AnalyticsProvider } from "@/context/AnalyticsContext";
-import { ThemeProvider } from "@/context/ThemeContext";
 
 function createTestQueryClient() {
   return new QueryClient({

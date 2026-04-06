@@ -1,3 +1,6 @@
+import { useAnalytics } from "@/hooks/use-analytics";
+import { purgeOldEvents } from "@/lib/analytics/storage";
+import type { EventCategory, SessionSummary } from "@/lib/analytics/types";
 import {
   createContext,
   useCallback,
@@ -5,9 +8,6 @@ import {
   useEffect,
   useState,
 } from "react";
-import { useAnalytics } from "@/hooks/use-analytics";
-import { purgeOldEvents } from "@/lib/analytics/storage";
-import type { EventCategory, SessionSummary } from "@/lib/analytics/types";
 
 const STORAGE_KEY = "grid-analytics-enabled";
 
@@ -99,6 +99,7 @@ export function AnalyticsProvider({
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAnalyticsContext(): AnalyticsContextValue {
   const ctx = useContext(AnalyticsContext);
   if (!ctx) {

@@ -188,17 +188,25 @@ class CaseCompletedHandler(BaseEventHandler):
         """
         case_id = event.get("case_id")
         logger.info(f"Handling case.completed event for {case_id}")
+        outcome = str(event.get("outcome", "")).lower()
+        status_map = {
+            "success": "completed",
+            "partial": "partial",
+            "failure": "failed",
+            "failed": "failed",
+        }
+        repository_status = status_map.get(outcome, "completed")
 
         if self.repository:
             try:
                 await self.repository.update_case_status(
                     case_id=case_id,
-                    status="completed",
+                    status=repository_status,
                     outcome=event.get("outcome"),
                     solution=event.get("solution", ""),
                     agent_experience=event.get("agent_experience", {}),
                 )
-                logger.debug(f"Case {case_id} marked as completed")
+                logger.debug(f"Case {case_id} marked as {repository_status} (outcome={outcome or 'unknown'})")
             except Exception as e:
                 logger.error(f"Error updating case {case_id}: {e}")
 

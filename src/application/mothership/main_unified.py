@@ -172,11 +172,14 @@ def create_app() -> FastAPI:
     # 2. Mothership custom middlewares (Unified Setup)
 
     # Add Parasite Guard first (total Rickall defense)
-    middleware = add_parasite_guard(app, settings)
+    mode = "full" if settings.security.parasite_guard_pruning_enabled else "detect"
+    middleware = add_parasite_guard(app, mode=mode)
+    app.state.parasite_guard = middleware  # type: ignore[reportAttributeAccessIssue]
     # Inject dispose_engine callable to fix DDD inversion (infrastructure -> application)
     if hasattr(middleware, "wire_dispose_engine"):
         middleware.wire_dispose_engine(dispose_async_engine)
         logger.info("Parasite Guard dispose_engine injected (main_unified)")
+    logger.info("Parasite Guard integrated (main_unified, mode=%s)", mode)
 
     # Add Unified DRT Middleware with full security settings
     unified_drt_middleware = UnifiedDRTMiddleware(

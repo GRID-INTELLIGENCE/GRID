@@ -87,11 +87,15 @@ class TestUserContextManager:
     """Test UserContextManager for user behavior pattern recognition."""
 
     @pytest.fixture
-    def temp_context_dir(self, tmp_path: Path):
-        """Create temporary directory for context storage."""
-        context_dir = tmp_path / "context_storage"
+    def temp_context_dir(self):
+        """Create temporary directory for context storage within allowed roots."""
+        context_dir = Path("/tmp/grid/context/test_navigation")
         context_dir.mkdir(parents=True, exist_ok=True)
-        return context_dir
+        yield context_dir
+        # Cleanup
+        import shutil
+
+        shutil.rmtree(context_dir, ignore_errors=True)
 
     @pytest.fixture
     def context_manager(self, temp_context_dir):

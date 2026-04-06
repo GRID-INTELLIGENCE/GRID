@@ -1,3 +1,4 @@
+import type { ThemeName } from "@/tokens";
 import {
   createContext,
   useCallback,
@@ -5,7 +6,6 @@ import {
   useEffect,
   useState,
 } from "react";
-import type { ThemeName } from "@/tokens";
 
 const STORAGE_KEY = "grid-theme";
 const VALID_THEMES: ThemeName[] = ["dark", "light", "mycelium"];
@@ -66,6 +66,7 @@ export function ThemeProvider({
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useTheme(): ThemeContextValue {
   const ctx = useContext(ThemeContext);
   if (!ctx) {

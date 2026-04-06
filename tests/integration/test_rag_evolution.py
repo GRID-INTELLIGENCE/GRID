@@ -2,228 +2,331 @@
 Comprehensive test suite for RAG Evolution Layer.
 
 Tests the core state management and persistence components including:
-- FibonacciEvolutionEngine: Dynamic optimization patterns
+- FibonacciSequence / FibonacciEvolutionEngine: Dynamic optimization patterns
 - VersionState: Version management and evolution tracking
-- LandscapeDetector: State change detection
-- RealTimeAdapter: Adaptation mechanisms
-
-NOTE: Many tests are skipped - evolution module APIs differ from test expectations.
+- LandscapeDetector analyzers: State change detection
+- DynamicWeightNetwork / RealTimeAdapter: Adaptation mechanisms
 """
 
-import tempfile
-from pathlib import Path
-from unittest.mock import Mock
+from datetime import datetime
 
 import pytest
 
-# Import necessary components
+from grid.awareness.context import Context
+from grid.essence.core_state import EssentialState
 from grid.evolution import (
     AdaptationState,
     DynamicWeightNetwork,
     FibonacciEvolutionEngine,
     FibonacciEvolutionState,
-    LandscapeDetector,
     LandscapeShift,
     LandscapeSnapshot,
     RealTimeAdapter,
     VersionState,
     WeightUpdate,
 )
+from grid.evolution.fibonacci_evolution import FibonacciSequence
+from grid.evolution.landscape_detector import StatisticalLandscapeAnalyzer
+
+# ---------------------------------------------------------------------------
+# Shared fixtures
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture
+def essential_state():
+    """Minimal EssentialState for evolution tests."""
+    return EssentialState(
+        pattern_signature="test_sig",
+        quantum_state={"patterns": ["alpha"]},
+        context_depth=1.0,
+        coherence_factor=0.5,
+    )
+
+
+@pytest.fixture
+def context():
+    """Minimal Context for evolution tests."""
+    return Context(
+        temporal_depth=1.0,
+        spatial_field={"origin": "test"},
+        relational_web={},
+        quantum_signature="ctx_test",
+    )
+
+
+# ---------------------------------------------------------------------------
+# FibonacciSequence
+# ---------------------------------------------------------------------------
+
+
+class TestFibonacciSequence:
+    """Test the standalone FibonacciSequence generator."""
+
+    def test_generate_returns_correct_length(self):
+        seq = FibonacciSequence()
+        result = seq.generate(8)
+        assert len(result) == 8
+
+    def test_generate_known_values(self):
+        seq = FibonacciSequence()
+        result = seq.generate(8)
+        assert result == [0, 1, 1, 2, 3, 5, 8, 13]
+
+    def test_generate_zero_returns_empty(self):
+        assert FibonacciSequence().generate(0) == []
+
+    def test_golden_ratio(self):
+        phi = FibonacciSequence().get_golden_ratio()
+        assert abs(phi - 1.618) < 0.001
+
+    def test_growth_factor_within_bounds(self):
+        seq = FibonacciSequence()
+        for step in range(10):
+            gf = seq.get_growth_factor(step)
+            assert 1.05 <= gf <= 1.8
+
+
+# ---------------------------------------------------------------------------
+# FibonacciEvolutionEngine
+# ---------------------------------------------------------------------------
 
 
 class TestFibonacciEvolution:
-    """Test Fibonacci evolution patterns and state management."""
+    """Test Fibonacci evolution engine using the real async API."""
 
     @pytest.fixture
-    def evolution_engine(self):
-        """Create FibonacciEvolutionEngine instance."""
+    def engine(self):
         return FibonacciEvolutionEngine()
 
-    @pytest.mark.skip(reason="FibonacciEvolutionEngine uses fibonacci.generate(n), not generate_sequence")
-    def test_sequence_generation(self, evolution_engine):
-        """Test Fibonacci sequence generation."""
-        sequence = evolution_engine.generate_sequence(10)
+    @pytest.mark.asyncio
+    async def test_evolve_with_fibonacci_changes_state(self, engine, essential_state, context):
+        """evolve_with_fibonacci returns an evolved EssentialState."""
+        evolved = await engine.evolve_with_fibonacci(essential_state, context)
+        assert isinstance(evolved, EssentialState)
+        assert evolved.pattern_signature != essential_state.pattern_signature
+        assert "_fib" in evolved.pattern_signature
 
-        assert len(sequence) == 10
-        assert sequence == [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55]
+    @pytest.mark.asyncio
+    async def test_evolution_history_grows(self, engine, essential_state, context):
+        """Each call appends to evolution_history."""
+        assert len(engine.get_evolution_history()) == 0
+        await engine.evolve_with_fibonacci(essential_state, context)
+        assert len(engine.get_evolution_history()) == 1
+        await engine.evolve_with_fibonacci(essential_state, context)
+        assert len(engine.get_evolution_history()) == 2
 
-    @pytest.mark.skip(reason="FibonacciEvolutionEngine uses evolve_with_fibonacci, not evolve_state")
-    def test_state_evolution(self, evolution_engine):
-        """Test state evolution with Fibonacci patterns."""
-        initial_state = Mock(complexity=0.5, stability=0.7, adaptability=0.3)
+    @pytest.mark.asyncio
+    async def test_evolution_state_records_growth_factor(self, engine, essential_state, context):
+        """History entries store structural_changes with growth_factor."""
+        await engine.evolve_with_fibonacci(essential_state, context)
+        history = engine.get_evolution_history()
+        assert "growth_factor" in history[0].structural_changes
 
-        evolved_state = evolution_engine.evolve_state(initial_state)
+    def test_fibonacci_evolution_state_dataclass(self, essential_state, context):
+        """FibonacciEvolutionState can be created with base_state + context."""
+        state = FibonacciEvolutionState(base_state=essential_state, context=context)
+        assert state.evolution_step == 0
+        assert state.growth_pattern == []
 
-        assert evolved_state.complexity != initial_state.complexity
-        assert evolved_state.stability != initial_state.stability
-        assert evolved_state.adaptability != initial_state.adaptability
-
-    @pytest.mark.skip(reason="FibonacciEvolutionState uses base_state/context, not complexity/stability; no save/load")
-    def test_state_persistence(self, evolution_engine):
-        """Test state persistence and loading."""
-        initial_state = FibonacciEvolutionState(complexity=0.6, stability=0.8, adaptability=0.4)
-
-        # Save state
-        with tempfile.NamedTemporaryFile(suffix=".json") as temp_file:
-            temp_path = Path(temp_file.name)
-            evolution_engine.save_state(initial_state, temp_path)
-
-            # Load state
-            loaded_state = evolution_engine.load_state(temp_path)
-
-            assert loaded_state.complexity == initial_state.complexity
-            assert loaded_state.stability == initial_state.stability
-            assert loaded_state.adaptability == initial_state.adaptability
-
-    @pytest.mark.skip(reason="FibonacciEvolutionEngine has no adapt_state; uses evolve_with_fibonacci")
-    def test_adaptation_feedback(self, evolution_engine):
-        """Test adaptation feedback loop."""
-        initial_state = FibonacciEvolutionState(complexity=0.5, stability=0.5, adaptability=0.5)
-
-        # Simulate positive feedback
-        feedback = {"complexity": 0.6, "stability": 0.7, "adaptability": 0.4}
-
-        adapted_state = evolution_engine.adapt_state(initial_state, feedback)
-
-        assert adapted_state.complexity > initial_state.complexity
-        assert adapted_state.stability > initial_state.stability
-        assert adapted_state.adaptability < initial_state.adaptability
+    def test_detect_structural_similarity(self):
+        """detect_structural_similarity returns a float in [0, 1]."""
+        engine = FibonacciEvolutionEngine()
+        sim = engine.detect_structural_similarity(3, 5)
+        assert 0.0 <= sim <= 1.0
 
 
-@pytest.mark.skip(reason="VersionState API uses essential_state/context, not current_version/evolution_sequence")
+# ---------------------------------------------------------------------------
+# VersionState
+# ---------------------------------------------------------------------------
+
+
 class TestVersionState:
-    """Test version state management and evolution tracking."""
+    """Test VersionState dataclass and its needs_evolution logic."""
 
-    @pytest.fixture
-    def version_state(self):
-        """Create VersionState instance."""
-        return VersionState(current_version="1.0.0", evolution_sequence=[0, 1, 1, 2, 3])
+    def test_version_state_creation(self, essential_state, context):
+        vs = VersionState(
+            essential_state=essential_state,
+            context=context,
+            quantum_signature="vs_test",
+        )
+        assert vs.transform_history == []
+        assert vs.quantum_signature == "vs_test"
 
-    def test_version_increment(self, version_state):
-        """Test version increment logic."""
-        version_state.increment_version()
+    @pytest.mark.asyncio
+    async def test_needs_evolution_low_coherence(self, context):
+        """With coherence_factor <= 1.5, no evolution needed."""
+        state = EssentialState(
+            pattern_signature="s",
+            quantum_state={},
+            context_depth=1.0,
+            coherence_factor=0.5,
+        )
+        vs = VersionState(essential_state=state, context=context, quantum_signature="q")
+        assert await vs._needs_evolution() is False
 
-        assert version_state.current_version == "1.0.1"
-        assert len(version_state.evolution_sequence) == 6
-        assert version_state.evolution_sequence[-1] == 5
-
-    def test_version_rollback(self, version_state):
-        """Test version rollback capability."""
-        version_state.increment_version()  # 1.0.1
-        version_state.increment_version()  # 1.0.2
-
-        version_state.rollback_version()
-
-        assert version_state.current_version == "1.0.1"
-        assert len(version_state.evolution_sequence) == 7
-        assert version_state.evolution_sequence[-1] == 3
-
-    def test_state_compatibility(self, version_state):
-        """Test state compatibility checking."""
-        compatible_state = VersionState(current_version="1.0.1", evolution_sequence=[0, 1, 1, 2, 3, 5])
-
-        incompatible_state = VersionState(current_version="2.0.0", evolution_sequence=[0, 1, 1, 2, 3, 5, 8])
-
-        assert version_state.is_compatible_with(compatible_state)
-        assert not version_state.is_compatible_with(incompatible_state)
-
-
-@pytest.mark.skip(reason="LandscapeDetector API differs (no capture_landscape, detect_shift, register_analyzer)")
-class TestLandscapeDetection:
-    """Test landscape detection and state change analysis."""
-
-    @pytest.fixture
-    def landscape_detector(self):
-        """Create LandscapeDetector instance."""
-        return LandscapeDetector()
-
-    def test_landscape_capture(self, landscape_detector):
-        """Test landscape capture and snapshot creation."""
-        mock_state = {
-            "component1": {"status": "active", "load": 0.7},
-            "component2": {"status": "inactive", "load": 0.2},
-        }
-
-        snapshot = landscape_detector.capture_landscape(mock_state)
-
-        assert isinstance(snapshot, LandscapeSnapshot)
-        assert len(snapshot.components) == 2
-        assert "component1" in snapshot.components
-        assert "component2" in snapshot.components
-
-    def test_shift_detection(self, landscape_detector):
-        """Test landscape shift detection."""
-        initial_state = {"component1": {"status": "active", "load": 0.7}}
-
-        changed_state = {
-            "component1": {"status": "active", "load": 0.9},
-            "component2": {"status": "active", "load": 0.1},
-        }
-
-        shift = landscape_detector.detect_shift(initial_state, changed_state)
-
-        assert isinstance(shift, LandscapeShift)
-        assert len(shift.changes) == 2
-        assert "component1" in shift.changes
-        assert "component2" in shift.changes
-
-    def test_analysis_integration(self, landscape_detector):
-        """Test integration with analysis components."""
-        # Test with statistical analyzer
-        statistical_analyzer = Mock()
-        statistical_analyzer.analyze.return_value = {"trend": "increasing", "confidence": 0.85}
-
-        landscape_detector.register_analyzer("statistical", statistical_analyzer)
-
-        analysis = landscape_detector.analyze_landscape({"component1": {"status": "active", "load": 0.7}})
-
-        assert "statistical" in analysis
-        assert analysis["statistical"]["trend"] == "increasing"
+    @pytest.mark.asyncio
+    async def test_needs_evolution_high_coherence(self, context):
+        """With coherence_factor > 1.5, evolution is needed."""
+        state = EssentialState(
+            pattern_signature="s",
+            quantum_state={},
+            context_depth=1.0,
+            coherence_factor=2.0,
+        )
+        vs = VersionState(essential_state=state, context=context, quantum_signature="q")
+        assert await vs._needs_evolution() is True
 
 
-@pytest.mark.skip(reason="RealTimeAdapter/WeightUpdate/AdaptationState APIs differ from test expectations")
+# ---------------------------------------------------------------------------
+# Landscape analyzers
+# ---------------------------------------------------------------------------
+
+
+class TestLandscapeAnalyzers:
+    """Test StatisticalLandscapeAnalyzer and LandscapeSnapshot / LandscapeShift."""
+
+    def test_snapshot_creation(self):
+        snap = LandscapeSnapshot(
+            timestamp=datetime.now(),
+            patterns=["p1", "p2"],
+            structural_features={"depth": 3},
+            domain_metrics={"coherence": 0.9},
+        )
+        assert len(snap.patterns) == 2
+
+    def test_shift_to_dict(self):
+        shift = LandscapeShift(
+            shift_type="structural",
+            magnitude=0.6,
+            affected_domains=["domain_a"],
+            detected_patterns=["pattern_x"],
+        )
+        d = shift.to_dict()
+        assert d["shift_type"] == "structural"
+        assert d["magnitude"] == 0.6
+
+    def test_statistical_analyzer_needs_window(self):
+        """With fewer snapshots than window_size, no shifts are detected."""
+        analyzer = StatisticalLandscapeAnalyzer(window_size=5)
+        snap = LandscapeSnapshot(
+            timestamp=datetime.now(),
+            patterns=["p1"],
+            structural_features={},
+            domain_metrics={},
+        )
+        analyzer.add_snapshot(snap)
+        assert analyzer.detect_statistical_shifts() == []
+
+    def test_statistical_analyzer_detects_shift(self):
+        """Feeding divergent pattern sets across the window triggers a shift."""
+        analyzer = StatisticalLandscapeAnalyzer(window_size=3)
+        # First window — patterns A
+        for _ in range(6):
+            analyzer.add_snapshot(
+                LandscapeSnapshot(
+                    timestamp=datetime.now(),
+                    patterns=["a"],
+                    structural_features={},
+                    domain_metrics={"coherence": 0.5},
+                )
+            )
+        # Replace recent window with entirely different patterns
+        analyzer.snapshots[-3:] = [
+            LandscapeSnapshot(
+                timestamp=datetime.now(),
+                patterns=["z", "y"],
+                structural_features={},
+                domain_metrics={"coherence": 0.8},
+            )
+            for _ in range(3)
+        ]
+        shifts = analyzer.detect_statistical_shifts(threshold=0.1)
+        assert len(shifts) >= 1
+        assert all(isinstance(s, LandscapeShift) for s in shifts)
+
+
+# ---------------------------------------------------------------------------
+# DynamicWeightNetwork
+# ---------------------------------------------------------------------------
+
+
+class TestDynamicWeightNetwork:
+    """Test DynamicWeightNetwork weight management."""
+
+    def test_default_weights(self):
+        net = DynamicWeightNetwork()
+        w = net.get_weights()
+        assert "input" in w
+        assert "hidden" in w
+        assert "output" in w
+
+    def test_custom_initial_weights(self):
+        custom = {"layer1": {"w1": 0.7, "w2": 0.3}}
+        net = DynamicWeightNetwork(initial_weights=custom)
+        assert net.get_weights()["layer1"]["w1"] == 0.7
+
+    def test_update_weight_returns_record(self):
+        net = DynamicWeightNetwork()
+        update = net.update_weight("input", "coherence_weight", 0.5, reason="test")
+        assert isinstance(update, WeightUpdate)
+        assert update.layer == "input"
+        assert update.new_value == 0.5
+
+    def test_update_weight_changes_value(self):
+        net = DynamicWeightNetwork()
+        net.update_weight("input", "coherence_weight", 0.9)
+        assert net.get_weights()["input"]["coherence_weight"] == 0.9
+
+    def test_adapt_weights_iterative(self):
+        net = DynamicWeightNetwork()
+        pattern = {"coherence": 0.8, "context_depth": 2.0, "pattern_count": 5}
+        updates = net.adapt_weights_iterative(pattern, adaptation_rate=0.1)
+        assert isinstance(updates, list)
+        assert all(isinstance(u, WeightUpdate) for u in updates)
+
+
+# ---------------------------------------------------------------------------
+# RealTimeAdapter
+# ---------------------------------------------------------------------------
+
+
 class TestRealTimeAdaptation:
-    """Test real-time adaptation mechanisms."""
+    """Test RealTimeAdapter async adaptation loop."""
 
     @pytest.fixture
-    def realtime_adapter(self):
-        """Create RealTimeAdapter instance."""
+    def adapter(self):
         return RealTimeAdapter()
 
-    def test_weight_adaptation(self, realtime_adapter):
-        """Test dynamic weight adaptation."""
-        initial_weights = {"feature1": 0.5, "feature2": 0.3, "feature3": 0.2}
+    def test_initial_state(self, adapter):
+        assert adapter.adaptation_state.iteration == 0
+        assert adapter.performance_history == []
 
-        # Simulate positive feedback for feature1
-        feedback = {"feature1": 0.8, "feature2": 0.4, "feature3": 0.1}
+    @pytest.mark.asyncio
+    async def test_adapt_increments_iteration(self, adapter, essential_state, context):
+        result = await adapter.adapt(essential_state, context)
+        assert isinstance(result, AdaptationState)
+        assert result.iteration == 1
 
-        adapted_weights = realtime_adapter.adapt_weights(initial_weights, feedback)
+    @pytest.mark.asyncio
+    async def test_adapt_records_performance(self, adapter, essential_state, context):
+        await adapter.adapt(essential_state, context, performance_metric=0.75)
+        assert len(adapter.performance_history) == 1
+        assert adapter.adaptation_state.performance_metrics["current"] == 0.75
 
-        assert adapted_weights["feature1"] > initial_weights["feature1"]
-        assert adapted_weights["feature2"] < initial_weights["feature2"]
-        assert adapted_weights["feature3"] < initial_weights["feature3"]
+    @pytest.mark.asyncio
+    async def test_multiple_adaptations(self, adapter, essential_state, context):
+        for i in range(5):
+            await adapter.adapt(essential_state, context, performance_metric=0.5 + i * 0.05)
+        assert adapter.adaptation_state.iteration == 5
+        assert len(adapter.performance_history) == 5
 
-    def test_network_adaptation(self, realtime_adapter):
-        """Test dynamic weight network adaptation."""
-        network = DynamicWeightNetwork(
-            initial_weights={"node1": {"node2": 0.7, "node3": 0.3}, "node2": {"node1": 0.4, "node3": 0.6}}
-        )
+    def test_predict_returns_dict(self, adapter, essential_state, context):
+        result = adapter.predict(essential_state, context)
+        assert "prediction" in result
+        assert "confidence" in result
 
-        # Simulate positive feedback for node1-node2 connection
-        update = WeightUpdate(source="node1", target="node2", weight_change=0.2, feedback=0.9)
-
-        network.apply_update(update)
-
-        assert network.weights["node1"]["node2"] > 0.7
-        assert network.weights["node2"]["node1"] < 0.4
-
-    def test_adaptation_state_management(self, realtime_adapter):
-        """Test adaptation state management."""
-        initial_state = AdaptationState(weights={"feature1": 0.5, "feature2": 0.3}, feedback_history=[])
-
-        # Apply adaptation
-        adapted_state = realtime_adapter.adapt_state(initial_state, {"feature1": 0.7, "feature2": 0.2})
-
-        assert adapted_state.weights["feature1"] > initial_state.weights["feature1"]
-        assert adapted_state.weights["feature2"] < initial_state.weights["feature2"]
-        assert len(adapted_state.feedback_history) == 1
+    def test_get_adaptation_summary(self, adapter):
+        summary = adapter.get_adaptation_summary()
+        assert "iteration" in summary
+        assert summary["iteration"] == 0

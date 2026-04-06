@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, ReactNode } from "react";
+import React, { createContext, ReactNode, useContext, useReducer } from "react";
 import { apiClient } from "../api/client";
 
 interface InferenceRequest {
@@ -132,6 +132,7 @@ const InferenceContext = createContext<InferenceContextType | undefined>(
   undefined
 );
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useInference = (): InferenceContextType => {
   const context = useContext(InferenceContext);
   if (!context) {
