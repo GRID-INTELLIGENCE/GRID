@@ -473,6 +473,10 @@ dev/temp/
 dev/logs/
 dev/cache/
 dev/*.json
+dev/*.json.archived
+dev/*.db
+dev/*.db-wal
+dev/*.db-shm
 
 # Reports (root-level only; docs/reports/ is tracked)
 /reports/
