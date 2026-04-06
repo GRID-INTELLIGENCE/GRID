@@ -2,7 +2,13 @@
 
 from .graph_store import EntityId, RelationshipId, SearchContext
 from .ingest import IngestConfig, IngestResult, ingest, ingest_many
-from .persistent_store import PersistentJSONKnowledgeStore
+from .persistent_store import PersistentJSONKnowledgeStore as _PersistentJSONKnowledgeStoreLegacy
+from .sqlite_store import PersistentSQLiteKnowledgeStore
+
+# Transparent alias: all consumers importing PersistentJSONKnowledgeStore
+# now receive the SQLite-backed implementation. The original JSON class is
+# still importable directly from grid.knowledge.persistent_store if needed.
+PersistentJSONKnowledgeStore = PersistentSQLiteKnowledgeStore
 from .structural_learning import (
     AdaptiveRelationshipModel,
     Entity,
@@ -24,6 +30,7 @@ __all__ = [
     "HierarchyEvolutionTracker",
     "StructuralLearningLayer",
     "PersistentJSONKnowledgeStore",
+    "PersistentSQLiteKnowledgeStore",
     "EntityId",
     "RelationshipId",
     "SearchContext",
