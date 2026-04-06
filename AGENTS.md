@@ -27,3 +27,35 @@ Run periodically (e.g. weekly or pre-release) to keep tracked vs untracked and .
 2. **Skill:** Use the **git-repo-audit** skill (`.cursor/skills/git-repo-audit/`) for a repeatable audit and short report.
 3. **Subtractive analyst:** Invoke the subtractive-analyst subagent with a prompt focused on git tracked vs untracked and .gitignore recommendations.
 4. **CI:** The pipeline already runs a "Git hygiene" step (no untracked in `src/` or `tests/`); fix any failures before merge.
+
+## Debugging scope windows
+
+Treat `GRID-main` as four separate debugging/refactor surfaces. Do not widen scope unless a contract change forces it.
+
+- **Python service window:** `src/<domain>` plus the matching `tests/<domain>` and only the minimum related `config/` or `schemas/` files.
+- **Frontend renderer window:** `frontend/src` only. Start with `make frontend-typecheck`, then `make test-frontend`.
+- **Electron window:** `frontend/electron` and Electron-specific config only. Use `make electron-build` after renderer checks are green.
+- **Landing window:** `landing/` and its brand-generation scripts only. Use `make landing-validate`.
+
+Default debugging order:
+
+1. Reproduce inside one window only.
+2. Run the smallest real gate for that window.
+3. Fix the failing layer before widening to adjacent surfaces.
+4. Re-run the narrow gate, then the full window gate.
+
+Practical notes from the current workspace snapshot:
+
+- `frontend` is the heaviest application surface in the repo; most of its size is `frontend/node_modules`.
+- The frontend test runner is Vitest. Use plain `npm test`; do not use Jest-only flags such as `--runInBand`.
+- Root `make test` is a backend safety slice, not full-repo confidence.
+
+## Coverage integrity workflow
+
+Use these commands as the canonical coverage diagnostics:
+
+- `make coverage-backend` for the core backend slice (`tests/unit`, `tests/security`, `tests/api`) and root `coverage.json`.
+- `make coverage-mycelium` for focused module validation (`src/mycelium`).
+
+If a module appears unexpectedly low or `0%`, run focused module coverage before assuming tests are missing.
+For example, `tests/mycelium` currently validates high module coverage even when broader slice artifacts can under-represent it.

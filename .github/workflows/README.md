@@ -21,13 +21,15 @@ Consolidated quality checks, security scanning, tests, and build verification.
 | **lint** | no | Ruff check/format, mypy (continue-on-error) |
 | **security** | no | Bandit + pip-audit (continue-on-error) |
 | **smoke-test** | yes | Import checks, Python version assertion, test collection |
-| **test** | yes | Unit tests (`-x`), async tests, policy tests |
+| **test** | yes | Unit/security/api tests (`-x`), async tests, policy tests |
 | **integration** | no | Integration tests (main/master push only) |
 | **build** | conditional | Package build + dist verification |
 | **validation** | no | Schema/contract validation (manual dispatch only) |
 | **ci-status** | gate | Summary — fails if secrets-scan, smoke-test, or test failed |
 
 **Setup:** All Python jobs use `astral-sh/setup-uv@v7.3.0` with `python-version: "3.13"`. CI sets `PYTHONPATH=src` so imports resolve (source layout). Ruff format check covers `src/`, `tests/`, `scripts/`. Mypy runs on `src/grid/`, `src/application/`, `src/tools/`, `src/search/`, `src/cognitive/`, `src/mycelium/`.
+
+**Coverage note:** backend coverage configuration is defined in `pyproject.toml` (`[tool.coverage.*]`, `fail_under = 75`), but the visible `ci.yml` test job currently executes pytest without explicit `--cov` flags. Use local `make coverage-backend` / `make coverage-mycelium` for coverage diagnostics until CI enforcement is updated.
 
 **Duration:** ~2-5 minutes
 

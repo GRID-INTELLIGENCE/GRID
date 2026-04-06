@@ -12,7 +12,7 @@ GRID (Geometric Resonance Intelligence Driver) is a local-first AI framework bui
 # Install / sync environment
 uv sync --group dev --group test
 
-# Run all tests (unit + integration + security + API)
+# Run the core backend test slice
 uv run pytest tests/unit tests/integration tests/security tests/api -q --tb=short
 
 # Run a single test file
@@ -31,6 +31,23 @@ uv run pytest safety/tests -q --tb=short
 
 # Boundary module tests
 uv run pytest boundaries/tests -q --tb=short
+
+# Frontend renderer checks
+cd frontend && npm run typecheck
+cd frontend && npm test
+
+# Frontend/Electron build checks
+cd frontend && npm run build:renderer
+cd frontend && npm run build:electron
+
+# Landing brand validation
+cd landing && npm run validate:brand
+
+# Backend coverage refresh (diagnostic, non-gating)
+make coverage-backend
+
+# Focused module coverage (used to validate disputed module gaps)
+make coverage-mycelium
 
 # Lint
 uv run ruff check .
@@ -54,11 +71,39 @@ uv run python -m grid --help
 uv run python -m pytest -q --tb=short && uv run ruff check work/ safety/ security/ boundaries/
 
 # Makefile shortcuts
-make test        # Run tests
-make lint        # Ruff + Mypy
-make format      # Auto-format
-make clean       # Remove caches
+make test               # Core backend tests
+make test-frontend      # Frontend Vitest suite
+make frontend-typecheck # Frontend typecheck
+make electron-build     # Electron build
+make landing-validate   # Landing brand validation
+make lint               # Ruff + Mypy
+make format             # Auto-format
+make clean              # Remove caches
 ```
+
+## Recommended Debugging Windows
+
+Treat `GRID-main` as four separate execution surfaces:
+
+1. **Python service**: `src/<domain>` and matching `tests/<domain>`.
+2. **Frontend renderer**: `frontend/src` only.
+3. **Electron shell**: `frontend/electron` and Electron config.
+4. **Landing/branding**: `landing/` only.
+
+Default workflow:
+
+1. Reproduce in one window only.
+2. Run that window's smallest real gate.
+3. Fix the failing layer before widening scope.
+4. Re-run the narrow gate, then the full window gate.
+
+Notes:
+
+- `npm test` in `frontend/` uses Vitest. Do not pass Jest-only flags such as `--runInBand`.
+- `make test` is a backend confidence slice, not a full-repo verification command.
+- `make coverage-backend` is the canonical backend coverage refresh command.
+- If a module appears unexpectedly low/zero, run focused coverage (for example `make coverage-mycelium`) before planning large test-count expansions.
+- Avoid running heavy Python tests, Electron, and large frontend builds in parallel when RAM pressure is already high.
 
 ## Architecture
 

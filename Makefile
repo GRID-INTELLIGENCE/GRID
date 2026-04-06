@@ -2,7 +2,7 @@
 # Streamlines local development with uv
 # Note: Dotfiles (.agentignore, .cursorrules, .python-version, .secrets.baseline) in config/
 
-.PHONY: help install run test lint format export-requirements check-venv clean guard-no-debug docker-build docker-build-prod docker-up docker-down docker-logs docker-shell
+.PHONY: help install run test test-core test-frontend coverage-backend coverage-mycelium lint format export-requirements check-venv clean guard-no-debug docker-build docker-build-prod docker-up docker-down docker-logs docker-shell frontend-typecheck frontend-build electron-build landing-validate
 
 # Default target
 .DEFAULT_GOAL := help
@@ -25,15 +25,46 @@ run: ## Run the Mothership API locally
 	@echo "$(GREEN)Starting Mothership API...$(NC)"
 	uv run python -m application.mothership.main
 
-test: ## Run tests (unit, integration, security, api guardrails)
+test: ## Run core backend tests (unit, integration, security, api)
 	@echo "$(BLUE)Running tests...$(NC)"
 	uv run pytest tests/unit tests/integration tests/security tests/api -q --tb=short
+
+test-core: ## Alias for core backend tests
+	@$(MAKE) test
+
+test-frontend: ## Run GRID frontend Vitest suite
+	@echo "$(BLUE)Running frontend tests...$(NC)"
+	cd frontend && npm test
+
+coverage-backend: ## Refresh backend coverage artifact from the core CI-like slice
+	@echo "$(BLUE)Refreshing backend coverage artifact...$(NC)"
+	uv run pytest tests/unit tests/security tests/api --cov=src --cov-report=term-missing --cov-report=json:coverage.json --cov-fail-under=0
+
+coverage-mycelium: ## Run focused mycelium coverage (diagnostic for module-level gaps)
+	@echo "$(BLUE)Running focused mycelium coverage...$(NC)"
+	uv run pytest tests/mycelium --cov=src/mycelium --cov-report=term-missing --cov-report=json:artifacts/coverage_mycelium.json --cov-fail-under=0
 
 lint: ## Run static analysis (Ruff + Mypy)
 	@echo "$(BLUE)Linting...$(NC)"
 	uv run ruff check .
 	@echo "$(BLUE)Type checking...$(NC)"
 	-uv run mypy src/grid/ src/application/ src/tools/ src/search/ src/cognitive/ src/mycelium/
+
+frontend-typecheck: ## Type-check the frontend renderer workspace
+	@echo "$(BLUE)Type checking frontend...$(NC)"
+	cd frontend && npm run typecheck
+
+frontend-build: ## Build the frontend renderer bundle
+	@echo "$(BLUE)Building frontend renderer...$(NC)"
+	cd frontend && npm run build:renderer
+
+electron-build: ## Build Electron main/preload code
+	@echo "$(BLUE)Building Electron process...$(NC)"
+	cd frontend && npm run build:electron
+
+landing-validate: ## Validate the landing-page brand pipeline
+	@echo "$(BLUE)Validating landing assets...$(NC)"
+	cd landing && npm run validate:brand
 
 guard-no-debug: ## Assert no DEBUG/ENABLE_DEV_TOKEN in production (run after test+lint for Session Verify)
 	@echo "$(BLUE)Checking no debug flags in production...$(NC)"
