@@ -215,6 +215,7 @@ MANIFEST
 htmlcov/
 .tox/
 .nox/
+coverage.json
 coverage.xml
 *.cover
 .hypothesis/
