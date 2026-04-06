@@ -73,10 +73,12 @@ python_functions = ["test_*"]
 
 [tool.ruff]
 line-length = 120
+
+[tool.ruff.lint]
 select = ["E", "F", "I", "N", "W", "UP"]
 ignore = ["E501"]  # Line too long - handled by formatter
 
-[tool.ruff.isort]
+[tool.ruff.lint.isort]
 known-first-party = ["boundaries", "boundaries.toolkit"]
 
 [tool.mypy]

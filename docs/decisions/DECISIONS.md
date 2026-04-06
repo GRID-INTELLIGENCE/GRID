@@ -5,6 +5,16 @@ Append new entries at the top. One decision per entry.
 
 ---
 
+## 2026-03-14 — Code Quality Highlights Synthesis
+
+**Decision**: Synthesised current code quality standards into `docs/CODE_QUALITY_HIGHLIGHTS.md`. Migrated deprecated `[tool.ruff]` top-level lint keys to `[tool.ruff.lint]` in `boundaries/toolkit/pyproject.toml` to eliminate the ruff deprecation warning.
+
+**Why**: The codebase had accumulated multiple quality-related documents scattered across `.github/`, `docs/`, and the root. A single authoritative highlights document gives contributors and reviewers a quick-reference snapshot of metrics, tooling, CI gates, and key improvements. The ruff config migration keeps the toolchain warning-free and aligned with ruff ≥0.2 expectations.
+
+**Alternatives considered**: Updating README.md quality section only — rejected because the README is already long; a dedicated doc in `docs/` is more discoverable for contributors. Auto-generating from CI artefacts — deferred; the current hand-maintained doc is sufficient for v2.7.0 scale.
+
+---
+
 ## 2026-03-07 — Security Review: 57 Findings Across 4 Domains
 
 **Decision**: Completed comprehensive read-only security review of GRID v2.6.1. Identified 57 findings (7 CRITICAL, 17 HIGH, 21 MEDIUM, 12 LOW) across Auth/JWT, API/Input Validation, MCP/Skills/RAG, and Deps/Infrastructure domains. Spot-checked and verified all CRITICAL and HIGH findings against source. Established 7 release gates that must pass before next tagged release.
