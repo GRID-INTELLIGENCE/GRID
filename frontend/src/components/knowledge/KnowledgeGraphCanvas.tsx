@@ -1,9 +1,28 @@
-import { computeForceLayout } from "@/components/knowledge/graph-layout";
+import {
+  computeSampledForceLayout,
+  type PositionedNode,
+  toPositionMap,
+} from "@/components/knowledge/graph-layout";
+import { GraphDecisionError } from "@/lib/knowledge-api-guards";
 import type { KnowledgeGraphEdge, KnowledgeGraphNode } from "@/types/api";
-import { useId, useMemo, useState } from "react";
+import { useDeferredValue, useEffect, useId, useReducer } from "react";
 
 const W = 720;
 const H = 400;
+const LAYOUT_TIMEOUT_MS = 1_500;
+const LAYOUT_ITERATIONS = 120;
+const LAYOUT_REPULSION_SAMPLES = 24;
+const LAYOUT_CACHE_MAX = 12;
+
+const layoutCache = new Map<string, PositionedNode[]>();
+
+function cacheLayout(key: string, positions: PositionedNode[]): void {
+  if (layoutCache.size >= LAYOUT_CACHE_MAX) {
+    const oldest = layoutCache.keys().next().value;
+    if (typeof oldest === "string") layoutCache.delete(oldest);
+  }
+  layoutCache.set(key, positions);
+}
 
 function truncate(s: string, max: number): string {
   if (s.length <= max) return s;
@@ -13,27 +32,223 @@ function truncate(s: string, max: number): string {
 interface KnowledgeGraphCanvasProps {
   nodes: KnowledgeGraphNode[];
   edges: KnowledgeGraphEdge[];
+  graphHash?: string;
+}
+
+interface LayoutState {
+  positions: Map<string, PositionedNode>;
+  pending: boolean;
+  error: GraphDecisionError | null;
+  durationMs: number | null;
+  hoverId: string | null;
+}
+
+type LayoutAction =
+  | { type: "reset" }
+  | { type: "start" }
+  | { type: "done"; positions: Map<string, PositionedNode>; durationMs: number }
+  | { type: "fail"; error: GraphDecisionError }
+  | { type: "cache_hit"; positions: Map<string, PositionedNode> }
+  | { type: "hover"; id: string | null };
+
+const initialLayoutState: LayoutState = {
+  positions: new Map(),
+  pending: false,
+  error: null,
+  durationMs: null,
+  hoverId: null,
+};
+
+function layoutReducer(state: LayoutState, action: LayoutAction): LayoutState {
+  switch (action.type) {
+    case "reset":
+      return { ...initialLayoutState, hoverId: state.hoverId };
+    case "start":
+      return { ...state, pending: true, error: null };
+    case "done":
+      return {
+        ...state,
+        pending: false,
+        error: null,
+        positions: action.positions,
+        durationMs: action.durationMs,
+      };
+    case "fail":
+      return { ...state, pending: false, error: action.error };
+    case "cache_hit":
+      return {
+        ...state,
+        pending: false,
+        error: null,
+        positions: action.positions,
+      };
+    case "hover":
+      return { ...state, hoverId: action.id };
+  }
 }
 
 export function KnowledgeGraphCanvas({
   nodes,
   edges,
+  graphHash,
 }: KnowledgeGraphCanvasProps) {
-  const [hoverId, setHoverId] = useState<string | null>(null);
+  const [layout, dispatch] = useReducer(layoutReducer, initialLayoutState);
+  const {
+    positions,
+    pending: layoutPending,
+    error: layoutError,
+    durationMs: layoutDurationMs,
+    hoverId,
+  } = layout;
   const reactId = useId();
   const markerId = `kg-arrow-${reactId.replace(/\W/g, "")}`;
+  const deferredNodes = useDeferredValue(nodes);
+  const deferredEdges = useDeferredValue(edges);
 
-  const positions = useMemo(() => {
-    if (nodes.length === 0) {
-      return new Map<string, { id: string; x: number; y: number }>();
+  useEffect(() => {
+    if (deferredNodes.length === 0) {
+      dispatch({ type: "reset" });
+      return;
     }
-    return computeForceLayout(
-      nodes.map((n) => ({ id: n.id })),
-      edges.map((e) => ({ source: e.source, target: e.target })),
-      W,
-      H
-    );
-  }, [nodes, edges]);
+
+    const cacheKey = `${graphHash ?? "nohash"}:${deferredNodes.length}:${
+      deferredEdges.length
+    }:${W}x${H}`;
+    const cached = layoutCache.get(cacheKey);
+    if (cached) {
+      dispatch({ type: "cache_hit", positions: toPositionMap(cached) });
+      return;
+    }
+
+    let canceled = false;
+    let worker: Worker | null = null;
+    const requestId = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+
+    const failWith = (
+      code: "LAYOUT_TIMEOUT" | "SCHEMA_INVALID",
+      message: string
+    ) => {
+      if (canceled) return;
+      dispatch({
+        type: "fail",
+        error: new GraphDecisionError({
+          code,
+          message,
+          status: code === "LAYOUT_TIMEOUT" ? 503 : 422,
+          suggested_actions: [
+            "Reduce max_nodes on the graph query",
+            "Retry the graph render",
+          ],
+          details: {
+            node_count: deferredNodes.length,
+            edge_count: deferredEdges.length,
+          },
+        }),
+      });
+    };
+
+    const applyLayout = (next: PositionedNode[], durationMs: number): void => {
+      if (canceled) return;
+      cacheLayout(cacheKey, next);
+      dispatch({ type: "done", positions: toPositionMap(next), durationMs });
+    };
+
+    dispatch({ type: "start" });
+
+    const timeoutId = window.setTimeout(() => {
+      if (worker) {
+        worker.terminate();
+      }
+      failWith("LAYOUT_TIMEOUT", "Graph layout exceeded client render budget");
+    }, LAYOUT_TIMEOUT_MS);
+
+    if (typeof Worker !== "undefined") {
+      worker = new Worker(
+        new URL("./graph-layout.worker.ts", import.meta.url),
+        {
+          type: "module",
+        }
+      );
+      worker.onmessage = (
+        event: MessageEvent<
+          | {
+              type: "layout";
+              requestId: string;
+              positions: PositionedNode[];
+              durationMs: number;
+            }
+          | { type: "error"; requestId: string; message: string }
+        >
+      ) => {
+        const payload = event.data;
+        if (payload.requestId !== requestId) return;
+        window.clearTimeout(timeoutId);
+        worker?.terminate();
+        if (payload.type === "error") {
+          failWith("SCHEMA_INVALID", payload.message);
+          return;
+        }
+        applyLayout(payload.positions, payload.durationMs);
+      };
+      worker.onerror = () => {
+        window.clearTimeout(timeoutId);
+        worker?.terminate();
+        failWith("SCHEMA_INVALID", "Knowledge graph worker failed");
+      };
+      worker.postMessage({
+        requestId,
+        nodes: deferredNodes.map((n) => ({ id: n.id })),
+        edges: deferredEdges.map((e) => ({
+          source: e.source,
+          target: e.target,
+        })),
+        width: W,
+        height: H,
+        iterations: LAYOUT_ITERATIONS,
+        repulsionSamples: LAYOUT_REPULSION_SAMPLES,
+      });
+    } else {
+      try {
+        const started = performance.now();
+        const fallbackLayout = computeSampledForceLayout(
+          deferredNodes.map((n) => ({ id: n.id })),
+          deferredEdges.map((e) => ({ source: e.source, target: e.target })),
+          W,
+          H,
+          {
+            iterations: LAYOUT_ITERATIONS,
+            repulsionSamples: LAYOUT_REPULSION_SAMPLES,
+          }
+        );
+        const durationMs = Math.round(performance.now() - started);
+        window.clearTimeout(timeoutId);
+        if (durationMs > LAYOUT_TIMEOUT_MS) {
+          failWith(
+            "LAYOUT_TIMEOUT",
+            "Knowledge graph layout exceeded client render budget"
+          );
+        } else {
+          applyLayout([...fallbackLayout.values()], durationMs);
+        }
+      } catch (error) {
+        window.clearTimeout(timeoutId);
+        failWith(
+          "SCHEMA_INVALID",
+          error instanceof Error
+            ? error.message
+            : "Failed to compute graph layout"
+        );
+      }
+    }
+
+    return () => {
+      canceled = true;
+      window.clearTimeout(timeoutId);
+      if (worker) {
+        worker.terminate();
+      }
+    };
+  }, [deferredEdges, deferredNodes, graphHash]);
 
   if (nodes.length === 0) {
     return (
@@ -74,7 +289,7 @@ export function KnowledgeGraphCanvas({
           </marker>
         </defs>
 
-        {edges.map((e) => {
+        {deferredEdges.map((e) => {
           const a = positions.get(e.source);
           const b = positions.get(e.target);
           if (!a || !b) return null;
@@ -95,7 +310,7 @@ export function KnowledgeGraphCanvas({
           );
         })}
 
-        {nodes.map((n) => {
+        {deferredNodes.map((n) => {
           const p = positions.get(n.id);
           if (!p) return null;
           const isDoc = n.entity_type === "Document";
@@ -104,8 +319,8 @@ export function KnowledgeGraphCanvas({
           return (
             <g
               key={n.id}
-              onMouseEnter={() => setHoverId(n.id)}
-              onMouseLeave={() => setHoverId(null)}
+              onMouseEnter={() => dispatch({ type: "hover", id: n.id })}
+              onMouseLeave={() => dispatch({ type: "hover", id: null })}
               className="cursor-default"
             >
               <circle
@@ -131,10 +346,31 @@ export function KnowledgeGraphCanvas({
         })}
       </svg>
 
+      {layoutPending ? (
+        <p className="text-[10px] text-[var(--muted-foreground)]">
+          Computing graph layout…
+        </p>
+      ) : null}
+
+      {layoutError ? (
+        <p className="text-[10px] text-[var(--destructive)]" role="alert">
+          {layoutError.code}: {layoutError.message}
+          {layoutError.suggestedActions.length > 0
+            ? ` — ${layoutError.suggestedActions.join(" · ")}`
+            : ""}
+        </p>
+      ) : null}
+
+      {layoutDurationMs != null ? (
+        <p className="text-[10px] text-[var(--muted-foreground)]">
+          Layout duration: {layoutDurationMs}ms
+        </p>
+      ) : null}
+
       {hoverId ? (
         <p className="text-[10px] text-[var(--muted-foreground)] min-h-[2.5rem]">
-          {nodes.find((x) => x.id === hoverId)?.subtitle ||
-            nodes.find((x) => x.id === hoverId)?.label}
+          {deferredNodes.find((x) => x.id === hoverId)?.subtitle ||
+            deferredNodes.find((x) => x.id === hoverId)?.label}
         </p>
       ) : (
         <p className="text-[10px] text-[var(--muted-foreground)]">

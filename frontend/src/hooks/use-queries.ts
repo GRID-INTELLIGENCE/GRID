@@ -8,6 +8,7 @@
 
 import { gridClient } from "@/lib/grid-client";
 import {
+  parseGraphDecisionError,
   parseKnowledgeGraphPayload,
   parseKnowledgeGraphStats,
 } from "@/lib/knowledge-api-guards";
@@ -208,15 +209,29 @@ export function useKnowledgeGraphStats() {
   });
 }
 
-export function useKnowledgeGraph(opts?: { maxNodes?: number }) {
+export function useKnowledgeGraph(opts?: {
+  maxNodes?: number;
+  maxEdges?: number;
+}) {
   const maxNodes = opts?.maxNodes;
-  const suffix = maxNodes != null ? `?max_nodes=${maxNodes}` : "";
+  const maxEdges = opts?.maxEdges;
+  const params = new URLSearchParams();
+  if (maxNodes != null) params.set("max_nodes", String(maxNodes));
+  if (maxEdges != null) params.set("max_edges", String(maxEdges));
+  const suffix = params.toString() ? `?${params.toString()}` : "";
   const endpoint = `/api/v1/knowledge/graph${suffix}`;
   return useQuery({
-    queryKey: queryKeys.knowledge.graph(maxNodes),
+    queryKey: queryKeys.knowledge.graph({ maxNodes, maxEdges }),
     queryFn: async () => {
       const response = await gridClient.get<KnowledgeGraphPayload>(endpoint);
       if (!response.ok) {
+        const decisionError = parseGraphDecisionError(
+          response.data,
+          response.status
+        );
+        if (decisionError) {
+          throw decisionError;
+        }
         throw new Error(
           response.error ??
             `Knowledge graph request failed (${response.status})`

@@ -10,6 +10,7 @@ import {
   useSessionLookup,
   useSignalQuality,
 } from "@/hooks";
+import { GraphDecisionError } from "@/lib/knowledge-api-guards";
 import { cn } from "@/lib/utils";
 import type { RagSession } from "@/types/api";
 import {
@@ -25,7 +26,8 @@ import {
 import { useState } from "react";
 
 /** Cap graph payload for SVG layout performance (use API without max_nodes for full export). */
-const KNOWLEDGE_GRAPH_UI_MAX_NODES = 500;
+const KNOWLEDGE_GRAPH_UI_MAX_NODES = 2_000;
+const KNOWLEDGE_GRAPH_UI_MAX_EDGES = 8_000;
 
 export function Knowledge() {
   const [sessionIdInput, setSessionIdInput] = useState("");
@@ -34,7 +36,10 @@ export function Knowledge() {
 
   const stats = useRagStats();
   const kgStats = useKnowledgeGraphStats();
-  const kgGraph = useKnowledgeGraph({ maxNodes: KNOWLEDGE_GRAPH_UI_MAX_NODES });
+  const kgGraph = useKnowledgeGraph({
+    maxNodes: KNOWLEDGE_GRAPH_UI_MAX_NODES,
+    maxEdges: KNOWLEDGE_GRAPH_UI_MAX_EDGES,
+  });
   const signalQuality = useSignalQuality();
   const sessionLookup = useSessionLookup();
   const sessionDelete = useSessionDelete();
@@ -269,9 +274,22 @@ export function Knowledge() {
           )}
           {kgGraph.isError && (
             <p className="text-xs text-destructive" role="alert">
-              {kgGraph.error instanceof Error
-                ? kgGraph.error.message
-                : "Could not load knowledge graph visualization."}
+              {kgGraph.error instanceof GraphDecisionError
+                ? `${kgGraph.error.code}: ${kgGraph.error.message}${
+                    kgGraph.error.suggestedActions.length > 0
+                      ? ` — ${kgGraph.error.suggestedActions.join(" · ")}`
+                      : ""
+                  }`
+                : kgGraph.error instanceof Error
+                  ? kgGraph.error.message
+                  : "Could not load knowledge graph visualization."}
+            </p>
+          )}
+          {kgGraph.data?.limits && (
+            <p className="text-[10px] text-[var(--muted-foreground)]">
+              Limits: nodes {kgGraph.data.limits.applied_max_nodes} · edges{" "}
+              {kgGraph.data.limits.max_edges} · export{" "}
+              {kgGraph.data.limits.export_ms ?? 0}ms
             </p>
           )}
           {kgGraph.data?.truncated &&
@@ -281,6 +299,10 @@ export function Knowledge() {
                 entities (UI limit {KNOWLEDGE_GRAPH_UI_MAX_NODES}). Increase{" "}
                 <code className="rounded bg-[var(--muted)] px-1">
                   KNOWLEDGE_GRAPH_UI_MAX_NODES
+                </code>{" "}
+                and{" "}
+                <code className="rounded bg-[var(--muted)] px-1">
+                  KNOWLEDGE_GRAPH_UI_MAX_EDGES
                 </code>{" "}
                 or call{" "}
                 <code className="rounded bg-[var(--muted)] px-1">
@@ -296,7 +318,11 @@ export function Knowledge() {
           {kgGraph.isLoading ? (
             <Loader2 className="mx-auto h-6 w-6 animate-spin text-[var(--muted-foreground)]" />
           ) : kgGraph.isError ? null : (
-            <KnowledgeGraphCanvas nodes={graphNodes} edges={graphEdges} />
+            <KnowledgeGraphCanvas
+              nodes={graphNodes}
+              edges={graphEdges}
+              graphHash={kgGraph.data?.graph_hash}
+            />
           )}
         </CardContent>
       </Card>

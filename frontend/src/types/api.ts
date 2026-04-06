@@ -156,6 +156,29 @@ export interface KnowledgeGraphStats {
   [key: string]: unknown;
 }
 
+export type GraphDecisionCode =
+  | "SCHEMA_INVALID"
+  | "GRAPH_TOO_LARGE"
+  | "LAYOUT_TIMEOUT"
+  | "INCONSISTENT_GRAPH"
+  | "UNSUPPORTED_REQUEST";
+
+export interface GraphDecisionErrorPayload {
+  code: GraphDecisionCode;
+  message: string;
+  status: number;
+  suggested_actions?: string[];
+  details?: Record<string, unknown>;
+}
+
+export interface KnowledgeGraphLimits {
+  requested_max_nodes?: number | null;
+  applied_max_nodes: number;
+  max_edges: number;
+  timeout_ms: number;
+  export_ms?: number;
+}
+
 /** Payload from GET /api/v1/knowledge/graph */
 export interface KnowledgeGraphNode {
   id: string;
@@ -180,6 +203,9 @@ export interface KnowledgeGraphPayload {
   total_entities?: number;
   /** True when max_nodes capped the node set. */
   truncated?: boolean;
+  /** Stable hash for the node/edge payload, suitable as a layout cache key. */
+  graph_hash?: string;
+  limits?: KnowledgeGraphLimits;
 }
 
 // ── Admission Gate ──────────────────────────────────────────────────

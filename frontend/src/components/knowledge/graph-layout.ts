@@ -1,5 +1,8 @@
 /**
- * Simple force-directed layout for small knowledge graphs (no d3 dependency).
+ * Force-directed layout helpers for knowledge graphs.
+ *
+ * `computeForceLayout` preserves the original full-pair simulation.
+ * `computeSampledForceLayout` uses sampled repulsion for larger graphs.
  */
 
 export interface LayoutNode {
@@ -24,18 +27,25 @@ interface SimPoint {
   vy: number;
 }
 
-/**
- * Run a short force simulation: repulsion between all pairs, attraction along edges.
- */
-export function computeForceLayout(
+interface LayoutOptions {
+  iterations?: number;
+  margin?: number;
+}
+
+interface SimConfig {
+  iterations: number;
+  margin: number;
+  repulsion: number;
+  attraction: number;
+  damping: number;
+  repulsionSamples?: number;
+}
+
+function initPositions(
   nodes: LayoutNode[],
-  edges: LayoutEdge[],
   width: number,
-  height: number,
-  options?: { iterations?: number; margin?: number }
-): Map<string, PositionedNode> {
-  const iterations = options?.iterations ?? 220;
-  const margin = options?.margin ?? 44;
+  height: number
+): { positions: Map<string, SimPoint>; ids: string[] } {
   const cx = width / 2;
   const cy = height / 2;
   const n = nodes.length;
@@ -52,33 +62,77 @@ export function computeForceLayout(
     });
   });
 
-  const repulsion = 2800;
-  const attraction = 0.028;
-  const damping = 0.88;
-  const ids = nodes.map((x) => x.id);
+  return { positions, ids: nodes.map((x) => x.id) };
+}
+
+function simulate(
+  positions: Map<string, SimPoint>,
+  ids: string[],
+  edges: LayoutEdge[],
+  width: number,
+  height: number,
+  config: SimConfig
+): Map<string, PositionedNode> {
+  const {
+    iterations,
+    margin,
+    repulsion,
+    attraction,
+    damping,
+    repulsionSamples,
+  } = config;
+  const n = ids.length;
 
   for (let iter = 0; iter < iterations; iter++) {
-    for (let i = 0; i < ids.length; i++) {
-      for (let j = i + 1; j < ids.length; j++) {
+    if (typeof repulsionSamples === "number") {
+      const sampleCount = Math.max(
+        2,
+        Math.min(repulsionSamples, Math.max(2, n - 1))
+      );
+      const stride = Math.max(1, Math.floor((n - 1) / sampleCount));
+      for (let i = 0; i < n; i++) {
         const a = positions.get(ids[i]);
-        const b = positions.get(ids[j]);
-        if (!a || !b) continue;
-        const dx = b.x - a.x;
-        const dy = b.y - a.y;
-        const dist = Math.sqrt(dx * dx + dy * dy) || 0.01;
-        const f = repulsion / (dist * dist);
-        const fx = (dx / dist) * f;
-        const fy = (dy / dist) * f;
-        a.vx -= fx;
-        a.vy -= fy;
-        b.vx += fx;
-        b.vy += fy;
+        if (!a) continue;
+        for (let s = 1; s <= sampleCount; s++) {
+          const j = (i + s * stride + iter) % n;
+          if (j === i) continue;
+          const b = positions.get(ids[j]);
+          if (!b) continue;
+          const dx = b.x - a.x;
+          const dy = b.y - a.y;
+          const dist = Math.sqrt(dx * dx + dy * dy) || 0.01;
+          const f = repulsion / (dist * dist);
+          const fx = (dx / dist) * f;
+          const fy = (dy / dist) * f;
+          a.vx -= fx;
+          a.vy -= fy;
+          b.vx += fx;
+          b.vy += fy;
+        }
+      }
+    } else {
+      for (let i = 0; i < ids.length; i++) {
+        for (let j = i + 1; j < ids.length; j++) {
+          const a = positions.get(ids[i]);
+          const b = positions.get(ids[j]);
+          if (!a || !b) continue;
+          const dx = b.x - a.x;
+          const dy = b.y - a.y;
+          const dist = Math.sqrt(dx * dx + dy * dy) || 0.01;
+          const f = repulsion / (dist * dist);
+          const fx = (dx / dist) * f;
+          const fy = (dy / dist) * f;
+          a.vx -= fx;
+          a.vy -= fy;
+          b.vx += fx;
+          b.vy += fy;
+        }
       }
     }
 
-    for (const e of edges) {
-      const a = positions.get(e.source);
-      const b = positions.get(e.target);
+    for (const edge of edges) {
+      const a = positions.get(edge.source);
+      const b = positions.get(edge.target);
       if (!a || !b) continue;
       const dx = b.x - a.x;
       const dy = b.y - a.y;
@@ -110,4 +164,61 @@ export function computeForceLayout(
     if (p) out.set(id, { id, x: p.x, y: p.y });
   }
   return out;
+}
+
+/**
+ * Original full-pair simulation: O(n²) repulsion.
+ */
+export function computeForceLayout(
+  nodes: LayoutNode[],
+  edges: LayoutEdge[],
+  width: number,
+  height: number,
+  options?: LayoutOptions
+): Map<string, PositionedNode> {
+  const { positions, ids } = initPositions(nodes, width, height);
+  return simulate(positions, ids, edges, width, height, {
+    iterations: options?.iterations ?? 220,
+    margin: options?.margin ?? 44,
+    repulsion: 2800,
+    attraction: 0.028,
+    damping: 0.88,
+  });
+}
+
+/**
+ * Sampled repulsion simulation: near O(n * k) for k sampled neighbors.
+ */
+export function computeSampledForceLayout(
+  nodes: LayoutNode[],
+  edges: LayoutEdge[],
+  width: number,
+  height: number,
+  options?: LayoutOptions & { repulsionSamples?: number }
+): Map<string, PositionedNode> {
+  const { positions, ids } = initPositions(nodes, width, height);
+  return simulate(positions, ids, edges, width, height, {
+    iterations: options?.iterations ?? 120,
+    margin: options?.margin ?? 40,
+    repulsion: 2300,
+    attraction: 0.022,
+    damping: 0.9,
+    repulsionSamples: options?.repulsionSamples ?? 24,
+  });
+}
+
+export function serializeLayout(
+  layout: Map<string, PositionedNode>
+): PositionedNode[] {
+  return [...layout.values()];
+}
+
+export function toPositionMap(
+  positions: PositionedNode[]
+): Map<string, PositionedNode> {
+  const map = new Map<string, PositionedNode>();
+  for (const p of positions) {
+    map.set(p.id, p);
+  }
+  return map;
 }

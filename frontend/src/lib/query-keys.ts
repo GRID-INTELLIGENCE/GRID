@@ -46,8 +46,13 @@ export const queryKeys = {
   },
   knowledge: {
     stats: () => ["knowledge", "stats"] as const,
-    graph: (maxNodes?: number) =>
-      ["knowledge", "graph", maxNodes ?? "all"] as const,
+    graph: (opts?: { maxNodes?: number; maxEdges?: number }) =>
+      [
+        "knowledge",
+        "graph",
+        opts?.maxNodes ?? "default",
+        opts?.maxEdges ?? "default",
+      ] as const,
   },
   admission: {
     policy: () => ["admission", "policy"] as const,

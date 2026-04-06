@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { computeForceLayout } from "./graph-layout";
+import { computeForceLayout, computeSampledForceLayout } from "./graph-layout";
 
 describe("computeForceLayout", () => {
   it("returns bounded positions for a triangle", () => {
@@ -26,5 +26,18 @@ describe("computeForceLayout", () => {
       iterations: 10,
     });
     expect(pos.size).toBe(1);
+  });
+
+  it("computes sampled layout for larger node sets", () => {
+    const nodes = Array.from({ length: 200 }, (_, i) => ({ id: `n${i}` }));
+    const edges = Array.from({ length: 199 }, (_, i) => ({
+      source: `n${i}`,
+      target: `n${i + 1}`,
+    }));
+    const pos = computeSampledForceLayout(nodes, edges, 900, 600, {
+      iterations: 25,
+      repulsionSamples: 16,
+    });
+    expect(pos.size).toBe(200);
   });
 });
