@@ -5,9 +5,12 @@ Test script to verify per-user safety engine isolation and race condition fixes
 
 import asyncio
 
+import pytest
+
 from safety.ai_workflow_safety import get_ai_workflow_safety_engine
 
 
+@pytest.mark.asyncio
 async def test_per_user_isolation():
     """Test that different users get isolated safety engines"""
     print("Testing per-user safety engine isolation...")
@@ -41,6 +44,7 @@ async def test_per_user_isolation():
     print("✓ Per-user isolation working correctly")
 
 
+@pytest.mark.asyncio
 async def test_concurrent_access():
     """Test concurrent access doesn't cause race conditions"""
     print("Testing concurrent access safety...")
@@ -70,6 +74,7 @@ async def test_concurrent_access():
     print("✓ Concurrent access handled safely")
 
 
+@pytest.mark.asyncio
 async def test_engine_caching():
     """Test that engines are properly cached and reused"""
     print("Testing engine caching...")
@@ -88,6 +93,7 @@ async def test_engine_caching():
     print("✓ Engine caching working correctly")
 
 
+@pytest.mark.asyncio
 async def test_statistics_safety():
     """Test that statistical operations handle edge cases safely"""
     print("Testing statistics safety...")

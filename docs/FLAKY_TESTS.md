@@ -158,7 +158,7 @@ Re-run passed. PR #81 was merged at `48df616a1b7e2341eb4d11355f04ad257a901e9f`.
 | **CI-gated** | NO — `safety/tests/` is not in the CI `test` job scope |
 | **Scope** | `uv run pytest safety/tests -q --tb=short` |
 | **First observed** | 2026-04-06, Phase 1 local dry-run |
-| **Status** | Pre-existing on `main`; not introduced by PR #81 |
+| **Status** | **Fixed** — `@pytest.mark.asyncio` added to all 7 functions (this branch) |
 
 ### Failing Tests
 
