@@ -2,10 +2,13 @@
 
 import asyncio
 
+import pytest
+
 from safety.ai_workflow_safety import TemporalSafetyConfig
 from safety.context_safe_engine_manager import get_safe_engine
 
 
+@pytest.mark.asyncio
 async def test_timestamp_inconsistency():
     """Test timestamp inconsistency by triggering cleanup and access in quick succession."""
     print("Testing timestamp inconsistency...")
@@ -28,6 +31,7 @@ async def test_timestamp_inconsistency():
     print("Created multiple engines")
 
 
+@pytest.mark.asyncio
 async def test_invalid_user_id():
     """Test with invalid user_ids."""
     print("\nTesting invalid user_id validation...")
@@ -51,6 +55,7 @@ async def test_invalid_user_id():
             print(f"  ✗ Rejected: {e}")
 
 
+@pytest.mark.asyncio
 async def test_config_bounds():
     """Test configuration bounds validation."""
     print("\nTesting config bounds validation...")

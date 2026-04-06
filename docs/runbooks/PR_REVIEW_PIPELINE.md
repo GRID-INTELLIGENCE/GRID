@@ -7,7 +7,7 @@
 
 ## Overview
 
-This runbook defines the **6-phase pipeline execution policy** for merging feature branches into `main`. It ensures the CI pipeline stays green, all critical tests pass, and no regressions or merge conflicts are introduced.
+This runbook defines the **7-phase pipeline execution policy** (Phase 0 through Phase 6) for merging feature branches into `main`. It ensures the CI pipeline stays green, all critical tests pass, and no regressions or merge conflicts are introduced.
 
 ```
 Phase 0: Pre-Flight          → environment + branch assertion
@@ -28,8 +28,8 @@ Source: `.github/workflows/ci.yml`
 ### Job Dependency Graph
 
 ```
-secrets-scan ──→ lint (non-blocking) ──────────────────────→ ci-status
-            └──→ smoke-test ──→ test ──────────────────────→ ci-status
+secrets-scan ──→ lint (non-blocking) ──→ test ────────────→ ci-status
+            └──→ smoke-test ──────────→ test ────────────→ ci-status
                           │  └──→ integration (main only)
                           │  └──→ build (main only)
                           └──→ test-mcp-security ──────────→ ci-status
@@ -43,8 +43,8 @@ secrets-scan ──→ lint (non-blocking) ────────────�
 | `secrets-scan` | **YES** | Always |
 | `smoke-test` | **YES** | Always |
 | `test` | **YES** | Always |
-| `test-mcp-security` | **YES** | Always |
-| `ci-status` | **YES** (final gate) | Always |
+| `test-mcp-security` | NO (runs before ci-status, not a gate input) | Always |
+| `ci-status` | **YES** (final gate; fails if secrets-scan, smoke-test, or test fail) | Always |
 | `lint` | NO (`continue-on-error: true`) | Always |
 | `security` | NO (unless critical CVE) | Always |
 | `integration` | NO | main push / workflow_dispatch only |
@@ -67,10 +67,11 @@ git branch --show-current
 git status
 # Expected: nothing to commit, working tree clean
 
-# 0.3 Confirm HEAD == main
+# 0.3 Confirm branch is up to date with main (no unmerged main commits)
 git log --oneline -1 HEAD
-git log --oneline -1 main
-# Expected: same commit hash
+git log --oneline -1 origin/main
+# Expected: HEAD is a descendant of (or equal to) origin/main; no commits in
+#           origin/main that are not reachable from HEAD (i.e., branch is current)
 
 # 0.4 Fetch remote
 git fetch origin main
@@ -101,6 +102,8 @@ GRID_ENV=production uv run python scripts/assert_no_debug_in_prod.py
 uv run ruff check .
 
 # 1.3 CI-gated test suite (mirrors ci.yml `test` job)
+# Note: env vars below are set by tests/conftest.py; explicit export here provides
+# a clean local baseline matching CI runner state.
 PYTHONPATH=src \
 MOTHERSHIP_ENVIRONMENT=test \
 MOTHERSHIP_DATABASE_URL="sqlite:///:memory:" \
@@ -110,7 +113,8 @@ SAFETY_BYPASS_REDIS=true \
 MOTHERSHIP_REDIS_ENABLED=false \
 ENABLE_DEV_TOKEN=1 \
 BLOCKER_DISABLED=1 \
-uv run pytest tests/unit/ tests/security/ tests/api/ -v --tb=short -x --timeout=30
+uv run pytest tests/unit/ tests/security/ tests/api/ -v --tb=short -x
+# CI exact command (no extra env overrides): uv run pytest tests/unit/ tests/security/ tests/api/ -v --tb=short -x
 
 # 1.4 MCP security tests (mirrors ci.yml `test-mcp-security` job)
 uv run pytest tests/security/test_mcp_server_security.py -v --tb=short
@@ -207,8 +211,10 @@ Confirm: `base.ref == "main"`, `state == "open"`.
 ### Polling Algorithm
 
 ```python
-CRITICAL_JOBS = {"secrets-scan", "smoke-test", "test", "test-mcp-security", "ci-status"}
-NON_BLOCKING_JOBS = {"lint", "security", "integration", "build", "validation"}
+# Gate jobs: ci-status fails only when secrets-scan, smoke-test, or test fail.
+# test-mcp-security is a ci-status dependency but does NOT cause ci-status to fail.
+CRITICAL_JOBS = {"secrets-scan", "smoke-test", "test", "ci-status"}
+NON_BLOCKING_JOBS = {"lint", "test-mcp-security", "security", "integration", "build", "validation"}
 MAX_POLLS = 60
 
 for poll in range(MAX_POLLS):
@@ -222,8 +228,19 @@ for poll in range(MAX_POLLS):
     jobs = classify(check_runs)
     # jobs: {name: status}  status ∈ {queued, in_progress, success, failure, skipped}
 
-    critical_done   = all(jobs[j] in {"success","failure","skipped"} for j in CRITICAL_JOBS if j in jobs)
-    critical_failed = any(jobs[j] == "failure" for j in CRITICAL_JOBS if j in jobs)
+    # Guard: if no check runs have appeared yet, CI hasn't started — keep waiting.
+    if not jobs:
+        sleep(30)
+        continue
+
+    present_critical = [j for j in CRITICAL_JOBS if j in jobs]
+    # Guard: wait until at least one critical job is visible before evaluating.
+    if not present_critical:
+        sleep(30)
+        continue
+
+    critical_done   = all(jobs[j] in {"success","failure","skipped"} for j in present_critical)
+    critical_failed = any(jobs[j] == "failure" for j in present_critical)
 
     if critical_failed:
         → ABORT: invoke Phase 3B (failure triage)
@@ -285,7 +302,7 @@ for poll in range(MAX_POLLS):
 [ ] PR mergeable_state == "clean"
     → mcp__github__pull_request_read(method="get") → check mergeable_state
 [ ] No unresolved blocking review comments
-[ ] Branch not behind main (fast-forward eligible)
+[ ] Branch is up to date with main (no unmerged main commits; rebased if needed)
 ```
 
 **Abort condition**: `mergeable_state == "dirty"` → rebase and re-push:
