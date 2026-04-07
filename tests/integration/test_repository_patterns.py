@@ -174,7 +174,11 @@ class TestRepositoryQueries:
     def repository(self):
         repo = InMemoryRepository()
         for i in range(10):
-            repo._store[f"item_{i}"] = {"id": f"item_{i}", "name": f"test_{i}", "type": "filter_test" if i < 5 else "other"}
+            repo._store[f"item_{i}"] = {
+                "id": f"item_{i}",
+                "name": f"test_{i}",
+                "type": "filter_test" if i < 5 else "other",
+            }
         return repo
 
     @pytest.mark.asyncio

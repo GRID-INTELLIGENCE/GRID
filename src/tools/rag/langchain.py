@@ -123,9 +123,7 @@ def create_simple_rag_chain(
         )
 
     return RunnableLambda(
-        lambda _input: {
-            "error": "Use `ainvoke` for async execution of GRID RAG chain."
-        },
+        lambda _input: {"error": "Use `ainvoke` for async execution of GRID RAG chain."},
         afunc=_query,
     )
 
@@ -151,4 +149,3 @@ def create_rag_tool(
         return str(result.get("answer", ""))
 
     return rag_query
-

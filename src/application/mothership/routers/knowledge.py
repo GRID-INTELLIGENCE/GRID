@@ -155,7 +155,9 @@ def _validation_error_messages(exc: ValidationError) -> list[str]:
     return messages
 
 
-def _coerce_graph_payload(payload: Any, *, max_edges: int) -> tuple[list[GraphNode], list[GraphEdge], str | None, int, bool]:
+def _coerce_graph_payload(
+    payload: Any, *, max_edges: int
+) -> tuple[list[GraphNode], list[GraphEdge], str | None, int, bool]:
     if not isinstance(payload, dict):
         _raise_graph_error(
             code="SCHEMA_INVALID",

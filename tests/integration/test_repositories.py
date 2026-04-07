@@ -60,7 +60,9 @@ class InMemoryRepository:
     async def count(self) -> int:
         return len(self._store)
 
-    async def query(self, *, filter_by: dict[str, Any] | None = None, limit: int | None = None, offset: int = 0) -> list[dict[str, Any]]:
+    async def query(
+        self, *, filter_by: dict[str, Any] | None = None, limit: int | None = None, offset: int = 0
+    ) -> list[dict[str, Any]]:
         results = list(self._store.values())
         if filter_by:
             for k, v in filter_by.items():
