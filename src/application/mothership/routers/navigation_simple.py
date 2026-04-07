@@ -125,7 +125,9 @@ def _build_simple_paths(payload: NavigationRequest) -> tuple[dict[str, Any], lis
     return primary_path, alternatives, 0.8
 
 
-def _build_advanced_paths(payload: NavigationRequest, ctx: dict[str, Any]) -> tuple[dict[str, Any], list[dict[str, Any]], float]:
+def _build_advanced_paths(
+    payload: NavigationRequest, ctx: dict[str, Any]
+) -> tuple[dict[str, Any], list[dict[str, Any]], float]:
     """Create context-aware navigation plan without external module dependency."""
     complexity = min(len(ctx), 8)
     confidence = min(0.94, 0.74 + complexity * 0.02)
@@ -144,21 +146,20 @@ def _build_advanced_paths(payload: NavigationRequest, ctx: dict[str, Any]) -> tu
         "confidence": confidence,
     }
 
-    alternatives: list[dict[str, Any]] = []
     variants = min(payload.max_alternatives - 1, 3)
-    for idx in range(variants):
-        alternatives.append(
-            {
-                "steps": [
-                    {"action": "scope_goal", "station": "intake"},
-                    {"action": "route_variant", "station": "planner", "variant": idx + 1},
-                    {"action": "execute_route", "station": "delivery", "target": payload.goal},
-                    {"action": "verify_outcome", "station": "validation"},
-                ],
-                "estimated_time": round(estimated_time + (idx + 1) * 3.5, 2),
-                "confidence": max(0.45, round(confidence - (idx + 1) * 0.07, 2)),
-            }
-        )
+    alternatives: list[dict[str, Any]] = [
+        {
+            "steps": [
+                {"action": "scope_goal", "station": "intake"},
+                {"action": "route_variant", "station": "planner", "variant": idx + 1},
+                {"action": "execute_route", "station": "delivery", "target": payload.goal},
+                {"action": "verify_outcome", "station": "validation"},
+            ],
+            "estimated_time": round(estimated_time + (idx + 1) * 3.5, 2),
+            "confidence": max(0.45, round(confidence - (idx + 1) * 0.07, 2)),
+        }
+        for idx in range(variants)
+    ]
 
     return primary_path, alternatives, confidence
 
