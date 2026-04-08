@@ -21,24 +21,39 @@ export default defineConfig({
     rollupOptions: {
       output: {
         // Optimize chunk splitting for better caching
-        manualChunks: {
-          // Vendor chunks
-          "react-vendor": ["react", "react-dom", "react-router-dom"],
-          "query-vendor": ["@tanstack/react-query"],
-          "ui-vendor": [
-            "lucide-react",
-            "clsx",
-            "class-variance-authority",
-            "tailwind-merge",
-          ],
-          // App chunks
-          "grid-client": ["./src/lib/grid-client.ts"],
-          "state-persistence": ["./src/lib/state-persistence.ts"],
-          analytics: [
-            "./src/lib/analytics/types.ts",
-            "./src/lib/analytics/storage.ts",
-            "./src/hooks/use-analytics.ts",
-          ],
+        manualChunks(id) {
+          if (id.includes("node_modules")) {
+            if (
+              id.includes("react-dom/") ||
+              id.includes("react/") ||
+              id.includes("react-router-dom")
+            ) {
+              return "react-vendor";
+            }
+            if (id.includes("@tanstack/react-query")) {
+              return "query-vendor";
+            }
+            if (
+              id.includes("lucide-react") ||
+              id.includes("clsx") ||
+              id.includes("class-variance-authority") ||
+              id.includes("tailwind-merge")
+            ) {
+              return "ui-vendor";
+            }
+          }
+          if (id.includes("src/lib/grid-client")) {
+            return "grid-client";
+          }
+          if (id.includes("src/lib/state-persistence")) {
+            return "state-persistence";
+          }
+          if (
+            id.includes("src/lib/analytics") ||
+            id.includes("src/hooks/use-analytics")
+          ) {
+            return "analytics";
+          }
         },
         // Optimize asset naming for caching
         assetFileNames: (assetInfo) => {
