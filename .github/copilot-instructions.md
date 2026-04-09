@@ -58,13 +58,12 @@ Core Layer (Foundation)
 
 ```bash
 # Quick setup with UV (recommended)
-cd e:\grid
 uv venv --python 3.13 --clear
-.\.venv\Scripts\Activate.ps1
+source .venv/bin/activate
 uv sync --group dev --group test
 
 # Verify setup
-pytest tests/unit/ -v
+uv run pytest tests/unit/ -v
 ruff check .
 ```
 
@@ -73,40 +72,40 @@ ruff check .
 **Tests** (default task, runs pytest with verbose output and coverage):
 ```bash
 # All tests
-pytest tests/ -v --tb=short
+uv run pytest tests/ -v --tb=short
 
 # Unit tests only (fast)
-pytest tests/unit/ -v
+uv run pytest tests/unit/ -v
 
 # Integration tests
-pytest tests/integration/ -v
+uv run pytest tests/integration/ -v
 
 # Exclude slow tests
-pytest -m "not slow"
+uv run pytest -m "not slow"
 
 # Coverage report
-pytest --cov=src --cov-report=html
+uv run pytest --cov=src --cov-report=html
 ```
 
 **RAG Operations**:
 ```bash
 # Query knowledge base
-python -m tools.rag.cli query "How does pattern recognition work?"
+uv run python -m tools.rag.cli query "How does pattern recognition work?"
 
 # Index/rebuild docs
-python -m tools.rag.cli index docs/ --rebuild --curate
+uv run python -m tools.rag.cli index docs/ --rebuild --curate
 
 # RAG statistics
-python -m tools.rag.cli stats
+uv run python -m tools.rag.cli stats
 ```
 
 **Skills** (domain transformations and utilities with automated discovery):
 ```bash
 # List available skills (auto-discovered from src/grid/skills/)
-python -m grid skills list
+uv run python -m grid skills list
 
 # Run a skill with JSON args
-python -m grid skills run transform.schema_map --args-json '{"text":"...", "target_schema":"resonance"}'
+uv run python -m grid skills run transform.schema_map --args-json '{"text":"...", "target_schema":"resonance"}'
 
 # Common skills: transform.schema_map, context.refine, compress.articulate, cross_reference.explain
 ```
@@ -114,10 +113,10 @@ python -m grid skills run transform.schema_map --args-json '{"text":"...", "targ
 **API Server**:
 ```bash
 # Start Mothership API (main application)
-python -m application.mothership.main
+uv run python -m application.mothership.main
 
 # Development server with reload
-uvicorn application.mothership.main:app --reload --host 0.0.0.0 --port 8080
+uv run uvicorn application.mothership.main:app --reload --host 0.0.0.0 --port 8080
 ```
 
 **Code Quality**:
@@ -126,8 +125,8 @@ uvicorn application.mothership.main:app --reload --host 0.0.0.0 --port 8080
 ruff check .
 ruff check --fix .
 
-# Formatting (Black)
-black .
+# Formatting (Ruff)
+ruff format .
 
 # Type checking (mypy)
 mypy src/
@@ -147,7 +146,7 @@ make format
 ### Python Essentials
 - **Version**: Python 3.13+ (pattern matching, improved errors)
 - **Type hints**: Required for ALL functions, methods, class attributes
-- **Formatter**: Black (120 char line length, configured in `pyproject.toml`)
+- **Formatter**: Ruff format (120 char line length, configured in `pyproject.toml`)
 - **Linter**: Ruff (pre-commit)
 - **Type checker**: mypy (run before commits)
 - **Style**: PEP 8 with project overrides (120 char limit)
@@ -181,7 +180,7 @@ tests/
 └── fixtures/      # Shared test data
 ```
 
-Pattern: `test_{module_name}.py` mirrors source structure with `≥80%` coverage target.
+Pattern: `test_{module_name}.py` mirrors source structure with `≥75%` coverage target.
 
 **Test Markers** (use pytest markers):
 - `@pytest.mark.unit` - Unit tests (fast, isolated)
@@ -227,7 +226,7 @@ Domain transformations use `grid.skills.registry`:
 
 ```bash
 # Run with strict JSON parameters
-python -m grid skills run transform.schema_map --args-json '{"text": "...", "target_schema": "resonance"}'
+uv run python -m grid skills run transform.schema_map --args-json '{"text": "...", "target_schema": "resonance"}'
 ```
 
 ### Unified Fabric Event System
@@ -316,7 +315,7 @@ async def test_event_flow(event_bus, sample_event):
 - Write tests alongside code
 - Use pytest fixtures for setup
 - Mock external dependencies (including Ollama in unit tests)
-- Aim for ≥80% coverage
+- Aim for ≥75% coverage
 
 ## Integration Points
 
@@ -328,7 +327,7 @@ Use RAG to:
 - Understand decision history
 
 ```bash
-python -m tools.rag.cli query "Where is X pattern implemented?"
+uv run python -m tools.rag.cli query "Where is X pattern implemented?"
 ```
 
 ### API Patterns
@@ -391,14 +390,14 @@ For user-facing features, consider:
 
 ## Quick Debugging Checklist
 
-- Run `python scripts/validate_ide_context.py` to check environment setup
+- Run `uv run python scripts/validate_ide_context.py` to check environment setup
 - Check `.rag_db/` exists (RAG database)
 - Verify Ollama models installed: `ollama list`
-- Run tests with `pytest tests/ -v --tb=short`
+- Run tests with `uv run pytest tests/ -v --tb=short`
 - Check `benchmark_metrics.json` for performance SLA compliance (0.1ms guard)
 - Verify UV environment: `uv sync --group dev --group test`
-- Check test isolation: `pytest tests/unit/ -v` (should not require external services)
-- Verify unified_fabric event bus: `pytest tests/unified_fabric/ -v`
+- Check test isolation: `uv run pytest tests/unit/ -v` (should not require external services)
+- Verify unified_fabric event bus: `uv run pytest tests/unified_fabric/ -v`
 
 ## Copilot Code Review Guardrails
 

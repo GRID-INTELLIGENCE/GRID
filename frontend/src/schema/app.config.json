@@ -131,6 +131,14 @@
       "icon": "compass"
     },
     {
+      "id": "mcq",
+      "path": "/mcq",
+      "title": "Verification Checkpoint",
+      "description": "MCQ verification checkpoint — knowledge verification, identity validation, smarter path unlocking",
+      "navLabel": "Checkpoint",
+      "icon": "radar"
+    },
+    {
       "id": "mycelium",
       "path": "/mycelium",
       "title": "Mycelium",
@@ -160,6 +168,7 @@
       "knowledge",
       "terminal",
       "roundtable",
+      "mcq",
       "mycelium"
     ],
     "secondary": ["settings"]

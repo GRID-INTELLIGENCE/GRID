@@ -31,6 +31,7 @@ export type RouteKey =
   | "login"
   | "roundtable"
   | "admission"
+  | "mcq"
   | "mycelium"
   | "mycelium-demo";
 

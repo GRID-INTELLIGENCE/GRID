@@ -13,7 +13,7 @@ from typing import Any
 
 import networkx as nx
 
-from ..knowledge import PersistentJSONKnowledgeStore
+from ..knowledge.persistent_store import PersistentJSONKnowledgeStore
 from ..knowledge.graph_schema import EntityType
 from ..knowledge.graph_store import Entity
 from .brain import AIBrain

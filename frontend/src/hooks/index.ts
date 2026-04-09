@@ -10,6 +10,10 @@ export {
   useHealth,
   useKnowledgeGraph,
   useKnowledgeGraphStats,
+  useMCQBank,
+  useMCQBanks,
+  useMCQQuestion,
+  useMCQQuestions,
   useMetrics,
   useRagStats,
   useReadiness,
@@ -22,10 +26,17 @@ export {
 } from "./use-queries";
 
 export {
+  useCreateMCQBank,
+  useCreateMCQQuestion,
+  useDeleteMCQBank,
+  useDeleteMCQQuestion,
   useIntelligenceProcess,
   useNavigationPlan,
   useSessionDelete,
   useSessionLookup,
+  useSubmitMCQAnswers,
+  useUpdateMCQBank,
+  useUpdateMCQQuestion,
 } from "./use-mutations";
 
 export { useConnectivityEpoch, useOnlineStatus } from "./use-online-status";

@@ -79,6 +79,7 @@ export const routeComponents: Record<RouteKey, ComponentType> = {
   settings: lazyRoute(() => import("@/pages/SettingsPage"), "SettingsPage"),
   register: lazyRoute(() => import("@/pages/Register"), "Register"),
   login: lazyRoute(() => import("@/pages/Login"), "Login"),
+  mcq: lazyRoute(() => import("@/pages/MCQPage"), "MCQPage"),
   roundtable: lazyRoute(
     () => import("@/pages/RoundTablePage"),
     "RoundTablePage"

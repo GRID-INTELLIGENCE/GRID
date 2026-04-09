@@ -74,6 +74,7 @@ from .routers.agentic import router as agentic_router
 from .routers.cockpit import router as cockpit_router
 from .routers.corruption_monitoring import router as corruption_router
 from .routers.health import router as health_router
+from .routers.mcq import router as mcq_router
 from .routers.payment import get_payment_gateway
 from .routers.safety import router as safety_router
 
@@ -913,6 +914,10 @@ The API supports multiple authentication methods:
 
     # Include skills health router
     api_router.include_router(skills_router)
+
+    # Include MCQ router
+    api_router.include_router(mcq_router)
+    logger.info("MCQ API endpoints registered")
 
     app.include_router(corruption_router)
     logger.info("Corruption monitoring API endpoints registered")

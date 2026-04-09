@@ -155,6 +155,13 @@ describe("routeComponents", () => {
       "knowledge",
       "terminal",
       "settings",
+      "register",
+      "login",
+      "roundtable",
+      "admission",
+      "mcq",
+      "mycelium",
+      "mycelium-demo",
     ];
     for (const key of expectedKeys) {
       expect(routeComponents[key]).toBeDefined();

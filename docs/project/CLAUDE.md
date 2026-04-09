@@ -12,7 +12,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Cognitive Decision Support**: Bounded rationality and human-centered AI
 - **Domain-Driven Design**: Professional architectural patterns
 
-**Version**: 2.6.1
+**Version**: 2.8.0
 **Python**: 3.13 (required: >=3.13,<3.14)
 **Package Manager**: UV (do NOT use pip directly)
 
@@ -188,7 +188,7 @@ tests/
 ### Test Configuration
 
 - **Coverage threshold**: 75% (fail-under configured)
-- **Async mode**: Auto (`asyncio_mode = "auto"`)
+- **Async mode**: Strict (`asyncio_mode = "strict"`) — all async tests require explicit `@pytest.mark.asyncio`
 - **Test database**: `sqlite:///:memory:` (in-memory)
 - **External services**: Disabled in tests (Redis, Databricks)
 
@@ -245,9 +245,9 @@ The CI pipeline (`.github/workflows/ci-main.yml`) includes:
 
 1. **Secrets Scan**: Heuristic secret detection
 2. **Smoke Test**: Quick environment verification
-3. **Lint**: Ruff, Black, MyPy checks
+3. **Lint**: Ruff, MyPy checks
 4. **Security**: Bandit, pip-audit scanning
-5. **Test**: Matrix testing (Python 3.11, 3.12, 3.13)
+5. **Test**: Python 3.13
 6. **Build**: Package building and verification
 7. **Integration**: Extended tests (main branch only)
 8. **Verify Deployment**: MCP servers and handlers

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-GRID (Geometric Resonance Intelligence Driver) is a local-first AI framework built on Python 3.13, FastAPI, SQLAlchemy, and ChromaDB+Ollama for RAG. It uses domain-driven design with event-driven agentic workflows, a 9-pattern cognitive intelligence engine, and layered security/safety enforcement. Version 2.7.0, MIT license, repo at `github.com/GRID-INTELLIGENCE/GRID`.
+GRID (Geometric Resonance Intelligence Driver) is a local-first AI framework built on Python 3.13, FastAPI, SQLAlchemy, and ChromaDB+Ollama for RAG. It uses domain-driven design with event-driven agentic workflows, a 9-pattern cognitive intelligence engine, and layered security/safety enforcement. Version 2.8.0, MIT license, repo at `github.com/GRID-INTELLIGENCE/GRID`.
 
 ## Commands
 

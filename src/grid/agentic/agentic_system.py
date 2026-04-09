@@ -14,7 +14,6 @@ from cognitive import CognitiveEngine, InteractionEvent, get_cognitive_engine
 from cognitive.light_of_the_seven.cognitive_layer.schemas.cognitive_state import CognitiveState
 from cognitive.scaffolding_engine import get_scaffolding_engine
 from grid.exceptions import SkillStoreError
-from grid.xai.explainer import explainer
 from safety.guardian.engine import RuleAction, get_guardian_engine
 from safety.guardian.engine import Severity as GuardianSeverity
 
@@ -435,6 +434,10 @@ class AgenticSystem:
         }
 
         # Synthesize XAI explanation with real Guardian evaluation data
+        # Lazy import to break transitive cycle:
+        # grid.agentic -> grid.xai.explainer -> cognitive -> grid.xai
+        from grid.xai.explainer import explainer
+
         xai_trace: dict[str, Any] = explainer.synthesize_explanation(
             decision_id=f"DEC-{case_id}-MAIN",
             context={

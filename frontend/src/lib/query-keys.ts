@@ -59,4 +59,24 @@ export const queryKeys = {
     stats: () => ["admission", "stats"] as const,
     bannered: () => ["admission", "bannered"] as const,
   },
+  mcq: {
+    banks: {
+      all: ["mcq", "banks"] as const,
+      list: (params?: {
+        owner_id?: string;
+        is_public?: boolean;
+        tags?: string[];
+      }) => ["mcq", "banks", "list", params ?? {}] as const,
+      detail: (id: string) => ["mcq", "banks", id] as const,
+    },
+    questions: {
+      all: ["mcq", "questions"] as const,
+      list: (params?: {
+        bank_id?: string;
+        difficulty?: string;
+        tags?: string[];
+      }) => ["mcq", "questions", "list", params ?? {}] as const,
+      detail: (id: string) => ["mcq", "questions", id] as const,
+    },
+  },
 } as const;

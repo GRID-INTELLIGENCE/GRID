@@ -552,6 +552,25 @@ class WebSocketEvent(BaseSchema):
 # Exports
 # =============================================================================
 
+from .mcq import (
+    MCQAnswerResponse,
+    MCQAnswerSubmission,
+    MCQBankCreate,
+    MCQBankListParams,
+    MCQBankResponse,
+    MCQBankSummary,
+    MCQBankUpdate,
+    MCQDifficultySchema,
+    MCQOptionCreate,
+    MCQOptionResponse,
+    MCQQuestionCreate,
+    MCQQuestionListParams,
+    MCQQuestionResponse,
+    MCQQuestionUpdate,
+    MCQSubmissionCreate,
+    MCQSubmissionResponse,
+)
+
 __all__ = [
     # Enums
     "SystemStatusSchema",
@@ -607,4 +626,21 @@ __all__ = [
     "WebSocketMessage",
     "WebSocketSubscription",
     "WebSocketEvent",
+    # MCQ
+    "MCQDifficultySchema",
+    "MCQOptionCreate",
+    "MCQOptionResponse",
+    "MCQQuestionCreate",
+    "MCQQuestionUpdate",
+    "MCQQuestionResponse",
+    "MCQQuestionListParams",
+    "MCQBankCreate",
+    "MCQBankUpdate",
+    "MCQBankResponse",
+    "MCQBankListParams",
+    "MCQBankSummary",
+    "MCQAnswerSubmission",
+    "MCQAnswerResponse",
+    "MCQSubmissionCreate",
+    "MCQSubmissionResponse",
 ]

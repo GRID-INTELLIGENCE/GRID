@@ -39,7 +39,6 @@ from cognitive.light_of_the_seven.cognitive_layer.schemas.user_cognitive_profile
 from cognitive.patterns import PatternMatcher
 from cognitive.temporal.temporal_router import TemporalRouter
 from cognitive.xai.explanation_generator import ExplanationGenerator
-from grid.xai.explainer import XAIExplainer
 
 logger = logging.getLogger(__name__)
 
@@ -240,7 +239,10 @@ class EnhancedCognitiveEngine:
         self.temporal_router = TemporalRouter()
         self.explanation_generator = ExplanationGenerator()
 
-        # GRID XAI integration
+        # GRID XAI integration (lazy import to avoid circular dependency:
+        # cognitive -> grid.xai.explainer -> cognitive)
+        from grid.xai.explainer import XAIExplainer
+
         self.xai_explainer = XAIExplainer(trace_dir=Path(xai_trace_dir))
 
         # State management with bounded caches

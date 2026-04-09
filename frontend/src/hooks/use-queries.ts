@@ -32,6 +32,13 @@ import type {
   SecurityStatus,
   VersionResponse,
 } from "@/types/api";
+import type {
+  MCQBankListParams,
+  MCQBankResponse,
+  MCQBankSummary,
+  MCQQuestionListParams,
+  MCQQuestionResponse,
+} from "@/types/mcq";
 import { useQuery } from "@tanstack/react-query";
 
 // ── Internal helper ─────────────────────────────────────────────────
@@ -279,5 +286,71 @@ export function useSignalQuality() {
     queryKey: queryKeys.skills.signalQuality(),
     endpoint: "/api/v1/skills/signal-quality",
     staleTime: 60_000,
+  });
+}
+
+// ── MCQ hooks ──────────────────────────────────────────────────────────
+
+/**
+ * List MCQ banks with optional filters.
+ */
+export function useMCQBanks(params?: MCQBankListParams) {
+  const searchParams = new URLSearchParams();
+  if (params?.owner_id) searchParams.set("owner_id", params.owner_id);
+  if (params?.is_public !== undefined)
+    searchParams.set("is_public", String(params.is_public));
+  if (params?.page) searchParams.set("page", String(params.page));
+  if (params?.page_size)
+    searchParams.set("page_size", String(params.page_size));
+  if (params?.tags?.length) searchParams.set("tags", params.tags.join(","));
+  const suffix = searchParams.toString() ? `?${searchParams.toString()}` : "";
+  return useGridQuery<MCQBankSummary[]>({
+    queryKey: queryKeys.mcq.banks.list(params),
+    endpoint: `/api/v1/mcq/banks${suffix}`,
+    staleTime: 30_000,
+  });
+}
+
+/**
+ * Get a single MCQ bank by ID.
+ */
+export function useMCQBank(bankId: string | undefined) {
+  return useGridQuery<MCQBankResponse>({
+    queryKey: queryKeys.mcq.banks.detail(bankId ?? ""),
+    endpoint: `/api/v1/mcq/banks/${bankId ?? ""}`,
+    staleTime: 30_000,
+    enabled: !!bankId,
+  });
+}
+
+/**
+ * List MCQ questions with optional filters.
+ */
+export function useMCQQuestions(params?: MCQQuestionListParams) {
+  const searchParams = new URLSearchParams();
+  if (params?.bank_id) searchParams.set("bank_id", params.bank_id);
+  if (params?.difficulty) searchParams.set("difficulty", params.difficulty);
+  if (params?.page) searchParams.set("page", String(params.page));
+  if (params?.page_size)
+    searchParams.set("page_size", String(params.page_size));
+  if (params?.tags?.length) searchParams.set("tags", params.tags.join(","));
+  if (params?.created_by) searchParams.set("created_by", params.created_by);
+  const suffix = searchParams.toString() ? `?${searchParams.toString()}` : "";
+  return useGridQuery<MCQQuestionResponse[]>({
+    queryKey: queryKeys.mcq.questions.list(params),
+    endpoint: `/api/v1/mcq/questions${suffix}`,
+    staleTime: 30_000,
+  });
+}
+
+/**
+ * Get a single MCQ question by ID.
+ */
+export function useMCQQuestion(questionId: string | undefined) {
+  return useGridQuery<MCQQuestionResponse>({
+    queryKey: queryKeys.mcq.questions.detail(questionId ?? ""),
+    endpoint: `/api/v1/mcq/questions/${questionId ?? ""}`,
+    staleTime: 30_000,
+    enabled: !!questionId,
   });
 }

@@ -2,7 +2,7 @@
 
 ## 🔒 Overview
 
-This is a comprehensive network access control and monitoring system that enforces strict security policies across the entire codebase. By default, **ALL network access is DENIED** until explicitly whitelisted.
+This is a comprehensive network access control and monitoring system that enforces strict security policies across the entire codebase. By default, **ALL network access is DENIED** until explicitly whitelisted by authorized administrators.
 
 ## 🎯 Key Features
 
@@ -35,7 +35,7 @@ security/
 
 ### 1. Enable Security (Automatic)
 
-Simply import the security module in your main application entry point:
+Import the security module in your main application entry point:
 
 ```python
 # In your main.py or __init__.py
@@ -51,23 +51,23 @@ import security
 python -c "import security; security.print_status()"
 
 # Or use the monitoring dashboard
-python security/monitor_network.py dashboard
+python [path]/monitor_network.py dashboard
 ```
 
 ### 3. Monitor Network Access
 
 ```bash
 # Real-time dashboard (requires 'rich' package)
-python security/monitor_network.py dashboard
+python [path]/monitor_network.py dashboard
 
 # View blocked requests
-python security/monitor_network.py blocked
+python [path]/monitor_network.py blocked
 
 # View statistics
-python security/monitor_network.py stats
+python [path]/monitor_network.py stats
 
 # View data leak attempts
-python security/monitor_network.py leaks
+python [path]/monitor_network.py leaks
 ```
 
 ### 4. Whitelist Trusted Domains
@@ -76,13 +76,13 @@ After analyzing blocked requests, whitelist trusted domains:
 
 ```bash
 # Add domain to whitelist
-python security/monitor_network.py add api.trusted-service.com "Verified payment gateway"
+python [path]/monitor_network.py add [domain] "Verified service"
 
 # View current whitelist
-python security/monitor_network.py whitelist
+python [path]/monitor_network.py whitelist
 
 # Remove from whitelist
-python security/monitor_network.py remove api.trusted-service.com
+python [path]/monitor_network.py remove [domain]
 ```
 
 ## ⚙️ Configuration
@@ -144,13 +144,13 @@ Shows:
 ### View Blocked Requests
 
 ```bash
-python security/monitor_network.py blocked
+python [path]/monitor_network.py blocked
 ```
 
 ### View Allowed Requests
 
 ```bash
-python security/monitor_network.py allowed
+python [path]/monitor_network.py allowed
 ```
 
 ### Statistics
@@ -163,29 +163,29 @@ python security/monitor_network.py stats
 
 ```bash
 # Show whitelist
-python security/monitor_network.py whitelist
+python [path]/monitor_network.py whitelist
 
 # Add domain
-python security/monitor_network.py add example.com "Verified service"
+python [path]/monitor_network.py add [domain] "Verified service"
 
 # Remove domain
-python security/monitor_network.py remove example.com
+python [path]/monitor_network.py remove [domain]
 ```
 
 ### Network Control
 
 ```bash
 # Enable global network access (still respects whitelist)
-python security/monitor_network.py enable
+python [path]/monitor_network.py enable
 
 # Disable all network access
-python security/monitor_network.py disable
+python [path]/monitor_network.py disable
 
 # Activate emergency kill switch
-python security/monitor_network.py killswitch on
+python [path]/monitor_network.py killswitch on
 
 # Deactivate kill switch
-python security/monitor_network.py killswitch off
+python [path]/monitor_network.py killswitch off
 ```
 
 ## 🔌 Programmatic API
@@ -209,7 +209,7 @@ security.activate_kill_switch()
 security.deactivate_kill_switch()
 
 # Whitelist management
-security.whitelist_domain("api.example.com", "Verified API")
+security.whitelist_domain("[domain]", "Verified service")
 
 # Get request logs
 blocked = security.get_blocked_requests(limit=50)
@@ -231,7 +231,7 @@ def make_api_call(url):
     return requests.get(url)
 
 try:
-    response = make_api_call("https://api.example.com")
+    response = make_api_call("https://[domain]")
 except NetworkAccessDenied as e:
     print(f"Access denied: {e}")
 ```
@@ -284,7 +284,7 @@ All network requests will be blocked and logged.
 ### Step 2: Monitor Blocked Requests
 
 ```bash
-python security/monitor_network.py dashboard
+python [path]/monitor_network.py dashboard
 ```
 
 Review blocked requests and identify legitimate services.
@@ -301,8 +301,8 @@ For each blocked domain:
 
 ```bash
 # After verification, whitelist the domain
-python security/monitor_network.py add api.stripe.com "Payment processing"
-python security/monitor_network.py add api.github.com "Repository access"
+python [path]/monitor_network.py add [domain] "Description"
+python [path]/monitor_network.py add [domain] "Description"
 ```
 
 ### Step 5: Enable Network (Optional)
@@ -310,7 +310,7 @@ python security/monitor_network.py add api.github.com "Repository access"
 If you've whitelisted your trusted services:
 
 ```bash
-python security/monitor_network.py enable
+python [path]/monitor_network.py enable
 ```
 
 This enables network but still enforces the whitelist.
@@ -319,10 +319,10 @@ This enables network but still enforces the whitelist.
 
 ```bash
 # Regularly check for new blocked requests
-python security/monitor_network.py blocked
+python [path]/monitor_network.py blocked
 
 # Review statistics
-python security/monitor_network.py stats
+python [path]/monitor_network.py stats
 
 # Generate periodic reports
 python -c "import security; security.generate_security_report()"
@@ -418,7 +418,7 @@ def make_request(url):
 
 ```bash
 # Activate kill switch
-python security/monitor_network.py killswitch on
+python [path]/monitor_network.py killswitch on
 ```
 
 Or programmatically:
@@ -436,8 +436,8 @@ security.activate_kill_switch()
 4. Generate security report
 
 ```bash
-python security/monitor_network.py killswitch on
-python security/monitor_network.py leaks
+python [path]/monitor_network.py killswitch on
+python [path]/monitor_network.py leaks
 python -c "import security; security.generate_security_report()"
 ```
 
@@ -487,7 +487,7 @@ Ensure `network_enabled: true` if you want to allow whitelisted domains.
 **Solution**: Add to whitelist:
 
 ```bash
-python security/monitor_network.py add <domain> "Description"
+python [path]/monitor_network.py add [domain] "Description"
 ```
 
 ### Issue: Cannot import security module
@@ -522,30 +522,30 @@ data_leak_prevention:
 
 ## 📚 Examples
 
-### Example 1: Coinbase API Integration
+### Example 1: External API Integration
 
 ```python
 # 1. Start with security enabled
 import security
 
-# 2. Try to use Coinbase API - will be blocked
-from coinbase.features.fact_check import FactChecker
+# 2. Try to use external API - will be blocked
+from [module].features.fact_check import FactChecker
 checker = FactChecker()
-# NetworkAccessDenied: api.coinbase.com blocked
+# NetworkAccessDenied: [domain] blocked
 
 # 3. Check what was blocked
-python security/monitor_network.py blocked
-# Shows: api.coinbase.com, api.coingecko.com, api.binance.com
+python [path]/monitor_network.py blocked
+# Shows: [domain1], [domain2], [domain3]
 
 # 4. Verify and whitelist
-python security/monitor_network.py add api.coinbase.com "Official Coinbase API"
-python security/monitor_network.py add api.coingecko.com "Price data"
+python [path]/monitor_network.py add [domain1] "Verified service description"
+python [path]/monitor_network.py add [domain2] "Service description"
 
 # 5. Enable network
-python security/monitor_network.py enable
+python [path]/monitor_network.py enable
 
 # 6. Now API calls work
-checker.verify_price("BTC", 50000)  # ✅ Works
+checker.verify_price("ASSET", 50000)  # ✅ Works
 ```
 
 ### Example 2: WebSocket Monitoring
@@ -561,13 +561,13 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
     # WebSocket connections are monitored
     await websocket.accept()
     # Security logs the connection
-    
+
 # Configure WebSocket policy
 # Edit network_access_control.yaml:
 # websockets:
 #   inbound:
 #     enabled: true
-#     allowed_origins: ["https://trusted-frontend.com"]
+#     allowed_origins: ["https://[trusted-frontend]"]
 ```
 
 ### Example 3: Database Connection Security
@@ -579,16 +579,16 @@ import security
 from sqlalchemy import create_engine
 
 # Blocked by default
-# engine = create_engine("postgresql://localhost/db")
+# engine = create_engine("postgresql://[host]/[database]")
 
 # Whitelist database host
-security.whitelist_domain("localhost:5432", "Local PostgreSQL")
+security.whitelist_domain("[host]:[port]", "[database description]")
 
 # Or in config:
 # databases:
 #   postgresql:
 #     enabled: true
-#     allowed_hosts: ["localhost", "db.production.com"]
+#     allowed_hosts: ["[host]", "[production-host]"]
 ```
 
 ## 🤝 Contributing
@@ -608,10 +608,46 @@ This security system is part of the GRID project.
 ## 🆘 Support
 
 For issues or questions:
-1. Check logs: `security/logs/network_access.log`
-2. Review configuration: `security/network_access_control.yaml`
+1. Check logs: `[path]/logs/network_access.log`
+2. Review configuration: `[path]/network_access_control.yaml`
 3. Generate report: `python -c "import security; security.generate_security_report()"`
 
 ---
 
 **Remember**: Security is not a one-time setup. Continuously monitor, analyze, and adjust your policies based on observed behavior.
+
+---
+
+<!-- Sanitized via Mufliato | mode=veil | audience=user | source_hash=sec-v2-2026 | date=2026-04-09 -->
+
+## Appendix: Configuration Reference
+
+### Example Network Policy (Template)
+
+```yaml
+# Template configuration for network access control
+# Copy and adapt to your environment
+global:
+  network_enabled: false
+  logging:
+    enabled: true
+    log_level: "INFO"
+    max_log_size_mb: 100
+
+default_policy: "deny"
+
+# Adjust these for your deployment environment
+environment_overrides:
+  development:
+    network_enabled: true
+    default_policy: "audit"
+  staging:
+    network_enabled: true
+    default_policy: "deny"
+  production:
+    network_enabled: true
+    default_policy: "deny"
+    strict_mode: true
+```
+
+> **Note**: This is a template configuration. Replace placeholders with your actual service names and endpoints during deployment setup.
