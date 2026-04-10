@@ -1,0 +1,61 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://grid.dev/schemas/probe-entity-map.schema.json",
+  "title": "Probe Entity Map",
+  "description": "JSON-Schema contract for the probe entity map — a flat lookup of all governance entities with their classification, source location, and domain assignment.",
+  "type": "object",
+  "properties": {
+    "schema_version": { "type": "string" },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "entity_count": { "type": "integer", "minimum": 0 },
+    "entities": {
+      "type": "object",
+      "description": "Entity map keyed by entity ID.",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "label": { "type": "string", "minLength": 1 },
+          "type": { "type": "string", "minLength": 1 },
+          "domain": { "type": "string", "minLength": 1 },
+          "source": { "type": "string" },
+          "class_name": { "type": "string" },
+          "line_number": { "type": "integer", "minimum": 0 },
+          "description": { "type": "string" },
+          "execution_order": { "type": "integer" },
+          "conditional": { "type": "boolean" },
+          "condition_flag": { "type": "string" },
+          "critical": { "type": "boolean" },
+          "discovered_by": {
+            "type": "string",
+            "enum": ["seed", "ast_scan", "pattern_match"],
+            "description": "How this entity was discovered."
+          },
+          "dependencies": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        },
+        "required": ["label", "type", "domain", "source"],
+        "additionalProperties": false
+      }
+    },
+    "domains": {
+      "type": "object",
+      "description": "Domain summary — entity count per domain.",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "entity_count": { "type": "integer", "minimum": 0 },
+          "entity_ids": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        },
+        "required": ["entity_count", "entity_ids"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["schema_version", "generated_at", "entity_count", "entities", "domains"],
+  "additionalProperties": false
+}

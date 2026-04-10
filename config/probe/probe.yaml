@@ -1,0 +1,109 @@
+__schema__: "probe/1.0"
+# Probe Integration Configuration
+# Defines how the governance probe connects to the GRID middleware chain,
+# what entities to scan, scoring thresholds, and feature flags.
+
+probe:
+  enabled: true
+  version: "1.0.0"
+  description: "Governance entity probe — maps middleware, auth, gating, and security entities"
+
+# Scan targets: which source trees to index for entity discovery
+scan:
+  roots:
+    - path: "src/application/mothership/middleware"
+      entity_types: ["middleware", "gate", "enforcer"]
+    - path: "src/application/mothership/security"
+      entity_types: ["auth", "jwt", "merit"]
+    - path: "src/application/mothership/routers"
+      entity_types: ["router", "endpoint"]
+    - path: "src/grid/core_modules"
+      entity_types: ["gate", "governance"]
+    - path: "src/grid/legal"
+      entity_types: ["governance", "compliance"]
+    - path: "src/grid/security"
+      entity_types: ["security", "audit"]
+    - path: "src/grid/auth"
+      entity_types: ["auth", "rbac"]
+    - path: "src/infrastructure/parasite_guard"
+      entity_types: ["middleware", "security"]
+    - path: "safety"
+      entity_types: ["safety", "enforcer"]
+    - path: "boundaries"
+      entity_types: ["boundary", "gate", "contract"]
+  exclude_patterns:
+    - "__pycache__"
+    - "*.pyc"
+    - ".git"
+    - "node_modules"
+    - "dist"
+    - ".venv"
+
+# Entity classification rules
+classification:
+  # Pattern matchers for auto-classifying discovered entities
+  patterns:
+    - id: "cls-middleware"
+      match: "class.*Middleware"
+      entity_type: "middleware"
+      domain: "request_pipeline"
+    - id: "cls-gate"
+      match: "(GovernanceGate|GateKeeper|AdmissionGate)"
+      entity_type: "gate"
+      domain: "governance"
+    - id: "cls-auth"
+      match: "(Auth|RequiredAuth|AdminAuth|WriteAuth)"
+      entity_type: "auth_dependency"
+      domain: "authentication"
+    - id: "cls-router"
+      match: "APIRouter"
+      entity_type: "router"
+      domain: "routing"
+    - id: "cls-enforcer"
+      match: "(Enforcer|Detector|Monitor|Guard)"
+      entity_type: "enforcer"
+      domain: "security"
+    - id: "cls-schema"
+      match: "class.*\\(BaseModel\\)"
+      entity_type: "schema"
+      domain: "data_contract"
+    - id: "cls-rate-limit"
+      match: "(RateLimit|TokenBucket|SlidingWindow)"
+      entity_type: "rate_limiter"
+      domain: "throttling"
+
+# Scoring: how entities are weighted in the probe report
+scoring:
+  # Weight multipliers by domain (higher = more important in aggregate score)
+  domain_weights:
+    governance: 1.5
+    security: 1.4
+    authentication: 1.3
+    request_pipeline: 1.2
+    throttling: 1.1
+    routing: 1.0
+    data_contract: 0.9
+    safety: 1.3
+  # Coverage thresholds
+  thresholds:
+    healthy: 0.8        # >= 80% coverage = healthy
+    degraded: 0.5       # >= 50% = degraded
+    # below 50% = failing
+
+# Feature flags for probe subsystems
+features:
+  ast_scanning: true           # Use AST parsing for entity discovery
+  pattern_matching: true       # Use regex pattern matching
+  dependency_graph: true       # Build entity dependency graph
+  coverage_scoring: true       # Calculate coverage scores
+  report_generation: true      # Generate structured reports
+  api_endpoint: true           # Expose /api/v1/probe endpoint
+
+# Output configuration
+output:
+  # Where to write probe results
+  data_dir: "data/probe"
+  # Report format (json for structured, both for json+markdown)
+  format: "both"
+  # Maximum entities per report
+  max_entities: 500

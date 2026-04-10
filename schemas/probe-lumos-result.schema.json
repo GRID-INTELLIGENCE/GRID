@@ -1,0 +1,194 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "probe-lumos-result.schema.json",
+  "title": "Probe Lumos Result",
+  "description": "Schema for the output of the lumos 6-phase ecosystem illumination pipeline. Captures PATH scores, entity rankings, sweep actions, verification gates, and evolution eligibility.",
+  "type": "object",
+  "required": [
+    "started_at",
+    "completed_at",
+    "phases_completed",
+    "composite_score",
+    "verdict",
+    "path_scores",
+    "scored_entities",
+    "gate_results",
+    "evolution_eligible"
+  ],
+  "properties": {
+    "started_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO timestamp when the lumos pipeline started"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO timestamp when the pipeline completed"
+    },
+    "phases_completed": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["probe", "quantify", "sort", "guide", "execute", "evolve"]
+      },
+      "description": "Ordered list of completed phases"
+    },
+    "composite_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Weighted composite PATH score (0-100)"
+    },
+    "verdict": {
+      "type": "string",
+      "enum": ["FAST_CLEAR", "WATCH", "ACT", "URGENT"],
+      "description": "Lumos tier verdict from composite score"
+    },
+    "path_scores": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/PathScore"
+      },
+      "description": "Individual PATH dimension scores"
+    },
+    "scored_entities": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ScoredEntity"
+      },
+      "description": "Ranked entities with per-entity PATH scores"
+    },
+    "sweep_actions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/SweepAction"
+      },
+      "description": "Prioritized sweep actions from GUIDE phase"
+    },
+    "gate_results": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/GateResult"
+      },
+      "description": "Verification gate results from EXECUTE phase"
+    },
+    "execution_log": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Human-readable execution log entries"
+    },
+    "evolution_eligible": {
+      "type": "boolean",
+      "description": "Whether all conditions for evolution promotion are met"
+    },
+    "evolution_message": {
+      "type": "string",
+      "description": "Explanation of evolution eligibility decision"
+    },
+    "ecosystem_state": {
+      "type": "object",
+      "description": "Snapshot of ecosystem bridge state at probe time",
+      "properties": {
+        "audit_stats": { "type": "object" },
+        "enforcement": { "type": ["object", "null"] },
+        "ecosystem": { "type": ["object", "null"] },
+        "line_audit": { "type": ["object", "null"] }
+      }
+    }
+  },
+  "$defs": {
+    "PathScore": {
+      "type": "object",
+      "required": ["dimension", "raw_value", "weight", "weighted"],
+      "properties": {
+        "dimension": {
+          "type": "string",
+          "enum": ["health", "trust", "drift", "fail", "momentum"],
+          "description": "PATH dimension name"
+        },
+        "raw_value": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Raw dimension score (0-100)"
+        },
+        "weight": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Weight multiplier for this dimension"
+        },
+        "weighted": {
+          "type": "number",
+          "description": "raw_value × weight"
+        },
+        "evidence": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Evidence strings explaining the score"
+        }
+      }
+    },
+    "ScoredEntity": {
+      "type": "object",
+      "required": ["name", "entity_type", "path_score", "tier"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Entity name (repo, server, or cluster)"
+        },
+        "entity_type": {
+          "type": "string",
+          "enum": ["repo", "mcp-server", "cluster"],
+          "description": "Classification of the entity"
+        },
+        "path_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "tier": {
+          "type": "string",
+          "enum": ["FAST_CLEAR", "WATCH", "ACT", "URGENT"]
+        },
+        "dimensions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/PathScore" }
+        },
+        "sweep_protocol": {
+          "type": "string",
+          "enum": ["A_MONITOR", "B_WATCH", "C_TRIAGE", "D_REMEDIATE", "E_STABILIZE", "F_EMERGENCY"],
+          "description": "Assigned sweep protocol for this entity"
+        }
+      }
+    },
+    "SweepAction": {
+      "type": "object",
+      "required": ["target", "protocol", "action", "priority"],
+      "properties": {
+        "target": { "type": "string" },
+        "protocol": {
+          "type": "string",
+          "enum": ["A_MONITOR", "B_WATCH", "C_TRIAGE", "D_REMEDIATE", "E_STABILIZE", "F_EMERGENCY"]
+        },
+        "action": { "type": "string" },
+        "priority": { "type": "integer", "minimum": 1 },
+        "depends_on": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "GateResult": {
+      "type": "object",
+      "required": ["gate_name", "passed", "message"],
+      "properties": {
+        "gate_name": { "type": "string" },
+        "passed": { "type": "boolean" },
+        "message": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      }
+    }
+  }
+}

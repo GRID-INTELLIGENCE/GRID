@@ -1,0 +1,75 @@
+__schema__: "probe-ecosystem/1.0"
+# Ecosystem Integration Configuration
+# Wires the probe to echoes-server (enforcement) and seeds-server (health)
+# for the lumos 6-phase pipeline merge.
+
+ecosystem:
+  enabled: true
+  version: "1.0.0"
+  description: "Probe ecosystem integration — merges governance analysis with enforcement and health pipelines"
+
+# Echoes Process — Audit & Enforcement Pipeline
+echoes:
+  enabled: true
+  # Path to the echoes audit NDJSON trail
+  audit_path: "~/.echoes/audit.ndjson"
+  # Path to the precedent enforcement store
+  precedent_store: "~/.echoes/precedents/precedent-store.json"
+  # Maximum audit events to ingest per scan
+  max_events: 200
+  # Minimum escalation level to surface as a finding
+  escalation_threshold: "flagged"  # observed | flagged | restricted | blocked
+  # Sources to filter on (empty = all sources)
+  source_filter: []
+
+# Seeds Process — Ecosystem Health Pipeline
+seeds:
+  enabled: true
+  # Directory containing ecosystem snapshots
+  snapshots_dir: "~/.seeds-server/snapshots"
+  # Minimum health score to be considered healthy
+  health_threshold: 70
+  # Repos to explicitly track (empty = all)
+  tracked_repos: []
+
+# Eligibility Process — Structural Normalizer
+eligibility:
+  enabled: true
+  # check_the_line runs as read-only audit
+  mode: "check"  # check | hold
+  # When check fails, block evolution?
+  block_on_failure: false
+
+# Lumos Pipeline Configuration
+lumos:
+  enabled: true
+  # PATH score weights
+  weights:
+    health: 0.30
+    trust: 0.25
+    drift: 0.20
+    fail: 0.15
+    momentum: 0.10
+  # Tier boundaries
+  tiers:
+    fast_clear: 65  # >= this = FAST CLEAR
+    watch: 50       # >= this = WATCH
+    act: 35         # >= this = ACT
+    # below act = URGENT
+  # Verification gates
+  gates:
+    composite_score_valid: true
+    no_blocked_precedents: true
+    ecosystem_minimum_health: true
+    line_audit_clean: true
+  # Minimum composite score for evolution eligibility
+  evolution_threshold: 65
+
+# Output configuration for ecosystem data
+output:
+  # Where to write ecosystem bridge state
+  data_dir: "data/probe"
+  # Include in standard probe report?
+  include_in_report: true
+  # Emit audit events to echoes for self-tracking?
+  self_audit: true

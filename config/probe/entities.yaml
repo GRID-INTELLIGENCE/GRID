@@ -1,0 +1,255 @@
+__schema__: "probe-entities/1.0"
+# Known Governance Entities
+# Pre-seeded entity catalog from Phase 2.1 audit.
+# The probe scanner augments this with discovered entities at runtime.
+
+entities:
+  # --- Middleware Chain (execution order) ---
+  - id: "ent-admission-gate"
+    label: "AdmissionGateMiddleware"
+    type: "middleware"
+    domain: "governance"
+    source: "src/application/mothership/middleware/admission_gate.py"
+    class_name: "AdmissionGateMiddleware"
+    execution_order: 1
+    description: "Entity attribution, budget enforcement, origin whitelist, payload validation, profit-mask detection"
+    conditional: true
+    condition_flag: "settings.security.admission_gate_enabled"
+
+  - id: "ent-parasite-guard"
+    label: "ParasiteGuardMiddleware"
+    type: "middleware"
+    domain: "security"
+    source: "src/infrastructure/parasite_guard/middleware.py"
+    class_name: "ParasiteGuardMiddleware"
+    execution_order: 2
+    description: "Total Rickall Defense — parasite detection chain"
+    conditional: true
+    condition_flag: "settings.security.parasite_guard_enabled"
+
+  - id: "ent-safety"
+    label: "SafetyMiddleware"
+    type: "middleware"
+    domain: "safety"
+    source: "safety/api/middleware.py"
+    class_name: "SafetyMiddleware"
+    execution_order: 3
+    description: "MANDATORY in production. Auth + trust tier, rate limit, pre-check detector"
+    conditional: false
+    critical: true
+
+  - id: "ent-accountability-contract"
+    label: "AccountabilityContractMiddleware"
+    type: "middleware"
+    domain: "governance"
+    source: "src/application/mothership/middleware/accountability_contract.py"
+    class_name: "AccountabilityContractMiddleware"
+    execution_order: 4
+    description: "TUV-001 governance contract, RBAC + claims enforcement"
+    conditional: true
+    condition_flag: "settings.security.accountability_enabled"
+
+  - id: "ent-drt"
+    label: "UnifiedDRTMiddleware"
+    type: "middleware"
+    domain: "security"
+    source: "src/application/mothership/middleware/drt_middleware_unified.py"
+    class_name: "UnifiedDRTMiddleware"
+    execution_order: 5
+    description: "Don't Repeat Themselves — behavioral monitoring, attack similarity detection"
+    conditional: true
+
+  - id: "ent-data-corruption"
+    label: "DataCorruptionDetectionMiddleware"
+    type: "middleware"
+    domain: "security"
+    source: "src/application/mothership/middleware/data_corruption.py"
+    class_name: "DataCorruptionDetectionMiddleware"
+    execution_order: 6
+    description: "Tracks 500/503, integrity errors, deadlocks, timeouts"
+    conditional: true
+
+  - id: "ent-stream-monitor"
+    label: "StreamMonitorMiddleware"
+    type: "middleware"
+    domain: "request_pipeline"
+    source: "src/application/mothership/middleware/stream_monitor.py"
+    class_name: "StreamMonitorMiddleware"
+    execution_order: 7
+    description: "ASGI-level monitoring for streaming/SSE/WebSocket"
+    conditional: true
+
+  - id: "ent-security-headers"
+    label: "SecurityHeadersMiddleware"
+    type: "middleware"
+    domain: "security"
+    source: "src/application/mothership/middleware/__init__.py"
+    class_name: "SecurityHeadersMiddleware"
+    execution_order: 8
+    description: "HSTS, CSP, XSS, clickjack headers"
+
+  - id: "ent-error-handling"
+    label: "ErrorHandlingMiddleware"
+    type: "middleware"
+    domain: "request_pipeline"
+    source: "src/application/mothership/middleware/__init__.py"
+    class_name: "ErrorHandlingMiddleware"
+    execution_order: 9
+    description: "Catch-all, generic 500 in production"
+
+  - id: "ent-security-enforcer"
+    label: "SecurityEnforcerMiddleware"
+    type: "middleware"
+    domain: "security"
+    source: "src/application/mothership/middleware/security_enforcer.py"
+    class_name: "SecurityEnforcerMiddleware"
+    execution_order: 10
+    description: "Input sanitization, auth enforcement, threat detection"
+
+  - id: "ent-circuit-breaker"
+    label: "CircuitBreakerMiddleware"
+    type: "middleware"
+    domain: "request_pipeline"
+    source: "src/application/mothership/middleware/circuit_breaker.py"
+    class_name: "CircuitBreakerMiddleware"
+    execution_order: 11
+    description: "CLOSED/OPEN/HALF_OPEN states, per-endpoint failure tracking"
+
+  - id: "ent-request-logging"
+    label: "RequestLoggingMiddleware"
+    type: "middleware"
+    domain: "request_pipeline"
+    source: "src/application/mothership/middleware/__init__.py"
+    class_name: "RequestLoggingMiddleware"
+    execution_order: 12
+    description: "Structured logging, excludes /health, /ping, /metrics"
+
+  - id: "ent-timing"
+    label: "TimingMiddleware"
+    type: "middleware"
+    domain: "request_pipeline"
+    source: "src/application/mothership/middleware/__init__.py"
+    class_name: "TimingMiddleware"
+    execution_order: 13
+    description: "X-Process-Time headers"
+
+  - id: "ent-accountability"
+    label: "AccountabilityMiddleware"
+    type: "middleware"
+    domain: "governance"
+    source: "src/application/mothership/middleware/accountability.py"
+    class_name: "AccountabilityMiddleware"
+    execution_order: 14
+    description: "Delivery scoring (X-Delivery-Score, X-Delivery-Class)"
+
+  - id: "ent-request-id"
+    label: "RequestIDMiddleware"
+    type: "middleware"
+    domain: "request_pipeline"
+    source: "src/application/mothership/middleware/__init__.py"
+    class_name: "RequestIDMiddleware"
+    execution_order: 15
+    description: "X-Request-ID, X-Correlation-ID generation/propagation"
+
+  - id: "ent-versioning"
+    label: "VersioningMiddleware"
+    type: "middleware"
+    domain: "request_pipeline"
+    source: "src/application/mothership/middleware/versioning.py"
+    class_name: "VersioningMiddleware"
+    execution_order: 16
+    description: "API version headers (/api/v1, /api/v2, /api/experimental)"
+
+  - id: "ent-request-size"
+    label: "RequestSizeLimitMiddleware"
+    type: "middleware"
+    domain: "security"
+    source: "src/application/mothership/middleware/request_size.py"
+    class_name: "RequestSizeLimitMiddleware"
+    execution_order: 17
+    description: "10MB body limit, 413 rejection"
+
+  - id: "ent-usage-tracking"
+    label: "UsageTrackingMiddleware"
+    type: "middleware"
+    domain: "request_pipeline"
+    source: "src/application/mothership/middleware/usage_tracking.py"
+    class_name: "UsageTrackingMiddleware"
+    execution_order: 18
+    description: "Billing usage metering per-user"
+
+  - id: "ent-rate-limit"
+    label: "APIGuardRateLimitMiddleware"
+    type: "middleware"
+    domain: "throttling"
+    source: "src/application/mothership/middleware/apiguard_adapter.py"
+    class_name: "APIGuardRateLimitMiddleware"
+    execution_order: 19
+    description: "Token bucket, Redis-backed, per-user rate limiting"
+
+  # --- Authentication & Authorization ---
+  - id: "ent-auth-base"
+    label: "Auth"
+    type: "auth_dependency"
+    domain: "authentication"
+    source: "src/application/mothership/dependencies.py"
+    description: "Base auth dependency — validates JWT or API key"
+
+  - id: "ent-auth-required"
+    label: "RequiredAuth"
+    type: "auth_dependency"
+    domain: "authentication"
+    source: "src/application/mothership/dependencies.py"
+    description: "Ensures authenticated=True"
+
+  - id: "ent-auth-admin"
+    label: "AdminAuth"
+    type: "auth_dependency"
+    domain: "authentication"
+    source: "src/application/mothership/dependencies.py"
+    description: "Requires auth + admin permission + merit standing"
+
+  - id: "ent-rbac"
+    label: "RBAC System"
+    type: "auth_dependency"
+    domain: "authentication"
+    source: "src/grid/auth/rbac.py"
+    description: "Roles: ANONYMOUS, READER, WRITER, ADMIN, SUPER_ADMIN, SERVICE_ACCOUNT"
+
+  - id: "ent-merit-standing"
+    label: "Merit Standing Engine"
+    type: "gate"
+    domain: "governance"
+    source: "src/application/mothership/security/merit_standing.py"
+    description: "Additional tier check after RBAC passes, ActionClass maps permissions to merit tiers"
+
+  # --- Governance Gates ---
+  - id: "ent-governance-gate"
+    label: "GovernanceGate"
+    type: "gate"
+    domain: "governance"
+    source: "src/grid/core_modules/governance_gates.py"
+    class_name: "GovernanceGate"
+    description: "Consent and value-based access control — GateVerdict (ALLOW/DENY/ESCALATE/DEFER)"
+
+  - id: "ent-governance-engine"
+    label: "GovernanceEngine"
+    type: "gate"
+    domain: "governance"
+    source: "src/grid/legal/governance.py"
+    class_name: "GovernanceEngine"
+    description: "Policy registry with domain-specific governance rules"
+
+  - id: "ent-gatekeeper"
+    label: "GateKeeper"
+    type: "gate"
+    domain: "governance"
+    source: "boundaries/transition_gate/"
+    description: "Transition gate — envelope validation, fingerprint, contracts"
+
+  - id: "ent-boundary-engine"
+    label: "BoundaryEngine"
+    type: "gate"
+    domain: "governance"
+    source: "boundaries/boundary.py"
+    description: "Governance boundary enforcement engine"

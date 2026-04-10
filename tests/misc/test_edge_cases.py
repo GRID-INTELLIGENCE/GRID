@@ -336,37 +336,6 @@ class TestIntegrationEdgeCases:
         grid_adsr.update(20.0)  # Decay
         bridge.sync_decay_phase()  # Should not raise
 
-    def test_hooks_no_registered_callbacks(self):
-        """Test hooks with no registered callbacks."""
-        from Arena.the_chase.python.src.the_chase.overwatch.hooks import OverwatchHooks
-
-        hooks = OverwatchHooks()
-        hooks.trigger_hook("pre_user_prompt", "test")  # Should not raise
-
-    def test_mcp_no_servers(self):
-        """Test MCP with no servers configured."""
-        from Arena.the_chase.python.src.the_chase.overwatch.mcp import OverwatchMCP
-
-        mcp = OverwatchMCP({})
-        result = mcp.call_mcp_tool("any_server", "any_tool", {})
-        assert result["status"] == "error"
-
-    def test_arena_mode_no_models(self):
-        """Test Arena Mode with no models."""
-        from Arena.the_chase.python.src.the_chase.overwatch.arena_mode import OverwatchArenaMode
-
-        arena = OverwatchArenaMode()
-        results = arena.compare_models("test", [])
-        assert results == {}
-
-    def test_plan_mode_empty_task(self):
-        """Test Plan Mode with empty task."""
-        from Arena.the_chase.python.src.the_chase.overwatch.plan_mode import OverwatchPlanMode
-
-        plan = OverwatchPlanMode()
-        result = plan.create_plan("")
-        assert "steps" in result
-
 
 class TestStateTransitionEdgeCases:
     """Edge cases for state transitions."""

@@ -1,5 +1,28 @@
 """
 ADSR-Arena Integration Bridge
+
+ORI PROBE NOTE (2026-04-09):
+  Scope: This module is the sole cross-boundary link between
+  Arena's ADSR envelope, cache layer, and reward system.
+  Signal: KEEP — core integration point, well-tested
+  (test_adsr_arena_integration.py, test_edge_cases.py).
+
+  Architectural smell — dual ADSR:
+    src/application/resonance/adsr_envelope.py (production)
+    Arena/the_chase/.../core/adsr_envelope.py   (Arena-specific)
+  Both implement EnvelopePhase state machines independently.
+  Consolidation candidate for next refactor pass.
+
+  Architectural smell — duplicated RewardLevel:
+    Arena/the_chase/.../overwatch/rewards.py  defines RewardLevel
+    Arena/the_chase/.../core/cache.py         defines RewardLevel (copy)
+  Should canonicalize to one source.
+
+  Removed in this sweep (dead stubs, no real logic):
+    overwatch/arena_mode.py, hooks.py, mcp.py, models.py, plan_mode.py
+    overwatch/audit.py (zero importers), orchestrator (broken imports)
+    resonance_chase_demo.py, fix_types_incrementally.py (one-shot scripts)
+    api/, brain/, cli/ (empty stub packages)
 """
 
 from ..core.adsr_envelope import ADSREnvelope, EnvelopePhase

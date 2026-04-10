@@ -36,3 +36,5 @@ routers:
     enabled: true
   - module: "application.mothership.routers.knowledge:router"
     enabled: true
+  - module: "application.mothership.routers.probe:router"
+    enabled: true

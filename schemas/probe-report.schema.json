@@ -1,0 +1,188 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://grid.dev/schemas/probe-report.schema.json",
+  "title": "Probe Report",
+  "description": "JSON-Schema contract for governance probe reports: entity maps, coverage scores, findings, and dependency graphs.",
+  "type": "object",
+  "$defs": {
+    "entity_type": {
+      "type": "string",
+      "enum": [
+        "middleware",
+        "gate",
+        "enforcer",
+        "auth_dependency",
+        "router",
+        "schema",
+        "rate_limiter",
+        "security",
+        "safety",
+        "boundary",
+        "contract"
+      ],
+      "description": "Classification type of a governance entity."
+    },
+    "domain": {
+      "type": "string",
+      "enum": [
+        "governance",
+        "security",
+        "authentication",
+        "request_pipeline",
+        "throttling",
+        "routing",
+        "data_contract",
+        "safety"
+      ],
+      "description": "Domain category the entity belongs to."
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["critical", "high", "medium", "low"],
+      "description": "Severity level of a finding."
+    },
+    "entity": {
+      "type": "object",
+      "description": "A discovered governance entity.",
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "label": { "type": "string", "minLength": 1 },
+        "type": { "$ref": "#/$defs/entity_type" },
+        "domain": { "$ref": "#/$defs/domain" },
+        "source": { "type": "string", "description": "File path relative to project root." },
+        "class_name": { "type": "string" },
+        "line_number": { "type": "integer", "minimum": 0 },
+        "description": { "type": "string" },
+        "execution_order": { "type": "integer", "minimum": 0 },
+        "conditional": { "type": "boolean", "default": false },
+        "condition_flag": { "type": "string" },
+        "critical": { "type": "boolean", "default": false },
+        "dependencies": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "IDs of entities this one depends on."
+        },
+        "metadata": { "type": "object" }
+      },
+      "required": ["id", "label", "type", "domain", "source"],
+      "additionalProperties": false
+    },
+    "finding": {
+      "type": "object",
+      "description": "A probe finding — gap, anomaly, or observation.",
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "entity_id": { "type": "string", "description": "ID of the related entity." },
+        "severity": { "$ref": "#/$defs/severity" },
+        "category": {
+          "type": "string",
+          "enum": ["gap", "anomaly", "observation", "recommendation"]
+        },
+        "message": { "type": "string", "minLength": 1 },
+        "source_file": { "type": "string" },
+        "line_number": { "type": "integer", "minimum": 0 },
+        "metadata": { "type": "object" }
+      },
+      "required": ["id", "severity", "category", "message"],
+      "additionalProperties": false
+    },
+    "coverage_score": {
+      "type": "object",
+      "description": "Coverage score for a domain.",
+      "properties": {
+        "domain": { "$ref": "#/$defs/domain" },
+        "entity_count": { "type": "integer", "minimum": 0 },
+        "tested_count": { "type": "integer", "minimum": 0 },
+        "score": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+        "status": {
+          "type": "string",
+          "enum": ["healthy", "degraded", "failing"]
+        },
+        "weight": { "type": "number", "minimum": 0.0 }
+      },
+      "required": ["domain", "entity_count", "score", "status"],
+      "additionalProperties": false
+    },
+    "dependency_edge": {
+      "type": "object",
+      "description": "A dependency relationship between two entities.",
+      "properties": {
+        "from_id": { "type": "string", "minLength": 1 },
+        "to_id": { "type": "string", "minLength": 1 },
+        "relation": {
+          "type": "string",
+          "enum": [
+            "depends_on",
+            "precedes",
+            "enforces",
+            "validates",
+            "wraps",
+            "delegates_to"
+          ]
+        }
+      },
+      "required": ["from_id", "to_id", "relation"],
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "report_id": { "type": "string", "minLength": 1 },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "probe_version": { "type": "string" },
+    "scan_root": { "type": "string" },
+    "entities": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/entity" },
+      "description": "All discovered governance entities."
+    },
+    "findings": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/finding" },
+      "description": "Probe findings — gaps, anomalies, observations."
+    },
+    "coverage": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/coverage_score" },
+      "description": "Coverage scores by domain."
+    },
+    "dependency_graph": {
+      "type": "object",
+      "description": "Entity dependency graph.",
+      "properties": {
+        "edges": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/dependency_edge" }
+        }
+      },
+      "required": ["edges"],
+      "additionalProperties": false
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "total_entities": { "type": "integer", "minimum": 0 },
+        "total_findings": { "type": "integer", "minimum": 0 },
+        "critical_findings": { "type": "integer", "minimum": 0 },
+        "aggregate_score": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+        "aggregate_status": {
+          "type": "string",
+          "enum": ["healthy", "degraded", "failing"]
+        },
+        "domains_scanned": { "type": "integer", "minimum": 0 }
+      },
+      "required": ["total_entities", "total_findings", "aggregate_score", "aggregate_status"],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "report_id",
+    "generated_at",
+    "probe_version",
+    "entities",
+    "findings",
+    "coverage",
+    "dependency_graph",
+    "summary"
+  ],
+  "additionalProperties": false
+}
