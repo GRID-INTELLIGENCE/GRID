@@ -19,6 +19,16 @@ from application.mothership.middleware.entity_signing import (
     sign_entity_id,
     verify_entity_signature,
 )
+from application.mothership.security.merit_standing import Badge, get_merit_engine
+
+
+def _provision_merit(entity_id: str) -> None:
+    """Pre-provision an entity to B2_VERIFIED so POST requests pass merit check."""
+    engine = get_merit_engine()
+    standing = engine.get_or_create_standing(entity_id)
+    standing.badge = Badge.B2_VERIFIED
+    standing.score = 65
+    standing._update_eligible_scopes()
 
 
 @pytest.mark.asyncio
@@ -42,6 +52,12 @@ class TestHMACIntegration:
         # Add middleware
         app.add_middleware(AdmissionGateMiddleware, attribution=attribution_engine)
 
+        # Pre-provision known test entities to B2_VERIFIED for ACTION_WRITE
+        _provision_merit("test-entity-123")
+        _provision_merit("test-entity")
+        _provision_merit("ip:testclient")
+        _provision_merit("api:test-api-key-123")  # API key entity uses 16-char prefix
+
         return TestClient(app), secret, attribution_engine
 
     @pytest.fixture
@@ -56,6 +72,10 @@ class TestHMACIntegration:
             return {"success": True, "processed": True}
 
         app.add_middleware(AdmissionGateMiddleware, attribution=attribution_engine)
+
+        # Pre-provision known test entities to B2_VERIFIED for ACTION_WRITE
+        _provision_merit("test-entity")
+        _provision_merit("ip:testclient")
 
         return TestClient(app), attribution_engine
 

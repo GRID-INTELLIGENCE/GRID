@@ -115,7 +115,7 @@ class AgenticSystem:
                 cognitive_state = await self.cognitive_engine.track_interaction(interaction)
 
                 # Get adaptations based on cognitive state
-                _, adaptations_raw = await self.cognitive_engine.adapt_response(
+                _, adaptations_raw, _ = await self.cognitive_engine.adapt_response(
                     query=task or "/execute",
                     context={"case_id": case_id},
                     user_id=user_id,
