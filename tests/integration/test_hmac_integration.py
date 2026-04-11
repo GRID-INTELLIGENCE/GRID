@@ -31,7 +31,6 @@ def _provision_merit(entity_id: str) -> None:
     standing._update_eligible_scopes()
 
 
-@pytest.mark.asyncio
 class TestHMACIntegration:
     """Test HMAC integration through actual middleware stack."""
 

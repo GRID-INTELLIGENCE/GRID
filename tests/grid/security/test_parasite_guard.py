@@ -470,7 +470,6 @@ class TestDummyResponseGenerator:
 # =============================================================================
 
 
-@pytest.mark.asyncio
 class TestParasiteProfiler:
     """Tests for ParasiteProfiler."""
 
@@ -651,7 +650,6 @@ class TestMrPoopyButtholeException:
 # =============================================================================
 
 
-@pytest.mark.asyncio
 class TestEdgeCases:
     """Tests for edge cases and error handling."""
 
