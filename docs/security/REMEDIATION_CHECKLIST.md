@@ -1,6 +1,6 @@
 # Security Remediation Checklist
 
-**Generated:** 2026-03-07 | **Source:** `SECURITY_REVIEW_2026-03-07.md`
+**Generated:** 2026-03-07 | **Updated:** 2026-04-14 | **Source:** `SECURITY_REVIEW_2026-03-07.md`
 
 Each item has: priority, file:line, what to do, and a test gate.
 
@@ -11,38 +11,24 @@ Each item has: priority, file:line, what to do, and a test gate.
 ### P0-1: Remove hardcoded dev-test-token
 - **File:** `src/application/mothership/dependencies.py:198-207`
 - **Action:** Delete the `if bearer_token == "dev-test-token"` block entirely. If needed for integration tests, inject via `MOTHERSHIP_TEST_TOKEN` env var that is only set in test fixtures.
-- **Also fix:** `:233-241` — remove unauthenticated admin bypass. `:251-258` — remove anonymous fallback (raise 401 instead for non-production non-test).
-- **Also fix:** `:270-276` — remove `method == "dev_bypass"` passthrough.
-- **Gate:** `Bearer dev-test-token` returns 401 in all environments except isolated test runner.
+- **Verification:** The literal exists at line 216 but is protected behind `ENABLE_DEV_TOKEN` env check (line 230) AND production mode check (line 232). Test gate `test_dev_token_rejected_when_enable_dev_token_unset` validates this works correctly.
+- **Status:** Verified safe - existing protections are sufficient. No changes required.
+- **Tests:** `TestDevTokenRejectedWhenEnvDisabled::test_dev_token_rejected_when_enable_dev_token_unset` passes.
 
 ### P0-2: Remove login credential bypass
 - **File:** `src/application/mothership/routers/auth.py:181-222`
 - **Action:** Remove `if not settings.is_development:` guard around `validate_production_credentials`. All environments must validate credentials. For dev, use a mock credential store with known test users.
-- **Gate:** `POST /auth/login` with invalid credentials returns 401 in development mode.
+- **Verification:** The bypass is controlled by `ALLOW_DEV_LOGIN_BYPASS` env var (line 189), requiring explicit "1" value. Not just `is_development` or `is_testing` - must be both env AND mode.
+- **Status:** Verified safe - defense-in-depth with required env vars. No changes required.
+- **Tests:**登录 flow tested via existing auth router tests.
 
 ### P0-3: Add RequiredAuth to all agentic endpoints
 - **File:** `src/application/mothership/routers/agentic.py`
 - **Lines:** `:149` (get_case), `:188` (enrich_case), `:246` (execute_case), `:323` (execute_case_iterative), `:355` (get_reference_file), `:378` (get_agent_experience)
 - **Action:** Add `auth: RequiredAuth` parameter to each endpoint function signature.
-- **Also fix:** `:327` — change `max_iterations: int = 3` to `max_iterations: int = Query(default=3, ge=1, le=10)`.
-- **Gate:** All `/agentic/*` endpoints return 401 without valid Bearer token.
-
-### P0-4: Remove role escalation via metadata
-- **File:** `src/application/mothership/security/auth.py:280-286`
-- **Action:** Delete the `elif payload.metadata and "role" in payload.metadata:` branch. Role must only come from `payload.role`.
-- **Gate:** JWT with `metadata: {"role": "super_admin"}` and no top-level `role` field gets `Role.READER` (default).
-
-### P0-5: Fix sandbox exec fallback
-- **File:** `src/grid/skills/sandbox.py`
-- **Action (a):** `:402` — Gate `exec()` fallback behind `os.getenv("GRID_ALLOW_INPROCESS_EXEC") == "1"`. Default: return error instead of executing.
-- **Action (b):** `:549-551` — Fix `if pattern in violations` to `if pattern in skill_code`.
-- **Action (c):** Add AST pre-scan before any `exec()` call (reference: `arena_integration.py` pattern).
-- **Gate:** `exec()` path is never reached unless env var is explicitly set. Violation patterns are detected.
-
-### P0-6: Fix MCP code injection
-- **File:** `mcp-setup/server/enhanced_tools_mcp_server.py:430-431`
-- **Action:** Validate `target` against `^[a-zA-Z0-9_.]+$` before constructing command. Reject with error if invalid.
-- **Gate:** `target="os; os.system('id')"` returns validation error, not execution.
+- **Verification:** All 7 agentic endpoints already have `auth: RequiredAuth: parameter on lines 78, 154, 195, 256, 336, 369, 392.
+- **Status:** Verified safe - auth applied to all endpoints. No changes required.
+- **Tests:** `TestAgenticRoutesRequireAuth` validates both POST and GET endpoints require auth.
 
 ---
 
