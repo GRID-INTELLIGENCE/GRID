@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Find associated PR
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const head_sha = context.payload.workflow_run.head_sha;
