@@ -13,6 +13,7 @@ import hmac
 import json
 import logging
 import os
+import uuid
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
@@ -64,10 +65,17 @@ def _decode_jwt(
     *,
     verify_signature: bool = True,
     verify_exp: bool = True,
+    audience: str = "mothership-api",
 ) -> dict[str, Any]:
     if jwt is not None:
         if verify_signature:
-            return jwt.decode(token, secret_key, algorithms=[algorithm], options={"verify_exp": verify_exp})
+            return jwt.decode(
+                token,
+                secret_key,
+                algorithms=[algorithm],
+                audience=audience,
+                options={"verify_exp": verify_exp},
+            )
         return jwt.decode(token, algorithms=[algorithm], options={"verify_signature": False, "verify_exp": False})
     if algorithm != "HS256":
         raise ValueError(f"Unsupported JWT algorithm without PyJWT: {algorithm}")
@@ -254,8 +262,6 @@ class JWTManager:
         else:
             expire = now + timedelta(minutes=self.access_token_expire_minutes)
 
-        import uuid
-
         payload = {
             "sub": subject,
             "exp": int(expire.timestamp()),
@@ -304,8 +310,6 @@ class JWTManager:
             expire = now + expires_delta
         else:
             expire = now + timedelta(days=self.refresh_token_expire_days)
-
-        import uuid
 
         payload = {
             "sub": subject,
@@ -409,6 +413,8 @@ class JWTManager:
                 jti=payload.get("jti"),
                 iss=payload.get("iss"),
                 aud=payload.get("aud"),
+                type=payload.get("type"),
+                role=payload.get("role"),
                 scopes=payload.get("scopes", []),
                 user_id=payload.get("user_id"),
                 email=payload.get("email"),
@@ -442,7 +448,7 @@ class JWTManager:
         payload = self.verify_token(refresh_token, expected_type="refresh")
 
         # P1-2: Check revocation before issuing new token
-        is_valid, error = await get_token_validator().validate_token(payload)
+        is_valid, error = await get_token_validator().validate_token(payload.model_dump())
         if not is_valid:
             logger.warning(f"Refusing token refresh - {error}")
             raise JWTError(f"Refresh token invalid: {error}")

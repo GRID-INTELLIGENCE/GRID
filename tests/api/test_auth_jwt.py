@@ -165,9 +165,10 @@ class TestJWTManager:
         with pytest.raises(JWTError):
             jwt_manager.verify_token(token)
 
-    def test_refresh_access_token(self, jwt_manager: JWTManager, valid_refresh_token: str) -> None:
+    @pytest.mark.asyncio
+    async def test_refresh_access_token(self, jwt_manager: JWTManager, valid_refresh_token: str) -> None:
         """Test refreshing access token from refresh token."""
-        new_access_token = jwt_manager.refresh_access_token(valid_refresh_token)
+        new_access_token = await jwt_manager.refresh_access_token(valid_refresh_token)
 
         assert isinstance(new_access_token, str)
         assert len(new_access_token) > 0
@@ -176,10 +177,11 @@ class TestJWTManager:
         payload = jwt_manager.verify_token(new_access_token, expected_type="access")
         assert payload.sub == "test_user"
 
-    def test_refresh_with_access_token_fails(self, jwt_manager: JWTManager, valid_access_token: str) -> None:
+    @pytest.mark.asyncio
+    async def test_refresh_with_access_token_fails(self, jwt_manager: JWTManager, valid_access_token: str) -> None:
         """Test that refresh fails when using access token."""
         with pytest.raises(ValueError, match="Invalid token type"):
-            jwt_manager.refresh_access_token(valid_access_token)
+            await jwt_manager.refresh_access_token(valid_access_token)
 
     def test_weak_secret_key_warning(self) -> None:
         """Test that weak secret key generates warning."""

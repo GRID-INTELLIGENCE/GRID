@@ -167,8 +167,6 @@ class TokenValidator:
         if verify_exp:
             exp = token_payload.get("exp")
             if exp:
-                from datetime import datetime
-
                 if datetime.now(UTC).timestamp() > exp:
                     return False, "Token has expired"
 

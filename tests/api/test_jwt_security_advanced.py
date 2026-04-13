@@ -221,18 +221,17 @@ class TestTokenValidation:
 
     def test_token_with_missing_claims(self, jwt_manager: JWTManager) -> None:
         """Test tokens with missing required claims."""
-        # Create token missing 'sub' claim
+        # Create token missing 'sub' claim but with required aud/iss
         payload = {
             "exp": int((datetime.now(UTC) + timedelta(hours=1)).timestamp()),
             "iat": int(datetime.now(UTC).timestamp()),
+            "iss": "grid-mothership",
+            "aud": "mothership-api",
         }
 
         token = jwt.encode(payload, jwt_manager.secret_key, algorithm=jwt_manager.algorithm)
 
-        # Should fail validation (missing 'sub')
-        # Should have empty sub if missing or default handling
-        # It seems the implementation handles missing sub gracefully (returns empty string)
-        # So we assert that sub is empty string
+        # Should handle missing 'sub' gracefully (returns empty string)
         payload_obj = jwt_manager.verify_token(token)
         assert payload_obj.sub == ""
 
@@ -337,20 +336,19 @@ class TestConcurrency:
         # All verifications should succeed
         assert all(results)
 
-    def test_concurrent_token_refresh(self, jwt_manager: JWTManager) -> None:
+    @pytest.mark.asyncio
+    async def test_concurrent_token_refresh(self, jwt_manager: JWTManager) -> None:
         """Test concurrent token refresh operations."""
+        import asyncio
+
         # Create a refresh token
         refresh_token = jwt_manager.create_refresh_token(
             subject="test_user",
             user_id="user_123",
         )
 
-        def refresh_access_token() -> str:
-            return jwt_manager.refresh_access_token(refresh_token)
-
-        with ThreadPoolExecutor(max_workers=10) as executor:
-            futures = [executor.submit(refresh_access_token) for _ in range(50)]
-            new_tokens = [f.result() for f in futures]
+        tasks = [jwt_manager.refresh_access_token(refresh_token) for _ in range(50)]
+        new_tokens = await asyncio.gather(*tasks)
 
         # All tokens should be valid
         for token in new_tokens:

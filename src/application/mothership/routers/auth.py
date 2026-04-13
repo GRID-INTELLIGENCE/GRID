@@ -24,7 +24,7 @@ from application.mothership.dependencies import (
 from application.mothership.schemas import ApiResponse, ResponseMeta
 from application.mothership.security.credential_validation import validate_production_credentials
 from application.mothership.security.jwt import get_jwt_manager
-from application.mothership.security.token_revocation import get_token_validator, is_token_revoked
+from application.mothership.security.token_revocation import get_token_validator
 
 logger = logging.getLogger(__name__)
 
@@ -299,8 +299,12 @@ async def refresh_token(
     """
     request_id = request_context.get("request_id", "unknown")
 
+    # Convert empty string to None to allow env var fallback (matches login endpoint)
+    secret_key_param = (
+        settings.security.secret_key if settings.security.secret_key and settings.security.secret_key.strip() else None
+    )
     jwt_manager = get_jwt_manager(
-        secret_key=settings.security.secret_key,
+        secret_key=secret_key_param,
         environment=settings.environment.value,
         algorithm=settings.security.algorithm,
         access_token_expire_minutes=settings.security.access_token_expire_minutes,
@@ -308,17 +312,8 @@ async def refresh_token(
     )
 
     try:
-        # CRIT-3: Check revocation before issuing new access token (revocation key is JTI everywhere).
-        payload = jwt_manager.verify_token(request.refresh_token, expected_type="refresh")
-        if payload.jti and await is_token_revoked(payload.jti):
-            logger.warning("Refresh rejected: token revoked (jti=%s, request_id=%s)", payload.jti, request_id)
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Refresh token has been revoked",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-
-        # Generate new access token from refresh token
+        # Generate new access token from refresh token.
+        # CRIT-3: revocation check (JTI-keyed) is performed inside refresh_access_token().
         new_access_token = await jwt_manager.refresh_access_token(request.refresh_token)
 
         response_data = RefreshResponse(
