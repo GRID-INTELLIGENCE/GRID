@@ -84,7 +84,8 @@ jobs:
           fi
           git config user.name "portfolio-agent"
           git config user.email "portfolio-agent@users.noreply.github.com"
-          git add -A
+          git diff --name-only | xargs git add
+          git ls-files --others --exclude-standard | xargs -r git add
           git commit -m "chore(agent): apply automated PR fixes"
           git push origin HEAD:${{ github.event.pull_request.head.ref }}
 

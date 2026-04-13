@@ -7,9 +7,8 @@ Uses Pydantic v2 for validation, serialization, and OpenAPI schema generation.
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import datetime
 from enum import StrEnum
-from typing import Any
 
 from pydantic import Field, field_validator
 

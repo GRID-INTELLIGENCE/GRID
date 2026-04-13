@@ -132,7 +132,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: [secrets-scan]
-    continue-on-error: true
     steps:
       - name: "Checkout"
         uses: actions/checkout@v6
@@ -549,7 +548,7 @@ jobs:
           echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
           echo "| Secrets Scan | ${{ needs.secrets-scan.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Lint | ${{ needs.lint.result }} (non-blocking) |" >> $GITHUB_STEP_SUMMARY
+          echo "| Lint | ${{ needs.lint.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Smoke Test | ${{ needs.smoke-test.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Test | ${{ needs.test.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| MCP Security | ${{ needs.test-mcp-security.result }} |" >> $GITHUB_STEP_SUMMARY

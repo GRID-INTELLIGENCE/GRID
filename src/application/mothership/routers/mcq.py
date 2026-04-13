@@ -324,7 +324,7 @@ async def delete_bank(
     request_id = request_context.get("request_id", "unknown")
     user_id = _get_current_user_id(auth)
 
-    bank = _check_bank_ownership(bank_id, user_id)
+    _check_bank_ownership(bank_id, user_id)
 
     # Delete all questions in the bank
     question_ids = _bank_questions.get(bank_id, [])
@@ -458,16 +458,14 @@ async def list_questions(
                 detail="You do not have permission to access this bank",
             )
         question_ids = _bank_questions.get(params.bank_id, [])
-        for qid in question_ids:
-            if qid in _mcq_questions:
-                questions.append(_mcq_questions[qid])
+        questions.extend(_mcq_questions[qid] for qid in question_ids if qid in _mcq_questions)
     else:
         # List all questions user has access to
         for bank in _mcq_banks.values():
             if bank.owner_id == user_id or bank.is_public:
-                for qid in _bank_questions.get(bank.id, []):
-                    if qid in _mcq_questions:
-                        questions.append(_mcq_questions[qid])
+                questions.extend(
+                    _mcq_questions[qid] for qid in _bank_questions.get(bank.id, []) if qid in _mcq_questions
+                )
 
     # Apply filters
     if params.difficulty:

@@ -314,10 +314,7 @@ class TrainingLoop:
 
         # Mean latency across all transitions
         all_latencies = [
-            t.info.get("duration_ms", 0)
-            for ep in episodes
-            for t in ep.transitions
-            if t.info.get("duration_ms", 0) > 0
+            t.info.get("duration_ms", 0) for ep in episodes for t in ep.transitions if t.info.get("duration_ms", 0) > 0
         ]
         mean_latency = sum(all_latencies) / len(all_latencies) if all_latencies else 0.0
 
