@@ -176,6 +176,8 @@ async def read_resource(uri) -> str:  # type: ignore[misc]
 
 # ── Tool definitions ──────────────────────────────────────────────────────────
 
+    # NEXT: KnowledgeGraphBridge (Option B, deferred — isolated now)
+
 
 @server.list_tools()
 async def list_tools() -> list[Tool]:
