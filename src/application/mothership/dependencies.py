@@ -340,12 +340,6 @@ async def require_authentication(
             detail="Authentication required",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    if auth.get("authenticated") and not auth.get("permissions"):
-        logger.warning(
-            "Authenticated user '%s' has empty permission set — RBAC resolution may have failed (method=%s)",
-            auth.get("user_id"),
-            auth.get("method"),
-        )
     return auth
 
 
