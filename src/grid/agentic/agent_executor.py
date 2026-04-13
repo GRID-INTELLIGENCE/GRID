@@ -4,21 +4,23 @@ from __future__ import annotations
 
 import asyncio
 import json
-import logging
 import os
 from pathlib import Path
 from typing import Any
 
 import aiofiles
 
+import structlog
+
 from .adaptive_timeout import AdaptiveTimeoutManager
+from .anticipation_engine import create_anticipation_engine
 from .error_classifier import ErrorClassifier
 from .learning_coordinator import OnlineLearningCoordinator
 from .recovery_engine import RecoveryEngine
 from .runtime_behavior_tracer import ExecutionBehavior, ExecutionOutcome, RuntimeBehaviorTracer
 from .skill_retriever import SkillRetriever
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 
 class AgentExecutor:
@@ -47,6 +49,7 @@ class AgentExecutor:
         self.timeout_manager = AdaptiveTimeoutManager()
         self.recovery_engine = RecoveryEngine()
         self.learning_coordinator = OnlineLearningCoordinator()
+        self._anticipation_engine = create_anticipation_engine(self.learning_coordinator)
 
     async def execute_task(
         self,
@@ -120,6 +123,15 @@ class AgentExecutor:
 
             # Finalize learning
             await self.learning_coordinator.record_execution_outcome(case_id, trace)
+
+            # Synthesise anticipation signal; attach to trace.metadata for episode pickup
+            _sig = self._anticipation_engine.synthesize(trace, session_id=case_id)
+            if not _sig.kill_switch_active:
+                trace.metadata["anticipation"] = {
+                    "score": _sig.anticipation_score,
+                    "proposals": [{"action_type": p.action_type, "skill_id": p.skill_id, "expected_reward": p.expected_reward} for p in _sig.synthesis],
+                    "schema_version": _sig.window.schema_version,
+                }
 
             return result
         except TimeoutError:

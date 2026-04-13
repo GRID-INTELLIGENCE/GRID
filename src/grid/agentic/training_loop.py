@@ -171,6 +171,10 @@ class TrainingLoop:
             if traces:
                 episode.start_time = traces[0].get("start_time", time.time())
                 episode.end_time = traces[-1].get("end_time")
+                # Carry anticipation signal from final trace into episode for downstream RL
+                last_anticipation = traces[-1].get("metadata", {}).get("anticipation")
+                if last_anticipation is not None:
+                    episode.metadata["anticipation"] = last_anticipation
 
             for i, trace in enumerate(traces):
                 done = i == len(traces) - 1

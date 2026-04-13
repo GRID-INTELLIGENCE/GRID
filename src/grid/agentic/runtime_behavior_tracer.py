@@ -6,14 +6,15 @@ resource usage, and outcomes to enable adaptive learning and observability.
 
 from __future__ import annotations
 
-import logging
 import time
 import uuid
 from dataclasses import dataclass, field
 from enum import StrEnum
 from typing import Any
 
-logger = logging.getLogger(__name__)
+import structlog
+
+logger = structlog.get_logger(__name__)
 
 
 class ExecutionOutcome(StrEnum):

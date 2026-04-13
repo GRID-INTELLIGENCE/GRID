@@ -6,14 +6,15 @@ future task routing and skill selection.
 
 from __future__ import annotations
 
-import logging
 import time
 from dataclasses import dataclass, field
 from typing import Any
 
+import structlog
+
 from .runtime_behavior_tracer import ExecutionBehavior, ExecutionOutcome
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 
 @dataclass
