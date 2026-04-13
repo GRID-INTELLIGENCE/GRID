@@ -280,8 +280,6 @@ async def verify_jwt_token(token: str | None, require_valid: bool = True) -> dic
     # Map scope 'role' or similar to RBAC Role
     if hasattr(payload, "role"):
         role_name = payload.role
-    elif payload.metadata and "role" in payload.metadata:
-        role_name = payload.metadata["role"]
     else:
         role_name = Role.READER.value
 

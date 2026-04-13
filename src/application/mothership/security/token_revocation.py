@@ -82,6 +82,8 @@ class TokenRevocationList:
     async def is_revoked(self, jti: str) -> bool:
         """Check if a token JTI is revoked.
 
+        Fails closed: If Redis check fails, treat as revoked (deny by default).
+
         Args:
             jti: JWT ID to check
 
@@ -95,7 +97,8 @@ class TokenRevocationList:
             return data is not None
         except Exception as e:
             logger.error(f"Error checking revocation status for {jti}: {e}")
-            return False
+            logger.warning(f"FAIL-CLOSED: Treating token {jti} as revoked due to backend error")
+            return True
 
     async def cleanup_expired(self) -> int:
         """Clean up expired revocations.

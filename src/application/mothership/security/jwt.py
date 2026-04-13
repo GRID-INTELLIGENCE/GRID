@@ -29,6 +29,7 @@ except ImportError:
 from pydantic import BaseModel, Field
 
 from .secret_validation import SecretStrength, SecretValidationError, generate_secure_secret, validate_secret_strength
+from .token_revocation import get_token_validator
 
 logger = logging.getLogger(__name__)
 
@@ -108,10 +109,13 @@ class TokenPayload(BaseModel):
     exp: int = Field(..., description="Expiration timestamp")
     iat: int = Field(..., description="Issued at timestamp")
     jti: str | None = Field(None, description="JWT ID (unique token identifier)")
+    iss: str | None = Field(None, description="Issuer (source service)")
+    aud: str | None = Field(None, description="Audience (target service)")
     scopes: list[str] = Field(default_factory=list, description="Permission scopes")
     user_id: str | None = Field(None, description="User ID")
     email: str | None = Field(None, description="User email")
     role: str | None = Field(None, description="User role")
+    type: str | None = Field(None, description="Token type (access/refresh)")
     metadata: dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
 
 
@@ -257,6 +261,8 @@ class JWTManager:
             "exp": int(expire.timestamp()),
             "iat": int(now.timestamp()),
             "jti": str(uuid.uuid4()),
+            "iss": "grid-mothership",
+            "aud": "mothership-api",
             "type": "access",
         }
 
@@ -306,6 +312,8 @@ class JWTManager:
             "exp": int(expire.timestamp()),
             "iat": int(now.timestamp()),
             "jti": str(uuid.uuid4()),
+            "iss": "grid-mothership",
+            "aud": "mothership-api",
             "type": "refresh",
         }
 
@@ -381,12 +389,26 @@ class JWTManager:
             if expected_type and payload.get("type") != expected_type:
                 raise ValueError(f"Invalid token type: expected {expected_type}, got {payload.get('type')}")
 
+            # Validate issuer and audience claims (P1-3)
+            if payload.get("iss") != "grid-mothership":
+                logger.warning(
+                    f"Token issuer validation failed: expected 'grid-mothership', got '{payload.get('iss')}'"
+                )
+                raise JWTError("Invalid token issuer")
+            if payload.get("aud") != "mothership-api":
+                logger.warning(
+                    f"Token audience validation failed: expected 'mothership-api', got '{payload.get('aud')}'"
+                )
+                raise JWTError("Invalid token audience")
+
             # Convert to TokenPayload model
             return TokenPayload(
                 sub=payload.get("sub", ""),
                 exp=payload.get("exp", 0),
                 iat=payload.get("iat", 0),
                 jti=payload.get("jti"),
+                iss=payload.get("iss"),
+                aud=payload.get("aud"),
                 scopes=payload.get("scopes", []),
                 user_id=payload.get("user_id"),
                 email=payload.get("email"),
@@ -418,6 +440,12 @@ class JWTManager:
         """
         # Verify refresh token
         payload = self.verify_token(refresh_token, expected_type="refresh")
+
+        # P1-2: Check revocation before issuing new token
+        is_valid, error = await get_token_validator().validate_token(payload)
+        if not is_valid:
+            logger.warning(f"Refusing token refresh - {error}")
+            raise JWTError(f"Refresh token invalid: {error}")
 
         # Create new access token with same subject
         return self.create_access_token(
