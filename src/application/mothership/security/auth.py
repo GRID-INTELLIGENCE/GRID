@@ -277,23 +277,17 @@ async def verify_jwt_token(token: str | None, require_valid: bool = True) -> dic
             "error": "token_revoked",
         }
 
-    # Map scope 'role' or similar to RBAC Role
-    if hasattr(payload, "role"):
-        role_name = payload.role
-    else:
-        role_name = Role.READER.value
-
-    try:
-        role = Role(role_name.lower())
-    except (ValueError, AttributeError):
-        role = Role.READER
+    # Permissions are pre-expanded in the token by the login handler.
+    # Read them directly from scopes — no role-based lookup needed.
+    scopes = payload.scopes if hasattr(payload, "scopes") else []
+    permissions = set(scopes) if scopes else get_permissions_for_role(Role.READER)
 
     return {
         "authenticated": True,
         "method": "bearer",
         "user_id": payload.user_id if hasattr(payload, "user_id") else payload.sub,
-        "role": role.value,
-        "permissions": get_permissions_for_role(role),
+        "role": payload.role if hasattr(payload, "role") else Role.READER.value,
+        "permissions": permissions,
         "token_payload": payload.model_dump() if hasattr(payload, "model_dump") else {},
     }
 

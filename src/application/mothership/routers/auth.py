@@ -24,9 +24,20 @@ from application.mothership.dependencies import (
 from application.mothership.schemas import ApiResponse, ResponseMeta
 from application.mothership.security.credential_validation import validate_production_credentials
 from application.mothership.security.jwt import get_jwt_manager
+from application.mothership.security.rbac import Role, get_permissions_for_role
 from application.mothership.security.token_revocation import get_token_validator
+from grid.organization.models import UserRole
 
 logger = logging.getLogger(__name__)
+
+_USER_ROLE_TO_RBAC: dict[UserRole, Role] = {
+    UserRole.ADMIN: Role.ADMIN,
+    UserRole.MANAGER: Role.WRITER,
+    UserRole.DEVELOPER: Role.WRITER,
+    UserRole.ANALYST: Role.READER,
+    UserRole.VIEWER: Role.READER,
+    UserRole.GUEST: Role.ANONYMOUS,
+}
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
 
@@ -225,19 +236,18 @@ async def login(
         refresh_token_expire_days=settings.security.refresh_token_expire_days,
     )
 
-    # Normalize scopes - ensure valid permissions only
-    valid_scopes = {"read", "write", "admin"}
-    granted_scopes = [s for s in request.scopes if s in valid_scopes]
-    if not granted_scopes:
-        granted_scopes = ["read"]  # Default to read-only
-
-    # Get user details from auth result in production, or use defaults in dev
+    # Server-resolved permissions — client scopes ignored to prevent escalation.
+    # The user's organizational role is expanded to granular RBAC permissions and
+    # embedded as scopes in the token. verify_jwt_token reads them back directly.
     if not allow_test_credential_bypass and auth_result and auth_result.user:
         user_id = auth_result.user.user_id
         email = auth_result.user.email or f"{request.username}@example.com"
+        rbac_role = _USER_ROLE_TO_RBAC.get(auth_result.user.role, Role.READER)
+        granted_scopes = sorted(get_permissions_for_role(rbac_role))
     else:
         user_id = f"user_{request.username}"
         email = f"{request.username}@example.com" if "@" not in request.username else request.username
+        granted_scopes = sorted(get_permissions_for_role(Role.WRITER))
 
     try:
         token_pair = jwt_manager.create_token_pair(

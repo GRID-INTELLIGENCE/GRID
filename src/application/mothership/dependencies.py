@@ -294,19 +294,28 @@ async def get_optional_authentication(
     present, but missing credentials must not trigger a 401 before the route body
     executes.
     """
+    anonymous_context = {
+        "authenticated": False,
+        "method": "anonymous",
+        "permissions": set(),
+        "token_payload": {},
+        "user_id": None,
+        "email": None,
+    }
+
     if bearer_token:
         try:
             return await verify_jwt_token(bearer_token, require_valid=True)
         except Exception as e:
-            logger.warning(f"Optional JWT verification failed: {e}")
-            raise
+            logger.warning("Optional JWT verification failed: %s", e)
+            return anonymous_context
 
     if api_key:
         try:
             return verify_api_key(api_key, require_valid=True)
         except Exception as e:
-            logger.warning(f"Optional API key verification failed: {e}")
-            raise
+            logger.warning("Optional API key verification failed: %s", e)
+            return anonymous_context
 
     # CRIT-7: Anonymous must never have admin or elevated permissions.
     return {
@@ -330,6 +339,12 @@ async def require_authentication(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Authentication required",
             headers={"WWW-Authenticate": "Bearer"},
+        )
+    if auth.get("authenticated") and not auth.get("permissions"):
+        logger.warning(
+            "Authenticated user '%s' has empty permission set — RBAC resolution may have failed (method=%s)",
+            auth.get("user_id"),
+            auth.get("method"),
         )
     return auth
 

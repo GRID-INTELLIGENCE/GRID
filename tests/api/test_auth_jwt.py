@@ -248,7 +248,7 @@ class TestAuthEndpoints:
         assert "write" in data["data"]["scopes"]
 
     def test_login_invalid_scopes(self, client: TestClient) -> None:
-        """Test login with invalid scopes grants read-only."""
+        """Test login with invalid scopes — client scopes are ignored, server resolves permissions."""
         response = client.post(
             "/api/v1/auth/login",
             json={
@@ -260,8 +260,11 @@ class TestAuthEndpoints:
 
         assert response.status_code == 200
         data = response.json()
-        # Should default to read-only when no valid scopes
-        assert data["data"]["scopes"] == ["read"]
+        # Client scopes are ignored — server resolves from user role (dev bypass = WRITER)
+        granted = data["data"]["scopes"]
+        assert "read" in granted
+        assert "write" in granted
+        assert "execute" in granted
 
     def test_login_validation_error(self, client: TestClient) -> None:
         """Test login with missing fields."""
@@ -438,8 +441,9 @@ class TestSecurityHardening:
             "/api/v1/auth/validate",
             headers={"Authorization": f"Bearer {access_token}"},
         )
-        # Correctly fails with 401 because token is revoked
-        assert response.status_code == 401
+        # /validate uses optional auth — revoked token returns 200 with valid=False
+        assert response.status_code == 200
+        assert response.json()["data"]["valid"] is False
 
     def test_malformed_token_rejected(self, client: TestClient) -> None:
         """Test that malformed tokens are rejected."""
@@ -448,8 +452,9 @@ class TestSecurityHardening:
             headers={"Authorization": "Bearer not.a.valid.token"},
         )
 
-        # Should fail validation
-        assert response.status_code in [401, 500]
+        # /validate uses optional auth — malformed token returns 200 with valid=False
+        assert response.status_code == 200
+        assert response.json()["data"]["valid"] is False
 
     def test_token_expiration_respected(self, jwt_manager: JWTManager, client: TestClient) -> None:
         """Test that expired tokens are rejected."""
@@ -464,7 +469,9 @@ class TestSecurityHardening:
             headers={"Authorization": f"Bearer {expired_token}"},
         )
 
-        assert response.status_code == 401
+        # /validate uses optional auth — expired token returns 200 with valid=False
+        assert response.status_code == 200
+        assert response.json()["data"]["valid"] is False
 
     def test_rate_limiting_on_login(self) -> None:
         """Test rate limiting on login endpoint."""
