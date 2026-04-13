@@ -319,7 +319,7 @@ async def refresh_token(
             )
 
         # Generate new access token from refresh token
-        new_access_token = jwt_manager.refresh_access_token(request.refresh_token)
+        new_access_token = await jwt_manager.refresh_access_token(request.refresh_token)
 
         response_data = RefreshResponse(
             access_token=new_access_token,

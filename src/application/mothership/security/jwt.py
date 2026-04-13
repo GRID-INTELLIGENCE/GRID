@@ -425,7 +425,7 @@ class JWTManager:
             logger.exception("Unexpected error during JWT verification")
             raise JWTError(f"Token verification failed: {e}") from e
 
-    def refresh_access_token(self, refresh_token: str) -> str:
+    async def refresh_access_token(self, refresh_token: str) -> str:
         """
         Generate a new access token from a valid refresh token.
 

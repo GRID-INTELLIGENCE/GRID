@@ -1,8 +1,14 @@
 """GRID Agentic System - Event-driven agentic processing."""
 
-from .anticipation_engine import ActionProposal, AnticipationEngine, AnticipationSignal, AnticipationStore, ProximityWindow
 from .agent_executor import AgentExecutor
 from .agentic_system import AgenticSystem
+from .anticipation_engine import (
+    ActionProposal,
+    AnticipationEngine,
+    AnticipationSignal,
+    AnticipationStore,
+    ProximityWindow,
+)
 from .event_bus import EventBus
 from .events import (
     BaseEvent,
