@@ -320,6 +320,33 @@ def reset_services():
         pass
 
 
+@pytest.fixture(scope="module", autouse=True)
+def module_isolation():
+    """Explicit module-scope isolation: clear stale state between test modules.
+
+    This ensures that module-level state from integration tests doesn't persist
+    into security/api tests (which was causing the combined test suite to hang).
+    """
+    yield
+    # Teardown: hard cleanup of test-related module state
+    import gc
+    import sys
+
+    gc.collect()
+
+    # Clear event loop if needed (asyncio)
+    try:
+        import asyncio
+        try:
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                loop.stop()
+        except RuntimeError:
+            pass
+    except ImportError:
+        pass
+
+
 from unittest.mock import AsyncMock, Mock
 
 

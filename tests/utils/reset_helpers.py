@@ -134,6 +134,32 @@ def reset_parasite_profiler() -> None:
         pass
 
 
+def reset_db_engine() -> None:
+    """Reset the async DB engine singleton and its asyncio.Lock.
+
+    The module-level ``_engine_lock = asyncio.Lock()`` in
+    ``application.mothership.db.engine`` is bound to whatever event loop was
+    active at import time.  When pytest creates a *new* loop for a subsequent
+    test module (e.g. via ``TestClient``), ``dispose_async_engine`` tries to
+    acquire the old lock on the new loop → deadlock.
+
+    This helper performs a synchronous (non-awaited) reset:
+    - sets ``_engine`` and ``_sessionmaker`` to ``None``
+    - recreates ``_engine_lock`` so it binds to the *current* loop
+    """
+    try:
+        import asyncio
+        import importlib
+
+        _module = importlib.import_module("application.mothership.db.engine")
+        _module._engine = None  # type: ignore[attr-defined]
+        _module._sessionmaker = None  # type: ignore[attr-defined]
+        _module._disposed = True  # type: ignore[attr-defined]
+        _module._engine_lock = asyncio.Lock()  # type: ignore[attr-defined]
+    except ImportError:
+        pass
+
+
 def reset_all_singletons() -> None:
     """Reset all known global singletons.
 
@@ -148,6 +174,7 @@ def reset_all_singletons() -> None:
     reset_rate_limiter_state()
     reset_mastermind_session()
     reset_parasite_profiler()
+    reset_db_engine()
 
 
 __all__ = [
@@ -157,5 +184,6 @@ __all__ = [
     "reset_rate_limiter_state",
     "reset_mastermind_session",
     "reset_parasite_profiler",
+    "reset_db_engine",
     "reset_all_singletons",
 ]
