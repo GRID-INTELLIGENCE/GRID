@@ -1,11 +1,16 @@
-import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { Login } from '../Login';
+import { describe, expect, it, vi } from 'vitest';
 import { AuthProvider } from '../../contexts/AuthContext';
 import { HouseProvider } from '../../contexts/HouseContext';
+import { Login } from '../Login';
 
-// Mock the auth service
-// Mock the auth service
+vi.mock('../../services/api/auth', () => ({
+  authService: {
+    validate: vi.fn().mockResolvedValue({ success: false, data: { valid: false } }),
+    login: vi.fn(),
+    logout: vi.fn(),
+  },
+}));
 
 describe('Login View', () => {
   it('renders login form correctly', () => {

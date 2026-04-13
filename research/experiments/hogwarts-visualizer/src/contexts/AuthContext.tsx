@@ -1,6 +1,5 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { authService, LoginRequest } from '../services/api/auth';
-import { ValidateResponse } from '../services/api/auth';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { authService, LoginRequest, ValidateResponse } from '../services/api/auth';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -63,8 +62,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } else {
         setError(response.error || 'Login failed');
       }
-    } catch (err: any) {
-      setError(err.response?.data?.error || err.message || 'Login failed');
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { error?: string } }; message?: string };
+      setError(e.response?.data?.error ?? e.message ?? 'Login failed');
       throw err;
     } finally {
       setLoading(false);
@@ -102,6 +102,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {

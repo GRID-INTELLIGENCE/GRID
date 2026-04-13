@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, ReactNode, useContext, useState } from 'react';
 import { House, HOUSE_THEMES } from '../types/house';
 
 interface HouseContextType {
@@ -29,6 +29,7 @@ export const HouseProvider: React.FC<HouseProviderProps> = ({
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useHouse = (): HouseContextType => {
   const context = useContext(HouseContext);
   if (!context) {

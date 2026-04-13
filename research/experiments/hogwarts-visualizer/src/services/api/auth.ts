@@ -1,5 +1,5 @@
-import apiClient from './client';
 import { ApiResponse } from '../../types/api';
+import apiClient from './client';
 
 export interface LoginRequest {
   username: string;
@@ -64,8 +64,8 @@ export const authService = {
   /**
    * Logout and invalidate session.
    */
-  logout: async (): Promise<ApiResponse<any>> => {
-    const response = await apiClient.post<ApiResponse<any>>('/auth/logout');
+  logout: async (): Promise<ApiResponse<Record<string, unknown>>> => {
+    const response = await apiClient.post<ApiResponse<Record<string, unknown>>>('/auth/logout');
     return response.data;
   },
 };
