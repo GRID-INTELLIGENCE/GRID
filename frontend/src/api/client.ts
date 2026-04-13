@@ -1,6 +1,6 @@
 import axios, {
-  type AxiosInstance,
   type AxiosError,
+  type AxiosInstance,
   type InternalAxiosRequestConfig,
 } from "axios";
 import { jwtDecode } from "jwt-decode";
@@ -126,6 +126,22 @@ class ApiClient {
   }
 
   private setupInterceptors() {
+    // Defence-in-depth: reject headers containing CRLF characters.
+    // Mitigates GHSA-fvcv-3m26-pcqx gadget chain at the application boundary
+    // regardless of axios version or prototype-pollution state.
+    this.client.interceptors.request.use((config) => {
+      if (config.headers) {
+        for (const [key, value] of Object.entries(config.headers)) {
+          if (typeof value === "string" && /[\r\n]/.test(value)) {
+            throw new Error(
+              `Security: header "${key}" contains invalid CRLF characters`
+            );
+          }
+        }
+      }
+      return config;
+    });
+
     // Request interceptor for auth token
     this.client.interceptors.request.use((config) => {
       const token = this.getAccessToken();
@@ -190,8 +206,8 @@ class ApiClient {
       return this.refreshPromise;
     }
 
-    this.refreshPromise = axios
-      .post(`${API_BASE_URL}/auth/refresh`, {
+    this.refreshPromise = this.client
+      .post<AuthTokens>("/auth/refresh", {
         refresh_token: this.getRefreshToken(),
       })
       .then((response) => response.data);
