@@ -416,6 +416,27 @@ else:
                 security_violations=violations,
             )
 
+        # CRIT-5: Gate fallback exec() behind explicit environment flag.
+        allow_inprocess_exec = os.getenv("GRID_ALLOW_INPROCESS_EXEC", "").strip().lower() in ("1", "true", "yes")
+        if not allow_inprocess_exec:
+            logger.error(
+                "Sandbox fallback BLOCKED for %s: GRID_ALLOW_INPROCESS_EXEC not set. "
+                "Set to '1' to enable fallback execution (NOT RECOMMENDED FOR PRODUCTION).",
+                execution_id,
+            )
+            return SandboxResult(
+                execution_id=execution_id,
+                status=SandboxStatus.FAILED,
+                start_time=start_time,
+                end_time=datetime.now(),
+                exit_code=1,
+                stdout="",
+                stderr="Execution blocked: GRID_ALLOW_INPROCESS_EXEC not enabled",
+                resource_usage=await self._get_resource_usage(execution_id),
+                error_message="Fallback exec() disabled - set GRID_ALLOW_INPROCESS_EXEC=1 to enable (production unsafe)",
+                security_violations=[],
+            )
+
         def _run_in_process() -> Any:
             # Build restricted builtins — deny dangerous primitives.
             import builtins as _builtins
@@ -474,7 +495,7 @@ else:
             safe_builtins["__import__"] = _safe_import
 
             namespace: dict[str, Any] = {"__builtins__": safe_builtins}
-            exec(skill_code, namespace)  # noqa: S102 - intentional sandbox fallback execution
+            exec(skill_code, namespace)  # noqa: S102 - fallback execution only when GRID_ALLOW_INPROCESS_EXEC=1
             main = namespace.get("main")
             if not callable(main):
                 raise RuntimeError("No main function found in skill")
