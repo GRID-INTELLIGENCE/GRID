@@ -79,7 +79,7 @@
             "source.fixAll": "explicit",
             "source.organizeImports": "explicit"
         },
-        "editor.defaultFormatter": "codeium.windsurf",
+        "editor.defaultFormatter": "charliermarsh.ruff",
         "editor.formatOnSave": true,
         "editor.rulers": [
             120
