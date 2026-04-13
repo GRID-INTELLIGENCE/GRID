@@ -1,5 +1,6 @@
 """GRID Agentic System - Event-driven agentic processing."""
 
+from .anticipation_engine import ActionProposal, AnticipationEngine, AnticipationSignal, AnticipationStore, ProximityWindow
 from .agent_executor import AgentExecutor
 from .agentic_system import AgenticSystem
 from .event_bus import EventBus
@@ -48,4 +49,9 @@ __all__ = [
     "AgentExperienceResponse",
     "RoundTableFacilitator",
     "RoundTableResult",
+    "ActionProposal",
+    "AnticipationEngine",
+    "AnticipationSignal",
+    "AnticipationStore",
+    "ProximityWindow",
 ]
