@@ -182,6 +182,36 @@ class RAGSession:
 
 session = RAGSession()
 
+# ── Durable session persistence ──────────────────────────────────────────────
+_SESSIONS_DIR = Path.home() / ".rag-sessions"
+
+
+def _sessions_path() -> Path:
+    """Path to durable session store."""
+    _SESSIONS_DIR.mkdir(parents=True, exist_ok=True)
+    return _SESSIONS_DIR / "sessions.json"
+
+
+def _load_sessions() -> None:
+    """Load sessions from disk on startup."""
+    path = _sessions_path()
+    if path.exists():
+        try:
+            data = json.loads(path.read_text())
+            session.sessions = data
+            logger.info("Loaded %d durable sessions", len(data))
+        except Exception as e:
+            logger.warning("Failed to load sessions from %s: %s", path, e)
+
+
+def _save_sessions() -> None:
+    """Persist sessions to disk after mutation."""
+    try:
+        _sessions_path().write_text(json.dumps(session.sessions, indent=2, default=str))
+    except Exception as e:
+        logger.warning("Failed to save sessions: %s", e)
+
+
 # ── MCP Server ────────────────────────────────────────────────────────────────
 server = Server("grid-rag")
 
@@ -344,6 +374,10 @@ async def list_tools() -> list[Tool]:
                         "description": "Include source references in answer",
                         "default": True,
                     },
+                    "where": {
+                        "type": "object",
+                        "description": "Metadata filter to scope retrieval (e.g. {\"client_id\": \"xyz\"}). Uses ChromaDB where syntax.",
+                    },
                 },
                 "required": ["query"],
             },
@@ -417,6 +451,10 @@ async def list_tools() -> list[Tool]:
                         "default": 0.0,
                         "minimum": 0.0,
                         "maximum": 1.0,
+                    },
+                    "where": {
+                        "type": "object",
+                        "description": "Metadata filter to scope search (e.g. {\"client_id\": \"xyz\"}, {\"event_type\": \"abuse_signal\"}). Uses ChromaDB where syntax.",
                     },
                 },
                 "required": ["query"],
@@ -524,6 +562,96 @@ async def list_tools() -> list[Tool]:
                 "required": ["query"],
             },
         ),
+        # ── Behavioral enforcement tools ─────────────────────────────────
+        Tool(
+            name="rag_behavioral_log",
+            description="Log a structured behavioral event for a client. Embeds the event description for semantic retrieval and stores typed metadata for exact-match filtering.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "client_id": {"type": "string", "description": "Client identifier"},
+                    "event_type": {
+                        "type": "string",
+                        "description": "Event classification",
+                        "enum": [
+                            "abuse_signal",
+                            "drift",
+                            "violation",
+                            "quarantine_trigger",
+                            "lesson_assigned",
+                            "compliance_restored",
+                            "escalation",
+                            "observation",
+                        ],
+                    },
+                    "description": {"type": "string", "description": "Human-readable event description"},
+                    "severity": {
+                        "type": "string",
+                        "description": "Event severity",
+                        "enum": ["critical", "high", "medium", "low", "info"],
+                        "default": "medium",
+                    },
+                    "protocol_clause": {
+                        "type": "string",
+                        "description": "Protocol or contract clause referenced (e.g. '3.2', 'NR-01')",
+                    },
+                    "action_taken": {
+                        "type": "string",
+                        "description": "Action taken in response (e.g. 'quarantine_flag', 'lesson_v2_assigned')",
+                    },
+                    "tags": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Free-form classification tags",
+                    },
+                    "metadata": {"type": "object", "description": "Additional event metadata"},
+                },
+                "required": ["client_id", "event_type", "description"],
+            },
+        ),
+        Tool(
+            name="rag_behavioral_scan",
+            description="Scan all behavioral records for a client using metadata filters. Returns a chronological timeline without LLM generation. Use for audit trails, pattern review, and pre-assessment data gathering.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "client_id": {"type": "string", "description": "Client identifier to scan"},
+                    "event_type": {
+                        "type": "string",
+                        "description": "Filter by event type (e.g. 'abuse_signal', 'drift')",
+                    },
+                    "severity": {"type": "string", "description": "Filter by severity level"},
+                    "limit": {
+                        "type": "integer",
+                        "description": "Max records to return (default: 50)",
+                        "default": 50,
+                        "minimum": 1,
+                        "maximum": 500,
+                    },
+                },
+                "required": ["client_id"],
+            },
+        ),
+        Tool(
+            name="rag_assess_client",
+            description="Synthesize a client's full behavioral trajectory into a structured risk assessment. Pulls all behavioral records, runs LLM analysis, and returns drift level, risk classification, escalation trajectory, and recommended actions/lessons.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "client_id": {"type": "string", "description": "Client identifier to assess"},
+                    "include_recommendations": {
+                        "type": "boolean",
+                        "description": "Include lesson and action recommendations in assessment",
+                        "default": True,
+                    },
+                    "context": {
+                        "type": "string",
+                        "description": "Additional context for the assessment (e.g. current protocol version, recent policy changes, reason for review)",
+                    },
+                },
+                "required": ["client_id"],
+            },
+        ),
     ]
 
 
@@ -545,6 +673,9 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> CallToolResult:
             "rag_get_session": _handle_get_session,
             "rag_delete_session": _handle_delete_session,
             "rag_conversational_query": _handle_conversational_query,
+            "rag_behavioral_log": _handle_behavioral_log,
+            "rag_behavioral_scan": _handle_behavioral_scan,
+            "rag_assess_client": _handle_assess_client,
         }
         handler = handlers.get(name)
         if handler is None:
@@ -606,6 +737,7 @@ async def _handle_query(args: dict[str, Any]) -> CallToolResult:
     top_k = args.get("top_k", 5)
     temperature = args.get("temperature", 0.3)
     include_sources = args.get("include_sources", True)
+    where = args.get("where")
 
     sanitized, error = _sanitize_query(query)
     if error:
@@ -620,7 +752,9 @@ async def _handle_query(args: dict[str, Any]) -> CallToolResult:
         session.last_query = query
         session.query_count += 1
 
-        result = await engine.query(query_text=query, top_k=top_k, temperature=temperature, include_sources=True)
+        result = await engine.query(
+            query_text=query, top_k=top_k, temperature=temperature, include_sources=True, where=where
+        )
 
         answer = result.get("answer", "No answer generated")
         sources = _filter_sources(result.get("sources", []))
@@ -714,6 +848,7 @@ async def _handle_search(args: dict[str, Any]) -> CallToolResult:
     query = args["query"]
     top_k = args.get("top_k", 10)
     threshold = args.get("threshold", 0.0)
+    where = args.get("where")
 
     sanitized, error = _sanitize_query(query)
     if error:
@@ -736,7 +871,7 @@ async def _handle_search(args: dict[str, Any]) -> CallToolResult:
             else:
                 query_embedding = list(query_embedding)
 
-        results = engine.vector_store.query(query_embedding=query_embedding, n_results=top_k)
+        results = engine.vector_store.query(query_embedding=query_embedding, n_results=top_k, where=where)
 
         documents = results.get("documents", [])
         metadatas = results.get("metadatas", [])
@@ -901,6 +1036,7 @@ async def _handle_create_session(args: dict[str, Any]) -> CallToolResult:
             "metadata": metadata,
             "created_at": datetime.now().isoformat(),
         }
+        _save_sessions()
 
         return CallToolResult(content=[TextContent(type="text", text=f"Session '{session_id}' created successfully")])
 
@@ -967,6 +1103,7 @@ async def _handle_delete_session(args: dict[str, Any]) -> CallToolResult:
         if success:
             if session_id in session.sessions:
                 del session.sessions[session_id]
+                _save_sessions()
 
             return CallToolResult(
                 content=[TextContent(type="text", text=f"Session '{session_id}' deleted successfully")]
@@ -1033,6 +1170,279 @@ async def _handle_conversational_query(args: dict[str, Any]) -> CallToolResult:
             content=[TextContent(type="text", text=f"Conversational query failed: {str(e)}")],
             isError=True,
         )
+
+
+# ── Behavioral enforcement handlers ──────────────────────────────────────────
+
+
+async def _handle_behavioral_log(args: dict[str, Any]) -> CallToolResult:
+    """Ingest a structured behavioral event into the knowledge base."""
+    client_id = args["client_id"]
+    event_type = args["event_type"]
+    description = args["description"]
+    severity = args.get("severity", "medium")
+    protocol_clause = args.get("protocol_clause")
+    action_taken = args.get("action_taken")
+    tags = args.get("tags", [])
+    extra_metadata = args.get("metadata", {})
+
+    try:
+        engine = await ensure_rag_engine()
+        if engine is None:
+            return CallToolResult(content=[TextContent(type="text", text="Error: RAG engine not initialized")])
+
+        timestamp = datetime.now().isoformat()
+        doc_id = f"behavioral_{client_id}_{timestamp.replace(':', '-').replace('.', '-')}"
+
+        # Document text is what gets embedded — semantic search surface
+        doc_text = f"[{event_type.upper()}] Client {client_id} — {description}"
+        if protocol_clause:
+            doc_text += f"\nProtocol clause: {protocol_clause}"
+        if action_taken:
+            doc_text += f"\nAction taken: {action_taken}"
+
+        # Structured metadata for ChromaDB exact-match filtering
+        doc_metadata: dict[str, Any] = {
+            "source": f"behavioral/{client_id}",
+            "record_type": "behavioral_event",
+            "client_id": client_id,
+            "event_type": event_type,
+            "severity": severity,
+            "timestamp": timestamp,
+            "added_at": timestamp,
+        }
+        if protocol_clause:
+            doc_metadata["protocol_clause"] = protocol_clause
+        if action_taken:
+            doc_metadata["action_taken"] = action_taken
+        if tags:
+            # ChromaDB metadata values must be str/int/float/bool
+            doc_metadata["tags"] = ",".join(tags)
+        # Merge extra metadata (only scalar values survive ChromaDB)
+        doc_metadata.update({k: v for k, v in extra_metadata.items() if isinstance(v, (str, int, float, bool))})
+
+        engine.add_documents(documents=[doc_text], ids=[doc_id], metadatas=[doc_metadata])
+
+        return CallToolResult(
+            content=[
+                TextContent(
+                    type="text",
+                    text=(
+                        f"Behavioral event logged\n"
+                        f"- Client: {client_id}\n"
+                        f"- Type: {event_type}\n"
+                        f"- Severity: {severity}\n"
+                        f"- ID: {doc_id}"
+                    ),
+                )
+            ]
+        )
+    except Exception as e:
+        return CallToolResult(content=[TextContent(type="text", text=f"Behavioral log failed: {str(e)}")])
+
+
+async def _handle_behavioral_scan(args: dict[str, Any]) -> CallToolResult:
+    """Scan behavioral records for a client using metadata filters."""
+    client_id = args["client_id"]
+    event_type = args.get("event_type")
+    severity = args.get("severity")
+    limit = args.get("limit", 50)
+
+    try:
+        engine = await ensure_rag_engine()
+        if engine is None:
+            return CallToolResult(content=[TextContent(type="text", text="Error: RAG engine not initialized")])
+        if engine.vector_store is None:
+            return CallToolResult(content=[TextContent(type="text", text="Error: Vector store not initialized")])
+
+        # Build ChromaDB where filter
+        conditions: list[dict[str, Any]] = [
+            {"client_id": {"$eq": client_id}},
+            {"record_type": {"$eq": "behavioral_event"}},
+        ]
+        if event_type:
+            conditions.append({"event_type": {"$eq": event_type}})
+        if severity:
+            conditions.append({"severity": {"$eq": severity}})
+
+        where_filter: dict[str, Any] = {"$and": conditions} if len(conditions) > 1 else conditions[0]
+
+        # Use ChromaDB collection.get for metadata-only retrieval (no embedding needed)
+        collection = getattr(engine.vector_store, "collection", None)
+        if collection is None:
+            return CallToolResult(
+                content=[TextContent(type="text", text="Error: Behavioral scan requires ChromaDB vector store")]
+            )
+
+        results = collection.get(
+            where=where_filter,
+            limit=limit,
+            include=["documents", "metadatas"],
+        )
+
+        documents = results.get("documents", []) or []
+        metadatas = results.get("metadatas", []) or []
+        ids = results.get("ids", []) or []
+
+        if not documents:
+            return CallToolResult(
+                content=[TextContent(type="text", text=f"No behavioral records found for client '{client_id}'")]
+            )
+
+        # Sort by timestamp (newest first)
+        entries = list(zip(ids, documents, metadatas, strict=False))
+        entries.sort(key=lambda e: e[2].get("timestamp", ""), reverse=True)
+
+        response = f"Behavioral Scan: {len(entries)} records for client '{client_id}'\n\n"
+        for doc_id, doc, meta in entries:
+            ts = meta.get("timestamp", "unknown")
+            evt = meta.get("event_type", "unknown")
+            sev = meta.get("severity", "unknown")
+            response += f"[{ts}] {sev.upper()} | {evt}\n"
+            response += f"  {doc[:300]}\n"
+            clause = meta.get("protocol_clause")
+            action = meta.get("action_taken")
+            if clause:
+                response += f"  Clause: {clause}\n"
+            if action:
+                response += f"  Action: {action}\n"
+            response += f"  ID: {doc_id}\n\n"
+
+        return CallToolResult(content=[TextContent(type="text", text=response)])
+
+    except Exception as e:
+        return CallToolResult(content=[TextContent(type="text", text=f"Behavioral scan failed: {str(e)}")])
+
+
+async def _handle_assess_client(args: dict[str, Any]) -> CallToolResult:
+    """Synthesize a client's behavioral trajectory into a risk assessment."""
+    client_id = args["client_id"]
+    include_recommendations = args.get("include_recommendations", True)
+    extra_context = args.get("context", "")
+
+    try:
+        engine = await ensure_rag_engine()
+        if engine is None:
+            return CallToolResult(content=[TextContent(type="text", text="Error: RAG engine not initialized")])
+        if engine.vector_store is None:
+            return CallToolResult(content=[TextContent(type="text", text="Error: Vector store not initialized")])
+
+        # Pull all behavioral records for this client
+        collection = getattr(engine.vector_store, "collection", None)
+        if collection is None:
+            return CallToolResult(
+                content=[TextContent(type="text", text="Error: Client assessment requires ChromaDB vector store")]
+            )
+
+        results = collection.get(
+            where={"$and": [
+                {"client_id": {"$eq": client_id}},
+                {"record_type": {"$eq": "behavioral_event"}},
+            ]},
+            limit=200,
+            include=["documents", "metadatas"],
+        )
+
+        documents = results.get("documents", []) or []
+        metadatas = results.get("metadatas", []) or []
+
+        if not documents:
+            return CallToolResult(
+                content=[
+                    TextContent(
+                        type="text",
+                        text=json.dumps(
+                            {
+                                "client_id": client_id,
+                                "record_count": 0,
+                                "drift_level": "none",
+                                "risk_classification": "unknown",
+                                "assessment": "No behavioral records found. Cannot assess.",
+                            },
+                            indent=2,
+                        ),
+                    )
+                ]
+            )
+
+        # Build timeline and statistics
+        entries = list(zip(documents, metadatas, strict=False))
+        entries.sort(key=lambda e: e[1].get("timestamp", ""))
+
+        severity_counts: dict[str, int] = {}
+        event_type_counts: dict[str, int] = {}
+        for _, meta in entries:
+            sev = meta.get("severity", "medium")
+            severity_counts[sev] = severity_counts.get(sev, 0) + 1
+            evt = meta.get("event_type", "unknown")
+            event_type_counts[evt] = event_type_counts.get(evt, 0) + 1
+
+        timeline_text = f"Behavioral timeline for client '{client_id}' ({len(entries)} events):\n\n"
+        for doc, meta in entries:
+            ts = meta.get("timestamp", "?")
+            timeline_text += (
+                f"[{ts}] {meta.get('severity', '?').upper()} "
+                f"{meta.get('event_type', '?')}: {doc[:200]}\n"
+            )
+
+        # Build assessment prompt for LLM synthesis
+        reco_block = ""
+        if include_recommendations:
+            reco_block = """- recommended_action: specific action to take next
+- lesson_assignment: what the client needs to learn, based on their specific drift pattern
+- protocol_remediation: which protocol clauses need reinforcement"""
+
+        assessment_prompt = f"""You are a behavioral risk analyst for a software governance system. Assess the following client's behavioral trajectory and produce a structured risk assessment.
+
+{timeline_text}
+
+Severity distribution: {json.dumps(severity_counts)}
+Event type distribution: {json.dumps(event_type_counts)}
+{"Additional context: " + extra_context if extra_context else ""}
+
+Produce a JSON object with these fields:
+- drift_level: "none" | "low" | "moderate" | "high" | "critical"
+- risk_classification: "safe" | "watch" | "restricted" | "quarantine" | "banned"
+- pattern_summary: one paragraph describing the behavioral pattern observed
+- escalation_trajectory: "stable" | "improving" | "degrading" | "volatile"
+{reco_block}
+
+Respond with ONLY the JSON object. No markdown fencing, no explanation."""
+
+        # Use the RAG engine's LLM provider for synthesis
+        from tools.rag.llm.factory import get_llm_provider
+
+        config = session.config or RAGConfig.from_env()
+        llm = get_llm_provider(config)
+
+        assessment_raw = await asyncio.get_event_loop().run_in_executor(
+            None, lambda: llm.generate(assessment_prompt, temperature=0.2)
+        )
+
+        # Parse LLM response — try JSON first, fall back to raw text
+        try:
+            assessment = json.loads(assessment_raw)
+        except json.JSONDecodeError:
+            # Try to extract JSON from the response if LLM wrapped it
+            json_match = re.search(r"\{[\s\S]+\}", assessment_raw)
+            if json_match:
+                try:
+                    assessment = json.loads(json_match.group())
+                except json.JSONDecodeError:
+                    assessment = {"assessment_raw": assessment_raw}
+            else:
+                assessment = {"assessment_raw": assessment_raw}
+
+        # Enrich with hard data
+        assessment["client_id"] = client_id
+        assessment["record_count"] = len(entries)
+        assessment["severity_distribution"] = severity_counts
+        assessment["event_type_distribution"] = event_type_counts
+
+        return CallToolResult(content=[TextContent(type="text", text=json.dumps(assessment, indent=2))])
+
+    except Exception as e:
+        return CallToolResult(content=[TextContent(type="text", text=f"Client assessment failed: {str(e)}")])
 
 
 # ── Prompts ───────────────────────────────────────────────────────────────────
@@ -1189,6 +1599,8 @@ Ready to begin research?""",
 async def main():
     """Main server entry point."""
     logger.info("Starting GRID RAG MCP Server...")
+
+    _load_sessions()
 
     try:
         config = await asyncio.wait_for(
