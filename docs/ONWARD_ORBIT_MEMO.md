@@ -11,7 +11,7 @@
 | `CascadeProjects/Projects/GRID-main` | main          | **0 / 0** vs `origin/main` (clean) | Memo/OIS commits **pushed**; `make lint` OK; `make test` still **5 failures** (sandbox + auth 401) per last full run — subset `TestRAGEngineBasic` + `test_rag_init` OK |
 | `CascadeProjects/Projects/Vision`    | main          | 0 / 0 vs `origin/main`        | Dirty (tracked + untracked `docs/`, workflow, tests); `uv run pytest` not re-run for this memo row                                                                 |
 | `roots/python-craft`                 | main          | **0 / 0** vs `origin/main` (clean) | OIS runbook **pushed** on `origin/main`; `uv run pytest` collects **0** tests (no suite yet); `ruff check` reports pre-existing issues in `src/craft/` (lock-in smoke, not blocking docs) |
-| `CascadeProjects` (monorepo root)    | hogsmade      | **0 / 0** vs `origin/hogsmade` | **Lock-in:** rebased + **pushed** (`pull --rebase --autostash` after `stash` failure). **Submodule:** `Projects/GRID-main` **pinned to `c874ddb`** on `hogsmade` (`446e512`). Tracked clean; optional untracked GATE JSON + viz HTML only |
+| `CascadeProjects` (monorepo root)    | hogsmade      | **0 / 0** vs `origin/hogsmade` | **Lock-in:** rebased + **pushed** (`pull --rebase --autostash` after `stash` failure). **Submodule:** `Projects/GRID-main` **pinned to `83ab822`** on `hogsmade` (`446e512` → **`f9494be`**). Tracked clean; optional untracked GATE JSON + viz HTML only |
 
 
 ## Post-push checks (this batch)
@@ -24,7 +24,7 @@
 
 - **Vision:** modified CONTRIBUTING/README/pyproject/cli/tests + new `docs/`, `ci-ocr-smoke.yml`, `test_ui_ux_surface_reference.py` — commit as small PRs or one docs+tests PR.
 - **python-craft:** OIS runbook **published** on `origin/main` (lock-in); refresh **OIS Part 2.1** after future edits.
-- **CascadeProjects:** `hogsmade` **synced** (0/0); **`Projects/GRID-main` → `c874ddb`** submodule bump **pushed** (`446e512`). Untracked GATE/viz only if you choose to track them; never blind `git add .`.
+- **CascadeProjects:** `hogsmade` **synced** (0/0); **`Projects/GRID-main` → `83ab822`** submodule tip **pushed** (`f9494be` on `hogsmade`). Untracked GATE/viz only if you choose to track them; never blind `git add .`.
 
 ## Remote note
 
