@@ -52,6 +52,8 @@ class AuditEntry:
     request_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     correlation_id: str | None = None
     user_id: str | None = None
+    trace_id: str | None = None
+    span_id: str | None = None
     details: dict[str, Any] = field(default_factory=dict)
     duration_ms: float | None = None
 
