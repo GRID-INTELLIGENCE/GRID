@@ -760,3 +760,17 @@ resonance_telemetry_events.jsonl
 *.tfplan
 release-notes-draft.md
 publish-summary.txt
+
+# ==========================
+# SCRATCH / ONE-OFF SCRIPTS
+# ==========================
+activate_security_expansion.sh
+experimental_security_expansion.py
+harness_security_challenge.py
+grid-tools.sh
+tools_config.py
+HOME_SETUP.md
+idea_risk_visual.md
+idea_risk_map.md
+idea_risk_matrix.txt
+risk_opportunity_matrix.md

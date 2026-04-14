@@ -267,7 +267,12 @@ class RAGEngine:
             )
 
     async def query(
-        self, query_text: str, top_k: int | None = None, temperature: float = 0.7, include_sources: bool = True
+        self,
+        query_text: str,
+        top_k: int | None = None,
+        temperature: float = 0.7,
+        include_sources: bool = True,
+        where: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Query the RAG system (async).
 
@@ -294,6 +299,8 @@ class RAGEngine:
         ):
             # Use hybrid retriever if enabled, otherwise standard vector search
             if self._hybrid_retriever is not None:
+                if where:
+                    logger.warning("Metadata filter ('where') not supported with hybrid retriever; filter ignored")
                 # Assuming hybrid retriever search is or will be async
                 if hasattr(self._hybrid_retriever, "async_search"):
                     results = await self._hybrid_retriever.async_search(query=query_text, top_k=top_k)
@@ -310,9 +317,9 @@ class RAGEngine:
                 # Check if vector store query is async
                 async_query_fn = getattr(self.vector_store, "async_query", None)
                 if async_query_fn is not None and callable(async_query_fn):
-                    results = await async_query_fn(query_embedding=query_embedding, n_results=top_k)  # type: ignore[misc]
+                    results = await async_query_fn(query_embedding=query_embedding, n_results=top_k, where=where)  # type: ignore[misc]
                 else:
-                    results = self.vector_store.query(query_embedding=query_embedding, n_results=top_k)
+                    results = self.vector_store.query(query_embedding=query_embedding, n_results=top_k, where=where)
 
             if not results["documents"]:
                 return {"answer": "No relevant documents found in the knowledge base.", "sources": [], "context": ""}
