@@ -27,7 +27,6 @@ from grid.agentic.anticipation_engine import (
 from grid.agentic.learning_coordinator import OnlineLearningCoordinator, SkillStats
 from grid.agentic.runtime_behavior_tracer import DecisionPoint, ExecutionBehavior, ExecutionOutcome
 
-
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
 

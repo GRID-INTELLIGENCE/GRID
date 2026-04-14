@@ -9,7 +9,6 @@ from pathlib import Path
 from typing import Any
 
 import aiofiles
-
 import structlog
 
 from .adaptive_timeout import AdaptiveTimeoutManager
