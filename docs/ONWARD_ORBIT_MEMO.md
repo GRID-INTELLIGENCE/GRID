@@ -4,14 +4,14 @@
 
 ## Pointers (path | branch | unpushed | last gate)
 
-**Canonical procedure (OIS):** `roots/python-craft/docs/INTEGRITY_SYNC_BATCH_ALGORITHM.md` — integrity → sync → push → memo row; includes dated checkpoint table and `hogsmade` worked example.
+**Canonical procedure (OIS):** `roots/python-craft/docs/INTEGRITY_SYNC_BATCH_ALGORITHM.md` — integrity → sync → push → memo row; **Part 2.1** is git-grounded (overrides seeds/dashboard lag for these four paths).
 
 | Repo                                 | Branch        | Unpushed                      | Last gate                                                                                                                                                          |
 | ------------------------------------ | ------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `CascadeProjects/Projects/GRID-main` | main          | 0 (pushed `d5ca8cd..1bd212f`) | `make lint` OK; `make test` **5 failures** (sandbox in-process env + auth refresh 401) — not RAG-commit blockers; subset `TestRAGEngineBasic` + `test_rag_init` OK |
+| `CascadeProjects/Projects/GRID-main` | main          | **ahead 1** vs `origin/main` (clean tree) | `make lint` OK; `make test` **5 failures** (sandbox in-process env + auth refresh 401) — not RAG-commit blockers; subset `TestRAGEngineBasic` + `test_rag_init` OK; **push** to publish memo/OIS pointer commit |
 | `CascadeProjects/Projects/Vision`    | main          | 0 / 0 vs `origin/main`        | Dirty (tracked + untracked `docs/`, workflow, tests); `uv run pytest` not re-run for this memo row                                                                 |
-| `roots/python-craft`                 | main          | 0 / 0 vs `origin/main`        | OIS runbook `docs/INTEGRITY_SYNC_BATCH_ALGORITHM.md` tracked locally; **push** `roots/python-craft` to publish; `uv run pytest` collects **0** tests (no suite yet) |
-| `CascadeProjects` (monorepo root)    | hogsmade      | **8 / 1** vs `origin/hogsmade` | Dirty: glimpse-artifact, shared-types, echoes/eligibility; untracked GATE JSON + viz HTML — **OIS:** `S=stash_all` then rebase train (see OIS Part 2.2)          |
+| `roots/python-craft`                 | main          | **ahead 1** vs `origin/main` | OIS runbook: may have **extra uncommitted** edits in `docs/` — align with **OIS Part 2.1** (git truth); then **push**; `uv run pytest` collects **0** tests (no suite yet) |
+| `CascadeProjects` (monorepo root)    | hogsmade      | **8 / 1** vs `origin/hogsmade` | Dirty: glimpse-artifact, shared-types, **submodule `Projects/GRID-main`**, echoes/eligibility; untracked GATE JSON + viz HTML — **OIS:** `S=stash_all` then rebase train (see OIS Part 2.2) |
 
 
 ## Post-push checks (this batch)
