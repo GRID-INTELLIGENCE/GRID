@@ -8,10 +8,10 @@
 
 | Repo                                 | Branch        | Unpushed                      | Last gate                                                                                                                                                          |
 | ------------------------------------ | ------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `CascadeProjects/Projects/GRID-main` | main          | **ahead 1** vs `origin/main` (clean tree) | `make lint` OK; `make test` **5 failures** (sandbox in-process env + auth refresh 401) — not RAG-commit blockers; subset `TestRAGEngineBasic` + `test_rag_init` OK; **push** to publish memo/OIS pointer commit |
+| `CascadeProjects/Projects/GRID-main` | main          | **0 / 0** vs `origin/main` (clean) | Memo/OIS commits **pushed**; `make lint` OK; `make test` still **5 failures** (sandbox + auth 401) per last full run — subset `TestRAGEngineBasic` + `test_rag_init` OK |
 | `CascadeProjects/Projects/Vision`    | main          | 0 / 0 vs `origin/main`        | Dirty (tracked + untracked `docs/`, workflow, tests); `uv run pytest` not re-run for this memo row                                                                 |
-| `roots/python-craft`                 | main          | **ahead 1** vs `origin/main` | OIS runbook: may have **extra uncommitted** edits in `docs/` — align with **OIS Part 2.1** (git truth); then **push**; `uv run pytest` collects **0** tests (no suite yet) |
-| `CascadeProjects` (monorepo root)    | hogsmade      | **8 / 1** vs `origin/hogsmade` | Dirty: glimpse-artifact, shared-types, **submodule `Projects/GRID-main`**, echoes/eligibility; untracked GATE JSON + viz HTML — **OIS:** `S=stash_all` then rebase train (see OIS Part 2.2) |
+| `roots/python-craft`                 | main          | **0 / 0** vs `origin/main` (clean) | OIS runbook **pushed** on `origin/main`; `uv run pytest` collects **0** tests (no suite yet); `ruff check` reports pre-existing issues in `src/craft/` (lock-in smoke, not blocking docs) |
+| `CascadeProjects` (monorepo root)    | hogsmade      | **0 / 0** vs `origin/hogsmade` | **Lock-in:** rebased + **pushed** (`pull --rebase --autostash` after `stash` failure). Remaining: **dirty submodule gitlink** `Projects/GRID-main` vs checked-out GRID + untracked GATE/viz — commit submodule bump when pinning |
 
 
 ## Post-push checks (this batch)
@@ -23,8 +23,8 @@
 ## Ecosystem sweep (classify next)
 
 - **Vision:** modified CONTRIBUTING/README/pyproject/cli/tests + new `docs/`, `ci-ocr-smoke.yml`, `test_ui_ux_surface_reference.py` — commit as small PRs or one docs+tests PR.
-- **python-craft:** OIS runbook under `docs/` committed on `main` locally — **push** to publish; no `.cursor/` noise on current snapshot.
-- **CascadeProjects:** `hogsmade` **ahead 1 / behind 8** + dirty tree — **no blind `git add .`**; use OIS stash → `pull --rebase` → `stash pop` → push; submodule pointer commits only with explicit `P`.
+- **python-craft:** OIS runbook **published** on `origin/main` (lock-in); refresh **OIS Part 2.1** after future edits.
+- **CascadeProjects:** `hogsmade` **synced** with `origin` (0/0); still **no blind `git add .`** — next step is optional **submodule-only** commit for `Projects/GRID-main` when pinning GRID SHA; untracked GATE/viz remain operator choice.
 
 ## Remote note
 
