@@ -708,6 +708,9 @@ bandit-report.json
 config.secrets.baseline
 tmp_scan_*.py
 Virtual Environments.MD
+privacy_report.md
+.privacy.json
+.privacy-audit/
 
 # ==========================
 # PLAYWRIGHT / E2E TEST OUTPUTS
