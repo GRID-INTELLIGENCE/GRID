@@ -90,6 +90,11 @@ class TestSkillDiscoveryEngine:
 
 
 class TestSkillsSandbox:
+    @pytest.fixture(autouse=True)
+    def _enable_inprocess_fallback(self, monkeypatch):
+        """Allow fallback execution path in sandbox unit tests."""
+        monkeypatch.setenv("GRID_ALLOW_INPROCESS_EXEC", "1")
+
     def test_execute_skill_success(self, monkeypatch):
         """Skill completes successfully and records output."""
         sandbox = SkillsSandbox(config=SandboxConfig(timeout=2.0))
