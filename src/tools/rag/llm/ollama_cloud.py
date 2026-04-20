@@ -9,12 +9,13 @@ class OllamaCloudLLM(OllamaLocalLLM):
     Extends local provider but uses cloud URL.
     """
 
-    def __init__(self, model: str, cloud_url: str, timeout: int = 120):
+    def __init__(self, model: str, cloud_url: str, timeout: int = 120, api_key: str | None = None):
         """Initialize cloud Ollama LLM provider.
 
         Args:
             model: Model name
             cloud_url: Cloud Ollama base URL
             timeout: Request timeout in seconds
+            api_key: Optional API token (e.g. ``OLLAMA_API_KEY``) for authenticated cloud requests
         """
-        super().__init__(model=model, base_url=cloud_url, timeout=timeout)
+        super().__init__(model=model, base_url=cloud_url, timeout=timeout, api_key=api_key)

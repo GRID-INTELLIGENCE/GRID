@@ -19,18 +19,31 @@ class OllamaLocalLLM(BaseLLMProvider):
     Uses proper Ollama HTTP API or Python package.
     """
 
-    def __init__(self, model: str = "ministral", base_url: str = "http://localhost:11434", timeout: int = 120):
+    def __init__(
+        self,
+        model: str = "ministral",
+        base_url: str = "http://localhost:11434",
+        timeout: int = 120,
+        api_key: str | None = None,
+    ):
         """Initialize local Ollama LLM provider.
 
         Args:
             model: Model name (ministral, gpt-oss-safeguard, etc.)
             base_url: Ollama base URL
             timeout: Request timeout in seconds
+            api_key: Optional bearer token for cloud or authenticated endpoints
         """
         self.model = model
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
+        self._api_key = api_key
         self._breaker = get_circuit_breaker("ollama")
+
+    def _auth_headers(self) -> dict[str, str]:
+        if self._api_key:
+            return {"Authorization": f"Bearer {self._api_key}"}
+        return {}
 
     def generate(
         self,
@@ -62,18 +75,26 @@ class OllamaLocalLLM(BaseLLMProvider):
                     messages.append({"role": "system", "content": system})
                 messages.append({"role": "user", "content": prompt})
 
-                response = ollama.chat(
-                    model=self.model,
-                    messages=messages,
-                    options={"temperature": temperature, "num_predict": max_tokens, **kwargs},
-                )
+                if self._api_key:
+                    client = ollama.Client(host=self.base_url, headers=self._auth_headers())
+                    response = client.chat(
+                        model=self.model,
+                        messages=messages,
+                        options={"temperature": temperature, "num_predict": max_tokens, **kwargs},
+                    )
+                else:
+                    response = ollama.chat(
+                        model=self.model,
+                        messages=messages,
+                        options={"temperature": temperature, "num_predict": max_tokens, **kwargs},
+                    )
                 return cast(str, response["message"]["content"])
             except ImportError:
                 # Fallback to HTTP API
                 pass
 
             # Use HTTP API
-            with httpx.Client(timeout=self.timeout) as client:
+            with httpx.Client(timeout=self.timeout, headers=self._auth_headers()) as client:
                 payload = {
                     "model": self.model,
                     "prompt": prompt,
@@ -122,9 +143,15 @@ class OllamaLocalLLM(BaseLLMProvider):
                     messages.append({"role": "system", "content": system})
                 messages.append({"role": "user", "content": prompt})
 
-                stream = ollama.chat(
-                    model=self.model, messages=messages, options={"temperature": temperature, **kwargs}, stream=True
-                )
+                if self._api_key:
+                    client = ollama.Client(host=self.base_url, headers=self._auth_headers())
+                    stream = client.chat(
+                        model=self.model, messages=messages, options={"temperature": temperature, **kwargs}, stream=True
+                    )
+                else:
+                    stream = ollama.chat(
+                        model=self.model, messages=messages, options={"temperature": temperature, **kwargs}, stream=True
+                    )
 
                 for chunk in stream:
                     if "message" in chunk and "content" in chunk["message"]:
@@ -135,7 +162,7 @@ class OllamaLocalLLM(BaseLLMProvider):
                 pass
 
             # Use HTTP API streaming
-            with httpx.Client(timeout=self.timeout) as client:
+            with httpx.Client(timeout=self.timeout, headers=self._auth_headers()) as client:
                 payload = {
                     "model": self.model,
                     "prompt": prompt,

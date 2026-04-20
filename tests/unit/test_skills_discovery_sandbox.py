@@ -91,8 +91,8 @@ class TestSkillDiscoveryEngine:
 
 class TestSkillsSandbox:
     @pytest.fixture(autouse=True)
-    def _enable_inprocess_fallback(self, monkeypatch):
-        """Allow fallback execution path in sandbox unit tests."""
+    def _allow_inprocess_exec(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Sandbox blocks in-process fallback unless explicitly allowed (production safety)."""
         monkeypatch.setenv("GRID_ALLOW_INPROCESS_EXEC", "1")
 
     def test_execute_skill_success(self, monkeypatch):

@@ -8,6 +8,10 @@
 /debug_*.py
 /test_*_fix.py
 
+# Local privacy scans and reports (machine-generated)
+/.privacy.json
+/privacy_report.md
+
 # Scratch artifacts
 src/tools/insite.txt
 

@@ -204,9 +204,15 @@ class TestEnhancedRateLimiter:
         assert not self.request_validator.validate_request_signature(data, wrong_signature, int(timestamp), client_id)
 
     @pytest.mark.asyncio
-    async def test_enhanced_rate_limiting(self):
+    async def test_enhanced_rate_limiting(self, monkeypatch: pytest.MonkeyPatch):
         """Test enhanced rate limiting with IP and user limits"""
-        with patch("safety.api.rate_limiter._get_redis") as mock_redis:
+        # Root conftest sets SAFETY_BYPASS_REDIS=true; this test exercises the Redis-backed path.
+        monkeypatch.delenv("SAFETY_BYPASS_REDIS", raising=False)
+        with (
+            patch("safety.api.rate_limiter._get_redis") as mock_redis,
+            patch("safety.api.rate_limiter.risk_manager.get_score", new_callable=AsyncMock) as mock_risk,
+        ):
+            mock_risk.return_value = 0.0
             mock_client = AsyncMock()
             mock_redis.return_value = mock_client
 

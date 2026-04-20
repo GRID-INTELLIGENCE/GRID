@@ -72,6 +72,10 @@ class OllamaEmbeddingProvider(BaseEmbeddingProvider):
             logger.debug("Text truncated from %d to %d characters", original_length, len(text))
 
         # STRICT MODE: Only use the configured model. No fallbacks.
+        # N10: the single-element list is intentional — the loop structure is retained
+        # for its inner retry logic (context-length truncation → continue), but any
+        # `continue # Try next model` branch is effectively a terminal exit since no
+        # second model exists. Do not interpret these as live multi-model fallback.
         models_to_try = [self.model]
 
         last_error = None
@@ -122,12 +126,19 @@ class OllamaEmbeddingProvider(BaseEmbeddingProvider):
                     # For other errors, continue to next model if available
                     continue
 
-                # Use HTTP API
+                # Use HTTP API — prefer the new /api/embed endpoint, fall back to
+                # the legacy /api/embeddings endpoint for older Ollama servers.
+                # New endpoint: {"model": ..., "input": str | list[str]} -> {"embeddings": [[...]]}
+                # Legacy endpoint: {"model": ..., "prompt": str}         -> {"embedding": [...]}
                 with httpx.Client(timeout=self.timeout) as client:
                     with self._breaker:
-                        response = client.post(
-                            f"{self.base_url}/api/embeddings", json={"model": model_name, "prompt": text}
-                        )
+                        response = client.post(f"{self.base_url}/api/embed", json={"model": model_name, "input": text})
+                        if response.status_code == 404:
+                            # Older Ollama server — retry against legacy endpoint
+                            response = client.post(
+                                f"{self.base_url}/api/embeddings",
+                                json={"model": model_name, "prompt": text},
+                            )
                     if response.status_code == 404:
                         last_error = Exception(f"Model '{model_name}' not found (404)")
                         continue  # Try next model
