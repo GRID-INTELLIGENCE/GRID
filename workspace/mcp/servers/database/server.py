@@ -7,7 +7,9 @@ Provides SQLite database operations using real MCP library
 import asyncio
 import json
 import logging
+import re
 import sqlite3
+import time
 from typing import Any
 
 # Real MCP imports
@@ -19,12 +21,109 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
+class SQLInjectionValidator:
+    """Validates SQL queries and inputs against injection attacks."""
+
+    # Dangerous statement starters — anything that isn't a plain SELECT
+    _DANGEROUS_STARTERS = (
+        "DROP ",
+        "DELETE ",
+        "INSERT ",
+        "UPDATE ",
+        "ALTER ",
+        "CREATE ",
+        "TRUNCATE ",
+        "EXEC ",
+        "EXECUTE ",
+        "UNION ",
+    )
+
+    # SQL injection patterns in raw input strings
+    _INPUT_INJECTION_PATTERNS = [
+        r"'[^']*;",  # single-quote then semicolon (classic injection)
+        r"--\s*(?:\n|$)",  # line comment at end of input
+        r";\s*(?:DROP|DELETE|INSERT|UPDATE|ALTER|EXEC)\b",  # compound dangerous stmt
+        r"'\s*;",  # quote-then-semicolon shorthand
+    ]
+
+    def validate_query(self, sql: str) -> bool:
+        """Return True only for safe SELECT-only queries with no compound statements."""
+        sql_stripped = sql.strip()
+        sql_upper = sql_stripped.upper()
+
+        # Must be a plain SELECT
+        if not sql_upper.startswith("SELECT ") and sql_upper != "SELECT":
+            return False
+
+        # No compound statements
+        if ";" in sql_stripped:
+            return False
+
+        # No UNION-based injection (covers SELECT … UNION SELECT …)
+        if re.search(r"\bUNION\b", sql_upper):
+            return False
+
+        return True
+
+    def sanitize_input(self, input_str: str) -> str:
+        """Return input unchanged if safe; raise ValueError if injection pattern detected."""
+        for pattern in self._INPUT_INJECTION_PATTERNS:
+            if re.search(pattern, input_str, re.IGNORECASE):
+                raise ValueError("Potentially malicious SQL input detected: injection pattern matched")
+        return input_str
+
+    def validate_table_name(self, name: str) -> bool:
+        """Return True for identifiers that contain only alphanumerics, underscores, and dots."""
+        if not name:
+            return False
+        return bool(re.match(r"^[a-zA-Z0-9_.]+$", name))
+
+
+class ConnectionManager:
+    """Manages SQLite connections with a per-manager limit and idle timeout."""
+
+    def __init__(self, max_connections: int = 10, connection_timeout: int = 300):
+        self.max_connections = max_connections
+        self.connection_timeout = connection_timeout
+        # Each entry: {"conn": <connection>, "db_path": str, "created_at": float}
+        self.connections: dict = {}
+
+    def add_connection(self, name: str, conn, db_path: str) -> bool:
+        """Register a connection under *name*. Returns False when the pool is full."""
+        if len(self.connections) >= self.max_connections:
+            return False
+        self.connections[name] = {
+            "conn": conn,
+            "db_path": db_path,
+            "created_at": time.time(),
+        }
+        return True
+
+    def get_connection(self, name: str):
+        """Return the connection or None if it is unknown or has exceeded the timeout."""
+        if name not in self.connections:
+            return None
+        entry = self.connections[name]
+        if time.time() - entry["created_at"] > self.connection_timeout:
+            del self.connections[name]
+            return None
+        return entry["conn"]
+
+    def remove_connection(self, name: str) -> bool:
+        """Remove and return True if the connection existed, False otherwise."""
+        if name in self.connections:
+            del self.connections[name]
+            return True
+        return False
+
+
 class ProductionDatabaseMCPServer:
     """Production Database MCP Server using real MCP library"""
 
     def __init__(self):
         self.server = Server("database")
         self.connections = {}
+        self._validator = SQLInjectionValidator()
         self._allowed_query_patterns = [
             "^SELECT\\s+",  # Only SELECT queries allowed for read operations
             "^INSERT\\s+INTO\\s+[a-zA-Z_][a-zA-Z0-9_]*\\s+VALUES\\s*\\(",
@@ -189,47 +288,8 @@ class ProductionDatabaseMCPServer:
             )
 
     def _is_query_safe(self, sql: str) -> bool:
-        """Validate SQL query against allowed patterns."""
-        import re
-
-        sql_upper = sql.strip().upper()
-
-        # Only allow SELECT queries for safety
-        if not sql_upper.startswith("SELECT"):
-            return False
-
-        # Check for dangerous keywords
-        dangerous_keywords = [
-            "DROP",
-            "DELETE",
-            "UPDATE",
-            "INSERT",
-            "ALTER",
-            "CREATE",
-            "TRUNCATE",
-            "EXEC",
-            "EXECUTE",
-            "SCRIPT",
-            "--",
-            ";",
-            "UNION",
-            "JOIN",
-            "WHERE",
-            "OR",
-            "AND",
-        ]
-
-        for keyword in dangerous_keywords:
-            if keyword in sql_upper:
-                logger.warning(f"Potentially dangerous keyword detected: {keyword}")
-                return False
-
-        # Basic pattern validation
-        for pattern in self._allowed_query_patterns:
-            if re.match(pattern, sql.strip()):
-                return True
-
-        return False
+        """Validate SQL query against injection patterns using SQLInjectionValidator."""
+        return self._validator.validate_query(sql)
 
     async def _list_tables(self, arguments: dict[str, Any]) -> CallToolResult:
         """List all tables in database"""
