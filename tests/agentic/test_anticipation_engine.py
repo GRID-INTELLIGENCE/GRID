@@ -269,7 +269,9 @@ class TestConsumerParse:
         signal = engine.synthesize(_make_behavior(decisions=3), session_id="s1")
 
         metadata: dict = {
-            "anticipation": None if signal.kill_switch_active else {
+            "anticipation": None
+            if signal.kill_switch_active
+            else {
                 "session_id": signal.session_id,
                 "score": signal.anticipation_score,
                 "proposals": [

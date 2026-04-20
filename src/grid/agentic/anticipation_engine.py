@@ -155,11 +155,7 @@ class AnticipationStore:
                     if session_id and record.get("session_id") != session_id:
                         continue
                     if task_type:
-                        rec_task = (
-                            record.get("window", {})
-                            .get("origin_state", {})
-                            .get("task_type")
-                        )
+                        rec_task = record.get("window", {}).get("origin_state", {}).get("task_type")
                         if rec_task != task_type:
                             continue
                     if min_score is not None and record.get("anticipation_score", 0.0) < min_score:
@@ -244,10 +240,7 @@ class AnticipationEngine:
             "user_satisfaction_proxy": stats.success_rate,
         }
         reward = compute_agentic_reward(simulated_trace, self._reward_cfg)
-        rationale = (
-            f"skill '{stats.skill_id}' success_rate={stats.success_rate:.2f} "
-            f"over {stats.usage_count} samples"
-        )
+        rationale = f"skill '{stats.skill_id}' success_rate={stats.success_rate:.2f} over {stats.usage_count} samples"
         return ActionProposal(
             action_type=task_type,
             skill_id=stats.skill_id,
