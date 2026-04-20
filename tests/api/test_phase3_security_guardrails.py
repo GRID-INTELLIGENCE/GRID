@@ -154,11 +154,13 @@ class TestKBErrorSanitization:
 
     def test_general_exception_handler_hides_details(self) -> None:
         """The general exception handler must return generic message."""
-        # knowledge_base.api.routes requires openai (optional dependency)
-        pytest.importorskip("openai")
-        from knowledge_base.api.routes import create_development_app
+        # Do not import knowledge_base.api.routes at module level: that package runs
+        # Databricks DB connect() on import and can hang CI. Exercise the same
+        # handler contract with a minimal FastAPI app.
+        from fastapi import FastAPI
+        from fastapi.responses import JSONResponse
 
-        app = create_development_app()
+        app = FastAPI()
 
         @app.get("/test-error")
         async def _raise():
@@ -166,8 +168,6 @@ class TestKBErrorSanitization:
 
         @app.exception_handler(Exception)
         async def _handler(request, exc):
-            from fastapi.responses import JSONResponse
-
             return JSONResponse(status_code=500, content={"error": "Internal server error"})
 
         client = TestClient(app, raise_server_exceptions=False)
