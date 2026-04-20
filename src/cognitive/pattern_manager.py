@@ -230,7 +230,7 @@ class AdvancedPatternManager:
 
         update = LearningUpdate(
             pattern_id=pattern_id,
-            was_correct=None,  # outcome unknown until validated
+            was_correct=True,  # resonance strengthens the pattern until explicit validation
             user_feedback="resonance",
             confidence_adjustment=confidence_delta,
             context=features,

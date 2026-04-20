@@ -198,7 +198,7 @@ class TestAuthEndpoints:
     def test_token_refresh_valid_token(self, mock_get_jwt_manager, client):
         """Scenario: Valid token refresh should work."""
         jwt_manager = Mock()
-        jwt_manager.refresh_access_token.return_value = "new_access_token"
+        jwt_manager.refresh_access_token = AsyncMock(return_value="new_access_token")
         mock_get_jwt_manager.return_value = jwt_manager
 
         refresh_data = {"refresh_token": "safe_refresh_token"}
@@ -209,7 +209,7 @@ class TestAuthEndpoints:
 
         assert data["success"], "Refresh should be successful"
         assert "access_token" in data["data"], "Should return new access token"
-        jwt_manager.refresh_access_token.assert_called_once_with("safe_refresh_token")
+        jwt_manager.refresh_access_token.assert_awaited_once_with("safe_refresh_token")
 
     def test_invalid_refresh_token(self, client):
         """Scenario: Invalid refresh token should be rejected"""
