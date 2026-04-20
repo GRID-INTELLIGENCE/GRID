@@ -376,7 +376,7 @@ async def list_tools() -> list[Tool]:
                     },
                     "where": {
                         "type": "object",
-                        "description": "Metadata filter to scope retrieval (e.g. {\"client_id\": \"xyz\"}). Uses ChromaDB where syntax.",
+                        "description": 'Metadata filter to scope retrieval (e.g. {"client_id": "xyz"}). Uses ChromaDB where syntax.',
                     },
                 },
                 "required": ["query"],
@@ -454,7 +454,7 @@ async def list_tools() -> list[Tool]:
                     },
                     "where": {
                         "type": "object",
-                        "description": "Metadata filter to scope search (e.g. {\"client_id\": \"xyz\"}, {\"event_type\": \"abuse_signal\"}). Uses ChromaDB where syntax.",
+                        "description": 'Metadata filter to scope search (e.g. {"client_id": "xyz"}, {"event_type": "abuse_signal"}). Uses ChromaDB where syntax.',
                     },
                 },
                 "required": ["query"],
@@ -1335,10 +1335,12 @@ async def _handle_assess_client(args: dict[str, Any]) -> CallToolResult:
             )
 
         results = collection.get(
-            where={"$and": [
-                {"client_id": {"$eq": client_id}},
-                {"record_type": {"$eq": "behavioral_event"}},
-            ]},
+            where={
+                "$and": [
+                    {"client_id": {"$eq": client_id}},
+                    {"record_type": {"$eq": "behavioral_event"}},
+                ]
+            },
             limit=200,
             include=["documents", "metadatas"],
         )
@@ -1380,10 +1382,7 @@ async def _handle_assess_client(args: dict[str, Any]) -> CallToolResult:
         timeline_text = f"Behavioral timeline for client '{client_id}' ({len(entries)} events):\n\n"
         for doc, meta in entries:
             ts = meta.get("timestamp", "?")
-            timeline_text += (
-                f"[{ts}] {meta.get('severity', '?').upper()} "
-                f"{meta.get('event_type', '?')}: {doc[:200]}\n"
-            )
+            timeline_text += f"[{ts}] {meta.get('severity', '?').upper()} {meta.get('event_type', '?')}: {doc[:200]}\n"
 
         # Build assessment prompt for LLM synthesis
         reco_block = ""
