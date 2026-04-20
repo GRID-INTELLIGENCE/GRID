@@ -40,7 +40,12 @@ def conversational_engine():
     config.use_hybrid = False
     config.use_reranker = False
     config.use_intelligent_rag = False
-    return ConversationalRAGEngine(config)
+    try:
+        return ConversationalRAGEngine(config)
+    except RuntimeError as exc:
+        if "No compatible embedding model" in str(exc) or "ollama pull" in str(exc).lower():
+            pytest.skip(str(exc))
+        raise
 
 
 class TestConversationMemory:
@@ -110,7 +115,12 @@ class TestConversationalRAGEngine:
     @pytest.mark.asyncio
     async def test_create_conversational_engine(self):
         """Test creating conversational RAG engine."""
-        engine = create_conversational_rag_engine()
+        try:
+            engine = create_conversational_rag_engine()
+        except RuntimeError as exc:
+            if "No compatible embedding model" in str(exc) or "ollama pull" in str(exc).lower():
+                pytest.skip(str(exc))
+            raise
         assert isinstance(engine, ConversationalRAGEngine)
         assert hasattr(engine, "conversation_memory")
         assert engine.config.conversation_enabled
@@ -214,7 +224,12 @@ class TestMultiHopReasoning:
         config.multi_hop_enabled = True
         config.multi_hop_max_depth = 2
         config.vector_store_provider = "in_memory"
-        engine = ConversationalRAGEngine(config)
+        try:
+            engine = ConversationalRAGEngine(config)
+        except RuntimeError as exc:
+            if "No compatible embedding model" in str(exc) or "ollama pull" in str(exc).lower():
+                pytest.skip(str(exc))
+            raise
 
         # Mock the base engine
         engine._rag_engine = Mock()

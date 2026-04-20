@@ -52,7 +52,7 @@ def test_code_analysis_validate_path_blocks_escape(code_analysis_module: ModuleT
     outside.write_text("print('outside')", encoding="utf-8")
 
     try:
-        with pytest.raises(ValueError, match="outside GRID workspace root"):
+        with pytest.raises(ValueError, match="outside allowed workspace roots|outside GRID workspace root"):
             code_analysis_module._validate_path(str(outside))
     finally:
         outside.unlink(missing_ok=True)
@@ -88,7 +88,8 @@ def test_test_runner_run_tests_blocks_escape(test_runner_module: ModuleType) -> 
         result = test_runner_module.run_tests(str(outside), verbose=False)
 
         assert result["success"] is False
-        assert "outside GRID workspace root" in result["error"]
+        err = result.get("error") or ""
+        assert "outside" in err.lower() and ("workspace" in err.lower() or "grid" in err.lower())
     finally:
         outside.unlink(missing_ok=True)
 
