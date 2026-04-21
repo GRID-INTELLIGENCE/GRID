@@ -1,0 +1,49 @@
+version: 1
+scope: experience
+silent_notes:
+  enabled: true
+  schema:
+    - timestamp
+    - session_id
+    - signal
+    - severity
+    - trigger
+    - evidence_summary
+    - recommended_action
+severity:
+  info:
+    interrupt_user: false
+  low:
+    interrupt_user: false
+  medium:
+    interrupt_user: false
+    conditional_interrupt: "only_to_prevent_scope_or_privacy_drift"
+  high:
+    interrupt_user: true
+    response_shape: "one_warning_line_plus_one_safe_next_step"
+  critical:
+    interrupt_user: true
+    response_shape: "refuse_and_redirect_to_safe_path"
+automation_loop:
+  enabled: true
+  recurrence_thresholds:
+    clarification_repeat_count: 3
+    tool_error_repeat_count: 3
+    user_correction_repeat_count: 2
+  classes:
+    - ux
+    - scope
+    - tooling
+    - policy
+    - data_minimization
+  proposal_contract:
+    - observation
+    - bounded_adjustment
+    - expected_impact
+    - opt_in_required
+guardrails:
+  never_include:
+    - secrets
+    - tokens
+    - raw_env_values
+    - pii

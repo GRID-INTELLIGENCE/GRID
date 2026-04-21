@@ -870,6 +870,7 @@ async def main():
                     embedding_model=config.embedding_model,
                     llm_model=config.llm_model_local,
                     base_url=config.ollama_base_url,
+                    embedding_provider=config.embedding_provider,
                 ),
             ),
             timeout=15.0,

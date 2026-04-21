@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+project_root="$(pwd -P)"
+audit_dir="$project_root/.privacy-audit"
+day_log="$audit_dir/$(date +%F).log"
+hook_log="$project_root/audit.log"
+
+mkdir -p "$audit_dir"
+touch "$day_log"
+touch "$hook_log"
+
+{
+  echo "=== $(date -Is) pre-commit snapshot ==="
+  sed -n '1,200p' "$day_log"
+  echo
+} >> "$hook_log"
+
+echo "[pre-commit] audit snapshot appended to $hook_log"

@@ -168,7 +168,7 @@ This phase applies Gemini's principle of **Declarative Intent**. Users should ne
 
 3. **User Onboarding Flow**
    - Self-service registration with tiered access (Free/Pro/Enterprise)
-   - Guided tour of capabilities using the Canvas Flip metaphor
+   - Guided tour of capabilities using the Canvas Flip metaphor (implemented runbook: `docs/guides/PLAZA_GRID_GUIDED_TOUR.md`)
    - "Coffee House" cognitive load adaptation from first interaction
 
 **Maps to Codemap:**

@@ -203,16 +203,19 @@ class RAGEngine:
         # Initialize intelligent orchestrator for Phase 3 reasoning
         self._intelligent_orchestrator = None
         if config.use_intelligent_rag:
-            from .intelligence.intelligent_orchestrator import create_intelligent_orchestrator
-            from .intelligence.retrieval_orchestrator import create_retrieval_orchestrator
+            try:
+                from .intelligence.intelligent_orchestrator import create_intelligent_orchestrator
+                from .intelligence.retrieval_orchestrator import create_retrieval_orchestrator
 
-            retrieval_orch = create_retrieval_orchestrator(engine=self)
-            self._intelligent_orchestrator = create_intelligent_orchestrator(
-                retrieval_orchestrator=retrieval_orch,
-                llm_provider=self.llm_provider,
-                enable_all_features=True,
-            )
-            logger.info("Intelligent RAG orchestrator enabled with full reasoning pipeline.")
+                retrieval_orch = create_retrieval_orchestrator(engine=self)
+                self._intelligent_orchestrator = create_intelligent_orchestrator(
+                    retrieval_orchestrator=retrieval_orch,
+                    llm_provider=self.llm_provider,
+                    enable_all_features=True,
+                )
+                logger.info("Intelligent RAG orchestrator enabled with full reasoning pipeline.")
+            except (ImportError, ModuleNotFoundError):
+                logger.warning("Intelligent RAG modules not found — falling back to standard RAG pipeline")
 
     def index(
         self,

@@ -4,6 +4,15 @@
     "strategy": "fallback",
     "providers": [
       {
+        "type": "ollama-local",
+        "model": "ministral-3:3b",
+        "url": "http://localhost:11434",
+        "label": "Local Ollama — Ministral 3B (RAM-safe default)",
+        "timeout_ms": 120000,
+        "health_check": true,
+        "health_timeout_ms": 2000
+      },
+      {
         "type": "ollama-cloud",
         "model": "mistral:latest",
         "url": "https://api.ollama.com",
@@ -11,15 +20,6 @@
         "timeout_ms": 60000,
         "health_check": true,
         "health_timeout_ms": 3000
-      },
-      {
-        "type": "ollama-local",
-        "model": "ministral-3:latest",
-        "url": "http://localhost:11434",
-        "label": "Local Ollama — Ministral",
-        "timeout_ms": 120000,
-        "health_check": true,
-        "health_timeout_ms": 2000
       }
     ]
   },

@@ -362,6 +362,7 @@ def check_rag_system_health(
     embedding_model: str = "nomic-embed-text-v2-moe:latest",
     llm_model: str = "ministral-3:latest",
     base_url: str = "http://localhost:11434",
+    embedding_provider: str = "ollama",
 ) -> dict[str, any]:
     """
     Check health of the RAG system's model dependencies.
@@ -370,11 +371,35 @@ def check_rag_system_health(
         embedding_model: Name of embedding model to check
         llm_model: Name of LLM model to check
         base_url: Ollama base URL
+        embedding_provider: Embedding provider (ollama, huggingface, simple)
 
     Returns:
         Dictionary with system health status
     """
-    logger.info(f"Checking RAG system health (embedding={embedding_model}, llm={llm_model})")
+    logger.info(f"Checking RAG system health (embedding={embedding_model}, llm={llm_model}, provider={embedding_provider})")
+
+    # Skip Ollama health checks for non-Ollama providers
+    if embedding_provider != "ollama":
+        logger.info(f"Skipping Ollama health check for provider={embedding_provider}")
+        return {
+            "overall_status": "healthy",
+            "ollama_accessible": False,
+            "embedding_model": {
+                "model_name": embedding_model,
+                "status": "healthy",
+                "is_available": True,
+                "last_checked": datetime.now(UTC).isoformat(),
+                "details": {"provider": embedding_provider, "ollama_check_skipped": True},
+            },
+            "llm_model": {
+                "model_name": llm_model,
+                "status": "healthy",
+                "is_available": True,
+                "last_checked": datetime.now(UTC).isoformat(),
+                "details": {"provider": embedding_provider, "ollama_check_skipped": True},
+            },
+            "timestamp": datetime.now(UTC).isoformat(),
+        }
 
     health_check = check_models_health([embedding_model, llm_model], base_url)
 

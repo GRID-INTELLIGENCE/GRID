@@ -1,4 +1,4 @@
-﻿{
+{
   "permissions": {
     "allow": [
       "Bash(uv run python:*)",
@@ -7,5 +7,16 @@
       "Bash(git push:*)"
     ]
   },
-  "prefersReducedMotion": true
+  "enabledMcpjsonServers": [
+    "glimpse-server",
+    "eligibility-server"
+  ],
+  "prefersReducedMotion": true,
+  "disabledMcpjsonServers": [
+    "echoes-server",
+    "grid-server",
+    "afloat-server",
+    "lots-server",
+    "pulse-server"
+  ]
 }

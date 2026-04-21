@@ -109,7 +109,7 @@ def get_llm_provider(
         from ..model_resolver import resolve_llm
 
         resolved = resolve_llm()
-        logger.info("llm_factory.fallback_chain", provider=resolved.label, model=resolved.model)
+        logger.info("llm_factory.fallback_chain provider=%s model=%s", resolved.label, resolved.model)
         return _provider_from_resolved(resolved)
 
     # --- Legacy explicit-mode path ---

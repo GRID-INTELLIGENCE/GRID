@@ -78,7 +78,7 @@ def get_embedding_provider(provider_type: str | None = None, config: RAGConfig |
         from ..model_resolver import resolve_embedding
 
         resolved = resolve_embedding()
-        logger.info("embedding_factory.fallback_chain", provider=resolved.label, model=resolved.model)
+        logger.info("embedding_factory.fallback_chain provider=%s model=%s", resolved.label, resolved.model)
         return _embedding_from_resolved(resolved)
 
     # --- Legacy explicit-mode path ---
