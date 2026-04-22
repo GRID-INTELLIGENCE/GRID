@@ -41,6 +41,7 @@ class ProcessingResult:
     output: Any | None = None
     cognitive_context: CognitiveContext | None = None
     processing_time_ms: float = 0.0
+    pass_count: int = 1
     patterns_detected: list[str] = field(default_factory=list)
     adaptations_applied: list[str] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
@@ -52,6 +53,7 @@ class ProcessingResult:
             "output": self.output,
             "cognitive_context": self.cognitive_context.to_dict() if self.cognitive_context else None,
             "processing_time_ms": self.processing_time_ms,
+            "pass_count": self.pass_count,
             "patterns_detected": self.patterns_detected,
             "adaptations_applied": self.adaptations_applied,
             "errors": self.errors,
@@ -170,7 +172,7 @@ class CognitiveProcessor:
             temporal_context = await self._analyze_temporal()
 
             # 5. Adaptive processing
-            output, adaptations = await self._adaptive_process(processed_input, patterns_detected, temporal_context)
+            output, adaptations, pass_count = await self._adaptive_process(processed_input, patterns_detected, temporal_context)
             adaptations_applied = adaptations
 
             # 6. Update metrics and determine final state
@@ -188,6 +190,7 @@ class CognitiveProcessor:
                 output=output,
                 cognitive_context=self._context,
                 processing_time_ms=processing_time_ms,
+                pass_count=pass_count,
                 patterns_detected=patterns_detected,
                 adaptations_applied=adaptations_applied,
                 errors=errors,
@@ -262,7 +265,7 @@ class CognitiveProcessor:
         input_data: Any,
         patterns: list[str],
         temporal_context: dict[str, Any],
-    ) -> tuple[Any, list[str]]:
+    ) -> tuple[Any, list[str], int]:
         """
         Process input adaptively based on cognitive context.
 
@@ -273,10 +276,17 @@ class CognitiveProcessor:
         - Processing mode (System 1 vs System 2)
         """
         adaptations: list[str] = []
+        pass_count = 1
 
         # Determine coffee mode based on cognitive load
         coffee_mode = self._metrics.get_coffee_mode()
         self._context.coffee_mode = coffee_mode
+
+        # Pattern-based adaptations (pre-processing triggers)
+        if "COMPLEX_PATTERN" in patterns:
+            # Force initial confidence drop for complex patterns to trigger multi-pass
+            self._metrics.decision_confidence = min(self._metrics.decision_confidence, 0.6)
+            adaptations.append("complex_reasoning_triggered")
 
         # Adjust processing based on load
         if self._metrics.is_overloaded():
@@ -289,14 +299,16 @@ class CognitiveProcessor:
             adaptations.append("full_analysis")
             self._context.processing_mode = ProcessingMode.SYSTEM_2
             # Full processing for optimal state
-            output = await self._full_process(input_data, patterns)
+            result = await self._full_process(input_data, patterns)
+            output = result["output"]
+            pass_count = result["pass_count"]
 
         else:
             # Balanced processing
             adaptations.append("balanced_processing")
             output = await self._balanced_process(input_data, patterns)
 
-        # Pattern-based adaptations
+        # Pattern-based adaptations (post-processing markers)
         if "URGENT_PATTERN" in patterns:
             adaptations.append("prioritized")
             self._context.attention = AttentionLevel.FOCUSED
@@ -304,7 +316,7 @@ class CognitiveProcessor:
         if "COMPLEX_PATTERN" in patterns and coffee_mode != CoffeeMode.COLD_BREW:
             adaptations.append("complexity_warning")
 
-        return output, adaptations
+        return output, adaptations, pass_count
 
     async def _simplified_process(self, input_data: Any) -> Any:
         """Simplified processing for high-load situations."""
@@ -313,16 +325,56 @@ class CognitiveProcessor:
             "mode": "simplified",
             "input_received": True,
             "deferred_analysis": True,
+            "pass_count": 1,
         }
 
-    async def _full_process(self, input_data: Any, patterns: list[str]) -> Any:
-        """Full processing for optimal cognitive state."""
+    async def _full_process(self, input_data: Any, patterns: list[str]) -> dict[str, Any]:
+        """Full processing with Multi-Pass refinement."""
+        pass_count = 0
+        all_insights = []
+        final_output = None
+
+        # Multi-Pass Refinement Loop
+        while pass_count < 3 and self._metrics.decision_confidence < 0.8:
+            pass_count += 1
+
+            # Simulate a pass: generate insights and construct output
+            current_insights = self._generate_insights(patterns)
+            for insight in current_insights:
+                if insight not in all_insights:
+                    all_insights.append(insight)
+
+            if pass_count > 1:
+                all_insights.append(f"Refinement Pass {pass_count}: Confidence optimized")
+
+            # Build the output structure
+            final_output = {
+                "mode": "full",
+                "input_data": input_data,
+                "patterns": patterns,
+                "analysis_complete": True,
+                "insights": all_insights,
+                "refinement_level": pass_count,
+            }
+
+            # Boost confidence after each pass
+            self._metrics.decision_confidence = min(1.0, self._metrics.decision_confidence + 0.15)
+
+        # Ensure at least one pass occurred if confidence was already high
+        if pass_count == 0:
+            pass_count = 1
+            final_output = {
+                "mode": "full",
+                "input_data": input_data,
+                "patterns": patterns,
+                "analysis_complete": True,
+                "insights": self._generate_insights(patterns),
+                "refinement_level": 1,
+            }
+
         return {
-            "mode": "full",
-            "input_data": input_data,
-            "patterns": patterns,
-            "analysis_complete": True,
-            "insights": self._generate_insights(patterns),
+            "output": final_output,
+            "pass_count": pass_count
         }
 
     async def _balanced_process(self, input_data: Any, patterns: list[str]) -> Any:

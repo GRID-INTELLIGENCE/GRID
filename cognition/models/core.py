@@ -54,9 +54,9 @@ class CoffeeMode(Enum):
     def chunk_size(self) -> int:
         """Get the processing chunk size for this mode."""
         sizes = {
-            CoffeeMode.ESPRESSO: 32,
-            CoffeeMode.AMERICANO: 64,
-            CoffeeMode.COLD_BREW: 128,
+            CoffeeMode.ESPRESSO: 64,   # Doubled for precision
+            CoffeeMode.AMERICANO: 128, # Doubled for exploration
+            CoffeeMode.COLD_BREW: 256, # Doubled for comprehensive depth
         }
         return sizes[self]
 
