@@ -307,15 +307,22 @@ async def get_optional_authentication(
         try:
             return await verify_jwt_token(bearer_token, require_valid=True)
         except Exception as e:
-            logger.warning("Optional JWT verification failed: %s", e)
-            return anonymous_context
+            logger.warning(f"Optional JWT verification failed: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=str(e) if settings.is_development else "Invalid or expired authentication token",
+                headers={"WWW-Authenticate": "Bearer"},
+            ) from e
 
     if api_key:
         try:
             return verify_api_key(api_key, require_valid=True)
         except Exception as e:
-            logger.warning("Optional API key verification failed: %s", e)
-            return anonymous_context
+            logger.warning(f"Optional API key verification failed: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=str(e) if settings.is_development else "Invalid API Key",
+            ) from e
 
     # CRIT-7: Anonymous must never have admin or elevated permissions.
     return {
