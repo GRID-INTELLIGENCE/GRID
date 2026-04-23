@@ -128,7 +128,10 @@ class AgentExecutor:
             if not _sig.kill_switch_active:
                 trace.metadata["anticipation"] = {
                     "score": _sig.anticipation_score,
-                    "proposals": [{"action_type": p.action_type, "skill_id": p.skill_id, "expected_reward": p.expected_reward} for p in _sig.synthesis],
+                    "proposals": [
+                        {"action_type": p.action_type, "skill_id": p.skill_id, "expected_reward": p.expected_reward}
+                        for p in _sig.synthesis
+                    ],
                     "schema_version": _sig.window.schema_version,
                 }
 

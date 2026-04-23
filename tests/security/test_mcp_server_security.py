@@ -299,21 +299,31 @@ class TestRAGPathContainment:
     """Verify docs_path and index path containment logic."""
 
     HOME = Path.home().resolve()
+    # Repo root: ~/roots/GRID often symlinks here; Path.resolve() follows symlinks and must
+    # still match an allowed prefix (otherwise tests fail when GRID lives under another home).
+    _REPO_ROOT = Path(__file__).resolve().parents[2]
     ALLOWED_ROOTS = [
-        (HOME / "roots" / "GRID").resolve(),
-        (HOME / "CascadeProjects").resolve(),
-        (HOME / "canopy").resolve(),
-        (HOME / "roots").resolve(),
+        HOME / "roots" / "GRID",
+        HOME / "CascadeProjects",
+        HOME / "canopy",
+        HOME / "roots",
+        _REPO_ROOT,
     ]
     SENSITIVE = [".ssh", ".gnupg", ".env", "credentials", "secrets"]
 
     def _is_allowed(self, path_str: str) -> bool:
-        resolved = Path(path_str).resolve()
-        if not any(str(resolved).startswith(str(r)) for r in self.ALLOWED_ROOTS):
-            return False
-        if any(s in str(resolved).lower() for s in self.SENSITIVE):
-            return False
-        return True
+        p = Path(path_str).expanduser()
+        # Match declared roots on both lexical paths and resolved paths. Symlinks under
+        # ~/roots/GRID may resolve to another user's checkout; lexical check still reflects intent.
+        candidates = {str(p), str(p.resolve())}
+        root_strs = [str(r) for r in self.ALLOWED_ROOTS]
+        for candidate in candidates:
+            if not any(candidate.startswith(r) for r in root_strs):
+                continue
+            if any(s in candidate.lower() for s in self.SENSITIVE):
+                continue
+            return True
+        return False
 
     def test_rejects_etc(self):
         assert not self._is_allowed("/etc/")
