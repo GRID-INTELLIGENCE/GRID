@@ -300,10 +300,10 @@ class TestRAGPathContainment:
 
     HOME = Path.home().resolve()
     ALLOWED_ROOTS = [
-        HOME / "roots" / "GRID",
-        HOME / "CascadeProjects",
-        HOME / "canopy",
-        HOME / "roots",
+        (HOME / "roots" / "GRID").resolve(),
+        (HOME / "CascadeProjects").resolve(),
+        (HOME / "canopy").resolve(),
+        (HOME / "roots").resolve(),
     ]
     SENSITIVE = [".ssh", ".gnupg", ".env", "credentials", "secrets"]
 

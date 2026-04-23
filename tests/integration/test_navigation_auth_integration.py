@@ -153,10 +153,12 @@ class TestNavigationAuthenticationBasics:
         response = client.post(
             "/api/v1/navigation/plan",
             headers={"Authorization": f"Bearer {expired_token}"},
-            json={"goal": "Test", "context": {}},
+            json={"goal": "Plan navigation to target location", "context": {}},
         )
 
         # Should reject expired token
+        if response.status_code != 401:
+            print(f"DEBUG: Response body: {response.json()}")
         assert response.status_code == 401
 
     def test_navigation_with_invalid_token(self, client: TestClient) -> None:
@@ -164,7 +166,7 @@ class TestNavigationAuthenticationBasics:
         response = client.post(
             "/api/v1/navigation/plan",
             headers={"Authorization": "Bearer invalid.token.here"},
-            json={"goal": "Test", "context": {}},
+            json={"goal": "Plan navigation to target location", "context": {}},
         )
 
         # Should reject invalid token
@@ -183,7 +185,7 @@ class TestNavigationAuthenticationBasics:
             response = client.post(
                 "/api/v1/navigation/plan",
                 headers=headers,
-                json={"goal": "Test", "context": {}},
+                json={"goal": "Plan navigation to target location", "context": {}},
             )
             # Should handle gracefully (dev mode might allow, prod would reject)
             assert response.status_code in [200, 401, 422]
@@ -588,7 +590,7 @@ class TestNavigationTokenRefresh:
         response = client.post(
             "/api/v1/navigation/plan",
             headers={"Authorization": f"Bearer {authenticated_user['refresh_token']}"},
-            json={"goal": "Test", "context": {}},
+            json={"goal": "Plan navigation to target location", "context": {}},
         )
 
         # Should reject refresh token (type mismatch)

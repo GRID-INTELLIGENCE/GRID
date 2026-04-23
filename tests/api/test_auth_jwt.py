@@ -441,9 +441,8 @@ class TestSecurityHardening:
             "/api/v1/auth/validate",
             headers={"Authorization": f"Bearer {access_token}"},
         )
-        # /validate uses optional auth — revoked token returns 200 with valid=False
-        assert response.status_code == 200
-        assert response.json()["data"]["valid"] is False
+        # /validate uses optional auth — but revoked token must trigger 401 (Security Guardrail)
+        assert response.status_code == 401
 
     def test_malformed_token_rejected(self, client: TestClient) -> None:
         """Test that malformed tokens are rejected."""
@@ -452,9 +451,8 @@ class TestSecurityHardening:
             headers={"Authorization": "Bearer not.a.valid.token"},
         )
 
-        # /validate uses optional auth — malformed token returns 200 with valid=False
-        assert response.status_code == 200
-        assert response.json()["data"]["valid"] is False
+        # /validate uses optional auth — but malformed token must trigger 401 (Security Guardrail)
+        assert response.status_code == 401
 
     def test_token_expiration_respected(self, jwt_manager: JWTManager, client: TestClient) -> None:
         """Test that expired tokens are rejected."""
@@ -469,9 +467,8 @@ class TestSecurityHardening:
             headers={"Authorization": f"Bearer {expired_token}"},
         )
 
-        # /validate uses optional auth — expired token returns 200 with valid=False
-        assert response.status_code == 200
-        assert response.json()["data"]["valid"] is False
+        # /validate uses optional auth — but expired token must trigger 401 (Security Guardrail)
+        assert response.status_code == 401
 
     def test_rate_limiting_on_login(self) -> None:
         """Test rate limiting on login endpoint."""

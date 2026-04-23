@@ -23,15 +23,15 @@ class TestSecureSubprocess:
 
     def test_command_whitelisting_allows_whitelisted_command(self) -> None:
         """Test that whitelisted commands are allowed."""
-        runner = SecureSubprocess(allowed_commands=["python", "echo"])
+        runner = SecureSubprocess(allowed_commands=["python3", "echo"])
 
         # Should not raise
-        result = runner.run(["python", "--version"], timeout=5)
+        result = runner.run(["python3", "--version"], timeout=5)
         assert isinstance(result, SubprocessResult)
 
     def test_command_whitelisting_blocks_non_whitelisted_command(self) -> None:
         """Test that non-whitelisted commands are blocked."""
-        runner = SecureSubprocess(allowed_commands=["python"])
+        runner = SecureSubprocess(allowed_commands=["python3"])
 
         with pytest.raises(SubprocessSecurityError, match="not in whitelist"):
             runner.run(["rm", "-rf", "/"], timeout=5)
@@ -41,7 +41,7 @@ class TestSecureSubprocess:
         runner = SecureSubprocess(allowed_commands=[])
 
         # Should not raise
-        result = runner.run(["python", "--version"], timeout=5)
+        result = runner.run(["python3", "--version"], timeout=5)
         assert isinstance(result, SubprocessResult)
 
     def test_path_validation_allows_allowed_directory(self) -> None:
@@ -50,7 +50,7 @@ class TestSecureSubprocess:
             runner = SecureSubprocess(allowed_directories=[tmpdir])
 
             # Should not raise
-            result = runner.run(["python", "--version"], cwd=tmpdir, timeout=5)
+            result = runner.run(["python3", "--version"], cwd=tmpdir, timeout=5)
             assert isinstance(result, SubprocessResult)
 
     def test_path_validation_blocks_non_allowed_directory(self) -> None:
@@ -60,7 +60,7 @@ class TestSecureSubprocess:
         runner = SecureSubprocess(allowed_directories=[str(Path.cwd())])
 
         with pytest.raises(SubprocessSecurityError, match="not in allowed directories"):
-            runner.run(["python", "--version"], cwd=temp_dir, timeout=5)
+            runner.run(["python3", "--version"], cwd=temp_dir, timeout=5)
 
     def test_path_validation_allows_all_when_empty(self) -> None:
         """Test that empty allowed_directories allows all directories."""
@@ -68,7 +68,7 @@ class TestSecureSubprocess:
 
         # Should not raise
         temp_dir = tempfile.gettempdir()
-        result = runner.run(["python", "--version"], cwd=temp_dir, timeout=5)
+        result = runner.run(["python3", "--version"], cwd=temp_dir, timeout=5)
         assert isinstance(result, SubprocessResult)
 
     def test_command_injection_prevention_string_command(self) -> None:
@@ -76,7 +76,7 @@ class TestSecureSubprocess:
         runner = SecureSubprocess()
 
         # Command injection attempt
-        malicious_cmd = "python --version; rm -rf /"
+        malicious_cmd = "python3 --version; rm -rf /"
         result = runner.run(malicious_cmd, timeout=5)
 
         # Should execute only the first command, not the injection
@@ -87,7 +87,7 @@ class TestSecureSubprocess:
         runner = SecureSubprocess()
 
         # List command prevents injection
-        result = runner.run(["python", "--version"], timeout=5)
+        result = runner.run(["python3", "--version"], timeout=5)
 
         # Should execute successfully
         assert isinstance(result, SubprocessResult)
@@ -97,7 +97,7 @@ class TestSecureSubprocess:
         runner = SecureSubprocess(default_timeout=1)
 
         # Command that will hang
-        result = runner.run(["python", "-c", "import time; time.sleep(5)"], timeout=1)
+        result = runner.run(["python3", "-c", "import time; time.sleep(5)"], timeout=1)
 
         # Should timeout
         assert result.returncode == -1
@@ -107,7 +107,7 @@ class TestSecureSubprocess:
         """Test that default timeout is used when not specified."""
         runner = SecureSubprocess(default_timeout=1)
 
-        result = runner.run(["python", "-c", "import time; time.sleep(2)"])
+        result = runner.run(["python3", "-c", "import time; time.sleep(2)"])
 
         # Should timeout using default
         assert result.returncode == -1
@@ -116,7 +116,7 @@ class TestSecureSubprocess:
         """Test successful command execution."""
         runner = SecureSubprocess()
 
-        result = runner.run(["python", "--version"], timeout=5)
+        result = runner.run(["python3", "--version"], timeout=5)
 
         assert result.success
         assert result.returncode == 0
@@ -127,7 +127,7 @@ class TestSecureSubprocess:
         """Test failed command execution."""
         runner = SecureSubprocess()
 
-        result = runner.run(["python", "-c", "exit(1)"], timeout=5)
+        result = runner.run(["python3", "-c", "exit(1)"], timeout=5)
 
         assert not result.success
         assert result.returncode == 1
@@ -144,7 +144,7 @@ class TestSecureSubprocess:
         runner = SecureSubprocess()
 
         # String command should be parsed
-        result = runner.run("python --version", timeout=5)
+        result = runner.run("python3 --version", timeout=5)
 
         assert result.success
         assert "Python" in result.stdout
@@ -155,7 +155,7 @@ class TestSecureSubprocess:
 
         # Command with sensitive data
         result = runner.run(
-            ["python", "-c", "print('test')"],
+            ["python3", "-c", "print('test')"],
             env={"PASSWORD": "secret123", "API_KEY": "key456"},
             timeout=5,
         )
@@ -172,7 +172,7 @@ class TestSecureSubprocess:
 
         async def run_async() -> None:
             runner = SecureSubprocess()
-            result = await runner.run_async(["python", "--version"], timeout=5)
+            result = await runner.run_async(["python3", "--version"], timeout=5)
 
             assert result.success
             assert "Python" in result.stdout
@@ -185,7 +185,7 @@ class TestSecureSubprocess:
 
         async def run_async_timeout() -> None:
             runner = SecureSubprocess(default_timeout=1)
-            result = await runner.run_async(["python", "-c", "import time; time.sleep(5)"], timeout=1)
+            result = await runner.run_async(["python3", "-c", "import time; time.sleep(5)"], timeout=1)
 
             assert result.returncode == -1
             assert not result.success
@@ -205,14 +205,14 @@ class TestSecureSubprocess:
         runner = SecureSubprocess()
 
         with pytest.raises(subprocess.CalledProcessError):
-            runner.run(["python", "-c", "exit(1)"], check=True, timeout=5)
+            runner.run(["python3", "-c", "exit(1)"], check=True, timeout=5)
 
     def test_check_parameter_succeeds_on_success(self) -> None:
         """Test that check=True doesn't raise on success."""
         runner = SecureSubprocess()
 
         # Should not raise
-        result = runner.run(["python", "--version"], check=True, timeout=5)
+        result = runner.run(["python3", "--version"], check=True, timeout=5)
         assert result.success
 
 
@@ -225,11 +225,11 @@ class TestCommandInjectionPrevention:
 
         # Various injection attempts
         injection_attempts = [
-            "python --version; rm -rf /",
-            "python --version && rm -rf /",
-            "python --version | cat /etc/passwd",
-            "python --version `whoami`",
-            "python --version $(whoami)",
+            "python3 --version; rm -rf /",
+            "python3 --version && rm -rf /",
+            "python3 --version | cat /etc/passwd",
+            "python3 --version `whoami`",
+            "python3 --version $(whoami)",
         ]
 
         for attempt in injection_attempts:
@@ -251,7 +251,7 @@ class TestCommandInjectionPrevention:
 
         for attempt in traversal_attempts:
             with pytest.raises(SubprocessSecurityError):
-                runner.run(["python", "--version"], cwd=attempt, timeout=5)
+                runner.run(["python3", "--version"], cwd=attempt, timeout=5)
 
 
 class TestPathValidation:
@@ -265,7 +265,7 @@ class TestPathValidation:
             subdir = Path(tmpdir) / "subdir"
             subdir.mkdir()
 
-            result = runner.run(["python", "--version"], cwd=str(subdir), timeout=5)
+            result = runner.run(["python3", "--version"], cwd=str(subdir), timeout=5)
             assert result.success
 
     def test_absolute_path_within_base(self) -> None:
@@ -273,7 +273,7 @@ class TestPathValidation:
         with tempfile.TemporaryDirectory() as tmpdir:
             runner = SecureSubprocess(allowed_directories=[tmpdir])
 
-            result = runner.run(["python", "--version"], cwd=Path(tmpdir).resolve(), timeout=5)
+            result = runner.run(["python3", "--version"], cwd=Path(tmpdir).resolve(), timeout=5)
             assert result.success
 
     def test_path_outside_base_rejected(self) -> None:
@@ -283,4 +283,4 @@ class TestPathValidation:
 
             with tempfile.TemporaryDirectory() as other_dir:
                 with pytest.raises(SubprocessSecurityError):
-                    runner.run(["python", "--version"], cwd=str(other_dir), timeout=5)
+                    runner.run(["python3", "--version"], cwd=str(other_dir), timeout=5)

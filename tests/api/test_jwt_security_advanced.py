@@ -432,9 +432,8 @@ class TestAPISecurityHardening:
             headers={"Authorization": f"Bearer {malicious_token}"},
         )
 
-        # /validate uses optional auth — malformed token returns 200 with valid=False
-        assert response.status_code == 200
-        assert response.json()["data"]["valid"] is False
+        # /validate uses optional auth — but malformed token must trigger 401 (Security Guardrail)
+        assert response.status_code == 401
 
     def test_token_length_limits(self, client: TestClient) -> None:
         """Test that extremely long tokens are rejected."""
@@ -446,9 +445,8 @@ class TestAPISecurityHardening:
             headers={"Authorization": f"Bearer {long_token}"},
         )
 
-        # /validate uses optional auth — invalid token returns 200 with valid=False
-        assert response.status_code == 200
-        assert response.json()["data"]["valid"] is False
+        # /validate uses optional auth — but invalid token must trigger 401 (Security Guardrail)
+        assert response.status_code == 401
 
     def test_multiple_authorization_headers(self, client: TestClient) -> None:
         """Test handling of multiple Authorization headers."""
