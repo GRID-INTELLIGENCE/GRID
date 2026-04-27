@@ -31,5 +31,5 @@ requests>=2.31.0
 aioresponses>=0.7.0
 
 # Debugging
-debugpy>=1.6.0
+debugpy>=1.8.20
 icecream>=2.2.0
