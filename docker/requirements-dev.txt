@@ -32,4 +32,4 @@ aioresponses>=0.7.0
 
 # Debugging
 debugpy>=1.6.0
-icecream>=2.1.0
+icecream>=2.2.0
