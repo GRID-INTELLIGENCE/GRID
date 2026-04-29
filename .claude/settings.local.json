@@ -9,14 +9,28 @@
   },
   "enabledMcpjsonServers": [
     "glimpse-server",
-    "eligibility-server"
+    "eligibility-server",
+    "grid-intelligence",
+    "ori-server",
+    "school-server"
   ],
-  "prefersReducedMotion": true,
   "disabledMcpjsonServers": [
     "echoes-server",
     "grid-server",
     "afloat-server",
     "lots-server",
-    "pulse-server"
-  ]
+    "pulse-server",
+    "seeds-server",
+    "grid-rag",
+    "grid-rag-enhanced",
+    "maintain-server",
+    "overview-server",
+    "grid-enhanced-tools",
+    "code-analysis",
+    "test-runner",
+    "portfolio-safety-lens",
+    "harness-server",
+    "nexus-server"
+  ],
+  "prefersReducedMotion": true
 }
