@@ -19,8 +19,10 @@ async def _update_db_metrics() -> None:
     try:
         engine = get_async_engine()
         if engine and engine.pool:
-            pool_size = engine.pool.size()
-            checked_out = engine.pool.checkedout()
+            pool_size_fn = getattr(engine.pool, "size", None)
+            checked_out_fn = getattr(engine.pool, "checkedout", None)
+            pool_size = pool_size_fn() if callable(pool_size_fn) else 0
+            checked_out = checked_out_fn() if callable(checked_out_fn) else 0
             _db_connections.set(checked_out)
             logger.debug(f"DB metrics updated: {checked_out}/{pool_size} connections")
     except Exception as e:

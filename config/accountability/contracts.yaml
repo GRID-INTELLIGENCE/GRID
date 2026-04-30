@@ -22,6 +22,22 @@ defaults:
     data_classification: "confidential"
 
 endpoints:
+  - path: /version
+    methods: ["GET"]
+    description: Public application version metadata endpoint
+    security:
+      authentication_required: false
+      required_roles: []
+      rate_limit: 120
+    compliance:
+      data_classification: "public"
+      audit_logging: true
+    performance:
+      max_latency_ms: 500
+      max_error_rate: 0.01
+      min_throughput_rps: 10
+      timeout_ms: 5000
+
   - path: /api/v1/rag/query/stream
     methods: ["POST"]
     description: Streaming RAG query endpoint
