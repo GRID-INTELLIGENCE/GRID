@@ -22,7 +22,7 @@ myst-parser>=2.0.0
 # Development utilities
 ipython>=8.14.0
 jupyter>=1.1.1
-jupyterlab>=4.5.6
+jupyterlab>=4.5.7
 rich>=13.0.0
 
 # HTTP testing
