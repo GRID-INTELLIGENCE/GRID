@@ -912,6 +912,16 @@ class PrunerOrchestrator:
     def __init__(self, app: FastAPI | None = None) -> None:
         self.app = app
         self._disabled_middlewares: weakref.WeakSet[Any] = weakref.WeakSet()
+        # Injected by the application layer to avoid DDD inversion (see set_dispose_engine)
+        self._dispose_engine: Callable | None = None
+
+    def set_dispose_engine(self, fn: Callable) -> None:
+        """Inject the dispose_engine callable from the application layer.
+
+        Calling this avoids the infrastructure layer importing from
+        application.mothership.db.engine directly (DDD inversion).
+        """
+        self._dispose_engine = fn
 
     async def prune(self, source: SourceMap, context: ParasiteContext | None = None) -> PruneResult:
         """
@@ -991,16 +1001,17 @@ class PrunerOrchestrator:
 
     async def _dispose_database_engine(self, steps: list[str]) -> None:
         """Dispose of database engine connections if available."""
+        if self._dispose_engine is None:
+            log.debug("No dispose_engine injected; skipping database engine disposal")
+            return
         try:
-            from application.mothership.db.engine import dispose_async_engine
-
-            await dispose_async_engine()
+            result = self._dispose_engine()
+            if asyncio.iscoroutine(result):
+                await result
             steps.append("Database engine disposed successfully")
             log.info("Database engine disposed during parasite pruning")
             # Record success metric
             get_profiler().record_db_engine_disposal_success()
-        except ImportError:
-            log.debug("Database engine not available for disposal")
         except Exception as e:
             log.warning("Database engine disposal failed: %s", e)
             # Record failure metric

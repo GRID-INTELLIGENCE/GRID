@@ -340,7 +340,7 @@ exclude = [
 ]
 
 [tool.ruff.lint]
-select = ["E", "F", "B", "I", "W", "UP", "ASYNC", "S", "SIM", "C4", "PERF"]
+select = ["E", "F", "B", "I", "W", "UP", "ASYNC", "S", "SIM", "C4", "PERF", "ANN"]
 extend-ignore = [
     "B007", # Unused loop control variable (stylistic)
     "B008", # Allow FastAPI Depends()
@@ -356,6 +356,7 @@ extend-ignore = [
     "S106", # Possible hardcoded password
     "S107", # Possible hardcoded password
     "SIM", # Simplify - too aggressive for now
+    "ANN401", # Dynamically typed (`Any`) (too restrictive for flexible APIs)
 ]
 
 [tool.ruff.lint.per-file-ignores]

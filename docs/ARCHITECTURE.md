@@ -2,8 +2,8 @@
 
 **GRID (Geometric Resonance Intelligence Driver)** - Comprehensive Architecture Overview
 
-Version: 2.5.0
-Last Updated: February 2026
+Version: 2.8.0
+Last Updated: May 2026
 Status: Production Ready
 
 ---
@@ -114,7 +114,6 @@ graph TB
         EP1[CLI Entry<br/>grid, grid-cli]
         EP2[API Entry<br/>grid-api]
         EP3[Service Entry<br/>grid-service]
-        EP4[Agentic Entry<br/>grid-agentic]
     end
 
     subgraph "Layer 2: Application"
@@ -314,17 +313,33 @@ mindmap
 
 FastAPI applications with clean architecture patterns.
 
+**Canonical API route policy (v2.8.0):**
+- All product endpoints are versioned under `/api/v1/*` via `create_api_router(prefix="/api/v1")`
+- Operational endpoints stay root-level: `/health/*`, `/metrics`, `/ping`, `/`, `/security/status`
+- Canonical app factory: `application.mothership.main.create_app()`
+- Declared entry points: `grid`, `grid-api`, `grid-cli`, `grid-service` (see `pyproject.toml`)
+
 ```mermaid
 graph TB
     subgraph "Mothership Application"
         MAIN[main.py<br/>Application Factory]
 
-        subgraph "Routers"
+        subgraph "Routers (product — /api/v1/*)"
             R1[/api/v1/intelligence]
             R2[/api/v1/agentic]
             R3[/api/v1/resonance]
             R4[/api/v1/skills]
-            R5[/api/v1/health]
+            R5[/api/v1/safety]
+            R6[/api/v1/corruption]
+            R7[/api/v1/admission]
+            R8[/api/v1/drt]
+        end
+
+        subgraph "Operational (root-level)"
+            OP1[/health/*]
+            OP2[/metrics]
+            OP3[/ping]
+            OP4[/security/status]
         end
 
         subgraph "Services"
@@ -354,7 +369,8 @@ graph TB
         end
     end
 
-    MAIN --> R1 & R2 & R3 & R4 & R5
+    MAIN --> R1 & R2 & R3 & R4 & R5 & R6 & R7 & R8
+    MAIN --> OP1 & OP2 & OP3 & OP4
     R1 --> S1
     R2 --> S2
     R3 --> S3
@@ -1627,6 +1643,40 @@ timeline
 
 ---
 
+## Canonical Ownership Reference (v2.8.0)
+
+### Event Bus Ownership
+
+Four event bus implementations exist. Each owns a distinct domain — do not cross-wire them.
+
+| Bus | Module | Domain | Lifecycle managed by app? |
+|-----|--------|--------|--------------------------|
+| Agentic EventBus | `grid.agentic.event_bus` | Agentic cases, skills, execution | No (passive singleton) |
+| Infrastructure EventBus | `infrastructure.event_bus` | ParasiteGuard / security events | Yes — started/stopped in lifespan |
+| DynamicEventBus | `unified_fabric` | Cross-system: safety, grid, pathways | Integration-only; individual adapters call `init_event_bus()` |
+| Grid I/O EventBus | `grid.events.core` | Input/output gateways | No (synchronous, no lifecycle) |
+
+**Important:** Three of the four modules export a function named `get_event_bus()`. Always use the module-qualified import to avoid selecting the wrong bus.
+
+### Safety / Security Stack Ownership
+
+| Package | Owns | Active in runtime? |
+|---------|------|-------------------|
+| `safety/` | Runtime HTTP safety enforcement, audit DB, middleware | Yes |
+| `application.mothership.security` | App-layer auth (JWT, RBAC), input sanitization, CORS | Yes |
+| `grid.security` | Infrastructure secrets, threat detection, ParasiteGuard primitives | Yes |
+| `src/grid/safety/` | Privilege rings, boundary contracts, guardrails | Significant — not yet wired; wire in explicitly before use |
+| `security/` (top-level) | Network access control (patches network libs on import) | Significant — not yet wired; wire in explicitly before use |
+| `boundaries/` (top-level) | Consent management, transition gate, refusal rights | Significant — not yet wired; wire in explicitly before use |
+
+### DDD Boundary Rules
+
+- `grid.*` and `infrastructure.*` **must not** import from `application.*` at module level.
+- The application layer injects callables (e.g., `wire_dispose_engine`) to break upward dependencies.
+- Entry-point shims (`src/main.py`, `__main__.py`) are the only permitted crossing points.
+
+---
+
 ## Conclusion
 
 GRID is a **production-ready, cognitive-aware framework** that combines:
@@ -1650,6 +1700,6 @@ GRID is a **production-ready, cognitive-aware framework** that combines:
 - [Agentic System Documentation](AGENTIC_SYSTEM.md)
 - [Security Architecture](security/SECURITY_ARCHITECTURE.md)
 
-**Version**: 2.2.0
-**Last Updated**: January 2026
+**Version**: 2.8.0
+**Last Updated**: May 2026
 **Maintainer**: GRID Core Team

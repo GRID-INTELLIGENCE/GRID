@@ -106,19 +106,17 @@ class EventBus:
         # Store in history (deque auto-pops oldest when at maxlen)
         self.event_history.append(event_data)
 
-        # Publish to Redis if enabled
+        # Publish to Redis if enabled (cross-process / cross-service delivery)
         if self.use_redis and self.redis_client:
             try:
                 await self.redis_client.publish(f"events:{event_type}", str(event_data))
                 await self.redis_client.publish("events:all", str(event_data))
             except Exception as e:
-                logger.error(f"Failed to publish to Redis: {e}. Falling back to in-memory queue.")
-                await self.event_queue.put(event_data)
-        else:
-            # Use in-memory queue
-            await self.event_queue.put(event_data)
+                logger.error(f"Failed to publish to Redis: {e}. Event will still be delivered to local handlers.")
 
-        # Trigger handlers synchronously
+        # Single delivery path: trigger local handlers directly.
+        # WARNING: do NOT start process_queue() as a background task — it also
+        # calls _trigger_handlers() and would cause double delivery.
         await self._trigger_handlers(event_type, event_data)
 
     async def subscribe(self, event_type: str, handler: Callable) -> Subscription:

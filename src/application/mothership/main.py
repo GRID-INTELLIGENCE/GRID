@@ -40,7 +40,7 @@ from pydantic import BaseModel
 from application.api_docs import setup_api_docs
 
 # Observability & Documentation
-from application.monitoring import get_metrics_router, setup_metrics
+from application.monitoring import setup_metrics
 from application.skills.api import router as skills_router
 
 try:
@@ -463,11 +463,10 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
                 from infrastructure.event_bus.event_system import get_eventbus
                 from infrastructure.parasite_guard.eventbus_integration import wire_parasite_guard_to_eventbus
 
-                # Get singleton event bus (will initialize if needed, but usually configured elsewhere)
-                # Note: EventBus usually needs specific config, so we assume defaults or env vars handled it
                 event_bus = await get_eventbus()
+                await event_bus.start()
+                app.state.infrastructure_event_bus = event_bus  # type: ignore[reportAttributeAccessIssue]
 
-                # Wire it up
                 wire_parasite_guard_to_eventbus(app.state.parasite_guard, event_bus)  # type: ignore[reportAttributeAccessIssue]
                 logger.info("ParasiteGuard wired to EventBus for security event emission")
             except Exception as e:
@@ -556,6 +555,14 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
                 await wait_for_sanitization(app.state.parasite_guard)
             except Exception as e:
                 logger.warning(f"Error waiting for parasite sanitization: {e}")
+
+        # Stop infrastructure event bus (used by ParasiteGuard)
+        if hasattr(app.state, "infrastructure_event_bus"):
+            try:
+                await app.state.infrastructure_event_bus.stop()  # type: ignore[reportAttributeAccessIssue]
+                logger.info("Infrastructure event bus stopped")
+            except Exception as e:
+                logger.warning(f"Error stopping infrastructure event bus: {e}")
 
         # Shutdown DRT middleware
         if hasattr(app.state, "drt_middleware"):
@@ -654,9 +661,8 @@ The API supports multiple authentication methods:
     else:
         logger.info("Distributed tracing disabled (set MOTHERSHIP_TRACING_ENABLED=true to enable)")
 
-    # Setup Prometheus metrics
+    # Setup Prometheus metrics middleware and the canonical /metrics endpoint.
     setup_metrics(app)
-    app.include_router(get_metrics_router())
 
     # Setup API documentation
     setup_api_docs(
@@ -823,10 +829,10 @@ The API supports multiple authentication methods:
         middleware = add_parasite_guard(app, mode=mode)
         # Store for wiring in lifespan
         app.state.parasite_guard = middleware  # type: ignore[reportAttributeAccessIssue]
-        # Inject dispose_engine callable to fix DDD inversion (infrastructure -> application)
-        if hasattr(middleware, "set_dispose_engine"):
-            middleware.set_dispose_engine(dispose_async_engine)  # type: ignore[attr-defined]
-            logger.info("Parasite Guard dispose_engine injected")
+        # Inject dispose_engine callable to eliminate DDD inversion (infrastructure -> application)
+        if hasattr(middleware, "wire_dispose_engine"):
+            middleware.wire_dispose_engine(dispose_async_engine)  # type: ignore[attr-defined]
+            logger.info("Parasite Guard dispose_engine wired")
         logger.info("Parasite Guard integrated (mode=%s)", mode)
 
     # 9. Admission Gate (top-of-stack pre-filter — added LAST so it runs FIRST)
@@ -919,32 +925,32 @@ The API supports multiple authentication methods:
     api_router.include_router(mcq_router)
     logger.info("MCQ API endpoints registered")
 
-    app.include_router(corruption_router)
-    logger.info("Corruption monitoring API endpoints registered")
+    api_router.include_router(corruption_router)
+    logger.info("Corruption monitoring API endpoints registered at /api/v1/corruption/*")
 
     # Admission gate enforcement endpoints (penalty, compliance, billboard)
     try:
         from .routers.admission_enforcement import router as admission_router
 
-        app.include_router(admission_router)
-        logger.info("Admission gate enforcement API endpoints registered")
+        api_router.include_router(admission_router)
+        logger.info("Admission gate enforcement API endpoints registered at /api/v1/admission/*")
     except Exception as e:
         logger.warning("Admission enforcement router not available: %s", e)
 
     if drt_router is not None:
-        app.include_router(drt_router)
-        logger.info("DRT monitoring API endpoints registered")
+        api_router.include_router(drt_router)
+        logger.info("DRT monitoring API endpoints registered at /api/v1/drt/*")
 
-    # Safety enforcement endpoints (protected by SafetyMiddleware)
-    app.include_router(safety_router)
-    logger.info("Safety enforcement API endpoints registered")
+    # Safety enforcement endpoints (versioned under /api/v1/safety)
+    api_router.include_router(safety_router)
+    logger.info("Safety enforcement API endpoints registered at /api/v1/safety/*")
 
     # RAG streaming endpoints (conversational query, sessions, WebSocket, stats)
     try:
         from .routers.rag_streaming import router as rag_router
 
-        app.include_router(rag_router, prefix="/rag", tags=["rag"])
-        logger.info("RAG streaming API endpoints registered at /rag/*")
+        api_router.include_router(rag_router)
+        logger.info("RAG streaming API endpoints registered at /api/v1/rag/*")
     except Exception as e:
         logger.warning("RAG streaming router not available: %s", e)
 

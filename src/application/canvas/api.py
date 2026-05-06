@@ -13,7 +13,7 @@ from .canvas import Canvas
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/api/v1/canvas", tags=["canvas"])
+router = APIRouter(prefix="/canvas", tags=["canvas"])
 
 
 class RoutingRequest(BaseModel):
