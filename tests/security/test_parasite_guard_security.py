@@ -99,59 +99,52 @@ async def test_pruner_disposes_database_engine() -> None:
     # Create pruner
     pruner = PrunerOrchestrator(app=None)
     steps = []
+    mock_dispose = AsyncMock()
+    pruner.set_dispose_engine(mock_dispose)
 
-    # Mock dispose_async_engine
-    with patch("application.mothership.db.engine.dispose_async_engine", new_callable=AsyncMock) as mock_dispose:
-        await pruner._dispose_database_engine(steps)
+    await pruner._dispose_database_engine(steps)
 
-        # Verify dispose was called
-        mock_dispose.assert_called_once()
-
-        # Verify steps were updated
-        assert "Database engine disposed successfully" in steps
+    mock_dispose.assert_called_once()
+    assert "Database engine disposed successfully" in steps
 
 
 @pytest.mark.asyncio
 async def test_pruner_handles_database_disposal_failure() -> None:
     """Test that PrunerOrchestrator handles database disposal failures."""
     pruner = PrunerOrchestrator(app=None)
+    pruner.set_dispose_engine(AsyncMock(side_effect=RuntimeError("Disposal failed")))
 
-    # Mock dispose_async_engine to raise exception
-    with patch("application.mothership.db.engine.dispose_async_engine", side_effect=RuntimeError("Disposal failed")):
-        with pytest.raises(RuntimeError, match="Disposal failed"):
-            await pruner._dispose_database_engine([])
+    with pytest.raises(RuntimeError, match="Disposal failed"):
+        await pruner._dispose_database_engine([])
 
 
 @pytest.mark.asyncio
 async def test_pruner_records_metrics() -> None:
     """Test that PrunerOrchestrator records metrics for disposal."""
     pruner = PrunerOrchestrator(app=None)
+    pruner.set_dispose_engine(AsyncMock())
 
     mock_profiler = MagicMock()
     _globals = pruner._dispose_database_engine.__globals__
-    with patch("application.mothership.db.engine.dispose_async_engine", new_callable=AsyncMock):
-        with patch.dict(_globals, {"get_profiler": lambda: mock_profiler}):
-            await pruner._dispose_database_engine([])
+    with patch.dict(_globals, {"get_profiler": lambda: mock_profiler}):
+        await pruner._dispose_database_engine([])
 
-            # Verify success metric was recorded
-            mock_profiler.record_db_engine_disposal_success.assert_called_once()
+        mock_profiler.record_db_engine_disposal_success.assert_called_once()
 
 
 @pytest.mark.asyncio
 async def test_pruner_records_failure_metrics() -> None:
     """Test that PrunerOrchestrator records failure metrics."""
     pruner = PrunerOrchestrator(app=None)
+    pruner.set_dispose_engine(AsyncMock(side_effect=RuntimeError("Failed")))
 
     mock_profiler = MagicMock()
     _globals = pruner._dispose_database_engine.__globals__
-    # Mock dispose to raise exception
-    with patch("application.mothership.db.engine.dispose_async_engine", side_effect=RuntimeError("Failed")):
-        with patch.dict(_globals, {"get_profiler": lambda: mock_profiler}):
-            with pytest.raises(RuntimeError):
-                await pruner._dispose_database_engine([])
+    with patch.dict(_globals, {"get_profiler": lambda: mock_profiler}):
+        with pytest.raises(RuntimeError):
+            await pruner._dispose_database_engine([])
 
-            # Verify failure metric was recorded
-            mock_profiler.record_db_engine_disposal_failure.assert_called_once()
+        mock_profiler.record_db_engine_disposal_failure.assert_called_once()
 
 
 @pytest.mark.asyncio
@@ -168,21 +161,21 @@ async def test_pruner_with_context_cleanup() -> None:
     )
 
     # Mock cleanup and disposal
+    pruner.set_dispose_engine(AsyncMock())
     with patch.object(context, "cleanup", new_callable=AsyncMock) as mock_cleanup:
-        with patch("application.mothership.db.engine.dispose_async_engine", new_callable=AsyncMock):
-            _config = pruner.prune.__globals__["ParasiteGuardConfig"]
-            _orig_prune_enabled = _config.prune_enabled
-            _config.prune_enabled = True
-            try:
-                result = await pruner.prune(None, context=context)
+        _config = pruner.prune.__globals__["ParasiteGuardConfig"]
+        _orig_prune_enabled = _config.prune_enabled
+        _config.prune_enabled = True
+        try:
+            result = await pruner.prune(None, context=context)
 
-                # Verify context cleanup was called
-                mock_cleanup.assert_called_once()
+            # Verify context cleanup was called
+            mock_cleanup.assert_called_once()
 
-                # Verify result includes context cleanup step
-                assert any("Cleaned up resources" in step for step in result.steps)
-            finally:
-                _config.prune_enabled = _orig_prune_enabled
+            # Verify result includes context cleanup step
+            assert any("Cleaned up resources" in step for step in result.steps)
+        finally:
+            _config.prune_enabled = _orig_prune_enabled
 
 
 @pytest.mark.asyncio
