@@ -197,7 +197,7 @@ async def mark_false_positive(
         if violation:
             # Extract signature from violation (simplified - in real implementation
             # you'd reconstruct the signature from violation metadata)
-            from ..middleware.unified_drt import BehavioralSignature
+            from ..middleware.drt_middleware import BehavioralSignature
 
             signature = BehavioralSignature(
                 path_pattern=violation[0]["request_path"],

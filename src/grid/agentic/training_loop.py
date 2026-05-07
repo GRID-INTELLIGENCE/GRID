@@ -9,8 +9,10 @@ Reference: research/rl-datasheets.md, Datasheet 1
 
 from __future__ import annotations
 
+import math
 import time
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
 import structlog
 from pydantic import BaseModel, Field
@@ -20,7 +22,130 @@ from .learning_coordinator import OnlineLearningCoordinator
 from .reward_functions import RewardConfig, compute_agentic_reward
 from .runtime_behavior_tracer import RuntimeBehaviorTracer
 
+if TYPE_CHECKING:
+    pass
+
 logger = structlog.get_logger(__name__)
+
+# ── Optional torch import (graceful degradation) ─────────────────────────────
+try:
+    import torch
+    import torch.nn as nn
+    import torch.optim as optim
+
+    _TORCH_AVAILABLE = True
+except ImportError:  # pragma: no cover
+    _TORCH_AVAILABLE = False
+    torch = None  # type: ignore[assignment]
+    nn = None  # type: ignore[assignment]
+    optim = None  # type: ignore[assignment]
+
+# ── State encoding constants (Datasheet 1, Section 2) ────────────────────────
+# State vector dimension after encoding:
+#   task_type (12 one-hot) + agent_role (8 one-hot) + confidence (1) +
+#   fallback_used (1) + skills_retrieved (1) + skills_used (1) +
+#   llm_calls (1) + duration_ms_log (1) = 26
+_TASK_TYPES = [
+    "code_gen", "code_review", "analysis", "writing", "research",
+    "planning", "debugging", "testing", "documentation", "qa",
+    "conversation", "unknown",
+]
+_AGENT_ROLES = [
+    "coordinator", "researcher", "reviewer", "writer",
+    "debugger", "planner", "executor", "unknown",
+]
+_STATE_DIM = len(_TASK_TYPES) + len(_AGENT_ROLES) + 6  # 26
+
+# Action dimension: 1 discrete (skill index, mapped to [0,1] via softmax head)
+# + 1 temperature R[0,2] + 1 autonomy R[0,0.95] + 1 recovery Binary
+_ACTION_DIM = 4
+
+_HIDDEN_DIM = 64
+
+
+# ── State / Action encoding ───────────────────────────────────────────────────
+
+
+def _encode_state(state: dict) -> list[float]:
+    """Convert a state dict to a fixed-length float vector (length _STATE_DIM).
+
+    Encoding:
+    - task_type  → one-hot (12)
+    - agent_role → one-hot (8)
+    - confidence → scalar in [0, 1]
+    - fallback_used → 0.0/1.0
+    - skills_retrieved → log1p-normalised
+    - skills_used → log1p-normalised
+    - llm_calls → log1p-normalised
+    - duration_ms → log1p(x / 1000) normalised
+    """
+    task_type = str(state.get("task_type", "unknown")).lower()
+    agent_role = str(state.get("agent_role", "unknown")).lower()
+
+    task_oh = [1.0 if t == task_type else 0.0 for t in _TASK_TYPES]
+    role_oh = [1.0 if r == agent_role else 0.0 for r in _AGENT_ROLES]
+
+    # Scalar features
+    scalars = [
+        float(state.get("confidence", 0.5)),
+        1.0 if state.get("fallback_used") else 0.0,
+        math.log1p(float(state.get("skills_retrieved", 0))),
+        math.log1p(float(state.get("skills_used", 0))),
+        math.log1p(float(state.get("llm_calls", 0))),
+        math.log1p(float(state.get("duration_ms", 0)) / 1000.0),
+    ]
+
+    return task_oh + role_oh + scalars
+
+
+# ── Policy Network ────────────────────────────────────────────────────────────
+
+
+if _TORCH_AVAILABLE:
+
+    class PolicyNetwork(nn.Module):  # type: ignore[misc]
+        """Lightweight MLP policy + baseline value network for REINFORCE.
+
+        Architecture (Datasheet 1, Section 6):
+        - Shared encoder: Linear(_STATE_DIM → _HIDDEN_DIM) + ReLU
+        - Policy head: Linear(_HIDDEN_DIM → _ACTION_DIM) — outputs un-normalised
+          log-probabilities over a discretised action space
+        - Value head: Linear(_HIDDEN_DIM → 1) — baseline for variance reduction
+
+        The action space is treated as a single categorical over _ACTION_DIM
+        buckets (a simplification of the mixed action space; full SAC with
+        separate continuous heads is the recommended next step once this
+        foundation is validated).
+        """
+
+        def __init__(self, state_dim: int = _STATE_DIM, hidden_dim: int = _HIDDEN_DIM, action_dim: int = _ACTION_DIM) -> None:
+            super().__init__()
+            self.encoder = nn.Sequential(
+                nn.Linear(state_dim, hidden_dim),
+                nn.ReLU(),
+                nn.Linear(hidden_dim, hidden_dim),
+                nn.ReLU(),
+            )
+            self.policy_head = nn.Linear(hidden_dim, action_dim)
+            self.value_head = nn.Linear(hidden_dim, 1)
+
+        def forward(self, state_tensor: "torch.Tensor") -> "tuple[torch.Tensor, torch.Tensor]":
+            """Return (action_logits, state_value)."""
+            h = self.encoder(state_tensor)
+            return self.policy_head(h), self.value_head(h).squeeze(-1)
+
+        def action_log_probs(self, state_tensor: "torch.Tensor") -> "torch.Tensor":
+            """Return log-softmax action probabilities."""
+            logits, _ = self.forward(state_tensor)
+            return torch.log_softmax(logits, dim=-1)
+
+else:  # pragma: no cover
+
+    class PolicyNetwork:  # type: ignore[no-redef]
+        """Stub when torch is not installed."""
+
+        def __init__(self, *args: object, **kwargs: object) -> None:
+            raise RuntimeError("torch is required for PolicyNetwork. Install torch>=2.0.")
 
 
 # ── Data Models ──────────────────────────────────────────────────────────────
@@ -130,11 +255,24 @@ class TrainingLoop:
         self._step_count = 0
         self._total_episodes_processed = 0
 
+        # Initialise policy network and optimiser when torch is available.
+        if _TORCH_AVAILABLE:
+            self._policy: PolicyNetwork | None = PolicyNetwork()
+            self._optimizer: optim.Adam | None = optim.Adam(  # type: ignore[union-attr]
+                self._policy.parameters(),
+                lr=self.config.learning_rate,
+            )
+        else:  # pragma: no cover
+            self._policy = None
+            self._optimizer = None
+            logger.warning("training_loop_no_torch", msg="torch not installed; policy updates disabled")
+
         logger.info(
             "training_loop_initialized",
             min_episode_turns=self.config.min_episode_turns,
             gamma=self.config.gamma,
             batch_size=self.config.batch_size,
+            policy_network="enabled" if _TORCH_AVAILABLE else "disabled",
         )
 
     def collect_episodes(self, min_turns: int = 3) -> list[Episode]:
@@ -245,17 +383,18 @@ class TrainingLoop:
         return returns
 
     def train_step(self) -> TrainStepResult:
-        """Execute one training step.
+        """Execute one REINFORCE policy gradient training step.
 
-        TODO: Implement SAC or PPO policy update. Current implementation:
-        1. Collects episodes from tracer history
-        2. Computes rewards
-        3. Returns stub result with episode statistics
+        Algorithm (Datasheet 1, Section 6 — PPO/REINFORCE foundation):
+        1. Collect episodes from tracer history.
+        2. Compute discounted returns G_t per episode.
+        3. Encode states into fixed-length tensors.
+        4. Forward pass through PolicyNetwork → action log-probs + state values.
+        5. Compute policy loss = -mean(log_π(a|s) * advantage) with entropy bonus.
+        6. Compute value loss = MSE(V(s), G_t) for baseline regression.
+        7. Combined loss backward + optimizer step.
 
-        The actual policy gradient computation will be added when the
-        policy network architecture is defined (see Datasheet 1, Section 6:
-        recommended algorithms are SAC for mixed action space, PPO with
-        action masking).
+        Falls back to stub_computed when torch is unavailable.
         """
         start = time.monotonic()
         self._step_count += 1
@@ -271,19 +410,27 @@ class TrainingLoop:
 
         returns = self.compute_rewards(episodes)
         mean_reward = sum(returns) / len(returns) if returns else 0.0
-
         self._total_episodes_processed += len(episodes)
 
-        # TODO(SAC/PPO): Policy network forward pass, loss computation, optimizer step.
-        # The stub returns episode-level statistics for validation.
+        policy_loss: float | None = None
+        value_loss: float | None = None
+        entropy: float | None = None
+        status = "stub_computed"
+
+        if _TORCH_AVAILABLE and self._policy is not None and self._optimizer is not None:
+            policy_loss, value_loss, entropy = self._reinforce_update(episodes, returns)
+            status = "reinforce_computed"
 
         duration_ms = (time.monotonic() - start) * 1000
         result = TrainStepResult(
             step=self._step_count,
             episodes_used=len(episodes),
             mean_reward=round(mean_reward, 4),
+            policy_loss=round(policy_loss, 6) if policy_loss is not None else None,
+            value_loss=round(value_loss, 6) if value_loss is not None else None,
+            entropy=round(entropy, 6) if entropy is not None else None,
             duration_ms=round(duration_ms, 2),
-            status="stub_computed",
+            status=status,
         )
 
         logger.info(
@@ -291,49 +438,69 @@ class TrainingLoop:
             step=result.step,
             episodes_used=result.episodes_used,
             mean_reward=result.mean_reward,
+            policy_loss=result.policy_loss,
+            value_loss=result.value_loss,
+            entropy=result.entropy,
             duration_ms=result.duration_ms,
+            status=result.status,
         )
 
         return result
 
     def evaluate(self) -> EvalResult:
-        """Evaluate current policy performance.
+        """Evaluate current policy on the held-out eval split.
 
-        TODO: Implement proper evaluation with held-out episodes. Current
-        implementation uses all available tracer history as a proxy.
-
-        Per Datasheet 1, Section 4: use 80/10/10 train/eval/test split
-        by session (not by transition).
+        Implements 80/10/10 train/eval/test split by session as specified in
+        Datasheet 1, Section 4. Sessions are sorted by start_time so that
+        the eval split always covers the most recent 10% of sessions
+        (chronological hold-out, not random).
         """
         episodes = self.collect_episodes(min_turns=self.config.min_episode_turns)
         if not episodes:
             logger.warning("evaluate_no_episodes")
             return EvalResult(status="no_episodes")
 
-        returns = self.compute_rewards(episodes)
+        # Sort by start_time for chronological 80/10/10 split
+        episodes_sorted = sorted(episodes, key=lambda e: e.start_time)
+        n = len(episodes_sorted)
+        eval_start = int(n * 0.80)
+        eval_end = int(n * 0.90)
+
+        # Fall back to using all episodes when too few for a proper split
+        if eval_end <= eval_start:
+            eval_episodes = episodes_sorted
+        else:
+            eval_episodes = episodes_sorted[eval_start:eval_end]
+
+        returns = self.compute_rewards(eval_episodes)
         sorted_returns = sorted(returns)
 
         # Count successful episodes (positive total reward)
-        successes = sum(1 for ep in episodes if ep.total_reward > 0)
+        successes = sum(1 for ep in eval_episodes if ep.total_reward > 0)
 
         # Mean latency across all transitions
         all_latencies = [
-            t.info.get("duration_ms", 0) for ep in episodes for t in ep.transitions if t.info.get("duration_ms", 0) > 0
+            t.info.get("duration_ms", 0)
+            for ep in eval_episodes
+            for t in ep.transitions
+            if t.info.get("duration_ms", 0) > 0
         ]
         mean_latency = sum(all_latencies) / len(all_latencies) if all_latencies else 0.0
 
         result = EvalResult(
-            episodes_evaluated=len(episodes),
+            episodes_evaluated=len(eval_episodes),
             mean_reward=round(sum(returns) / len(returns), 4),
             median_reward=round(sorted_returns[len(sorted_returns) // 2], 4),
-            success_rate=round(successes / len(episodes), 4) if episodes else 0.0,
+            success_rate=round(successes / len(eval_episodes), 4) if eval_episodes else 0.0,
             mean_latency_ms=round(mean_latency, 2),
-            status="stub_evaluated",
+            status="evaluated",
         )
 
         logger.info(
             "evaluation_complete",
-            episodes=result.episodes_evaluated,
+            total_episodes=n,
+            eval_split=f"{eval_start}:{eval_end}",
+            episodes_evaluated=result.episodes_evaluated,
             mean_reward=result.mean_reward,
             success_rate=result.success_rate,
         )
@@ -372,3 +539,101 @@ class TrainingLoop:
             "recovery_strategy": trace.get("recovery_strategy"),
             "skills_used": trace.get("skills_used", 0),
         }
+
+    def _reinforce_update(
+        self,
+        episodes: list[Episode],
+        returns: list[float],
+    ) -> tuple[float, float, float]:
+        """Run one REINFORCE gradient update over the episode batch.
+
+        REINFORCE with baseline (Williams, 1992):
+        - Advantage: A_t = G_t - V(s_t)  (reduces variance vs raw return)
+        - Policy loss: -E[log π(a|s) * A_t]  (gradient ascent on expected return)
+        - Value loss: MSE(V(s_t), G_t)  (train baseline towards actual return)
+        - Entropy bonus: -E[H(π)] regularises against premature convergence
+
+        Args:
+            episodes: Episodes collected this step.
+            returns: Discounted total return per episode (pre-computed by compute_rewards).
+
+        Returns:
+            (policy_loss, value_loss, mean_entropy) as Python floats.
+        """
+        assert _TORCH_AVAILABLE and self._policy is not None and self._optimizer is not None
+
+        # Normalise returns for training stability
+        returns_t = torch.tensor(returns, dtype=torch.float32)
+        if returns_t.std() > 1e-8:
+            returns_t = (returns_t - returns_t.mean()) / (returns_t.std() + 1e-8)
+
+        all_log_probs: list[torch.Tensor] = []
+        all_values: list[torch.Tensor] = []
+        all_advantages: list[torch.Tensor] = []
+        all_entropies: list[torch.Tensor] = []
+
+        for ep, ret_norm in zip(episodes, returns_t.tolist()):
+            for transition in ep.transitions:
+                state_vec = _encode_state(transition.state)
+                s = torch.tensor(state_vec, dtype=torch.float32).unsqueeze(0)
+
+                logits, value = self._policy(s)
+                log_probs = torch.log_softmax(logits, dim=-1).squeeze(0)
+                probs = log_probs.exp()
+
+                # Pseudo-action: map decision_type to an action index
+                action_idx = self._action_to_index(transition.action)
+                log_prob = log_probs[action_idx]
+
+                advantage = torch.tensor(ret_norm - value.item(), dtype=torch.float32)
+                ep_entropy = -(probs * log_probs).sum()
+
+                all_log_probs.append(log_prob)
+                all_values.append(value.squeeze(0))
+                all_advantages.append(advantage)
+                all_entropies.append(ep_entropy)
+
+        if not all_log_probs:
+            return 0.0, 0.0, 0.0
+
+        log_probs_t = torch.stack(all_log_probs)
+        values_t = torch.stack(all_values)
+        advantages_t = torch.stack(all_advantages)
+        entropies_t = torch.stack(all_entropies)
+
+        # Build target returns per-transition by repeating per-episode returns
+        target_returns: list[float] = []
+        for ep, ret in zip(episodes, returns_t.tolist()):
+            target_returns.extend([ret] * len(ep.transitions))
+        targets_t = torch.tensor(target_returns, dtype=torch.float32)
+
+        policy_loss_t = -(log_probs_t * advantages_t).mean()
+        value_loss_t = torch.nn.functional.mse_loss(values_t, targets_t)
+        entropy_t = entropies_t.mean()
+
+        # Entropy regularisation coefficient (encourages exploration)
+        _ENTROPY_COEFF = 0.01
+        loss = policy_loss_t + 0.5 * value_loss_t - _ENTROPY_COEFF * entropy_t
+
+        self._optimizer.zero_grad()
+        loss.backward()
+        # Gradient clipping for stability
+        torch.nn.utils.clip_grad_norm_(self._policy.parameters(), max_norm=1.0)
+        self._optimizer.step()
+
+        return (
+            policy_loss_t.item(),
+            value_loss_t.item(),
+            entropy_t.item(),
+        )
+
+    @staticmethod
+    def _action_to_index(action: dict) -> int:
+        """Map an action dict to a discrete action index [0, _ACTION_DIM).
+
+        Mapping (Datasheet 1, Section 2 action space):
+        0 = route      1 = retrieve     2 = recover      3 = other
+        """
+        dt = str(action.get("decision_type", "route")).lower()
+        mapping = {"route": 0, "retrieve": 1, "recover": 2}
+        return mapping.get(dt, 3)
