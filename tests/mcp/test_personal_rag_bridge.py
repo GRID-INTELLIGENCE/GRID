@@ -103,33 +103,40 @@ class TestQueryPersonalRag:
 class TestGovernanceTierMapping:
     """Tests for the governance tier resolver in personal-rag config."""
 
+    @staticmethod
+    def _load_rag_config():
+        """Load personal-rag config.py by file path to avoid sys.modules name collision.
+
+        GRID has its own 'config' package at the project root; importing by name
+        would hit the cached sys.modules entry. spec_from_file_location bypasses
+        that by using a distinct module name.
+        """
+        import importlib.util
+        from pathlib import Path
+
+        config_path = Path.home() / "intelligence" / "personal-rag" / "config.py"
+        if not config_path.exists():
+            return None
+        spec = importlib.util.spec_from_file_location("personal_rag_config", config_path)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return mod
+
     def test_tier_mapping_completeness(self):
         """All operational + reference source types have a tier mapping."""
-        import sys
-        rag_dir = str(__import__("pathlib").Path.home() / "intelligence" / "personal-rag")
-        if rag_dir not in sys.path:
-            sys.path.insert(0, rag_dir)
-
-        try:
-            from config import GOVERNANCE_TIERS, OPERATIONAL_SOURCES, REFERENCE_SOURCES, resolve_governance_tier
-        except ImportError:
+        config = self._load_rag_config()
+        if config is None:
             pytest.skip("personal-rag not available on this system")
 
-        for src in OPERATIONAL_SOURCES | REFERENCE_SOURCES:
-            tier = resolve_governance_tier(src)
+        for src in config.OPERATIONAL_SOURCES | config.REFERENCE_SOURCES:
+            tier = config.resolve_governance_tier(src)
             assert tier in {"T0", "T1", "T2", "T3"}, f"{src} → {tier} not in valid tiers"
 
     def test_unknown_source_defaults_to_t3(self):
         """Unknown source types fall back to T3."""
-        import sys
-        rag_dir = str(__import__("pathlib").Path.home() / "intelligence" / "personal-rag")
-        if rag_dir not in sys.path:
-            sys.path.insert(0, rag_dir)
-
-        try:
-            from config import resolve_governance_tier
-        except ImportError:
+        config = self._load_rag_config()
+        if config is None:
             pytest.skip("personal-rag not available on this system")
 
-        assert resolve_governance_tier("nonexistent_source") == "T3"
-        assert resolve_governance_tier("") == "T3"
+        assert config.resolve_governance_tier("nonexistent_source") == "T3"
+        assert config.resolve_governance_tier("") == "T3"
