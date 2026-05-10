@@ -174,9 +174,16 @@ async def read_resource(uri) -> str:  # type: ignore[misc]
         return f"Error: {exc}"
 
 
-# ── Tool definitions ──────────────────────────────────────────────────────────
+# ── personal-rag bridge availability ──────────────────────────────────────────
+try:
+    from grid.mcp.personal_rag_bridge import PersonalRagBridgeError, query_personal_rag
 
-# NEXT: KnowledgeGraphBridge (Option B, deferred — isolated now)
+    PERSONAL_RAG_BRIDGE_AVAILABLE = True
+except ImportError:
+    PERSONAL_RAG_BRIDGE_AVAILABLE = False
+    logger.info("personal-rag bridge not available — intelligence_query_personal tool disabled")
+
+# ── Tool definitions ──────────────────────────────────────────────────────────
 
 
 @server.list_tools()
@@ -310,7 +317,57 @@ async def list_tools() -> list[Tool]:
                 "required": ["coordinates"],
             },
         ),
-    ]
+    ] + ([
+        Tool(
+            name="intelligence_query_personal",
+            description=(
+                "Query personal-rag knowledge base through the digest gate. "
+                "Returns governance-tiered chunks (T0=core policy, T1=playbooks, "
+                "T2=session/memory, T3=audit/cache) for context enrichment. "
+                "Requires a valid digest_sha256 from get_session_digest."
+            ),
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "Natural-language query to search personal knowledge base",
+                    },
+                    "digest_sha256": {
+                        "type": "string",
+                        "description": "12-char sha256 prefix from personal-rag get_session_digest",
+                        "minLength": 12,
+                        "maxLength": 12,
+                    },
+                    "source_filter": {
+                        "type": "string",
+                        "description": "Comma-separated source types (default: all operational)",
+                        "default": "",
+                    },
+                    "min_score": {
+                        "type": "number",
+                        "description": "Minimum similarity threshold (0.0-1.0)",
+                        "default": 0.65,
+                        "minimum": 0.0,
+                        "maximum": 1.0,
+                    },
+                    "governance_tier_filter": {
+                        "type": "string",
+                        "description": "Filter by tier: T0,T1,T2,T3 (default: all)",
+                        "default": "",
+                    },
+                    "k": {
+                        "type": "integer",
+                        "description": "Number of chunks to return (1-50)",
+                        "default": 5,
+                        "minimum": 1,
+                        "maximum": 50,
+                    },
+                },
+                "required": ["query", "digest_sha256"],
+            },
+        ),
+    ] if PERSONAL_RAG_BRIDGE_AVAILABLE else [])
 
 
 # ── Tool dispatch ─────────────────────────────────────────────────────────────
@@ -328,6 +385,7 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> CallToolResult:
             "intelligence_graph_query": _handle_graph_query,
             "intelligence_add_navigation_data": _handle_add_navigation_data,
             "intelligence_enhance_navigation": _handle_enhance_navigation,
+            "intelligence_query_personal": _handle_query_personal,
         }
         handler = handlers.get(name)
         if handler is None:
@@ -582,6 +640,50 @@ async def _handle_enhance_navigation(args: dict[str, Any]) -> CallToolResult:
         logger.error("enhance_navigation failed: %s", exc)
         return CallToolResult(
             content=[TextContent(type="text", text=f"Navigation enhancement failed: {exc}")],
+            isError=True,
+        )
+
+
+async def _handle_query_personal(args: dict[str, Any]) -> CallToolResult:
+    if not PERSONAL_RAG_BRIDGE_AVAILABLE:
+        return CallToolResult(
+            content=[TextContent(type="text", text="personal-rag bridge is not available")],
+            isError=True,
+        )
+
+    query = args.get("query", "")
+    digest_sha256 = args.get("digest_sha256", "")
+    if not query or not digest_sha256:
+        return CallToolResult(
+            content=[TextContent(type="text", text="Error: query and digest_sha256 are required")],
+            isError=True,
+        )
+
+    try:
+        result = await asyncio.get_event_loop().run_in_executor(
+            None,
+            lambda: query_personal_rag(
+                query=query,
+                digest_sha256=digest_sha256,
+                k=args.get("k", 5),
+                source_filter=args.get("source_filter", ""),
+                min_score=args.get("min_score", 0.65),
+                governance_tier_filter=args.get("governance_tier_filter", ""),
+            ),
+        )
+        return CallToolResult(
+            content=[TextContent(type="text", text=json.dumps(result, indent=2))]
+        )
+    except PersonalRagBridgeError as exc:
+        logger.warning("personal-rag bridge error: %s", exc)
+        return CallToolResult(
+            content=[TextContent(type="text", text=f"personal-rag bridge error: {exc}")],
+            isError=True,
+        )
+    except Exception as exc:
+        logger.error("intelligence_query_personal failed: %s", exc)
+        return CallToolResult(
+            content=[TextContent(type="text", text=f"Query failed: {exc}")],
             isError=True,
         )
 
