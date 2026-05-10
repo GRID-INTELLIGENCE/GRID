@@ -20,7 +20,15 @@ try:
     HAS_BM25 = True
 except ImportError:
     HAS_BM25 = False
-    BM25Okapi = Any  # type: ignore
+
+    class BM25Okapi:  # type: ignore
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def get_scores(self, *args, **kwargs):
+            return []
+
+from .reranker import create_reranker
 
 
 def tokenize(text: str) -> list[str]:
@@ -133,6 +141,9 @@ class HybridRetriever:
         else:
             vec_results = self.vector_store.query(query_embedding=query_embedding, n_results=vec_k)
 
+        if vec_results is None:
+            return {"ids": [], "documents": [], "metadatas": [], "distances": []}
+
         # Ensure BM25
         if not self._ensure_bm25_index():
             return cast(dict[str, Any], vec_results)
@@ -144,6 +155,9 @@ class HybridRetriever:
         query_embedding = self.embedding_provider.embed(query) if self.embedding_provider else {}
         vec_k = min(top_k * 2, 50)
         vec_results = self.vector_store.query(query_embedding=query_embedding, n_results=vec_k)
+
+        if vec_results is None:
+            return {"ids": [], "documents": [], "metadatas": [], "distances": []}
 
         if not self._ensure_bm25_index():
             return cast(dict[str, Any], vec_results)
@@ -182,10 +196,21 @@ class HybridRetriever:
         query_embedding = self.embedding_provider.embed(query) if self.embedding_provider else {}
         res = self.vector_store.query(query_embedding=query_embedding, n_results=k)
 
-        docs = res.get("documents", [])
-        metas = res.get("metadatas", [])
-        distances = res.get("distances", [0.0] * len(docs))
-        ids = res.get("ids", [""] * len(docs))
+        if res is None:
+            return []
+
+        # Flatten ChromaDB results
+        _ids = res.get("ids")
+        ids = _ids[0] if _ids and isinstance(_ids, list) and isinstance(_ids[0], list) else (_ids or [])
+        
+        _docs = res.get("documents")
+        docs = _docs[0] if _docs and isinstance(_docs, list) and isinstance(_docs[0], list) else (_docs or [])
+        
+        _metas = res.get("metadatas")
+        metas = _metas[0] if _metas and isinstance(_metas, list) and isinstance(_metas[0], list) else (_metas or [])
+        
+        _dists = res.get("distances")
+        distances = _dists[0] if _dists and isinstance(_dists, list) and isinstance(_dists[0], list) else (_dists or [])
 
         from .types import ScoredChunk
 
@@ -196,10 +221,18 @@ class HybridRetriever:
 
     def _fuse_results(self, query: str, vec_results: dict[str, Any], top_k: int) -> dict[str, Any]:
         """Internal RRF fusion logic."""
-        vec_ids = vec_results.get("ids", [])
-        vec_docs = vec_results.get("documents", [])
-        vec_metas = vec_results.get("metadatas", [])
-        vec_dists = vec_results.get("distances", [])
+        # Flatten ChromaDB results (query returns list of lists)
+        _ids = vec_results.get("ids")
+        vec_ids = _ids[0] if _ids and isinstance(_ids, list) and isinstance(_ids[0], list) else (_ids or [])
+        
+        _docs = vec_results.get("documents")
+        vec_docs = _docs[0] if _docs and isinstance(_docs, list) and isinstance(_docs[0], list) else (_docs or [])
+        
+        _metas = vec_results.get("metadatas")
+        vec_metas = _metas[0] if _metas and isinstance(_metas, list) and isinstance(_metas[0], list) else (_metas or [])
+        
+        _dists = vec_results.get("distances")
+        vec_dists = _dists[0] if _dists and isinstance(_dists, list) and isinstance(_dists[0], list) else (_dists or [])
 
         # Get BM25 scores
         query_tokens = tokenize(query)
@@ -215,6 +248,27 @@ class HybridRetriever:
             rrf_scores[doc_id] = rrf_scores.get(doc_id, 0) + 1 / (self.k + rank + 1)
         for rank, (doc_id, _) in enumerate(bm25_ranked):
             rrf_scores[doc_id] = rrf_scores.get(doc_id, 0) + 1 / (self.k + rank + 1)
+
+        # Neural Reranking (before RRF fusion)
+        if self.reranker:
+            candidate_ids = list(set(vec_ids) | {doc_id for doc_id, _ in bm25_ranked})
+            vec_lookup = {vid: vdoc for vid, vdoc in zip(vec_ids, vec_docs, strict=False)}
+            bm25_lookup = dict(zip(self._chunk_ids, self._chunk_texts, strict=False))
+            
+            texts = []
+            valid_ids = []
+            for cid in candidate_ids:
+                text = vec_lookup.get(cid) or bm25_lookup.get(cid)
+                if text:
+                    texts.append(text)
+                    valid_ids.append(cid)
+            
+            if texts:
+                # Reranker returns (index, score) tuples
+                reranked = self.reranker.rerank(query, texts, top_k=limit)
+                for rank, (idx, _) in enumerate(reranked):
+                    doc_id = valid_ids[idx]
+                    rrf_scores[doc_id] = rrf_scores.get(doc_id, 0) + 1 / (self.k + rank + 1)
 
         fused_ranking = sorted(rrf_scores.items(), key=lambda x: -x[1])[:top_k]
 
@@ -270,4 +324,10 @@ def create_hybrid_retriever(vector_store: Any, embedding_provider: Any, config: 
         logger.warning("Hybrid search requested but rank_bm25 not installed.")
         return None
 
-    return HybridRetriever(vector_store=vector_store, embedding_provider=embedding_provider)
+    reranker = create_reranker(config)
+    return HybridRetriever(
+        vector_store=vector_store,
+        embedding_provider=embedding_provider,
+        reranker=reranker,
+        k=getattr(config, "k", 60)
+    )
