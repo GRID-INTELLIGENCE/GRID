@@ -3,8 +3,8 @@
 # Core dependencies for the dynamic API architecture
 
 # Web Framework (SECURITY UPDATE: Patched CORS bypass CVE)
-fastapi==0.136.1
-uvicorn[standard]==0.47.0
+fastapi==0.136.3
+uvicorn[standard]==0.48.0
 starlette==0.52.1
 
 # Authentication & Security
