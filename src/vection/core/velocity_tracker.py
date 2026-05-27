@@ -20,7 +20,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any
 
-from vection.schemas.velocity_vector import DirectionCategory, VelocityVector
+from vection.schemas.velocity_vector import DirectionCategory, VelocityVector, categorize_direction
 
 logger = logging.getLogger(__name__)
 
@@ -184,13 +184,8 @@ class VelocityTracker:
         return topics
 
     def _categorize_direction(self, direction: str) -> DirectionCategory:
-        """Categorize direction string to enum."""
-        direction_lower = direction.lower()
-        if "analyze" in direction_lower or "debug" in direction_lower:
-            return DirectionCategory.INVESTIGATION
-        if "create" in direction_lower or "run" in direction_lower:
-            return DirectionCategory.EXECUTION
-        return DirectionCategory.UNKNOWN
+        """Categorize direction string to enum (delegates to the canonical mapping)."""
+        return categorize_direction(direction)
 
     def _calculate_magnitude(self) -> float:
         """Calculate velocity magnitude from event rate."""
@@ -211,7 +206,7 @@ class VelocityTracker:
         seq = list(self.direction_sequence)
         if len(seq) < 2:
             return 0.5
-        same = sum(1 for a, b in zip(seq, seq[1:]) if a == b)
+        same = sum(1 for a, b in zip(seq, seq[1:], strict=False) if a == b)
         return same / (len(seq) - 1)
 
     def _calculate_drift(self) -> float:
@@ -223,7 +218,7 @@ class VelocityTracker:
         seq = list(self.direction_sequence)
         if len(seq) < 2:
             return 0.0
-        transitions = sum(1 for a, b in zip(seq, seq[1:]) if a != b)
+        transitions = sum(1 for a, b in zip(seq, seq[1:], strict=False) if a != b)
         return transitions / (len(seq) - 1)
 
     def _calculate_confidence(self) -> float:

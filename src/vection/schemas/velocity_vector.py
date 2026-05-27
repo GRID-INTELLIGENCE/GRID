@@ -6,6 +6,7 @@ Provides direction, magnitude, momentum, drift, and projection capabilities.
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import StrEnum
@@ -22,6 +23,58 @@ class DirectionCategory(StrEnum):
     REFLECTION = "reflection"  # Review, retrospection
     TRANSITION = "transition"  # Shifting between modes
     UNKNOWN = "unknown"  # Insufficient data
+
+
+# Canonical keyword → cognitive direction mapping. This is the single source of
+# truth for direction categorization across vection (velocity_tracker, engine,
+# and from_direction all delegate to categorize_direction below).
+#
+# Covers semantic verbs AND HTTP methods, because the admission gate feeds request
+# methods/paths through this. Categories are ordered most-specific first: a string
+# that matches several returns the earliest category here.
+DIRECTION_KEYWORDS: dict[DirectionCategory, frozenset[str]] = {
+    DirectionCategory.INVESTIGATION: frozenset(
+        {"investigate", "analyze", "analyse", "debug", "diagnose", "why", "inspect", "trace", "audit", "examine"}
+    ),
+    DirectionCategory.SYNTHESIS: frozenset(
+        {"combine", "merge", "synthesize", "synthesise", "integrate", "compose", "aggregate", "assemble"}
+    ),
+    DirectionCategory.REFLECTION: frozenset(
+        {"review", "reflect", "summarize", "summarise", "evaluate", "report", "retrospect", "assess"}
+    ),
+    DirectionCategory.TRANSITION: frozenset(
+        {"switch", "change", "transition", "shift", "redirect", "connect"}
+    ),
+    DirectionCategory.EXECUTION: frozenset(
+        {
+            "execute", "run", "implement", "build", "create", "deploy", "add", "update", "write",
+            "post", "put", "patch", "delete",  # HTTP write methods
+        }
+    ),
+    DirectionCategory.EXPLORATION: frozenset(
+        {
+            "explore", "discover", "browse", "search", "find", "list", "query",
+            "get", "read", "fetch", "head", "options",  # HTTP read/probe methods
+        }
+    ),
+}
+
+
+def categorize_direction(direction: str) -> DirectionCategory:
+    """Map a free-text direction/intent/HTTP-method string to a DirectionCategory.
+
+    Tokenizes on word boundaries and returns the first category (most specific
+    first per DIRECTION_KEYWORDS) whose keyword set intersects the tokens. Word
+    tokens, not substrings, so "get" matches the HTTP method but not "budget".
+    Returns UNKNOWN when nothing matches.
+    """
+    tokens = set(re.findall(r"[a-z]+", direction.lower()))
+    if not tokens:
+        return DirectionCategory.UNKNOWN
+    for category, keywords in DIRECTION_KEYWORDS.items():
+        if tokens & keywords:
+            return category
+    return DirectionCategory.UNKNOWN
 
 
 @dataclass
@@ -265,12 +318,12 @@ class VelocityVector:
         Returns:
             New VelocityVector.
         """
-        # Try to match to DirectionCategory
+        # Try exact enum-value match first ("exploration" → EXPLORATION),
+        # then fall back to keyword inference.
         try:
             category = DirectionCategory(direction.lower())
         except ValueError:
-            # Infer category from direction detail
-            category = cls._infer_category(direction)
+            category = categorize_direction(direction)
 
         return cls(
             direction=category,
@@ -280,42 +333,3 @@ class VelocityVector:
             drift=0.0,
             confidence=confidence,
         )
-
-    @staticmethod
-    def _infer_category(detail: str) -> DirectionCategory:
-        """Infer direction category from detail string.
-
-        Args:
-            detail: Direction detail string.
-
-        Returns:
-            Inferred DirectionCategory.
-        """
-        detail_lower = detail.lower()
-
-        category_keywords = {
-            DirectionCategory.EXPLORATION: ["explore", "discover", "browse", "search"],
-            DirectionCategory.INVESTIGATION: [
-                "investigate",
-                "analyze",
-                "debug",
-                "diagnose",
-                "why",
-            ],
-            DirectionCategory.EXECUTION: [
-                "execute",
-                "run",
-                "implement",
-                "build",
-                "create",
-            ],
-            DirectionCategory.SYNTHESIS: ["combine", "merge", "synthesize", "integrate"],
-            DirectionCategory.REFLECTION: ["review", "reflect", "summarize", "evaluate"],
-            DirectionCategory.TRANSITION: ["switch", "change", "transition", "shift"],
-        }
-
-        for category, keywords in category_keywords.items():
-            if any(kw in detail_lower for kw in keywords):
-                return category
-
-        return DirectionCategory.UNKNOWN

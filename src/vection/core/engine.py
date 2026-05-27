@@ -25,7 +25,7 @@ from typing import Any, TypeVar
 
 from vection.schemas.context_state import Anchor, ContextStatus, VectionContext
 from vection.schemas.emergence_signal import EmergenceSignal
-from vection.schemas.velocity_vector import DirectionCategory, VelocityVector
+from vection.schemas.velocity_vector import DirectionCategory, VelocityVector, categorize_direction
 
 logger = logging.getLogger(__name__)
 
@@ -466,29 +466,8 @@ class Vection:
         return "unknown"
 
     def _categorize_direction(self, direction: str) -> DirectionCategory:
-        """Categorize direction string.
-
-        Args:
-            direction: Direction string.
-
-        Returns:
-            DirectionCategory enum.
-        """
-        direction_lower = direction.lower()
-
-        mappings = {
-            DirectionCategory.EXPLORATION: ["search", "find", "explore", "browse"],
-            DirectionCategory.INVESTIGATION: ["analyze", "debug", "investigate", "why"],
-            DirectionCategory.EXECUTION: ["execute", "run", "create", "build", "do"],
-            DirectionCategory.SYNTHESIS: ["combine", "merge", "integrate"],
-            DirectionCategory.REFLECTION: ["review", "summarize", "evaluate"],
-        }
-
-        for category, keywords in mappings.items():
-            if any(kw in direction_lower for kw in keywords):
-                return category
-
-        return DirectionCategory.UNKNOWN
+        """Categorize direction string (delegates to the canonical mapping)."""
+        return categorize_direction(direction)
 
     def _calculate_magnitude(self, state: SessionState) -> float:
         """Calculate velocity magnitude.

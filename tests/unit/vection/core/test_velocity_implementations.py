@@ -9,6 +9,7 @@ from __future__ import annotations
 import pytest
 
 from vection.core.velocity_tracker import VelocityTracker
+from vection.schemas.velocity_vector import DirectionCategory, categorize_direction
 
 
 def _tracker_with_directions(directions: list[str]) -> VelocityTracker:
@@ -152,3 +153,75 @@ class TestMomentumDriftComplementarity:
         tracker = _tracker_with_directions(seq)
         total = tracker._calculate_momentum() + tracker._calculate_drift()
         assert total == pytest.approx(1.0)
+
+
+# ---------------------------------------------------------------------------
+# Canonical direction categorization
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+class TestCategorizeDirection:
+    @pytest.mark.parametrize(
+        ("text", "expected"),
+        [
+            # HTTP read/probe methods → EXPLORATION
+            ("GET", DirectionCategory.EXPLORATION),
+            ("HEAD", DirectionCategory.EXPLORATION),
+            ("OPTIONS", DirectionCategory.EXPLORATION),
+            # HTTP write methods → EXECUTION
+            ("POST", DirectionCategory.EXECUTION),
+            ("PUT", DirectionCategory.EXECUTION),
+            ("PATCH", DirectionCategory.EXECUTION),
+            ("DELETE", DirectionCategory.EXECUTION),
+            # Semantic verbs
+            ("analyze the failure", DirectionCategory.INVESTIGATION),
+            ("debug", DirectionCategory.INVESTIGATION),
+            ("explore options", DirectionCategory.EXPLORATION),
+            ("build the project", DirectionCategory.EXECUTION),
+            ("merge the branches", DirectionCategory.SYNTHESIS),
+            ("review the diff", DirectionCategory.REFLECTION),
+            ("switch context", DirectionCategory.TRANSITION),
+        ],
+    )
+    def test_known_inputs(self, text: str, expected: DirectionCategory) -> None:
+        assert categorize_direction(text) == expected
+
+    def test_unknown_returns_unknown(self) -> None:
+        assert categorize_direction("zxqwv") == DirectionCategory.UNKNOWN
+
+    def test_empty_returns_unknown(self) -> None:
+        assert categorize_direction("") == DirectionCategory.UNKNOWN
+
+    def test_case_insensitive(self) -> None:
+        assert categorize_direction("AnAlYzE") == DirectionCategory.INVESTIGATION
+
+    def test_token_match_not_substring(self) -> None:
+        # "budget" contains the substring "get" but is not the token "get"
+        assert categorize_direction("budget") == DirectionCategory.UNKNOWN
+        # "remove" contains "move" but token matching protects against it
+        assert categorize_direction("remove") == DirectionCategory.UNKNOWN
+
+    def test_most_specific_wins(self) -> None:
+        # "analyze" (INVESTIGATION) precedes "get" (EXPLORATION) in priority order
+        assert categorize_direction("get and analyze") == DirectionCategory.INVESTIGATION
+
+    def test_http_method_with_path(self) -> None:
+        # Mirrors the admission gate's "{method} {path}" style direction strings
+        assert categorize_direction("DELETE /api/v1/users/42") == DirectionCategory.EXECUTION
+
+
+@pytest.mark.unit
+class TestTrackerUsesCanonicalCategorization:
+    """The tracker's HTTP-style events should now produce meaningful categories
+    instead of UNKNOWN (the regression that motivated this enrichment)."""
+
+    def test_http_get_events_categorized(self) -> None:
+        tracker = VelocityTracker(session_id="t")
+        velocity = tracker.track_event({"action": "GET", "query": "/api/health"})
+        assert velocity.direction == DirectionCategory.EXPLORATION
+
+    def test_http_post_events_categorized(self) -> None:
+        tracker = VelocityTracker(session_id="t")
+        velocity = tracker.track_event({"action": "POST", "query": "/api/orders"})
+        assert velocity.direction == DirectionCategory.EXECUTION
