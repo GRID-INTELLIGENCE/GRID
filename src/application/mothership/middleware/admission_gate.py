@@ -932,7 +932,7 @@ class AdmissionGateMiddleware(BaseHTTPMiddleware):
                 momentum=velocity.momentum,
                 drift=velocity.drift,
             )
-            if anomaly_alert and anomaly_alert.severity in (AlertSeverity.HIGH, AlertSeverity.CRITICAL):
+            if anomaly_alert and anomaly_alert.severity in (AlertSeverity.MEDIUM, AlertSeverity.HIGH, AlertSeverity.CRITICAL):
                 self.attribution.record_violation(
                     entity_id,
                     ViolationType.VELOCITY_ANOMALY,
