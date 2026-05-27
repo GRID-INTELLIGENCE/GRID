@@ -29,6 +29,7 @@ from ..middleware.admission_gate import (
     BILLBOARD_VERSION,
     PROFIT_MASK_SIGNALS,
     EntityAttributionEngine,
+    EntityRecord,
     PolicyBillboard,
     ViolationType,
 )
@@ -67,6 +68,29 @@ class GateStatsResponse(BaseModel):
     rejection_reasons: dict[str, int]
     tracked_entities: int
     bannered_entities: int
+    # Aggregate vection drift scalars (fleet-drift signal in the primary stats view)
+    mean_drift: float
+    max_drift: float
+    high_drift_count: int
+    timestamp: str
+
+
+class DriftingEntity(BaseModel):
+    """A single entity's current drift score."""
+
+    entity_id: str
+    drift_score: float
+
+
+class DriftSummaryResponse(BaseModel):
+    """Fleet-wide vection drift summary."""
+
+    tracked_entities: int
+    mean_drift: float
+    max_drift: float
+    high_drift_count: int
+    high_drift_threshold: float
+    top_drifting: list[DriftingEntity]
     timestamp: str
 
 
@@ -275,7 +299,7 @@ def _get_attribution(request: Request) -> EntityAttributionEngine:
     return attr
 
 
-def _classify_tier(record) -> tuple[str, str]:
+def _classify_tier(record: EntityRecord) -> tuple[str, str]:
     """Classify an entity's current penalty tier."""
     if record.profit_mask_violations > 0:
         return "intentional_scheming", ("3x accelerated penalty. Profit-masking or safety bypass detected.")
@@ -322,12 +346,55 @@ async def get_policy_billboard(request: Request) -> PolicyBillboardResponse:
 )
 async def get_gate_stats(request: Request) -> GateStatsResponse:
     attr = _get_attribution(request)
+    # top_n=0 skips the per-entity sort — /stats only needs the scalar aggregates.
+    drift = attr.drift_summary(top_n=0)
     return GateStatsResponse(
         total_admitted=attr.total_admitted,
         total_rejected=attr.total_rejected,
         rejection_reasons=dict(attr.rejection_reasons),
         tracked_entities=len(attr.entities),
         bannered_entities=len(attr.bannered_entities()),
+        mean_drift=drift["mean_drift"],
+        max_drift=drift["max_drift"],
+        high_drift_count=drift["high_drift_count"],
+        timestamp=_now_iso(),
+    )
+
+
+@router.get(
+    "/drift",
+    response_model=DriftSummaryResponse,
+    summary="Get fleet-wide drift summary",
+    description=(
+        "Returns aggregate vection drift across all tracked entities: mean and max "
+        "drift, the number of entities above the budget-surcharge threshold, and the "
+        "highest-drift entities. Answers 'is the fleet drifting?' without inspecting "
+        "individual records."
+    ),
+)
+async def get_drift_summary(request: Request, top_n: int = 10) -> DriftSummaryResponse:
+    attr = _get_attribution(request)
+    summary = attr.drift_summary(top_n=top_n)
+
+    # Structured log only when something is drifting, so calm polling stays quiet
+    # but a drifting fleet leaves a parseable trail in the log pipeline.
+    if summary["high_drift_count"] > 0:
+        logger.info(
+            "admission_drift.fleet_summary tracked=%d mean=%.3f max=%.3f high=%d threshold=%.2f",
+            summary["tracked_entities"],
+            summary["mean_drift"],
+            summary["max_drift"],
+            summary["high_drift_count"],
+            summary["high_drift_threshold"],
+        )
+
+    return DriftSummaryResponse(
+        tracked_entities=summary["tracked_entities"],
+        mean_drift=summary["mean_drift"],
+        max_drift=summary["max_drift"],
+        high_drift_count=summary["high_drift_count"],
+        high_drift_threshold=summary["high_drift_threshold"],
+        top_drifting=[DriftingEntity(**d) for d in summary["top_drifting"]],
         timestamp=_now_iso(),
     )
 

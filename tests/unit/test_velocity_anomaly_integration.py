@@ -14,17 +14,18 @@ from __future__ import annotations
 import pytest
 
 from application.mothership.middleware.admission_gate import (
+    DRIFT_SURCHARGE_THRESHOLD,
     EntityAttributionEngine,
     ViolationType,
 )
 from vection.core.velocity_tracker import VelocityTracker, VelocityTrackerRegistry
+from vection.schemas.velocity_vector import VelocityVector
 from vection.security.anomaly_detector import (
     AnomalyDetector,
     AnomalyDetectorConfig,
     AnomalyType,
     DetectionThresholds,
 )
-
 
 # ---------------------------------------------------------------------------
 # ViolationType and BASE_PENALTIES
@@ -189,7 +190,7 @@ class TestDriftConfidenceWeighting:
 class TestAnomalyToViolationPipeline:
     """Drives the full pipeline without mocking the anomaly detector."""
 
-    def _high_drift_velocity(self):
+    def _high_drift_velocity(self) -> VelocityVector:
         """Build a VelocityTracker with 20 fully alternating events and return
         the final VelocityVector."""
         tracker = VelocityTracker(session_id="entity-drift", history_size=100, direction_history_size=100)
@@ -310,3 +311,72 @@ class TestAnomalyToViolationPipeline:
 
         budget = engine.effective_budget("entity-drift", 100)
         assert budget < 100
+
+
+# ---------------------------------------------------------------------------
+# Aggregate drift observability
+# ---------------------------------------------------------------------------
+
+
+class TestDriftSummary:
+    def test_empty_engine_zero_summary(self) -> None:
+        summary = EntityAttributionEngine().drift_summary()
+        assert summary["tracked_entities"] == 0
+        assert summary["mean_drift"] == pytest.approx(0.0)
+        assert summary["max_drift"] == pytest.approx(0.0)
+        assert summary["high_drift_count"] == 0
+        assert summary["top_drifting"] == []
+
+    def test_threshold_matches_enforcement_constant(self) -> None:
+        summary = EntityAttributionEngine().drift_summary()
+        assert summary["high_drift_threshold"] == DRIFT_SURCHARGE_THRESHOLD
+
+    def test_mean_and_max(self) -> None:
+        engine = EntityAttributionEngine()
+        engine.update_drift("a", 0.2)
+        engine.update_drift("b", 0.8)
+        summary = engine.drift_summary()
+        assert summary["tracked_entities"] == 2
+        assert summary["mean_drift"] == pytest.approx(0.5)
+        assert summary["max_drift"] == pytest.approx(0.8)
+
+    def test_high_drift_count_uses_surcharge_threshold(self) -> None:
+        engine = EntityAttributionEngine()
+        engine.update_drift("below", DRIFT_SURCHARGE_THRESHOLD)  # not strictly above
+        engine.update_drift("above1", 0.6)
+        engine.update_drift("above2", 0.9)
+        summary = engine.drift_summary()
+        assert summary["high_drift_count"] == 2
+
+    def test_top_drifting_ranked_descending(self) -> None:
+        engine = EntityAttributionEngine()
+        engine.update_drift("low", 0.1)
+        engine.update_drift("high", 0.9)
+        engine.update_drift("mid", 0.5)
+        summary = engine.drift_summary(top_n=3)
+        ids = [d["entity_id"] for d in summary["top_drifting"]]
+        assert ids == ["high", "mid", "low"]
+
+    def test_top_drifting_respects_top_n(self) -> None:
+        engine = EntityAttributionEngine()
+        for i in range(10):
+            engine.update_drift(f"e{i}", i / 10.0)
+        summary = engine.drift_summary(top_n=3)
+        assert len(summary["top_drifting"]) == 3
+        assert summary["top_drifting"][0]["entity_id"] == "e9"
+
+    def test_top_n_zero_skips_ranking(self) -> None:
+        engine = EntityAttributionEngine()
+        engine.update_drift("a", 0.9)
+        summary = engine.drift_summary(top_n=0)
+        assert summary["top_drifting"] == []
+        # Scalar aggregates still computed
+        assert summary["max_drift"] == pytest.approx(0.9)
+
+    def test_top_drifting_excludes_zero_drift(self) -> None:
+        engine = EntityAttributionEngine()
+        engine.update_drift("zero", 0.0)
+        engine.update_drift("nonzero", 0.3)
+        summary = engine.drift_summary(top_n=10)
+        ids = [d["entity_id"] for d in summary["top_drifting"]]
+        assert ids == ["nonzero"]

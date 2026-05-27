@@ -53,6 +53,10 @@ DEFAULT_WINDOW_SECONDS = 60.0
 DEFAULT_CONTEXT_TOKEN_CEILING = 25_000
 DEFAULT_MAX_BODY_BYTES = 512 * 1024  # 512 KB estimated context limit
 PROFIT_MASK_PENALTY_MULTIPLIER = 3  # 3x penalty for profit-masking abuse
+# Vection drift surcharge: an entity's confidence-weighted drift above this value
+# starts reducing its effective budget. Single source of truth for both enforcement
+# (effective_budget) and observability (drift_summary).
+DRIFT_SURCHARGE_THRESHOLD = 0.5
 
 # Paths that bypass the gate entirely (minimal infra + self-observation endpoints).
 # `/admission/*` endpoints exist to observe and operate the gate; they should not
@@ -632,7 +636,7 @@ class EntityAttributionEngine:
         # representing a session whose cognitive trajectory is too chaotic to trust at
         # full throughput. The floor stays at 10% so high-drift sessions aren't silenced.
         reduction_pct = min(record.total_penalty_points, 90) / 100.0
-        drift_surcharge = max(0.0, (record.drift_score - 0.5) * 0.4)  # 0–20%
+        drift_surcharge = max(0.0, (record.drift_score - DRIFT_SURCHARGE_THRESHOLD) * 0.4)  # 0–20%
         total_reduction = min(reduction_pct + drift_surcharge, 0.90)
         return max(int(base_budget * (1.0 - total_reduction)), max(1, base_budget // 10))
 
@@ -727,6 +731,47 @@ class EntityAttributionEngine:
                 for v in record.violations
             ],
             "merit_standing": merit_data,
+        }
+
+    def drift_summary(self, top_n: int = 10) -> dict[str, Any]:
+        """Aggregate vection drift across all tracked entities — the fleet-drift view.
+
+        Returns mean/max drift, the count of entities above the surcharge threshold,
+        and (when top_n > 0) the highest-drift entities. Lets an operator answer
+        "is the fleet drifting?" without inspecting individual records.
+
+        Pass top_n=0 to skip the sort when only the scalar aggregates are needed
+        (e.g. the frequently-polled /stats endpoint).
+        """
+        scores = [r.drift_score for r in self._entities.values()]
+        tracked = len(scores)
+        if tracked == 0:
+            return {
+                "tracked_entities": 0,
+                "mean_drift": 0.0,
+                "max_drift": 0.0,
+                "high_drift_count": 0,
+                "high_drift_threshold": DRIFT_SURCHARGE_THRESHOLD,
+                "top_drifting": [],
+            }
+
+        high_drift_count = sum(1 for s in scores if s > DRIFT_SURCHARGE_THRESHOLD)
+        top_drifting: list[dict[str, Any]] = []
+        if top_n > 0:
+            ranked = sorted(self._entities.values(), key=lambda r: r.drift_score, reverse=True)
+            top_drifting = [
+                {"entity_id": r.entity_id, "drift_score": r.drift_score}
+                for r in ranked[:top_n]
+                if r.drift_score > 0.0
+            ]
+
+        return {
+            "tracked_entities": tracked,
+            "mean_drift": sum(scores) / tracked,
+            "max_drift": max(scores),
+            "high_drift_count": high_drift_count,
+            "high_drift_threshold": DRIFT_SURCHARGE_THRESHOLD,
+            "top_drifting": top_drifting,
         }
 
     def load_entities(self, entities: dict[str, EntityRecord]) -> None:
@@ -944,7 +989,9 @@ class AdmissionGateMiddleware(BaseHTTPMiddleware):
                     },
                 )
         except Exception:
-            pass  # Vection is best-effort; never let it block admission
+            # Vection is best-effort; never let it block admission. Debug-level so a
+            # persistent failure is diagnosable without spamming the request path.
+            logger.debug("admission_gate.vection_failed", exc_info=True)
 
         # --- Gate 0: Banner check (hard block) ---
         record = self.attribution.get_record(entity_id)

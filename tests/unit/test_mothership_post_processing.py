@@ -1017,6 +1017,53 @@ class TestEnforcementRouterStats:
         assert data["tracked_entities"] == 0
         assert data["bannered_entities"] == 0
 
+    def test_stats_includes_drift_scalars(self) -> None:
+        app = _build_app_with_router()
+        attr = app.state.admission_attribution
+        attr.update_drift("e1", 0.2)
+        attr.update_drift("e2", 0.8)
+        client = TestClient(app, raise_server_exceptions=False)
+        data = client.get("/admission/stats").json()
+        assert data["mean_drift"] == pytest.approx(0.5)
+        assert data["max_drift"] == pytest.approx(0.8)
+        assert data["high_drift_count"] == 1
+
+
+class TestEnforcementRouterDrift:
+    """Tests for GET /admission/drift."""
+
+    def test_empty_fleet_summary(self) -> None:
+        app = _build_app_with_router()
+        client = TestClient(app, raise_server_exceptions=False)
+        resp = client.get("/admission/drift")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["tracked_entities"] == 0
+        assert data["mean_drift"] == pytest.approx(0.0)
+        assert data["high_drift_count"] == 0
+        assert data["top_drifting"] == []
+
+    def test_drift_summary_ranks_entities(self) -> None:
+        app = _build_app_with_router()
+        attr = app.state.admission_attribution
+        attr.update_drift("calm", 0.1)
+        attr.update_drift("drifting", 0.9)
+        attr.update_drift("moderate", 0.6)
+        client = TestClient(app, raise_server_exceptions=False)
+        data = client.get("/admission/drift?top_n=2").json()
+        assert data["tracked_entities"] == 3
+        assert data["high_drift_count"] == 2  # "drifting" (0.9) and "moderate" (0.6) exceed 0.5
+        ids = [e["entity_id"] for e in data["top_drifting"]]
+        assert ids == ["drifting", "moderate"]
+
+    def test_drift_threshold_surfaced(self) -> None:
+        from application.mothership.middleware.admission_gate import DRIFT_SURCHARGE_THRESHOLD
+
+        app = _build_app_with_router()
+        client = TestClient(app, raise_server_exceptions=False)
+        data = client.get("/admission/drift").json()
+        assert data["high_drift_threshold"] == DRIFT_SURCHARGE_THRESHOLD
+
 
 class TestEnforcementRouterEntityReport:
     """Tests for GET /admission/entity/{entity_id}."""
