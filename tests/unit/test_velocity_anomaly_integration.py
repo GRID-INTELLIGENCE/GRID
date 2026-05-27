@@ -201,17 +201,10 @@ class TestAnomalyToViolationPipeline:
         return tracker.current_velocity
 
     def _make_detector(self) -> AnomalyDetector:
-        """Detector with sensitivity=1.0 so adjusted threshold equals the base value.
-
-        At the default sensitivity=0.5, _adjust_threshold multiplies by 1.5, which
-        raises the drift threshold to 1.05 — above the maximum possible drift of 1.0
-        and therefore unreachable.  sensitivity=1.0 keeps the threshold at its
-        configured value.
-        """
+        """Detector using default sensitivity (1.0) so thresholds equal their configured values."""
         return AnomalyDetector(
             AnomalyDetectorConfig(
                 thresholds=DetectionThresholds(drift_threshold=0.7),
-                sensitivity=1.0,
             )
         )
 

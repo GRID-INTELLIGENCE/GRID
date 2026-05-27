@@ -235,6 +235,12 @@ class AnomalyDetectorConfig:
         alert_cooldown_seconds: Minimum time between similar alerts.
         track_metrics_window: Window for metric tracking.
         sensitivity: Overall detection sensitivity (0.0 - 1.0).
+            At 1.0, thresholds equal their configured values (factor = 1.0).
+            Below 1.0, thresholds are raised (fewer alerts): factor = 2.0 - sensitivity,
+            so sensitivity=0.5 raises every threshold by 50%.  Drift is capped at 1.0
+            by VelocityVector, so any sensitivity below 1.0 that pushes drift_threshold
+            above 1.0 makes DRIFT_ANOMALY unreachable.  Default is 1.0 (use configured
+            thresholds as-is).
     """
 
     thresholds: DetectionThresholds = field(default_factory=DetectionThresholds)
@@ -242,7 +248,7 @@ class AnomalyDetectorConfig:
     max_alerts: int = 1000
     alert_cooldown_seconds: float = 60.0
     track_metrics_window: float = 3600.0
-    sensitivity: float = 0.5
+    sensitivity: float = 1.0
 
 
 @dataclass
