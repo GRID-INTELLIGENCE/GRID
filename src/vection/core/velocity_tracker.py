@@ -203,10 +203,16 @@ class VelocityTracker:
         return min(1.0, rate * 0.5 + 0.2)
 
     def _calculate_momentum(self) -> float:
-        """Calculate momentum from direction consistency."""
-        if len(self.direction_sequence) < 2:
+        """Calculate momentum as direction-consistency rate over recent history.
+
+        1.0 = every consecutive step kept the same direction (pure momentum)
+        0.0 = every step reversed direction (no momentum)
+        """
+        seq = list(self.direction_sequence)
+        if len(seq) < 2:
             return 0.5
-        return 0.7  # Simplified for security focus
+        same = sum(1 for a, b in zip(seq, seq[1:]) if a == b)
+        return same / (len(seq) - 1)
 
     def _calculate_drift(self) -> float:
         """Calculate drift as the rate of direction changes over recent history.
@@ -221,8 +227,11 @@ class VelocityTracker:
         return transitions / (len(seq) - 1)
 
     def _calculate_confidence(self) -> float:
-        """Calculate velocity confidence."""
-        return 0.8  # Simplified
+        """Calculate confidence from observation depth.
+
+        Scales linearly from 0.0 (no history) to 1.0 at 20+ events.
+        """
+        return min(1.0, len(self.history) / 20.0)
 
     def to_dict(self) -> dict[str, Any]:
         """Convert tracker state to dictionary."""

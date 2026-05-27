@@ -230,6 +230,7 @@ class ViolationType(StrEnum):
     MISSING_STRUCTURE = "missing_structure"
     PROFIT_MASKING = "profit_masking"
     ENTITY_BANNERED = "entity_bannered"
+    VELOCITY_ANOMALY = "velocity_anomaly"
 
 
 @dataclass
@@ -361,6 +362,7 @@ class EntityAttributionEngine:
         ViolationType.MISSING_STRUCTURE: 3,
         ViolationType.PROFIT_MASKING: 15,  # base is already high, then 3x
         ViolationType.ENTITY_BANNERED: 0,  # bannered entities are already blocked
+        ViolationType.VELOCITY_ANOMALY: 8,  # same weight as context overflow
     }
 
     # Type alias for the optional async persistence callback.
@@ -909,15 +911,38 @@ class AdmissionGateMiddleware(BaseHTTPMiddleware):
 
         entity_id = self.attribution.resolve_entity(request)
 
-        # --- Vection drift update ---
-        # Track this request in the entity's VelocityTracker and push the resulting
-        # drift score into the EntityRecord before effective_budget() reads it.
+        # --- Vection drift update + anomaly check ---
+        # Track this request in the entity's VelocityTracker, push confidence-weighted
+        # drift into the EntityRecord before effective_budget() reads it, then run
+        # check_velocity_anomaly() and record violations for HIGH/CRITICAL alerts.
         try:
             from vection.core.velocity_tracker import get_velocity_registry
+            from vection.security.anomaly_detector import AlertSeverity, get_anomaly_detector
 
             tracker = get_velocity_registry().get_or_create(entity_id)
             velocity = tracker.track_event({"action": request.method, "query": request.url.path})
-            self.attribution.update_drift(entity_id, velocity.drift)
+
+            # Confidence-weighted drift: low-confidence readings don't over-penalize.
+            self.attribution.update_drift(entity_id, velocity.drift * velocity.confidence)
+
+            anomaly_alert = get_anomaly_detector().check_velocity_anomaly(
+                session_id=entity_id,
+                velocity_magnitude=velocity.magnitude,
+                velocity_direction=velocity.direction.value,
+                momentum=velocity.momentum,
+                drift=velocity.drift,
+            )
+            if anomaly_alert and anomaly_alert.severity in (AlertSeverity.HIGH, AlertSeverity.CRITICAL):
+                self.attribution.record_violation(
+                    entity_id,
+                    ViolationType.VELOCITY_ANOMALY,
+                    metadata={
+                        "anomaly_type": anomaly_alert.anomaly_type.value,
+                        "severity": anomaly_alert.severity.value,
+                        "drift": velocity.drift,
+                        "momentum": velocity.momentum,
+                    },
+                )
         except Exception:
             pass  # Vection is best-effort; never let it block admission
 
