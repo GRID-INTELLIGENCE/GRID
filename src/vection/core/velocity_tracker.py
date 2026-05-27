@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import logging
 import time
-from collections import deque
+from collections import OrderedDict, deque
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any
@@ -242,14 +242,38 @@ class VelocityTracker:
 
 
 # Module-level registry
+DEFAULT_MAX_TRACKERS = 10_000
+
+
 class VelocityTrackerRegistry:
-    def __init__(self):
-        self._trackers: dict[str, VelocityTracker] = {}
+    """Bounded LRU registry of per-session VelocityTrackers.
+
+    The admission gate calls get_or_create() on every request keyed by entity_id
+    (which includes per-IP keys for anonymous traffic). Without a cap, an attacker
+    rotating entity-ids or IPs would grow this map without bound. Eviction is
+    least-recently-used: the tracker untouched for the longest time is dropped first
+    once the cap is reached. An evicted entity simply rebuilds drift history from
+    scratch on its next request — the same cold-start behaviour as a fresh process.
+    """
+
+    def __init__(self, max_trackers: int = DEFAULT_MAX_TRACKERS) -> None:
+        self._max_trackers = max_trackers
+        self._trackers: OrderedDict[str, VelocityTracker] = OrderedDict()
 
     def get_or_create(self, session_id: str) -> VelocityTracker:
-        if session_id not in self._trackers:
-            self._trackers[session_id] = VelocityTracker(session_id)
-        return self._trackers[session_id]
+        tracker = self._trackers.get(session_id)
+        if tracker is not None:
+            self._trackers.move_to_end(session_id)
+            return tracker
+        tracker = VelocityTracker(session_id)
+        self._trackers[session_id] = tracker
+        if len(self._trackers) > self._max_trackers:
+            evicted_id, _ = self._trackers.popitem(last=False)
+            logger.debug("velocity_registry.evicted session=%s", evicted_id)
+        return tracker
+
+    def __len__(self) -> int:
+        return len(self._trackers)
 
 
 _registry = VelocityTrackerRegistry()

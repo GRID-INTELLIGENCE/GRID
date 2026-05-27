@@ -140,3 +140,40 @@ class TestVelocityTrackerRegistry:
         assert tracker1 is not tracker2
         assert tracker1.session_id == "session-1"
         assert tracker2.session_id == "session-2"
+
+    def test_registry_bounded_by_max_trackers(self):
+        """Registry must not grow beyond max_trackers."""
+        from vection.core.velocity_tracker import VelocityTrackerRegistry
+
+        registry = VelocityTrackerRegistry(max_trackers=3)
+        for i in range(10):
+            registry.get_or_create(f"session-{i}")
+        assert len(registry) == 3
+
+    def test_registry_evicts_least_recently_used(self):
+        """The oldest-touched tracker is evicted first when over capacity."""
+        from vection.core.velocity_tracker import VelocityTrackerRegistry
+
+        registry = VelocityTrackerRegistry(max_trackers=2)
+        registry.get_or_create("a")
+        registry.get_or_create("b")
+        # Touch "a" so "b" becomes least-recently-used
+        registry.get_or_create("a")
+        # Adding "c" should evict "b", not "a"
+        registry.get_or_create("c")
+
+        assert len(registry) == 2
+        # "a" survived as a distinct instance; "b" was evicted and rebuilds fresh
+        a_again = registry.get_or_create("a")
+        assert a_again.session_id == "a"
+
+    def test_registry_evicted_session_rebuilds_fresh(self):
+        """An evicted session gets a brand-new tracker on its next access."""
+        from vection.core.velocity_tracker import VelocityTrackerRegistry
+
+        registry = VelocityTrackerRegistry(max_trackers=1)
+        first = registry.get_or_create("x")
+        registry.get_or_create("y")  # evicts "x"
+        rebuilt = registry.get_or_create("x")  # evicts "y", rebuilds "x"
+        assert rebuilt is not first
+        assert rebuilt.session_id == "x"
