@@ -256,6 +256,8 @@ class EntityRecord:
     last_seen: float = field(default_factory=time.monotonic)
     # Merit standing for roll-number model
     merit_standing: MeritStanding | None = None
+    # Vection drift score: 0.0 = stable trajectory, 1.0 = maximum churn
+    drift_score: float = 0.0
 
     def __post_init__(self) -> None:
         """Ensure merit_standing is initialized."""
@@ -431,6 +433,15 @@ class EntityAttributionEngine:
         record.last_seen = time.monotonic()
         return record
 
+    def update_drift(self, entity_id: str, drift_score: float) -> None:
+        """Attach a vection drift score to an entity record.
+
+        Called from the request dispatch path after VelocityTracker.track_event().
+        drift_score is clamped to [0.0, 1.0].
+        """
+        record = self.get_record(entity_id)
+        record.drift_score = max(0.0, min(1.0, drift_score))
+
     # -- profit-mask detection --
 
     def detect_profit_masking(
@@ -528,6 +539,7 @@ class EntityAttributionEngine:
                         "violation_count": record.violation_count,
                         "bannered": record.bannered,
                         "banner_reason": record.banner_reason,
+                        "drift_score": record.drift_score,
                     },
                     created_at=datetime.fromtimestamp(record.first_seen, tz=UTC),
                     updated_at=datetime.now(UTC),
@@ -613,9 +625,14 @@ class EntityAttributionEngine:
             return base_budget
         if record.bannered:
             return 0
-        # Reduce budget: lose 1% per penalty point, floor at 10% of original
+        # Penalty reduction: lose 1% per penalty point, floor at 10% of original.
+        # Drift surcharge: drift ≥ 0.5 adds up to 20% on top of the penalty reduction,
+        # representing a session whose cognitive trajectory is too chaotic to trust at
+        # full throughput. The floor stays at 10% so high-drift sessions aren't silenced.
         reduction_pct = min(record.total_penalty_points, 90) / 100.0
-        return max(int(base_budget * (1.0 - reduction_pct)), max(1, base_budget // 10))
+        drift_surcharge = max(0.0, (record.drift_score - 0.5) * 0.4)  # 0–20%
+        total_reduction = min(reduction_pct + drift_surcharge, 0.90)
+        return max(int(base_budget * (1.0 - total_reduction)), max(1, base_budget // 10))
 
     # -- merit standing integration --
 
@@ -891,6 +908,18 @@ class AdmissionGateMiddleware(BaseHTTPMiddleware):
             return await call_next(request)
 
         entity_id = self.attribution.resolve_entity(request)
+
+        # --- Vection drift update ---
+        # Track this request in the entity's VelocityTracker and push the resulting
+        # drift score into the EntityRecord before effective_budget() reads it.
+        try:
+            from vection.core.velocity_tracker import get_velocity_registry
+
+            tracker = get_velocity_registry().get_or_create(entity_id)
+            velocity = tracker.track_event({"action": request.method, "query": request.url.path})
+            self.attribution.update_drift(entity_id, velocity.drift)
+        except Exception:
+            pass  # Vection is best-effort; never let it block admission
 
         # --- Gate 0: Banner check (hard block) ---
         record = self.attribution.get_record(entity_id)

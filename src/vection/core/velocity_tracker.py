@@ -209,8 +209,16 @@ class VelocityTracker:
         return 0.7  # Simplified for security focus
 
     def _calculate_drift(self) -> float:
-        """Calculate drift from direction variance."""
-        return 0.0  # Simplified
+        """Calculate drift as the rate of direction changes over recent history.
+
+        0.0 = perfectly stable (same direction throughout)
+        1.0 = maximum churn (direction flips on every step)
+        """
+        seq = list(self.direction_sequence)
+        if len(seq) < 2:
+            return 0.0
+        transitions = sum(1 for a, b in zip(seq, seq[1:]) if a != b)
+        return transitions / (len(seq) - 1)
 
     def _calculate_confidence(self) -> float:
         """Calculate velocity confidence."""
