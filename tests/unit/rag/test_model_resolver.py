@@ -333,6 +333,20 @@ class TestProbeProvider:
         provider = {"type": "openai", "api_key_env": "NONEXISTENT_KEY"}
         assert _probe_provider(provider) is False
 
+    def test_mistral_checks_api_key_env(self, monkeypatch: pytest.MonkeyPatch):
+        from tools.rag.model_resolver import _probe_provider
+
+        monkeypatch.setenv("MISTRAL_API_KEY", "test-key")
+        provider = {"type": "mistral", "api_key_env": "MISTRAL_API_KEY", "model": "mistral-small-latest"}
+        assert _probe_provider(provider) is True
+
+    def test_mistral_missing_key_returns_false(self, monkeypatch: pytest.MonkeyPatch):
+        from tools.rag.model_resolver import _probe_provider
+
+        monkeypatch.delenv("MISTRAL_API_KEY", raising=False)
+        provider = {"type": "mistral", "api_key_env": "MISTRAL_API_KEY", "model": "mistral-small-latest"}
+        assert _probe_provider(provider) is False
+
     def test_simple_always_healthy(self):
         from tools.rag.model_resolver import _probe_provider
 
