@@ -3,7 +3,7 @@ Vector Embedding Engine
 =======================
 
 Handles generation and management of vector embeddings for document chunks.
-Supports OpenAI embeddings with batch processing and caching.
+Supports OpenAI and Mistral embeddings with batch processing and caching.
 """
 
 import asyncio
@@ -16,12 +16,34 @@ from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
-from openai import OpenAI
 
 from ..core.config import KnowledgeBaseConfig
 from ..core.database import KnowledgeBaseDB
 
 logger = logging.getLogger(__name__)
+
+
+def _make_embedding_client(config: KnowledgeBaseConfig) -> Any:
+    """Return the embedding client for the configured provider."""
+    provider = config.embeddings.provider
+    if provider == "mistral":
+        from mistralai import Mistral
+
+        return Mistral(api_key=config.embeddings.api_key)
+    # Default: OpenAI (also covers openai-compatible endpoints)
+    from openai import OpenAI
+
+    return OpenAI(api_key=config.embeddings.api_key)
+
+
+def _create_embeddings(client: Any, provider: str, model: str, texts: list[str]) -> list[list[float]]:
+    """Call the provider-specific embeddings API and return a list of embedding vectors."""
+    if provider == "mistral":
+        response = client.embeddings.create(model=model, inputs=texts)
+        return [d.embedding for d in response.data]
+    # OpenAI / openai-compatible
+    response = client.embeddings.create(model=model, input=texts)
+    return [d.embedding for d in response.data]
 
 
 @dataclass
@@ -42,8 +64,7 @@ class EmbeddingEngine:
         self.config = config
         self.db = db
 
-        # Initialize OpenAI client
-        self.client = OpenAI(api_key=config.embeddings.api_key)
+        self.client = _make_embedding_client(config)
 
         # Initialize cache
         self.embedding_cache: dict[str, list[float]] = {}
@@ -68,13 +89,11 @@ class EmbeddingEngine:
             )
 
         try:
-            # Call OpenAI API using new client
-            response = self.client.embeddings.create(
-                model=self.config.embeddings.model, input=text, user="knowledge-base"
+            embeddings = _create_embeddings(
+                self.client, self.config.embeddings.provider, self.config.embeddings.model, [text]
             )
-
-            embedding = response.data[0].embedding
-            token_count = response.usage.total_tokens
+            embedding = embeddings[0]
+            token_count = len(text.split())
 
             # Cache the result
             self.embedding_cache[text_hash] = embedding
@@ -133,13 +152,15 @@ class EmbeddingEngine:
             # Generate embeddings for uncached texts
             if uncached_texts:
                 try:
-                    response = self.client.embeddings.create(
-                        model=self.config.embeddings.model, input=uncached_texts, user="knowledge-base"
+                    batch_embeddings = _create_embeddings(
+                        self.client,
+                        self.config.embeddings.provider,
+                        self.config.embeddings.model,
+                        uncached_texts,
                     )
 
-                    for j, data in enumerate(response.data):
+                    for j, embedding in enumerate(batch_embeddings):
                         text = uncached_texts[j]
-                        embedding = data.embedding
 
                         # Cache the result
                         text_hash = hashlib.md5(text.encode()).hexdigest()

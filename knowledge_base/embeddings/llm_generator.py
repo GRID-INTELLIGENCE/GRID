@@ -3,7 +3,7 @@ LLM Integration for Generation
 ==============================
 
 Handles question-answering and text generation using retrieved context.
-Integrates with OpenAI GPT models for conversational AI capabilities.
+Supports OpenAI and Mistral providers for conversational AI capabilities.
 """
 
 import logging
@@ -12,13 +12,22 @@ from collections.abc import AsyncGenerator
 from dataclasses import dataclass
 from typing import Any
 
-import openai
-from openai import OpenAI
-
 from ..core.config import KnowledgeBaseConfig
 from ..search.retriever import RankedResult
 
 logger = logging.getLogger(__name__)
+
+
+def _make_llm_client(config: KnowledgeBaseConfig) -> Any:
+    """Return the LLM client for the configured provider."""
+    provider = config.llm.provider
+    if provider == "mistral":
+        from mistralai import Mistral
+
+        return Mistral(api_key=config.llm.api_key)
+    from openai import OpenAI
+
+    return OpenAI(api_key=config.llm.api_key)
 
 
 @dataclass
@@ -130,9 +139,7 @@ class LLMGenerator:
 
     def __init__(self, config: KnowledgeBaseConfig):
         self.config = config
-
-        # Initialize OpenAI client
-        self.client = OpenAI(api_key=config.llm.api_key)
+        self.client = _make_llm_client(config)
 
         # Generation statistics
         self.generation_stats = {"total_generations": 0, "total_tokens_used": 0, "avg_response_time": 0.0, "errors": 0}
@@ -149,22 +156,28 @@ class LLMGenerator:
             temperature = request.temperature or self.config.llm.temperature
             max_tokens = request.max_tokens or self.config.llm.max_tokens
 
-            # Call OpenAI API using new client
-            response = self.client.chat.completions.create(
-                model=self.config.llm.model,
-                messages=[{"role": "user", "content": prompt}],
-                temperature=temperature,
-                max_tokens=max_tokens,
-            )
+            messages = [{"role": "user", "content": prompt}]
+            provider = self.config.llm.provider
+            if provider == "mistral":
+                response = self.client.chat.complete(
+                    model=self.config.llm.model,
+                    messages=messages,
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                )
+            else:
+                response = self.client.chat.completions.create(
+                    model=self.config.llm.model,
+                    messages=messages,
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                )
 
-            # Extract response
             answer = response.choices[0].message.content.strip()
-
-            # Extract token usage
             token_usage = {
-                "prompt_tokens": response.usage.prompt_tokens,
-                "completion_tokens": response.usage.completion_tokens,
-                "total_tokens": response.usage.total_tokens,
+                "prompt_tokens": getattr(getattr(response, "usage", None), "prompt_tokens", 0) or 0,
+                "completion_tokens": getattr(getattr(response, "usage", None), "completion_tokens", 0) or 0,
+                "total_tokens": getattr(getattr(response, "usage", None), "total_tokens", 0) or 0,
             }
 
             # Calculate confidence (simplified - based on response length and context)
@@ -212,26 +225,38 @@ class LLMGenerator:
             return
 
         try:
-            # Build prompt
             prompt = PromptBuilder.build_qa_prompt(request.query, request.context, request.system_prompt)
-
-            # Call OpenAI API with streaming
-            response = openai.ChatCompletion.create(
-                model=self.config.llm.model,
-                messages=[{"role": "user", "content": prompt}],
-                temperature=request.temperature or self.config.llm.temperature,
-                max_tokens=request.max_tokens or self.config.llm.max_tokens,
-                stream=True,
-            )
+            messages = [{"role": "user", "content": prompt}]
+            temperature = request.temperature or self.config.llm.temperature
+            max_tokens = request.max_tokens or self.config.llm.max_tokens
+            provider = self.config.llm.provider
 
             full_response = ""
-            for chunk in response:
-                if chunk.choices[0].delta.get("content"):
-                    content = chunk.choices[0].delta["content"]
-                    full_response += content
-                    yield content
+            if provider == "mistral":
+                stream = self.client.chat.stream(
+                    model=self.config.llm.model,
+                    messages=messages,
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                )
+                for chunk in stream:
+                    content = chunk.data.choices[0].delta.content or ""
+                    if content:
+                        full_response += content
+                        yield content
+            else:
+                with self.client.chat.completions.stream(
+                    model=self.config.llm.model,
+                    messages=messages,
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                ) as stream:
+                    for chunk in stream:
+                        content = chunk.choices[0].delta.content or ""
+                        if content:
+                            full_response += content
+                            yield content
 
-            # Log completion (would need to be done after streaming)
             logger.info(f"Streamed response completed, length: {len(full_response)}")
 
         except Exception as e:
@@ -242,13 +267,23 @@ class LLMGenerator:
         """Summarize text using LLM."""
         try:
             prompt = PromptBuilder.build_summary_prompt(text, max_length)
+            messages = [{"role": "user", "content": prompt}]
+            provider = self.config.llm.provider
 
-            response = self.client.chat.completions.create(
-                model=self.config.llm.model,
-                messages=[{"role": "user", "content": prompt}],
-                temperature=0.3,
-                max_tokens=max_length // 4,  # Rough estimate
-            )
+            if provider == "mistral":
+                response = self.client.chat.complete(
+                    model=self.config.llm.model,
+                    messages=messages,
+                    temperature=0.3,
+                    max_tokens=max_length // 4,
+                )
+            else:
+                response = self.client.chat.completions.create(
+                    model=self.config.llm.model,
+                    messages=messages,
+                    temperature=0.3,
+                    max_tokens=max_length // 4,
+                )
 
             summary = response.choices[0].message.content.strip()
             return summary
