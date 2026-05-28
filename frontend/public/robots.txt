@@ -1,0 +1,76 @@
+# robots.txt for GRID
+# Served at /robots.txt (Vite copies frontend/public/* to the site root).
+#
+# Posture: GRID is an intelligence platform, not a content site. There is
+# nothing here that benefits from search indexing, and the API surface must
+# never be crawled. AI/LLM training and scraper agents are denied outright;
+# general crawlers are walled off from every non-public path.
+
+# ---------------------------------------------------------------------------
+# AI / LLM training + scraper agents — full deny
+# ---------------------------------------------------------------------------
+User-agent: GPTBot
+Disallow: /
+
+User-agent: OAI-SearchBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: Claude-Web
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: PerplexityBot
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: Amazonbot
+Disallow: /
+
+User-agent: Applebot-Extended
+Disallow: /
+
+User-agent: Meta-ExternalAgent
+Disallow: /
+
+User-agent: Diffbot
+Disallow: /
+
+User-agent: Omgilibot
+Disallow: /
+
+User-agent: cohere-ai
+Disallow: /
+
+# ---------------------------------------------------------------------------
+# All other crawlers — public pages only, no machinery
+# ---------------------------------------------------------------------------
+User-agent: *
+Disallow: /api/
+Disallow: /admission/
+Disallow: /admin/
+Disallow: /auth/
+Disallow: /payment/
+Disallow: /agentic/
+Disallow: /intelligence/
+Disallow: /mcp/
+Disallow: /metrics
+Disallow: /health
+Disallow: /docs
+Disallow: /redoc
+Disallow: /openapi.json
