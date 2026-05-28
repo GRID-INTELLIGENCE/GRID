@@ -36,7 +36,6 @@ class MistralLLM(BaseLLMProvider):
         self.server_url = server_url
         self.timeout = timeout
         self._client = None
-        self._async_client = None
         self._breaker = get_circuit_breaker("mistral")
 
     def _get_client(self):
@@ -59,23 +58,8 @@ class MistralLLM(BaseLLMProvider):
         return self._client
 
     def _get_async_client(self):
-        """Lazy load Mistral async client."""
-        if self._async_client is None:
-            try:
-                from mistralai import Mistral
-
-                kwargs: dict[str, Any] = {"async_client": True}
-                if self.api_key:
-                    kwargs["api_key"] = self.api_key
-                if self.server_url:
-                    kwargs["server_url"] = self.server_url
-
-                self._async_client = Mistral(**kwargs)
-            except ImportError:
-                raise ImportError(
-                    "Mistral AI library not installed. Install with: pip install mistralai"
-                ) from None
-        return self._async_client
+        """Return the Mistral client (same instance handles sync and async)."""
+        return self._get_client()
 
     def _build_messages(self, prompt: str, system: str | None = None) -> list[dict[str, str]]:
         messages = []
