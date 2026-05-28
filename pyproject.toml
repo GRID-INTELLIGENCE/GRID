@@ -89,7 +89,7 @@ dependencies = [
     "chromadb>=1.4.1",
     "ollama>=0.6.1",
     "huggingface-hub>=1.0",
-    "mistralai>=0.1.0",
+    "mistralai>=1.0.0",
     # Utilities
     "anyio>=4.0.0",
     "aiofiles>=23.2.1",
