@@ -7,6 +7,14 @@ model_list:
     drop_params: true
 
 # Optional: external API models (require corresponding API keys in env)
+# - model_name: mistral-large
+#   litellm_params:
+#     model: mistral/mistral-large-latest
+#     drop_params: true
+# - model_name: mistral-small
+#   litellm_params:
+#     model: mistral/mistral-small-latest
+#     drop_params: true
 # - model_name: gpt-4o
 #   litellm_params:
 #     model: openai/gpt-4o
