@@ -20,12 +20,29 @@
         "timeout_ms": 60000,
         "health_check": true,
         "health_timeout_ms": 3000
+      },
+      {
+        "type": "mistral",
+        "model": "mistral-small-latest",
+        "api_key_env": "MISTRAL_API_KEY",
+        "label": "Mistral AI API — mistral-small (cloud fallback)",
+        "timeout_ms": 30000,
+        "health_check": true
       }
     ]
   },
   "embedding": {
     "strategy": "fallback",
     "providers": [
+      {
+        "type": "ollama-local",
+        "model": "nomic-embed-text-v2-moe:latest",
+        "url": "http://localhost:11434",
+        "label": "Local Ollama — Nomic v2 MoE",
+        "timeout_ms": 30000,
+        "health_check": true,
+        "health_timeout_ms": 2000
+      },
       {
         "type": "ollama-cloud",
         "model": "nomic-embed-text-v2-moe:latest",
@@ -36,13 +53,12 @@
         "health_timeout_ms": 3000
       },
       {
-        "type": "ollama-local",
-        "model": "nomic-embed-text-v2-moe:latest",
-        "url": "http://localhost:11434",
-        "label": "Local Ollama — Nomic v2 MoE",
+        "type": "mistral",
+        "model": "mistral-embed",
+        "api_key_env": "MISTRAL_API_KEY",
+        "label": "Mistral AI API — mistral-embed (cloud fallback)",
         "timeout_ms": 30000,
-        "health_check": true,
-        "health_timeout_ms": 2000
+        "health_check": true
       }
     ]
   },
