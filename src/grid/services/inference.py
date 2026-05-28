@@ -132,7 +132,7 @@ class InferenceService:
             )
             return ProcessingResult(
                 result=harness_result.content,
-                tokens_used=harness_result.usage.get("completion_tokens", 0),
+                tokens_used=harness_result.usage.get("prompt_tokens", 0) + harness_result.usage.get("completion_tokens", 0),
                 processing_time=time.time() - start,
                 model=model_name,
                 metadata={"provider": harness_result.provider.value, "origin": "harness"},
