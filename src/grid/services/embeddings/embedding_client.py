@@ -127,7 +127,7 @@ class MistralEmbeddingClient(EmbeddingClient):
     async def health_check(self) -> bool:
         try:
             client = self._get_client()
-            await client.list_models()
+            await client.models.list_async()
             return True
         except Exception:
             return False
