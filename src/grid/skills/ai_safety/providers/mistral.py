@@ -117,7 +117,6 @@ def mistral_handler(args: dict[str, Any]) -> dict[str, Any]:
 
     # Remove content from kwargs to avoid duplicate
     kwargs = {k: v for k, v in args.items() if k != "content"}
-    kwargs = {k: v for k, v in args.items() if k != "content"}
     violations = check_mistral_safety(content, **kwargs)
 
     return {
