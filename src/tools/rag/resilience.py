@@ -75,6 +75,7 @@ _token_buckets: dict[str, Any] = {}
 # Keys: service name → (failure_threshold, recovery_timeout, success_threshold)
 _CIRCUIT_DEFAULTS: dict[str, tuple[int, float, int]] = {
     "ollama": (3, 30.0, 1),
+    "mistral": (5, 60.0, 1),
     "openai": (5, 60.0, 1),
     "openai_compatible": (4, 45.0, 1),
     "anthropic": (5, 60.0, 1),
@@ -84,6 +85,7 @@ _CIRCUIT_DEFAULTS: dict[str, tuple[int, float, int]] = {
 # Keys: service name → (capacity, refill_rate)
 _BUCKET_DEFAULTS: dict[str, tuple[int, float]] = {
     "ollama": (30, 5.0),
+    "mistral": (60, 10.0),
     "openai": (60, 10.0),
     "openai_compatible": (40, 5.0),
     "anthropic": (40, 5.0),
@@ -93,6 +95,7 @@ _BUCKET_DEFAULTS: dict[str, tuple[int, float]] = {
 # Retry defaults: (max_retries, base_delay, max_delay)
 _RETRY_DEFAULTS: dict[str, tuple[int, float, float]] = {
     "ollama": (2, 0.5, 10.0),
+    "mistral": (3, 1.0, 30.0),
     "openai": (3, 1.0, 30.0),
     "openai_compatible": (3, 1.0, 30.0),
     "anthropic": (3, 1.0, 30.0),

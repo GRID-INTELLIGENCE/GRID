@@ -57,8 +57,10 @@ def route_models(
 
     # Check if external provider is configured
     if config.llm_mode == ModelMode.EXTERNAL:
-        llm_provider = config.external_provider or "openai"
-        if llm_provider == "openai":
+        llm_provider = config.external_provider or "mistral"
+        if llm_provider == "mistral":
+            llm_model = config.mistral_model
+        elif llm_provider == "openai":
             llm_model = config.openai_model
         elif llm_provider == "anthropic":
             llm_model = config.anthropic_model
