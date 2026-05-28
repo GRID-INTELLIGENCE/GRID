@@ -11,6 +11,12 @@ try:
 except ImportError:
     HuggingFaceEmbeddingProvider = None  # type: ignore[assignment,misc]
 
+# Mistral AI provider (optional dependency)
+try:
+    from .mistral import MistralEmbeddingProvider
+except ImportError:
+    MistralEmbeddingProvider = None  # type: ignore[assignment,misc]
+
 # OpenAI provider (optional dependency)
 try:
     from .openai import OpenAIEmbeddingProvider
@@ -26,6 +32,10 @@ __all__ = [
     "get_embedding_provider",
     "EmbeddingProviderType",
 ]
+
+# Add Mistral if available
+if MistralEmbeddingProvider is not None:
+    __all__.append("MistralEmbeddingProvider")
 
 # Add OpenAI if available
 if OpenAIEmbeddingProvider is not None:

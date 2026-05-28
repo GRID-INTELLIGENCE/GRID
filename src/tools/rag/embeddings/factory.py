@@ -21,6 +21,7 @@ class EmbeddingProviderType(StrEnum):
 
     OLLAMA = "ollama"  # Ollama-based models (Nomic, etc.)
     HUGGINGFACE = "huggingface"  # Local HF models (BGE, etc.)
+    MISTRAL = "mistral"  # Mistral AI cloud embeddings (mistral-embed)
     OPENAI = "openai"  # OpenAI cloud embeddings
     SIMPLE = "simple"  # Simple fallback (word frequency)
 
@@ -50,6 +51,11 @@ def _embedding_from_resolved(resolved: "ResolvedProvider") -> BaseEmbeddingProvi
             model=resolved.model,
             base_url=resolved.url or "http://localhost:11434",
         )
+    if resolved.type == "mistral":
+        from .mistral import MistralEmbeddingProvider
+
+        api_key = os.environ.get(resolved.api_key_env or "MISTRAL_API_KEY", "")
+        return MistralEmbeddingProvider(model=resolved.model, api_key=api_key)
     if resolved.type == "openai":
         from .openai import OpenAIEmbeddingProvider
 
@@ -113,6 +119,16 @@ def get_embedding_provider(provider_type: str | None = None, config: RAGConfig |
             model_name=config.embedding_model,
             allow_download=getattr(config, "reranker_allow_download", False),
         )
+    elif provider_type == EmbeddingProviderType.MISTRAL.value:
+        from .mistral import MistralEmbeddingProvider
+
+        api_key = getattr(config, "mistral_api_key", None) or os.environ.get("MISTRAL_API_KEY", "")
+        if not api_key:
+            raise ValueError(
+                "External Mistral embeddings require MISTRAL_API_KEY. "
+                "Set RAG_EMBEDDING_PROVIDER=mistral and MISTRAL_API_KEY."
+            )
+        return MistralEmbeddingProvider(model=config.embedding_model, api_key=api_key)
     elif provider_type == EmbeddingProviderType.OPENAI.value:
         from .openai import OpenAIEmbeddingProvider
 
