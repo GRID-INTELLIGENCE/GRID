@@ -96,7 +96,7 @@ class MistralEmbeddingClient(EmbeddingClient):
         if self._client is None:
             from mistralai import Mistral
 
-            kwargs: dict = {"async_client": True}
+            kwargs: dict = {}
             if self._api_key:
                 kwargs["api_key"] = self._api_key
             self._client = Mistral(**kwargs)
