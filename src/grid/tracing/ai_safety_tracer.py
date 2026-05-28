@@ -31,7 +31,7 @@ def trace_model_inference(model_name: str, prompt: str | None = None):
         prompt: Optional prompt text (will be hashed for security)
 
     Example:
-        @trace_model_inference(model_name="gpt-4", prompt=user_prompt)
+        @trace_model_inference(model_name="mistral-large-latest", prompt=user_prompt)
         def generate_response(prompt: str):
             ...
     """
