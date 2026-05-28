@@ -244,7 +244,7 @@ def get_llm_provider(
         elif config.llm_mode == ModelMode.COPILOT:
             provider_type = LLMProviderType.COPILOT.value
         elif config.llm_mode == ModelMode.EXTERNAL:
-            provider_type = (config.external_provider or "openai").lower()
+            provider_type = (config.external_provider or "mistral").lower()
         else:
             provider_type = LLMProviderType.OLLAMA_LOCAL.value
 
