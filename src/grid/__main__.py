@@ -419,7 +419,6 @@ def build_parser() -> argparse.ArgumentParser:
     analyze.add_argument("--file", help="Read text from file")
     analyze.add_argument("--output", choices=["json", "table", "yaml"], default="table")
     analyze.add_argument("--use-rag", action="store_true", default=False)
-    analyze.add_argument("--openai-key")
     analyze.add_argument("--confidence", type=float, default=0.7)
     analyze.add_argument("--max-entities", type=int, default=0)
     analyze.add_argument("--timings", action="store_true", default=False)
