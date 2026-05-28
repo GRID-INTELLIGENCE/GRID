@@ -58,6 +58,7 @@
             "ollama-local",
             "openai",
             "anthropic",
+            "mistral",
             "openai-compatible",
             "simple"
           ],
@@ -121,6 +122,14 @@
         {
           "if": {
             "properties": { "type": { "const": "anthropic" } }
+          },
+          "then": {
+            "required": ["api_key_env"]
+          }
+        },
+        {
+          "if": {
+            "properties": { "type": { "const": "mistral" } }
           },
           "then": {
             "required": ["api_key_env"]

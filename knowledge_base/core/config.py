@@ -4,9 +4,10 @@ Knowledge Base Configuration
 
 Centralized configuration management for the GRID Knowledge Base system.
 
-Note: The Knowledge Base is OpenAI-only (embeddings and LLM). Set OPENAI_ATLAS_API
-(or the configured API key env) for external use. For local or multi-provider RAG,
-use src/tools/rag instead.
+Defaults use Mistral AI (mistral-large-latest, mistral-embed). Set MISTRAL_API_KEY
+for external use. OpenAI remains available as a secondary/legacy option —
+set OPENAI_ATLAS_API and change the provider/model fields. For local or
+multi-provider RAG, use src/tools/rag instead.
 """
 
 import os
@@ -31,9 +32,9 @@ class DatabaseConfig:
 class EmbeddingConfig:
     """Vector embedding configuration."""
 
-    model: str = "text-embedding-3-large"
-    provider: str = "openai"
-    dimensions: int = 3072
+    model: str = "mistral-embed"
+    provider: str = "mistral"
+    dimensions: int = 1024
     api_key: str | None = None
     batch_size: int = 100
     max_tokens: int = 8191
@@ -54,8 +55,8 @@ class SearchConfig:
 class LLMConfig:
     """LLM configuration for generation."""
 
-    model: str = "gpt-4-turbo-preview"
-    provider: str = "openai"
+    model: str = "mistral-large-latest"
+    provider: str = "mistral"
     api_key: str | None = None
     temperature: float = 0.3
     max_tokens: int = 1000
@@ -104,7 +105,7 @@ class KnowledgeBaseConfig:
 
     # Paths
     data_dir: Path = field(default_factory=lambda: Path("data"))
-    api_key: str = field(default_factory=lambda: os.getenv("OPENAI_ATLAS_API", ""))
+    api_key: str = field(default_factory=lambda: os.getenv("MISTRAL_API_KEY", os.getenv("OPENAI_ATLAS_API", "")))
     cache_dir: Path = field(default_factory=lambda: Path("cache"))
     logs_dir: Path = field(default_factory=lambda: Path("logs"))
 
@@ -119,10 +120,10 @@ class KnowledgeBaseConfig:
         config.database.token = os.getenv("DATABRICKS_TOKEN")
 
         # Embeddings
-        config.embeddings.api_key = os.getenv("OPENAI_ATLAS_API")
+        config.embeddings.api_key = os.getenv("MISTRAL_API_KEY") or os.getenv("OPENAI_ATLAS_API")
 
         # LLM
-        config.llm.api_key = os.getenv("OPENAI_ATLAS_API")
+        config.llm.api_key = os.getenv("MISTRAL_API_KEY") or os.getenv("OPENAI_ATLAS_API")
 
         # Security
         config.security.jwt_secret = os.getenv("JWT_SECRET")
@@ -140,10 +141,10 @@ class KnowledgeBaseConfig:
             errors.append("DATABRICKS_TOKEN is required")
 
         if not self.embeddings.api_key:
-            errors.append("OPENAI_ATLAS_API is required for embeddings")
+            errors.append("MISTRAL_API_KEY or OPENAI_ATLAS_API is required for embeddings")
 
         if not self.llm.api_key:
-            errors.append("OPENAI_ATLAS_API is required for LLM")
+            errors.append("MISTRAL_API_KEY or OPENAI_ATLAS_API is required for LLM")
 
         if self.security.enable_auth and not self.security.jwt_secret:
             errors.append("JWT_SECRET is required when auth is enabled")

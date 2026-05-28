@@ -36,25 +36,28 @@ class LLMProviderType(StrEnum):
     OPENAI = "openai"  # OpenAI API (or OpenAI-compatible via base_url)
     ANTHROPIC = "anthropic"  # Anthropic Claude API
     GEMINI = "gemini"  # Google Gemini API
+    MISTRAL = "mistral"  # Mistral AI API
     OPENAI_COMPATIBLE = "openai_compatible"  # LiteLLM or any OpenAI-compatible endpoint
     SIMPLE = "simple"  # Simple fallback
 
 
-def _use_fallback_chain() -> bool:
+def _use_fallback_chain(config: RAGConfig | None = None) -> bool:
     """Check whether to use the ollama-models.json fallback chain."""
+    # If a config is provided with explicit external mode, skip fallback chain
+    if config is not None and config.llm_mode == ModelMode.EXTERNAL:
+        return False
     mode = os.environ.get("RAG_LLM_MODE", "").lower()
     if mode == "auto":
         return True
-    # If no explicit mode, check if the config file exists
-    if not mode:
-        try:
-            from ..model_resolver import _find_config_path
+    if mode:
+        return False
+    try:
+        from ..model_resolver import _find_config_path
 
-            _find_config_path()
-            return True
-        except FileNotFoundError:
-            return False
-    return False
+        _find_config_path()
+        return True
+    except FileNotFoundError:
+        return False
 
 
 def _use_catalog_auto_select() -> bool:
@@ -133,6 +136,11 @@ def _provider_from_resolved(resolved: "ResolvedProvider") -> BaseLLMProvider:  #
 
         api_key = os.environ.get(resolved.api_key_env or "ANTHROPIC_API_KEY", "")
         return AnthropicLLM(model=resolved.model, api_key=api_key)
+    if resolved.type == "mistral":
+        from .mistral import MistralLLM
+
+        api_key = os.environ.get(resolved.api_key_env or "MISTRAL_API_KEY", "")
+        return MistralLLM(model=resolved.model, api_key=api_key)
     if resolved.type == "simple":
         from .simple import SimpleLLM
 
@@ -218,7 +226,7 @@ def get_llm_provider(
             logger.warning("llm_factory.catalog_auto_select failed, falling through to path 2: %s", exc)
 
     # --- Fallback chain path ---
-    if provider_type is None and model is None and _use_fallback_chain():
+    if provider_type is None and model is None and _use_fallback_chain(config):
         from ..model_resolver import resolve_llm
 
         resolved = resolve_llm()
@@ -255,6 +263,8 @@ def get_llm_provider(
                 model = config.anthropic_model
             elif provider_type == LLMProviderType.GEMINI.value:
                 model = config.gemini_model
+            elif provider_type == LLMProviderType.MISTRAL.value:
+                model = config.mistral_model
             elif provider_type == LLMProviderType.OPENAI_COMPATIBLE.value:
                 model = config.openai_model  # or a dedicated field; reuse openai_model
             else:
@@ -313,6 +323,17 @@ def get_llm_provider(
             model=model,
             api_base=api_base,
             api_key=config.openai_api_key,
+        )
+    elif provider_type == LLMProviderType.MISTRAL.value:
+        from .mistral import MistralLLM
+
+        if not config.mistral_api_key:
+            raise ValueError(
+                "External Mistral mode requires MISTRAL_API_KEY. Set RAG_LLM_MODE=external and RAG_LLM_PROVIDER=mistral."
+            )
+        return MistralLLM(
+            model=model,
+            api_key=config.mistral_api_key,
         )
     elif provider_type == LLMProviderType.GEMINI.value:
         from .gemini import GeminiLLM

@@ -129,8 +129,8 @@ async def get_inference_status(task_id: str, auth: Auth):
 async def list_available_models(auth: Auth):
     """List available inference models."""
     return {
-        "models": ["gpt-3.5-turbo", "gpt-4", "claude-2", "local-llama", "ollama-llama3"],
-        "default": "ollama-llama3",
+        "models": ["mistral-large-latest", "mistral-small-latest", "gpt-4", "claude-2", "local-llama", "ollama-llama3"],
+        "default": "mistral-large-latest",
     }
 
 

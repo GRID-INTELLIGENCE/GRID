@@ -24,11 +24,11 @@ class TestEnvironmentalIntegrity(unittest.TestCase):
         self.original_modules = set(sys.modules.keys())
         self.original_environ = dict(os.environ)
 
-        # Clean up any existing grid modules to prevent registry conflicts
-        grid_modules = [name for name in sys.modules.keys() if name.startswith("grid.")]
-        for module in grid_modules:
-            if module in sys.modules:
-                del sys.modules[module]
+        # Save and remove grid modules to prevent registry conflicts.
+        # They are restored in tearDown so downstream tests see a consistent sys.modules.
+        self._saved_grid_modules = {k: v for k, v in sys.modules.items() if k.startswith("grid.")}
+        for module in list(self._saved_grid_modules):
+            del sys.modules[module]
 
         # Clean up Prometheus registry if it exists
         try:
@@ -47,7 +47,7 @@ class TestEnvironmentalIntegrity(unittest.TestCase):
         os.environ.clear()
         os.environ.update(self.original_environ)
 
-        # Clean up any test modules added to sys.modules
+        # Remove any grid modules introduced during this test
         current_modules = set(sys.modules.keys())
         new_modules = current_modules - self.original_modules
         for module in new_modules:
@@ -56,6 +56,9 @@ class TestEnvironmentalIntegrity(unittest.TestCase):
                     del sys.modules[module]
                 except KeyError:
                     pass
+
+        # Restore the grid modules that were present before setUp() removed them
+        sys.modules.update(self._saved_grid_modules)
 
     def test_module_utils_import(self):
         """Test that module utils can be imported."""

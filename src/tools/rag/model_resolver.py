@@ -127,7 +127,7 @@ def _probe_provider(provider: dict[str, Any]) -> bool:
 
     if ptype in ("ollama-cloud", "ollama-local"):
         return _probe_ollama(url, health_timeout)
-    if ptype in ("openai", "anthropic", "openai-compatible"):
+    if ptype in ("openai", "anthropic", "mistral", "openai-compatible"):
         # For API providers, check that the key env var is set
         key_env = provider.get("api_key_env", "")
         return bool(os.environ.get(key_env))

@@ -72,6 +72,38 @@ def test_get_llm_provider_gemini_when_configured() -> None:
         os.environ.pop("GEMINI_API_KEY", None)
 
 
+def test_get_llm_provider_mistral_when_configured() -> None:
+    """When RAG_LLM_MODE=external and RAG_LLM_PROVIDER=mistral and MISTRAL_API_KEY set, return MistralLLM."""
+    os.environ["RAG_LLM_MODE"] = "external"
+    os.environ["RAG_LLM_PROVIDER"] = "mistral"
+    os.environ["MISTRAL_API_KEY"] = "test-key-for-mistral-unit-test"
+    try:
+        config = RAGConfig.from_env()
+        assert config.llm_mode == ModelMode.EXTERNAL
+        assert config.external_provider == "mistral"
+        assert config.mistral_model == "mistral-large-latest"
+        provider = get_llm_provider(config=config)
+        assert type(provider).__name__ == "MistralLLM"
+    finally:
+        os.environ.pop("RAG_LLM_MODE", None)
+        os.environ.pop("RAG_LLM_PROVIDER", None)
+        os.environ.pop("MISTRAL_API_KEY", None)
+
+
+def test_get_llm_provider_mistral_raises_without_key() -> None:
+    """When external provider is mistral but MISTRAL_API_KEY missing, raise ValueError."""
+    os.environ["RAG_LLM_MODE"] = "external"
+    os.environ["RAG_LLM_PROVIDER"] = "mistral"
+    os.environ.pop("MISTRAL_API_KEY", None)
+    try:
+        config = RAGConfig.from_env()
+        with pytest.raises(ValueError, match="MISTRAL_API_KEY"):
+            get_llm_provider(config=config)
+    finally:
+        os.environ.pop("RAG_LLM_MODE", None)
+        os.environ.pop("RAG_LLM_PROVIDER", None)
+
+
 def test_get_llm_provider_gemini_raises_without_key() -> None:
     """When external provider is gemini but GEMINI_API_KEY missing, raise ValueError."""
     os.environ["RAG_LLM_MODE"] = "external"
@@ -87,12 +119,14 @@ def test_get_llm_provider_gemini_raises_without_key() -> None:
 
 
 def test_llm_provider_type_includes_external() -> None:
-    """LLMProviderType enum includes OPENAI, ANTHROPIC, GEMINI, OPENAI_COMPATIBLE."""
+    """LLMProviderType enum includes OPENAI, ANTHROPIC, GEMINI, MISTRAL, OPENAI_COMPATIBLE."""
     assert hasattr(LLMProviderType, "OPENAI")
     assert hasattr(LLMProviderType, "ANTHROPIC")
     assert hasattr(LLMProviderType, "GEMINI")
+    assert hasattr(LLMProviderType, "MISTRAL")
     assert hasattr(LLMProviderType, "OPENAI_COMPATIBLE")
     assert LLMProviderType.OPENAI.value == "openai"
     assert LLMProviderType.ANTHROPIC.value == "anthropic"
     assert LLMProviderType.GEMINI.value == "gemini"
+    assert LLMProviderType.MISTRAL.value == "mistral"
     assert LLMProviderType.OPENAI_COMPATIBLE.value == "openai_compatible"

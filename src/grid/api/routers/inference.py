@@ -62,7 +62,7 @@ async def get_inference_status(task_id: str, current_user: User = Depends(get_cu
 @router.get("/models")
 async def list_available_models(current_user: User = Depends(get_current_active_user)):
     """List available inference models"""
-    return {"models": ["gpt-3.5-turbo", "gpt-4", "claude-2", "local-model"], "default": "gpt-3.5-turbo"}
+    return {"models": ["mistral-large-latest", "mistral-small-latest", "gpt-4", "claude-2", "local-model"], "default": "mistral-large-latest"}
 
 
 # Helper functions

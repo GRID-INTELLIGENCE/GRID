@@ -50,8 +50,9 @@ class InferenceService:
             )
 
         self.models = {
-            "default": "gpt-3.5-turbo",
-            "gpt-3.5-turbo": "gpt-3.5-turbo",
+            "default": "mistral-large-latest",
+            "mistral-large-latest": "mistral-large-latest",
+            "mistral-small-latest": "mistral-small-latest",
             "gpt-4": "gpt-4",
             "claude-2": "claude-2",
             "local-model": "local-model",

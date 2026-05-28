@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 class EmbeddingProvider(StrEnum):
     OLLAMA = "ollama"
     OPENAI = "openai"
+    MISTRAL = "mistral"
 
 
 @dataclass
@@ -77,6 +78,56 @@ class OllamaEmbeddingClient(EmbeddingClient):
     async def health_check(self) -> bool:
         try:
             await self._client.list()
+            return True
+        except Exception:
+            return False
+
+
+class MistralEmbeddingClient(EmbeddingClient):
+    """Native Mistral AI embedding client using the mistralai SDK."""
+
+    def __init__(self, api_key: str | None = None):
+        self._api_key = api_key
+        self._client = None
+        self._default_model = "mistral-embed"
+        self._semaphore = asyncio.Semaphore(10)
+
+    def _get_client(self):
+        if self._client is None:
+            from mistralai import Mistral
+
+            kwargs: dict = {"async_client": True}
+            if self._api_key:
+                kwargs["api_key"] = self._api_key
+            self._client = Mistral(**kwargs)
+        return self._client
+
+    async def embed(self, texts: list[str], model: str | None = None) -> EmbeddingResponse:
+        target_model = model or self._default_model
+        client = self._get_client()
+        start_time = time.time()
+
+        async with self._semaphore:
+            try:
+                response = await client.embeddings.create_async(
+                    model=target_model,
+                    inputs=texts,
+                )
+                latency_ms = int((time.time() - start_time) * 1000)
+                embeddings = [d.embedding for d in response.data]
+                return EmbeddingResponse(
+                    embeddings=embeddings,
+                    model=target_model,
+                    latency_ms=latency_ms,
+                )
+            except Exception as e:
+                logger.error(f"Mistral embedding failed: {e}")
+                raise
+
+    async def health_check(self) -> bool:
+        try:
+            client = self._get_client()
+            await client.list_models()
             return True
         except Exception:
             return False

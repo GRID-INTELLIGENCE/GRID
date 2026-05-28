@@ -117,7 +117,7 @@ def test_feature_extractor_wrapper():
         warnings.simplefilter("always")
         # Create a mock self object
         mock_self = Mock()
-        result = safe_extract(mock_self, "test query", mock_doc, None, None, 5)
+        result = safe_extract(mock_self, "test query", mock_doc, None, None, None, 5)
         print(f"Safe features: {result}")
         print(f"Warnings: {len(w)}")
 

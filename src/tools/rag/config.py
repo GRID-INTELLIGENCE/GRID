@@ -65,7 +65,9 @@ class RAGConfig:
     anthropic_model: str = "claude-3-5-sonnet-20241022"  # Default Anthropic model
     gemini_api_key: str | None = None  # Google Gemini API key
     gemini_model: str = "gemini-1.5-flash"  # Default Gemini model
-    external_provider: str = "openai"  # Default external provider: openai, anthropic, openai_compatible
+    mistral_api_key: str | None = None  # Mistral AI API key
+    mistral_model: str = "mistral-large-latest"  # Default Mistral model
+    external_provider: str = "mistral"  # Default external provider: openai, anthropic, gemini, mistral, openai_compatible
     llm_api_base: str | None = None  # For openai_compatible: base URL for chat completions
 
     # Chunking configuration
@@ -136,7 +138,9 @@ class RAGConfig:
             anthropic_model=os.getenv("ANTHROPIC_MODEL", "claude-3-5-sonnet-20241022"),
             gemini_api_key=os.getenv("GEMINI_API_KEY"),
             gemini_model=os.getenv("GEMINI_MODEL", "gemini-1.5-flash"),
-            external_provider=os.getenv("RAG_LLM_PROVIDER", os.getenv("RAG_EXTERNAL_PROVIDER", "openai")),
+            mistral_api_key=os.getenv("MISTRAL_API_KEY"),
+            mistral_model=os.getenv("MISTRAL_MODEL", "mistral-large-latest"),
+            external_provider=os.getenv("RAG_LLM_PROVIDER", os.getenv("RAG_EXTERNAL_PROVIDER", "mistral")),
             llm_api_base=os.getenv("OPENAI_BASE_URL") or os.getenv("RAG_LLM_API_BASE"),
             # Chunking config
             chunk_size=int(os.getenv("RAG_CHUNK_SIZE", "1000")),

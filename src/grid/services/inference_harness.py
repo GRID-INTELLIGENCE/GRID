@@ -25,6 +25,7 @@ class ProviderType(StrEnum):
     """Supported inference providers."""
 
     OLLAMA = "ollama"
+    MISTRAL = "mistral"
     LLAMACPP = "llamacpp"
     TRANSFORMERS = "transformers"
     MOCK = "mock"
@@ -282,6 +283,47 @@ class TransformersProvider:
             provider=ProviderType.TRANSFORMERS,
             latency_ms=latency,
             usage={"prompt_tokens": len(prompt.split()), "completion_tokens": len(content.split())},
+        )
+
+
+class MistralProvider:
+    """Mistral AI API-based inference provider."""
+
+    def __init__(self, model: str = "mistral-large-latest") -> None:
+        self.model = model
+        self._api_key: str | None = None
+        self._client: Any = None
+
+    def _get_client(self):
+        if self._client is None:
+            from mistralai import Mistral
+
+            self._api_key = os.environ.get("MISTRAL_API_KEY")
+            self._client = Mistral(api_key=self._api_key)
+        return self._client
+
+    def is_available(self) -> bool:
+        return bool(os.environ.get("MISTRAL_API_KEY"))
+
+    async def generate(self, prompt: str, **kwargs: Any) -> InferenceResult:
+        start_time = time.perf_counter()
+        client = self._get_client()
+
+        response = await client.chat.complete_async(
+            model=kwargs.get("model", self.model),
+            messages=[{"role": "user", "content": prompt}],
+            temperature=kwargs.get("temperature", 0.7),
+            max_tokens=kwargs.get("max_tokens", 1024),
+        )
+
+        latency = (time.perf_counter() - start_time) * 1000
+        content = response.choices[0].message.content or ""
+        return InferenceResult(
+            content=content,
+            model=self.model,
+            provider=ProviderType.MISTRAL,
+            latency_ms=latency,
+            usage={"prompt_tokens": 0, "completion_tokens": 0},
         )
 
 
