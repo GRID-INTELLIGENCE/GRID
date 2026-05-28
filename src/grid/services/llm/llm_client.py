@@ -253,3 +253,29 @@ class MistralNativeClient(LLMClient):
             return True
         except Exception:
             return False
+
+
+def get_llm_client(config: LLMConfig | None = None) -> LLMClient:
+    """Return an LLMClient for the configured provider.
+
+    Provider resolution order:
+    1. config.provider if config is supplied
+    2. GRID_LLM_PROVIDER env var
+    3. OLLAMA (default local)
+
+    MISTRAL is selected only when MISTRAL_API_KEY is also set; otherwise
+    falls back to OLLAMA so the harness stays functional without cloud keys.
+    """
+    import os
+
+    cfg = config or LLMConfig()
+    provider = cfg.provider
+
+    if provider == LLMProvider.MISTRAL or (
+        provider == LLMProvider.OLLAMA and os.environ.get("GRID_LLM_PROVIDER", "").lower() == "mistral"
+    ):
+        api_key = os.environ.get("MISTRAL_API_KEY", "")
+        if api_key:
+            return MistralNativeClient(api_key=api_key)
+        # No key — silently fall through to Ollama so local dev works
+    return OllamaNativeClient(host=os.environ.get("OLLAMA_HOST", "http://localhost:11434"))

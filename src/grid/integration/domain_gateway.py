@@ -202,18 +202,18 @@ class GridIntelligenceAdapter:
 
     def _load_llm(self) -> None:
         try:
-            from grid.services.llm.llm_client import OllamaNativeClient
+            from grid.services.llm.llm_client import get_llm_client
 
-            self._llm_client = OllamaNativeClient()
+            self._llm_client = get_llm_client()
             logger.info("Connected to GRID LLM service")
         except ImportError as e:
             logger.warning(f"GRID LLM not available: {e}")
 
     def _load_embeddings(self) -> None:
         try:
-            from grid.services.embeddings.embedding_client import OllamaEmbeddingClient
+            from grid.services.embeddings.embedding_client import get_embedding_client
 
-            self._embedding_client = OllamaEmbeddingClient()
+            self._embedding_client = get_embedding_client()
             logger.info("Connected to GRID Embedding service")
         except ImportError as e:
             logger.warning(f"GRID Embeddings not available: {e}")

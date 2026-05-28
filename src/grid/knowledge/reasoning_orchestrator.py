@@ -16,7 +16,7 @@ from datetime import datetime
 from enum import StrEnum
 from typing import Any
 
-from grid.services.llm.llm_client import LLMClient, LLMConfig, OllamaNativeClient
+from grid.services.llm.llm_client import LLMClient, LLMConfig, get_llm_client
 
 logger = logging.getLogger(__name__)
 
@@ -81,7 +81,7 @@ class ReasoningOrchestrator:
         self.enable_kg = enable_kg
         self.enable_llm = enable_llm
         self.llm_model = llm_model
-        self.llm_client = llm_client or OllamaNativeClient()
+        self.llm_client = llm_client or get_llm_client()
         self.reasoning_chain: list[ReasoningStep] = []
 
     async def reason(

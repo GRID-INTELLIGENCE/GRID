@@ -131,3 +131,22 @@ class MistralEmbeddingClient(EmbeddingClient):
             return True
         except Exception:
             return False
+
+
+def get_embedding_client() -> EmbeddingClient:
+    """Return an EmbeddingClient for the configured provider.
+
+    Provider resolution order:
+    1. GRID_EMBEDDING_PROVIDER env var
+    2. OLLAMA (default local)
+
+    MISTRAL is selected only when MISTRAL_API_KEY is also set.
+    """
+    import os
+
+    provider = os.environ.get("GRID_EMBEDDING_PROVIDER", "").lower()
+    if provider == "mistral":
+        api_key = os.environ.get("MISTRAL_API_KEY", "")
+        if api_key:
+            return MistralEmbeddingClient(api_key=api_key)
+    return OllamaEmbeddingClient(host=os.environ.get("OLLAMA_HOST", "http://localhost:11434"))
