@@ -59,13 +59,22 @@ class InferenceHarness:
     def __init__(self) -> None:
         """Initialize the harness with default priorities."""
         self.providers: dict[ProviderType, InferenceProvider] = {}
-        self.priority: list[ProviderType] = [ProviderType.OLLAMA, ProviderType.LLAMACPP, ProviderType.TRANSFORMERS]
+        self.priority: list[ProviderType] = [
+            ProviderType.OLLAMA,
+            ProviderType.MISTRAL,
+            ProviderType.LLAMACPP,
+            ProviderType.TRANSFORMERS,
+        ]
         self._setup_defaults()
 
     def _setup_defaults(self) -> None:
         """Configures default providers based on environment."""
-        # Ollama
+        # Ollama (primary local)
         self.providers[ProviderType.OLLAMA] = OllamaProvider()
+
+        # Mistral (cloud fallback when MISTRAL_API_KEY is set)
+        mistral_model = os.environ.get("MISTRAL_HARNESS_MODEL", "mistral-large-latest")
+        self.providers[ProviderType.MISTRAL] = MistralProvider(model=mistral_model)
 
         # LlamaCPP (EUFLE Sync) - configured via environment variables
         # Required env vars: EUFLE_ROOT or LLAMACPP_MODEL_PATH, and LLAMACPP_CLI_PATH

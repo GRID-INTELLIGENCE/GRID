@@ -112,13 +112,39 @@ class AISafetyConfig:
 
         return key
 
+    def get_mistral_api_key(self, required: bool = False) -> str | None:
+        """
+        Get Mistral API key from environment with validation.
+
+        Args:
+            required: Whether API key is required
+
+        Returns:
+            API key or None if not required and not set
+
+        Raises:
+            SecretValidationError: If required key is missing
+        """
+        key = get_secret_from_env(
+            env_var="MISTRAL_API_KEY",
+            required=required and self.environment == "production",
+            environment=self.environment,
+            default=None,
+        )
+
+        if key:
+            self._api_keys["mistral"] = mask_secret(key)
+            logger.info(f"Mistral API key loaded (masked: {self._api_keys['mistral']})")
+
+        return key
+
     def validate_api_key_format(self, key: str, provider: str) -> bool:
         """
         Validate API key format for common providers.
 
         Args:
             key: API key to validate
-            provider: Provider name (gemini, openai, anthropic)
+            provider: Provider name (gemini, openai, anthropic, mistral)
 
         Returns:
             True if format appears valid, False otherwise
@@ -130,7 +156,6 @@ class AISafetyConfig:
 
         # Basic format validation (without exposing actual key patterns)
         if provider_lower == "gemini":
-            # Gemini keys typically start with specific prefixes
             return len(key) >= 32
         elif provider_lower == "openai":
             # OpenAI keys start with "sk-"
@@ -138,6 +163,9 @@ class AISafetyConfig:
         elif provider_lower == "anthropic":
             # Anthropic keys start with "sk-ant-"
             return key.startswith("sk-ant-") and len(key) >= 32
+        elif provider_lower == "mistral":
+            # Mistral keys are opaque strings; minimum length check only
+            return len(key) >= 32
 
         # Unknown provider - just check minimum length
         return len(key) >= 32
@@ -204,3 +232,4 @@ __all__ = [
     "AISafetyConfig",
     "get_ai_safety_config",
 ]
+
