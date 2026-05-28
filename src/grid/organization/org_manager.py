@@ -17,7 +17,7 @@ class OrganizationManager:
         self._initialize_default_orgs()
 
     def _initialize_default_orgs(self) -> None:
-        """Initialize default organizations (OpenAI, NVIDIA, Walt Disney Pictures)."""
+        """Initialize default organizations (OpenAI, Mistral AI, NVIDIA, Walt Disney Pictures)."""
         # OpenAI
         openai_org = Organization(
             org_id="openai",
@@ -32,6 +32,21 @@ class OrganizationManager:
             },
         )
         self.organizations["openai"] = openai_org
+
+        # Mistral AI (primary external LLM provider)
+        mistral_org = Organization(
+            org_id="mistral",
+            name="Mistral AI",
+            role=OrganizationRole.MISTRAL,
+            domain="mistral.ai",
+            settings={
+                "primary_focus": ["LLM development", "Open-weight models", "European AI"],
+                "deep_focus": None,
+                "strict_mode": True,
+                "auto_penalty": True,
+            },
+        )
+        self.organizations["mistral"] = mistral_org
 
         # NVIDIA
         nvidia_org = Organization(

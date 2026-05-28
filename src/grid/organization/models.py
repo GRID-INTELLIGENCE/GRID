@@ -12,6 +12,7 @@ class OrganizationRole(StrEnum):
     """Organization roles."""
 
     OPENAI = "openai"
+    MISTRAL = "mistral"
     NVIDIA = "nvidia"
     WALT_DISNEY_PICTURES = "walt_disney_pictures"
     PARTNER = "partner"
