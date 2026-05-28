@@ -5,7 +5,7 @@
 # Web Framework (SECURITY UPDATE: Patched CORS bypass CVE)
 fastapi==0.136.3
 uvicorn[standard]==0.48.0
-starlette==0.52.1
+starlette==1.1.0
 
 # Authentication & Security
 python-jose[cryptography]==3.5.0
