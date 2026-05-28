@@ -189,11 +189,12 @@ class MistralNativeClient(LLMClient):
                     max_tokens=cfg.max_tokens,
                 )
                 latency_ms = int((time.time() - start_time) * 1000)
+                usage = response.usage
                 return LLMResponse(
                     content=response.choices[0].message.content or "",
                     finish_reason="stop",
                     model=cfg.model,
-                    tokens_used=0,
+                    tokens_used=(usage.prompt_tokens + usage.completion_tokens) if usage else 0,
                     latency_ms=latency_ms,
                 )
             except Exception as e:
@@ -216,11 +217,12 @@ class MistralNativeClient(LLMClient):
                     max_tokens=cfg.max_tokens,
                 )
                 latency_ms = int((time.time() - start_time) * 1000)
+                usage = response.usage
                 return LLMResponse(
                     content=response.choices[0].message.content or "",
                     finish_reason="stop",
                     model=cfg.model,
-                    tokens_used=0,
+                    tokens_used=(usage.prompt_tokens + usage.completion_tokens) if usage else 0,
                     latency_ms=latency_ms,
                 )
             except Exception as e:

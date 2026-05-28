@@ -327,12 +327,16 @@ class MistralProvider:
 
         latency = (time.perf_counter() - start_time) * 1000
         content = response.choices[0].message.content or ""
+        usage = response.usage
         return InferenceResult(
             content=content,
             model=self.model,
             provider=ProviderType.MISTRAL,
             latency_ms=latency,
-            usage={"prompt_tokens": 0, "completion_tokens": 0},
+            usage={
+                "prompt_tokens": usage.prompt_tokens if usage else 0,
+                "completion_tokens": usage.completion_tokens if usage else 0,
+            },
         )
 
 
