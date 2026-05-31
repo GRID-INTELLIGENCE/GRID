@@ -12,7 +12,10 @@
     "eligibility-server",
     "grid-intelligence",
     "ori-server",
-    "school-server"
+    "school-server",
+    "craft-server",
+    "mangrove-server",
+    "glass-server"
   ],
   "disabledMcpjsonServers": [
     "echoes-server",
