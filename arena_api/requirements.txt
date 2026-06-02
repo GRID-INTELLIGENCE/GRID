@@ -44,7 +44,7 @@ bandit==1.9.4
 safety==3.7.0
 
 # Performance Testing
-locust==2.44.0
+locust==2.44.1
 
 # Environment Management
 python-dotenv==1.2.2
