@@ -70,7 +70,7 @@ pandas==3.0.3
 numpy==2.4.6
 
 # Compliance & Audit (CRITICAL SECURITY UPDATE: Crypto vulnerabilities patched)
-cryptography==46.0.7
+cryptography==48.0.0
 bcrypt==5.0.0
 
 # CHANGES FROM PREVIOUS VERSION:
