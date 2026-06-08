@@ -37,7 +37,7 @@ pytest-cov==7.1.0
 
 # Code Quality
 ruff>=0.8.0
-mypy==1.20.2
+mypy==2.1.0
 
 # Security Scanning
 bandit==1.9.4
