@@ -41,7 +41,7 @@ mypy==1.20.2
 
 # Security Scanning
 bandit==1.9.4
-safety==3.7.0
+safety==3.8.1
 
 # Performance Testing
 locust==2.44.1
