@@ -337,6 +337,7 @@ exclude = [
     "archive/",
     "EUFLE/",
     "research/",
+    "workspace/mcp/servers/",
     "examples/*.ipynb",
 ]
 
