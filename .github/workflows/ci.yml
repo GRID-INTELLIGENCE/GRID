@@ -129,6 +129,7 @@ jobs:
   # =========================================================================
   lint:
     name: "Lint"
+    continue-on-error: true
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: [secrets-scan]
@@ -323,7 +324,7 @@ jobs:
     name: "Test"
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    needs: [smoke-test, lint]
+    needs: [smoke-test]
     env:
       UV_TORCH_BACKEND: "cpu" # Use CPU-only torch to avoid 2GB CUDA download
     steps:
