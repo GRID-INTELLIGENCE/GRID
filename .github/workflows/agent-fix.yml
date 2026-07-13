@@ -27,7 +27,7 @@ jobs:
             echo "eligible=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         if: steps.guard.outputs.eligible == 'true'
         with:
           ref: ${{ github.event.pull_request.head.sha }}
