@@ -60,7 +60,7 @@ mkdocs==1.6.1
 mkdocs-material==9.7.6
 
 # Container & Orchestration
-kubernetes==35.0.0
+kubernetes==36.0.2
 
 # AI/ML Safety (SECURITY UPDATE)
 transformers==5.10.2
